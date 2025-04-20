@@ -339,20 +339,6 @@ func ReceiveCancellation(self *Request) <-chan struct{} {
 	return self.httpRequest.Context().Done()
 }
 
-// ReceiveCancellationReadable returns a readable store,
-// which indicates whether the request is cancelled.
-//
-// This is useful for web sockets and server sent events.
-func ReceiveCancellationReadable(self *Request) *Readable[bool] {
-	return ReadableCreate(false, func(set func(value bool)) (destroy func()) {
-		go func() {
-			<-self.httpRequest.Context().Done()
-			set(true)
-		}()
-		return func() {}
-	})
-}
-
 // ReceiveCookie reads the contents of a cookie from the message and returns the value.
 //
 // Compatible with web sockets.
@@ -701,7 +687,13 @@ func serverMapRoute(
 		request := Request{
 			server:      self,
 			httpRequest: httpRequest,
+			done:        false,
 		}
+
+		go func() {
+			<-httpRequest.Context().Done()
+			request.done = true
+		}()
 
 		httpHeader := writer.Header()
 
@@ -749,6 +741,7 @@ type Request struct {
 	response      *Response
 	httpRequest   *http.Request
 	webSocketConn *websocket.Conn
+	done          bool
 }
 
 type Navigate struct {
@@ -781,7 +774,6 @@ func SendNavigateWithParameters(self *Response, page string, parameters map[stri
 	p, pathFound := pages[page]
 	if !pathFound {
 		NotifierSendError(self.server.notifier, fmt.Errorf("redirect to page `%s` failed because page id `%s` is unknown", page, page))
-		return
 	}
 
 	location := string(
@@ -815,13 +807,11 @@ func SendRedirect(self *Response, location string, statusCode int) {
 	SendHeader(self, "Location", location)
 }
 
-// SendRedirectToSecure tries to redirect the request to the https server.
-//
-// When the request is already secure, SendRedirectToSecure returns false.
-func SendRedirectToSecure(self *Response, statusCode int) bool {
+// SendRedirectToSecure redirects the request to the https server.
+func SendRedirectToSecure(self *Response) {
 	request := self.request
 	if "" == request.server.certificate || "" == request.server.certificateKey || request.httpRequest.TLS != nil {
-		return false
+		return
 	}
 
 	insecureSuffix := fmt.Sprintf(":%d", request.server.port)
@@ -829,7 +819,7 @@ func SendRedirectToSecure(self *Response, statusCode int) bool {
 	secureHost := strings.Replace(request.httpRequest.Host, insecureSuffix, secureSuffix, 1)
 	secureLocation := fmt.Sprintf("https://%s%s", secureHost, request.httpRequest.RequestURI)
 	SendRedirect(self, secureLocation, 302)
-	return true
+	return
 }
 
 // SendStatus sets the status code.
@@ -838,7 +828,7 @@ func SendRedirectToSecure(self *Response, statusCode int) bool {
 // so that the increaseIndex time you invoke this
 // function it will fail with an error.
 //
-// You can retrieve the error using ServerRecallError.
+// All errors are sent to the server notifier.
 func SendStatus(self *Response, code int) {
 	if self.lockedStatusAndHeader {
 		NotifierSendError(self.server.notifier, errors.New("status is locked"))
@@ -853,7 +843,7 @@ func SendStatus(self *Response, code int) {
 //
 // This means the status will become locked and further attempts to send the status will fail with an error.
 //
-// You can retrieve the error using ServerRecallError
+// All errors are sent to the server notifier.
 func SendHeader(self *Response, key string, value string) {
 	if self.lockedStatusAndHeader {
 		NotifierSendError(self.server.notifier, errors.New("headers locked"))
@@ -879,10 +869,14 @@ func SendCookie(self *Response, key string, value string) {
 //
 // The status code and the header will become locked and further attempts to send either of them will fail with an error.
 //
-// You can retrieve the error using ServerRecallError.
+// All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
 func SendContent(self *Response, content []byte) {
+	if self.request.done {
+		return
+	}
+
 	if !self.lockedStatusAndHeader {
 		(*self.writer).WriteHeader(self.statusCode)
 		self.lockedStatusAndHeader = true
@@ -892,6 +886,7 @@ func SendContent(self *Response, content []byte) {
 		writeError := self.webSocket.WriteMessage(websocket.TextMessage, content)
 		if writeError != nil {
 			NotifierSendError(self.server.notifier, writeError)
+			return
 		}
 		return
 	}
@@ -914,7 +909,7 @@ func SendContent(self *Response, content []byte) {
 //
 // The status code and the header will become locked and further attempts to send either of them will fail with an error.
 //
-// You can retrieve the error using ServerRecallError.
+// All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
 func SendEcho(self *Response, content string) {
@@ -931,7 +926,7 @@ func SendUnauthorized(self *Response) {
 	SendStatus(self, http.StatusUnauthorized)
 }
 
-// SendBadRequest sends an empty echo with status 400 Bad Request.
+// SendBadRequest tris to send an empty echo with status 400 Bad Request.
 func SendBadRequest(self *Response) {
 	SendStatus(self, http.StatusBadRequest)
 }
@@ -952,13 +947,14 @@ func SendTooManyRequests(self *Response) {
 //
 // The status code and the header will become locked and further attempts to send either of them will fail with an error.
 //
-// You can retrieve the error using ServerRecallError.
+// All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
 func SendJson(self *Response, payload any) {
 	content, marshalError := json.Marshal(payload)
 	if marshalError != nil {
 		NotifierSendError(self.server.notifier, marshalError)
+		return
 	}
 
 	if nil == self.webSocket {
@@ -1309,21 +1305,18 @@ func createReaderFromFileName(fileName string) (*bytes.Reader, *os.FileInfo, err
 	return bytes.NewReader(buffer), &fileInfo, nil
 }
 
-// SendServerSentEventsUpgrade upgrades the http connection to server sent events.
-func SendServerSentEventsUpgrade(
-	self *Response,
-	callback func(
-		event func(eventName string),
-	),
-) {
+// SendSseUpgrade upgrades the http connection to server sent events
+// and returns a function that sets the name of the current event.
+//
+// The default event is "message".
+func SendSseUpgrade(self *Response) (setEventName func(eventName string)) {
 	SendHeader(self, "Access-Control-Allow-Origin", "*")
 	SendHeader(self, "Access-Control-Expose-Headers", "Content-Type")
 	SendHeader(self, "Content-Type", "text/event-stream")
 	SendHeader(self, "Cache-Control", "no-cache")
 	SendHeader(self, "Connection", "keep-alive")
-
 	self.eventName = "message"
-	callback(func(eventName string) {
+	setEventName = func(eventName string) {
 		if "" == eventName {
 			NotifierSendError(
 				self.server.notifier,
@@ -1333,11 +1326,12 @@ func SendServerSentEventsUpgrade(
 		}
 
 		self.eventName = eventName
-	})
+	}
+	return
 }
 
-// SendWebSocketUpgrade upgrades the http connection to web socket.
-func SendWebSocketUpgrade(self *Response, callback func()) {
+// SendWsUpgrade upgrades the http connection to web sockets.
+func SendWsUpgrade(self *Response) {
 	request := self.request
 	conn, upgradeError := self.server.webSocketUpgrader.Upgrade(*self.writer, request.httpRequest, nil)
 	if upgradeError != nil {
@@ -1353,7 +1347,6 @@ func SendWebSocketUpgrade(self *Response, callback func()) {
 	self.webSocket = conn
 	request.webSocketConn = conn
 	self.lockedStatusAndHeader = true
-	callback()
 }
 
 // SendPage renders and echos a svelte page.
