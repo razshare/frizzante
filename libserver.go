@@ -1429,7 +1429,6 @@ func ServerWithApi(
 		}
 		serverMapRoute(self, pattern, routeCreate(handler))
 	}
-
 }
 
 type Guard = func(
@@ -1472,8 +1471,8 @@ func ServerWithIndex(
 	self *Server,
 	index Index,
 ) {
+	var paths []string
 	page := ""
-	path_ := ""
 	var baseHandler func(req *Request, res *Response, p *Page)
 	var actionHandler func(req *Request, res *Response, p *Page)
 
@@ -1482,7 +1481,7 @@ func ServerWithIndex(
 			page = pageLocal
 		},
 		func(pathLocal string) {
-			path_ = pathLocal
+			paths = append(paths, pathLocal)
 		},
 		func(baseHandlerLocal func(req *Request, res *Response, p *Page)) {
 			baseHandler = baseHandlerLocal
@@ -1492,17 +1491,12 @@ func ServerWithIndex(
 		},
 	)
 
-	if "" == path_ {
-		path_ = "/" + strings.ReplaceAll(page, ".", "/")
+	if 0 == len(paths) {
+		paths = append(paths, "/"+strings.ReplaceAll(page, ".", "/"))
 	}
 
 	if "" == page {
 		NotifierSendError(self.notifier, fmt.Errorf("could not add index because page `%s` is unknown", page))
-		return
-	}
-
-	if "" == path_ {
-		NotifierSendError(self.notifier, fmt.Errorf("could not add index because path `%s` is unknown", path_))
 		return
 	}
 
@@ -1518,6 +1512,8 @@ func ServerWithIndex(
 		}
 	}
 
-	serverMapRoute(self, "GET "+path_, routeCreateWithPage(page, baseHandler))
-	serverMapRoute(self, "POST "+path_, routeCreateWithPage(page, actionHandler))
+	for _, path := range paths {
+		serverMapRoute(self, "GET "+path, routeCreateWithPage(page, baseHandler))
+		serverMapRoute(self, "POST "+path, routeCreateWithPage(page, actionHandler))
+	}
 }
