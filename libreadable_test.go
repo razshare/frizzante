@@ -76,7 +76,7 @@ func TestReadableRead(t *testing.T) {
 		}
 	})
 
-	value := ReadableRead(s)
+	value := ReadableGet(s)
 
 	if "default" != value {
 		t.Fatal("store value is not default")

@@ -28,13 +28,13 @@ func WritableSubscribe[T any](self *Writable[T], callback func(value T)) (unsubs
 	return
 }
 
-// WritableRead reads the current value of a writable store.
-func WritableRead[T any](self *Writable[T]) T {
+// WritableGet gets the current value of a writable store.
+func WritableGet[T any](self *Writable[T]) T {
 	return self.value
 }
 
-// WritableWrite writes a new value to the writable store.
-func WritableWrite[T any](self *Writable[T], value T) {
+// WritableSet sets a new value to the writable store.
+func WritableSet[T any](self *Writable[T], value T) {
 	self.value = value
 	for _, subscriber := range self.subscribers {
 		subscriber(value)

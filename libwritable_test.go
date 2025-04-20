@@ -10,7 +10,7 @@ func TestWritableCreate(t *testing.T) {
 	}
 
 	s = WritableCreate("default")
-	WritableWrite(s, "updated")
+	WritableSet(s, "updated")
 
 	if "updated" != s.value {
 		t.Fatal("findSubscriber value is not updated")
@@ -37,7 +37,7 @@ func TestWritableSubscribe(t *testing.T) {
 	}
 
 	s = WritableCreate("default")
-	WritableWrite(s, "updated")
+	WritableSet(s, "updated")
 
 	unsubscribe = WritableSubscribe(s, func(value string) {
 		if "updated" != value {
@@ -50,7 +50,7 @@ func TestWritableSubscribe(t *testing.T) {
 
 func TestWritableRead(t *testing.T) {
 	s := WritableCreate("default")
-	value := WritableRead(s)
+	value := WritableGet(s)
 
 	if "default" != value {
 		t.Fatal("store value is not default")

@@ -46,7 +46,7 @@ func ReadableSubscribe[T any](self *Readable[T], callback func(value T)) (unsubs
 	return
 }
 
-// ReadableRead reads the current value of a readable store.
-func ReadableRead[T any](self *Readable[T]) T {
+// ReadableGet get the current value of a readable store.
+func ReadableGet[T any](self *Readable[T]) T {
 	return self.value
 }

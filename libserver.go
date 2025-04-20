@@ -770,6 +770,8 @@ type Response struct {
 	eventId               int64
 }
 
+var pathFieldRegex = regexp.MustCompile(`\{(.*?)}`)
+
 // SendNavigateWithParameters sends the client an instruction to navigate.
 func SendNavigateWithParameters(self *Response, page string, parameters map[string]string) {
 	if nil == parameters {
@@ -812,8 +814,6 @@ func SendRedirect(self *Response, location string, statusCode int) {
 	SendStatus(self, statusCode)
 	SendHeader(self, "Location", location)
 }
-
-var pathFieldRegex = regexp.MustCompile(`\{(.*?)}`)
 
 // SendRedirectToSecure tries to redirect the request to the https server.
 //
