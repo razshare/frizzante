@@ -2,20 +2,22 @@ package indexes
 
 import f "github.com/razshare/frizzante"
 
-func indexShowFunction(_ *f.Request, _ *f.Response, _ *f.Page) {
+func baseHandler(req *f.Request, res *f.Response, page *f.Page) {
 	// Show page.
 }
 
-func indexActionFunction(_ *f.Request, _ *f.Response, _ *f.Page) {
-	// Run page action.
+func actionHandler(req *f.Request, res *f.Response, page *f.Page) {
+	// Modify state.
 }
 
-func Index(
-	route func(path string, page string),
-	show func(showFunction func(req *f.Request, res *f.Response, p *f.Page)),
-	action func(actionFunction func(req *f.Request, res *f.Response, p *f.Page)),
+func index(
+	withPage func(page string),
+	withPath func(path string),
+	withBaseHandler func(base func(req *f.Request, res *f.Response, page *f.Page)),
+	withActionHandler func(action func(req *f.Request, res *f.Response, page *f.Page)),
 ) {
-	route("/path", "page")
-	show(indexShowFunction)
-	action(indexActionFunction)
+	withPage("page")
+	withPath("/path")
+	withBaseHandler(baseHandler)
+	withActionHandler(actionHandler)
 }

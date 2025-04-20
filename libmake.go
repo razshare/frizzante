@@ -15,7 +15,7 @@ import (
 var templates embed.FS
 
 func createApi(apiName string) {
-	fileName := filepath.Join("lib", "api")
+	fileName := filepath.Join("lib", "components", "server")
 	if !Exists(fileName) {
 		writeError := os.MkdirAll(fileName, os.ModePerm)
 		if writeError != nil {
@@ -36,10 +36,18 @@ func createApi(apiName string) {
 	apiName = strings.Trim(strings.ReplaceAll(apiName, "-", "_"), "\r\n\t ")
 
 	apiNameCamel := strings.ToLower(apiName[0:1]) + apiName[1:]
-	apiNamePascal := strings.ToTitle(apiName[0:1]) + apiName[1:]
+	//apiNamePascal := strings.ToTitle(apiName[0:1]) + apiName[1:]
+	newDirectoryName := filepath.Join("lib", "components", "server", apiNameCamel)
+
+	if !Exists(newDirectoryName) {
+		mkdirError := os.MkdirAll(newDirectoryName, os.ModePerm)
+		if mkdirError != nil {
+			panic(mkdirError)
+		}
+	}
 
 	oldFileName := "templates/api/example.go"
-	newFileName := filepath.Join("lib", "api", apiNameCamel+".go")
+	newFileName := filepath.Join(newDirectoryName, "api.go")
 	readBytes, readError := templates.ReadFile(oldFileName)
 	if nil != readError {
 		panic(readError)
@@ -49,20 +57,20 @@ func createApi(apiName string) {
 		return
 	}
 
-	// Api.
-	oldName := []byte("func Api")
-	newName := []byte("func " + apiNamePascal)
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+	// Package.
+	oldName := []byte("package api")
+	newName := []byte("package " + apiNameCamel)
+	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
 	// Pattern.
 	oldName = []byte("\"GET /\"")
 	newName = []byte("\"GET /api/" + apiNameCamel + "\"")
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
-	// Serve.
-	oldName = []byte("serveFunction")
-	newName = []byte(apiNameCamel + "ServeFunction")
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+	// Api.
+	oldName = []byte("func api(")
+	newName = []byte("func Api(")
+	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
 	writeError := os.WriteFile(newFileName, readBytes, os.ModePerm)
 	if writeError != nil {
@@ -72,7 +80,7 @@ func createApi(apiName string) {
 }
 
 func createIndex(indexName string) {
-	fileName := filepath.Join("lib", "indexes")
+	fileName := filepath.Join("lib", "components", "server")
 	if !Exists(fileName) {
 		writeError := os.MkdirAll(fileName, os.ModePerm)
 		if writeError != nil {
@@ -93,10 +101,18 @@ func createIndex(indexName string) {
 	indexName = strings.Trim(strings.ReplaceAll(indexName, "-", "_"), "\r\n\t ")
 
 	indexNameCamel := strings.ToLower(indexName[0:1]) + indexName[1:]
-	indexNamePascal := strings.ToTitle(indexName[0:1]) + indexName[1:]
+	//indexNamePascal := strings.ToTitle(indexName[0:1]) + indexName[1:]
+	newDirectoryName := filepath.Join("lib", "components", "server", indexNameCamel)
+
+	if !Exists(newDirectoryName) {
+		mkdirError := os.MkdirAll(newDirectoryName, os.ModePerm)
+		if mkdirError != nil {
+			panic(mkdirError)
+		}
+	}
 
 	oldFileName := "templates/indexes/example.go"
-	newFileName := filepath.Join("lib", "indexes", indexNameCamel+".go")
+	newFileName := filepath.Join(newDirectoryName, "index.go")
 	readBytes, readError := templates.ReadFile(oldFileName)
 	if nil != readError {
 		panic(readError)
@@ -106,30 +122,25 @@ func createIndex(indexName string) {
 		return
 	}
 
-	// Index.
-	oldName := []byte("func Index")
-	newName := []byte("func " + indexNamePascal)
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+	// Package.
+	oldName := []byte("package indexes")
+	newName := []byte("package " + indexNameCamel)
+	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
-	// Path.
-	oldName = []byte("\"/path\"")
-	newName = []byte("\"/" + indexName + "\"")
+	// Index.
+	oldName = []byte("func index(")
+	newName = []byte("func Index(")
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	// Page.
 	oldName = []byte("\"page\"")
 	newName = []byte("\"" + indexName + "\"")
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
-	// Show.
-	oldName = []byte("indexShowFunction")
-	newName = []byte(indexNameCamel + "ShowFunction")
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
-
-	// Action.
-	oldName = []byte("indexActionFunction")
-	newName = []byte(indexNameCamel + "ActionFunction")
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+	// Path.
+	oldName = []byte("\"/path\"")
+	newName = []byte("\"/" + indexName + "\"")
+	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
 	writeError := os.WriteFile(newFileName, readBytes, os.ModePerm)
 	if writeError != nil {
@@ -139,7 +150,7 @@ func createIndex(indexName string) {
 }
 
 func createGuard(guardName string) {
-	fileName := filepath.Join("lib", "guards")
+	fileName := filepath.Join("lib", "components", "server")
 	if !Exists(fileName) {
 		writeError := os.MkdirAll(fileName, os.ModePerm)
 		if writeError != nil {
@@ -160,10 +171,18 @@ func createGuard(guardName string) {
 	guardName = strings.Trim(strings.ReplaceAll(guardName, "-", "_"), "\r\n\t ")
 
 	guardNameCamel := strings.ToLower(guardName[0:1]) + guardName[1:]
-	guardNamePascal := strings.ToTitle(guardName[0:1]) + guardName[1:]
+	//guardNamePascal := strings.ToTitle(guardName[0:1]) + guardName[1:]
+	newDirectoryName := filepath.Join("lib", "components", "server", guardNameCamel)
+
+	if !Exists(newDirectoryName) {
+		mkdirError := os.MkdirAll(newDirectoryName, os.ModePerm)
+		if mkdirError != nil {
+			panic(mkdirError)
+		}
+	}
 
 	oldFileName := "templates/guards/example.go"
-	newFileName := filepath.Join("lib", "guards", guardNameCamel+".go")
+	newFileName := filepath.Join(newDirectoryName, "guard.go")
 	readBytes, readError := templates.ReadFile(oldFileName)
 	if nil != readError {
 		panic(readError)
@@ -174,15 +193,15 @@ func createGuard(guardName string) {
 		return
 	}
 
-	// Api.
-	oldTitle := []byte("GuardApi")
-	newTitle := []byte(guardNamePascal + "Api")
-	readBytes = bytes.ReplaceAll(readBytes, oldTitle, newTitle)
+	// Package.
+	oldName := []byte("package guards")
+	newName := []byte("package " + guardNameCamel)
+	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
-	// Pages.
-	oldTitle = []byte("GuardPages")
-	newTitle = []byte(guardNamePascal + "Pages")
-	readBytes = bytes.ReplaceAll(readBytes, oldTitle, newTitle)
+	// Guard.
+	oldName = []byte("func guard(")
+	newName = []byte("func Guard(")
+	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
 	writeError := os.WriteFile(newFileName, readBytes, os.ModePerm)
 	if writeError != nil {

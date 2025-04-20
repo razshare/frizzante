@@ -531,16 +531,16 @@ func ServerStop(self *Server) {
 var pathParametersPattern = regexp.MustCompile(`{([^{}]+)}`)
 
 type Route struct {
-	server   *Server
-	isPage   bool
-	page     string
-	callback func(request *Request, response *Response)
-	mount    func(pattern string)
+	server  *Server
+	isPage  bool
+	page    string
+	handler func(request *Request, response *Response)
+	mount   func(pattern string)
 }
 
 // routeCreate creates a route configuration from a callback function.
 func routeCreate(
-	callback func(
+	handler func(
 		request *Request,
 		response *Response,
 	),
@@ -548,7 +548,7 @@ func routeCreate(
 	return &Route{
 		isPage: false,
 		page:   "",
-		callback: func(request *Request, response *Response) {
+		handler: func(request *Request, response *Response) {
 			for _, guard := range response.server.apiGuards {
 				pass := false
 				guard(request, response, func() {
@@ -560,7 +560,7 @@ func routeCreate(
 				}
 			}
 
-			callback(request, response)
+			handler(request, response)
 		},
 		mount: func(pattern string) {},
 	}
@@ -576,14 +576,18 @@ func routeCreate(
 // However, it is safe to invoke receive functions, like ReceiveHeader, ReceiveCookie, etc.
 func routeCreateWithPage(
 	page string,
-	callback func(req *Request, res *Response, p *Page),
+	handler func(
+		req *Request,
+		res *Response,
+		p *Page,
+	),
 ) *Route {
 	var pattern string
 
 	return &Route{
 		isPage: true,
 		page:   page,
-		callback: func(
+		handler: func(
 			request *Request,
 			response *Response,
 		) {
@@ -606,7 +610,7 @@ func routeCreateWithPage(
 				}
 			}
 
-			callback(request, response, p)
+			handler(request, response, p)
 
 			if nil != response.navigate {
 				SendRedirect(response, response.navigate.Location, http.StatusFound)
@@ -713,12 +717,12 @@ func serverMapRoute(
 		if isEntry {
 			SendEmbeddedFileOrElse(&response, func() {
 				SendFileOrElse(&response, func() {
-					if route.callback != nil {
+					if route.handler != nil {
 						if "/favicon.ico" == request.httpRequest.RequestURI {
 							SendNotFound(&response)
 							return
 						}
-						route.callback(&request, &response)
+						route.handler(&request, &response)
 
 						if !response.lockedStatusAndHeader {
 							SendEcho(&response, "")
@@ -726,8 +730,8 @@ func serverMapRoute(
 					}
 				})
 			})
-		} else if route.callback != nil {
-			route.callback(&request, &response)
+		} else if route.handler != nil {
+			route.handler(&request, &response)
 
 			if !response.lockedStatusAndHeader {
 				SendEcho(&response, "")
@@ -1392,7 +1396,7 @@ func ServerWithSessionOperator(
 
 type Api = func(
 	route func(pattern string),
-	serve func(serveFunction func(req *Request, res *Response)),
+	withHandler func(handler func(req *Request, res *Response)),
 )
 
 // ServerWithApi adds an api.
@@ -1401,19 +1405,19 @@ func ServerWithApi(
 	api Api,
 ) {
 	var patterns []string
-	var serve func(req *Request, res *Response)
+	var handler func(req *Request, res *Response)
 
 	api(
 		func(pattern string) {
 			patterns = append(patterns, pattern)
 		},
-		func(serveFunction func(req *Request, res *Response)) {
-			serve = serveFunction
+		func(handlerLocal func(req *Request, res *Response)) {
+			handler = handlerLocal
 		},
 	)
 
-	if nil == serve {
-		serve = func(req *Request, res *Response) {
+	if nil == handler {
+		handler = func(req *Request, res *Response) {
 			// Noop.
 		}
 	}
@@ -1423,22 +1427,44 @@ func ServerWithApi(
 			NotifierSendError(self.notifier, fmt.Errorf("could not add api because path is empty"))
 			return
 		}
-		serverMapRoute(self, pattern, routeCreate(serve))
+		serverMapRoute(self, pattern, routeCreate(handler))
 	}
 
 }
 
-type ApiGuardFunction = func(req *Request, res *Response, pass func())
+type Guard = func(
+	withApiGuard func(func(req *Request, res *Response, pass func())),
+	withPageGuard func(func(req *Request, res *Response, page *Page, pass func())),
+)
 
-// ServerWithApiGuard adds an api guard, a function that executes before every api request.
-func ServerWithApiGuard(self *Server, guard ApiGuardFunction) {
-	self.apiGuards = append(self.apiGuards, guard)
+// ServerWithGuard adds a guard.
+func ServerWithGuard(self *Server, guard Guard) {
+	var apiGuard func(req *Request, res *Response, pass func())
+	var pageGuard func(req *Request, res *Response, page *Page, pass func())
+
+	guard(
+		func(apiGuardLocal func(req *Request, res *Response, pass func())) {
+			apiGuard = apiGuardLocal
+		},
+		func(pageGuardLocal func(req *Request, res *Response, page *Page, pass func())) {
+			pageGuard = pageGuardLocal
+		},
+	)
+
+	if nil != apiGuard {
+		self.apiGuards = append(self.apiGuards, apiGuard)
+	}
+
+	if nil != pageGuard {
+		self.pageGuards = append(self.pageGuards, pageGuard)
+	}
 }
 
 type Index = func(
-	route func(path string, page string),
-	show func(showFunction func(req *Request, res *Response, p *Page)),
-	action func(actionFunction func(req *Request, res *Response, p *Page)),
+	withPage func(path string),
+	withPath func(page string),
+	withBase func(showFunction func(req *Request, res *Response, p *Page)),
+	withAction func(actionFunction func(req *Request, res *Response, p *Page)),
 )
 
 // ServerWithIndex adds an index.
@@ -1446,57 +1472,52 @@ func ServerWithIndex(
 	self *Server,
 	index Index,
 ) {
-	indexPage := ""
-	indexPath := ""
-	var show func(req *Request, res *Response, p *Page)
-	var action func(req *Request, res *Response, p *Page)
+	page := ""
+	path_ := ""
+	var baseHandler func(req *Request, res *Response, p *Page)
+	var actionHandler func(req *Request, res *Response, p *Page)
 
 	index(
-		func(path string, page string) {
-			indexPath = path
-			indexPage = page
+		func(pageLocal string) {
+			page = pageLocal
 		},
-		func(showFunction func(req *Request, res *Response, p *Page)) {
-			show = showFunction
+		func(pathLocal string) {
+			path_ = pathLocal
 		},
-		func(actionFunction func(req *Request, res *Response, p *Page)) {
-			action = actionFunction
+		func(baseHandlerLocal func(req *Request, res *Response, p *Page)) {
+			baseHandler = baseHandlerLocal
+		},
+		func(actionHandlerLocal func(req *Request, res *Response, p *Page)) {
+			actionHandler = actionHandlerLocal
 		},
 	)
 
-	if "" == indexPath {
-		indexPath = "/" + strings.ReplaceAll(indexPage, ".", "/")
+	if "" == path_ {
+		path_ = "/" + strings.ReplaceAll(page, ".", "/")
 	}
 
-	if "" == indexPage {
-		NotifierSendError(self.notifier, fmt.Errorf("could not add index because page `%s` is unknown", indexPage))
+	if "" == page {
+		NotifierSendError(self.notifier, fmt.Errorf("could not add index because page `%s` is unknown", page))
 		return
 	}
 
-	if "" == indexPath {
-		NotifierSendError(self.notifier, fmt.Errorf("could not add index because path `%s` is unknown", indexPath))
+	if "" == path_ {
+		NotifierSendError(self.notifier, fmt.Errorf("could not add index because path `%s` is unknown", path_))
 		return
 	}
 
-	if nil == show {
-		show = func(req *Request, res *Response, p *Page) {
+	if nil == baseHandler {
+		baseHandler = func(req *Request, res *Response, p *Page) {
 			// Noop.
 		}
 	}
 
-	if nil == action {
-		action = func(req *Request, res *Response, p *Page) {
+	if nil == actionHandler {
+		actionHandler = func(req *Request, res *Response, p *Page) {
 			// Noop.
 		}
 	}
 
-	serverMapRoute(self, "GET "+indexPath, routeCreateWithPage(indexPage, show))
-	serverMapRoute(self, "POST "+indexPath, routeCreateWithPage(indexPage, action))
-}
-
-type IndexGuard = func(req *Request, res *Response, p *Page, pass func())
-
-// ServerWithIndexGuard adds an index guard, a function that executes before every index executes.
-func ServerWithIndexGuard(self *Server, guard IndexGuard) {
-	self.pageGuards = append(self.pageGuards, guard)
+	serverMapRoute(self, "GET "+path_, routeCreateWithPage(page, baseHandler))
+	serverMapRoute(self, "POST "+path_, routeCreateWithPage(page, actionHandler))
 }

@@ -13,22 +13,22 @@ func TestSessionStart(test *testing.T) {
 	port := NextNumber(8080)
 	ServerWithPort(server, port)
 	ServerWithApi(server, func(
-		route func(pattern string),
-		serve func(serveFunction func(req *Request, res *Response)),
+		withPattern func(pattern string),
+		withHandler func(handler func(req *Request, res *Response)),
 	) {
-		route("GET /")
-		serve(func(request *Request, response *Response) {
+		withPattern("GET /")
+		withHandler(func(request *Request, response *Response) {
 			get, _, _ := SessionStart(request, response)
 			name := get("name", "world").(string)
 			SendEcho(response, fmt.Sprintf("hello %s", name))
 		})
 	})
 	ServerWithApi(server, func(
-		route func(pattern string),
-		serve func(serveFunction func(req *Request, res *Response)),
+		withPattern func(pattern string),
+		withHandler func(handler func(req *Request, res *Response)),
 	) {
-		route("POST /")
-		serve(func(request *Request, response *Response) {
+		withPattern("POST /")
+		withHandler(func(request *Request, response *Response) {
 			_, set, _ := SessionStart(request, response)
 			name := ReceiveMessage(request)
 			set("name", name)

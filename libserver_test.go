@@ -160,11 +160,11 @@ func TestServerWithApi(test *testing.T) {
 	ServerWithNotifier(server, notifier)
 	expected := "hello"
 	ServerWithApi(server, func(
-		route func(pattern string),
-		serve func(serveFunction func(req *Request, res *Response)),
+		withPattern func(pattern string),
+		withHandler func(handler func(req *Request, res *Response)),
 	) {
-		route("GET /")
-		serve(func(_ *Request, response *Response) {
+		withPattern("GET /")
+		withHandler(func(_ *Request, response *Response) {
 			SendEcho(response, expected)
 		})
 	})
@@ -191,11 +191,11 @@ func TestSendStatus(test *testing.T) {
 	ServerWithPort(server, port)
 	ServerWithNotifier(server, notifier)
 	ServerWithApi(server, func(
-		route func(pattern string),
-		serve func(serveFunction func(req *Request, res *Response)),
+		withPattern func(pattern string),
+		withHandler func(handler func(req *Request, res *Response)),
 	) {
-		route("GET /")
-		serve(func(_ *Request, response *Response) {
+		withPattern("GET /")
+		withHandler(func(_ *Request, response *Response) {
 			SendStatus(response, expected)
 			SendEcho(response, "Ok")
 		})
@@ -226,11 +226,11 @@ func TestSendHeader(test *testing.T) {
 	ServerWithNotifier(server, notifier)
 	expected := "application/json"
 	ServerWithApi(server, func(
-		route func(pattern string),
-		serve func(serveFunction func(req *Request, res *Response)),
+		withPattern func(pattern string),
+		withHandler func(handler func(req *Request, res *Response)),
 	) {
-		route("GET /")
-		serve(func(_ *Request, response *Response) {
+		withPattern("GET /")
+		withHandler(func(_ *Request, response *Response) {
 			SendHeader(response, "Content-Type", expected)
 			SendEcho(response, "{}")
 		})

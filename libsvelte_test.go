@@ -16,11 +16,13 @@ func TestRenderServer(test *testing.T) {
 	ServerWithNotifier(server, notifier)
 	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
 	ServerWithIndex(server, func(
-		route func(path string, page string),
+		withPage func(page string),
+		withPath func(path string),
 		show func(showFunction func(req *Request, res *Response, p *Page)),
 		action func(actionFunction func(req *Request, res *Response, o *Page)),
 	) {
-		route("/", "welcome")
+		withPage("welcome")
+		withPath("/")
 		show(func(req *Request, res *Response, p *Page) {
 			PageWithRender(p, RenderServer)
 			PageWithData(p, "name", "world")
@@ -51,12 +53,14 @@ func TestRenderClient(test *testing.T) {
 	ServerWithHostName(server, "127.0.0.1")
 	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
 	ServerWithIndex(server, func(
-		route func(path string, page string),
-		show func(showFunction func(req *Request, res *Response, p *Page)),
-		action func(actionFunction func(req *Request, res *Response, o *Page)),
+		withPage func(page string),
+		withPath func(path string),
+		withBaseHandler func(baseHandler func(req *Request, res *Response, p *Page)),
+		withActionHandler func(actionFunction func(req *Request, res *Response, o *Page)),
 	) {
-		route("/", "welcome")
-		show(func(req *Request, res *Response, p *Page) {
+		withPage("welcome")
+		withPath("/")
+		withBaseHandler(func(req *Request, res *Response, p *Page) {
 			PageWithRender(p, RenderClient)
 			PageWithData(p, "name", "world")
 		})
