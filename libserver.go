@@ -334,6 +334,25 @@ func ServerTemporaryDirectoryClear(self *Server) {
 	}
 }
 
+// ReceiveCancellation returns a channel that's closed when the request is cancelled.
+func ReceiveCancellation(self *Request) <-chan struct{} {
+	return self.httpRequest.Context().Done()
+}
+
+// ReceiveCancellationReadable returns a readable store,
+// which indicates whether the request is cancelled.
+//
+// This is useful for web sockets and server sent events.
+func ReceiveCancellationReadable(self *Request) *Readable[bool] {
+	return ReadableCreate(false, func(set func(value bool)) (destroy func()) {
+		go func() {
+			<-self.httpRequest.Context().Done()
+			set(true)
+		}()
+		return func() {}
+	})
+}
+
 // ReceiveCookie reads the contents of a cookie from the message and returns the value.
 //
 // Compatible with web sockets.
@@ -816,7 +835,7 @@ func SendRedirectToSecure(self *Response, statusCode int) bool {
 // SendStatus sets the status code.
 //
 // This will lock the status, which makes it
-// so that the next time you invoke this
+// so that the increaseIndex time you invoke this
 // function it will fail with an error.
 //
 // You can retrieve the error using ServerRecallError.
@@ -864,13 +883,7 @@ func SendCookie(self *Response, key string, value string) {
 //
 // Compatible with web sockets.
 func SendContent(self *Response, content []byte) {
-	isEvent := "" != self.eventName
 	if !self.lockedStatusAndHeader {
-		if isEvent && 1 == self.eventId {
-			SendHeader(self, "Cache-Control", "no-store")
-			SendHeader(self, "Content-Type", "text/event-stream")
-			SendHeader(self, "Connection", "keep-alive")
-		}
 		(*self.writer).WriteHeader(self.statusCode)
 		self.lockedStatusAndHeader = true
 	}
@@ -883,7 +896,7 @@ func SendContent(self *Response, content []byte) {
 		return
 	}
 
-	if isEvent {
+	if "" != self.eventName {
 		sendEventContent(self, content)
 		return
 	}
@@ -1299,10 +1312,26 @@ func createReaderFromFileName(fileName string) (*bytes.Reader, *os.FileInfo, err
 // SendServerSentEventsUpgrade upgrades the http connection to server sent events.
 func SendServerSentEventsUpgrade(
 	self *Response,
-	callback func(event func(eventName string)),
+	callback func(
+		event func(eventName string),
+	),
 ) {
+	SendHeader(self, "Access-Control-Allow-Origin", "*")
+	SendHeader(self, "Access-Control-Expose-Headers", "Content-Type")
+	SendHeader(self, "Content-Type", "text/event-stream")
+	SendHeader(self, "Cache-Control", "no-cache")
+	SendHeader(self, "Connection", "keep-alive")
+
 	self.eventName = "message"
 	callback(func(eventName string) {
+		if "" == eventName {
+			NotifierSendError(
+				self.server.notifier,
+				fmt.Errorf("renaming a server sent event (`%s`) to an empty string is not allowed", self.eventName),
+			)
+			return
+		}
+
 		self.eventName = eventName
 	})
 }
