@@ -2,20 +2,19 @@ package guards
 
 import f "github.com/razshare/frizzante"
 
-func apiHandler(req *f.Request, res *f.Response, pass func()) {
-	// Guard api.
-	pass()
-}
-
-func pageHandler(req *f.Request, res *f.Response, page *f.Page, pass func()) {
-	// Guard page.
+func guardHandler(req *f.Request, res *f.Response, pass func()) {
+	// Guard.
 	pass()
 }
 
 func guard(
-	withApiHandler func(func(req *f.Request, res *f.Response, pass func())),
-	withPageHandler func(func(req *f.Request, res *f.Response, page *f.Page, pass func())),
+	withGuardHandler func(
+		guardHandler func(
+			req *f.Request,
+			res *f.Response,
+			pass func(),
+		),
+	),
 ) {
-	withApiHandler(apiHandler)
-	withPageHandler(pageHandler)
+	withGuardHandler(guardHandler)
 }

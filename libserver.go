@@ -29,8 +29,7 @@ type Server struct {
 	multipartFormMaxMemory int64
 	server                 *http.Server
 	mux                    *http.ServeMux
-	apiGuards              []func(req *Request, res *Response, pass func())
-	pageGuards             []func(req *Request, res *Response, p *Page, pass func())
+	guards                 []func(req *Request, res *Response, pass func())
 	sessions               map[string]*net.Conn
 	readTimeout            time.Duration
 	writeTimeout           time.Duration
@@ -77,8 +76,7 @@ func ServerCreate() *Server {
 		server:                 nil,
 		mux:                    http.NewServeMux(),
 		sessions:               map[string]*net.Conn{},
-		apiGuards:              []func(req *Request, res *Response, pass func()){},
-		pageGuards:             []func(req *Request, res *Response, p *Page, pass func()){},
+		guards:                 []func(req *Request, res *Response, pass func()){},
 		readTimeout:            10 * time.Second,
 		writeTimeout:           10 * time.Second,
 		maxHeaderBytes:         3 * MB,
@@ -549,7 +547,7 @@ func routeCreate(
 		isPage: false,
 		page:   "",
 		handler: func(request *Request, response *Response) {
-			for _, guard := range response.server.apiGuards {
+			for _, guard := range response.server.guards {
 				pass := false
 				guard(request, response, func() {
 					pass = true
@@ -599,9 +597,9 @@ func routeCreateWithPage(
 				parameters: map[string]string{},
 			}
 
-			for _, guard := range response.server.pageGuards {
+			for _, guard := range response.server.guards {
 				pass := false
-				guard(request, response, p, func() {
+				guard(request, response, func() {
 					pass = true
 				})
 
@@ -1432,30 +1430,21 @@ func ServerWithApi(
 }
 
 type Guard = func(
-	withApiGuard func(func(req *Request, res *Response, pass func())),
-	withPageGuard func(func(req *Request, res *Response, page *Page, pass func())),
+	withGuardHandler func(guardHandler func(req *Request, res *Response, pass func())),
 )
 
 // ServerWithGuard adds a guard.
 func ServerWithGuard(self *Server, guard Guard) {
-	var apiGuard func(req *Request, res *Response, pass func())
-	var pageGuard func(req *Request, res *Response, page *Page, pass func())
+	var guardHandler func(req *Request, res *Response, pass func())
 
 	guard(
-		func(apiGuardLocal func(req *Request, res *Response, pass func())) {
-			apiGuard = apiGuardLocal
-		},
-		func(pageGuardLocal func(req *Request, res *Response, page *Page, pass func())) {
-			pageGuard = pageGuardLocal
+		func(guardHandlerLocal func(req *Request, res *Response, pass func())) {
+			guardHandler = guardHandlerLocal
 		},
 	)
 
-	if nil != apiGuard {
-		self.apiGuards = append(self.apiGuards, apiGuard)
-	}
-
-	if nil != pageGuard {
-		self.pageGuards = append(self.pageGuards, pageGuard)
+	if nil != guardHandler {
+		self.guards = append(self.guards, guardHandler)
 	}
 }
 
