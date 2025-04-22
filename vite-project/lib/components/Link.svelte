@@ -30,7 +30,7 @@
 
     /**
      * @typedef Props
-     * @property {string} page
+     * @property {string} view
      * @property {import("svelte").Snippet} children
      * @property {"start"|"center"|"end"} [align]
      * @property {Record<string,string>} [parameters]
@@ -38,7 +38,7 @@
 
     /** @type {Props} */
     const {
-        page,
+        view,
         children,
         align = "start",
         parameters = {},
@@ -52,11 +52,11 @@
      */
     function onmouseup(e) {
         e.preventDefault()
-        navigate(page, parameters)
+        navigate(view, parameters)
     }
 </script>
 
-<a href="{path(page, parameters)}"
+<a href="{path(view, parameters)}"
    class:start={"start"===align}
    class:center={"center"===align}
    class:end={"end"===align}

@@ -19,8 +19,8 @@ func Prepare() {
 		panic(err)
 	}
 
-	// Prepare pages.
-	err = preparePages()
+	// Prepare view.
+	err = prepareViews()
 	if err != nil {
 		panic(err)
 	}
@@ -39,7 +39,7 @@ func Prepare() {
 }
 
 func prepareLib() error {
-	asyncSvelte, asyncSvelteError := viteProject.ReadFile("vite-project/page.async.svelte")
+	asyncSvelte, asyncSvelteError := viteProject.ReadFile("vite-project/view.async.svelte")
 	if asyncSvelteError != nil {
 		return asyncSvelteError
 	}
@@ -91,7 +91,7 @@ func prepareLib() error {
 		}
 	}
 
-	err := os.WriteFile(".frizzante/vite-project/page.async.svelte", asyncSvelte, os.ModePerm)
+	err := os.WriteFile(".frizzante/vite-project/view.async.svelte", asyncSvelte, os.ModePerm)
 	if err != nil {
 		return err
 	}
@@ -160,12 +160,12 @@ func prepareLib() error {
 	return nil
 }
 
-func preparePages() error {
-	libPages := filepath.Join("lib", "pages")
+func prepareViews() error {
+	libViews := filepath.Join("lib", "components", "views")
 	sep := string(filepath.Separator)
 	suffix := ".svelte"
 	return filepath.Walk(
-		libPages,
+		libViews,
 		func(fileName string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
@@ -175,14 +175,14 @@ func preparePages() error {
 				return nil
 			}
 
-			fileNameBase := strings.Trim(strings.TrimPrefix(fileName, libPages), sep)
-			page := strings.TrimSuffix(strings.ReplaceAll(fileNameBase, sep, "."), ".svelte")
+			fileNameBase := strings.Trim(strings.TrimPrefix(fileName, libViews), sep)
+			view := strings.TrimSuffix(strings.ReplaceAll(fileNameBase, sep, "."), ".svelte")
 
 			importFileName, err := filepath.Rel(".frizzante/vite-project", fileName)
 			if err != nil {
 				panic(err)
 			}
-			documents[page] = fmt.Sprintf("./%s", importFileName)
+			components[view] = fmt.Sprintf("./%s", importFileName)
 
 			return nil
 		},
@@ -195,23 +195,23 @@ func prepareSsr() error {
 	if readError != nil {
 		return readError
 	}
-	for page, fileName := range documents {
-		pageAsComponentName := strings.ToUpper(strings.ReplaceAll(page, ".", "_"))
-		builder.WriteString(fmt.Sprintf("    import %s from '%s'\n", pageAsComponentName, fileName))
+	for component, fileName := range components {
+		viewAsComponentName := strings.ToUpper(strings.ReplaceAll(component, ".", "_"))
+		builder.WriteString(fmt.Sprintf("    import %s from '%s'\n", viewAsComponentName, fileName))
 	}
 
 	renderServerSvelteString := strings.Replace(string(renderServerSvelte), "//:app-imports", builder.String(), 1)
 
 	builder.Reset()
 	counter := 0
-	for page, _ := range documents {
-		pageAsComponentName := strings.ReplaceAll(page, ".", "_")
+	for view, _ := range components {
+		viewAsComponentName := strings.ReplaceAll(view, ".", "_")
 		if 0 == counter {
-			builder.WriteString(fmt.Sprintf("{#if '%s' === page}\n", page))
+			builder.WriteString(fmt.Sprintf("{#if '%s' === view}\n", view))
 		} else {
-			builder.WriteString(fmt.Sprintf("{:else if '%s' === page}\n", page))
+			builder.WriteString(fmt.Sprintf("{:else if '%s' === view}\n", view))
 		}
-		builder.WriteString(fmt.Sprintf("    <%s />\n", strings.ToUpper(pageAsComponentName)))
+		builder.WriteString(fmt.Sprintf("    <%s />\n", strings.ToUpper(viewAsComponentName)))
 		counter++
 	}
 	if counter > 0 {
@@ -235,18 +235,18 @@ func prepareCsr() error {
 	}
 
 	var builder strings.Builder
-	builder.WriteString("import Document from './page.async.svelte'")
+	builder.WriteString("import View from './view.async.svelte'")
 	renderClientSvelteString := strings.Replace(string(renderClientSvelte), "//:app-imports", builder.String(), 1)
 
 	builder.Reset()
 	counter := 0
-	for page, fileName := range documents {
+	for view, fileName := range components {
 		if 0 == counter {
-			builder.WriteString(fmt.Sprintf("{#if '%s' === pageState}\n", page))
+			builder.WriteString(fmt.Sprintf("{#if '%s' === viewState}\n", view))
 		} else {
-			builder.WriteString(fmt.Sprintf("{:else if '%s' === pageState}\n", page))
+			builder.WriteString(fmt.Sprintf("{:else if '%s' === viewState}\n", view))
 		}
-		builder.WriteString(fmt.Sprintf("    <Document from={import('%s')} />\n", fileName))
+		builder.WriteString(fmt.Sprintf("    <View from={import('%s')} />\n", fileName))
 		counter++
 	}
 	if counter > 0 {

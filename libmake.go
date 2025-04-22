@@ -15,12 +15,15 @@ import (
 var templates embed.FS
 
 type NameMetadata struct {
-	RelativeFileNameTemplate string
-	FullDirectoryNameCamel   string
-	FullFileNameCamel        string
-	RelativeFileNameCamel    string
-	FunctionNamePascal       string
-	PackageNameCamel         string
+	Name                          string
+	RelativeFileNameTemplate      string
+	FullDirectoryNameCamel        string
+	FullFileNameCamel             string
+	FullFileNamePascal            string
+	RelativeFileNameCamel         string
+	BaseFileNamePascalNoExtension string
+	BaseDirectoryName             string
+	BaseFileNamePascal            string
 }
 
 func findNameMetadata(root string, template string, name string, message string) *NameMetadata {
@@ -31,10 +34,13 @@ func findNameMetadata(root string, template string, name string, message string)
 		}
 	}
 
+	trimmedName := strings.Trim(name, "\r\n\t ")
+
 	if "" == name {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print(message)
 		name, _ = reader.ReadString('\n')
+		trimmedName = strings.Trim(name, "\r\n\t ")
 		if "" == name {
 			return findNameMetadata(root, template, name, message)
 		}
@@ -45,8 +51,8 @@ func findNameMetadata(root string, template string, name string, message string)
 		panic(fullFileNameRootError)
 	}
 
-	metadata := &NameMetadata{}
-	trimmedName := strings.Trim(name, "\r\n\t ")
+	metadata := &NameMetadata{Name: trimmedName}
+
 	extensionName := filepath.Ext(template)
 
 	baseFileName := strings.ReplaceAll(
@@ -76,13 +82,16 @@ func findNameMetadata(root string, template string, name string, message string)
 	relativeFileNameCamel = relativeFileNameCamel[1:] + extensionName
 
 	fullFileNameCamel := filepath.Join(fullRoot, relativeFileNameCamel)
+	fullFileNamePascal := filepath.Join(fullRoot, relativeFileNamePascal)
 
 	metadata.FullDirectoryNameCamel = filepath.Dir(fullFileNameCamel)
 	metadata.FullFileNameCamel = fullFileNameCamel
+	metadata.FullFileNamePascal = fullFileNamePascal
 	metadata.RelativeFileNameCamel = relativeFileNameCamel
 	metadata.RelativeFileNameTemplate = template
-	metadata.FunctionNamePascal = filepath.Base(strings.TrimSuffix(relativeFileNamePascal, extensionName))
-	metadata.PackageNameCamel = filepath.Base(metadata.FullDirectoryNameCamel)
+	metadata.BaseDirectoryName = filepath.Base(metadata.FullDirectoryNameCamel)
+	metadata.BaseFileNamePascal = filepath.Base(metadata.FullFileNamePascal)
+	metadata.BaseFileNamePascalNoExtension = strings.TrimSuffix(metadata.BaseFileNamePascal, extensionName)
 	return metadata
 }
 
@@ -113,6 +122,15 @@ func findNameMetadataForPage(name string) *NameMetadata {
 	)
 }
 
+func findNameMetadataForView(name string) *NameMetadata {
+	return findNameMetadata(
+		filepath.Join("lib", "components", "views"),
+		filepath.Join("templates", "views", "example.svelte"),
+		name,
+		"Name the view: ",
+	)
+}
+
 func createApi(apiName string) {
 	metadata := findNameMetadataForApi(apiName)
 
@@ -124,7 +142,8 @@ func createApi(apiName string) {
 	}
 
 	if Exists(metadata.FullFileNameCamel) {
-		fmt.Printf("Api `%s` already exists.\n", metadata.FunctionNamePascal)
+		fmt.Printf("Api `%s` already exists.\n", metadata.BaseFileNamePascalNoExtension)
+		createApi("")
 		return
 	}
 
@@ -135,7 +154,7 @@ func createApi(apiName string) {
 
 	// Package.
 	oldName := []byte("package api")
-	newName := []byte("package " + metadata.PackageNameCamel)
+	newName := []byte("package " + metadata.BaseDirectoryName)
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	// Pattern.
@@ -145,7 +164,7 @@ func createApi(apiName string) {
 
 	// ApiFunction.
 	oldName = []byte("func api(")
-	newName = []byte("func " + metadata.FunctionNamePascal + "(")
+	newName = []byte("func " + metadata.BaseFileNamePascalNoExtension + "(")
 	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
 	writeError := os.WriteFile(metadata.FullFileNameCamel, readBytes, os.ModePerm)
@@ -166,6 +185,7 @@ func createGuard(guardName string) {
 
 	if Exists(metadata.FullFileNameCamel) {
 		fmt.Printf("Guard `%s` already exists.\n", metadata.FullFileNameCamel)
+		createGuard("")
 		return
 	}
 
@@ -176,12 +196,12 @@ func createGuard(guardName string) {
 
 	// Package.
 	oldName := []byte("package guards")
-	newName := []byte("package " + metadata.PackageNameCamel)
+	newName := []byte("package " + metadata.BaseDirectoryName)
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	// GuardFunction.
 	oldName = []byte("func guard(")
-	newName = []byte("func " + metadata.FunctionNamePascal + "(")
+	newName = []byte("func " + metadata.BaseFileNamePascalNoExtension + "(")
 	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
 	writeError := os.WriteFile(metadata.FullFileNameCamel, readBytes, os.ModePerm)
@@ -201,7 +221,8 @@ func createPage(pageName string) {
 	}
 
 	if Exists(metadata.FullFileNameCamel) {
-		fmt.Printf("Page function `%s` already exists.\n", metadata.FunctionNamePascal)
+		fmt.Printf("Page `%s` already exists.\n", metadata.BaseFileNamePascalNoExtension)
+		createPage("")
 		return
 	}
 
@@ -212,17 +233,17 @@ func createPage(pageName string) {
 
 	// Package.
 	oldName := []byte("package pages")
-	newName := []byte("package " + metadata.PackageNameCamel)
+	newName := []byte("package " + metadata.BaseDirectoryName)
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	// PageFunction.
 	oldName = []byte("func page(")
-	newName = []byte("func " + metadata.FunctionNamePascal + "(")
+	newName = []byte("func " + metadata.BaseFileNamePascalNoExtension + "(")
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	// Document.
 	oldName = []byte("\"pageName\"")
-	newName = []byte("\"" + pageName + "\"")
+	newName = []byte("\"" + metadata.BaseFileNamePascalNoExtension + "\"")
 	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
 	// Path.
@@ -238,12 +259,17 @@ func createPage(pageName string) {
 	metadata.FullFileNameCamel = strings.TrimSuffix(metadata.FullFileNameCamel, ".go") + ".svelte"
 	metadata.RelativeFileNameTemplate = strings.TrimSuffix(metadata.RelativeFileNameTemplate, ".go") + ".svelte"
 	metadata.RelativeFileNameCamel = strings.TrimSuffix(metadata.RelativeFileNameCamel, ".go") + ".svelte"
-	createPageComponent(metadata)
+	createViewComponent(metadata.Name)
 }
 
-func createPageComponent(metadata *NameMetadata) {
-	if Exists(metadata.FullFileNameCamel) {
-		fmt.Printf("Page component `%s` already exists.\n", metadata.FunctionNamePascal)
+func createViewComponent(pageName string) {
+	metadata := findNameMetadataForView(pageName)
+
+	fileName := filepath.Join(metadata.FullDirectoryNameCamel, metadata.BaseFileNamePascal)
+
+	if Exists(fileName) {
+		fmt.Printf("component `%s` already exists.\n", fileName)
+		createViewComponent("")
 		return
 	}
 
@@ -252,7 +278,7 @@ func createPageComponent(metadata *NameMetadata) {
 		panic(readError)
 	}
 
-	writeError := os.WriteFile(metadata.FullFileNameCamel, readBytes, os.ModePerm)
+	writeError := os.WriteFile(fileName, readBytes, os.ModePerm)
 	if writeError != nil {
 		panic(writeError)
 	}

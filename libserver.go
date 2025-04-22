@@ -29,7 +29,7 @@ type Server struct {
 	multipartFormMaxMemory int64
 	server                 *http.Server
 	mux                    *http.ServeMux
-	guards                 []func(req *Request, res *Response, pass func())
+	guards                 []func(request *Request, response *Response, pass func())
 	sessions               map[string]*net.Conn
 	readTimeout            time.Duration
 	writeTimeout           time.Duration
@@ -76,7 +76,7 @@ func ServerCreate() *Server {
 		server:                 nil,
 		mux:                    http.NewServeMux(),
 		sessions:               map[string]*net.Conn{},
-		guards:                 []func(req *Request, res *Response, pass func()){},
+		guards:                 []func(request *Request, response *Response, pass func()){},
 		readTimeout:            10 * time.Second,
 		writeTimeout:           10 * time.Second,
 		maxHeaderBytes:         3 * MB,
@@ -455,11 +455,11 @@ func ReceiveContentType(self *Request) string {
 
 func notFoundApi(
 	route func(pattern string),
-	serve func(serveFunction func(req *Request, res *Response)),
+	serve func(serveFunction func(request *Request, response *Response)),
 ) {
 	route("GET /")
-	serve(func(req *Request, res *Response) {
-		SendStatus(res, 404)
+	serve(func(request *Request, response *Response) {
+		SendStatus(response, 404)
 	})
 }
 
@@ -530,7 +530,7 @@ var pathParametersPattern = regexp.MustCompile(`{([^{}]+)}`)
 
 type Route struct {
 	server  *Server
-	page    string
+	view    string
 	handler func(request *Request, response *Response)
 	mount   func(pattern string)
 }
@@ -543,7 +543,7 @@ func routeCreate(
 	),
 ) *Route {
 	return &Route{
-		page: "",
+		view: "",
 		handler: func(request *Request, response *Response) {
 			for _, guard := range response.server.guards {
 				pass := false
@@ -564,16 +564,16 @@ func routeCreate(
 
 // routeCreateWithPage creates a route configuration from a callback function, just like routeCreate.
 //
-// Unlike routeCreate, routeCreateWithPage also creates a Document, which is used to automatically
-// to serve a svelte page after invoking callback.
+// Unlike routeCreate, routeCreateWithView also creates a Document, which is used to automatically
+// to serve a svelte view after invoking callback.
 //
 // Generally speaking, you should never manually invoke SendEcho or similar functions.
 //
 // However, it is safe to invoke receive functions, like ReceiveHeader, ReceiveCookie, etc.
-func routeCreateWithPage(
-	page string,
+func routeCreateWithView(
+	view string,
 	handler func(
-		req *Request,
+		request *Request,
 		res *Response,
 		document *Document,
 	),
@@ -581,7 +581,7 @@ func routeCreateWithPage(
 	var pattern string
 
 	return &Route{
-		page: page,
+		view: view,
 		handler: func(
 			request *Request,
 			response *Response,
@@ -590,7 +590,7 @@ func routeCreateWithPage(
 				Render:     RenderFull,
 				Data:       map[string]any{},
 				efs:        request.server.embeddedFileSystem,
-				pageName:   page,
+				view:       view,
 				parameters: map[string]string{},
 			}
 
@@ -647,14 +647,14 @@ func routeCreateWithPage(
 				document.parameters[name[1]] = request.httpRequest.PathValue(name[1])
 			}
 
-			SendView(response, document)
+			SendDocument(response, document)
 		},
 		mount: func(patternLocal string) {
 			pattern = patternLocal
 			patternParts := strings.Split(patternLocal, " ")
 			patternCounter := len(patternParts)
 			if patternCounter > 1 {
-				documents[page] = path.Join(patternParts[1:]...)
+				components[view] = path.Join(patternParts[1:]...)
 			}
 		},
 	}
@@ -770,7 +770,7 @@ func SendNavigateWithParameters(self *Response, page string, parameters map[stri
 		parameters = map[string]string{}
 	}
 
-	p, pathFound := documents[page]
+	p, pathFound := components[page]
 	if !pathFound {
 		NotifierSendError(self.server.notifier, fmt.Errorf("redirect to page `%s` failed because page id `%s` is unknown", page, page))
 	}
@@ -1348,9 +1348,9 @@ func SendWsUpgrade(self *Response) {
 	self.lockedStatusAndHeader = true
 }
 
-// SendView renders and echos a svelte page.
-func SendView(self *Response, page *Document) {
-	content, compileError := DocumentCompile(page)
+// SendDocument echos a document's view.
+func SendDocument(self *Response, document *Document) {
+	content, compileError := DocumentCompile(document)
 	if nil != compileError {
 		NotifierSendError(self.server.notifier, compileError)
 		return
@@ -1391,7 +1391,7 @@ func ServerWithSessionOperator(
 
 type ApiFunction = func(
 	withPattern func(pattern string),
-	withHandler func(handler func(req *Request, res *Response)),
+	withHandler func(handler func(request *Request, response *Response)),
 )
 
 // ServerWithApi adds an api.
@@ -1400,19 +1400,19 @@ func ServerWithApi(
 	apiFunction ApiFunction,
 ) {
 	var patterns []string
-	var handler func(req *Request, res *Response)
+	var handler func(request *Request, response *Response)
 
 	apiFunction(
 		func(pattern string) {
 			patterns = append(patterns, pattern)
 		},
-		func(handlerLocal func(req *Request, res *Response)) {
+		func(handlerLocal func(request *Request, response *Response)) {
 			handler = handlerLocal
 		},
 	)
 
 	if nil == handler {
-		handler = func(req *Request, res *Response) {
+		handler = func(request *Request, response *Response) {
 			// Noop.
 		}
 	}
@@ -1427,15 +1427,15 @@ func ServerWithApi(
 }
 
 type GuardFunction = func(
-	withGuardHandler func(guardHandler func(req *Request, res *Response, pass func())),
+	withGuardHandler func(guardHandler func(request *Request, response *Response, pass func())),
 )
 
 // ServerWithGuard adds a guard.
 func ServerWithGuard(self *Server, guardFunction GuardFunction) {
-	var guardHandler func(req *Request, res *Response, pass func())
+	var guardHandler func(request *Request, response *Response, pass func())
 
 	guardFunction(
-		func(guardHandlerLocal func(req *Request, res *Response, pass func())) {
+		func(guardHandlerLocal func(request *Request, response *Response, pass func())) {
 			guardHandler = guardHandlerLocal
 		},
 	)
@@ -1448,8 +1448,8 @@ func ServerWithGuard(self *Server, guardFunction GuardFunction) {
 type PageFunction = func(
 	withPath func(page string),
 	withDocument func(document *Document),
-	withBase func(showFunction func(req *Request, res *Response, document *Document)),
-	withAction func(actionFunction func(req *Request, res *Response, document *Document)),
+	withBase func(showFunction func(request *Request, response *Response, document *Document)),
+	withAction func(actionFunction func(request *Request, response *Response, document *Document)),
 )
 
 // ServerWithPage adds a page.
@@ -1458,48 +1458,48 @@ func ServerWithPage(
 	pageFunction PageFunction,
 ) {
 	var paths []string
-	page := ""
-	var baseHandler func(req *Request, res *Response, document *Document)
-	var actionHandler func(req *Request, res *Response, document *Document)
+	view := ""
+	var baseHandler func(request *Request, response *Response, document *Document)
+	var actionHandler func(request *Request, response *Response, document *Document)
 
 	pageFunction(
 		func(pathLocal string) {
 			paths = append(paths, pathLocal)
 		},
 		func(document *Document) {
-			page = document.pageName
+			view = document.view
 		},
-		func(baseHandlerLocal func(req *Request, res *Response, document *Document)) {
+		func(baseHandlerLocal func(request *Request, response *Response, document *Document)) {
 			baseHandler = baseHandlerLocal
 		},
-		func(actionHandlerLocal func(req *Request, res *Response, document *Document)) {
+		func(actionHandlerLocal func(request *Request, response *Response, document *Document)) {
 			actionHandler = actionHandlerLocal
 		},
 	)
 
 	if 0 == len(paths) {
-		paths = append(paths, "/"+strings.ReplaceAll(page, ".", "/"))
+		paths = append(paths, "/"+strings.ReplaceAll(view, ".", "/"))
 	}
 
-	if "" == page {
-		NotifierSendError(self.notifier, fmt.Errorf("could not add page `%s` because it doesn't exist", page))
+	if "" == view {
+		NotifierSendError(self.notifier, fmt.Errorf("view `%s` doesn't exist", view))
 		return
 	}
 
 	if nil == baseHandler {
-		baseHandler = func(req *Request, res *Response, document *Document) {
+		baseHandler = func(request *Request, res *Response, document *Document) {
 			// Noop.
 		}
 	}
 
 	if nil == actionHandler {
-		actionHandler = func(req *Request, res *Response, document *Document) {
+		actionHandler = func(request *Request, res *Response, document *Document) {
 			// Noop.
 		}
 	}
 
 	for _, path_ := range paths {
-		serverMapRoute(self, "GET "+path_, routeCreateWithPage(page, baseHandler))
-		serverMapRoute(self, "POST "+path_, routeCreateWithPage(page, actionHandler))
+		serverMapRoute(self, "GET "+path_, routeCreateWithView(view, baseHandler))
+		serverMapRoute(self, "POST "+path_, routeCreateWithView(view, actionHandler))
 	}
 }

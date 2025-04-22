@@ -11,12 +11,12 @@ import (
 	"strings"
 )
 
-var documents = map[string]string{}
+var components = map[string]string{}
 
 type Document struct {
 	Render     Render
 	Data       map[string]any
-	pageName   string
+	view       string
 	efs        embed.FS
 	parameters map[string]string
 }
@@ -24,16 +24,17 @@ type Document struct {
 var noScriptPattern = regexp.MustCompile(`<script.*>.*</script>`)
 
 type DocumentProps struct {
-	Page       string            `json:"page"`
+	View       string            `json:"view"`
 	Data       map[string]any    `json:"data"`
-	Pages      map[string]string `json:"pages"`
+	Views      map[string]string `json:"views"`
 	Parameters map[string]string `json:"parameters"`
 }
 
-// DocumentCreate creates a document.
-func DocumentCreate(pageName string) *Document {
+// DocumentCreate creates a document with a view.
+
+func DocumentCreate(view string) *Document {
 	return &Document{
-		pageName: pageName,
+		view: view,
 	}
 }
 
@@ -58,8 +59,8 @@ func DocumentCompile(self *Document) (string, error) {
 	}
 
 	routerPropsBytes, jsonError := json.Marshal(DocumentProps{
-		Pages:      documents,
-		Page:       self.pageName,
+		Views:      components,
+		View:       self.view,
 		Data:       self.Data,
 		Parameters: self.parameters,
 	})

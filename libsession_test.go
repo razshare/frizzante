@@ -14,7 +14,7 @@ func TestSessionStart(test *testing.T) {
 	ServerWithPort(server, port)
 	ServerWithApi(server, func(
 		withPattern func(pattern string),
-		withHandler func(handler func(req *Request, res *Response)),
+		withHandler func(handler func(request *Request, response *Response)),
 	) {
 		withPattern("GET /")
 		withHandler(func(request *Request, response *Response) {
@@ -25,7 +25,7 @@ func TestSessionStart(test *testing.T) {
 	})
 	ServerWithApi(server, func(
 		withPattern func(pattern string),
-		withHandler func(handler func(req *Request, res *Response)),
+		withHandler func(handler func(request *Request, response *Response)),
 	) {
 		withPattern("POST /")
 		withHandler(func(request *Request, response *Response) {

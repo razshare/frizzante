@@ -18,13 +18,13 @@
     /** @type {function(string):string} */
     const path = getContext("path")
     /** @type {function(string):string} */
-    const page = getContext("page")
+    const view = getContext("view")
     /** @type {function(string,Record<string,string>)} */
     const navigate = getContext("navigate")
     /** @type {Record<string,any>} */
     const data = getContext("data")
 
-    const onsubmit = update({page, navigate, data})
+    const onsubmit = update({view, navigate, data})
     const id = uuid()
 
     /**

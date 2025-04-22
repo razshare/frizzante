@@ -4,15 +4,15 @@
 
     /**
      * @typedef Props
-     * @property {string} page
+     * @property {string} view
      * @property {Record<string,any>} data
-     * @property {Record<string,string>} pages
+     * @property {Record<string,string>} views
      * @property {Record<string,string>} parameters
      */
 
     // Do not remove or discard `pageId`, it's being used by app-router.
     /** @type {Props} */
-    let {page, data, pages, parameters} = $props()
+    let {view, data, views, parameters} = $props()
     setContext("data", data)
     setContext("navigate", function () {
         // Noop.
@@ -26,15 +26,15 @@
     }
 
     setContext("path", path)
-    setContext("page", _page)
+    setContext("view", _view)
 
     /**
-     * @param {string} page
+     * @param {string} view
      * @param {Record<string,string>} [fields]
      */
-    function path(page, fields = {}) {
-        let result = pages[page] ?? ""
-        if (!pages[page]) {
+    function path(view, fields = {}) {
+        let result = views[view] ?? ""
+        if (!views[view]) {
             return ""
         }
 
@@ -49,12 +49,12 @@
 
     /**
      * @param {string} path
-     * @returns {{page:string,parameters:Record<string,string>}}
+     * @returns {{view:string,parameters:Record<string,string>}}
      */
-    function _page(path) {
+    function _view(path) {
         const partsGiven = path.split("/")
-        for (const page in pages) {
-            const pathExpected = pages[page]
+        for (const view in views) {
+            const pathExpected = views[view]
             const partsExpected = pathExpected.split("/")
             if (partsExpected.length !== partsGiven.length) {
                 continue
@@ -85,14 +85,14 @@
 
             if (ok) {
                 return {
-                    page,
+                    view,
                     parameters,
                 }
             }
         }
 
         return {
-            page: "",
+            view: "",
             parameters: {}
         }
     }

@@ -18,12 +18,12 @@ func TestRenderServer(test *testing.T) {
 	ServerWithPage(server, func(
 		withPath func(path string),
 		withDocument func(document *Document),
-		show func(showFunction func(req *Request, res *Response, document *Document)),
-		action func(actionFunction func(req *Request, res *Response, document *Document)),
+		show func(showFunction func(request *Request, response *Response, document *Document)),
+		action func(actionFunction func(request *Request, response *Response, document *Document)),
 	) {
 		withPath("/")
-		withDocument(DocumentCreate("welcome"))
-		show(func(req *Request, res *Response, doc *Document) {
+		withDocument(DocumentCreate("Welcome"))
+		show(func(request *Request, response *Response, doc *Document) {
 			doc.Render = RenderServer
 			doc.Data["name"] = "world"
 		})
@@ -55,12 +55,12 @@ func TestRenderClient(test *testing.T) {
 	ServerWithPage(server, func(
 		withPath func(path string),
 		withDocument func(document *Document),
-		withBaseHandler func(baseHandler func(req *Request, res *Response, doc *Document)),
-		withActionHandler func(actionFunction func(req *Request, res *Response, doc *Document)),
+		withBaseHandler func(baseHandler func(request *Request, response *Response, doc *Document)),
+		withActionHandler func(actionFunction func(request *Request, response *Response, doc *Document)),
 	) {
 		withPath("/")
-		withDocument(DocumentCreate("welcome"))
-		withBaseHandler(func(req *Request, res *Response, doc *Document) {
+		withDocument(DocumentCreate("Welcome"))
+		withBaseHandler(func(request *Request, response *Response, doc *Document) {
 			doc.Render = RenderClient
 			doc.Data["name"] = "world"
 		})

@@ -5,15 +5,15 @@ import f "github.com/razshare/frizzante"
 func page(
 	withPath func(path string),
 	withDocument func(document *f.Document),
-	withBaseHandler func(base func(req *f.Request, res *f.Response, doc *f.Document)),
-	withActionHandler func(action func(req *f.Request, res *f.Response, doc *f.Document)),
+	withBaseHandler func(baseHandler func(request *f.Request, response *f.Response, document *f.Document)),
+	withActionHandler func(actionHandler func(request *f.Request, response *f.Response, document *f.Document)),
 ) {
 	withPath("/path")
 	withDocument(f.DocumentCreate("pageName"))
-	withBaseHandler(func(req *f.Request, res *f.Response, doc *f.Document) {
+	withBaseHandler(func(request *f.Request, response *f.Response, document *f.Document) {
 		// Show page.
 	})
-	withActionHandler(func(req *f.Request, res *f.Response, doc *f.Document) {
+	withActionHandler(func(request *f.Request, response *f.Response, document *f.Document) {
 		// Modify state.
 	})
 }

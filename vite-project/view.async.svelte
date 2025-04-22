@@ -3,8 +3,8 @@
 </script>
 <script>
     let {from} = $props()
-    from.then((page) => {
-        PreviousComponent = page
+    from.then((view) => {
+        PreviousComponent = view
     })
 </script>
 

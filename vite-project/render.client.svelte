@@ -4,52 +4,51 @@
 
     /**
      * @typedef Props
-     * @property {string} page
+     * @property {string} view
      * @property {Record<string,any>} data
-     * @property {Record<string,string>} pages
+     * @property {Record<string,string>} views
      * @property {Record<string,string>} parameters
      */
 
     /** @type {Props} */
-    let {page, data, pages, parameters} = $props()
-    // Do not remove or discard `pageId`, it's being used by app-router.
-    let pageState = $state(page)
+    let {view, data, views, parameters} = $props()
+    let viewState = $state(view)
     let dataState = $state({...data})
     let navCounterPrevious = 0
     setContext("data", dataState)
     setContext("navigate",
         /**
-         * @param {string} page
+         * @param {string} view
          * @param {Record<string,string>} [parameters]
          * @param {false|Record<string,any>} [data]
          */
-        function (page, parameters, data = false) {
-            navigate(page, "push", parameters, data)
+        function (view, parameters, data = false) {
+            navigate(view, "push", parameters, data)
         }
     )
     setContext("path", path)
-    setContext("page", _page)
+    setContext("view", _view)
 
     window.history.replaceState({
         ...(window.history.state ?? {}),
-        page,
+        view,
         parameters,
         navCounter: navCounterPrevious,
     }, "", `${document.location.pathname}${document.location.hash}${document.location.search}`)
 
     window.addEventListener("popstate", (e) => {
         e.preventDefault()
-        const pageLocal = e.state?.page ?? ""
+        const viewLocal = e.state?.view ?? ""
         const parameters = e.state?.parameters ?? {}
         const navCounterLocal = e.state?.navCounter ?? 0
         if (navCounterLocal < navCounterPrevious) {
-            navigate(pageLocal, "back", parameters)
+            navigate(viewLocal, "back", parameters)
             navCounterPrevious = navCounterLocal
         } else if (navCounterLocal > navCounterPrevious) {
-            navigate(pageLocal, "forward", parameters)
+            navigate(viewLocal, "forward", parameters)
             navCounterPrevious = navCounterLocal
         } else {
-            navigate(pageLocal, "push", parameters)
+            navigate(viewLocal, "push", parameters)
         }
     });
 
@@ -61,12 +60,12 @@
     }
 
     /**
-     * @param {string} page
+     * @param {string} view
      * @param {Record<string,string>} [parameters]
      */
-    function path(page, parameters = {}) {
-        let result = pages[page] ?? ""
-        if (!pages[page]) {
+    function path(view, parameters = {}) {
+        let result = views[view] ?? ""
+        if (!views[view]) {
             return ""
         }
 
@@ -81,12 +80,12 @@
 
     /**
      * @param {string} path
-     * @returns {{page:string,parameters:Record<string,string>}}
+     * @returns {{view:string,parameters:Record<string,string>}}
      */
-    function _page(path) {
+    function _view(path) {
         const partsGiven = path.split("/")
-        for (const page in pages) {
-            const pathExpected = pages[page]
+        for (const view in views) {
+            const pathExpected = views[view]
             const partsExpected = pathExpected.split("/")
             if (partsExpected.length !== partsGiven.length) {
                 continue
@@ -117,39 +116,39 @@
 
             if (ok) {
                 return {
-                    page,
+                    view,
                     parameters,
                 }
             }
         }
 
         return {
-            page: "",
+            view: "",
             parameters: {}
         }
     }
 
     /**
      *
-     * @param {string} page
+     * @param {string} view
      * @param {"back"|"forward"|"push"} modifier
      * @param {Record<string,string>} [parameters]
      * @param {false|Record<string,any>} [data]
      */
-    function navigate(page, modifier, parameters, data = false) {
-        if (!pages[page]) {
+    function navigate(view, modifier, parameters, data = false) {
+        if (!views[view]) {
             return
         }
 
-        const pathLocal = path(page, parameters)
+        const pathLocal = path(view, parameters)
         if ("push" === modifier) {
             window.history.pushState({
-                page,
+                view,
                 parameters,
                 navCounter: ++navCounterPrevious,
             }, "", pathLocal);
         }
-        pageState = page
+        viewState = view
 
         if(false !== data){
             return

@@ -1,6 +1,6 @@
 /**
  * @typedef DonePayload
- * @property {function(string):{page:string,parameters:Record<string,string>}} page
+ * @property {function(string):{view:string,parameters:Record<string,string>}} view
  * @property {function(string,Record<string,string>,false|Record<string,any>)} navigate
  * @property {string} query
  * @property {Record<string,any>} data
@@ -12,7 +12,7 @@
  */
 function done(payload) {
     const {
-        page,
+        view,
         navigate,
         query,
         data,
@@ -44,8 +44,8 @@ function done(payload) {
                 }
 
                 if (response.redirected) {
-                    const resolved = page(response.url.replace(window.location.origin, ""))
-                    navigate(resolved.page, resolved.parameters, responseData)
+                    const resolved = view(response.url.replace(window.location.origin, ""))
+                    navigate(resolved.view, resolved.parameters, responseData)
                 }
             })
             .catch(fail)
@@ -61,7 +61,7 @@ function fail(reason) {
 
 /**
  * @typedef UpdatePayload
- * @property {function(string):{page:string,parameters:Record<string,string>}} page
+ * @property {function(string):{view:string,parameters:Record<string,string>}} view
  * @property {function(string,Record<string,string>,false|Record<string,any>)} navigate
  * @property {Record<string,any>} data
  */
@@ -70,7 +70,7 @@ function fail(reason) {
  * @param {UpdatePayload} payload
  */
 export function update(payload) {
-    const {page, navigate, data} = payload
+    const {view, navigate, data} = payload
     return function onsubmit(e) {
         e.preventDefault()
         /** @type {HTMLFormElement} */
@@ -89,7 +89,7 @@ export function update(payload) {
             const query = `?${search}`
             const init = {method, headers}
             const donePayload = {
-                page,
+                view,
                 navigate,
                 query,
                 data,
@@ -101,7 +101,7 @@ export function update(payload) {
 
         const init = {method, headers, body: formData}
         const donePayload = {
-            page,
+            view,
             navigate,
             query: "",
             data,
