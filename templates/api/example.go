@@ -2,14 +2,13 @@ package api
 
 import f "github.com/razshare/frizzante"
 
-func handler(req *f.Request, res *f.Response) {
-	// Serve api.
-}
-
 func api(
-	withPattern func(string),
+	withPattern func(pattern string),
 	withHandler func(handler func(req *f.Request, res *f.Response)),
 ) {
 	withPattern("GET /")
-	withHandler(handler)
+	withHandler(func(req *f.Request, res *f.Response) {
+		// Handle.
+		f.SendEcho(res, "Ok.")
+	})
 }

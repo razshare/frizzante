@@ -182,7 +182,7 @@ func preparePages() error {
 			if err != nil {
 				panic(err)
 			}
-			pages[page] = fmt.Sprintf("./%s", importFileName)
+			documents[page] = fmt.Sprintf("./%s", importFileName)
 
 			return nil
 		},
@@ -195,7 +195,7 @@ func prepareSsr() error {
 	if readError != nil {
 		return readError
 	}
-	for page, fileName := range pages {
+	for page, fileName := range documents {
 		pageAsComponentName := strings.ToUpper(strings.ReplaceAll(page, ".", "_"))
 		builder.WriteString(fmt.Sprintf("    import %s from '%s'\n", pageAsComponentName, fileName))
 	}
@@ -204,7 +204,7 @@ func prepareSsr() error {
 
 	builder.Reset()
 	counter := 0
-	for page, _ := range pages {
+	for page, _ := range documents {
 		pageAsComponentName := strings.ReplaceAll(page, ".", "_")
 		if 0 == counter {
 			builder.WriteString(fmt.Sprintf("{#if '%s' === page}\n", page))
@@ -235,18 +235,18 @@ func prepareCsr() error {
 	}
 
 	var builder strings.Builder
-	builder.WriteString("import Page from './page.async.svelte'")
+	builder.WriteString("import Document from './page.async.svelte'")
 	renderClientSvelteString := strings.Replace(string(renderClientSvelte), "//:app-imports", builder.String(), 1)
 
 	builder.Reset()
 	counter := 0
-	for page, fileName := range pages {
+	for page, fileName := range documents {
 		if 0 == counter {
 			builder.WriteString(fmt.Sprintf("{#if '%s' === pageState}\n", page))
 		} else {
 			builder.WriteString(fmt.Sprintf("{:else if '%s' === pageState}\n", page))
 		}
-		builder.WriteString(fmt.Sprintf("    <Page from={import('%s')} />\n", fileName))
+		builder.WriteString(fmt.Sprintf("    <Document from={import('%s')} />\n", fileName))
 		counter++
 	}
 	if counter > 0 {

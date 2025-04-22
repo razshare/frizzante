@@ -11,37 +11,34 @@ import (
 	"strings"
 )
 
-var pages = map[string]string{}
+var documents = map[string]string{}
 
-type Page struct {
-	render     Render
-	data       map[string]any
+type Document struct {
+	Render     Render
+	Data       map[string]any
+	pageName   string
 	efs        embed.FS
-	name       string
 	parameters map[string]string
-}
-
-// PageWithRender sets the page rendering mode.
-func PageWithRender(self *Page, render Render) {
-	self.render = render
-}
-
-// PageWithData sets data to the page.
-func PageWithData(self *Page, key string, value any) {
-	self.data[key] = value
 }
 
 var noScriptPattern = regexp.MustCompile(`<script.*>.*</script>`)
 
-type PageProps struct {
+type DocumentProps struct {
 	Page       string            `json:"page"`
 	Data       map[string]any    `json:"data"`
 	Pages      map[string]string `json:"pages"`
 	Parameters map[string]string `json:"parameters"`
 }
 
-// PageCompile compiles a page.
-func PageCompile(self *Page) (string, error) {
+// DocumentCreate creates a document.
+func DocumentCreate(pageName string) *Document {
+	return &Document{
+		pageName: pageName,
+	}
+}
+
+// DocumentCompile compiles a document.
+func DocumentCompile(self *Document) (string, error) {
 	fileNameIndex := filepath.Join(".dist", "client", ".frizzante", "vite-project", "index.html")
 
 	var indexBytes []byte
@@ -60,10 +57,10 @@ func PageCompile(self *Page) (string, error) {
 		indexBytes = indexBytesLocal
 	}
 
-	routerPropsBytes, jsonError := json.Marshal(PageProps{
-		Pages:      pages,
-		Page:       self.name,
-		Data:       self.data,
+	routerPropsBytes, jsonError := json.Marshal(DocumentProps{
+		Pages:      documents,
+		Page:       self.pageName,
+		Data:       self.Data,
 		Parameters: self.parameters,
 	})
 
@@ -78,7 +75,7 @@ func PageCompile(self *Page) (string, error) {
 		return "", targetIdError
 	}
 
-	if RenderFull == self.render {
+	if RenderFull == self.Render {
 		head, body, renderError := render(self.efs, routerPropsString)
 		if renderError != nil {
 			return "", renderError
@@ -109,7 +106,7 @@ func PageCompile(self *Page) (string, error) {
 		), nil
 	}
 
-	if RenderClient == self.render {
+	if RenderClient == self.Render {
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
@@ -136,7 +133,7 @@ func PageCompile(self *Page) (string, error) {
 		), nil
 	}
 
-	if RenderServer == self.render {
+	if RenderServer == self.Render {
 		head, body, renderError := render(self.efs, routerPropsString)
 		if renderError != nil {
 			return "", renderError
@@ -164,7 +161,7 @@ func PageCompile(self *Page) (string, error) {
 		), nil
 	}
 
-	if RenderHeadless == self.render {
+	if RenderHeadless == self.Render {
 		_, body, renderError := render(self.efs, routerPropsString)
 
 		if renderError != nil {

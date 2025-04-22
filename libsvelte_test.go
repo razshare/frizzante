@@ -15,17 +15,17 @@ func TestRenderServer(test *testing.T) {
 	ServerWithHostName(server, "127.0.0.1")
 	ServerWithNotifier(server, notifier)
 	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
-	ServerWithIndex(server, func(
-		withPage func(page string),
+	ServerWithPage(server, func(
 		withPath func(path string),
-		show func(showFunction func(req *Request, res *Response, p *Page)),
-		action func(actionFunction func(req *Request, res *Response, o *Page)),
+		withDocument func(document *Document),
+		show func(showFunction func(req *Request, res *Response, document *Document)),
+		action func(actionFunction func(req *Request, res *Response, document *Document)),
 	) {
-		withPage("welcome")
 		withPath("/")
-		show(func(req *Request, res *Response, p *Page) {
-			PageWithRender(p, RenderServer)
-			PageWithData(p, "name", "world")
+		withDocument(DocumentCreate("welcome"))
+		show(func(req *Request, res *Response, doc *Document) {
+			doc.Render = RenderServer
+			doc.Data["name"] = "world"
 		})
 	})
 	go ServerStart(server)
@@ -52,17 +52,17 @@ func TestRenderClient(test *testing.T) {
 	ServerWithNotifier(server, notifier)
 	ServerWithHostName(server, "127.0.0.1")
 	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
-	ServerWithIndex(server, func(
-		withPage func(page string),
+	ServerWithPage(server, func(
 		withPath func(path string),
-		withBaseHandler func(baseHandler func(req *Request, res *Response, p *Page)),
-		withActionHandler func(actionFunction func(req *Request, res *Response, o *Page)),
+		withDocument func(document *Document),
+		withBaseHandler func(baseHandler func(req *Request, res *Response, doc *Document)),
+		withActionHandler func(actionFunction func(req *Request, res *Response, doc *Document)),
 	) {
-		withPage("welcome")
 		withPath("/")
-		withBaseHandler(func(req *Request, res *Response, p *Page) {
-			PageWithRender(p, RenderClient)
-			PageWithData(p, "name", "world")
+		withDocument(DocumentCreate("welcome"))
+		withBaseHandler(func(req *Request, res *Response, doc *Document) {
+			doc.Render = RenderClient
+			doc.Data["name"] = "world"
 		})
 	})
 	go ServerStart(server)

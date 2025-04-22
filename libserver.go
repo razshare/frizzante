@@ -530,7 +530,6 @@ var pathParametersPattern = regexp.MustCompile(`{([^{}]+)}`)
 
 type Route struct {
 	server  *Server
-	isPage  bool
 	page    string
 	handler func(request *Request, response *Response)
 	mount   func(pattern string)
@@ -544,8 +543,7 @@ func routeCreate(
 	),
 ) *Route {
 	return &Route{
-		isPage: false,
-		page:   "",
+		page: "",
 		handler: func(request *Request, response *Response) {
 			for _, guard := range response.server.guards {
 				pass := false
@@ -566,7 +564,7 @@ func routeCreate(
 
 // routeCreateWithPage creates a route configuration from a callback function, just like routeCreate.
 //
-// Unlike routeCreate, routeCreateWithPage also creates a Page, which is used to automatically
+// Unlike routeCreate, routeCreateWithPage also creates a Document, which is used to automatically
 // to serve a svelte page after invoking callback.
 //
 // Generally speaking, you should never manually invoke SendEcho or similar functions.
@@ -577,23 +575,22 @@ func routeCreateWithPage(
 	handler func(
 		req *Request,
 		res *Response,
-		p *Page,
+		document *Document,
 	),
 ) *Route {
 	var pattern string
 
 	return &Route{
-		isPage: true,
-		page:   page,
+		page: page,
 		handler: func(
 			request *Request,
 			response *Response,
 		) {
-			p := &Page{
-				render:     RenderFull,
-				data:       map[string]any{},
+			document := &Document{
+				Render:     RenderFull,
+				Data:       map[string]any{},
 				efs:        request.server.embeddedFileSystem,
-				name:       page,
+				pageName:   page,
 				parameters: map[string]string{},
 			}
 
@@ -608,7 +605,7 @@ func routeCreateWithPage(
 				}
 			}
 
-			handler(request, response, p)
+			handler(request, response, document)
 
 			if nil != response.navigate {
 				SendRedirect(response, response.navigate.Location, http.StatusFound)
@@ -619,17 +616,17 @@ func routeCreateWithPage(
 				return
 			}
 
-			if nil == p {
+			if nil == document {
 				NotifierSendError(request.server.notifier, fmt.Errorf("svelte page handler `%s` returned a nil page", pattern))
 				return
 			}
 
-			if nil == p.data {
-				p.data = map[string]any{}
+			if nil == document.Data {
+				document.Data = map[string]any{}
 			}
 
 			if VerifyAccept(request, "application/json") {
-				data, marshalError := json.Marshal(p.data)
+				data, marshalError := json.Marshal(document.Data)
 				if marshalError != nil {
 					NotifierSendError(request.server.notifier, marshalError)
 					return
@@ -639,25 +636,25 @@ func routeCreateWithPage(
 				return
 			}
 
-			if nil == p.parameters {
-				p.parameters = map[string]string{}
+			if nil == document.parameters {
+				document.parameters = map[string]string{}
 			}
 
 			for _, name := range pathParametersPattern.FindAllStringSubmatch(pattern, -1) {
 				if len(name) < 1 {
 					continue
 				}
-				p.parameters[name[1]] = request.httpRequest.PathValue(name[1])
+				document.parameters[name[1]] = request.httpRequest.PathValue(name[1])
 			}
 
-			SendPage(response, p)
+			SendView(response, document)
 		},
 		mount: func(patternLocal string) {
 			pattern = patternLocal
 			patternParts := strings.Split(patternLocal, " ")
 			patternCounter := len(patternParts)
 			if patternCounter > 1 {
-				pages[page] = path.Join(patternParts[1:]...)
+				documents[page] = path.Join(patternParts[1:]...)
 			}
 		},
 	}
@@ -773,7 +770,7 @@ func SendNavigateWithParameters(self *Response, page string, parameters map[stri
 		parameters = map[string]string{}
 	}
 
-	p, pathFound := pages[page]
+	p, pathFound := documents[page]
 	if !pathFound {
 		NotifierSendError(self.server.notifier, fmt.Errorf("redirect to page `%s` failed because page id `%s` is unknown", page, page))
 	}
@@ -1351,9 +1348,9 @@ func SendWsUpgrade(self *Response) {
 	self.lockedStatusAndHeader = true
 }
 
-// SendPage renders and echos a svelte page.
-func SendPage(self *Response, page *Page) {
-	content, compileError := PageCompile(page)
+// SendView renders and echos a svelte page.
+func SendView(self *Response, page *Document) {
+	content, compileError := DocumentCompile(page)
 	if nil != compileError {
 		NotifierSendError(self.server.notifier, compileError)
 		return
@@ -1379,7 +1376,7 @@ func SendPage(self *Response, page *Page) {
 //
 // Destroy must destroy the whole session, store included.
 //
-// In this context, "store", is any type dataata storage,
+// In this context, "store", is any type data storage,
 // it could be a file written to disk, a database, Ram,
 // it doesn't matter.
 //
@@ -1392,20 +1389,20 @@ func ServerWithSessionOperator(
 	self.sessionOperator = sessionOperator
 }
 
-type Api = func(
-	route func(pattern string),
+type ApiFunction = func(
+	withPattern func(pattern string),
 	withHandler func(handler func(req *Request, res *Response)),
 )
 
 // ServerWithApi adds an api.
 func ServerWithApi(
 	self *Server,
-	api Api,
+	apiFunction ApiFunction,
 ) {
 	var patterns []string
 	var handler func(req *Request, res *Response)
 
-	api(
+	apiFunction(
 		func(pattern string) {
 			patterns = append(patterns, pattern)
 		},
@@ -1429,15 +1426,15 @@ func ServerWithApi(
 	}
 }
 
-type Guard = func(
+type GuardFunction = func(
 	withGuardHandler func(guardHandler func(req *Request, res *Response, pass func())),
 )
 
 // ServerWithGuard adds a guard.
-func ServerWithGuard(self *Server, guard Guard) {
+func ServerWithGuard(self *Server, guardFunction GuardFunction) {
 	var guardHandler func(req *Request, res *Response, pass func())
 
-	guard(
+	guardFunction(
 		func(guardHandlerLocal func(req *Request, res *Response, pass func())) {
 			guardHandler = guardHandlerLocal
 		},
@@ -1448,34 +1445,34 @@ func ServerWithGuard(self *Server, guard Guard) {
 	}
 }
 
-type Index = func(
-	withPage func(path string),
+type PageFunction = func(
 	withPath func(page string),
-	withBase func(showFunction func(req *Request, res *Response, p *Page)),
-	withAction func(actionFunction func(req *Request, res *Response, p *Page)),
+	withDocument func(document *Document),
+	withBase func(showFunction func(req *Request, res *Response, document *Document)),
+	withAction func(actionFunction func(req *Request, res *Response, document *Document)),
 )
 
-// ServerWithIndex adds an index.
-func ServerWithIndex(
+// ServerWithPage adds a page.
+func ServerWithPage(
 	self *Server,
-	index Index,
+	pageFunction PageFunction,
 ) {
 	var paths []string
 	page := ""
-	var baseHandler func(req *Request, res *Response, p *Page)
-	var actionHandler func(req *Request, res *Response, p *Page)
+	var baseHandler func(req *Request, res *Response, document *Document)
+	var actionHandler func(req *Request, res *Response, document *Document)
 
-	index(
-		func(pageLocal string) {
-			page = pageLocal
-		},
+	pageFunction(
 		func(pathLocal string) {
 			paths = append(paths, pathLocal)
 		},
-		func(baseHandlerLocal func(req *Request, res *Response, p *Page)) {
+		func(document *Document) {
+			page = document.pageName
+		},
+		func(baseHandlerLocal func(req *Request, res *Response, document *Document)) {
 			baseHandler = baseHandlerLocal
 		},
-		func(actionHandlerLocal func(req *Request, res *Response, p *Page)) {
+		func(actionHandlerLocal func(req *Request, res *Response, document *Document)) {
 			actionHandler = actionHandlerLocal
 		},
 	)
@@ -1485,24 +1482,24 @@ func ServerWithIndex(
 	}
 
 	if "" == page {
-		NotifierSendError(self.notifier, fmt.Errorf("could not add index because page `%s` is unknown", page))
+		NotifierSendError(self.notifier, fmt.Errorf("could not add page `%s` because it doesn't exist", page))
 		return
 	}
 
 	if nil == baseHandler {
-		baseHandler = func(req *Request, res *Response, p *Page) {
+		baseHandler = func(req *Request, res *Response, document *Document) {
 			// Noop.
 		}
 	}
 
 	if nil == actionHandler {
-		actionHandler = func(req *Request, res *Response, p *Page) {
+		actionHandler = func(req *Request, res *Response, document *Document) {
 			// Noop.
 		}
 	}
 
-	for _, path := range paths {
-		serverMapRoute(self, "GET "+path, routeCreateWithPage(page, baseHandler))
-		serverMapRoute(self, "POST "+path, routeCreateWithPage(page, actionHandler))
+	for _, path_ := range paths {
+		serverMapRoute(self, "GET "+path_, routeCreateWithPage(page, baseHandler))
+		serverMapRoute(self, "POST "+path_, routeCreateWithPage(page, actionHandler))
 	}
 }
