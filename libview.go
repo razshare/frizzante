@@ -13,33 +13,32 @@ import (
 
 var components = map[string]string{}
 
-type Document struct {
+type View struct {
 	Render     Render
 	Data       map[string]any
-	view       string
+	name       string
 	efs        embed.FS
 	parameters map[string]string
 }
 
 var noScriptPattern = regexp.MustCompile(`<script.*>.*</script>`)
 
-type DocumentProps struct {
+type ViewProps struct {
 	View       string            `json:"view"`
 	Data       map[string]any    `json:"data"`
 	Views      map[string]string `json:"views"`
 	Parameters map[string]string `json:"parameters"`
 }
 
-// DocumentCreate creates a document with a view.
-
-func DocumentCreate(view string) *Document {
-	return &Document{
-		view: view,
+// ViewReference references a view.
+func ViewReference(view string) *View {
+	return &View{
+		name: view,
 	}
 }
 
-// DocumentCompile compiles a document.
-func DocumentCompile(self *Document) (string, error) {
+// ViewCompile compiles a view.
+func ViewCompile(self *View) (string, error) {
 	fileNameIndex := filepath.Join(".dist", "client", ".frizzante", "vite-project", "index.html")
 
 	var indexBytes []byte
@@ -58,9 +57,9 @@ func DocumentCompile(self *Document) (string, error) {
 		indexBytes = indexBytesLocal
 	}
 
-	routerPropsBytes, jsonError := json.Marshal(DocumentProps{
+	routerPropsBytes, jsonError := json.Marshal(ViewProps{
 		Views:      components,
-		View:       self.view,
+		View:       self.name,
 		Data:       self.Data,
 		Parameters: self.parameters,
 	})

@@ -564,7 +564,7 @@ func routeCreate(
 
 // routeCreateWithPage creates a route configuration from a callback function, just like routeCreate.
 //
-// Unlike routeCreate, routeCreateWithView also creates a Document, which is used to automatically
+// Unlike routeCreate, routeCreateWithView also creates a View, which is used to automatically
 // to serve a svelte view after invoking callback.
 //
 // Generally speaking, you should never manually invoke SendEcho or similar functions.
@@ -575,7 +575,7 @@ func routeCreateWithView(
 	handler func(
 		request *Request,
 		res *Response,
-		document *Document,
+		view *View,
 	),
 ) *Route {
 	var pattern string
@@ -586,11 +586,11 @@ func routeCreateWithView(
 			request *Request,
 			response *Response,
 		) {
-			document := &Document{
+			document := &View{
 				Render:     RenderFull,
 				Data:       map[string]any{},
 				efs:        request.server.embeddedFileSystem,
-				view:       view,
+				name:       view,
 				parameters: map[string]string{},
 			}
 
@@ -1349,8 +1349,8 @@ func SendWsUpgrade(self *Response) {
 }
 
 // SendDocument echos a document's view.
-func SendDocument(self *Response, document *Document) {
-	content, compileError := DocumentCompile(document)
+func SendDocument(self *Response, view *View) {
+	content, compileError := ViewCompile(view)
 	if nil != compileError {
 		NotifierSendError(self.server.notifier, compileError)
 		return
@@ -1447,9 +1447,9 @@ func ServerWithGuard(self *Server, guardFunction GuardFunction) {
 
 type PageFunction = func(
 	withPath func(page string),
-	withDocument func(document *Document),
-	withBase func(showFunction func(request *Request, response *Response, document *Document)),
-	withAction func(actionFunction func(request *Request, response *Response, document *Document)),
+	withView func(view *View),
+	withBase func(showFunction func(request *Request, response *Response, view *View)),
+	withAction func(actionFunction func(request *Request, response *Response, view *View)),
 )
 
 // ServerWithPage adds a page.
@@ -1459,20 +1459,20 @@ func ServerWithPage(
 ) {
 	var paths []string
 	view := ""
-	var baseHandler func(request *Request, response *Response, document *Document)
-	var actionHandler func(request *Request, response *Response, document *Document)
+	var baseHandler func(request *Request, response *Response, view *View)
+	var actionHandler func(request *Request, response *Response, view *View)
 
 	pageFunction(
 		func(pathLocal string) {
 			paths = append(paths, pathLocal)
 		},
-		func(document *Document) {
-			view = document.view
+		func(viewLocal *View) {
+			view = viewLocal.name
 		},
-		func(baseHandlerLocal func(request *Request, response *Response, document *Document)) {
+		func(baseHandlerLocal func(request *Request, response *Response, view *View)) {
 			baseHandler = baseHandlerLocal
 		},
-		func(actionHandlerLocal func(request *Request, response *Response, document *Document)) {
+		func(actionHandlerLocal func(request *Request, response *Response, view *View)) {
 			actionHandler = actionHandlerLocal
 		},
 	)
@@ -1487,13 +1487,13 @@ func ServerWithPage(
 	}
 
 	if nil == baseHandler {
-		baseHandler = func(request *Request, res *Response, document *Document) {
+		baseHandler = func(request *Request, res *Response, view *View) {
 			// Noop.
 		}
 	}
 
 	if nil == actionHandler {
-		actionHandler = func(request *Request, res *Response, document *Document) {
+		actionHandler = func(request *Request, res *Response, view *View) {
 			// Noop.
 		}
 	}

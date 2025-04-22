@@ -241,8 +241,8 @@ func createPage(pageName string) {
 	newName = []byte("func " + metadata.BaseFileNamePascalNoExtension + "(")
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	// Document.
-	oldName = []byte("\"pageName\"")
+	// View.
+	oldName = []byte("\"viewName\"")
 	newName = []byte("\"" + metadata.BaseFileNamePascalNoExtension + "\"")
 	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
