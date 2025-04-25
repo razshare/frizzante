@@ -494,7 +494,7 @@ func ServerStart(self *Server) {
 				NotifierSendMessage(self.notifier, "shutting down server")
 				return
 			}
-			panic(err.Error())
+			log.Fatal(err)
 		}
 	}()
 
@@ -508,7 +508,7 @@ func ServerStart(self *Server) {
 					NotifierSendMessage(self.notifier, "shutting down server")
 					return
 				}
-				panic(err.Error())
+				log.Fatal(err)
 			}
 		}
 	}()
@@ -522,7 +522,7 @@ func ServerStart(self *Server) {
 func ServerStop(self *Server) {
 	err := self.server.Shutdown(context.Background())
 	if err != nil {
-		panic(err.Error())
+		log.Fatal(err)
 	}
 }
 

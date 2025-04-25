@@ -6,6 +6,7 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,7 +31,7 @@ func findNameMetadata(root string, template string, name string, message string)
 	if !Exists(root) {
 		writeError := os.MkdirAll(root, os.ModePerm)
 		if writeError != nil {
-			panic(writeError)
+			log.Fatal(writeError)
 		}
 	}
 
@@ -48,7 +49,7 @@ func findNameMetadata(root string, template string, name string, message string)
 
 	fullRoot, fullFileNameRootError := filepath.Abs(root)
 	if nil != fullFileNameRootError {
-		panic(fullFileNameRootError)
+		log.Fatal(fullFileNameRootError)
 	}
 
 	metadata := &NameMetadata{Name: trimmedName}
@@ -137,7 +138,7 @@ func createApi(apiName string) {
 	if !Exists(metadata.FullDirectoryNameCamel) {
 		mkdirError := os.MkdirAll(metadata.FullDirectoryNameCamel, os.ModePerm)
 		if mkdirError != nil {
-			panic(mkdirError)
+			log.Fatal(mkdirError)
 		}
 	}
 
@@ -149,7 +150,7 @@ func createApi(apiName string) {
 
 	readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
 	if nil != readError {
-		panic(readError)
+		log.Fatal(readError)
 	}
 
 	// Package.
@@ -169,7 +170,7 @@ func createApi(apiName string) {
 
 	writeError := os.WriteFile(metadata.FullFileNameCamel, readBytes, os.ModePerm)
 	if writeError != nil {
-		panic(writeError)
+		log.Fatal(writeError)
 	}
 }
 
@@ -179,7 +180,7 @@ func createGuard(guardName string) {
 	if !Exists(metadata.FullDirectoryNameCamel) {
 		mkdirError := os.MkdirAll(metadata.FullDirectoryNameCamel, os.ModePerm)
 		if mkdirError != nil {
-			panic(mkdirError)
+			log.Fatal(mkdirError)
 		}
 	}
 
@@ -191,7 +192,7 @@ func createGuard(guardName string) {
 
 	readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
 	if nil != readError {
-		panic(readError)
+		log.Fatal(readError)
 	}
 
 	// Package.
@@ -206,7 +207,7 @@ func createGuard(guardName string) {
 
 	writeError := os.WriteFile(metadata.FullFileNameCamel, readBytes, os.ModePerm)
 	if writeError != nil {
-		panic(writeError)
+		log.Fatal(writeError)
 	}
 }
 
@@ -216,7 +217,7 @@ func createPage(pageName string) {
 	if !Exists(metadata.FullDirectoryNameCamel) {
 		mkdirError := os.MkdirAll(metadata.FullDirectoryNameCamel, os.ModePerm)
 		if mkdirError != nil {
-			panic(mkdirError)
+			log.Fatal(mkdirError)
 		}
 	}
 
@@ -228,7 +229,7 @@ func createPage(pageName string) {
 
 	readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
 	if nil != readError {
-		panic(readError)
+		log.Fatal(readError)
 	}
 
 	// Package.
@@ -253,7 +254,7 @@ func createPage(pageName string) {
 
 	writeError := os.WriteFile(metadata.FullFileNameCamel, readBytes, os.ModePerm)
 	if writeError != nil {
-		panic(writeError)
+		log.Fatal(writeError)
 	}
 
 	metadata.FullFileNameCamel = strings.TrimSuffix(metadata.FullFileNameCamel, ".go") + ".svelte"
@@ -275,12 +276,12 @@ func createViewComponent(pageName string) {
 
 	readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
 	if nil != readError {
-		panic(readError)
+		log.Fatal(readError)
 	}
 
 	writeError := os.WriteFile(fileName, readBytes, os.ModePerm)
 	if writeError != nil {
-		panic(writeError)
+		log.Fatal(writeError)
 	}
 }
 

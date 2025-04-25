@@ -3,6 +3,7 @@ package frizzante
 import (
 	"embed"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,25 +17,25 @@ func Prepare() {
 	// Prepare lib.
 	err := prepareLib()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// Prepare view.
 	err = prepareViews()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// Prepare ssr.
 	err = prepareSsr()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 
 	// Prepare ssr.
 	err = prepareCsr()
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 }
 
@@ -180,7 +181,7 @@ func prepareViews() error {
 
 			importFileName, err := filepath.Rel(".frizzante/vite-project", fileName)
 			if err != nil {
-				panic(err)
+				log.Fatal(err)
 			}
 			components[view] = fmt.Sprintf("./%s", importFileName)
 
