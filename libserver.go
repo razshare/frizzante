@@ -1458,7 +1458,7 @@ func ServerWithPage(
 	pageFunction PageFunction,
 ) {
 	var paths []string
-	view := ""
+	var view *View
 	var baseHandler func(request *Request, response *Response, view *View)
 	var actionHandler func(request *Request, response *Response, view *View)
 
@@ -1467,7 +1467,7 @@ func ServerWithPage(
 			paths = append(paths, pathLocal)
 		},
 		func(viewLocal *View) {
-			view = viewLocal.name
+			view = viewLocal
 		},
 		func(baseHandlerLocal func(request *Request, response *Response, view *View)) {
 			baseHandler = baseHandlerLocal
@@ -1478,11 +1478,11 @@ func ServerWithPage(
 	)
 
 	if 0 == len(paths) {
-		paths = append(paths, "/"+strings.ReplaceAll(view, ".", "/"))
+		paths = append(paths, "/"+strings.ReplaceAll(view.name, ".", "/"))
 	}
 
-	if "" == view {
-		NotifierSendError(self.notifier, fmt.Errorf("view `%s` doesn't exist", view))
+	if "" == view.name {
+		NotifierSendError(self.notifier, fmt.Errorf("view name cannot be empty"))
 		return
 	}
 
@@ -1499,7 +1499,7 @@ func ServerWithPage(
 	}
 
 	for _, path_ := range paths {
-		serverMapRoute(self, "GET "+path_, routeCreateWithView(view, baseHandler))
-		serverMapRoute(self, "POST "+path_, routeCreateWithView(view, actionHandler))
+		serverMapRoute(self, "GET "+path_, routeCreateWithView(view.name, baseHandler))
+		serverMapRoute(self, "POST "+path_, routeCreateWithView(view.name, actionHandler))
 	}
 }
