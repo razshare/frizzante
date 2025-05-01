@@ -1359,6 +1359,7 @@ func SendView(self *Response, view *View) {
 		Data:               view.Data,
 		name:               view.name,
 		parameters:         view.parameters,
+		Functions:          view.Functions,
 		EmbeddedFileSystem: embeddedFileSystem,
 	})
 	if nil != compileError {
