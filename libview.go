@@ -25,12 +25,12 @@ const (
 var components = map[string]string{}
 
 type View struct {
-	Render             Render
-	Data               map[string]any
-	Functions          map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value
+	render             Render
+	data               map[string]any
+	functions          map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value
 	name               string
 	parameters         map[string]string
-	EmbeddedFileSystem *embed.FS
+	embeddedFileSystem *embed.FS
 }
 
 var noScriptPattern = regexp.MustCompile(`<script.*>.*</script>`)
@@ -46,10 +46,34 @@ type ViewProps struct {
 func ViewReference(view string) *View {
 	return &View{
 		name:       view,
-		Data:       map[string]any{},
+		data:       map[string]any{},
 		parameters: map[string]string{},
-		Functions:  map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value{},
+		functions:  map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value{},
 	}
+}
+
+// ViewWithRender sets the render mode for the view.
+func ViewWithRender(self *View, render Render) {
+	self.render = render
+}
+
+// ViewWithData sets data for the view.
+func ViewWithData(self *View, key string, value any) {
+	self.data[key] = value
+}
+
+// ViewWithFunction sets a global function for the view.
+func ViewWithFunction(
+	self *View,
+	name string,
+	function func(info *v8go.FunctionCallbackInfo) *v8go.Value,
+) {
+	self.functions[name] = function
+}
+
+// ViewWithEmbeddedFileSystem sets the embedded file system for the view.
+func ViewWithEmbeddedFileSystem(self *View, embeddedFileSystem embed.FS) {
+	self.embeddedFileSystem = &embeddedFileSystem
 }
 
 // ViewRender renders a view.
@@ -85,7 +109,7 @@ func ViewRender(self *View) (content string, compileError error) {
 		}
 		indexBytes = indexBytesLocal
 	} else {
-		indexBytesLocal, readError := self.EmbeddedFileSystem.ReadFile(fileNameIndex)
+		indexBytesLocal, readError := self.embeddedFileSystem.ReadFile(fileNameIndex)
 		if readError != nil {
 			return "", readError
 		}
@@ -95,7 +119,7 @@ func ViewRender(self *View) (content string, compileError error) {
 	routerPropsBytes, jsonError := json.Marshal(ViewProps{
 		Views:      components,
 		View:       self.name,
-		Data:       self.Data,
+		Data:       self.data,
 		Parameters: self.parameters,
 	})
 
@@ -110,7 +134,7 @@ func ViewRender(self *View) (content string, compileError error) {
 		return "", targetIdError
 	}
 
-	if RenderFull == self.Render {
+	if RenderFull == self.render {
 		head, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
@@ -141,7 +165,7 @@ func ViewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderClient == self.Render {
+	if RenderClient == self.render {
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
@@ -168,7 +192,7 @@ func ViewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderServer == self.Render {
+	if RenderServer == self.render {
 		head, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
@@ -196,7 +220,7 @@ func ViewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderHeadless == self.Render {
+	if RenderHeadless == self.render {
 		_, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 
 		if renderError != nil {
@@ -227,7 +251,7 @@ func ViewExecuteRenderServerJs(self *View, stringProps string) (head string, bod
 		}
 		renderEsmBytes = renderEsmBytesLocal
 	} else {
-		renderEsmBytesLocal, readError := self.EmbeddedFileSystem.ReadFile(renderFileName)
+		renderEsmBytesLocal, readError := self.embeddedFileSystem.ReadFile(renderFileName)
 		if readError != nil {
 			return "", "", readError
 		}
@@ -262,8 +286,8 @@ func ViewExecuteRenderServerJs(self *View, stringProps string) (head string, bod
 
 	globals := map[string]v8go.FunctionCallback{}
 
-	if nil != self.Functions {
-		for name, function := range self.Functions {
+	if nil != self.functions {
+		for name, function := range self.functions {
 			globals[name] = function
 		}
 	}

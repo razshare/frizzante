@@ -587,8 +587,8 @@ func routeCreateWithView(
 			response *Response,
 		) {
 			viewLocal := &View{
-				Render:     RenderFull,
-				Data:       map[string]any{},
+				render:     RenderFull,
+				data:       map[string]any{},
 				name:       view,
 				parameters: map[string]string{},
 			}
@@ -620,12 +620,12 @@ func routeCreateWithView(
 				return
 			}
 
-			if nil == viewLocal.Data {
-				viewLocal.Data = map[string]any{}
+			if nil == viewLocal.data {
+				viewLocal.data = map[string]any{}
 			}
 
 			if VerifyAccept(request, "application/json") {
-				data, marshalError := json.Marshal(viewLocal.Data)
+				data, marshalError := json.Marshal(viewLocal.data)
 				if marshalError != nil {
 					NotifierSendError(request.server.notifier, marshalError)
 					return
@@ -1338,18 +1338,18 @@ func SendWsUpgrade(self *Response) {
 
 // SendView echos a document's view.
 func SendView(self *Response, view *View) {
-	embeddedFileSystem := view.EmbeddedFileSystem
+	embeddedFileSystem := view.embeddedFileSystem
 	if nil == embeddedFileSystem {
 		embeddedFileSystem = &self.server.embeddedFileSystem
 	}
 
 	content, compileError := ViewRender(&View{
-		Render:             view.Render,
-		Data:               view.Data,
+		render:             view.render,
+		data:               view.data,
 		name:               view.name,
 		parameters:         view.parameters,
-		Functions:          view.Functions,
-		EmbeddedFileSystem: embeddedFileSystem,
+		functions:          view.functions,
+		embeddedFileSystem: embeddedFileSystem,
 	})
 	if nil != compileError {
 		NotifierSendError(self.server.notifier, compileError)

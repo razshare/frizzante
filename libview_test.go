@@ -24,8 +24,8 @@ func TestRenderServer(test *testing.T) {
 		withPath("/")
 		withView(ViewReference("Welcome"))
 		show(func(request *Request, response *Response, doc *View) {
-			doc.Render = RenderServer
-			doc.Data["name"] = "world"
+			doc.render = RenderServer
+			doc.data["name"] = "world"
 		})
 	})
 	go ServerStart(server)
@@ -61,8 +61,8 @@ func TestRenderClient(test *testing.T) {
 		withPath("/")
 		withView(ViewReference("Welcome"))
 		withBaseHandler(func(request *Request, response *Response, doc *View) {
-			doc.Render = RenderClient
-			doc.Data["name"] = "world"
+			doc.render = RenderClient
+			doc.data["name"] = "world"
 		})
 	})
 	go ServerStart(server)
