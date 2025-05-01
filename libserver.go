@@ -586,7 +586,7 @@ func routeCreateWithView(
 			request *Request,
 			response *Response,
 		) {
-			document := &View{
+			viewLocal := &View{
 				Render:     RenderFull,
 				Data:       map[string]any{},
 				efs:        request.server.embeddedFileSystem,
@@ -605,7 +605,7 @@ func routeCreateWithView(
 				}
 			}
 
-			handler(request, response, document)
+			handler(request, response, viewLocal)
 
 			if nil != response.navigate {
 				SendRedirect(response, response.navigate.Location, http.StatusFound)
@@ -616,17 +616,17 @@ func routeCreateWithView(
 				return
 			}
 
-			if nil == document {
+			if nil == viewLocal {
 				NotifierSendError(request.server.notifier, fmt.Errorf("svelte page handler `%s` returned a nil page", pattern))
 				return
 			}
 
-			if nil == document.Data {
-				document.Data = map[string]any{}
+			if nil == viewLocal.Data {
+				viewLocal.Data = map[string]any{}
 			}
 
 			if VerifyAccept(request, "application/json") {
-				data, marshalError := json.Marshal(document.Data)
+				data, marshalError := json.Marshal(viewLocal.Data)
 				if marshalError != nil {
 					NotifierSendError(request.server.notifier, marshalError)
 					return
@@ -636,18 +636,18 @@ func routeCreateWithView(
 				return
 			}
 
-			if nil == document.parameters {
-				document.parameters = map[string]string{}
+			if nil == viewLocal.parameters {
+				viewLocal.parameters = map[string]string{}
 			}
 
 			for _, name := range pathParametersPattern.FindAllStringSubmatch(pattern, -1) {
 				if len(name) < 1 {
 					continue
 				}
-				document.parameters[name[1]] = request.httpRequest.PathValue(name[1])
+				viewLocal.parameters[name[1]] = request.httpRequest.PathValue(name[1])
 			}
 
-			SendDocument(response, document)
+			SendView(response, viewLocal)
 		},
 		mount: func(patternLocal string) {
 			pattern = patternLocal
@@ -1348,8 +1348,8 @@ func SendWsUpgrade(self *Response) {
 	self.lockedStatusAndHeader = true
 }
 
-// SendDocument echos a document's view.
-func SendDocument(self *Response, view *View) {
+// SendView echos a document's view.
+func SendView(self *Response, view *View) {
 	content, compileError := ViewCompile(view)
 	if nil != compileError {
 		NotifierSendError(self.server.notifier, compileError)
