@@ -18,10 +18,10 @@ func TestJavaScriptRun(test *testing.T) {
 	// Simple.
 	script := "1+1"
 	actual, destroy, javaScriptError := JavaScriptRun(script, map[string]v8go.FunctionCallback{})
+	defer destroy()
 	if javaScriptError != nil {
 		test.Fatal(javaScriptError)
 	}
-	defer destroy()
 
 	if actual.Int32() != 2 {
 		test.Fatalf("script was expected to return 2, received '%d' instead", actual.Int32())
@@ -52,10 +52,10 @@ func TestJavaScriptRun(test *testing.T) {
 	result
 	`
 	actual, destroy, javaScriptError = JavaScriptRun(script, map[string]v8go.FunctionCallback{})
+	defer destroy()
 	if javaScriptError != nil {
 		test.Fatal(javaScriptError)
 	}
-	defer destroy()
 
 	obj := actual.Object()
 
@@ -112,10 +112,10 @@ func TestJavaScriptBundle(test *testing.T) {
 			return nil
 		},
 	})
+	defer destroy()
 	if javaScriptError != nil {
 		test.Fatal(javaScriptError)
 	}
-	defer destroy()
 
 	if actual != expected {
 		test.Fatalf("script was expected to update the actual value to '%s', received '%s' instead.", expected, actual)

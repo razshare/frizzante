@@ -37,6 +37,8 @@ func newJavaScriptContext(globals map[string]v8go.FunctionCallback) (*JavaScript
 //
 // It returns the last expression of the script and a destroyer function.
 //
+// The destroyer function is never nil.
+//
 // You should always call the destroyer function as soon as possible to limit memory usage.
 //
 // Each global function will be injected into the context of the module automatically so that you can invoke them from the script.
@@ -47,11 +49,11 @@ func JavaScriptRun(source string, globals map[string]v8go.FunctionCallback) (
 ) {
 	js, createError := newJavaScriptContext(globals)
 	if createError != nil {
-		return nil, nil, createError
+		return nil, func() {}, createError
 	}
 	exports, runError := js.context.RunScript(source, "frizzante.js")
 	if runError != nil {
-		return nil, nil, runError
+		return nil, func() {}, runError
 	}
 
 	return exports, func() { JavaScriptDestroy(js) }, nil

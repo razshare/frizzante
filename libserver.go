@@ -685,13 +685,7 @@ func serverMapRoute(
 		request := Request{
 			server:      self,
 			httpRequest: httpRequest,
-			done:        false,
 		}
-
-		go func() {
-			<-httpRequest.Context().Done()
-			request.done = true
-		}()
 
 		httpHeader := writer.Header()
 
@@ -739,7 +733,6 @@ type Request struct {
 	response      *Response
 	httpRequest   *http.Request
 	webSocketConn *websocket.Conn
-	done          bool
 }
 
 type Navigate struct {
@@ -871,10 +864,6 @@ func SendCookie(self *Response, key string, value string) {
 //
 // Compatible with web sockets.
 func SendContent(self *Response, content []byte) {
-	if self.request.done {
-		return
-	}
-
 	if !self.lockedStatusAndHeader {
 		(*self.writer).WriteHeader(self.statusCode)
 		self.lockedStatusAndHeader = true

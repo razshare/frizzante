@@ -294,10 +294,10 @@ func ViewExecuteRenderServerJs(self *View, stringProps string) (head string, bod
 	}
 
 	_, destroy, javaScriptError := JavaScriptRun(doneCjs, globals)
+	defer destroy()
 	if javaScriptError != nil {
 		return head, body, javaScriptError
 	}
-	defer destroy()
 
 	return head, body, nil
 }
