@@ -40,7 +40,11 @@ func newJavaScriptContext(globals map[string]v8go.FunctionCallback) (*JavaScript
 // You should always call the destroyer function as soon as possible to limit memory usage.
 //
 // Each global function will be injected into the context of the module automatically so that you can invoke them from the script.
-func JavaScriptRun(source string, globals map[string]v8go.FunctionCallback) (*v8go.Value, func(), error) {
+func JavaScriptRun(source string, globals map[string]v8go.FunctionCallback) (
+	result *v8go.Value,
+	destroy func(),
+	runError error,
+) {
 	js, createError := newJavaScriptContext(globals)
 	if createError != nil {
 		return nil, nil, createError
@@ -58,7 +62,7 @@ func JavaScriptDestroy(js *JavaScriptContext) {
 	js.isolate.Dispose()
 }
 
-func JavaScriptBundle(root string, format api.Format, source string) (string, error) {
+func JavaScriptBundle(root string, format api.Format, source string) (bundle string, bundleError error) {
 	result := api.Build(api.BuildOptions{
 		Bundle: true,
 		Format: format,
