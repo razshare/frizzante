@@ -4,21 +4,33 @@ import (
 	"embed"
 	"encoding/json"
 	"fmt"
+	"github.com/evanw/esbuild/pkg/api"
 	uuid "github.com/nu7hatch/gouuid"
 	"os"
 	"path/filepath"
 	"regexp"
+	"rogchap.com/v8go"
 	"strings"
+)
+
+type Render int64
+
+const (
+	RenderServer   Render = 0 // Renders only on the server.
+	RenderClient   Render = 1 // Renders only on the client.
+	RenderFull     Render = 2 // Renders on both the server and the client.
+	RenderHeadless Render = 3 // Renders only on the server and omits the base template.
 )
 
 var components = map[string]string{}
 
 type View struct {
-	Render     Render
-	Data       map[string]any
-	name       string
-	efs        embed.FS
-	parameters map[string]string
+	Render             Render
+	Data               map[string]any
+	Functions          map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value
+	name               string
+	parameters         map[string]string
+	EmbeddedFileSystem *embed.FS
 }
 
 var noScriptPattern = regexp.MustCompile(`<script.*>.*</script>`)
@@ -30,15 +42,38 @@ type ViewProps struct {
 	Parameters map[string]string `json:"parameters"`
 }
 
-// ViewReference references a view.
+// ViewReference references a view in lib/components/views.
 func ViewReference(view string) *View {
 	return &View{
-		name: view,
+		name:       view,
+		Data:       map[string]any{},
+		parameters: map[string]string{},
+		Functions:  map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value{},
 	}
 }
 
-// ViewCompile compiles a view.
-func ViewCompile(self *View) (string, error) {
+// ViewRender renders a view.
+//
+// If the View is using RenderServer, then ViewRender returns an HTML document.
+// The head of the document will contain *only* content declared with the <svelte:head> tag.
+// The body of the document will contain the fully rendered content of the view as HTML.
+//
+// If the View is using RenderClient, then ViewRender returns an HTML document.
+// The document itself doesn't include any of the view content, instead, custom <script> tags are injected into the head of
+// the document in order to asynchronously load a client JavaScript bundle that renders the view inside the client's browser,
+// thus ultimately loading the content into the document.
+//
+// If the View is using RenderFull, then ViewRender returns an HTML document.
+// The head of the document will contain any content declared with the <svelte:head> tag.
+// The body of the document will contain the fully rendered content of the view as HTML.
+// On top of that, just like when using RenderClient, custom <script> tags are also injected into the head of
+// the document in order to asynchronously load a client JavaScript bundle that, in this case, re-renders the
+// view inside the client's browser.
+// In short, RenderFull is a combination of RenderServer and RenderClient.
+//
+// If the View is using RenderHeadless, then ViewRender returns only the content of the view, without decorating it with an HTML document.
+// The output won't even contain a header, ignoring all <svelte:head> declarations and all css.
+func ViewRender(self *View) (content string, compileError error) {
 	fileNameIndex := filepath.Join(".dist", "client", ".frizzante", "vite-project", "index.html")
 
 	var indexBytes []byte
@@ -50,7 +85,7 @@ func ViewCompile(self *View) (string, error) {
 		}
 		indexBytes = indexBytesLocal
 	} else {
-		indexBytesLocal, readError := self.efs.ReadFile(fileNameIndex)
+		indexBytesLocal, readError := self.EmbeddedFileSystem.ReadFile(fileNameIndex)
 		if readError != nil {
 			return "", readError
 		}
@@ -76,7 +111,7 @@ func ViewCompile(self *View) (string, error) {
 	}
 
 	if RenderFull == self.Render {
-		head, body, renderError := render(self.efs, routerPropsString)
+		head, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
 		}
@@ -134,7 +169,7 @@ func ViewCompile(self *View) (string, error) {
 	}
 
 	if RenderServer == self.Render {
-		head, body, renderError := render(self.efs, routerPropsString)
+		head, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
 		}
@@ -162,7 +197,7 @@ func ViewCompile(self *View) (string, error) {
 	}
 
 	if RenderHeadless == self.Render {
-		_, body, renderError := render(self.efs, routerPropsString)
+		_, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 
 		if renderError != nil {
 			return "", renderError
@@ -173,4 +208,96 @@ func ViewCompile(self *View) (string, error) {
 	}
 
 	return "", nil
+}
+
+// ViewExecuteRenderServerJs executes the `.dist/server/render.server.js` file
+// and returns the head of the document along with its body.
+//
+// If the environment variable DEV is set to 1, the file .dist/server/render.server.js is executed directly from the
+// local file system, otherwise ViewExecuteRenderServerJs executes the file .dist/server/render.server.js located within the
+// view's embedded file system.
+func ViewExecuteRenderServerJs(self *View, stringProps string) (head string, body string, jsError error) {
+	renderFileName := filepath.Join(".dist", "server", "render.server.js")
+
+	var renderEsmBytes []byte
+	if "1" == os.Getenv("DEV") {
+		renderEsmBytesLocal, readError := os.ReadFile(renderFileName)
+		if readError != nil {
+			return "", "", readError
+		}
+		renderEsmBytes = renderEsmBytesLocal
+	} else {
+		renderEsmBytesLocal, readError := self.EmbeddedFileSystem.ReadFile(renderFileName)
+		if readError != nil {
+			return "", "", readError
+		}
+		renderEsmBytes = renderEsmBytesLocal
+	}
+
+	renderEsm := string(renderEsmBytes)
+
+	renderCjs, javaScriptBundleError := JavaScriptBundle(".", api.FormatCommonJS, renderEsm)
+	if javaScriptBundleError != nil {
+		return "", "", javaScriptBundleError
+	}
+
+	renderIif := fmt.Sprintf("const module={exports:{}}; const render = \n(function(){\n%s\nreturn render;\n})()", renderCjs)
+
+	doneEsm := fmt.Sprintf(
+		`
+		%s
+		render(%s).then(function done(rendered){
+			head(rendered.head??'');
+			body(rendered.body??'');
+		});
+		`,
+		renderIif,
+		stringProps,
+	)
+
+	doneCjs, bundleError := JavaScriptBundle(".", api.FormatCommonJS, doneEsm)
+	if bundleError != nil {
+		return "", "", bundleError
+	}
+
+	globals := map[string]v8go.FunctionCallback{}
+
+	if nil != self.Functions {
+		for name, function := range self.Functions {
+			globals[name] = function
+		}
+	}
+
+	globals["inspect"] = func(info *v8go.FunctionCallbackInfo) *v8go.Value {
+		args := info.Args()
+		if len(args) > 0 {
+			message := args[0].String()
+			println(message)
+		}
+		return nil
+	}
+
+	globals["head"] = func(info *v8go.FunctionCallbackInfo) *v8go.Value {
+		args := info.Args()
+		if len(args) > 0 {
+			head = args[0].String()
+		}
+		return nil
+	}
+
+	globals["body"] = func(info *v8go.FunctionCallbackInfo) *v8go.Value {
+		args := info.Args()
+		if len(args) > 0 {
+			body = args[0].String()
+		}
+		return nil
+	}
+
+	_, destroy, javaScriptError := JavaScriptRun(doneCjs, globals)
+	if javaScriptError != nil {
+		return head, body, javaScriptError
+	}
+	defer destroy()
+
+	return head, body, nil
 }

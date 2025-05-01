@@ -589,7 +589,6 @@ func routeCreateWithView(
 			viewLocal := &View{
 				Render:     RenderFull,
 				Data:       map[string]any{},
-				efs:        request.server.embeddedFileSystem,
 				name:       view,
 				parameters: map[string]string{},
 			}
@@ -1350,7 +1349,18 @@ func SendWsUpgrade(self *Response) {
 
 // SendView echos a document's view.
 func SendView(self *Response, view *View) {
-	content, compileError := ViewCompile(view)
+	embeddedFileSystem := view.EmbeddedFileSystem
+	if nil == embeddedFileSystem {
+		embeddedFileSystem = &self.server.embeddedFileSystem
+	}
+
+	content, compileError := ViewRender(&View{
+		Render:             view.Render,
+		Data:               view.Data,
+		name:               view.name,
+		parameters:         view.parameters,
+		EmbeddedFileSystem: embeddedFileSystem,
+	})
 	if nil != compileError {
 		NotifierSendError(self.server.notifier, compileError)
 		return

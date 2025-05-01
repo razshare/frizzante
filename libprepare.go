@@ -26,13 +26,13 @@ func Prepare() {
 		log.Fatal(err)
 	}
 
-	// Prepare ssr.
+	// Prepare vite-project/render.server.svelte.
 	err = prepareSsr()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// Prepare ssr.
+	// Prepare vite-project/render.client.svelte.
 	err = prepareCsr()
 	if err != nil {
 		log.Fatal(err)
