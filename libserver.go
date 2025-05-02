@@ -1343,6 +1343,11 @@ func SendView(self *Response, view *View) {
 		embeddedFileSystem = &self.server.embeddedFileSystem
 	}
 
+	notifier := view.notifier
+	if nil == embeddedFileSystem {
+		notifier = self.server.notifier
+	}
+
 	content, compileError := ViewRender(&View{
 		render:             view.render,
 		data:               view.data,
@@ -1350,6 +1355,7 @@ func SendView(self *Response, view *View) {
 		parameters:         view.parameters,
 		functions:          view.functions,
 		embeddedFileSystem: embeddedFileSystem,
+		notifier:           notifier,
 	})
 	if nil != compileError {
 		NotifierSendError(self.server.notifier, compileError)

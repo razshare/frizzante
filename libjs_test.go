@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewJavaScriptContext(test *testing.T) {
-	_, err := newJavaScriptContext(map[string]v8go.FunctionCallback{})
+	_, err := JavaScriptContextCreateWithGlobals(map[string]v8go.FunctionCallback{})
 	if err != nil {
 		test.Fatal(err)
 	}
@@ -17,7 +17,7 @@ func TestNewJavaScriptContext(test *testing.T) {
 func TestJavaScriptRun(test *testing.T) {
 	// Simple.
 	script := "1+1"
-	actual, destroy, javaScriptError := JavaScriptRun(script, map[string]v8go.FunctionCallback{})
+	actual, destroy, javaScriptError := JavaScriptRun("test", script, map[string]v8go.FunctionCallback{})
 	defer destroy()
 	if javaScriptError != nil {
 		test.Fatal(javaScriptError)
@@ -51,7 +51,7 @@ func TestJavaScriptRun(test *testing.T) {
 	
 	result
 	`
-	actual, destroy, javaScriptError = JavaScriptRun(script, map[string]v8go.FunctionCallback{})
+	actual, destroy, javaScriptError = JavaScriptRun("test", script, map[string]v8go.FunctionCallback{})
 	defer destroy()
 	if javaScriptError != nil {
 		test.Fatal(javaScriptError)
@@ -103,7 +103,7 @@ func TestJavaScriptBundle(test *testing.T) {
 	}
 	actual := ""
 	expected := "hello"
-	_, destroy, javaScriptError := JavaScriptRun(cjs, map[string]v8go.FunctionCallback{
+	_, destroy, javaScriptError := JavaScriptRun("test", cjs, map[string]v8go.FunctionCallback{
 		"signal": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
 			args := info.Args()
 			if len(args) > 0 {

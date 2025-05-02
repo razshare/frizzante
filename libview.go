@@ -30,6 +30,7 @@ type View struct {
 	functions          map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value
 	name               string
 	parameters         map[string]string
+	notifier           *Notifier
 	embeddedFileSystem *embed.FS
 }
 
@@ -62,6 +63,18 @@ func ViewWithData(self *View, key string, value any) {
 	self.data[key] = value
 }
 
+// ViewWithNotifier sets the view notifier.
+//
+// Note that when using ServerWithPage, the notifier of the view falls
+// back to the server notifier.
+//
+// Unless you have some very specific use case, this means you don't need
+// to worry about setting the notifier every time you create a new View,
+// just set it once on the server using ServerWithNotifier.
+func ViewWithNotifier(self *View, notifier *Notifier) {
+	self.notifier = notifier
+}
+
 // ViewWithFunction sets a global function for the view.
 func ViewWithFunction(
 	self *View,
@@ -72,6 +85,13 @@ func ViewWithFunction(
 }
 
 // ViewWithEmbeddedFileSystem sets the embedded file system for the view.
+//
+// Note that when using ServerWithPage, the embedded file system of the view falls
+// back to the server embedded file system.
+//
+// Unless you have some very specific use case, this means you don't need
+// to worry about setting the embedded file system every time you create a new View,
+// just set it once on the server using ServerWithEmbeddedFileSystem.
 func ViewWithEmbeddedFileSystem(self *View, embeddedFileSystem embed.FS) {
 	self.embeddedFileSystem = &embeddedFileSystem
 }
@@ -240,7 +260,7 @@ func ViewRender(self *View) (content string, compileError error) {
 // If the environment variable DEV is set to 1, the file .dist/server/render.server.js is executed directly from the
 // local file system, otherwise ViewExecuteRenderServerJs executes the file .dist/server/render.server.js located within the
 // view's embedded file system.
-func ViewExecuteRenderServerJs(self *View, stringProps string) (head string, body string, jsError error) {
+func ViewExecuteRenderServerJs(self *View, stringifiedProps string) (head string, body string, jsError error) {
 	renderFileName := filepath.Join(".dist", "server", "render.server.js")
 
 	var renderEsmBytes []byte
@@ -270,13 +290,12 @@ func ViewExecuteRenderServerJs(self *View, stringProps string) (head string, bod
 	doneEsm := fmt.Sprintf(
 		`
 		%s
-		render(%s).then(function done(rendered){
+		render(JSON.parse(stringifiedProps())).then(function done(rendered){
 			head(rendered.head??'');
 			body(rendered.body??'');
 		});
 		`,
 		renderIif,
-		stringProps,
 	)
 
 	doneCjs, bundleError := JavaScriptBundle(".", api.FormatCommonJS, doneEsm)
@@ -290,6 +309,14 @@ func ViewExecuteRenderServerJs(self *View, stringProps string) (head string, bod
 		for name, function := range self.functions {
 			globals[name] = function
 		}
+	}
+
+	globals["stringifiedProps"] = func(info *v8go.FunctionCallbackInfo) *v8go.Value {
+		value, valueError := v8go.NewValue(info.Context().Isolate(), stringifiedProps)
+		if nil != valueError {
+			return nil
+		}
+		return value
 	}
 
 	globals["inspect"] = func(info *v8go.FunctionCallbackInfo) *v8go.Value {
@@ -317,7 +344,7 @@ func ViewExecuteRenderServerJs(self *View, stringProps string) (head string, bod
 		return nil
 	}
 
-	_, destroy, javaScriptError := JavaScriptRun(doneCjs, globals)
+	_, destroy, javaScriptError := JavaScriptRun(renderFileName, doneCjs, globals)
 	defer destroy()
 	if javaScriptError != nil {
 		return head, body, javaScriptError
