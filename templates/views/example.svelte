@@ -11,4 +11,5 @@
     const data = getContext("data")
 </script>
 
+<span>Hello, this is view!</span>
 <!-- Content. -->

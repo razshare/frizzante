@@ -1402,15 +1402,19 @@ func ServerWithSessionOperator(
 	self.sessionOperator = sessionOperator
 }
 
-type ApiBuilderFunction = func(
-	withPattern func(string),
-	withHandler func(func(*Request, *Response)),
-)
+// ApiPatternProvider provides a pattern for the current api.
+type ApiPatternProvider = func(string)
+
+// ApiHandlerProvider provides a handler for the current api.
+type ApiHandlerProvider = func(func(request *Request, response *Response))
+
+// ApiBuilder builds an api.
+type ApiBuilder = func(ApiPatternProvider, ApiHandlerProvider)
 
 // ServerWithApi adds an api.
 func ServerWithApi(
 	self *Server,
-	builder ApiBuilderFunction,
+	builder ApiBuilder,
 ) {
 	var patterns []string
 	var handler func(request *Request, response *Response)
@@ -1439,14 +1443,16 @@ func ServerWithApi(
 	}
 }
 
-type GuardFunction = func(
-	withHandler func(func(*Request, *Response, func())),
-)
+// GuardHandlerProvider provides a handler for the current guard.
+type GuardHandlerProvider = func(func(request *Request, response *Response, pass func()))
+
+// GuardBuilder builds a guard.
+type GuardBuilder = func(GuardHandlerProvider)
 
 // ServerWithGuard adds a guard.
-func ServerWithGuard(self *Server, guardFunction GuardFunction) {
+func ServerWithGuard(self *Server, builder GuardBuilder) {
 	var guardHandler func(request *Request, response *Response, pass func())
-	guardFunction(
+	builder(
 		func(guardHandlerLocal func(request *Request, response *Response, pass func())) {
 			guardHandler = guardHandlerLocal
 		},
@@ -1457,22 +1463,34 @@ func ServerWithGuard(self *Server, guardFunction GuardFunction) {
 	}
 }
 
-type PageBuilderFunction = func(
-	withPath func(string),
-	withView func(*View),
-	withBaseHandler func(func(*Request, *Response, *View)),
-	withActionHandler func(func(*Request, *Response, *View)),
-)
+// PagePathProvider provides a path for the current page.
+type PagePathProvider = func(string)
+
+// PageViewProvider provides a view for the current page.
+type PageViewProvider = func(*View)
+
+// PageBaseHandlerProvider provides a base handler for the current page.
+//
+// This handler usually doesn't modify state.
+type PageBaseHandlerProvider = func(func(request *Request, response *Response, view *View))
+
+// PageActionHandlerProvider provides an action handler for the current page.
+//
+// This handler usually modifies state and sometimes redirects to a different page.
+type PageActionHandlerProvider = func(func(request *Request, response *Response, view *View))
+
+// PageBuilder builds a page.
+type PageBuilder = func(PagePathProvider, PageViewProvider, PageBaseHandlerProvider, PageActionHandlerProvider)
 
 // ServerWithPage adds a page.
 func ServerWithPage(
 	self *Server,
-	builder PageBuilderFunction,
+	builder PageBuilder,
 ) {
 	var paths []string
 	var view *View
-	var baseHandler func(request *Request, response *Response, view *View)
-	var actionHandler func(request *Request, response *Response, view *View)
+	var baseHandle func(request *Request, response *Response, view *View)
+	var actionHandle func(request *Request, response *Response, view *View)
 
 	builder(
 		func(pathLocal string) {
@@ -1481,11 +1499,11 @@ func ServerWithPage(
 		func(viewLocal *View) {
 			view = viewLocal
 		},
-		func(baseHandlerLocal func(request *Request, response *Response, view *View)) {
-			baseHandler = baseHandlerLocal
+		func(baseHandleLocal func(request *Request, response *Response, view *View)) {
+			baseHandle = baseHandleLocal
 		},
-		func(actionHandlerLocal func(request *Request, response *Response, view *View)) {
-			actionHandler = actionHandlerLocal
+		func(actionHandleLocal func(request *Request, response *Response, view *View)) {
+			actionHandle = actionHandleLocal
 		},
 	)
 
@@ -1498,20 +1516,20 @@ func ServerWithPage(
 		return
 	}
 
-	if nil == baseHandler {
-		baseHandler = func(request *Request, res *Response, view *View) {
+	if nil == baseHandle {
+		baseHandle = func(request *Request, res *Response, view *View) {
 			// Noop.
 		}
 	}
 
-	if nil == actionHandler {
-		actionHandler = func(request *Request, res *Response, view *View) {
+	if nil == actionHandle {
+		actionHandle = func(request *Request, res *Response, view *View) {
 			// Noop.
 		}
 	}
 
 	for _, path_ := range paths {
-		serverMapRoute(self, "GET "+path_, routeCreateWithView(view.name, baseHandler))
-		serverMapRoute(self, "POST "+path_, routeCreateWithView(view.name, actionHandler))
+		serverMapRoute(self, "GET "+path_, routeCreateWithView(view.name, baseHandle))
+		serverMapRoute(self, "POST "+path_, routeCreateWithView(view.name, actionHandle))
 	}
 }

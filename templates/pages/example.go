@@ -3,10 +3,10 @@ package pages
 import f "github.com/razshare/frizzante"
 
 func page(
-	withPath func(string),
-	withView func(*f.View),
-	withBaseHandler func(func(*f.Request, *f.Response, *f.View)),
-	withActionHandler func(func(*f.Request, *f.Response, *f.View)),
+	withPath f.PagePathProvider,
+	withView f.PageViewProvider,
+	withBaseHandler f.PageBaseHandlerProvider,
+	withActionHandler f.PageActionHandlerProvider,
 ) {
 	withPath("/path")
 	withView(f.ViewReference("ViewName"))
