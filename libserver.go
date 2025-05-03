@@ -1402,14 +1402,14 @@ func ServerWithSessionOperator(
 	self.sessionOperator = sessionOperator
 }
 
-// ProvideApiPattern provides a pattern for the current api.
-type ProvideApiPattern = func(string)
+// WithApiPattern provides a pattern for the current api.
+type WithApiPattern = func(string)
 
-// ProvideApiHandler provides a handler for the current api.
-type ProvideApiHandler = func(func(request *Request, response *Response))
+// WithApiHandler provides a handler for the current api.
+type WithApiHandler = func(func(request *Request, response *Response))
 
 // ApiBuilder builds an api.
-type ApiBuilder = func(ProvideApiPattern, ProvideApiHandler)
+type ApiBuilder = func(WithApiPattern, WithApiHandler)
 
 // ServerWithApi adds an api.
 func ServerWithApi(
@@ -1443,11 +1443,11 @@ func ServerWithApi(
 	}
 }
 
-// ProvideGuardHandler provides a handler for the current guard.
-type ProvideGuardHandler = func(func(request *Request, response *Response, pass func()))
+// WithGuardHandler provides a handler for the current guard.
+type WithGuardHandler = func(func(request *Request, response *Response, pass func()))
 
 // GuardBuilder builds a guard.
-type GuardBuilder = func(ProvideGuardHandler)
+type GuardBuilder = func(WithGuardHandler)
 
 // ServerWithGuard adds a guard.
 func ServerWithGuard(self *Server, builder GuardBuilder) {
@@ -1463,24 +1463,24 @@ func ServerWithGuard(self *Server, builder GuardBuilder) {
 	}
 }
 
-// ProvidePagePath provides a path for the current page.
-type ProvidePagePath = func(string)
+// WithPagePath provides a path for the current page.
+type WithPagePath = func(string)
 
-// ProvidePageView provides a view for the current page.
-type ProvidePageView = func(*View)
+// WithPageView provides a view for the current page.
+type WithPageView = func(*View)
 
-// ProvidePageBaseHandler provides a base handler for the current page.
+// WithPageBaseHandler provides a base handler for the current page.
 //
 // This handler usually doesn't modify state.
-type ProvidePageBaseHandler = func(func(request *Request, response *Response, view *View))
+type WithPageBaseHandler = func(func(request *Request, response *Response, view *View))
 
-// ProvidePageActionHandler provides an action handler for the current page.
+// WithPageActionHandler provides an action handler for the current page.
 //
 // This handler usually modifies state and sometimes redirects to a different page.
-type ProvidePageActionHandler = func(func(request *Request, response *Response, view *View))
+type WithPageActionHandler = func(func(request *Request, response *Response, view *View))
 
 // PageBuilder builds a page.
-type PageBuilder = func(ProvidePagePath, ProvidePageView, ProvidePageBaseHandler, ProvidePageActionHandler)
+type PageBuilder = func(WithPagePath, WithPageView, WithPageBaseHandler, WithPageActionHandler)
 
 // ServerWithPage adds a page.
 func ServerWithPage(
