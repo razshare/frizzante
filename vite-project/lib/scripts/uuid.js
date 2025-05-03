@@ -1,6 +1,6 @@
 /**
  * @typedef UuidPayload
- * @property {boolean} short If `true` the final string will 8 characters long, otherwise it will be 32 + 4 (dashes) characters long.\
+ * @property {boolean} short If `true` the final string will be 8 characters long, otherwise it will be 32 + 4 (dashes) characters long.\
  * For more information see https://en.wikipedia.org/wiki/Universally_unique_identifier#Textual_representation
  */
 
