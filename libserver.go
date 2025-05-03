@@ -43,21 +43,6 @@ type Server struct {
 	sessionOperator        SessionOperator
 }
 
-type SessionGetter = func(key string, defaultValue any) (value any)
-type SessionSetter = func(key string, value any)
-type SessionUnsetter = func(key string)
-type SessionValidator = func() (valid bool)
-type SessionDestroyer = func()
-
-type SessionOperator = func(
-	sessionId string,
-	withGetter func(get SessionGetter),
-	withSetter func(set SessionSetter),
-	withUnsetter func(unset SessionUnsetter),
-	withValidator func(validate SessionValidator),
-	withDestroyer func(destroy SessionDestroyer),
-)
-
 type sessionStore struct {
 	createdAt      time.Time
 	lastActivityAt time.Time
@@ -1376,6 +1361,26 @@ func SendView(self *Response, view *View) {
 	SendEcho(self, content)
 }
 
+type SessionGetter = func(key string, defaultValue any) (value any)
+type SessionSetter = func(key string, value any)
+type SessionUnsetter = func(key string)
+type SessionValidator = func() (valid bool)
+type SessionDestroyer = func()
+type WithSessionGetter = func(get SessionGetter)
+type WithSessionSetter = func(set SessionSetter)
+type WithSessionUnsetter = func(unset SessionUnsetter)
+type WithSessionValidator = func(validate SessionValidator)
+type WithSessionDestroyer = func(destroy SessionDestroyer)
+
+type SessionOperator = func(
+	sessionId string,
+	withGetter WithSessionGetter,
+	withSetter WithSessionSetter,
+	withUnsetter WithSessionUnsetter,
+	withValidator WithSessionValidator,
+	withDestroyer WithSessionDestroyer,
+)
+
 // ServerWithSessionOperator sets the session operator,
 // which is a function that provides the four main
 // operations used by the server to manage any session,
@@ -1395,10 +1400,7 @@ func SendView(self *Response, view *View) {
 //
 // The only thing that matters is a consistent
 // implementation of the four operations.
-func ServerWithSessionOperator(
-	self *Server,
-	sessionOperator SessionOperator,
-) {
+func ServerWithSessionOperator(self *Server, sessionOperator SessionOperator) {
 	self.sessionOperator = sessionOperator
 }
 
@@ -1409,17 +1411,14 @@ type WithApiPattern = func(string)
 type WithApiHandler = func(func(request *Request, response *Response))
 
 // ApiBuilder builds an api.
-type ApiBuilder = func(WithApiPattern, WithApiHandler)
+type ApiBuilder = func(withPattern WithApiPattern, withHandler WithApiHandler)
 
 // ServerWithApi adds an api.
-func ServerWithApi(
-	self *Server,
-	builder ApiBuilder,
-) {
+func ServerWithApi(self *Server, apiBuilder ApiBuilder) {
 	var patterns []string
 	var handler func(request *Request, response *Response)
 
-	builder(
+	apiBuilder(
 		func(pattern string) {
 			patterns = append(patterns, pattern)
 		},
@@ -1447,12 +1446,12 @@ func ServerWithApi(
 type WithGuardHandler = func(func(request *Request, response *Response, pass func()))
 
 // GuardBuilder builds a guard.
-type GuardBuilder = func(WithGuardHandler)
+type GuardBuilder = func(withHandler WithGuardHandler)
 
 // ServerWithGuard adds a guard.
-func ServerWithGuard(self *Server, builder GuardBuilder) {
+func ServerWithGuard(self *Server, guardBuilder GuardBuilder) {
 	var guardHandler func(request *Request, response *Response, pass func())
-	builder(
+	guardBuilder(
 		func(guardHandlerLocal func(request *Request, response *Response, pass func())) {
 			guardHandler = guardHandlerLocal
 		},
@@ -1480,19 +1479,21 @@ type WithPageBaseHandler = func(func(request *Request, response *Response, view 
 type WithPageActionHandler = func(func(request *Request, response *Response, view *View))
 
 // PageBuilder builds a page.
-type PageBuilder = func(WithPagePath, WithPageView, WithPageBaseHandler, WithPageActionHandler)
+type PageBuilder = func(
+	withPath WithPagePath,
+	withView WithPageView,
+	withBaseHandler WithPageBaseHandler,
+	withActionHandler WithPageActionHandler,
+)
 
 // ServerWithPage adds a page.
-func ServerWithPage(
-	self *Server,
-	builder PageBuilder,
-) {
+func ServerWithPage(self *Server, pageBuilder PageBuilder) {
 	var paths []string
 	var view *View
 	var baseHandle func(request *Request, response *Response, view *View)
 	var actionHandle func(request *Request, response *Response, view *View)
 
-	builder(
+	pageBuilder(
 		func(pathLocal string) {
 			paths = append(paths, pathLocal)
 		},
