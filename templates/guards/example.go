@@ -2,19 +2,9 @@ package guards
 
 import f "github.com/razshare/frizzante"
 
-func guard(
-	withHandler func(handler func(
-		request *f.Request,
-		response *f.Response,
-		pass func(),
-	)),
-) {
-	withHandler(func(
-		request *f.Request,
-		response *f.Response,
-		pass func(),
-	) {
-		// Guard.
+func guard(withHandler func(func(*f.Request, *f.Response, func()))) {
+	// Guard.
+	withHandler(func(request *f.Request, response *f.Response, pass func()) {
 		pass()
 	})
 }

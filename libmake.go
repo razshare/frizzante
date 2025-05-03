@@ -163,7 +163,7 @@ func createApi(apiName string) {
 	newName = []byte("\"GET /api/" + strings.ReplaceAll(strings.TrimSuffix(metadata.RelativeFileNameCamel, ".go"), string(filepath.Separator), "/") + "\"")
 	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
-	// ApiFunction.
+	// Api.
 	oldName = []byte("func api(")
 	newName = []byte("func " + metadata.BaseFileNamePascalNoExtension + "(")
 	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
@@ -237,13 +237,13 @@ func createPage(pageName string) {
 	newName := []byte("package " + metadata.BaseDirectoryName)
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	// PageFunction.
+	// PageBuilderFunction.
 	oldName = []byte("func page(")
 	newName = []byte("func " + metadata.BaseFileNamePascalNoExtension + "(")
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	// View.
-	oldName = []byte("\"viewName\"")
+	oldName = []byte("\"ViewName\"")
 	newName = []byte("\"" + metadata.BaseFileNamePascalNoExtension + "\"")
 	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 

@@ -29,7 +29,7 @@ type Server struct {
 	multipartFormMaxMemory int64
 	server                 *http.Server
 	mux                    *http.ServeMux
-	guards                 []func(request *Request, response *Response, pass func())
+	guards                 []func(*Request, *Response, func())
 	sessions               map[string]*net.Conn
 	readTimeout            time.Duration
 	writeTimeout           time.Duration
@@ -76,7 +76,7 @@ func ServerCreate() *Server {
 		server:                 nil,
 		mux:                    http.NewServeMux(),
 		sessions:               map[string]*net.Conn{},
-		guards:                 []func(request *Request, response *Response, pass func()){},
+		guards:                 []func(*Request, *Response, func()){},
 		readTimeout:            10 * time.Second,
 		writeTimeout:           10 * time.Second,
 		maxHeaderBytes:         3 * MB,
@@ -978,6 +978,13 @@ func VerifyAccept(self *Request, contentTypes ...string) bool {
 	return false
 }
 
+// sendEventContent sends content using the `server sent events` format.
+//
+// Usually this should be used internally in order to send content to a server sent event.
+//
+// That being said, other than the format, there is nothing else different between this function and SendContent.
+//
+// See https://html.spec.whatwg.org/multipage/server-sent-events.html for more details on the format.
 func sendEventContent(self *Response, content []byte) {
 	header := fmt.Sprintf("id: %d\r\nevent: %s\r\n", self.eventId, self.eventName)
 
@@ -1395,20 +1402,20 @@ func ServerWithSessionOperator(
 	self.sessionOperator = sessionOperator
 }
 
-type ApiFunction = func(
-	withPattern func(pattern string),
-	withHandler func(handler func(request *Request, response *Response)),
+type ApiBuilderFunction = func(
+	withPattern func(string),
+	withHandler func(func(*Request, *Response)),
 )
 
 // ServerWithApi adds an api.
 func ServerWithApi(
 	self *Server,
-	apiFunction ApiFunction,
+	builder ApiBuilderFunction,
 ) {
 	var patterns []string
 	var handler func(request *Request, response *Response)
 
-	apiFunction(
+	builder(
 		func(pattern string) {
 			patterns = append(patterns, pattern)
 		},
@@ -1433,13 +1440,12 @@ func ServerWithApi(
 }
 
 type GuardFunction = func(
-	withGuardHandler func(guardHandler func(request *Request, response *Response, pass func())),
+	withHandler func(func(*Request, *Response, func())),
 )
 
 // ServerWithGuard adds a guard.
 func ServerWithGuard(self *Server, guardFunction GuardFunction) {
 	var guardHandler func(request *Request, response *Response, pass func())
-
 	guardFunction(
 		func(guardHandlerLocal func(request *Request, response *Response, pass func())) {
 			guardHandler = guardHandlerLocal
@@ -1451,24 +1457,24 @@ func ServerWithGuard(self *Server, guardFunction GuardFunction) {
 	}
 }
 
-type PageFunction = func(
-	withPath func(page string),
-	withView func(view *View),
-	withBase func(showFunction func(request *Request, response *Response, view *View)),
-	withAction func(actionFunction func(request *Request, response *Response, view *View)),
+type PageBuilderFunction = func(
+	withPath func(string),
+	withView func(*View),
+	withBaseHandler func(func(*Request, *Response, *View)),
+	withActionHandler func(func(*Request, *Response, *View)),
 )
 
 // ServerWithPage adds a page.
 func ServerWithPage(
 	self *Server,
-	pageFunction PageFunction,
+	builder PageBuilderFunction,
 ) {
 	var paths []string
 	var view *View
 	var baseHandler func(request *Request, response *Response, view *View)
 	var actionHandler func(request *Request, response *Response, view *View)
 
-	pageFunction(
+	builder(
 		func(pathLocal string) {
 			paths = append(paths, pathLocal)
 		},

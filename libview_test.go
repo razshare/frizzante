@@ -16,16 +16,16 @@ func TestRenderServer(test *testing.T) {
 	ServerWithNotifier(server, notifier)
 	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
 	ServerWithPage(server, func(
-		withPath func(path string),
-		withView func(view *View),
-		show func(showFunction func(request *Request, response *Response, view *View)),
-		action func(actionFunction func(request *Request, response *Response, view *View)),
+		withPath func(string),
+		withView func(*View),
+		withBaseHandler func(func(*Request, *Response, *View)),
+		withActionHandler func(func(*Request, *Response, *View)),
 	) {
 		withPath("/")
 		withView(ViewReference("Welcome"))
-		show(func(request *Request, response *Response, doc *View) {
-			doc.render = RenderServer
-			doc.data["name"] = "world"
+		withBaseHandler(func(request *Request, response *Response, view *View) {
+			ViewWithRender(view, RenderServer)
+			ViewWithData(view, "name", "world")
 		})
 	})
 	go ServerStart(server)
@@ -53,16 +53,16 @@ func TestRenderClient(test *testing.T) {
 	ServerWithHostName(server, "127.0.0.1")
 	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
 	ServerWithPage(server, func(
-		withPath func(path string),
-		withView func(view *View),
-		withBaseHandler func(baseHandler func(request *Request, response *Response, doc *View)),
-		withActionHandler func(actionFunction func(request *Request, response *Response, doc *View)),
+		withPath func(string),
+		withView func(*View),
+		withBaseHandler func(func(*Request, *Response, *View)),
+		withActionHandler func(func(*Request, *Response, *View)),
 	) {
 		withPath("/")
 		withView(ViewReference("Welcome"))
-		withBaseHandler(func(request *Request, response *Response, doc *View) {
-			doc.render = RenderClient
-			doc.data["name"] = "world"
+		withBaseHandler(func(request *Request, response *Response, view *View) {
+			ViewWithRender(view, RenderClient)
+			ViewWithData(view, "name", "world")
 		})
 	})
 	go ServerStart(server)
