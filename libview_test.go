@@ -16,10 +16,10 @@ func TestRenderServer(test *testing.T) {
 	ServerWithNotifier(server, notifier)
 	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
 	ServerWithPage(server, func(
-		withPath func(string),
-		withView func(*View),
-		withBaseHandler func(func(*Request, *Response, *View)),
-		withActionHandler func(func(*Request, *Response, *View)),
+		withPath ProvidePagePath,
+		withView ProvidePageView,
+		withBaseHandler ProvidePageBaseHandler,
+		withActionHandler ProvidePageActionHandler,
 	) {
 		withPath("/")
 		withView(ViewReference("Welcome"))
@@ -53,10 +53,10 @@ func TestRenderClient(test *testing.T) {
 	ServerWithHostName(server, "127.0.0.1")
 	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
 	ServerWithPage(server, func(
-		withPath func(string),
-		withView func(*View),
-		withBaseHandler func(func(*Request, *Response, *View)),
-		withActionHandler func(func(*Request, *Response, *View)),
+		withPath ProvidePagePath,
+		withView ProvidePageView,
+		withBaseHandler ProvidePageBaseHandler,
+		withActionHandler ProvidePageActionHandler,
 	) {
 		withPath("/")
 		withView(ViewReference("Welcome"))

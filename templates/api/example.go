@@ -2,7 +2,7 @@ package api
 
 import f "github.com/razshare/frizzante"
 
-func api(withPattern f.ApiPatternProvider, withHandler f.ApiHandlerProvider) {
+func api(withPattern f.ProvideApiPattern, withHandler f.ProvideApiHandler) {
 	withPattern("GET /")
 	withHandler(func(request *f.Request, response *f.Response) {
 		// Handle.
