@@ -2,18 +2,17 @@ package pages
 
 import f "github.com/razshare/frizzante"
 
-func page(
-	withPath f.ConfigurePagePath,
-	withView f.ConfigurePageView,
-	withBase f.ConfigurePageBase,
-	withAction f.ConfigurePageAction,
-) {
-	withPath("/path")
-	withView(f.ViewReference("ViewName"))
-	withBase(func(request *f.Request, response *f.Response, view *f.View) {
+func page(context f.PageContext) {
+	// Context.
+	path, view, base, action := context()
+
+	// Configure.
+	path("/path")
+	view(f.ViewReference("ViewName"))
+	base(func(request *f.Request, response *f.Response, view *f.View) {
 		// Show page.
 	})
-	withAction(func(request *f.Request, response *f.Response, view *f.View) {
+	action(func(request *f.Request, response *f.Response, view *f.View) {
 		// Modify state.
 	})
 }
