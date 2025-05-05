@@ -52,24 +52,32 @@ func SessionStart(request *Request, response *Response) (
 		var sessionValidator func() (valid bool)
 		var sessionDestroyer func()
 
-		request.server.sessionOperator(
-			sessionId,
-			func(get func(key string, defaultValue any) (value any)) {
+		request.server.sessionBuilder(func() (
+			sessionIdLocal string,
+			withGetter ConfigureSessionGetter,
+			withSetter ConfigureSessionSetter,
+			withUnsetter ConfigureSessionUnsetter,
+			withValidator ConfigureSessionValidator,
+			withDestroyer ConfigureSessionDestroyer,
+		) {
+			sessionIdLocal = sessionId
+			withGetter = func(get func(key string, defaultValue any) (value any)) {
 				sessionGetter = get
-			},
-			func(set func(key string, value any)) {
+			}
+			withSetter = func(set func(key string, value any)) {
 				sessionSetter = set
-			},
-			func(unset func(key string)) {
+			}
+			withUnsetter = func(unset func(key string)) {
 				sessionUnsetter = unset
-			},
-			func(validate func() (valid bool)) {
+			}
+			withValidator = func(validate func() (valid bool)) {
 				sessionValidator = validate
-			},
-			func(destroy func()) {
+			}
+			withDestroyer = func(destroy func()) {
 				sessionDestroyer = destroy
-			},
-		)
+			}
+			return
+		})
 
 		freshSession := &Session{
 			id:       sessionId,
@@ -112,24 +120,32 @@ func SessionStart(request *Request, response *Response) (
 		var sessionValidator func() (valid bool)
 		var sessionDestroyer func()
 
-		request.server.sessionOperator(
-			sessionId,
-			func(get func(key string, defaultValue any) (value any)) {
+		request.server.sessionBuilder(func() (
+			sessionIdLocal string,
+			withGetter ConfigureSessionGetter,
+			withSetter ConfigureSessionSetter,
+			withUnsetter ConfigureSessionUnsetter,
+			withValidator ConfigureSessionValidator,
+			withDestroyer ConfigureSessionDestroyer,
+		) {
+			sessionIdLocal = sessionId
+			withGetter = func(get func(key string, defaultValue any) (value any)) {
 				sessionGetter = get
-			},
-			func(set func(key string, value any)) {
+			}
+			withSetter = func(set func(key string, value any)) {
 				sessionSetter = set
-			},
-			func(unset func(key string)) {
+			}
+			withUnsetter = func(unset func(key string)) {
 				sessionUnsetter = unset
-			},
-			func(validate func() (valid bool)) {
+			}
+			withValidator = func(validate func() (valid bool)) {
 				sessionValidator = validate
-			},
-			func(destroy func()) {
+			}
+			withDestroyer = func(destroy func()) {
 				sessionDestroyer = destroy
-			},
-		)
+			}
+			return
+		})
 
 		freshSession := &Session{
 			id:       sessionId,

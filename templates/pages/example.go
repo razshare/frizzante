@@ -3,17 +3,17 @@ package pages
 import f "github.com/razshare/frizzante"
 
 func page(
-	withPath f.WithPagePath,
-	withView f.WithPageView,
-	withBaseHandler f.WithPageBaseHandler,
-	withActionHandler f.WithPageActionHandler,
+	withPath f.ConfigurePagePath,
+	withView f.ConfigurePageView,
+	withBase f.ConfigurePageBase,
+	withAction f.ConfigurePageAction,
 ) {
 	withPath("/path")
 	withView(f.ViewReference("ViewName"))
-	withBaseHandler(func(request *f.Request, response *f.Response, view *f.View) {
+	withBase(func(request *f.Request, response *f.Response, view *f.View) {
 		// Show page.
 	})
-	withActionHandler(func(request *f.Request, response *f.Response, view *f.View) {
+	withAction(func(request *f.Request, response *f.Response, view *f.View) {
 		// Modify state.
 	})
 }

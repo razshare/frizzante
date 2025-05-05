@@ -40,7 +40,7 @@ type Server struct {
 	temporaryDirectory     string
 	embeddedFileSystem     embed.FS
 	webSocketUpgrader      *websocket.Upgrader
-	sessionOperator        SessionOperator
+	sessionBuilder         SessionBuilder
 }
 
 type sessionStore struct {
@@ -73,14 +73,8 @@ func ServerCreate() *Server {
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
 		},
-		sessionOperator: func(
-			sessionId string,
-			withGetter func(get SessionGetter),
-			withSetter func(set SessionSetter),
-			withUnsetter func(unset SessionUnsetter),
-			withValidator func(validate SessionValidator),
-			withDestroyer func(destroy SessionDestroyer),
-		) {
+		sessionBuilder: func(context SessionContext) {
+			sessionId, getter, setter, unsetter, validator, destroyer := context()
 
 			store, exists := memory[sessionId]
 			if !exists {
@@ -92,7 +86,7 @@ func ServerCreate() *Server {
 				memory[sessionId] = store
 			}
 
-			withGetter(func(key string, defaultValue any) (value any) {
+			getter(func(key string, defaultValue any) (value any) {
 				sessionItem, ok := store.data[key]
 				if !ok {
 					store.data[key] = defaultValue
@@ -106,23 +100,23 @@ func ServerCreate() *Server {
 				return
 			})
 
-			withSetter(func(key string, value any) {
+			setter(func(key string, value any) {
 				store.lastActivityAt = time.Now()
 				store.data[key] = value
 			})
 
-			withUnsetter(func(key string) {
+			unsetter(func(key string) {
 				store.lastActivityAt = time.Now()
 				delete(store.data, key)
 			})
 
-			withValidator(func() (valid bool) {
+			validator(func() (valid bool) {
 				elapsedSeconds := time.Since(store.lastActivityAt).Minutes()
 				valid = elapsedSeconds < 30
 				return
 			})
 
-			withDestroyer(func() {
+			destroyer(func() {
 				delete(memory, sessionId)
 			})
 		},
@@ -438,12 +432,10 @@ func ReceiveContentType(self *Request) string {
 	return self.httpRequest.Header.Get("Content-Type")
 }
 
-func notFoundApi(
-	route func(pattern string),
-	serve func(serveFunction func(request *Request, response *Response)),
-) {
-	route("GET /")
-	serve(func(request *Request, response *Response) {
+func notFoundApi(context ApiContext) {
+	pattern, handler := context()
+	pattern("GET /")
+	handler(func(request *Request, response *Response) {
 		SendStatus(response, 404)
 	})
 }
@@ -463,7 +455,7 @@ func ServerStart(self *Server) {
 	}
 
 	if !entryCreated {
-		ServerWithApi(self, notFoundApi)
+		ServerWithApiBuilder(self, notFoundApi)
 	}
 
 	var waiter sync.WaitGroup
@@ -1366,22 +1358,22 @@ type SessionSetter = func(key string, value any)
 type SessionUnsetter = func(key string)
 type SessionValidator = func() (valid bool)
 type SessionDestroyer = func()
-type WithSessionGetter = func(get SessionGetter)
-type WithSessionSetter = func(set SessionSetter)
-type WithSessionUnsetter = func(unset SessionUnsetter)
-type WithSessionValidator = func(validate SessionValidator)
-type WithSessionDestroyer = func(destroy SessionDestroyer)
-
-type SessionOperator = func(
+type ConfigureSessionGetter = func(get SessionGetter)
+type ConfigureSessionSetter = func(set SessionSetter)
+type ConfigureSessionUnsetter = func(unset SessionUnsetter)
+type ConfigureSessionValidator = func(validate SessionValidator)
+type ConfigureSessionDestroyer = func(destroy SessionDestroyer)
+type SessionContext = func() (
 	sessionId string,
-	withGetter WithSessionGetter,
-	withSetter WithSessionSetter,
-	withUnsetter WithSessionUnsetter,
-	withValidator WithSessionValidator,
-	withDestroyer WithSessionDestroyer,
+	withGetter ConfigureSessionGetter,
+	withSetter ConfigureSessionSetter,
+	withUnsetter ConfigureSessionUnsetter,
+	withValidator ConfigureSessionValidator,
+	withDestroyer ConfigureSessionDestroyer,
 )
+type SessionBuilder = func(context SessionContext)
 
-// ServerWithSessionOperator sets the session operator,
+// ServerWithSessionBuilder sets the session builder,
 // which is a function that provides the four main
 // operations used by the server to manage any session,
 // get, set, unset and destroy.
@@ -1400,32 +1392,36 @@ type SessionOperator = func(
 //
 // The only thing that matters is a consistent
 // implementation of the four operations.
-func ServerWithSessionOperator(self *Server, sessionOperator SessionOperator) {
-	self.sessionOperator = sessionOperator
+func ServerWithSessionBuilder(self *Server, sessionOperator SessionBuilder) {
+	self.sessionBuilder = sessionOperator
 }
 
-// WithApiPattern provides a pattern for the current api.
-type WithApiPattern = func(string)
+// ConfigureApiPattern configures the pattern for the current api.
+type ConfigureApiPattern = func(pattern string)
 
-// WithApiHandler provides a handler for the current api.
-type WithApiHandler = func(func(request *Request, response *Response))
+// ConfigureApiHandler configures the handler for the current api.
+type ConfigureApiHandler = func(handler func(request *Request, response *Response))
+
+// ApiContext retrieves the context of the current api.
+type ApiContext = func() (withPattern ConfigureApiPattern, withHandler ConfigureApiHandler)
 
 // ApiBuilder builds an api.
-type ApiBuilder = func(withPattern WithApiPattern, withHandler WithApiHandler)
+type ApiBuilder = func(context ApiContext)
 
-// ServerWithApi adds an api.
-func ServerWithApi(self *Server, apiBuilder ApiBuilder) {
+// ServerWithApiBuilder adds an api.
+func ServerWithApiBuilder(self *Server, builder ApiBuilder) {
 	var patterns []string
 	var handler func(request *Request, response *Response)
 
-	apiBuilder(
-		func(pattern string) {
+	builder(func() (withPattern ConfigureApiPattern, withHandler ConfigureApiHandler) {
+		withPattern = func(pattern string) {
 			patterns = append(patterns, pattern)
-		},
-		func(handlerLocal func(request *Request, response *Response)) {
+		}
+		withHandler = func(handlerLocal func(request *Request, response *Response)) {
 			handler = handlerLocal
-		},
-	)
+		}
+		return
+	})
 
 	if nil == handler {
 		handler = func(request *Request, response *Response) {
@@ -1442,71 +1438,84 @@ func ServerWithApi(self *Server, apiBuilder ApiBuilder) {
 	}
 }
 
-// WithGuardHandler provides a handler for the current guard.
-type WithGuardHandler = func(func(request *Request, response *Response, pass func()))
+// ConfigureGuardHandler configures the handler for the current guard.
+type ConfigureGuardHandler = func(handler func(request *Request, response *Response, pass func()))
+
+// GuardContext retrieves the context of the current guard.
+type GuardContext = func() (withHandler ConfigureGuardHandler)
 
 // GuardBuilder builds a guard.
-type GuardBuilder = func(withHandler WithGuardHandler)
+type GuardBuilder = func(context GuardContext)
 
-// ServerWithGuard adds a guard.
-func ServerWithGuard(self *Server, guardBuilder GuardBuilder) {
-	var guardHandler func(request *Request, response *Response, pass func())
-	guardBuilder(
-		func(guardHandlerLocal func(request *Request, response *Response, pass func())) {
-			guardHandler = guardHandlerLocal
-		},
-	)
+// ServerWithGuardBuilder adds a guard.
+func ServerWithGuardBuilder(self *Server, builder GuardBuilder) {
+	var handler func(request *Request, response *Response, pass func())
+	builder(func() (withHandler ConfigureGuardHandler) {
+		withHandler = func(handlerLocal func(request *Request, response *Response, pass func())) {
+			handler = handlerLocal
+		}
+		return
+	})
 
-	if nil != guardHandler {
-		self.guards = append(self.guards, guardHandler)
+	if nil != handler {
+		self.guards = append(self.guards, handler)
 	}
 }
 
-// WithPagePath provides a path for the current page.
-type WithPagePath = func(string)
+// ConfigurePagePath configures the path for the current page.
+type ConfigurePagePath = func(pattern string)
 
-// WithPageView provides a view for the current page.
-type WithPageView = func(*View)
+// ConfigurePageView configures the view for the current page.
+type ConfigurePageView = func(view *View)
 
-// WithPageBaseHandler provides a base handler for the current page.
+// ConfigurePageBase configures the base handler for the current page.
 //
 // This handler usually doesn't modify state.
-type WithPageBaseHandler = func(func(request *Request, response *Response, view *View))
+type ConfigurePageBase = func(handler func(request *Request, response *Response, view *View))
 
-// WithPageActionHandler provides an action handler for the current page.
+// ConfigurePageAction configures then action handler for the current page.
 //
 // This handler usually modifies state and sometimes redirects to a different page.
-type WithPageActionHandler = func(func(request *Request, response *Response, view *View))
+type ConfigurePageAction = func(handler func(request *Request, response *Response, view *View))
 
-// PageBuilder builds a page.
-type PageBuilder = func(
-	withPath WithPagePath,
-	withView WithPageView,
-	withBaseHandler WithPageBaseHandler,
-	withActionHandler WithPageActionHandler,
+// PageContext retrieves the context of the current page.
+type PageContext = func() (
+	withPath ConfigurePagePath,
+	withView ConfigurePageView,
+	withBase ConfigurePageBase,
+	withAction ConfigurePageAction,
 )
 
-// ServerWithPage adds a page.
-func ServerWithPage(self *Server, pageBuilder PageBuilder) {
+// PageBuilder builds a page.
+type PageBuilder = func(context PageContext)
+
+// ServerWithPageBuilder adds a page.
+func ServerWithPageBuilder(self *Server, builder PageBuilder) {
 	var paths []string
 	var view *View
-	var baseHandle func(request *Request, response *Response, view *View)
-	var actionHandle func(request *Request, response *Response, view *View)
+	var base func(request *Request, response *Response, view *View)
+	var action func(request *Request, response *Response, view *View)
 
-	pageBuilder(
-		func(pathLocal string) {
-			paths = append(paths, pathLocal)
-		},
-		func(viewLocal *View) {
+	builder(func() (
+		withPath ConfigurePagePath,
+		withView ConfigurePageView,
+		withBase ConfigurePageBase,
+		withAction ConfigurePageAction,
+	) {
+		withPath = func(path string) {
+			paths = append(paths, path)
+		}
+		withView = func(viewLocal *View) {
 			view = viewLocal
-		},
-		func(baseHandleLocal func(request *Request, response *Response, view *View)) {
-			baseHandle = baseHandleLocal
-		},
-		func(actionHandleLocal func(request *Request, response *Response, view *View)) {
-			actionHandle = actionHandleLocal
-		},
-	)
+		}
+		withBase = func(baseLocal func(request *Request, response *Response, view *View)) {
+			base = baseLocal
+		}
+		withAction = func(actionLocal func(request *Request, response *Response, view *View)) {
+			action = actionLocal
+		}
+		return
+	})
 
 	if 0 == len(paths) {
 		paths = append(paths, "/"+strings.ReplaceAll(view.name, ".", "/"))
@@ -1517,20 +1526,20 @@ func ServerWithPage(self *Server, pageBuilder PageBuilder) {
 		return
 	}
 
-	if nil == baseHandle {
-		baseHandle = func(request *Request, res *Response, view *View) {
+	if nil == base {
+		base = func(request *Request, res *Response, view *View) {
 			// Noop.
 		}
 	}
 
-	if nil == actionHandle {
-		actionHandle = func(request *Request, res *Response, view *View) {
+	if nil == action {
+		action = func(request *Request, res *Response, view *View) {
 			// Noop.
 		}
 	}
 
 	for _, path_ := range paths {
-		serverMapRoute(self, "GET "+path_, routeCreateWithView(view.name, baseHandle))
-		serverMapRoute(self, "POST "+path_, routeCreateWithView(view.name, actionHandle))
+		serverMapRoute(self, "GET "+path_, routeCreateWithView(view.name, base))
+		serverMapRoute(self, "POST "+path_, routeCreateWithView(view.name, action))
 	}
 }

@@ -65,7 +65,7 @@ func ViewWithData(self *View, key string, value any) {
 
 // ViewWithNotifier sets the view notifier.
 //
-// Note that when using ServerWithPage, the notifier of the view falls
+// Note that when using ServerWithPageBuilder, the notifier of the view falls
 // back to the server notifier.
 //
 // Unless you have some very specific use case, this means you don't need
@@ -86,7 +86,7 @@ func ViewWithFunction(
 
 // ViewWithEmbeddedFileSystem sets the embedded file system for the view.
 //
-// Note that when using ServerWithPage, the embedded file system of the view falls
+// Note that when using ServerWithPageBuilder, the embedded file system of the view falls
 // back to the server embedded file system.
 //
 // Unless you have some very specific use case, this means you don't need
