@@ -4,15 +4,15 @@ import f "github.com/razshare/frizzante"
 
 func page(context f.PageContext) {
 	// Context.
-	path, view, base, action := context()
+	withPath, withView, withBase, withAction := context()
 
 	// Configure.
-	path("/path")
-	view(f.ViewReference("ViewName"))
-	base(func(request *f.Request, response *f.Response, view *f.View) {
+	withPath("/path")
+	withView(f.ViewReference("ViewName"))
+	withBase(func(request *f.Request, response *f.Response, view *f.View) {
 		// Show page.
 	})
-	action(func(request *f.Request, response *f.Response, view *f.View) {
+	withAction(func(request *f.Request, response *f.Response, view *f.View) {
 		// Modify state.
 	})
 }

@@ -4,10 +4,10 @@ import f "github.com/razshare/frizzante"
 
 func guard(context f.GuardContext) {
 	// Context.
-	handler := context()
+	withHandler := context()
 
 	// Configure.
-	handler(func(request *f.Request, response *f.Response, pass func()) {
+	withHandler(func(request *f.Request, response *f.Response, pass func()) {
 		// Guard.
 		pass()
 	})

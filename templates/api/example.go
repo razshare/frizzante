@@ -4,11 +4,11 @@ import f "github.com/razshare/frizzante"
 
 func api(context f.ApiContext) {
 	// Context.
-	pattern, handler := context()
+	withPattern, withHandler := context()
 
 	// Configure.
-	pattern("GET /")
-	handler(func(request *f.Request, response *f.Response) {
+	withPattern("GET /")
+	withHandler(func(request *f.Request, response *f.Response) {
 		// Handle.
 		f.SendEcho(response, "Ok.")
 	})
