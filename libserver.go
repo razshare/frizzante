@@ -712,7 +712,7 @@ type Request struct {
 	webSocketConn *websocket.Conn
 }
 
-type Navigate struct {
+type navigate struct {
 	Page       string
 	Parameters map[string]string
 	Location   string
@@ -727,7 +727,7 @@ type Response struct {
 	header                *http.Header
 	webSocket             *websocket.Conn
 	eventName             string
-	navigate              *Navigate
+	navigate              *navigate
 	eventId               int64
 }
 
@@ -757,7 +757,7 @@ func ResponseSendNavigateWithParameters(self *Response, page string, parameters 
 		),
 	)
 
-	self.navigate = &Navigate{
+	self.navigate = &navigate{
 		Page:       page,
 		Parameters: parameters,
 		Location:   location,
