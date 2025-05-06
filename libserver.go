@@ -1492,9 +1492,9 @@ type PageBuilder = func(context PageContext)
 // ServerWithPageBuilder adds a page.
 func ServerWithPageBuilder(self *Server, builder PageBuilder) {
 	var paths []string
-	var view *View
 	var base func(request *Request, response *Response, view *View)
 	var action func(request *Request, response *Response, view *View)
+	view := ViewReference("Default")
 
 	builder(func() (
 		withPath ConfigurePagePath,
