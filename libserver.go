@@ -623,7 +623,7 @@ func routeCreateWithView(
 				viewLocal.parameters[name[1]] = request.httpRequest.PathValue(name[1])
 			}
 
-			SendView(response, viewLocal)
+			ResponseSendView(response, viewLocal)
 		},
 		mount: func(patternLocal string) {
 			pattern = patternLocal
@@ -680,8 +680,8 @@ func serverMapRoute(
 		response.request = &request
 
 		if isEntry {
-			SendEmbeddedFileOrElse(&response, func() {
-				SendFileOrElse(&response, func() {
+			ResponseSendEmbeddedFileOrElse(&response, func() {
+				ResponseSendFileOrElse(&response, func() {
 					if route.handler != nil {
 						if "/favicon.ico" == request.httpRequest.RequestURI {
 							ResponseSendNotFound(&response)
@@ -890,8 +890,8 @@ func ResponseSendUnauthorized(self *Response) {
 	ResponseSendStatus(self, http.StatusUnauthorized)
 }
 
-// SendBadRequest tris to send an empty message with status 400 Bad Request.
-func SendBadRequest(self *Response) {
+// ResponseSendBadRequest tris to send an empty message with status 400 Bad Request.
+func ResponseSendBadRequest(self *Response) {
 	ResponseSendStatus(self, http.StatusBadRequest)
 }
 
@@ -1008,9 +1008,9 @@ func sendEventContent(self *Response, content []byte) {
 	self.eventId++
 }
 
-// SendEmbeddedFileOrIndexOrElse sends the embedded file requested by the client,
+// ResponseSendEmbeddedFileOrIndexOrElse sends the embedded file requested by the client,
 // or the closest index.html embedded file, or else falls back.
-func SendEmbeddedFileOrIndexOrElse(self *Response, orElse func()) {
+func ResponseSendEmbeddedFileOrIndexOrElse(self *Response, orElse func()) {
 	request := self.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 
@@ -1066,9 +1066,9 @@ func SendEmbeddedFileOrIndexOrElse(self *Response, orElse func()) {
 	http.ServeContent(*self.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
 }
 
-// SendEmbeddedFileOrElse sends the embedded file requested by the client,
+// ResponseSendEmbeddedFileOrElse sends the embedded file requested by the client,
 // or the closest index.html embedded file, or else falls back.
-func SendEmbeddedFileOrElse(self *Response, orElse func()) {
+func ResponseSendEmbeddedFileOrElse(self *Response, orElse func()) {
 	request := self.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 	fileName = strings.Split(fileName, "?")[0]
@@ -1119,9 +1119,9 @@ func SendEmbeddedFileOrElse(self *Response, orElse func()) {
 	http.ServeContent(*self.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
 }
 
-// SendFileOrIndexOrElse sends the file requested by the client,
+// ResponseSendFileOrIndexOrElse sends the file requested by the client,
 // or the closest index.html file, or else falls back.
-func SendFileOrIndexOrElse(self *Response, orElse func()) {
+func ResponseSendFileOrIndexOrElse(self *Response, orElse func()) {
 	request := self.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 
@@ -1177,8 +1177,8 @@ func SendFileOrIndexOrElse(self *Response, orElse func()) {
 	http.ServeContent(*self.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
 }
 
-// SendFileOrElse sends the file requested by the client, or else falls back.
-func SendFileOrElse(self *Response, orElse func()) {
+// ResponseSendFileOrElse sends the file requested by the client, or else falls back.
+func ResponseSendFileOrElse(self *Response, orElse func()) {
 	request := self.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 
@@ -1276,11 +1276,11 @@ func createReaderFromFileName(fileName string) (*bytes.Reader, *os.FileInfo, err
 	return bytes.NewReader(buffer), &fileInfo, nil
 }
 
-// SendSseUpgrade upgrades the http connection to server sent events
+// ResponseSendSseUpgrade upgrades the http connection to server sent events
 // and returns a function that sets the name of the current event.
 //
 // The default event is "message".
-func SendSseUpgrade(self *Response) (setEventName func(eventName string)) {
+func ResponseSendSseUpgrade(self *Response) (setEventName func(eventName string)) {
 	ResponseSendHeader(self, "Access-Control-Allow-Origin", "*")
 	ResponseSendHeader(self, "Access-Control-Expose-Headers", "Content-Type")
 	ResponseSendHeader(self, "Content-Type", "text/event-stream")
@@ -1301,8 +1301,8 @@ func SendSseUpgrade(self *Response) (setEventName func(eventName string)) {
 	return
 }
 
-// SendWsUpgrade upgrades the http connection to web sockets.
-func SendWsUpgrade(self *Response) {
+// ResponseSendWsUpgrade upgrades the http connection to web sockets.
+func ResponseSendWsUpgrade(self *Response) {
 	request := self.request
 	conn, upgradeError := self.server.webSocketUpgrader.Upgrade(*self.writer, request.httpRequest, nil)
 	if upgradeError != nil {
@@ -1320,8 +1320,8 @@ func SendWsUpgrade(self *Response) {
 	self.lockedStatusAndHeader = true
 }
 
-// SendView sends a view.
-func SendView(self *Response, view *View) {
+// ResponseSendView sends a view.
+func ResponseSendView(self *Response, view *View) {
 	embeddedFileSystem := view.embeddedFileSystem
 	if nil == embeddedFileSystem {
 		embeddedFileSystem = &self.server.embeddedFileSystem
