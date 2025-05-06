@@ -10,6 +10,6 @@ func api(context f.ApiContext) {
 	withPattern("GET /")
 	withHandler(func(request *f.Request, response *f.Response) {
 		// Handle.
-		f.SendEcho(response, "Ok.")
+		f.ResponseSendMessage(response, "Ok.")
 	})
 }

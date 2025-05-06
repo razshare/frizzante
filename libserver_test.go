@@ -163,7 +163,7 @@ func TestServerWithApi(test *testing.T) {
 		pattern, handler := context()
 		pattern("GET /")
 		handler(func(_ *Request, response *Response) {
-			SendEcho(response, expected)
+			ResponseSendMessage(response, expected)
 		})
 	})
 	go ServerStart(server)
@@ -192,8 +192,8 @@ func TestSendStatus(test *testing.T) {
 		pattern, handler := context()
 		pattern("GET /")
 		handler(func(_ *Request, response *Response) {
-			SendStatus(response, expected)
-			SendEcho(response, "Ok")
+			ResponseSendStatus(response, expected)
+			ResponseSendMessage(response, "Ok")
 		})
 	})
 	go ServerStart(server)
@@ -225,8 +225,8 @@ func TestSendHeader(test *testing.T) {
 		pattern, handler := context()
 		pattern("GET /")
 		handler(func(_ *Request, response *Response) {
-			SendHeader(response, "Content-Type", expected)
-			SendEcho(response, "{}")
+			ResponseSendHeader(response, "Content-Type", expected)
+			ResponseSendMessage(response, "{}")
 		})
 	})
 	go ServerStart(server)

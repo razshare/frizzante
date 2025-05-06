@@ -18,7 +18,7 @@ func TestSessionStart(test *testing.T) {
 		handler(func(request *Request, response *Response) {
 			get, _, _ := SessionStart(request, response)
 			name := get("name", "world").(string)
-			SendEcho(response, fmt.Sprintf("hello %s", name))
+			ResponseSendMessage(response, fmt.Sprintf("hello %s", name))
 		})
 	})
 	ServerWithApiBuilder(server, func(context ApiContext) {
@@ -26,9 +26,9 @@ func TestSessionStart(test *testing.T) {
 		pattern("POST /")
 		handler(func(request *Request, response *Response) {
 			_, set, _ := SessionStart(request, response)
-			name := ReceiveMessage(request)
+			name := RequestReceiveMessage(request)
 			set("name", name)
-			SendEcho(response, "")
+			ResponseSendMessage(response, "")
 		})
 	})
 

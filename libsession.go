@@ -88,7 +88,7 @@ func SessionStart(request *Request, response *Response) (
 			destroy:  sessionDestroyer,
 		}
 
-		SendCookie(response, "session-id", freshSession.id)
+		ResponseSendCookie(response, "session-id", freshSession.id)
 		sessions[freshSession.id] = freshSession
 		get = sessionGetter
 		set = sessionSetter
@@ -156,7 +156,7 @@ func SessionStart(request *Request, response *Response) (
 			destroy:  sessionDestroyer,
 		}
 
-		SendCookie(response, "session-id", freshSession.id)
+		ResponseSendCookie(response, "session-id", freshSession.id)
 		sessions[freshSession.id] = freshSession
 		get = sessionGetter
 		set = sessionSetter
@@ -171,7 +171,7 @@ func SessionStart(request *Request, response *Response) (
 		return
 	}
 
-	SendCookie(response, "session-id", session.id)
+	ResponseSendCookie(response, "session-id", session.id)
 	get = session.get
 	set = session.set
 	unset = session.unset

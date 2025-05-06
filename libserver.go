@@ -311,15 +311,15 @@ func ServerTemporaryDirectoryClear(self *Server) {
 	}
 }
 
-// ReceiveCancellation returns a channel that's closed when the request is cancelled.
-func ReceiveCancellation(self *Request) <-chan struct{} {
+// RequestReceiveCancellation returns a channel that's closed when the request is cancelled.
+func RequestReceiveCancellation(self *Request) <-chan struct{} {
 	return self.httpRequest.Context().Done()
 }
 
-// ReceiveCookie reads the contents of a cookie from the message and returns the value.
+// RequestReceiveCookie reads the contents of a cookie from the message and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveCookie(self *Request, key string) string {
+func RequestReceiveCookie(self *Request, key string) string {
 	cookie, cookieError := self.httpRequest.Cookie(key)
 	if cookieError != nil {
 		NotifierSendError(self.server.notifier, cookieError)
@@ -333,10 +333,10 @@ func ReceiveCookie(self *Request, key string) string {
 	return value
 }
 
-// ReceiveMessage reads the contents of the message and returns the value.
+// RequestReceiveMessage reads the contents of the message and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveMessage(self *Request) string {
+func RequestReceiveMessage(self *Request) string {
 	if self.webSocketConn != nil {
 		_, readBytes, readError := self.webSocketConn.ReadMessage()
 		if readError != nil {
@@ -354,11 +354,11 @@ func ReceiveMessage(self *Request) string {
 	return string(readBytes)
 }
 
-// ReceiveJson reads the message as json and returns the value and a boolean,
+// RequestReceiveJson reads the message as json and returns the value and a boolean,
 // which indicates success or failure.
 //
 // Compatible with web sockets.
-func ReceiveJson[T any](self *Request) (*T, bool) {
+func RequestReceiveJson[T any](self *Request) (*T, bool) {
 	var value T
 	if self.webSocketConn != nil {
 		jsonError := self.webSocketConn.ReadJSON(value)
@@ -382,8 +382,8 @@ func ReceiveJson[T any](self *Request) (*T, bool) {
 	return &value, true
 }
 
-// ReceiveForm reads the message as a form and returns the value.
-func ReceiveForm(self *Request) *url.Values {
+// RequestReceiveForm reads the message as a form and returns the value.
+func RequestReceiveForm(self *Request) *url.Values {
 	if self.webSocketConn != nil {
 		NotifierSendError(self.server.notifier, errors.New("web socket connections cannot receive form payloads"))
 		return &url.Values{}
@@ -404,31 +404,31 @@ func ReceiveForm(self *Request) *url.Values {
 	return &self.httpRequest.Form
 }
 
-// ReceiveQuery reads a query field and returns the value.
+// RequestReceiveQuery reads a query field and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveQuery(self *Request, name string) string {
+func RequestReceiveQuery(self *Request, name string) string {
 	return self.httpRequest.URL.Query().Get(name)
 }
 
-// ReceivePath reads a parameters fields and returns the value.
+// RequestReceivePath reads a parameters fields and returns the value.
 //
 // Compatible with web sockets.
-func ReceivePath(self *Request, name string) string {
+func RequestReceivePath(self *Request, name string) string {
 	return self.httpRequest.PathValue(name)
 }
 
-// ReceiveHeader reads a header field and returns the value.
+// RequestReceiveHeader reads a header field and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveHeader(self *Request, key string) string {
+func RequestReceiveHeader(self *Request, key string) string {
 	return self.httpRequest.Header.Get(key)
 }
 
-// ReceiveContentType reads the Content-Type header field and returns the value.
+// RequestReceiveContentType reads the Content-Type header field and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveContentType(self *Request) string {
+func RequestReceiveContentType(self *Request) string {
 	return self.httpRequest.Header.Get("Content-Type")
 }
 
@@ -436,7 +436,7 @@ func notFoundApi(context ApiContext) {
 	pattern, handler := context()
 	pattern("GET /")
 	handler(func(request *Request, response *Response) {
-		SendStatus(response, 404)
+		ResponseSendStatus(response, 404)
 	})
 }
 
@@ -544,9 +544,9 @@ func routeCreate(
 // Unlike routeCreate, routeCreateWithView also creates a View, which is used to automatically
 // to serve a svelte view after invoking callback.
 //
-// Generally speaking, you should never manually invoke SendEcho or similar functions.
+// Generally speaking, you should never manually invoke ResponseSendMessage or similar functions.
 //
-// However, it is safe to invoke receive functions, like ReceiveHeader, ReceiveCookie, etc.
+// However, it is safe to invoke receive functions, like RequestReceiveHeader, RequestReceiveCookie, etc.
 func routeCreateWithView(
 	view string,
 	handler func(
@@ -584,7 +584,7 @@ func routeCreateWithView(
 			handler(request, response, viewLocal)
 
 			if nil != response.navigate {
-				SendRedirect(response, response.navigate.Location, http.StatusFound)
+				ResponseSendRedirect(response, response.navigate.Location, http.StatusFound)
 				return
 			}
 
@@ -601,14 +601,14 @@ func routeCreateWithView(
 				viewLocal.data = map[string]any{}
 			}
 
-			if VerifyAccept(request, "application/json") {
+			if RequestVerifyAccept(request, "application/json") {
 				data, marshalError := json.Marshal(viewLocal.data)
 				if marshalError != nil {
 					NotifierSendError(request.server.notifier, marshalError)
 					return
 				}
-				SendHeader(response, "Content-Type", "application/json")
-				SendEcho(response, string(data))
+				ResponseSendHeader(response, "Content-Type", "application/json")
+				ResponseSendMessage(response, string(data))
 				return
 			}
 
@@ -684,13 +684,13 @@ func serverMapRoute(
 				SendFileOrElse(&response, func() {
 					if route.handler != nil {
 						if "/favicon.ico" == request.httpRequest.RequestURI {
-							SendNotFound(&response)
+							ResponseSendNotFound(&response)
 							return
 						}
 						route.handler(&request, &response)
 
 						if !response.lockedStatusAndHeader {
-							SendEcho(&response, "")
+							ResponseSendMessage(&response, "")
 						}
 					}
 				})
@@ -699,7 +699,7 @@ func serverMapRoute(
 			route.handler(&request, &response)
 
 			if !response.lockedStatusAndHeader {
-				SendEcho(&response, "")
+				ResponseSendMessage(&response, "")
 			}
 		}
 	})
@@ -733,8 +733,8 @@ type Response struct {
 
 var pathFieldRegex = regexp.MustCompile(`\{(.*?)}`)
 
-// SendNavigateWithParameters sends the client an instruction to navigate.
-func SendNavigateWithParameters(self *Response, page string, parameters map[string]string) {
+// ResponseSendNavigateWithParameters sends the client an instruction to navigate.
+func ResponseSendNavigateWithParameters(self *Response, page string, parameters map[string]string) {
 	if nil == parameters {
 		parameters = map[string]string{}
 	}
@@ -764,19 +764,19 @@ func SendNavigateWithParameters(self *Response, page string, parameters map[stri
 	}
 }
 
-// SendNavigate sends the client an instruction to navigate.
-func SendNavigate(self *Response, page string) {
-	SendNavigateWithParameters(self, page, map[string]string{})
+// ResponseSendNavigate sends the client an instruction to navigate.
+func ResponseSendNavigate(self *Response, page string) {
+	ResponseSendNavigateWithParameters(self, page, map[string]string{})
 }
 
-// SendRedirect redirects the request.
-func SendRedirect(self *Response, location string, statusCode int) {
-	SendStatus(self, statusCode)
-	SendHeader(self, "Location", location)
+// ResponseSendRedirect redirects the request.
+func ResponseSendRedirect(self *Response, location string, statusCode int) {
+	ResponseSendStatus(self, statusCode)
+	ResponseSendHeader(self, "Location", location)
 }
 
-// SendRedirectToSecure redirects the request to the https server.
-func SendRedirectToSecure(self *Response) {
+// ResponseSendRedirectToSecure redirects the request to the https server.
+func ResponseSendRedirectToSecure(self *Response) {
 	request := self.request
 	if "" == request.server.certificate || "" == request.server.certificateKey || request.httpRequest.TLS != nil {
 		return
@@ -786,18 +786,18 @@ func SendRedirectToSecure(self *Response) {
 	secureSuffix := fmt.Sprintf(":%d", request.server.securePort)
 	secureHost := strings.Replace(request.httpRequest.Host, insecureSuffix, secureSuffix, 1)
 	secureLocation := fmt.Sprintf("https://%s%s", secureHost, request.httpRequest.RequestURI)
-	SendRedirect(self, secureLocation, 302)
+	ResponseSendRedirect(self, secureLocation, 302)
 	return
 }
 
-// SendStatus sets the status code.
+// ResponseSendStatus sets the status code.
 //
 // This will lock the status, which makes it
 // so that the increaseIndex time you invoke this
 // function it will fail with an error.
 //
 // All errors are sent to the server notifier.
-func SendStatus(self *Response, code int) {
+func ResponseSendStatus(self *Response, code int) {
 	if self.lockedStatusAndHeader {
 		NotifierSendError(self.server.notifier, errors.New("status is locked"))
 		return
@@ -805,14 +805,14 @@ func SendStatus(self *Response, code int) {
 	self.statusCode = code
 }
 
-// SendHeader sets a header field.
+// ResponseSendHeader sets a header field.
 //
 // If the status has not been sent already, a default "200 OK" status will be sent immediately.
 //
 // This means the status will become locked and further attempts to send the status will fail with an error.
 //
 // All errors are sent to the server notifier.
-func SendHeader(self *Response, key string, value string) {
+func ResponseSendHeader(self *Response, key string, value string) {
 	if self.lockedStatusAndHeader {
 		NotifierSendError(self.server.notifier, errors.New("headers locked"))
 		return
@@ -821,17 +821,17 @@ func SendHeader(self *Response, key string, value string) {
 	self.header.Set(key, value)
 }
 
-// SendContentType sets the Content-Type header field.
-func SendContentType(self *Response, contentType string) {
-	SendHeader(self, "Content-Type", contentType)
+// ResponseSendContentType sets the Content-Type header field.
+func ResponseSendContentType(self *Response, contentType string) {
+	ResponseSendHeader(self, "Content-Type", contentType)
 }
 
-// SendCookie sends a cookies to the client.
-func SendCookie(self *Response, key string, value string) {
-	SendHeader(self, "Set-Cookie", fmt.Sprintf("%s=%s; Path=/; HttpOnly", url.QueryEscape(key), url.QueryEscape(value)))
+// ResponseSendCookie sends a cookies to the client.
+func ResponseSendCookie(self *Response, key string, value string) {
+	ResponseSendHeader(self, "Set-Cookie", fmt.Sprintf("%s=%s; Path=/; HttpOnly", url.QueryEscape(key), url.QueryEscape(value)))
 }
 
-// SendContent sends binary safe content.
+// ResponseSendContent sends binary safe content.
 //
 // If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
 //
@@ -840,7 +840,7 @@ func SendCookie(self *Response, key string, value string) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func SendContent(self *Response, content []byte) {
+func ResponseSendContent(self *Response, content []byte) {
 	if !self.lockedStatusAndHeader {
 		(*self.writer).WriteHeader(self.statusCode)
 		self.lockedStatusAndHeader = true
@@ -867,7 +867,7 @@ func SendContent(self *Response, content []byte) {
 	}
 }
 
-// SendEcho sends utf-8 safe content.
+// ResponseSendMessage sends utf-8 safe content.
 //
 // If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
 //
@@ -876,36 +876,36 @@ func SendContent(self *Response, content []byte) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func SendEcho(self *Response, content string) {
-	SendContent(self, []byte(content))
+func ResponseSendMessage(self *Response, message string) {
+	ResponseSendContent(self, []byte(message))
 }
 
-// SendNotFound sends an empty echo with status 404 Not Found.
-func SendNotFound(self *Response) {
-	SendStatus(self, http.StatusNotFound)
+// ResponseSendNotFound sends an empty message with status 404 Not Found.
+func ResponseSendNotFound(self *Response) {
+	ResponseSendStatus(self, http.StatusNotFound)
 }
 
-// SendUnauthorized sends an empty echo with status 401 Unauthorized.
-func SendUnauthorized(self *Response) {
-	SendStatus(self, http.StatusUnauthorized)
+// ResponseSendUnauthorized sends an empty message with status 401 Unauthorized.
+func ResponseSendUnauthorized(self *Response) {
+	ResponseSendStatus(self, http.StatusUnauthorized)
 }
 
-// SendBadRequest tris to send an empty echo with status 400 Bad Request.
+// SendBadRequest tris to send an empty message with status 400 Bad Request.
 func SendBadRequest(self *Response) {
-	SendStatus(self, http.StatusBadRequest)
+	ResponseSendStatus(self, http.StatusBadRequest)
 }
 
-// SendForbidden sends an empty echo with status 403 Forbidden.
-func SendForbidden(self *Response) {
-	SendStatus(self, http.StatusForbidden)
+// ResponseSendForbidden sends an empty message with status 403 Forbidden.
+func ResponseSendForbidden(self *Response) {
+	ResponseSendStatus(self, http.StatusForbidden)
 }
 
-// SendTooManyRequests sends and empty echo with status 403 Forbidden.
-func SendTooManyRequests(self *Response) {
-	SendStatus(self, http.StatusTooManyRequests)
+// ResponseSendTooManyRequests sends and empty message with status 403 Forbidden.
+func ResponseSendTooManyRequests(self *Response) {
+	ResponseSendStatus(self, http.StatusTooManyRequests)
 }
 
-// SendJson sends json content.
+// ResponseSendJson sends json content.
 //
 // If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
 //
@@ -914,7 +914,7 @@ func SendTooManyRequests(self *Response) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func SendJson(self *Response, payload any) {
+func ResponseSendJson(self *Response, payload any) {
 	content, marshalError := json.Marshal(payload)
 	if marshalError != nil {
 		NotifierSendError(self.server.notifier, marshalError)
@@ -928,11 +928,11 @@ func SendJson(self *Response, payload any) {
 		}
 	}
 
-	SendContent(self, content)
+	ResponseSendContent(self, content)
 }
 
-// VerifyContentType checks if the incoming request has any of the given content-types.
-func VerifyContentType(self *Request, contentTypes ...string) bool {
+// RequestVerifyContentType checks if the incoming request has any of the given content-types.
+func RequestVerifyContentType(self *Request, contentTypes ...string) bool {
 	requestedMime := self.httpRequest.Header.Get("Content-Type")
 	for _, acceptedMime := range contentTypes {
 		if acceptedMime == "*" || strings.HasPrefix(requestedMime, acceptedMime) {
@@ -943,8 +943,8 @@ func VerifyContentType(self *Request, contentTypes ...string) bool {
 	return false
 }
 
-// VerifyAccept checks if the incoming request accepts any of the given content-types.
-func VerifyAccept(self *Request, contentTypes ...string) bool {
+// RequestVerifyAccept checks if the incoming request accepts any of the given content-types.
+func RequestVerifyAccept(self *Request, contentTypes ...string) bool {
 	requestedAcceptMime := self.httpRequest.Header.Get("Accept")
 	for _, acceptedMime := range contentTypes {
 		if acceptedMime == "*" || strings.Contains(requestedAcceptMime, acceptedMime) {
@@ -959,7 +959,7 @@ func VerifyAccept(self *Request, contentTypes ...string) bool {
 //
 // Usually this should be used internally in order to send content to a server sent event.
 //
-// That being said, other than the format, there is nothing else different between this function and SendContent.
+// That being said, other than the format, there is nothing else different between this function and ResponseSendContent.
 //
 // See https://html.spec.whatwg.org/multipage/server-sent-events.html for more details on the format.
 func sendEventContent(self *Response, content []byte) {
@@ -1057,11 +1057,11 @@ func SendEmbeddedFileOrIndexOrElse(self *Response, orElse func()) {
 	}
 
 	if "" == self.header.Get("Content-Type") {
-		SendHeader(self, "Content-Type", Mime(fileName))
+		ResponseSendHeader(self, "Content-Type", Mime(fileName))
 	}
 
 	if "" == self.header.Get("Content-Length") {
-		SendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
+		ResponseSendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
 	}
 	http.ServeContent(*self.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
 }
@@ -1110,11 +1110,11 @@ func SendEmbeddedFileOrElse(self *Response, orElse func()) {
 	}
 
 	if "" == self.header.Get("Content-Type") {
-		SendHeader(self, "Content-Type", Mime(fileName))
+		ResponseSendHeader(self, "Content-Type", Mime(fileName))
 	}
 
 	if "" == self.header.Get("Content-Length") {
-		SendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
+		ResponseSendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
 	}
 	http.ServeContent(*self.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
 }
@@ -1168,11 +1168,11 @@ func SendFileOrIndexOrElse(self *Response, orElse func()) {
 	}
 
 	if "" == self.header.Get("Content-Type") {
-		SendHeader(self, "Content-Type", Mime(fileName))
+		ResponseSendHeader(self, "Content-Type", Mime(fileName))
 	}
 
 	if "" == self.header.Get("Content-Length") {
-		SendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
+		ResponseSendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
 	}
 	http.ServeContent(*self.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
 }
@@ -1217,11 +1217,11 @@ func SendFileOrElse(self *Response, orElse func()) {
 	}
 
 	if "" == self.header.Get("Content-Type") {
-		SendHeader(self, "Content-Type", Mime(fileName))
+		ResponseSendHeader(self, "Content-Type", Mime(fileName))
 	}
 
 	if "" == self.header.Get("Content-Length") {
-		SendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
+		ResponseSendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
 	}
 	http.ServeContent(*self.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
 }
@@ -1281,11 +1281,11 @@ func createReaderFromFileName(fileName string) (*bytes.Reader, *os.FileInfo, err
 //
 // The default event is "message".
 func SendSseUpgrade(self *Response) (setEventName func(eventName string)) {
-	SendHeader(self, "Access-Control-Allow-Origin", "*")
-	SendHeader(self, "Access-Control-Expose-Headers", "Content-Type")
-	SendHeader(self, "Content-Type", "text/event-stream")
-	SendHeader(self, "Cache-Control", "no-cache")
-	SendHeader(self, "Connection", "keep-alive")
+	ResponseSendHeader(self, "Access-Control-Allow-Origin", "*")
+	ResponseSendHeader(self, "Access-Control-Expose-Headers", "Content-Type")
+	ResponseSendHeader(self, "Content-Type", "text/event-stream")
+	ResponseSendHeader(self, "Cache-Control", "no-cache")
+	ResponseSendHeader(self, "Connection", "keep-alive")
 	self.eventName = "message"
 	setEventName = func(eventName string) {
 		if "" == eventName {
@@ -1320,7 +1320,7 @@ func SendWsUpgrade(self *Response) {
 	self.lockedStatusAndHeader = true
 }
 
-// SendView echos a document's view.
+// SendView sends a view.
 func SendView(self *Response, view *View) {
 	embeddedFileSystem := view.embeddedFileSystem
 	if nil == embeddedFileSystem {
@@ -1347,10 +1347,10 @@ func SendView(self *Response, view *View) {
 	}
 
 	if "" == self.header.Get("Content-Type") {
-		SendHeader(self, "Content-Type", "text/html")
+		ResponseSendHeader(self, "Content-Type", "text/html")
 	}
 
-	SendEcho(self, content)
+	ResponseSendMessage(self, content)
 }
 
 type SessionGetter = func(key string, defaultValue any) (value any)
