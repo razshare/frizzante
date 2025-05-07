@@ -19,7 +19,7 @@
     const path = getContext("path")
     /** @type {function(string):string} */
     const view = getContext("view")
-    /** @type {function(string,Record<string,string>)} */
+    /** @type {function(string,Record<string,string>):void} */
     const navigate = getContext("navigate")
     /** @type {Record<string,any>} */
     const data = getContext("data")
@@ -36,13 +36,13 @@
 
     /** @type {Props} */
     let {
-        action = '?',
+        action = '',
         children,
         form = {},
     } = $props()
 
 
-    if ('?' !== action) {
+    if ('' !== action) {
         action = path(action)
     }
 </script>

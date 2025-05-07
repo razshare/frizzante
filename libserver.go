@@ -1390,6 +1390,9 @@ type Api struct {
 	handler  func(request *Request, response *Response)
 }
 
+// ApiBuilder builds an api.
+type ApiBuilder = func(api *Api)
+
 // ApiWithPattern adds a pattern.
 func ApiWithPattern(self *Api, pattern string) {
 	self.patterns = append(self.patterns, pattern)
@@ -1399,18 +1402,6 @@ func ApiWithPattern(self *Api, pattern string) {
 func ApiWithHandler(self *Api, handler func(request *Request, response *Response)) {
 	self.handler = handler
 }
-
-// ConfigureApiPattern configures the pattern for the current api.
-type ConfigureApiPattern = func(pattern string)
-
-// ConfigureApiHandler configures the handler for the current api.
-type ConfigureApiHandler = func(handler func(request *Request, response *Response))
-
-// ApiContext retrieves the context of the current api.
-type ApiContext = func() (withPattern ConfigureApiPattern, withHandler ConfigureApiHandler)
-
-// ApiBuilder builds an api.
-type ApiBuilder = func(api *Api)
 
 // ServerWithApiBuilder adds an api.
 func ServerWithApiBuilder(self *Server, builder ApiBuilder) {
@@ -1439,16 +1430,13 @@ type Guard struct {
 	handler func(request *Request, response *Response, pass func())
 }
 
-// ConfigureGuardHandler configures the handler for the current guard.
-type ConfigureGuardHandler = func(handler func(request *Request, response *Response, pass func()))
+// GuardBuilder builds a guard.
+type GuardBuilder = func(guard *Guard)
 
 // GuardWithHandler sets the handler.
 func GuardWithHandler(self *Guard, handler func(request *Request, response *Response, pass func())) {
 	self.handler = handler
 }
-
-// GuardBuilder builds a guard.
-type GuardBuilder = func(guard *Guard)
 
 // ServerWithGuardBuilder adds a guard.
 func ServerWithGuardBuilder(self *Server, builder GuardBuilder) {
@@ -1466,21 +1454,8 @@ type Page struct {
 	action func(request *Request, response *Response, view *View)
 }
 
-// ConfigurePagePath configures the path for the current page.
-type ConfigurePagePath = func(pattern string)
-
-// ConfigurePageView configures the view for the current page.
-type ConfigurePageView = func(view *View)
-
-// ConfigurePageBase configures the base handler for the current page.
-//
-// This handler usually doesn't modify state.
-type ConfigurePageBase = func(handler func(request *Request, response *Response, view *View))
-
-// ConfigurePageAction configures then action handler for the current page.
-//
-// This handler usually modifies state and sometimes redirects to a different page.
-type ConfigurePageAction = func(handler func(request *Request, response *Response, view *View))
+// PageBuilder builds a page.
+type PageBuilder = func(page *Page)
 
 // PageWithPath adds a path.
 func PageWithPath(self *Page, path string) {
@@ -1501,9 +1476,6 @@ func PageWithBaseHandler(self *Page, handler func(request *Request, response *Re
 func PageWithActionHandler(self *Page, handler func(request *Request, response *Response, view *View)) {
 	self.action = handler
 }
-
-// PageBuilder builds a page.
-type PageBuilder = func(page *Page)
 
 // ServerWithPageBuilder adds a page.
 func ServerWithPageBuilder(self *Server, builder PageBuilder) {
