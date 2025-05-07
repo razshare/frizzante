@@ -46,3 +46,4 @@ make build
 > [!NOTE]
 > This project is aimed mainly at linux distributions.\
 > Feel free to contribute any fixes for other platforms.
+
