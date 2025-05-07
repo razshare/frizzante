@@ -81,6 +81,16 @@ func SessionStart(request *Request, response *Response) *Session {
 	return session
 }
 
+// SessionWithId sets the session id.
+func SessionWithId(self *Session, id string) {
+	self.id = id
+}
+
+// SessionId gets the session id.
+func SessionId(self *Session) string {
+	return self.id
+}
+
 // SessionGet gets a property from the session store.
 func SessionGet[T any](self *Session, key string, defaultValue any) T {
 	return self.get(key, defaultValue).(T)
