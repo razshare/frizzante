@@ -51,7 +51,7 @@ type sessionStore struct {
 
 // ServerCreate creates a server.
 func ServerCreate() *Server {
-	var memory = map[string]sessionStore{}
+	var sessionStores = map[string]sessionStore{}
 
 	return &Server{
 		hostName:               "127.0.0.1",
@@ -74,27 +74,24 @@ func ServerCreate() *Server {
 			WriteBufferSize: 1024,
 		},
 		sessionBuilder: func(session *Session) {
-			store, exists := memory[session.id]
-			if !exists {
+			store, storeExists := sessionStores[session.id]
+			if !storeExists {
 				store = sessionStore{
 					data:           map[string]any{},
 					createdAt:      time.Now(),
 					lastActivityAt: time.Now(),
 				}
-				memory[session.id] = store
+				sessionStores[session.id] = store
 			}
 
-			SessionWithGetter(session, func(key string, defaultValue any) (value any) {
-				sessionItem, ok := store.data[key]
-				if !ok {
-					store.data[key] = defaultValue
-					value = defaultValue
-					store.lastActivityAt = time.Now()
+			SessionWithGetter(session, func(key string) (value any) {
+				valueLocal, keyExists := store.data[key]
+				if !keyExists {
 					return
 				}
 
 				store.lastActivityAt = time.Now()
-				value = sessionItem
+				value = valueLocal
 				return
 			})
 
@@ -108,14 +105,17 @@ func ServerCreate() *Server {
 				delete(store.data, key)
 			})
 
-			SessionWithValidator(session, func() (valid bool) {
-				elapsedSeconds := time.Since(store.lastActivityAt).Minutes()
-				valid = elapsedSeconds < 30
-				return
+			SessionWithKeyChecker(session, func(key string) bool {
+				_, keyExists := store.data[key]
+				return keyExists
+			})
+
+			SessionWithValidator(session, func() bool {
+				return time.Since(store.lastActivityAt).Minutes() < 30
 			})
 
 			SessionWithDestroyer(session, func() {
-				delete(memory, session.id)
+				delete(sessionStores, session.id)
 			})
 		},
 	}

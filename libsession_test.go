@@ -16,7 +16,12 @@ func TestSessionStart(test *testing.T) {
 		ApiWithPattern(api, "GET /")
 		ApiWithHandler(api, func(request *Request, response *Response) {
 			session := SessionStart(request, response)
-			name := SessionGet[string](session, "name", "world")
+
+			if !SessionHas(session, "name") {
+				SessionSet(session, "name", "world")
+			}
+
+			name := SessionGet[string](session, "name")
 			ResponseSendMessage(response, fmt.Sprintf("hello %s", name))
 		})
 	})
