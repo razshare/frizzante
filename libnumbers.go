@@ -2,10 +2,10 @@ package frizzante
 
 var nextNumbers = map[int]int{}
 
-// NextNumber gets the next number in line starting from headlessMode.
+// NextNumber gets the next number in line starting from base.
 //
 // Bases are stateful, meaning regardless of when and where you call NextNumber
-// it will keep track of the previous number generated for a given headlessMode,
+// it will keep track of the previous number generated for a given base,
 // and give you the next one.
 func NextNumber(base int) int {
 	number, ok := nextNumbers[base]
