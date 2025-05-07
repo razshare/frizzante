@@ -1492,14 +1492,14 @@ func PageWithView(self *Page, view *View) {
 	self.view = view
 }
 
-// PageWithBase sets the base.
-func PageWithBase(self *Page, base func(request *Request, response *Response, view *View)) {
-	self.base = base
+// PageWithBaseHandler sets the base.
+func PageWithBaseHandler(self *Page, handler func(request *Request, response *Response, view *View)) {
+	self.base = handler
 }
 
-// PageWithAction sets the action handler.
-func PageWithAction(self *Page, action func(request *Request, response *Response, view *View)) {
-	self.action = action
+// PageWithActionHandler sets the action handler.
+func PageWithActionHandler(self *Page, handler func(request *Request, response *Response, view *View)) {
+	self.action = handler
 }
 
 // PageBuilder builds a page.

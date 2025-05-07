@@ -18,7 +18,7 @@ func TestRenderServer(test *testing.T) {
 	ServerWithPageBuilder(server, func(page *Page) {
 		PageWithPath(page, "/")
 		PageWithView(page, ViewReference("Welcome"))
-		PageWithBase(page, func(request *Request, response *Response, view *View) {
+		PageWithBaseHandler(page, func(request *Request, response *Response, view *View) {
 			ViewWithRender(view, RenderServer)
 			ViewWithData(view, "name", "world")
 		})
@@ -50,7 +50,7 @@ func TestRenderClient(test *testing.T) {
 	ServerWithPageBuilder(server, func(page *Page) {
 		PageWithPath(page, "/")
 		PageWithView(page, ViewReference("Welcome"))
-		PageWithBase(page, func(request *Request, response *Response, view *View) {
+		PageWithBaseHandler(page, func(request *Request, response *Response, view *View) {
 			ViewWithRender(view, RenderClient)
 			ViewWithData(view, "name", "world")
 		})
