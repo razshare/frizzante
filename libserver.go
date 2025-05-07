@@ -29,7 +29,6 @@ type Server struct {
 	multipartFormMaxMemory int64
 	server                 *http.Server
 	mux                    *http.ServeMux
-	guards                 []func(*Request, *Response, func())
 	sessions               map[string]*net.Conn
 	readTimeout            time.Duration
 	writeTimeout           time.Duration
@@ -61,7 +60,6 @@ func ServerCreate() *Server {
 		server:                 nil,
 		mux:                    http.NewServeMux(),
 		sessions:               map[string]*net.Conn{},
-		guards:                 []func(*Request, *Response, func()){},
 		readTimeout:            10 * time.Second,
 		writeTimeout:           10 * time.Second,
 		maxHeaderBytes:         3 * MB,
@@ -506,20 +504,19 @@ type Route struct {
 	server  *Server
 	view    string
 	handler func(request *Request, response *Response)
+	guards  []func(request *Request, response *Response, pass func())
 	mount   func(pattern string)
 }
 
 // routeCreate creates a route configuration from a callback function.
 func routeCreate(
-	handler func(
-		request *Request,
-		response *Response,
-	),
+	handler func(request *Request, response *Response),
+	guards []func(request *Request, response *Response, pass func()),
 ) *Route {
 	return &Route{
 		view: "",
 		handler: func(request *Request, response *Response) {
-			for _, guard := range response.server.guards {
+			for _, guard := range guards {
 				pass := false
 				guard(request, response, func() {
 					pass = true
@@ -545,12 +542,9 @@ func routeCreate(
 //
 // However, it is safe to invoke receive functions, like RequestReceiveHeader, RequestReceiveCookie, etc.
 func routeCreateWithView(
+	handler func(request *Request, response *Response, view *View),
+	guards []func(request *Request, response *Response, pass func()),
 	view string,
-	handler func(
-		request *Request,
-		res *Response,
-		view *View,
-	),
 ) *Route {
 	var pattern string
 
@@ -567,11 +561,9 @@ func routeCreateWithView(
 				parameters: map[string]string{},
 			}
 
-			for _, guard := range response.server.guards {
+			for _, guard := range guards {
 				pass := false
-				guard(request, response, func() {
-					pass = true
-				})
+				guard(request, response, func() { pass = true })
 
 				if !pass {
 					return
@@ -638,11 +630,7 @@ var entryCreated = false
 // serverMapRoute maps a pattern to a given route.
 //
 // If the given pattern conflicts with one that is already registered, serverMapRoute panics.
-func serverMapRoute(
-	self *Server,
-	pattern string,
-	route *Route,
-) {
+func serverMapRoute(self *Server, pattern string, route *Route) {
 	patternParts := strings.Split(pattern, " ")
 	patternCounter := len(patternParts)
 	isEntry := patternCounter > 1 && strings.HasPrefix(strings.TrimPrefix(filepath.Join(patternParts[1:]...), " "), "/")
@@ -1388,6 +1376,7 @@ func ServerWithSessionBuilder(self *Server, builder SessionBuilder) {
 type Api struct {
 	patterns []string
 	handler  func(request *Request, response *Response)
+	guards   []func(request *Request, response *Response, pass func())
 }
 
 // ApiBuilder builds an api.
@@ -1403,10 +1392,16 @@ func ApiWithHandler(self *Api, handler func(request *Request, response *Response
 	self.handler = handler
 }
 
+// ApiWithGuardHandler add a guard handler.
+func ApiWithGuardHandler(self *Api, handler func(request *Request, response *Response, pass func())) {
+	self.guards = append(self.guards, handler)
+}
+
 // ServerWithApiBuilder adds an api.
 func ServerWithApiBuilder(self *Server, builder ApiBuilder) {
 	api := &Api{
 		patterns: []string{},
+		guards:   []func(request *Request, response *Response, pass func()){},
 	}
 
 	builder(api)
@@ -1422,28 +1417,7 @@ func ServerWithApiBuilder(self *Server, builder ApiBuilder) {
 			NotifierSendError(self.notifier, fmt.Errorf("could not add api because path is empty"))
 			return
 		}
-		serverMapRoute(self, pattern, routeCreate(api.handler))
-	}
-}
-
-type Guard struct {
-	handler func(request *Request, response *Response, pass func())
-}
-
-// GuardBuilder builds a guard.
-type GuardBuilder = func(guard *Guard)
-
-// GuardWithHandler sets the handler.
-func GuardWithHandler(self *Guard, handler func(request *Request, response *Response, pass func())) {
-	self.handler = handler
-}
-
-// ServerWithGuardBuilder adds a guard.
-func ServerWithGuardBuilder(self *Server, builder GuardBuilder) {
-	guard := &Guard{}
-	builder(guard)
-	if nil != guard.handler {
-		self.guards = append(self.guards, guard.handler)
+		serverMapRoute(self, pattern, routeCreate(api.handler, api.guards))
 	}
 }
 
@@ -1452,6 +1426,7 @@ type Page struct {
 	view   *View
 	base   func(request *Request, response *Response, view *View)
 	action func(request *Request, response *Response, view *View)
+	guards []func(request *Request, response *Response, pass func())
 }
 
 // PageBuilder builds a page.
@@ -1477,11 +1452,17 @@ func PageWithActionHandler(self *Page, handler func(request *Request, response *
 	self.action = handler
 }
 
+// PageWithGuardHandler add a guard handler.
+func PageWithGuardHandler(self *Page, handler func(request *Request, response *Response, pass func())) {
+	self.guards = append(self.guards, handler)
+}
+
 // ServerWithPageBuilder adds a page.
 func ServerWithPageBuilder(self *Server, builder PageBuilder) {
 	page := &Page{
-		view:  ViewReference("Default"),
-		paths: []string{},
+		view:   ViewReference("Default"),
+		paths:  []string{},
+		guards: []func(request *Request, response *Response, pass func()){},
 	}
 
 	builder(page)
@@ -1496,19 +1477,19 @@ func ServerWithPageBuilder(self *Server, builder PageBuilder) {
 	}
 
 	if nil == page.base {
-		page.base = func(request *Request, res *Response, view *View) {
+		page.base = func(request *Request, response *Response, view *View) {
 			// Noop.
 		}
 	}
 
 	if nil == page.action {
-		page.action = func(request *Request, res *Response, view *View) {
+		page.action = func(request *Request, response *Response, view *View) {
 			// Noop.
 		}
 	}
 
 	for _, path_ := range page.paths {
-		serverMapRoute(self, "GET "+path_, routeCreateWithView(page.view.name, page.base))
-		serverMapRoute(self, "POST "+path_, routeCreateWithView(page.view.name, page.action))
+		serverMapRoute(self, "GET "+path_, routeCreateWithView(page.base, page.guards, page.view.name))
+		serverMapRoute(self, "POST "+path_, routeCreateWithView(page.action, page.guards, page.view.name))
 	}
 }

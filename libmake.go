@@ -105,15 +105,6 @@ func findNameMetadataForApi(name string) *NameMetadata {
 	)
 }
 
-func findNameMetadataForGuard(name string) *NameMetadata {
-	return findNameMetadata(
-		filepath.Join("lib", "guards"),
-		filepath.Join("templates", "guards", "example.go"),
-		name,
-		"Name the guard: ",
-	)
-}
-
 func findNameMetadataForPage(name string) *NameMetadata {
 	return findNameMetadata(
 		filepath.Join("lib", "pages"),
@@ -165,43 +156,6 @@ func createApi(apiName string) {
 
 	// Api.
 	oldName = []byte("func api(")
-	newName = []byte("func " + metadata.BaseFileNameNoExtensionTitle + "(")
-	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
-
-	writeError := os.WriteFile(metadata.FullFileNameCamel, readBytes, os.ModePerm)
-	if writeError != nil {
-		log.Fatal(writeError)
-	}
-}
-
-func createGuard(guardName string) {
-	metadata := findNameMetadataForGuard(guardName)
-
-	if !Exists(metadata.FullDirectoryNameCamel) {
-		mkdirError := os.MkdirAll(metadata.FullDirectoryNameCamel, os.ModePerm)
-		if mkdirError != nil {
-			log.Fatal(mkdirError)
-		}
-	}
-
-	if Exists(metadata.FullFileNameCamel) {
-		fmt.Printf("Guard `%s` already exists.\n", metadata.FullFileNameCamel)
-		createGuard("")
-		return
-	}
-
-	readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
-	if nil != readError {
-		log.Fatal(readError)
-	}
-
-	// Package.
-	oldName := []byte("package guards")
-	newName := []byte("package " + metadata.BaseDirectoryName)
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
-
-	// GuardBuilder.
-	oldName = []byte("func guard(")
 	newName = []byte("func " + metadata.BaseFileNameNoExtensionTitle + "(")
 	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
@@ -293,17 +247,12 @@ func createViewComponent(pageName string) {
 // Make makes things.
 func Make() {
 	api := flag.Bool("api", false, "")
-	guard := flag.Bool("guard", false, "")
 	page := flag.Bool("page", false, "")
 	name := flag.String("name", "", "")
 	flag.Parse()
 
 	if *api {
 		createApi(*name)
-	}
-
-	if *guard {
-		createGuard(*name)
 	}
 
 	if *page {
