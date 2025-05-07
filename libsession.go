@@ -27,12 +27,7 @@ type Session struct {
 // Use set to create a new property or update an existing one to the session.
 //
 // Use unset to remove a property from the session.
-func SessionStart(request *Request, response *Response) (
-	get func(key string, defaultValue any) (value any),
-	set func(key string, value any),
-	unset func(key string),
-) {
-
+func SessionStart(request *Request, response *Response) *Session {
 	var sessionIdCookie *http.Cookie
 	sessionIdCookies := request.httpRequest.CookiesNamed("session-id")
 	sessionIdCookiesLen := len(sessionIdCookies)
@@ -45,55 +40,11 @@ func SessionStart(request *Request, response *Response) (
 		}
 
 		sessionId := uuidV4.String()
-
-		var sessionGetter func(key string, defaultValue any) (value any)
-		var sessionSetter func(key string, value any)
-		var sessionUnsetter func(key string)
-		var sessionValidator func() (valid bool)
-		var sessionDestroyer func()
-
-		request.server.sessionBuilder(func() (
-			sessionIdLocal string,
-			withGetter ConfigureSessionGetter,
-			withSetter ConfigureSessionSetter,
-			withUnsetter ConfigureSessionUnsetter,
-			withValidator ConfigureSessionValidator,
-			withDestroyer ConfigureSessionDestroyer,
-		) {
-			sessionIdLocal = sessionId
-			withGetter = func(get func(key string, defaultValue any) (value any)) {
-				sessionGetter = get
-			}
-			withSetter = func(set func(key string, value any)) {
-				sessionSetter = set
-			}
-			withUnsetter = func(unset func(key string)) {
-				sessionUnsetter = unset
-			}
-			withValidator = func(validate func() (valid bool)) {
-				sessionValidator = validate
-			}
-			withDestroyer = func(destroy func()) {
-				sessionDestroyer = destroy
-			}
-			return
-		})
-
-		freshSession := &Session{
-			id:       sessionId,
-			get:      sessionGetter,
-			set:      sessionSetter,
-			unset:    sessionUnsetter,
-			validate: sessionValidator,
-			destroy:  sessionDestroyer,
-		}
-
-		ResponseSendCookie(response, "session-id", freshSession.id)
+		freshSession := &Session{id: sessionId}
+		request.server.sessionBuilder(freshSession)
 		sessions[freshSession.id] = freshSession
-		get = sessionGetter
-		set = sessionSetter
-		unset = sessionUnsetter
-		return
+		ResponseSendCookie(response, "session-id", freshSession.id)
+		return freshSession
 	}
 
 	var sessionExists bool
@@ -113,72 +64,69 @@ func SessionStart(request *Request, response *Response) (
 			NotifierSendError(request.server.notifier, sessionIdError)
 		}
 		sessionId := uuidV4.String()
-
-		var sessionGetter func(key string, defaultValue any) (value any)
-		var sessionSetter func(key string, value any)
-		var sessionUnsetter func(key string)
-		var sessionValidator func() (valid bool)
-		var sessionDestroyer func()
-
-		request.server.sessionBuilder(func() (
-			sessionIdLocal string,
-			withGetter ConfigureSessionGetter,
-			withSetter ConfigureSessionSetter,
-			withUnsetter ConfigureSessionUnsetter,
-			withValidator ConfigureSessionValidator,
-			withDestroyer ConfigureSessionDestroyer,
-		) {
-			sessionIdLocal = sessionId
-			withGetter = func(get func(key string, defaultValue any) (value any)) {
-				sessionGetter = get
-			}
-			withSetter = func(set func(key string, value any)) {
-				sessionSetter = set
-			}
-			withUnsetter = func(unset func(key string)) {
-				sessionUnsetter = unset
-			}
-			withValidator = func(validate func() (valid bool)) {
-				sessionValidator = validate
-			}
-			withDestroyer = func(destroy func()) {
-				sessionDestroyer = destroy
-			}
-			return
-		})
-
-		freshSession := &Session{
-			id:       sessionId,
-			get:      sessionGetter,
-			set:      sessionSetter,
-			unset:    sessionUnsetter,
-			validate: sessionValidator,
-			destroy:  sessionDestroyer,
-		}
-
-		ResponseSendCookie(response, "session-id", freshSession.id)
+		freshSession := &Session{id: sessionId}
+		request.server.sessionBuilder(freshSession)
 		sessions[freshSession.id] = freshSession
-		get = sessionGetter
-		set = sessionSetter
-		unset = sessionUnsetter
-		return
+		ResponseSendCookie(response, "session-id", sessionId)
+		return freshSession
 	}
 
 	if !session.validate() {
 		delete(sessions, sessionIdCookie.Value)
 		session.destroy()
-		SessionStart(request, response)
-		return
+		return SessionStart(request, response)
 	}
 
 	ResponseSendCookie(response, "session-id", session.id)
-	get = session.get
-	set = session.set
-	unset = session.unset
-	return
+	return session
+}
+
+// SessionGet gets a property from the session store.
+func SessionGet[T any](self *Session, key string, defaultValue any) T {
+	return self.get(key, defaultValue).(T)
+}
+
+// SessionSet sets a property in the session store.
+func SessionSet[T any](self *Session, key string, value T) {
+	self.set(key, value)
+}
+
+// SessionUnset unsets a property in the session store.
+func SessionUnset(self *Session, key string) {
+	self.unset(key)
+}
+
+// SessionValidate validates the session.
+func SessionValidate(self *Session) bool {
+	return self.validate()
 }
 
 // SessionDestroy destroys the session.
 func SessionDestroy(self *Session) {
 	self.destroy()
+}
+
+// SessionWithGetter sets the getter, which will retrieve a property from the session store.
+func SessionWithGetter(self *Session, getter func(key string, defaultValue any) (value any)) {
+	self.get = getter
+}
+
+// SessionWithSetter sets the setter, which will create or modify a property to the session store.
+func SessionWithSetter(self *Session, setter func(key string, value any)) {
+	self.set = setter
+}
+
+// SessionWithUnsetter sets the unsetter, which will remove a property from the session store.
+func SessionWithUnsetter(self *Session, unsetter func(key string)) {
+	self.unset = unsetter
+}
+
+// SessionWithValidator sets the validator, which will validate if a session is still alive.
+func SessionWithValidator(self *Session, validator func() (valid bool)) {
+	self.validate = validator
+}
+
+// SessionWithDestroyer sets the destroyer, which will destroy a session.
+func SessionWithDestroyer(self *Session, destroyer func()) {
+	self.destroy = destroyer
 }

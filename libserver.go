@@ -73,20 +73,18 @@ func ServerCreate() *Server {
 			ReadBufferSize:  1024,
 			WriteBufferSize: 1024,
 		},
-		sessionBuilder: func(context SessionContext) {
-			sessionId, getter, setter, unsetter, validator, destroyer := context()
-
-			store, exists := memory[sessionId]
+		sessionBuilder: func(session *Session) {
+			store, exists := memory[session.id]
 			if !exists {
 				store = sessionStore{
 					data:           map[string]any{},
 					createdAt:      time.Now(),
 					lastActivityAt: time.Now(),
 				}
-				memory[sessionId] = store
+				memory[session.id] = store
 			}
 
-			getter(func(key string, defaultValue any) (value any) {
+			SessionWithGetter(session, func(key string, defaultValue any) (value any) {
 				sessionItem, ok := store.data[key]
 				if !ok {
 					store.data[key] = defaultValue
@@ -100,24 +98,24 @@ func ServerCreate() *Server {
 				return
 			})
 
-			setter(func(key string, value any) {
+			SessionWithSetter(session, func(key string, value any) {
 				store.lastActivityAt = time.Now()
 				store.data[key] = value
 			})
 
-			unsetter(func(key string) {
+			SessionWithUnsetter(session, func(key string) {
 				store.lastActivityAt = time.Now()
 				delete(store.data, key)
 			})
 
-			validator(func() (valid bool) {
+			SessionWithValidator(session, func() (valid bool) {
 				elapsedSeconds := time.Since(store.lastActivityAt).Minutes()
 				valid = elapsedSeconds < 30
 				return
 			})
 
-			destroyer(func() {
-				delete(memory, sessionId)
+			SessionWithDestroyer(session, func() {
+				delete(memory, session.id)
 			})
 		},
 	}
@@ -1362,15 +1360,7 @@ type ConfigureSessionSetter = func(set SessionSetter)
 type ConfigureSessionUnsetter = func(unset SessionUnsetter)
 type ConfigureSessionValidator = func(validate SessionValidator)
 type ConfigureSessionDestroyer = func(destroy SessionDestroyer)
-type SessionContext = func() (
-	sessionId string,
-	withGetter ConfigureSessionGetter,
-	withSetter ConfigureSessionSetter,
-	withUnsetter ConfigureSessionUnsetter,
-	withValidator ConfigureSessionValidator,
-	withDestroyer ConfigureSessionDestroyer,
-)
-type SessionBuilder = func(context SessionContext)
+type SessionBuilder = func(session *Session)
 
 // ServerWithSessionBuilder sets the session builder,
 // which is a function that provides the four main
@@ -1391,8 +1381,8 @@ type SessionBuilder = func(context SessionContext)
 //
 // The only thing that matters is a consistent
 // implementation of the four operations.
-func ServerWithSessionBuilder(self *Server, sessionOperator SessionBuilder) {
-	self.sessionBuilder = sessionOperator
+func ServerWithSessionBuilder(self *Server, builder SessionBuilder) {
+	self.sessionBuilder = builder
 }
 
 type Api struct {

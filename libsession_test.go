@@ -15,17 +15,17 @@ func TestSessionStart(test *testing.T) {
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "GET /")
 		ApiWithHandler(api, func(request *Request, response *Response) {
-			get, _, _ := SessionStart(request, response)
-			name := get("name", "world").(string)
+			session := SessionStart(request, response)
+			name := SessionGet[string](session, "name", "world")
 			ResponseSendMessage(response, fmt.Sprintf("hello %s", name))
 		})
 	})
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "POST /")
 		ApiWithHandler(api, func(request *Request, response *Response) {
-			_, set, _ := SessionStart(request, response)
+			session := SessionStart(request, response)
 			name := RequestReceiveMessage(request)
-			set("name", name)
+			SessionSet(session, "name", name)
 			ResponseSendMessage(response, "")
 		})
 	})
