@@ -159,10 +159,9 @@ func TestServerWithApi(test *testing.T) {
 	ServerWithPort(server, port)
 	ServerWithNotifier(server, notifier)
 	expected := "hello"
-	ServerWithApiBuilder(server, func(context ApiContext) {
-		pattern, handler := context()
-		pattern("GET /")
-		handler(func(_ *Request, response *Response) {
+	ServerWithApiBuilder(server, func(api *Api) {
+		ApiWithPattern(api, "GET /")
+		ApiWithHandler(api, func(_ *Request, response *Response) {
 			ResponseSendMessage(response, expected)
 		})
 	})
@@ -188,10 +187,9 @@ func TestSendStatus(test *testing.T) {
 	port := NextNumber(8080)
 	ServerWithPort(server, port)
 	ServerWithNotifier(server, notifier)
-	ServerWithApiBuilder(server, func(context ApiContext) {
-		pattern, handler := context()
-		pattern("GET /")
-		handler(func(_ *Request, response *Response) {
+	ServerWithApiBuilder(server, func(api *Api) {
+		ApiWithPattern(api, "GET /")
+		ApiWithHandler(api, func(_ *Request, response *Response) {
 			ResponseSendStatus(response, expected)
 			ResponseSendMessage(response, "Ok")
 		})
@@ -221,10 +219,9 @@ func TestSendHeader(test *testing.T) {
 	ServerWithPort(server, port)
 	ServerWithNotifier(server, notifier)
 	expected := "application/json"
-	ServerWithApiBuilder(server, func(context ApiContext) {
-		pattern, handler := context()
-		pattern("GET /")
-		handler(func(_ *Request, response *Response) {
+	ServerWithApiBuilder(server, func(api *Api) {
+		ApiWithPattern(api, "GET /")
+		ApiWithHandler(api, func(_ *Request, response *Response) {
 			ResponseSendHeader(response, "Content-Type", expected)
 			ResponseSendMessage(response, "{}")
 		})

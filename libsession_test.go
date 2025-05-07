@@ -12,19 +12,17 @@ func TestSessionStart(test *testing.T) {
 	server := ServerCreate()
 	port := NextNumber(8080)
 	ServerWithPort(server, port)
-	ServerWithApiBuilder(server, func(context ApiContext) {
-		pattern, handler := context()
-		pattern("GET /")
-		handler(func(request *Request, response *Response) {
+	ServerWithApiBuilder(server, func(api *Api) {
+		ApiWithPattern(api, "GET /")
+		ApiWithHandler(api, func(request *Request, response *Response) {
 			get, _, _ := SessionStart(request, response)
 			name := get("name", "world").(string)
 			ResponseSendMessage(response, fmt.Sprintf("hello %s", name))
 		})
 	})
-	ServerWithApiBuilder(server, func(context ApiContext) {
-		pattern, handler := context()
-		pattern("POST /")
-		handler(func(request *Request, response *Response) {
+	ServerWithApiBuilder(server, func(api *Api) {
+		ApiWithPattern(api, "POST /")
+		ApiWithHandler(api, func(request *Request, response *Response) {
 			_, set, _ := SessionStart(request, response)
 			name := RequestReceiveMessage(request)
 			set("name", name)

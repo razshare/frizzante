@@ -15,11 +15,10 @@ func TestRenderServer(test *testing.T) {
 	ServerWithHostName(server, "127.0.0.1")
 	ServerWithNotifier(server, notifier)
 	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
-	ServerWithPageBuilder(server, func(context PageContext) {
-		path, view, base, _ := context()
-		path("/")
-		view(ViewReference("Welcome"))
-		base(func(request *Request, response *Response, view *View) {
+	ServerWithPageBuilder(server, func(page *Page) {
+		PageWithPath(page, "/")
+		PageWithView(page, ViewReference("Welcome"))
+		PageWithBase(page, func(request *Request, response *Response, view *View) {
 			ViewWithRender(view, RenderServer)
 			ViewWithData(view, "name", "world")
 		})
@@ -48,11 +47,10 @@ func TestRenderClient(test *testing.T) {
 	ServerWithNotifier(server, notifier)
 	ServerWithHostName(server, "127.0.0.1")
 	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
-	ServerWithPageBuilder(server, func(context PageContext) {
-		path, view, base, _ := context()
-		path("/")
-		view(ViewReference("Welcome"))
-		base(func(request *Request, response *Response, view *View) {
+	ServerWithPageBuilder(server, func(page *Page) {
+		PageWithPath(page, "/")
+		PageWithView(page, ViewReference("Welcome"))
+		PageWithBase(page, func(request *Request, response *Response, view *View) {
 			ViewWithRender(view, RenderClient)
 			ViewWithData(view, "name", "world")
 		})

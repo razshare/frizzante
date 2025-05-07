@@ -432,10 +432,9 @@ func RequestReceiveContentType(self *Request) string {
 	return self.httpRequest.Header.Get("Content-Type")
 }
 
-func notFoundApi(context ApiContext) {
-	pattern, handler := context()
-	pattern("GET /")
-	handler(func(request *Request, response *Response) {
+func notFoundApi(api *Api) {
+	ApiWithPattern(api, "GET /")
+	ApiWithHandler(api, func(request *Request, response *Response) {
 		ResponseSendStatus(response, 404)
 	})
 }
@@ -1396,6 +1395,21 @@ func ServerWithSessionBuilder(self *Server, sessionOperator SessionBuilder) {
 	self.sessionBuilder = sessionOperator
 }
 
+type Api struct {
+	patterns []string
+	handler  func(request *Request, response *Response)
+}
+
+// ApiWithPattern adds a pattern.
+func ApiWithPattern(self *Api, pattern string) {
+	self.patterns = append(self.patterns, pattern)
+}
+
+// ApiWithHandler sets the handler.
+func ApiWithHandler(self *Api, handler func(request *Request, response *Response)) {
+	self.handler = handler
+}
+
 // ConfigureApiPattern configures the pattern for the current api.
 type ConfigureApiPattern = func(pattern string)
 
@@ -1406,60 +1420,60 @@ type ConfigureApiHandler = func(handler func(request *Request, response *Respons
 type ApiContext = func() (withPattern ConfigureApiPattern, withHandler ConfigureApiHandler)
 
 // ApiBuilder builds an api.
-type ApiBuilder = func(context ApiContext)
+type ApiBuilder = func(api *Api)
 
 // ServerWithApiBuilder adds an api.
 func ServerWithApiBuilder(self *Server, builder ApiBuilder) {
-	var patterns []string
-	var handler func(request *Request, response *Response)
+	api := &Api{
+		patterns: []string{},
+	}
 
-	builder(func() (withPattern ConfigureApiPattern, withHandler ConfigureApiHandler) {
-		withPattern = func(pattern string) {
-			patterns = append(patterns, pattern)
-		}
-		withHandler = func(handlerLocal func(request *Request, response *Response)) {
-			handler = handlerLocal
-		}
-		return
-	})
+	builder(api)
 
-	if nil == handler {
-		handler = func(request *Request, response *Response) {
+	if nil == api.handler {
+		api.handler = func(request *Request, response *Response) {
 			// Noop.
 		}
 	}
 
-	for _, pattern := range patterns {
+	for _, pattern := range api.patterns {
 		if "" == pattern {
 			NotifierSendError(self.notifier, fmt.Errorf("could not add api because path is empty"))
 			return
 		}
-		serverMapRoute(self, pattern, routeCreate(handler))
+		serverMapRoute(self, pattern, routeCreate(api.handler))
 	}
+}
+
+type Guard struct {
+	handler func(request *Request, response *Response, pass func())
 }
 
 // ConfigureGuardHandler configures the handler for the current guard.
 type ConfigureGuardHandler = func(handler func(request *Request, response *Response, pass func()))
 
-// GuardContext retrieves the context of the current guard.
-type GuardContext = func() (withHandler ConfigureGuardHandler)
+// GuardWithHandler sets the handler.
+func GuardWithHandler(self *Guard, handler func(request *Request, response *Response, pass func())) {
+	self.handler = handler
+}
 
 // GuardBuilder builds a guard.
-type GuardBuilder = func(context GuardContext)
+type GuardBuilder = func(guard *Guard)
 
 // ServerWithGuardBuilder adds a guard.
 func ServerWithGuardBuilder(self *Server, builder GuardBuilder) {
-	var handler func(request *Request, response *Response, pass func())
-	builder(func() (withHandler ConfigureGuardHandler) {
-		withHandler = func(handlerLocal func(request *Request, response *Response, pass func())) {
-			handler = handlerLocal
-		}
-		return
-	})
-
-	if nil != handler {
-		self.guards = append(self.guards, handler)
+	guard := &Guard{}
+	builder(guard)
+	if nil != guard.handler {
+		self.guards = append(self.guards, guard.handler)
 	}
+}
+
+type Page struct {
+	paths  []string
+	view   *View
+	base   func(request *Request, response *Response, view *View)
+	action func(request *Request, response *Response, view *View)
 }
 
 // ConfigurePagePath configures the path for the current page.
@@ -1478,68 +1492,61 @@ type ConfigurePageBase = func(handler func(request *Request, response *Response,
 // This handler usually modifies state and sometimes redirects to a different page.
 type ConfigurePageAction = func(handler func(request *Request, response *Response, view *View))
 
-// PageContext retrieves the context of the current page.
-type PageContext = func() (
-	withPath ConfigurePagePath,
-	withView ConfigurePageView,
-	withBase ConfigurePageBase,
-	withAction ConfigurePageAction,
-)
+// PageWithPath adds a path.
+func PageWithPath(self *Page, path string) {
+	self.paths = append(self.paths, path)
+}
+
+// PageWithView sets the view.
+func PageWithView(self *Page, view *View) {
+	self.view = view
+}
+
+// PageWithBase sets the base.
+func PageWithBase(self *Page, base func(request *Request, response *Response, view *View)) {
+	self.base = base
+}
+
+// PageWithAction sets the action handler.
+func PageWithAction(self *Page, action func(request *Request, response *Response, view *View)) {
+	self.action = action
+}
 
 // PageBuilder builds a page.
-type PageBuilder = func(context PageContext)
+type PageBuilder = func(page *Page)
 
 // ServerWithPageBuilder adds a page.
 func ServerWithPageBuilder(self *Server, builder PageBuilder) {
-	var paths []string
-	var base func(request *Request, response *Response, view *View)
-	var action func(request *Request, response *Response, view *View)
-	view := ViewReference("Default")
-
-	builder(func() (
-		withPath ConfigurePagePath,
-		withView ConfigurePageView,
-		withBase ConfigurePageBase,
-		withAction ConfigurePageAction,
-	) {
-		withPath = func(path string) {
-			paths = append(paths, path)
-		}
-		withView = func(viewLocal *View) {
-			view = viewLocal
-		}
-		withBase = func(baseLocal func(request *Request, response *Response, view *View)) {
-			base = baseLocal
-		}
-		withAction = func(actionLocal func(request *Request, response *Response, view *View)) {
-			action = actionLocal
-		}
-		return
-	})
-
-	if 0 == len(paths) {
-		paths = append(paths, "/"+strings.ReplaceAll(view.name, ".", "/"))
+	page := &Page{
+		view:  ViewReference("Default"),
+		paths: []string{},
 	}
 
-	if "" == view.name {
+	builder(page)
+
+	if 0 == len(page.paths) {
+		page.paths = append(page.paths, "/"+strings.ReplaceAll(page.view.name, ".", "/"))
+	}
+
+	if "" == page.view.name {
 		NotifierSendError(self.notifier, fmt.Errorf("view name cannot be empty"))
 		return
 	}
 
-	if nil == base {
-		base = func(request *Request, res *Response, view *View) {
+	if nil == page.base {
+		page.base = func(request *Request, res *Response, view *View) {
 			// Noop.
 		}
 	}
 
-	if nil == action {
-		action = func(request *Request, res *Response, view *View) {
+	if nil == page.action {
+		page.action = func(request *Request, res *Response, view *View) {
 			// Noop.
 		}
 	}
 
-	for _, path_ := range paths {
-		serverMapRoute(self, "GET "+path_, routeCreateWithView(view.name, base))
-		serverMapRoute(self, "POST "+path_, routeCreateWithView(view.name, action))
+	for _, path_ := range page.paths {
+		serverMapRoute(self, "GET "+path_, routeCreateWithView(page.view.name, page.base))
+		serverMapRoute(self, "POST "+path_, routeCreateWithView(page.view.name, page.action))
 	}
 }
