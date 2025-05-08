@@ -430,7 +430,7 @@ func RequestReceiveContentType(self *Request) string {
 
 func notFoundApi(api *Api) {
 	ApiWithPattern(api, "GET /")
-	ApiWithHandler(api, func(request *Request, response *Response) {
+	ApiWithRequestHandler(api, func(request *Request, response *Response) {
 		ResponseSendStatus(response, 404)
 	})
 }
@@ -1387,8 +1387,8 @@ func ApiWithPattern(self *Api, pattern string) {
 	self.patterns = append(self.patterns, pattern)
 }
 
-// ApiWithHandler sets the handler.
-func ApiWithHandler(self *Api, handler func(request *Request, response *Response)) {
+// ApiWithRequestHandler sets the request handler.
+func ApiWithRequestHandler(self *Api, handler func(request *Request, response *Response)) {
 	self.handler = handler
 }
 

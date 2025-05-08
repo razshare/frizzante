@@ -14,7 +14,7 @@ func TestSessionStart(test *testing.T) {
 	ServerWithPort(server, port)
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "GET /")
-		ApiWithHandler(api, func(request *Request, response *Response) {
+		ApiWithRequestHandler(api, func(request *Request, response *Response) {
 			session := SessionStart(request, response)
 
 			if !SessionHas(session, "name") {
@@ -27,7 +27,7 @@ func TestSessionStart(test *testing.T) {
 	})
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "POST /")
-		ApiWithHandler(api, func(request *Request, response *Response) {
+		ApiWithRequestHandler(api, func(request *Request, response *Response) {
 			session := SessionStart(request, response)
 			name := RequestReceiveMessage(request)
 			SessionSet(session, "name", name)

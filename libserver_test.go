@@ -161,7 +161,7 @@ func TestServerWithApi(test *testing.T) {
 	expected := "hello"
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "GET /")
-		ApiWithHandler(api, func(_ *Request, response *Response) {
+		ApiWithRequestHandler(api, func(_ *Request, response *Response) {
 			ResponseSendMessage(response, expected)
 		})
 	})
@@ -189,7 +189,7 @@ func TestSendStatus(test *testing.T) {
 	ServerWithNotifier(server, notifier)
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "GET /")
-		ApiWithHandler(api, func(_ *Request, response *Response) {
+		ApiWithRequestHandler(api, func(_ *Request, response *Response) {
 			ResponseSendStatus(response, expected)
 			ResponseSendMessage(response, "Ok")
 		})
@@ -221,7 +221,7 @@ func TestSendHeader(test *testing.T) {
 	expected := "application/json"
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "GET /")
-		ApiWithHandler(api, func(_ *Request, response *Response) {
+		ApiWithRequestHandler(api, func(_ *Request, response *Response) {
 			ResponseSendHeader(response, "Content-Type", expected)
 			ResponseSendMessage(response, "{}")
 		})
