@@ -28,7 +28,7 @@ type NameMetadata struct {
 }
 
 func findNameMetadata(root string, template string, name string, message string) *NameMetadata {
-	if !Exists(root) {
+	if !exists(root) {
 		writeError := os.MkdirAll(root, os.ModePerm)
 		if writeError != nil {
 			log.Fatal(writeError)
@@ -126,14 +126,14 @@ func findNameMetadataForView(name string) *NameMetadata {
 func createApi(apiName string) {
 	metadata := findNameMetadataForApi(apiName)
 
-	if !Exists(metadata.FullDirectoryNameCamel) {
+	if !exists(metadata.FullDirectoryNameCamel) {
 		mkdirError := os.MkdirAll(metadata.FullDirectoryNameCamel, os.ModePerm)
 		if mkdirError != nil {
 			log.Fatal(mkdirError)
 		}
 	}
 
-	if Exists(metadata.FullFileNameCamel) {
+	if exists(metadata.FullFileNameCamel) {
 		fmt.Printf("Api `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
 		createApi("")
 		return
@@ -168,14 +168,14 @@ func createApi(apiName string) {
 func createPage(pageName string) {
 	metadata := findNameMetadataForPage(pageName)
 
-	if !Exists(metadata.FullDirectoryNameCamel) {
+	if !exists(metadata.FullDirectoryNameCamel) {
 		mkdirError := os.MkdirAll(metadata.FullDirectoryNameCamel, os.ModePerm)
 		if mkdirError != nil {
 			log.Fatal(mkdirError)
 		}
 	}
 
-	if Exists(metadata.FullFileNameCamel) {
+	if exists(metadata.FullFileNameCamel) {
 		fmt.Printf("Page `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
 		createPage("")
 		return
@@ -222,7 +222,7 @@ func createViewComponent(pageName string) {
 
 	fileName := filepath.Join(metadata.FullDirectoryNameCamel, metadata.BaseFileNameTitle)
 
-	if Exists(fileName) {
+	if exists(fileName) {
 		fmt.Printf("component `%s` already exists.\n", fileName)
 		createViewComponent("")
 		return

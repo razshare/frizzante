@@ -17,37 +17,37 @@
 
     /** @type {function(string):string} */
     const path = getContext("path")
-    /** @type {function(string):string} */
-    const view = getContext("view")
-    /** @type {function(string,Record<string,string>):void} */
+    /** @type {function(string):{view:string,parameters:Record<string,string>}} */
+    const loadView = getContext("view")
+    /** @type {function(string,Record<string,string>,false|Record<string,any>)} */
     const navigate = getContext("navigate")
     /** @type {Record<string,any>} */
     const data = getContext("data")
 
-    const onsubmit = update({view, navigate, data})
+    const onsubmit = update({view: loadView, navigate, data})
     const id = uuid()
 
     /**
      * @typedef Props
-     * @property {string} [action]
      * @property {import("svelte").Snippet} children
+     * @property {string} [view]
      * @property {Record<string,string|number|boolean>} [form]
      */
 
     /** @type {Props} */
     let {
-        action = '',
+        view = '',
         children,
         form = {},
     } = $props()
 
 
-    if ('' !== action) {
-        action = path(action)
+    if ('' !== view) {
+        view = path(view)
     }
 </script>
 
-<form method="POST" {action} {onsubmit}>
+<form method="POST" action={view} {onsubmit}>
     {#each Object.keys(form) as key}
         {@const value = form[key]}
         <input type="hidden" name="{key}" value="{value}">

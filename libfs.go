@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 )
 
-// EmbeddedExists checks if file exists.
-func EmbeddedExists(embeddedFileSystem embed.FS, fileName string) bool {
-	return EmbeddedIsFile(embeddedFileSystem, fileName) || EmbeddedIsDirectory(embeddedFileSystem, fileName)
+// existsInEmbeddedFileSystem checks if file exists.
+func existsInEmbeddedFileSystem(embeddedFileSystem embed.FS, fileName string) bool {
+	return isEmbeddedFile(embeddedFileSystem, fileName) || isEmbeddedDirectory(embeddedFileSystem, fileName)
 }
 
-// EmbeddedIsFile check if file exists and is a file.
-func EmbeddedIsFile(embeddedFileSystem embed.FS, fileName string) bool {
+// isEmbeddedFile check if file exists and is a file.
+func isEmbeddedFile(embeddedFileSystem embed.FS, fileName string) bool {
 	_, err := embeddedFileSystem.ReadFile(fileName)
 	if err != nil {
 		return false
@@ -21,8 +21,8 @@ func EmbeddedIsFile(embeddedFileSystem embed.FS, fileName string) bool {
 	return true
 }
 
-// EmbeddedIsDirectory checks if file exists and is a directory.
-func EmbeddedIsDirectory(embeddedFileSystem embed.FS, fileName string) bool {
+// isEmbeddedDirectory checks if file exists and is a directory.
+func isEmbeddedDirectory(embeddedFileSystem embed.FS, fileName string) bool {
 	_, err := embeddedFileSystem.ReadDir(fileName)
 	if err != nil {
 		return false
@@ -30,20 +30,20 @@ func EmbeddedIsDirectory(embeddedFileSystem embed.FS, fileName string) bool {
 	return true
 }
 
-// Exists checks if file exists.
-func Exists(fileName string) bool {
+// exists checks if file exists.
+func exists(fileName string) bool {
 	_, statError := os.Stat(fileName)
 	return nil == statError || !errors.Is(statError, os.ErrNotExist)
 }
 
-// Delete deletes a file.
-func Delete(fileName string) bool {
+// deleteFile deletes a file.
+func deleteFile(fileName string) bool {
 	removeError := os.Remove(fileName)
 	return nil == removeError || !errors.Is(removeError, os.ErrNotExist)
 }
 
-// IsFile check if file exists and is a file.
-func IsFile(fileName string) bool {
+// isFile check if file exists and is a file.
+func isFile(fileName string) bool {
 	stat, statError := os.Stat(fileName)
 	if statError != nil {
 		return !errors.Is(statError, os.ErrNotExist)
@@ -51,8 +51,8 @@ func IsFile(fileName string) bool {
 	return !stat.IsDir()
 }
 
-// IsDirectory checks if file exists and is a directory.
-func IsDirectory(fileName string) bool {
+// isDirectory checks if file exists and is a directory.
+func isDirectory(fileName string) bool {
 	stat, statError := os.Stat(fileName)
 	if statError != nil {
 		return !errors.Is(statError, os.ErrNotExist)
@@ -129,12 +129,12 @@ var mimes = map[string]string{
 	".ogx":   "application/ogg",
 }
 
-func Mime(fileName string) string {
+func mime(fileName string) string {
 	extensionName := filepath.Ext(fileName)
-	mime, ok := mimes[extensionName]
+	mimeName, ok := mimes[extensionName]
 
 	if ok {
-		return mime
+		return mimeName
 	}
 
 	return "text/plain"

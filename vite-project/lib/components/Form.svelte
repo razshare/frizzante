@@ -5,29 +5,29 @@
     /** @type {function(string):string} */
     const path = getContext("path")
     /** @type {function(string):{view:string,parameters:Record<string,string>}} */
-    const view = getContext("view")
-    /** @type {function(string,Record<string,string>,false|Record<string,any>):void} */
+    const loadView = getContext("view")
+    /** @type {function(string,Record<string,string>,false|Record<string,any>)} */
     const navigate = getContext("navigate")
     /** @type {Record<string,any>} */
     const data = getContext("data")
 
-    const onsubmit = update({view, navigate, data})
+    const onsubmit = update({view: loadView, navigate, data})
 
     /**
      * @typedef Props
      * @property {import("svelte").Snippet} children
-     * @property {string} [action]
+     * @property {string} [view]
      */
 
     /** @type {Props} */
-    let {children, action = '?', ...rest} = $props()
+    let {children, view = '', ...rest} = $props()
 
-    if ('?' !== action) {
-        action = path(action)
+    if ('' !== view) {
+        view = path(view)
     }
 
 </script>
 
-<form method="POST" {action} {...rest} {onsubmit}>
+<form method="POST" action={view} {...rest} {onsubmit}>
     {@render children()}
 </form>

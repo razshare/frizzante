@@ -3,8 +3,6 @@ package frizzante
 import (
 	"fmt"
 	"net/http"
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 )
@@ -79,16 +77,6 @@ func TestServerWithCertificateAndKey(test *testing.T) {
 	}
 }
 
-func TestServerWithTemporaryDirectory(test *testing.T) {
-	server := ServerCreate()
-	expected := ".temp"
-	ServerWithTemporaryDirectory(server, expected)
-	actual := server.temporaryDirectory
-	if actual != expected {
-		test.Fatalf("server was expected to have temporary directory '%s', received '%s' instead", expected, actual)
-	}
-}
-
 func TestServerWithEmbeddedFileSystem(test *testing.T) {
 	server := ServerCreate()
 	expected := embeddedFileSystem
@@ -96,59 +84,6 @@ func TestServerWithEmbeddedFileSystem(test *testing.T) {
 	actual := server.embeddedFileSystem
 	if actual != expected {
 		test.Fatalf("incorrect embedded file system detected")
-	}
-}
-
-func TestServerTemporaryFileSave(test *testing.T) {
-	server := ServerCreate()
-	expected := "content"
-	ServerWithTemporaryDirectory(server, ".temp")
-	ServerTemporaryFileSave(server, "test", expected)
-	fileName := filepath.Join(".temp", "test")
-	if !Exists(fileName) {
-		test.Fatalf("server was expected to create a temporary '%s', but it failed to do so", fileName)
-	}
-	bytes, readError := os.ReadFile(fileName)
-	if readError != nil {
-		test.Fatal(readError)
-	}
-	actual := string(bytes)
-	if actual != expected {
-		test.Fatalf("server temporary file was expected to contain '%s', received '%s' instead", expected, actual)
-	}
-}
-
-func TestServerTemporaryFile(test *testing.T) {
-	server := ServerCreate()
-	expected := "content"
-	ServerWithTemporaryDirectory(server, ".temp")
-	ServerTemporaryFileSave(server, "test", expected)
-	actual := ServerTemporaryFile(server, "test")
-	if actual != expected {
-		test.Fatalf("server temporary file was expected to contain '%s', received '%s' instead", expected, actual)
-	}
-}
-
-func TestServerTemporaryFileExists(test *testing.T) {
-	server := ServerCreate()
-	ServerWithTemporaryDirectory(server, ".temp")
-	ServerTemporaryFileSave(server, "test", "test")
-	expected := true
-	actual := ServerTemporaryFileExists(server, "test")
-	if actual != expected {
-		test.Fatalf("server was expected to have a temporary file by the name of 'test'")
-	}
-}
-
-func TestServerTemporaryDirectoryClear(test *testing.T) {
-	server := ServerCreate()
-	ServerWithTemporaryDirectory(server, ".temp")
-	ServerTemporaryFileSave(server, "test", "test")
-	ServerTemporaryDirectoryClear(server)
-	expected := false
-	actual := ServerTemporaryFileExists(server, "test")
-	if actual != expected {
-		test.Fatalf("server was expected to not have a temporary file by the name of 'test'")
 	}
 }
 

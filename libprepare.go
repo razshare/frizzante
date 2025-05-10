@@ -85,7 +85,7 @@ func prepareLib() error {
 		return uuidJsError
 	}
 
-	if !Exists(".frizzante/vite-project") {
+	if !exists(".frizzante/vite-project") {
 		err := os.MkdirAll(".frizzante/vite-project", os.ModePerm)
 		if err != nil {
 			return err
@@ -112,14 +112,14 @@ func prepareLib() error {
 		return err
 	}
 
-	if !Exists(".frizzante/vite-project/lib/components") {
+	if !exists(".frizzante/vite-project/lib/components") {
 		err = os.MkdirAll(".frizzante/vite-project/lib/components", os.ModePerm)
 		if err != nil {
 			return err
 		}
 	}
 
-	if !Exists(".frizzante/vite-project/lib/scripts") {
+	if !exists(".frizzante/vite-project/lib/scripts") {
 		err = os.MkdirAll(".frizzante/vite-project/lib/scripts", os.ModePerm)
 		if err != nil {
 			return err
@@ -151,7 +151,7 @@ func prepareLib() error {
 		return err
 	}
 
-	if !Exists(".frizzante/vite-project") {
+	if !exists(".frizzante/vite-project") {
 		err = os.MkdirAll(".frizzante/vite-project", os.ModePerm)
 		if err != nil {
 			return err

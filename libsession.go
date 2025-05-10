@@ -1,20 +1,30 @@
 package frizzante
 
 import (
+	"encoding/json"
 	uuid "github.com/nu7hatch/gouuid"
 	"net/http"
+	"time"
 )
 
 var sessions = map[string]*Session{}
 
+type SessionBuilder = func(session *Session)
+
+type memorySessionStore struct {
+	data           map[string]string
+	lastActivityAt time.Time
+}
+
 type Session struct {
-	id         string
-	get        func(key string) (value any)
-	set        func(key string, value any)
-	unset      func(key string)
-	keyChecker func(key string) (exists bool)
-	validate   func() (isValid bool)
-	destroy    func()
+	id       string
+	get      func(key string) string
+	set      func(key string, value string)
+	remove   func(key string)
+	has      func(key string) bool
+	validate func() (isValid bool)
+	destroy  func()
+	notifier *Notifier
 }
 
 // SessionStart first tries to retrieve the client session, then,
@@ -48,23 +58,32 @@ func SessionStart(request *Request, response *Response) *Session {
 		return freshSession
 	}
 
-	var sessionExists bool
+	var sessionExistsInMemory bool
+	var providedSessionId string
 	var session *Session
 
 	for _, cookie := range sessionIdCookies {
-		session, sessionExists = sessions[cookie.Value]
-		if sessionExists {
+		providedSessionId = cookie.Value
+		session, sessionExistsInMemory = sessions[providedSessionId]
+		if sessionExistsInMemory {
 			sessionIdCookie = cookie
 			break
 		}
 	}
 
-	if !sessionExists {
-		uuidV4, sessionIdError := uuid.NewV4()
-		if sessionIdError != nil {
-			NotifierSendError(request.server.notifier, sessionIdError)
+	if !sessionExistsInMemory {
+		var sessionId string
+		if "" != providedSessionId {
+			sessionId = providedSessionId
+		} else {
+			uuidV4, sessionIdError := uuid.NewV4()
+			if sessionIdError != nil {
+				NotifierSendError(request.server.notifier, sessionIdError)
+			}
+
+			sessionId = uuidV4.String()
 		}
-		sessionId := uuidV4.String()
+
 		freshSession := &Session{id: sessionId}
 		request.server.sessionBuilder(freshSession)
 		sessions[freshSession.id] = freshSession
@@ -92,24 +111,37 @@ func SessionId(self *Session) string {
 	return self.id
 }
 
-// SessionGet gets a property from the session store.
+// SessionGet gets a property from the session store and unmarshals it as T.
 func SessionGet[T any](self *Session, key string) T {
-	return self.get(key).(T)
+	var value T
+	content := self.get(key)
+
+	marshalError := json.Unmarshal([]byte(content), &value)
+	if marshalError != nil {
+		NotifierSendError(self.notifier, marshalError)
+	}
+
+	return value
 }
 
-// SessionSet sets a property in the session store.
+// SessionSet marshals a value and saves it into the session store.
 func SessionSet[T any](self *Session, key string, value T) {
-	self.set(key, value)
+	content, marshalError := json.Marshal(value)
+	if marshalError != nil {
+		NotifierSendError(self.notifier, marshalError)
+		return
+	}
+	self.set(key, string(content))
 }
 
-// SessionUnset unsets a property in the session store.
-func SessionUnset(self *Session, key string) {
-	self.unset(key)
+// SessionRemove unsets a property in the session store.
+func SessionRemove(self *Session, key string) {
+	self.remove(key)
 }
 
 // SessionHas checks if a key exists in the session store.
 func SessionHas(self *Session, key string) bool {
-	return self.keyChecker(key)
+	return self.has(key)
 }
 
 // SessionValidate validates the session.
@@ -123,23 +155,23 @@ func SessionDestroy(self *Session) {
 }
 
 // SessionWithGetter sets the getter, which retrieves a property from the session store.
-func SessionWithGetter(self *Session, getter func(key string) (value any)) {
-	self.get = getter
+func SessionWithGetter(self *Session, get func(key string) (value string)) {
+	self.get = get
 }
 
 // SessionWithSetter sets the setter, which creates or modify a property to the session store.
-func SessionWithSetter(self *Session, setter func(key string, value any)) {
-	self.set = setter
+func SessionWithSetter(self *Session, set func(key string, value string)) {
+	self.set = set
 }
 
-// SessionWithUnsetter sets the unsetter, which removes a property from the session store.
-func SessionWithUnsetter(self *Session, unsetter func(key string)) {
-	self.unset = unsetter
+// SessionWithRemover sets the unsetter, which removes a property from the session store.
+func SessionWithRemover(self *Session, remove func(key string)) {
+	self.remove = remove
 }
 
-// SessionWithKeyChecker sets the key checker, which checks if a key exists in the session store.
-func SessionWithKeyChecker(self *Session, keyChecker func(key string) bool) {
-	self.keyChecker = keyChecker
+// SessionWithChecker sets the key checker, which checks if a key exists in the session store.
+func SessionWithChecker(self *Session, check func(key string) bool) {
+	self.has = check
 }
 
 // SessionWithValidator sets the validator, which validates if the session is still alive.
@@ -150,4 +182,142 @@ func SessionWithValidator(self *Session, validator func() (valid bool)) {
 // SessionWithDestroyer sets the destroyer, which destroys the session.
 func SessionWithDestroyer(self *Session, destroyer func()) {
 	self.destroy = destroyer
+}
+
+// SessionWithNotifier sets the notifier.
+func SessionWithNotifier(self *Session, notifier *Notifier) {
+	self.notifier = notifier
+}
+
+// SessionNotifier gets the notifier.
+func SessionNotifier(self *Session) *Notifier {
+	return self.notifier
+}
+
+// SessionBuilderCreateWithMemory creates a session builder that uses memory (RAM) as a backend.
+func SessionBuilderCreateWithMemory() SessionBuilder {
+	allData := map[string]map[string]string{}
+	operatingGlobal := map[string]map[string]chan int{}
+	lastActivities := map[string]time.Time{}
+	return func(session *Session) {
+		var operating map[string]chan int
+		sessionId := SessionId(session)
+		data, dataExists := allData[sessionId]
+		if !dataExists {
+			data = map[string]string{}
+			allData[sessionId] = data
+		}
+
+		operatingLocal, operatingExists := operatingGlobal[sessionId]
+		if operatingExists {
+			operating = operatingLocal
+		} else {
+			operating = map[string]chan int{}
+			operatingGlobal[sessionId] = operating
+		}
+
+		SessionWithGetter(session, func(key string) string {
+			lastActivities[sessionId] = time.Now()
+			value := data[key]
+			return value
+		})
+
+		SessionWithSetter(session, func(key string, value string) {
+			lastActivities[sessionId] = time.Now()
+			data[key] = value
+		})
+
+		SessionWithRemover(session, func(key string) {
+			lastActivities[sessionId] = time.Now()
+			delete(data, key)
+		})
+
+		SessionWithChecker(session, func(key string) bool {
+			_, ok := data[key]
+			return ok
+		})
+
+		SessionWithValidator(session, func() bool {
+			lastActivity, ok := lastActivities[sessionId]
+			if !ok {
+				lastActivity = time.Now()
+			}
+			return time.Since(lastActivity).Minutes() < 30
+		})
+
+		SessionWithDestroyer(session, func() {
+			delete(allData, sessionId)
+		})
+	}
+}
+
+// SessionBuilderCreateWithArchive creates a session builder that uses an archive a backend.
+func SessionBuilderCreateWithArchive(archive *Archive) SessionBuilder {
+	operatingGlobal := map[string]map[string]chan int{}
+	lastActivities := map[string]time.Time{}
+	return func(session *Session) {
+		var operating map[string]chan int
+		sessionId := SessionId(session)
+		archiveDomain := sessionId
+
+		operatingLocal, operatingExists := operatingGlobal[sessionId]
+		if operatingExists {
+			operating = operatingLocal
+		} else {
+			operating = map[string]chan int{}
+			operatingGlobal[sessionId] = operating
+		}
+
+		lock := func(key string) chan int {
+			op, ok := operating[key]
+			if !ok {
+				op = make(chan int, 1)
+				op <- 0
+				operating[key] = op
+			}
+
+			return op
+		}
+
+		SessionWithGetter(session, func(key string) string {
+			<-lock(key)
+			lastActivities[sessionId] = time.Now()
+			value := ArchiveGet(archive, archiveDomain, key)
+			lock(key) <- 0
+			return value
+		})
+
+		SessionWithSetter(session, func(key string, value string) {
+			<-lock(key)
+			lastActivities[sessionId] = time.Now()
+			ArchiveSet(archive, archiveDomain, key, value)
+			lock(key) <- 0
+		})
+
+		SessionWithRemover(session, func(key string) {
+			<-lock(key)
+			lastActivities[sessionId] = time.Now()
+			ArchiveRemove(archive, archiveDomain, key)
+			lock(key) <- 0
+		})
+
+		SessionWithChecker(session, func(key string) bool {
+			<-lock(key)
+			has := ArchiveHas(archive, archiveDomain, key)
+			lock(key) <- 0
+			return has
+		})
+
+		SessionWithValidator(session, func() bool {
+			lastActivity, ok := lastActivities[sessionId]
+			if !ok {
+				lastActivity = time.Now()
+			}
+			return time.Since(lastActivity).Minutes() < 30
+		})
+
+		SessionWithDestroyer(session, func() {
+			ArchiveRemoveDomain(archive, archiveDomain)
+		})
+	}
 }

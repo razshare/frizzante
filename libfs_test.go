@@ -13,7 +13,7 @@ var embeddedFileSystem embed.FS
 func TestEmbeddedExists(test *testing.T) {
 	// Positive.
 	fileName := "libfs.go"
-	actual := EmbeddedExists(embeddedFileSystem, fileName)
+	actual := existsInEmbeddedFileSystem(embeddedFileSystem, fileName)
 	expected := true
 	if !actual {
 		test.Fatalf("%s (embedded) was expected to exist", fileName)
@@ -21,7 +21,7 @@ func TestEmbeddedExists(test *testing.T) {
 
 	// Negative.
 	fileName = "qwerty"
-	actual = EmbeddedExists(embeddedFileSystem, fileName)
+	actual = existsInEmbeddedFileSystem(embeddedFileSystem, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to exist", fileName)
@@ -31,7 +31,7 @@ func TestEmbeddedExists(test *testing.T) {
 func TestEmbeddedIsFile(test *testing.T) {
 	// Positive.
 	fileName := "libfs.go"
-	actual := EmbeddedIsFile(embeddedFileSystem, fileName)
+	actual := isEmbeddedFile(embeddedFileSystem, fileName)
 	expected := true
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to be a file", fileName)
@@ -39,14 +39,14 @@ func TestEmbeddedIsFile(test *testing.T) {
 
 	// Negatives.
 	fileName = ".github"
-	actual = EmbeddedIsFile(embeddedFileSystem, fileName)
+	actual = isEmbeddedFile(embeddedFileSystem, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a file", fileName)
 	}
 
 	fileName = "qwerty"
-	actual = EmbeddedIsFile(embeddedFileSystem, fileName)
+	actual = isEmbeddedFile(embeddedFileSystem, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a file", fileName)
@@ -56,7 +56,7 @@ func TestEmbeddedIsFile(test *testing.T) {
 func TestEmbeddedIsDirectory(test *testing.T) {
 	// Positive.
 	fileName := ".github"
-	actual := EmbeddedIsDirectory(embeddedFileSystem, fileName)
+	actual := isEmbeddedDirectory(embeddedFileSystem, fileName)
 	expected := true
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to be a directory", fileName)
@@ -64,14 +64,14 @@ func TestEmbeddedIsDirectory(test *testing.T) {
 
 	// Negatives.
 	fileName = "libfs.go"
-	actual = EmbeddedIsDirectory(embeddedFileSystem, fileName)
+	actual = isEmbeddedDirectory(embeddedFileSystem, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a directory", fileName)
 	}
 
 	fileName = "qwerty"
-	actual = EmbeddedIsDirectory(embeddedFileSystem, fileName)
+	actual = isEmbeddedDirectory(embeddedFileSystem, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a directory", fileName)
@@ -81,7 +81,7 @@ func TestEmbeddedIsDirectory(test *testing.T) {
 func TestExists(test *testing.T) {
 	// Positive.
 	fileName := "libfs.go"
-	actual := Exists(fileName)
+	actual := exists(fileName)
 	expected := true
 	if actual != expected {
 		test.Fatalf("%s was expected to exist", fileName)
@@ -89,7 +89,7 @@ func TestExists(test *testing.T) {
 
 	// Negative.
 	fileName = "qwerty"
-	actual = Exists(fileName)
+	actual = exists(fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s was expected to not exist", fileName)
@@ -99,7 +99,7 @@ func TestExists(test *testing.T) {
 func TestIsFile(test *testing.T) {
 	// Positive.
 	fileName := "libfs.go"
-	actual := IsFile(fileName)
+	actual := isFile(fileName)
 	expected := true
 	if actual != expected {
 		test.Fatalf("%s was expected to be a file", fileName)
@@ -107,14 +107,14 @@ func TestIsFile(test *testing.T) {
 
 	// Negatives.
 	fileName = ".github"
-	actual = IsFile(fileName)
+	actual = isFile(fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s was expected to not be a file", fileName)
 	}
 
 	fileName = "qwerty"
-	actual = IsFile(fileName)
+	actual = isFile(fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s was expected to not be a file", fileName)
@@ -124,7 +124,7 @@ func TestIsFile(test *testing.T) {
 func TestIsDirectory(test *testing.T) {
 	// Positive.
 	fileName := ".github"
-	actual := IsDirectory(fileName)
+	actual := isDirectory(fileName)
 	expected := true
 	if actual != expected {
 		test.Fatalf("%s was expected to be a directory", fileName)
@@ -132,14 +132,14 @@ func TestIsDirectory(test *testing.T) {
 
 	// Negatives.
 	fileName = "libfs.go"
-	actual = IsDirectory(fileName)
+	actual = isDirectory(fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s was expected to not be a directory", fileName)
 	}
 
 	fileName = "qwerty"
-	actual = IsDirectory(fileName)
+	actual = isDirectory(fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s was expected to not be a directory", fileName)
@@ -218,7 +218,7 @@ var expectedMimes = map[string]string{
 func TestMime(test *testing.T) {
 	// Positives.
 	for fileName, expected := range expectedMimes {
-		actual := Mime(fileName)
+		actual := mime(fileName)
 		if actual != expected {
 			test.Fatalf("file %s was expected to resolve into mime %s, received %s instead", fileName, expected, actual)
 		}
@@ -226,7 +226,7 @@ func TestMime(test *testing.T) {
 
 	// Negative.
 	fileName := "my.file.qwerty123"
-	actual := Mime(fileName)
+	actual := mime(fileName)
 	expected := "text/plain"
 	if actual != expected {
 		test.Fatalf("file %s was expected to resolve into mime %s, received %s instead", fileName, expected, actual)

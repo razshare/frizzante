@@ -36,22 +36,22 @@ type Server struct {
 	certificate            string
 	certificateKey         string
 	notifier               *Notifier
-	temporaryDirectory     string
 	embeddedFileSystem     embed.FS
 	webSocketUpgrader      *websocket.Upgrader
 	sessionBuilder         SessionBuilder
-}
-
-type sessionStore struct {
-	createdAt      time.Time
-	lastActivityAt time.Time
-	data           map[string]any
+	entryCreated           bool
 }
 
 // ServerCreate creates a server.
 func ServerCreate() *Server {
-	var sessionStores = map[string]sessionStore{}
-
+	notifier := NotifierCreate()
+	archiveBuilder := ArchiveBuilderCreateWithFileSystem(notifier)
+	archive := ArchiveCreate(archiveBuilder)
+	sessionBuilder := SessionBuilderCreateWithArchive(archive)
+	webSocketUpgrader := &websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024,
+	}
 	return &Server{
 		hostName:               "127.0.0.1",
 		port:                   8081,
@@ -65,57 +65,10 @@ func ServerCreate() *Server {
 		maxHeaderBytes:         3 * MB,
 		certificate:            "",
 		certificateKey:         "",
-		temporaryDirectory:     ".temp",
-		notifier:               NotifierCreate(),
-		webSocketUpgrader: &websocket.Upgrader{
-			ReadBufferSize:  1024,
-			WriteBufferSize: 1024,
-		},
-		sessionBuilder: func(session *Session) {
-			store, storeExists := sessionStores[session.id]
-			if !storeExists {
-				store = sessionStore{
-					data:           map[string]any{},
-					createdAt:      time.Now(),
-					lastActivityAt: time.Now(),
-				}
-				sessionStores[session.id] = store
-			}
-
-			SessionWithGetter(session, func(key string) (value any) {
-				valueLocal, keyExists := store.data[key]
-				if !keyExists {
-					return
-				}
-
-				store.lastActivityAt = time.Now()
-				value = valueLocal
-				return
-			})
-
-			SessionWithSetter(session, func(key string, value any) {
-				store.lastActivityAt = time.Now()
-				store.data[key] = value
-			})
-
-			SessionWithUnsetter(session, func(key string) {
-				store.lastActivityAt = time.Now()
-				delete(store.data, key)
-			})
-
-			SessionWithKeyChecker(session, func(key string) bool {
-				_, keyExists := store.data[key]
-				return keyExists
-			})
-
-			SessionWithValidator(session, func() bool {
-				return time.Since(store.lastActivityAt).Minutes() < 30
-			})
-
-			SessionWithDestroyer(session, func() {
-				delete(sessionStores, session.id)
-			})
-		},
+		notifier:               notifier,
+		webSocketUpgrader:      webSocketUpgrader,
+		sessionBuilder:         sessionBuilder,
+		entryCreated:           false,
 	}
 }
 
@@ -172,11 +125,6 @@ func ServerWithCertificateAndKey(self *Server, certificate string, key string) {
 	self.certificateKey = key
 }
 
-// ServerWithTemporaryDirectory sets the temporary directory.
-func ServerWithTemporaryDirectory(self *Server, temporaryDirectory string) {
-	self.temporaryDirectory = temporaryDirectory
-}
-
 // ServerWithEmbeddedFileSystem sets the embedded file system.
 //
 // The embedded file system should contain at least directory ".dist" so
@@ -188,123 +136,6 @@ func ServerWithEmbeddedFileSystem(self *Server, embeddedFileSystem embed.FS) {
 // ServerWithNotifier sets the server notifier.
 func ServerWithNotifier(self *Server, notifier *Notifier) {
 	self.notifier = notifier
-}
-
-// ServerTemporaryFileSave sets a temporary file.
-//
-// When id is longer than 255 characters, the operation will fail silently and the server will be notified.
-func ServerTemporaryFileSave(self *Server, id string, contents string) {
-	if len(id) > 255 {
-		NotifierSendError(self.notifier, fmt.Errorf("temporary file id is too long"))
-		return
-	}
-
-	if strings.Contains(id, "../") {
-		NotifierSendError(self.notifier, fmt.Errorf("invalid substring `../` detected in temporary file id `%s`", id))
-		return
-	}
-
-	if !Exists(self.temporaryDirectory) {
-		mkdirError := os.MkdirAll(self.temporaryDirectory, os.ModePerm)
-		if mkdirError != nil {
-			NotifierSendError(self.notifier, mkdirError)
-			return
-		}
-	}
-
-	fileName := self.temporaryDirectory
-	if !strings.HasSuffix(fileName, "/") && !strings.HasPrefix(id, "/") {
-		fileName += "/"
-	}
-	fileName += id
-
-	directory := filepath.Dir(fileName)
-	if !Exists(directory) {
-		mkdirError := os.MkdirAll(directory, os.ModePerm)
-		if mkdirError != nil {
-			NotifierSendError(self.notifier, mkdirError)
-			return
-		}
-	}
-
-	var file *os.File
-
-	if !ServerTemporaryFileExists(self, id) {
-		fileLocal, createError := os.Create(fileName)
-		if createError != nil {
-			NotifierSendError(self.notifier, createError)
-			return
-		}
-		file = fileLocal
-	} else {
-		fileLocal, openError := os.Open(fileName)
-		if openError != nil {
-			NotifierSendError(self.notifier, openError)
-			return
-		}
-		file = fileLocal
-	}
-
-	_, writeError := file.WriteString(contents)
-	if writeError != nil {
-		NotifierSendError(self.notifier, writeError)
-		return
-	}
-
-	closeError := file.Close()
-	if closeError != nil {
-		NotifierSendError(self.notifier, closeError)
-		return
-	}
-}
-
-// ServerTemporaryFile gets the contents o a temporary file.
-func ServerTemporaryFile(self *Server, id string) string {
-	if strings.Contains(id, "../") {
-		NotifierSendError(self.notifier, fmt.Errorf("invalid substring `../` detected in temporary file id `%s`", id))
-		return ""
-	}
-
-	fileName := self.temporaryDirectory
-	if !strings.HasSuffix(fileName, "/") && !strings.HasPrefix(id, "/") {
-		fileName += "/"
-	}
-	fileName += id
-	contents, err := os.ReadFile(fileName)
-	if err != nil {
-		NotifierSendError(self.notifier, err)
-		return ""
-	}
-	return string(contents)
-}
-
-// ServerTemporaryFileExists checks if a temporary file Exists.
-//
-// When id is longer than 255 characters, the operation will fail silently and the server will be notified.
-func ServerTemporaryFileExists(self *Server, id string) bool {
-	if len(id) > 255 {
-		NotifierSendError(self.notifier, fmt.Errorf("temporary file id is too long"))
-		return false
-	}
-
-	if strings.Contains(id, "../") {
-		return false
-	}
-
-	fileName := self.temporaryDirectory
-	if !strings.HasSuffix(fileName, "/") && !strings.HasPrefix(id, "/") {
-		fileName += "/"
-	}
-	fileName += id
-	return Exists(fileName)
-}
-
-// ServerTemporaryDirectoryClear clears the temporary directory.
-func ServerTemporaryDirectoryClear(self *Server) {
-	err := os.RemoveAll(self.temporaryDirectory)
-	if err != nil {
-		NotifierSendError(self.notifier, err)
-	}
 }
 
 // RequestReceiveCancellation returns a channel that's closed when the request is cancelled.
@@ -354,28 +185,28 @@ func RequestReceiveMessage(self *Request) string {
 // which indicates success or failure.
 //
 // Compatible with web sockets.
-func RequestReceiveJson[T any](self *Request) (*T, bool) {
+func RequestReceiveJson[T any](self *Request) *T {
 	var value T
 	if self.webSocketConn != nil {
 		jsonError := self.webSocketConn.ReadJSON(value)
 		if jsonError != nil {
 			NotifierSendError(self.server.notifier, jsonError)
-			return nil, false
+			return nil
 		}
-		return &value, true
+		return &value
 	}
 
 	readBytes, readAllError := io.ReadAll(self.httpRequest.Body)
 	if readAllError != nil {
 		NotifierSendError(self.server.notifier, readAllError)
-		return nil, false
+		return nil
 	}
 	unmarshalError := json.Unmarshal(readBytes, &value)
 	if unmarshalError != nil {
 		NotifierSendError(self.server.notifier, unmarshalError)
-		return nil, false
+		return nil
 	}
-	return &value, true
+	return &value
 }
 
 // RequestReceiveForm reads the message as a form and returns the value.
@@ -437,7 +268,7 @@ func notFoundApi(api *Api) {
 
 // ServerStart starts the server.
 //
-// If the server fails to start, ServerStart panics.
+// If the server fails to start, ServerStart crashes the program.
 func ServerStart(self *Server) {
 	logger := log.New(self.notifier.errorFile, "<error>", log.Ltime|log.Llongfile)
 
@@ -449,7 +280,7 @@ func ServerStart(self *Server) {
 		ErrorLog:       logger,
 	}
 
-	if !entryCreated {
+	if !self.entryCreated {
 		ServerWithApiBuilder(self, notFoundApi)
 	}
 
@@ -490,7 +321,7 @@ func ServerStart(self *Server) {
 
 // ServerStop attempts to stop the server.
 //
-// If the shutdown attempt fails, ServerStop panics.
+// If the shutdown attempt fails, ServerStop crashes the program.
 func ServerStop(self *Server) {
 	err := self.server.Shutdown(context.Background())
 	if err != nil {
@@ -516,18 +347,18 @@ func routeCreate(
 	return &Route{
 		view: "",
 		handler: func(request *Request, response *Response) {
+			pass := 0 == len(guards)
 			for _, guard := range guards {
-				pass := false
-				guard(request, response, func() {
-					pass = true
-				})
+				guard(request, response, func() { pass = true })
 
 				if !pass {
-					return
+					break
 				}
 			}
 
-			handler(request, response)
+			if pass {
+				handler(request, response)
+			}
 		},
 		mount: func(pattern string) {},
 	}
@@ -561,16 +392,18 @@ func routeCreateWithView(
 				parameters: map[string]string{},
 			}
 
+			pass := 0 == len(guards)
 			for _, guard := range guards {
-				pass := false
 				guard(request, response, func() { pass = true })
 
 				if !pass {
-					return
+					break
 				}
 			}
 
-			handler(request, response, viewLocal)
+			if pass {
+				handler(request, response, viewLocal)
+			}
 
 			if nil != response.navigate {
 				ResponseSendRedirect(response, response.navigate.Location, http.StatusFound)
@@ -625,18 +458,16 @@ func routeCreateWithView(
 	}
 }
 
-var entryCreated = false
-
 // serverMapRoute maps a pattern to a given route.
 //
-// If the given pattern conflicts with one that is already registered, serverMapRoute panics.
+// If the given pattern conflicts with one that is already registered, serverMapRoute crashes the program.
 func serverMapRoute(self *Server, pattern string, route *Route) {
 	patternParts := strings.Split(pattern, " ")
 	patternCounter := len(patternParts)
 	isEntry := patternCounter > 1 && strings.HasPrefix(strings.TrimPrefix(filepath.Join(patternParts[1:]...), " "), "/")
 
-	if isEntry && !entryCreated {
-		entryCreated = true
+	if isEntry && !self.entryCreated {
+		self.entryCreated = true
 	}
 
 	if route.mount != nil {
@@ -999,14 +830,14 @@ func ResponseSendEmbeddedFileOrIndexOrElse(self *Response, orElse func()) {
 	request := self.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 
-	if !EmbeddedExists(request.server.embeddedFileSystem, fileName) {
+	if !existsInEmbeddedFileSystem(request.server.embeddedFileSystem, fileName) {
 		orElse()
 		return
 	}
 
-	if EmbeddedIsDirectory(request.server.embeddedFileSystem, fileName) {
+	if isEmbeddedDirectory(request.server.embeddedFileSystem, fileName) {
 		fileName = filepath.Join(fileName, "index.html")
-		if !IsFile(fileName) {
+		if !isFile(fileName) {
 			orElse()
 			return
 		}
@@ -1042,7 +873,7 @@ func ResponseSendEmbeddedFileOrIndexOrElse(self *Response, orElse func()) {
 	}
 
 	if "" == self.header.Get("Content-Type") {
-		ResponseSendHeader(self, "Content-Type", Mime(fileName))
+		ResponseSendHeader(self, "Content-Type", mime(fileName))
 	}
 
 	if "" == self.header.Get("Content-Length") {
@@ -1059,8 +890,8 @@ func ResponseSendEmbeddedFileOrElse(self *Response, orElse func()) {
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
-	if !EmbeddedExists(request.server.embeddedFileSystem, fileName) ||
-		EmbeddedIsDirectory(request.server.embeddedFileSystem, fileName) {
+	if !existsInEmbeddedFileSystem(request.server.embeddedFileSystem, fileName) ||
+		isEmbeddedDirectory(request.server.embeddedFileSystem, fileName) {
 		orElse()
 		return
 	}
@@ -1095,7 +926,7 @@ func ResponseSendEmbeddedFileOrElse(self *Response, orElse func()) {
 	}
 
 	if "" == self.header.Get("Content-Type") {
-		ResponseSendHeader(self, "Content-Type", Mime(fileName))
+		ResponseSendHeader(self, "Content-Type", mime(fileName))
 	}
 
 	if "" == self.header.Get("Content-Length") {
@@ -1110,14 +941,14 @@ func ResponseSendFileOrIndexOrElse(self *Response, orElse func()) {
 	request := self.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 
-	if !Exists(fileName) {
+	if !exists(fileName) {
 		orElse()
 		return
 	}
 
-	if IsDirectory(fileName) {
+	if isDirectory(fileName) {
 		fileName = filepath.Join(fileName, "index.html")
-		if !IsFile(fileName) {
+		if !isFile(fileName) {
 			orElse()
 			return
 		}
@@ -1153,7 +984,7 @@ func ResponseSendFileOrIndexOrElse(self *Response, orElse func()) {
 	}
 
 	if "" == self.header.Get("Content-Type") {
-		ResponseSendHeader(self, "Content-Type", Mime(fileName))
+		ResponseSendHeader(self, "Content-Type", mime(fileName))
 	}
 
 	if "" == self.header.Get("Content-Length") {
@@ -1167,7 +998,7 @@ func ResponseSendFileOrElse(self *Response, orElse func()) {
 	request := self.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 
-	if !Exists(fileName) || IsDirectory(fileName) {
+	if !exists(fileName) || isDirectory(fileName) {
 		orElse()
 		return
 	}
@@ -1202,7 +1033,7 @@ func ResponseSendFileOrElse(self *Response, orElse func()) {
 	}
 
 	if "" == self.header.Get("Content-Type") {
-		ResponseSendHeader(self, "Content-Type", Mime(fileName))
+		ResponseSendHeader(self, "Content-Type", mime(fileName))
 	}
 
 	if "" == self.header.Get("Content-Length") {
@@ -1337,18 +1168,6 @@ func ResponseSendView(self *Response, view *View) {
 
 	ResponseSendMessage(self, content)
 }
-
-type SessionGetter = func(key string, defaultValue any) (value any)
-type SessionSetter = func(key string, value any)
-type SessionUnsetter = func(key string)
-type SessionValidator = func() (valid bool)
-type SessionDestroyer = func()
-type ConfigureSessionGetter = func(get SessionGetter)
-type ConfigureSessionSetter = func(set SessionSetter)
-type ConfigureSessionUnsetter = func(unset SessionUnsetter)
-type ConfigureSessionValidator = func(validate SessionValidator)
-type ConfigureSessionDestroyer = func(destroy SessionDestroyer)
-type SessionBuilder = func(session *Session)
 
 // ServerWithSessionBuilder sets the session builder,
 // which is a function that provides the four main
