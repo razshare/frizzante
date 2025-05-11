@@ -29,7 +29,7 @@ type Server struct {
 	multipartFormMaxMemory int64
 	server                 *http.Server
 	mux                    *http.ServeMux
-	sessions               map[string]*net.Conn
+	connections            map[string]*net.Conn
 	readTimeout            time.Duration
 	writeTimeout           time.Duration
 	maxHeaderBytes         int
@@ -56,7 +56,7 @@ func ServerCreate() *Server {
 		multipartFormMaxMemory: 4096,
 		server:                 nil,
 		mux:                    http.NewServeMux(),
-		sessions:               map[string]*net.Conn{},
+		connections:            map[string]*net.Conn{},
 		readTimeout:            10 * time.Second,
 		writeTimeout:           10 * time.Second,
 		maxHeaderBytes:         3 * MB,
@@ -503,6 +503,10 @@ func serverMapRoute(self *Server, pattern string, route *Route) {
 
 						if !response.lockedStatusAndHeader {
 							ResponseSendMessage(response, "")
+						}
+
+						for _, after := range response.after {
+							after()
 						}
 					}
 				})

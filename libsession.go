@@ -105,16 +105,14 @@ func SessionStart[T any](request *Request, response *Response, builder SessionBu
 		session.load()
 	}
 
-	if nil != session.validate && session.validate() {
+	if session.validate() {
 		response.after = append(response.after, func() {
 			session.save()
 		})
 		return session.Store
 	}
 
-	if nil != session.destroy {
-		session.destroy()
-	}
+	session.destroy()
 
 	return sessionCreate[T](request, response, builder).Store
 }
