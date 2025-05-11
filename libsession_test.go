@@ -8,29 +8,84 @@ import (
 	"time"
 )
 
+type state struct {
+	name string
+}
+
+var sessions = map[string]*state{}
+var operating = map[string]chan int{}
+
+func memory(session *Session[state]) {
+	destroyed := false
+	SessionWithLoader(session, func() {
+		if destroyed {
+			return
+		}
+
+		_, sessionExists := sessions[session.Id]
+		if !sessionExists {
+			sessions[session.Id] = &state{}
+			operating[session.Id] = make(chan int, 1)
+			operating[session.Id] <- 0
+		}
+
+		<-operating[session.Id]
+		session.Value = sessions[session.Id]
+		operating[session.Id] <- 0
+	})
+
+	SessionWithValidator(session, func() bool {
+		if destroyed {
+			return false
+		}
+
+		return true
+	})
+
+	SessionWithSaver(session, func() {
+		if destroyed {
+			return
+		}
+
+		<-operating[session.Id]
+		sessions[session.Id] = session.Value
+		operating[session.Id] <- 0
+	})
+
+	SessionWithDestroyer(session, func() {
+		if destroyed {
+			return
+		}
+
+		<-operating[session.Id]
+		delete(sessions, session.Id)
+		destroyed = true
+		operating[session.Id] <- 0
+	})
+}
+
 func TestSessionStart(test *testing.T) {
 	server := ServerCreate()
 	port := NextNumber(8080)
 	ServerWithPort(server, port)
+	ServerWithSessionBuilder[state](server, memory)
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "GET /")
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart(request, response)
+			session := SessionStart[state](request, response)
 
-			if !SessionHas(session, "name") {
-				SessionSet(session, "name", "world")
+			if "" == session.name {
+				session.name = "world"
 			}
 
-			name := SessionGet[string](session, "name")
-			ResponseSendMessage(response, fmt.Sprintf("hello %s", name))
+			ResponseSendMessage(response, fmt.Sprintf("hello %s", session.name))
 		})
 	})
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "POST /")
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart(request, response)
-			name := RequestReceiveMessage(request)
-			SessionSet(session, "name", name)
+			session := SessionStart[state](request, response)
+			session.name = RequestReceiveMessage(request)
 			ResponseSendMessage(response, "")
 		})
 	})

@@ -89,8 +89,8 @@ func ArchiveAcceptsDomain(self *Archive, domain string) bool {
 //
 // This function is public only as a quality of life improvement, so that if you would like to
 // detect such strings before crashing the archive, you have a way to do so.
-func ArchiveAcceptsKey(self *Archive, domain string) bool {
-	for _, char := range domain {
+func ArchiveAcceptsKey(self *Archive, key string) bool {
+	for _, char := range key {
 		if !slices.Contains(self.alphabet, char) {
 			return false
 		}
@@ -104,12 +104,9 @@ func ArchiveWithName(self *Archive, name string) {
 	self.name = name
 }
 
-// ArchiveWithKeyReader sets the reader, which reads a value from the archive
+// ArchiveWithKeyGetter sets the reader, which reads a value from the archive
 // given its domain and key.
-func ArchiveWithKeyReader(
-	self *Archive,
-	reader func(domain string, key string) []byte,
-) {
+func ArchiveWithKeyGetter(self *Archive, getter func(domain string, key string) []byte) {
 	self.get = func(domain string, key string) []byte {
 		if !ArchiveAcceptsDomain(self, domain) {
 			NotifierSendError(self.notifier,
@@ -123,17 +120,14 @@ func ArchiveWithKeyReader(
 			return nil
 		}
 
-		return reader(domain, key)
+		return getter(domain, key)
 	}
 }
 
-// ArchiveWithKeyWriter sets the writer,
+// ArchiveWithKeySetter sets the writer,
 // which writes a value into the archive at a combination of
 // domain and key.
-func ArchiveWithKeyWriter(
-	self *Archive,
-	writer func(domain string, key string, value []byte),
-) {
+func ArchiveWithKeySetter(self *Archive, setter func(domain string, key string, value []byte)) {
 	self.set = func(domain string, key string, value []byte) {
 		if !ArchiveAcceptsDomain(self, domain) {
 			NotifierSendError(self.notifier,
@@ -147,16 +141,13 @@ func ArchiveWithKeyWriter(
 			return
 		}
 
-		writer(domain, key, value)
+		setter(domain, key, value)
 	}
 }
 
 // ArchiveWithDomainRemover sets the remover,
 // which removes a domain from the archive.
-func ArchiveWithDomainRemover(
-	self *Archive,
-	domainRemover func(domain string),
-) {
+func ArchiveWithDomainRemover(self *Archive, domainRemover func(domain string)) {
 	self.removeDomain = func(domain string) {
 		if !ArchiveAcceptsDomain(self, domain) {
 			NotifierSendError(self.notifier,
@@ -170,10 +161,7 @@ func ArchiveWithDomainRemover(
 
 // ArchiveWithKeyRemover sets the remover,
 // which removes a combination of domain and key from the archive.
-func ArchiveWithKeyRemover(
-	self *Archive,
-	keyRemover func(domain string, key string),
-) {
+func ArchiveWithKeyRemover(self *Archive, remover func(domain string, key string)) {
 	self.remove = func(domain string, key string) {
 		if !ArchiveAcceptsDomain(self, domain) {
 			NotifierSendError(self.notifier,
@@ -187,16 +175,13 @@ func ArchiveWithKeyRemover(
 			return
 		}
 
-		keyRemover(domain, key)
+		remover(domain, key)
 	}
 }
 
 // ArchiveWithDomainChecker sets the domain checker,
 // which checks if a domain exists in the archive.
-func ArchiveWithDomainChecker(
-	self *Archive,
-	domainChecker func(domain string) (exists bool),
-) {
+func ArchiveWithDomainChecker(self *Archive, checker func(domain string) (exists bool)) {
 	self.domainExists = func(domain string) (exists bool) {
 		if !ArchiveAcceptsDomain(self, domain) {
 			NotifierSendError(self.notifier,
@@ -204,16 +189,13 @@ func ArchiveWithDomainChecker(
 			return
 		}
 
-		return domainChecker(domain)
+		return checker(domain)
 	}
 }
 
 // ArchiveWithKeyChecker sets the domain and key checker,
 // which checks if a combination of domain and key exists in the archive.
-func ArchiveWithKeyChecker(
-	self *Archive,
-	keyChecker func(domain string, key string) (exists bool),
-) {
+func ArchiveWithKeyChecker(self *Archive, checker func(domain string, key string) (exists bool)) {
 	self.has = func(domain string, key string) (exists bool) {
 		if !ArchiveAcceptsDomain(self, domain) {
 			NotifierSendError(self.notifier,
@@ -227,7 +209,7 @@ func ArchiveWithKeyChecker(
 			return
 		}
 
-		return keyChecker(domain, key)
+		return checker(domain, key)
 	}
 }
 
@@ -260,6 +242,7 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 			'G',
 			'H',
 			'I',
+			'J',
 			'K',
 			'L',
 			'M',
@@ -270,6 +253,7 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 			'R',
 			'S',
 			'T',
+			'U',
 			'V',
 			'X',
 			'Y',
@@ -283,6 +267,7 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 			'g',
 			'h',
 			'i',
+			'j',
 			'k',
 			'l',
 			'm',
@@ -293,6 +278,7 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 			'r',
 			's',
 			't',
+			'u',
 			'v',
 			'x',
 			'y',
@@ -309,6 +295,7 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 			'0',
 			'_',
 			'-',
+			'.',
 		},
 	}
 
@@ -317,12 +304,13 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 	return archive
 }
 
-// ArchiveBuilderCreateWithFileSystem creates an archive builder that uses the file system as a backend.
-func ArchiveBuilderCreateWithFileSystem(notifier *Notifier) ArchiveBuilder {
-	return func(archive *Archive) {
+// ArchiveCreateLocal creates an archive that uses the local file system as a backend.
+func ArchiveCreateLocal(notifier *Notifier, name string) *Archive {
+	return ArchiveCreate(func(archive *Archive) {
+		ArchiveWithName(archive, name)
 		ArchiveWithNotifier(archive, notifier)
-		ArchiveWithKeyReader(archive, func(domain string, key string) []byte {
-			fileName := filepath.Join(archive.name, domain, key+".json")
+		ArchiveWithKeyGetter(archive, func(domain string, key string) []byte {
+			fileName := filepath.Join(archive.name, domain, key)
 			content, readError := os.ReadFile(fileName)
 			if readError != nil {
 				NotifierSendError(archive.notifier, readError)
@@ -331,7 +319,7 @@ func ArchiveBuilderCreateWithFileSystem(notifier *Notifier) ArchiveBuilder {
 			return content
 		})
 
-		ArchiveWithKeyWriter(archive, func(domain string, key string, value []byte) {
+		ArchiveWithKeySetter(archive, func(domain string, key string, value []byte) {
 			directoryName := filepath.Join(archive.name, domain)
 
 			if !exists(directoryName) {
@@ -342,20 +330,20 @@ func ArchiveBuilderCreateWithFileSystem(notifier *Notifier) ArchiveBuilder {
 				}
 			}
 
-			fileName := filepath.Join(archive.name, domain, key+".json")
-			writeError := os.WriteFile(fileName, []byte(value), os.ModePerm)
+			fileName := filepath.Join(archive.name, domain, key)
+			writeError := os.WriteFile(fileName, value, os.ModePerm)
 			if writeError != nil {
 				NotifierSendError(archive.notifier, writeError)
 			}
 		})
 
 		ArchiveWithKeyChecker(archive, func(domain string, key string) bool {
-			fileName := filepath.Join(archive.name, domain, key+".json")
+			fileName := filepath.Join(archive.name, domain, key)
 			return exists(fileName)
 		})
 
 		ArchiveWithKeyRemover(archive, func(domain string, key string) {
-			fileName := filepath.Join(archive.name, domain, key+".json")
+			fileName := filepath.Join(archive.name, domain, key)
 			removeError := os.Remove(fileName)
 			if removeError != nil {
 				NotifierSendError(archive.notifier, removeError)
@@ -374,5 +362,5 @@ func ArchiveBuilderCreateWithFileSystem(notifier *Notifier) ArchiveBuilder {
 				NotifierSendError(archive.notifier, removeError)
 			}
 		})
-	}
+	})
 }

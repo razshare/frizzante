@@ -38,16 +38,13 @@ type Server struct {
 	notifier               *Notifier
 	embeddedFileSystem     embed.FS
 	webSocketUpgrader      *websocket.Upgrader
-	sessionBuilder         SessionBuilder
 	entryCreated           bool
+	sessionBuilder         any
 }
 
 // ServerCreate creates a server.
 func ServerCreate() *Server {
 	notifier := NotifierCreate()
-	archiveBuilder := ArchiveBuilderCreateWithFileSystem(notifier)
-	archive := ArchiveCreate(archiveBuilder)
-	sessionBuilder := SessionBuilderCreateWithArchive(archive)
 	webSocketUpgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -67,9 +64,12 @@ func ServerCreate() *Server {
 		certificateKey:         "",
 		notifier:               notifier,
 		webSocketUpgrader:      webSocketUpgrader,
-		sessionBuilder:         sessionBuilder,
 		entryCreated:           false,
 	}
+}
+
+func ServerWithSessionBuilder[T any](self *Server, builder SessionBuilder[T]) {
+	self.sessionBuilder = builder
 }
 
 // ServerWithWebSocketReadBufferSize sets the maximum buffer size for each incoming web socket message.
@@ -475,14 +475,14 @@ func serverMapRoute(self *Server, pattern string, route *Route) {
 	}
 
 	self.mux.HandleFunc(pattern, func(writer http.ResponseWriter, httpRequest *http.Request) {
-		request := Request{
+		request := &Request{
 			server:      self,
 			httpRequest: httpRequest,
 		}
 
 		httpHeader := writer.Header()
 
-		response := Response{
+		response := &Response{
 			server:                self,
 			writer:                &writer,
 			lockedStatusAndHeader: false,
@@ -492,31 +492,35 @@ func serverMapRoute(self *Server, pattern string, route *Route) {
 			eventId:               1,
 		}
 
-		request.response = &response
-		response.request = &request
+		request.response = response
+		response.request = request
 
 		if isEntry {
-			ResponseSendEmbeddedFileOrElse(&response, func() {
-				ResponseSendFileOrElse(&response, func() {
+			ResponseSendEmbeddedFileOrElse(response, func() {
+				ResponseSendFileOrElse(response, func() {
 					if route.handler != nil {
 						if "/favicon.ico" == request.httpRequest.RequestURI {
-							ResponseSendNotFound(&response)
+							ResponseSendNotFound(response)
 							return
 						}
-						route.handler(&request, &response)
+						route.handler(request, response)
 
 						if !response.lockedStatusAndHeader {
-							ResponseSendMessage(&response, "")
+							ResponseSendMessage(response, "")
 						}
 					}
 				})
 			})
 		} else if route.handler != nil {
-			route.handler(&request, &response)
+			route.handler(request, response)
 
 			if !response.lockedStatusAndHeader {
-				ResponseSendMessage(&response, "")
+				ResponseSendMessage(response, "")
 			}
+		}
+
+		for _, after := range response.after {
+			after()
 		}
 	})
 }
@@ -545,6 +549,8 @@ type Response struct {
 	eventName             string
 	navigate              *navigate
 	eventId               int64
+	after                 []func()
+	context               map[string]any
 }
 
 var pathFieldRegex = regexp.MustCompile(`\{(.*?)}`)
@@ -1167,29 +1173,6 @@ func ResponseSendView(self *Response, view *View) {
 	}
 
 	ResponseSendMessage(self, content)
-}
-
-// ServerWithSessionBuilder sets the session builder,
-// which is a function that provides the four main
-// operations used by the server to manage any session,
-// get, set, unset and destroy.
-//
-// Get must retrieve data from the session store.
-//
-// Set must create a new property to the session store or update an existing one.
-//
-// Unset must remove a property from the session store.
-//
-// Destroy must destroy the whole session, store included.
-//
-// In this context, "store", is any type data storage,
-// it could be a file written to disk, a database, Ram,
-// it doesn't matter.
-//
-// The only thing that matters is a consistent
-// implementation of the four operations.
-func ServerWithSessionBuilder(self *Server, builder SessionBuilder) {
-	self.sessionBuilder = builder
 }
 
 type Api struct {

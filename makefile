@@ -1,13 +1,6 @@
 test: configure
 	CGO_ENABLED=1 go test
 
-www-watch-server:
-	bunx vite build --watch --ssr .frizzante/vite-project/render.server.js --outDir .dist/server && \
-	./node_modules/.bin/esbuild .dist/server/render.server.js --bundle --outfile=.dist/server/render.server.js --format=esm --allow-overwrite
-
-www-watch-client:
-	bunx vite build --watch --outDir .dist/client
-
 configure: clean update
 	go run lib/prepare/main.go
 	make www-build-server & \
@@ -16,13 +9,11 @@ configure: clean update
 
 clean:
 	go clean
-	rm main.db -f
+	rm bin/app -f
 	rm cert.pem -f
 	rm key.pem -f
-	rm bin/app -f
-	rm tmp -fr
-	rm tmp -fr
 	rm node_modules -fr
+	rm .sessions -fr
 	rm .dist -fr
 	rm .frizzante -fr
 	mkdir .dist/server -p
@@ -50,6 +41,7 @@ certificate:
 	"/C=XX/ST=Test/L=Test/O=Test/OU=Test/CN=Test"
 
 hooks:
-	printf "#!/usr/bin/bash\n" > .git/hooks/pre-commit
+	printf "#!/usr/bin/env bash\n" > .git/hooks/pre-commit
 	printf "make test" >> .git/hooks/pre-commit
 	chmod +x .git/hooks/pre-commit
+
