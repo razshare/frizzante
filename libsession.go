@@ -30,10 +30,6 @@ func sessionCreate[T any](request *Request, response *Response, builder SessionB
 	session := &Session[T]{
 		request:  request,
 		response: response,
-		destroy:  func() {},
-		validate: func() bool { return true },
-		load:     func() {},
-		save:     func() {},
 		Id:       sessionId,
 	}
 
@@ -42,6 +38,22 @@ func sessionCreate[T any](request *Request, response *Response, builder SessionB
 	})
 
 	builder(session)
+
+	if nil == session.save {
+		session.save = func() {}
+	}
+
+	if nil == session.load {
+		session.load = func() {}
+	}
+
+	if nil == session.destroy {
+		session.destroy = func() {}
+	}
+
+	if nil == session.validate {
+		session.validate = func() bool { return true }
+	}
 
 	session.load()
 	ResponseSendCookie(response, "session-id", session.Id)
@@ -72,6 +84,22 @@ func SessionStart[T any](request *Request, response *Response, builder SessionBu
 	}
 
 	builder(session)
+
+	if nil == session.save {
+		session.save = func() {}
+	}
+
+	if nil == session.load {
+		session.load = func() {}
+	}
+
+	if nil == session.destroy {
+		session.destroy = func() {}
+	}
+
+	if nil == session.validate {
+		session.validate = func() bool { return true }
+	}
 
 	if nil != session.load {
 		session.load()
