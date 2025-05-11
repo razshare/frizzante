@@ -1,11 +1,11 @@
 package frizzante
 
 import (
-	"encoding/json"
 	uuid "github.com/nu7hatch/gouuid"
 	"net/http"
 )
 
+type SessionInitializer[T any] = func() T
 type SessionBuilder[T any] = func(session *Session[T])
 type Session[T any] struct {
 	request  *Request
@@ -15,10 +15,10 @@ type Session[T any] struct {
 	load     func()
 	save     func()
 	Id       string
-	Value    *T
+	Store    T
 }
 
-func sessionCreate[T any](request *Request, response *Response) *Session[T] {
+func sessionCreate[T any](request *Request, response *Response, builder SessionBuilder[T]) *Session[T] {
 	uuidV4, sessionIdError := uuid.NewV4()
 
 	if sessionIdError != nil {
@@ -41,10 +41,7 @@ func sessionCreate[T any](request *Request, response *Response) *Session[T] {
 		session.save()
 	})
 
-	if nil != response.server.sessionBuilder {
-		builder := response.server.sessionBuilder.(SessionBuilder[T])
-		builder(session)
-	}
+	builder(session)
 
 	session.load()
 	ResponseSendCookie(response, "session-id", session.Id)
@@ -52,7 +49,7 @@ func sessionCreate[T any](request *Request, response *Response) *Session[T] {
 }
 
 // SessionStart starts the session and returns its state.
-func SessionStart[T any](request *Request, response *Response) *T {
+func SessionStart[T any](request *Request, response *Response, builder SessionBuilder[T]) T {
 	var sessionIdCookie *http.Cookie
 	sessionIdCookies := request.httpRequest.CookiesNamed("session-id")
 	sessionIdCookiesLen := 0
@@ -64,36 +61,34 @@ func SessionStart[T any](request *Request, response *Response) *T {
 
 	if 0 == sessionIdCookiesLen || nil == sessionIdCookie {
 		// Create new session.
-		return sessionCreate[T](request, response).Value
+		return sessionCreate[T](request, response, builder).Store
 	}
 
 	// Retrieve session.
 	session := &Session[T]{
 		request:  request,
 		response: response,
-		destroy:  func() {},
-		validate: func() bool { return true },
-		load:     func() {},
-		save:     func() {},
 		Id:       sessionIdCookie.Value,
 	}
 
-	if nil != response.server.sessionBuilder {
-		builder := response.server.sessionBuilder.(SessionBuilder[T])
-		builder(session)
+	builder(session)
+
+	if nil != session.load {
+		session.load()
 	}
 
-	session.load()
-	if session.validate() {
+	if nil != session.validate && session.validate() {
 		response.after = append(response.after, func() {
 			session.save()
 		})
-		return session.Value
+		return session.Store
 	}
 
-	// Session doesn't exist or is not valid, create a new one.
-	session.destroy()
-	return sessionCreate[T](request, response).Value
+	if nil != session.destroy {
+		session.destroy()
+	}
+
+	return sessionCreate[T](request, response, builder).Store
 }
 
 // SessionWithLoader sets the loader.
@@ -114,64 +109,4 @@ func SessionWithDestroyer[T any](self *Session[T], destroyer func()) {
 // SessionWithSaver sets the saver.
 func SessionWithSaver[T any](self *Session[T], saver func()) {
 	self.save = saver
-}
-
-// SessionBuilderCreate creates a session builder backed by the disk.
-func SessionBuilderCreate[T any](archive *Archive, initialize func() *T) SessionBuilder[T] {
-	var key = "session.json"
-	var operating = map[string]chan int{}
-	var sessions = map[string]*T{}
-	return func(session *Session[T]) {
-		SessionWithLoader(session, func() {
-			_, sessionExists := sessions[session.Id]
-			if !sessionExists {
-				sessions[session.Id] = initialize()
-				operating[session.Id] = make(chan int, 1)
-				operating[session.Id] <- 0
-
-				<-operating[session.Id]
-				if !ArchiveHas(archive, session.Id, key) {
-					readBytes, marshalError := json.Marshal(sessions[session.Id])
-					if nil != marshalError {
-						NotifierSendError(archive.notifier, marshalError)
-						operating[session.Id] <- 0
-						return
-					}
-					ArchiveSet(archive, session.Id, key, readBytes)
-				}
-				operating[session.Id] <- 0
-			}
-
-			<-operating[session.Id]
-			session.Value = sessions[session.Id]
-			readBytes := ArchiveGet(archive, session.Id, key)
-			marshalError := json.Unmarshal(readBytes, sessions[session.Id])
-			if nil != marshalError {
-				NotifierSendError(archive.notifier, marshalError)
-			}
-			operating[session.Id] <- 0
-		})
-
-		SessionWithValidator(session, func() bool {
-			return true
-		})
-
-		SessionWithSaver(session, func() {
-			<-operating[session.Id]
-			readBytes, marshalError := json.Marshal(sessions[session.Id])
-			if nil != marshalError {
-				NotifierSendError(archive.notifier, marshalError)
-				operating[session.Id] <- 0
-				return
-			}
-			ArchiveSet(archive, session.Id, key, readBytes)
-			operating[session.Id] <- 0
-		})
-
-		SessionWithDestroyer(session, func() {
-			<-operating[session.Id]
-			delete(operating, session.Id)
-			operating[session.Id] <- 0
-		})
-	}
 }

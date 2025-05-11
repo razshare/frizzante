@@ -15,13 +15,8 @@ type state struct {
 var sessions = map[string]*state{}
 var operating = map[string]chan int{}
 
-func memory(session *Session[state]) {
-	destroyed := false
+func memory(session *Session[*state]) {
 	SessionWithLoader(session, func() {
-		if destroyed {
-			return
-		}
-
 		_, sessionExists := sessions[session.Id]
 		if !sessionExists {
 			sessions[session.Id] = &state{}
@@ -30,36 +25,23 @@ func memory(session *Session[state]) {
 		}
 
 		<-operating[session.Id]
-		session.Value = sessions[session.Id]
+		session.Store = sessions[session.Id]
 		operating[session.Id] <- 0
 	})
 
 	SessionWithValidator(session, func() bool {
-		if destroyed {
-			return false
-		}
-
 		return true
 	})
 
 	SessionWithSaver(session, func() {
-		if destroyed {
-			return
-		}
-
 		<-operating[session.Id]
-		sessions[session.Id] = session.Value
+		sessions[session.Id] = session.Store
 		operating[session.Id] <- 0
 	})
 
 	SessionWithDestroyer(session, func() {
-		if destroyed {
-			return
-		}
-
 		<-operating[session.Id]
 		delete(sessions, session.Id)
-		destroyed = true
 		operating[session.Id] <- 0
 	})
 }
@@ -68,11 +50,10 @@ func TestSessionStart(test *testing.T) {
 	server := ServerCreate()
 	port := NextNumber(8080)
 	ServerWithPort(server, port)
-	ServerWithSessionBuilder[state](server, memory)
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "GET /")
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart[state](request, response)
+			session := SessionStart(request, response, memory)
 
 			if "" == session.name {
 				session.name = "world"
@@ -84,7 +65,7 @@ func TestSessionStart(test *testing.T) {
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "POST /")
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart[state](request, response)
+			session := SessionStart(request, response, memory)
 			session.name = RequestReceiveMessage(request)
 			ResponseSendMessage(response, "")
 		})

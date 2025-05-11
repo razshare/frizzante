@@ -227,7 +227,7 @@ func ArchiveWithNotifier(self *Archive, notifier *Notifier) {
 // regardless of the custom implementations of the getter, setter, remover and checker functions.
 func ArchiveCreate(builder ArchiveBuilder) *Archive {
 	archiveName, archiveNameError := filepath.Abs("archive")
-	if archiveNameError != nil {
+	if nil != archiveNameError {
 		log.Fatal(archiveNameError)
 	}
 	archive := &Archive{
@@ -304,15 +304,14 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 	return archive
 }
 
-// ArchiveCreateLocal creates an archive that uses the local file system as a backend.
-func ArchiveCreateLocal(notifier *Notifier, name string) *Archive {
+// ArchiveCreateOnDisk creates an archive that uses the local file system as a backend.
+func ArchiveCreateOnDisk(name string) *Archive {
 	return ArchiveCreate(func(archive *Archive) {
 		ArchiveWithName(archive, name)
-		ArchiveWithNotifier(archive, notifier)
 		ArchiveWithKeyGetter(archive, func(domain string, key string) []byte {
 			fileName := filepath.Join(archive.name, domain, key)
 			content, readError := os.ReadFile(fileName)
-			if readError != nil {
+			if nil != readError && nil != archive.notifier {
 				NotifierSendError(archive.notifier, readError)
 				return nil
 			}
@@ -324,7 +323,7 @@ func ArchiveCreateLocal(notifier *Notifier, name string) *Archive {
 
 			if !exists(directoryName) {
 				mkdirError := os.MkdirAll(directoryName, os.ModePerm)
-				if mkdirError != nil {
+				if nil != mkdirError {
 					NotifierSendError(archive.notifier, mkdirError)
 					return
 				}
@@ -332,7 +331,7 @@ func ArchiveCreateLocal(notifier *Notifier, name string) *Archive {
 
 			fileName := filepath.Join(archive.name, domain, key)
 			writeError := os.WriteFile(fileName, value, os.ModePerm)
-			if writeError != nil {
+			if nil != writeError {
 				NotifierSendError(archive.notifier, writeError)
 			}
 		})
@@ -345,7 +344,7 @@ func ArchiveCreateLocal(notifier *Notifier, name string) *Archive {
 		ArchiveWithKeyRemover(archive, func(domain string, key string) {
 			fileName := filepath.Join(archive.name, domain, key)
 			removeError := os.Remove(fileName)
-			if removeError != nil {
+			if nil != removeError {
 				NotifierSendError(archive.notifier, removeError)
 			}
 		})
@@ -358,7 +357,7 @@ func ArchiveCreateLocal(notifier *Notifier, name string) *Archive {
 		ArchiveWithDomainRemover(archive, func(domain string) {
 			fileName := filepath.Join(archive.name, domain)
 			removeError := os.RemoveAll(fileName)
-			if removeError != nil {
+			if nil != removeError {
 				NotifierSendError(archive.notifier, removeError)
 			}
 		})
