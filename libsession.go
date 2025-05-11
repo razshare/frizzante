@@ -18,8 +18,8 @@ type memorySessionStore struct {
 
 type Session struct {
 	id       string
-	get      func(key string) string
-	set      func(key string, value string)
+	get      func(key string) []byte
+	set      func(key string, value []byte)
 	remove   func(key string)
 	has      func(key string) bool
 	validate func() (isValid bool)
@@ -131,7 +131,7 @@ func SessionSet[T any](self *Session, key string, value T) {
 		NotifierSendError(self.notifier, marshalError)
 		return
 	}
-	self.set(key, string(content))
+	self.set(key, content)
 }
 
 // SessionRemove unsets a property in the session store.
@@ -155,12 +155,12 @@ func SessionDestroy(self *Session) {
 }
 
 // SessionWithGetter sets the getter, which retrieves a property from the session store.
-func SessionWithGetter(self *Session, get func(key string) (value string)) {
+func SessionWithGetter(self *Session, get func(key string) []byte) {
 	self.get = get
 }
 
 // SessionWithSetter sets the setter, which creates or modify a property to the session store.
-func SessionWithSetter(self *Session, set func(key string, value string)) {
+func SessionWithSetter(self *Session, set func(key string, value []byte)) {
 	self.set = set
 }
 
@@ -196,7 +196,7 @@ func SessionNotifier(self *Session) *Notifier {
 
 // SessionBuilderCreateWithMemory creates a session builder that uses memory (RAM) as a backend.
 func SessionBuilderCreateWithMemory() SessionBuilder {
-	allData := map[string]map[string]string{}
+	allData := map[string]map[string][]byte{}
 	operatingGlobal := map[string]map[string]chan int{}
 	lastActivities := map[string]time.Time{}
 	return func(session *Session) {
@@ -204,7 +204,7 @@ func SessionBuilderCreateWithMemory() SessionBuilder {
 		sessionId := SessionId(session)
 		data, dataExists := allData[sessionId]
 		if !dataExists {
-			data = map[string]string{}
+			data = map[string][]byte{}
 			allData[sessionId] = data
 		}
 
@@ -216,13 +216,13 @@ func SessionBuilderCreateWithMemory() SessionBuilder {
 			operatingGlobal[sessionId] = operating
 		}
 
-		SessionWithGetter(session, func(key string) string {
+		SessionWithGetter(session, func(key string) []byte {
 			lastActivities[sessionId] = time.Now()
 			value := data[key]
 			return value
 		})
 
-		SessionWithSetter(session, func(key string, value string) {
+		SessionWithSetter(session, func(key string, value []byte) {
 			lastActivities[sessionId] = time.Now()
 			data[key] = value
 		})
@@ -279,7 +279,7 @@ func SessionBuilderCreateWithArchive(archive *Archive) SessionBuilder {
 			return op
 		}
 
-		SessionWithGetter(session, func(key string) string {
+		SessionWithGetter(session, func(key string) []byte {
 			<-lock(key)
 			lastActivities[sessionId] = time.Now()
 			value := ArchiveGet(archive, archiveDomain, key)
@@ -287,7 +287,7 @@ func SessionBuilderCreateWithArchive(archive *Archive) SessionBuilder {
 			return value
 		})
 
-		SessionWithSetter(session, func(key string, value string) {
+		SessionWithSetter(session, func(key string, value []byte) {
 			<-lock(key)
 			lastActivities[sessionId] = time.Now()
 			ArchiveSet(archive, archiveDomain, key, value)

@@ -13,8 +13,8 @@ type ArchiveBuilder = func(archive *Archive)
 type Archive struct {
 	name string
 
-	get    func(domain string, key string) string
-	set    func(domain string, key string, value string)
+	get    func(domain string, key string) []byte
+	set    func(domain string, key string, value []byte)
 	has    func(domain string, key string) bool
 	remove func(domain string, key string)
 
@@ -26,12 +26,12 @@ type Archive struct {
 }
 
 // ArchiveGet reads the combination of domain and key from the archive.
-func ArchiveGet(self *Archive, domain string, key string) string {
+func ArchiveGet(self *Archive, domain string, key string) []byte {
 	return self.get(domain, key)
 }
 
 // ArchiveSet writes to the combination of domain and key int the archive.
-func ArchiveSet(self *Archive, domain string, key string, value string) {
+func ArchiveSet(self *Archive, domain string, key string, value []byte) {
 	self.set(domain, key, value)
 }
 
@@ -108,19 +108,19 @@ func ArchiveWithName(self *Archive, name string) {
 // given its domain and key.
 func ArchiveWithKeyReader(
 	self *Archive,
-	reader func(domain string, key string) (value string),
+	reader func(domain string, key string) []byte,
 ) {
-	self.get = func(domain string, key string) (value string) {
+	self.get = func(domain string, key string) []byte {
 		if !ArchiveAcceptsDomain(self, domain) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
-			return
+			return nil
 		}
 
 		if !ArchiveAcceptsKey(self, key) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", self.name, key))
-			return
+			return nil
 		}
 
 		return reader(domain, key)
@@ -132,9 +132,9 @@ func ArchiveWithKeyReader(
 // domain and key.
 func ArchiveWithKeyWriter(
 	self *Archive,
-	writer func(domain string, key string, value string),
+	writer func(domain string, key string, value []byte),
 ) {
-	self.set = func(domain string, key string, value string) {
+	self.set = func(domain string, key string, value []byte) {
 		if !ArchiveAcceptsDomain(self, domain) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
@@ -321,17 +321,17 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 func ArchiveBuilderCreateWithFileSystem(notifier *Notifier) ArchiveBuilder {
 	return func(archive *Archive) {
 		ArchiveWithNotifier(archive, notifier)
-		ArchiveWithKeyReader(archive, func(domain string, key string) string {
+		ArchiveWithKeyReader(archive, func(domain string, key string) []byte {
 			fileName := filepath.Join(archive.name, domain, key+".json")
 			content, readError := os.ReadFile(fileName)
 			if readError != nil {
 				NotifierSendError(archive.notifier, readError)
-				return ""
+				return nil
 			}
-			return string(content)
+			return content
 		})
 
-		ArchiveWithKeyWriter(archive, func(domain string, key string, value string) {
+		ArchiveWithKeyWriter(archive, func(domain string, key string, value []byte) {
 			directoryName := filepath.Join(archive.name, domain)
 
 			if !exists(directoryName) {
