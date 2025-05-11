@@ -49,6 +49,7 @@ func ServerCreate() *Server {
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
+
 	return &Server{
 		hostName:               "127.0.0.1",
 		port:                   8081,
@@ -68,6 +69,7 @@ func ServerCreate() *Server {
 	}
 }
 
+// ServerWithSessionBuilder sets the session builder.
 func ServerWithSessionBuilder[T any](self *Server, builder SessionBuilder[T]) {
 	self.sessionBuilder = builder
 }

@@ -1,6 +1,7 @@
 package frizzante
 
 import (
+	"encoding/json"
 	uuid "github.com/nu7hatch/gouuid"
 	"net/http"
 )
@@ -50,6 +51,7 @@ func sessionCreate[T any](request *Request, response *Response) *Session[T] {
 	return session
 }
 
+// SessionStart starts the session and returns its state.
 func SessionStart[T any](request *Request, response *Response) *T {
 	var sessionIdCookie *http.Cookie
 	sessionIdCookies := request.httpRequest.CookiesNamed("session-id")
@@ -94,18 +96,82 @@ func SessionStart[T any](request *Request, response *Response) *T {
 	return sessionCreate[T](request, response).Value
 }
 
+// SessionWithLoader sets the loader.
 func SessionWithLoader[T any](self *Session[T], loader func()) {
 	self.load = loader
 }
 
+// SessionWithValidator sets the validator.
 func SessionWithValidator[T any](self *Session[T], validator func() bool) {
 	self.validate = validator
 }
 
+// SessionWithDestroyer sets the destroyer.
 func SessionWithDestroyer[T any](self *Session[T], destroyer func()) {
 	self.destroy = destroyer
 }
 
+// SessionWithSaver sets the saver.
 func SessionWithSaver[T any](self *Session[T], saver func()) {
 	self.save = saver
+}
+
+// SessionBuilderCreate creates a session builder backed by the disk.
+func SessionBuilderCreate[T any](archive *Archive, initialize func() *T) SessionBuilder[T] {
+	var key = "session.json"
+	var operating = map[string]chan int{}
+	var sessions = map[string]*T{}
+	return func(session *Session[T]) {
+		SessionWithLoader(session, func() {
+			_, sessionExists := sessions[session.Id]
+			if !sessionExists {
+				sessions[session.Id] = initialize()
+				operating[session.Id] = make(chan int, 1)
+				operating[session.Id] <- 0
+
+				<-operating[session.Id]
+				if !ArchiveHas(archive, session.Id, key) {
+					readBytes, marshalError := json.Marshal(sessions[session.Id])
+					if nil != marshalError {
+						NotifierSendError(archive.notifier, marshalError)
+						operating[session.Id] <- 0
+						return
+					}
+					ArchiveSet(archive, session.Id, key, readBytes)
+				}
+				operating[session.Id] <- 0
+			}
+
+			<-operating[session.Id]
+			session.Value = sessions[session.Id]
+			readBytes := ArchiveGet(archive, session.Id, key)
+			marshalError := json.Unmarshal(readBytes, sessions[session.Id])
+			if nil != marshalError {
+				NotifierSendError(archive.notifier, marshalError)
+			}
+			operating[session.Id] <- 0
+		})
+
+		SessionWithValidator(session, func() bool {
+			return true
+		})
+
+		SessionWithSaver(session, func() {
+			<-operating[session.Id]
+			readBytes, marshalError := json.Marshal(sessions[session.Id])
+			if nil != marshalError {
+				NotifierSendError(archive.notifier, marshalError)
+				operating[session.Id] <- 0
+				return
+			}
+			ArchiveSet(archive, session.Id, key, readBytes)
+			operating[session.Id] <- 0
+		})
+
+		SessionWithDestroyer(session, func() {
+			<-operating[session.Id]
+			delete(operating, session.Id)
+			operating[session.Id] <- 0
+		})
+	}
 }
