@@ -13,7 +13,6 @@ type Session[T any] struct {
 	destroy  func()
 	load     func()
 	save     func()
-	resume   func() (*T, bool)
 	Id       string
 	Value    *T
 }
