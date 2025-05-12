@@ -55,18 +55,18 @@ func TestSessionStart(test *testing.T) {
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
 			session := SessionStart(request, response, memory)
 
-			if "" == session.name {
-				session.name = "world"
+			if "" == session.State.name {
+				session.State.name = "world"
 			}
 
-			ResponseSendMessage(response, fmt.Sprintf("hello %s", session.name))
+			ResponseSendMessage(response, fmt.Sprintf("hello %s", session.State.name))
 		})
 	})
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "POST /")
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
 			session := SessionStart(request, response, memory)
-			session.name = RequestReceiveMessage(request)
+			session.State.name = RequestReceiveMessage(request)
 			ResponseSendMessage(response, "")
 		})
 	})

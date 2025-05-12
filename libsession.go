@@ -61,7 +61,7 @@ func sessionCreate[T any](request *Request, response *Response, builder SessionB
 }
 
 // SessionStart starts the session and returns its state.
-func SessionStart[T any](request *Request, response *Response, builder SessionBuilder[T]) T {
+func SessionStart[T any](request *Request, response *Response, builder SessionBuilder[T]) *Session[T] {
 	var sessionIdCookie *http.Cookie
 	sessionIdCookies := request.httpRequest.CookiesNamed("session-id")
 	sessionIdCookiesLen := 0
@@ -73,7 +73,7 @@ func SessionStart[T any](request *Request, response *Response, builder SessionBu
 
 	if 0 == sessionIdCookiesLen || nil == sessionIdCookie {
 		// Create new session.
-		return sessionCreate[T](request, response, builder).State
+		return sessionCreate[T](request, response, builder)
 	}
 
 	// Retrieve session.
@@ -106,12 +106,22 @@ func SessionStart[T any](request *Request, response *Response, builder SessionBu
 		response.after = append(response.after, func() {
 			session.save()
 		})
-		return session.State
+		return session
 	}
 
 	session.destroy()
 
-	return sessionCreate[T](request, response, builder).State
+	return sessionCreate[T](request, response, builder)
+}
+
+// SessionSave saves the session.
+func SessionSave[T any](self *Session[T]) {
+	self.save()
+}
+
+// SessionLoad saves the session.
+func SessionLoad[T any](self *Session[T]) {
+	self.load()
 }
 
 // SessionWithLoadHandler sets the load handler.
