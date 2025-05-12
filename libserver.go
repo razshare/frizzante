@@ -517,10 +517,10 @@ func serverMapRoute(self *Server, pattern string, route *Route) {
 			if !response.lockedStatusAndHeader {
 				ResponseSendMessage(response, "")
 			}
-		}
 
-		for _, after := range response.after {
-			after()
+			for _, after := range response.after {
+				after()
+			}
 		}
 	})
 }
