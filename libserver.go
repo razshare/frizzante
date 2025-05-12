@@ -382,8 +382,8 @@ func routeCreateWithView(
 			response *Response,
 		) {
 			viewLocal := &View{
-				render:     RenderFull,
-				data:       map[string]any{},
+				Render:     RenderFull,
+				Data:       map[string]any{},
 				name:       view,
 				parameters: map[string]string{},
 			}
@@ -415,12 +415,12 @@ func routeCreateWithView(
 				return
 			}
 
-			if nil == viewLocal.data {
-				viewLocal.data = map[string]any{}
+			if nil == viewLocal.Data {
+				viewLocal.Data = map[string]any{}
 			}
 
 			if RequestVerifyAccept(request, "application/json") {
-				data, marshalError := json.Marshal(viewLocal.data)
+				data, marshalError := json.Marshal(viewLocal.Data)
 				if nil != marshalError {
 					NotifierSendError(request.server.notifier, marshalError)
 					return
@@ -1154,9 +1154,9 @@ func ResponseSendView(self *Response, view *View) {
 		notifier = self.server.notifier
 	}
 
-	content, compileError := ViewRender(&View{
-		render:             view.render,
-		data:               view.data,
+	content, compileError := viewRender(&View{
+		Render:             view.Render,
+		Data:               view.Data,
 		name:               view.name,
 		parameters:         view.parameters,
 		functions:          view.functions,

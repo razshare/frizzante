@@ -25,13 +25,13 @@ const (
 var components = map[string]string{}
 
 type View struct {
-	render             Render
-	data               map[string]any
-	functions          map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value
 	name               string
+	functions          map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value
 	parameters         map[string]string
 	notifier           *Notifier
 	embeddedFileSystem *embed.FS
+	Render             Render
+	Data               map[string]any
 }
 
 var noScriptPattern = regexp.MustCompile(`<script.*>.*</script>`)
@@ -47,67 +47,24 @@ type ViewProps struct {
 func ViewReference(view string) *View {
 	return &View{
 		name:       view,
-		data:       map[string]any{},
+		Data:       map[string]any{},
 		parameters: map[string]string{},
 		functions:  map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value{},
 	}
 }
 
-// ViewWithRender sets the render mode for the view.
-func ViewWithRender(self *View, render Render) {
-	self.render = render
-}
-
-// ViewWithData sets data for the view.
-func ViewWithData(self *View, key string, value any) {
-	self.data[key] = value
-}
-
-// ViewWithNotifier sets the view notifier.
+// viewRender renders a view.
 //
-// Note that when using ServerWithPageBuilder, the notifier of the view falls
-// back to the server notifier.
-//
-// Unless you have some very specific use case, this means you don't need
-// to worry about setting the notifier every time you create a new View,
-// just set it once on the server using ServerWithNotifier.
-func ViewWithNotifier(self *View, notifier *Notifier) {
-	self.notifier = notifier
-}
-
-// ViewWithFunction sets a global function for the view.
-func ViewWithFunction(
-	self *View,
-	name string,
-	function func(info *v8go.FunctionCallbackInfo) *v8go.Value,
-) {
-	self.functions[name] = function
-}
-
-// ViewWithEmbeddedFileSystem sets the embedded file system for the view.
-//
-// Note that when using ServerWithPageBuilder, the embedded file system of the view falls
-// back to the server embedded file system.
-//
-// Unless you have some very specific use case, this means you don't need
-// to worry about setting the embedded file system every time you create a new View,
-// just set it once on the server using ServerWithEmbeddedFileSystem.
-func ViewWithEmbeddedFileSystem(self *View, embeddedFileSystem embed.FS) {
-	self.embeddedFileSystem = &embeddedFileSystem
-}
-
-// ViewRender renders a view.
-//
-// If the View is using RenderServer, then ViewRender returns an HTML document.
+// If the View is using RenderServer, then viewRender returns an HTML document.
 // The head of the document will contain *only* content declared with the <svelte:head> tag.
 // The body of the document will contain the fully rendered content of the view as HTML.
 //
-// If the View is using RenderClient, then ViewRender returns an HTML document.
+// If the View is using RenderClient, then viewRender returns an HTML document.
 // The document itself doesn't include any of the view content, instead, custom <script> tags are injected into the head of
 // the document in order to asynchronously load a client JavaScript bundle that renders the view inside the client's browser,
 // thus ultimately loading the content into the document.
 //
-// If the View is using RenderFull, then ViewRender returns an HTML document.
+// If the View is using RenderFull, then viewRender returns an HTML document.
 // The head of the document will contain any content declared with the <svelte:head> tag.
 // The body of the document will contain the fully rendered content of the view as HTML.
 // On top of that, just like when using RenderClient, custom <script> tags are also injected into the head of
@@ -115,9 +72,9 @@ func ViewWithEmbeddedFileSystem(self *View, embeddedFileSystem embed.FS) {
 // view inside the client's browser.
 // In short, RenderFull is a combination of RenderServer and RenderClient.
 //
-// If the View is using RenderHeadless, then ViewRender returns only the content of the view, without decorating it with an HTML document.
+// If the View is using RenderHeadless, then viewRender returns only the content of the view, without decorating it with an HTML document.
 // The output won't even contain a header, ignoring all <svelte:head> declarations and all css.
-func ViewRender(self *View) (content string, compileError error) {
+func viewRender(self *View) (content string, compileError error) {
 	fileNameIndex := filepath.Join(".dist", "client", ".frizzante", "vite-project", "index.html")
 
 	var indexBytes []byte
@@ -139,7 +96,7 @@ func ViewRender(self *View) (content string, compileError error) {
 	routerPropsBytes, jsonError := json.Marshal(ViewProps{
 		Views:      components,
 		View:       self.name,
-		Data:       self.data,
+		Data:       self.Data,
 		Parameters: self.parameters,
 	})
 
@@ -154,8 +111,8 @@ func ViewRender(self *View) (content string, compileError error) {
 		return "", targetIdError
 	}
 
-	if RenderFull == self.render {
-		head, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
+	if RenderFull == self.Render {
+		head, body, renderError := viewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
 		}
@@ -185,7 +142,7 @@ func ViewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderClient == self.render {
+	if RenderClient == self.Render {
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
@@ -212,8 +169,8 @@ func ViewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderServer == self.render {
-		head, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
+	if RenderServer == self.Render {
+		head, body, renderError := viewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
 		}
@@ -240,8 +197,8 @@ func ViewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderHeadless == self.render {
-		_, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
+	if RenderHeadless == self.Render {
+		_, body, renderError := viewExecuteRenderServerJs(self, routerPropsString)
 
 		if renderError != nil {
 			return "", renderError
@@ -254,13 +211,13 @@ func ViewRender(self *View) (content string, compileError error) {
 	return "", nil
 }
 
-// ViewExecuteRenderServerJs executes the `.dist/server/render.server.js` file
+// viewExecuteRenderServerJs executes the `.dist/server/render.server.js` file
 // and returns the head of the document along with its body.
 //
 // If the environment variable DEV is set to 1, the file .dist/server/render.server.js is executed directly from the
-// local file system, otherwise ViewExecuteRenderServerJs executes the file .dist/server/render.server.js located within the
+// local file system, otherwise viewExecuteRenderServerJs executes the file .dist/server/render.server.js located within the
 // view's embedded file system.
-func ViewExecuteRenderServerJs(self *View, stringifiedProps string) (head string, body string, jsError error) {
+func viewExecuteRenderServerJs(self *View, stringifiedProps string) (head string, body string, jsError error) {
 	renderFileName := filepath.Join(".dist", "server", "render.server.js")
 
 	var renderEsmBytes []byte
