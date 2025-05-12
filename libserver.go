@@ -947,7 +947,7 @@ func ResponseSendFileOrIndexOrElse(self *Response, orElse func()) {
 	request := self.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 
-	if !exists(fileName) {
+	if !fileExists(fileName) {
 		orElse()
 		return
 	}
@@ -1004,7 +1004,7 @@ func ResponseSendFileOrElse(self *Response, orElse func()) {
 	request := self.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 
-	if !exists(fileName) || isDirectory(fileName) {
+	if !fileExists(fileName) || isDirectory(fileName) {
 		orElse()
 		return
 	}

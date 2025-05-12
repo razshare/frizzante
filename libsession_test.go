@@ -16,7 +16,7 @@ var sessions = map[string]*state{}
 var operating = map[string]chan int{}
 
 func memory(session *Session[*state]) {
-	SessionWithLoader(session, func() {
+	SessionWithLoadHandler(session, func() {
 		_, sessionExists := sessions[session.Id]
 		if !sessionExists {
 			sessions[session.Id] = &state{}
@@ -25,21 +25,21 @@ func memory(session *Session[*state]) {
 		}
 
 		<-operating[session.Id]
-		session.Store = sessions[session.Id]
+		session.State = sessions[session.Id]
 		operating[session.Id] <- 0
 	})
 
-	SessionWithValidator(session, func() bool {
+	SessionWithValidateHandler(session, func() bool {
 		return true
 	})
 
-	SessionWithSaver(session, func() {
+	SessionWithSaveHandler(session, func() {
 		<-operating[session.Id]
-		sessions[session.Id] = session.Store
+		sessions[session.Id] = session.State
 		operating[session.Id] <- 0
 	})
 
-	SessionWithDestroyer(session, func() {
+	SessionWithDestroyHandler(session, func() {
 		<-operating[session.Id]
 		delete(sessions, session.Id)
 		operating[session.Id] <- 0

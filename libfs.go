@@ -30,8 +30,8 @@ func isEmbeddedDirectory(embeddedFileSystem embed.FS, fileName string) bool {
 	return true
 }
 
-// exists checks if file exists.
-func exists(fileName string) bool {
+// fileExists checks if file exists.
+func fileExists(fileName string) bool {
 	_, statError := os.Stat(fileName)
 	return nil == statError || !errors.Is(statError, os.ErrNotExist)
 }

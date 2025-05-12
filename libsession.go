@@ -10,12 +10,12 @@ type SessionBuilder[T any] = func(session *Session[T])
 type Session[T any] struct {
 	request  *Request
 	response *Response
-	validate func() bool
-	destroy  func()
 	load     func()
 	save     func()
+	validate func() bool
+	destroy  func()
 	Id       string
-	Store    T
+	State    T
 }
 
 func sessionCreate[T any](request *Request, response *Response, builder SessionBuilder[T]) *Session[T] {
@@ -39,20 +39,20 @@ func sessionCreate[T any](request *Request, response *Response, builder SessionB
 
 	builder(session)
 
-	if nil == session.save {
-		session.save = func() {}
-	}
-
 	if nil == session.load {
 		session.load = func() {}
 	}
 
-	if nil == session.destroy {
-		session.destroy = func() {}
+	if nil == session.save {
+		session.save = func() {}
 	}
 
 	if nil == session.validate {
 		session.validate = func() bool { return true }
+	}
+
+	if nil == session.destroy {
+		session.destroy = func() {}
 	}
 
 	session.load()
@@ -73,7 +73,7 @@ func SessionStart[T any](request *Request, response *Response, builder SessionBu
 
 	if 0 == sessionIdCookiesLen || nil == sessionIdCookie {
 		// Create new session.
-		return sessionCreate[T](request, response, builder).Store
+		return sessionCreate[T](request, response, builder).State
 	}
 
 	// Retrieve session.
@@ -85,54 +85,51 @@ func SessionStart[T any](request *Request, response *Response, builder SessionBu
 
 	builder(session)
 
-	if nil == session.save {
-		session.save = func() {}
-	}
-
 	if nil == session.load {
 		session.load = func() {}
 	}
 
-	if nil == session.destroy {
-		session.destroy = func() {}
+	if nil == session.save {
+		session.save = func() {}
 	}
 
 	if nil == session.validate {
 		session.validate = func() bool { return true }
 	}
 
-	if nil != session.load {
-		session.load()
+	if nil == session.destroy {
+		session.destroy = func() {}
 	}
 
+	session.load()
 	if session.validate() {
 		response.after = append(response.after, func() {
 			session.save()
 		})
-		return session.Store
+		return session.State
 	}
 
 	session.destroy()
 
-	return sessionCreate[T](request, response, builder).Store
+	return sessionCreate[T](request, response, builder).State
 }
 
-// SessionWithLoader sets the loader.
-func SessionWithLoader[T any](self *Session[T], loader func()) {
+// SessionWithLoadHandler sets the load handler.
+func SessionWithLoadHandler[T any](self *Session[T], loader func()) {
 	self.load = loader
 }
 
-// SessionWithValidator sets the validator.
-func SessionWithValidator[T any](self *Session[T], validator func() bool) {
-	self.validate = validator
+// SessionWithSaveHandler sets the save handler.
+func SessionWithSaveHandler[T any](self *Session[T], handler func()) {
+	self.save = handler
 }
 
-// SessionWithDestroyer sets the destroyer.
-func SessionWithDestroyer[T any](self *Session[T], destroyer func()) {
-	self.destroy = destroyer
+// SessionWithValidateHandler sets the validate handler.
+func SessionWithValidateHandler[T any](self *Session[T], handler func() bool) {
+	self.validate = handler
 }
 
-// SessionWithSaver sets the saver.
-func SessionWithSaver[T any](self *Session[T], saver func()) {
-	self.save = saver
+// SessionWithDestroyHandler sets the destroy handler.
+func SessionWithDestroyHandler[T any](self *Session[T], handler func()) {
+	self.destroy = handler
 }

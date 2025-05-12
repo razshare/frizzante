@@ -81,7 +81,7 @@ func TestEmbeddedIsDirectory(test *testing.T) {
 func TestExists(test *testing.T) {
 	// Positive.
 	fileName := "libfs.go"
-	actual := exists(fileName)
+	actual := fileExists(fileName)
 	expected := true
 	if actual != expected {
 		test.Fatalf("%s was expected to exist", fileName)
@@ -89,7 +89,7 @@ func TestExists(test *testing.T) {
 
 	// Negative.
 	fileName = "qwerty"
-	actual = exists(fileName)
+	actual = fileExists(fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s was expected to not exist", fileName)

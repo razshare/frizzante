@@ -1,11 +1,13 @@
 package frizzante
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 	"slices"
+	"time"
 )
 
 type ArchiveBuilder = func(archive *Archive)
@@ -30,9 +32,30 @@ func ArchiveGet(self *Archive, domain string, key string) []byte {
 	return self.get(domain, key)
 }
 
+// ArchiveGetJson reads the combination of domain and key from the archive and unmarshals it as json.
+func ArchiveGetJson[T any](self *Archive, domain string, key string) T {
+	var value T
+	readBytes := self.get(domain, key)
+	unmarshalError := json.Unmarshal(readBytes, &value)
+	if nil != unmarshalError {
+		NotifierSendError(self.notifier, unmarshalError)
+	}
+	return value
+}
+
 // ArchiveSet writes to the combination of domain and key int the archive.
 func ArchiveSet(self *Archive, domain string, key string, value []byte) {
 	self.set(domain, key, value)
+}
+
+// ArchiveSetAsJson marshals content and writes to the combination of domain and key int the archive.
+func ArchiveSetAsJson(self *Archive, domain string, key string, content any) {
+	readBytes, marshalError := json.Marshal(content)
+	if nil != marshalError {
+		NotifierSendError(self.notifier, marshalError)
+		return
+	}
+	self.set(domain, key, readBytes)
 }
 
 // ArchiveHas checks if the combination of domain and key exists in the archive.
@@ -57,7 +80,7 @@ func ArchiveRemoveDomain(self *Archive, domain string) {
 
 // ArchiveAcceptsDomain checks if a domain is accepted by the alphabet of the archive.
 //
-// Generally speaking alphabets should not accept runes like "/", "\", ".", ".." and so on.
+// Generally speaking alphabets should not accept runes like "/", "\", ".." and so on.
 //
 // This is so that "sneaky" or maliciously constructed domains injected by clients
 // can't change directories.
@@ -79,7 +102,7 @@ func ArchiveAcceptsDomain(self *Archive, domain string) bool {
 
 // ArchiveAcceptsKey checks if a key is accepted by the alphabet of the archive.
 //
-// Generally speaking alphabets should not accept runes like "/", "\", ".", ".." and so on.
+// Generally speaking alphabets should not accept runes like "/", "\", ".." and so on.
 //
 // This is so that "sneaky" or maliciously constructed keys injected by clients
 // can't change directories.
@@ -231,7 +254,8 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 		log.Fatal(archiveNameError)
 	}
 	archive := &Archive{
-		name: archiveName,
+		name:     archiveName,
+		notifier: NotifierCreate(),
 		alphabet: []rune{
 			'A',
 			'B',
@@ -305,61 +329,108 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 }
 
 // ArchiveCreateOnDisk creates an archive that uses the local file system as a backend.
-func ArchiveCreateOnDisk(name string) *Archive {
+func ArchiveCreateOnDisk(name string, cacheTtl time.Duration) *Archive {
+	keys := CacheCreate[[]byte]()
+	domains := CacheCreate[bool]()
+	road := RoadCreate()
+
 	return ArchiveCreate(func(archive *Archive) {
 		ArchiveWithName(archive, name)
 		ArchiveWithKeyGetter(archive, func(domain string, key string) []byte {
+			lane := RoadWithLane(road, domain, key)
+			<-lane
 			fileName := filepath.Join(archive.name, domain, key)
-			content, readError := os.ReadFile(fileName)
-			if nil != readError && nil != archive.notifier {
+			if CacheIsNotExpired(keys, fileName) {
+				value := CacheGet(keys, fileName)
+				lane <- 0
+				return value
+			}
+			value, readError := os.ReadFile(fileName)
+			if nil != readError {
 				NotifierSendError(archive.notifier, readError)
+				lane <- 0
 				return nil
 			}
-			return content
+			CacheSet(keys, cacheTtl, fileName, value)
+			lane <- 0
+			return value
 		})
 
 		ArchiveWithKeySetter(archive, func(domain string, key string, value []byte) {
+			lane := RoadWithLane(road, domain, key)
+			<-lane
 			directoryName := filepath.Join(archive.name, domain)
-
-			if !exists(directoryName) {
+			if !fileExists(directoryName) {
 				mkdirError := os.MkdirAll(directoryName, os.ModePerm)
 				if nil != mkdirError {
 					NotifierSendError(archive.notifier, mkdirError)
+					lane <- 0
 					return
 				}
 			}
-
-			fileName := filepath.Join(archive.name, domain, key)
+			fileName := filepath.Join(directoryName, key)
 			writeError := os.WriteFile(fileName, value, os.ModePerm)
 			if nil != writeError {
 				NotifierSendError(archive.notifier, writeError)
 			}
+			CacheSet(keys, cacheTtl, fileName, value)
+			lane <- 0
+		})
+
+		ArchiveWithDomainChecker(archive, func(domain string) bool {
+			lane := RoadWithLane(road, domain)
+			<-lane
+			directoryName := filepath.Join(archive.name, domain)
+			if CacheIsNotExpired(domains, directoryName) {
+				value := CacheGet(domains, directoryName)
+				lane <- 0
+				return value
+			}
+			ok := fileExists(directoryName)
+			CacheSet(domains, cacheTtl, directoryName, ok)
+			lane <- 0
+			return ok
 		})
 
 		ArchiveWithKeyChecker(archive, func(domain string, key string) bool {
+			lane := RoadWithLane(road, domain, key)
+			<-lane
 			fileName := filepath.Join(archive.name, domain, key)
-			return exists(fileName)
+			if CacheIsNotExpired(domains, fileName) {
+				value := CacheGet(domains, fileName)
+				lane <- 0
+				return value
+			}
+			ok := fileExists(fileName)
+			CacheSet(domains, cacheTtl, fileName, ok)
+			lane <- 0
+			return ok
+		})
+
+		ArchiveWithDomainRemover(archive, func(domain string) {
+			lane := RoadWithLane(road, domain)
+			<-lane
+			directoryName := filepath.Join(archive.name, domain)
+			removeError := os.RemoveAll(directoryName)
+			if nil != removeError {
+				NotifierSendError(archive.notifier, removeError)
+			}
+			CacheRemove(keys, directoryName)
+			lane <- 0
 		})
 
 		ArchiveWithKeyRemover(archive, func(domain string, key string) {
+			lane := RoadWithLane(road, domain, key)
+			<-lane
 			fileName := filepath.Join(archive.name, domain, key)
 			removeError := os.Remove(fileName)
 			if nil != removeError {
 				NotifierSendError(archive.notifier, removeError)
+				lane <- 0
+				return
 			}
-		})
-
-		ArchiveWithDomainChecker(archive, func(domain string) bool {
-			fileName := filepath.Join(archive.name, domain)
-			return exists(fileName)
-		})
-
-		ArchiveWithDomainRemover(archive, func(domain string) {
-			fileName := filepath.Join(archive.name, domain)
-			removeError := os.RemoveAll(fileName)
-			if nil != removeError {
-				NotifierSendError(archive.notifier, removeError)
-			}
+			CacheRemove(keys, fileName)
+			lane <- 0
 		})
 	})
 }
