@@ -63,18 +63,18 @@ func ViewReference(view string) *View {
 	}
 }
 
-// viewRender renders a view.
+// ViewRender renders a view.
 //
-// If the View is using RenderServer, then viewRender returns an HTML document.
+// If the View is using RenderServer, then ViewRender returns an HTML document.
 // The head of the document will contain *only* content declared with the <svelte:head> tag.
 // The body of the document will contain the fully rendered content of the view as HTML.
 //
-// If the View is using RenderClient, then viewRender returns an HTML document.
+// If the View is using RenderClient, then ViewRender returns an HTML document.
 // The document itself doesn't include any of the view content, instead, custom <script> tags are injected into the head of
 // the document in order to asynchronously load a client JavaScript bundle that renders the view inside the client's browser,
 // thus ultimately loading the content into the document.
 //
-// If the View is using RenderFull, then viewRender returns an HTML document.
+// If the View is using RenderFull, then ViewRender returns an HTML document.
 // The head of the document will contain any content declared with the <svelte:head> tag.
 // The body of the document will contain the fully rendered content of the view as HTML.
 // On top of that, just like when using RenderClient, custom <script> tags are also injected into the head of
@@ -82,9 +82,9 @@ func ViewReference(view string) *View {
 // view inside the client's browser.
 // In short, RenderFull is a combination of RenderServer and RenderClient.
 //
-// If the View is using RenderHeadless, then viewRender returns only the content of the view, without decorating it with an HTML document.
+// If the View is using RenderHeadless, then ViewRender returns only the content of the view, without decorating it with an HTML document.
 // The output won't even contain a header, ignoring all <svelte:head> declarations and all css.
-func viewRender(self *View) (content string, compileError error) {
+func ViewRender(self *View) (content string, compileError error) {
 	fileNameIndex := filepath.Join(".dist", "client", ".frizzante", "vite-project", "index.html")
 
 	var indexBytes []byte
@@ -122,7 +122,7 @@ func viewRender(self *View) (content string, compileError error) {
 	}
 
 	if RenderFull == self.render {
-		head, body, renderError := viewExecuteRenderServerJs(self, routerPropsString)
+		head, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
 		}
@@ -180,7 +180,7 @@ func viewRender(self *View) (content string, compileError error) {
 	}
 
 	if RenderServer == self.render {
-		head, body, renderError := viewExecuteRenderServerJs(self, routerPropsString)
+		head, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
 		}
@@ -208,7 +208,7 @@ func viewRender(self *View) (content string, compileError error) {
 	}
 
 	if RenderHeadless == self.render {
-		_, body, renderError := viewExecuteRenderServerJs(self, routerPropsString)
+		_, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 
 		if renderError != nil {
 			return "", renderError
@@ -221,13 +221,13 @@ func viewRender(self *View) (content string, compileError error) {
 	return "", nil
 }
 
-// viewExecuteRenderServerJs executes the `.dist/server/render.server.js` file
+// ViewExecuteRenderServerJs executes the `.dist/server/render.server.js` file
 // and returns the head of the document along with its body.
 //
 // If the environment variable DEV is set to 1, the file .dist/server/render.server.js is executed directly from the
-// local file system, otherwise viewExecuteRenderServerJs executes the file .dist/server/render.server.js located within the
+// local file system, otherwise ViewExecuteRenderServerJs executes the file .dist/server/render.server.js located within the
 // view's embedded file system.
-func viewExecuteRenderServerJs(self *View, stringifiedProps string) (head string, body string, jsError error) {
+func ViewExecuteRenderServerJs(self *View, stringifiedProps string) (head string, body string, jsError error) {
 	renderFileName := filepath.Join(".dist", "server", "render.server.js")
 
 	var renderEsmBytes []byte

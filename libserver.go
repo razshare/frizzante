@@ -1166,7 +1166,7 @@ func ResponseSendView(self *Response, view *View) {
 		notifier = self.server.notifier
 	}
 
-	content, compileError := viewRender(&View{
+	content, compileError := ViewRender(&View{
 		render:             view.render,
 		data:               view.data,
 		name:               view.name,
