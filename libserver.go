@@ -382,8 +382,8 @@ func routeCreateWithView(
 			response *Response,
 		) {
 			viewLocal := &View{
-				Render:     RenderFull,
-				Data:       map[string]any{},
+				render:     RenderFull,
+				data:       map[string]any{},
 				name:       view,
 				parameters: map[string]string{},
 			}
@@ -415,12 +415,12 @@ func routeCreateWithView(
 				return
 			}
 
-			if nil == viewLocal.Data {
-				viewLocal.Data = map[string]any{}
+			if nil == viewLocal.data {
+				viewLocal.data = map[string]any{}
 			}
 
 			if RequestVerifyAccept(request, "application/json") {
-				data, marshalError := json.Marshal(viewLocal.Data)
+				data, marshalError := json.Marshal(viewLocal.data)
 				if nil != marshalError {
 					NotifierSendError(request.server.notifier, marshalError)
 					return
@@ -504,10 +504,6 @@ func serverMapRoute(self *Server, pattern string, route *Route) {
 						if !response.lockedStatusAndHeader {
 							ResponseSendMessage(response, "")
 						}
-
-						for _, after := range response.after {
-							after()
-						}
 					}
 				})
 			})
@@ -516,10 +512,6 @@ func serverMapRoute(self *Server, pattern string, route *Route) {
 
 			if !response.lockedStatusAndHeader {
 				ResponseSendMessage(response, "")
-			}
-
-			for _, after := range response.after {
-				after()
 			}
 		}
 	})
@@ -549,7 +541,6 @@ type Response struct {
 	eventName             string
 	navigate              *navigate
 	eventId               int64
-	after                 []func()
 	context               map[string]any
 }
 
@@ -1155,8 +1146,8 @@ func ResponseSendView(self *Response, view *View) {
 	}
 
 	content, compileError := viewRender(&View{
-		Render:             view.Render,
-		Data:               view.Data,
+		render:             view.render,
+		data:               view.data,
 		name:               view.name,
 		parameters:         view.parameters,
 		functions:          view.functions,

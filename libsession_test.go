@@ -8,41 +8,28 @@ import (
 	"time"
 )
 
-type state struct {
-	name string
-}
+var memory = map[string]map[string][]byte{}
 
-var sessions = map[string]*state{}
-var operating = map[string]chan int{}
+// Memory builds sessions in memory.
+func Memory(session *Session) {
+	sessionId := SessionId(session)
+	memory[sessionId] = map[string][]byte{}
 
-func memory(session *Session[*state]) {
-	SessionWithLoadHandler(session, func() {
-		_, sessionExists := sessions[session.Id]
-		if !sessionExists {
-			sessions[session.Id] = &state{}
-			operating[session.Id] = make(chan int, 1)
-			operating[session.Id] <- 0
-		}
-
-		<-operating[session.Id]
-		session.State = sessions[session.Id]
-		operating[session.Id] <- 0
+	SessionWithGetHandler(session, func(key string) []byte {
+		return memory[sessionId][key]
 	})
 
-	SessionWithValidateHandler(session, func() bool {
-		return true
+	SessionWithSetHandler(session, func(key string, value []byte) {
+		memory[sessionId][key] = value
 	})
 
-	SessionWithSaveHandler(session, func() {
-		<-operating[session.Id]
-		sessions[session.Id] = session.State
-		operating[session.Id] <- 0
+	SessionWithHasHandler(session, func(key string) bool {
+		_, hasKey := memory[sessionId][key]
+		return hasKey
 	})
 
 	SessionWithDestroyHandler(session, func() {
-		<-operating[session.Id]
-		delete(sessions, session.Id)
-		operating[session.Id] <- 0
+		delete(memory, sessionId)
 	})
 }
 
@@ -53,20 +40,20 @@ func TestSessionStart(test *testing.T) {
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "GET /")
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart(request, response, memory)
+			session := SessionStart(request, response, Memory)
 
-			if "" == session.State.name {
-				session.State.name = "world"
+			if !SessionHas(session, "name") {
+				SessionSetString(session, "name", "world")
 			}
 
-			ResponseSendMessage(response, fmt.Sprintf("hello %s", session.State.name))
+			ResponseSendMessage(response, fmt.Sprintf("hello %s", SessionGetString(session, "name")))
 		})
 	})
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "POST /")
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart(request, response, memory)
-			session.State.name = RequestReceiveMessage(request)
+			session := SessionStart(request, response, Memory)
+			SessionSetString(session, "name", RequestReceiveMessage(request))
 			ResponseSendMessage(response, "")
 		})
 	})

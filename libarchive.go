@@ -1,7 +1,6 @@
 package frizzante
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -32,30 +31,9 @@ func ArchiveGet(self *Archive, domain string, key string) []byte {
 	return self.get(domain, key)
 }
 
-// ArchiveGetJson reads the combination of domain and key from the archive and unmarshals it as json.
-func ArchiveGetJson[T any](self *Archive, domain string, key string) T {
-	var value T
-	readBytes := self.get(domain, key)
-	unmarshalError := json.Unmarshal(readBytes, &value)
-	if nil != unmarshalError {
-		NotifierSendError(self.notifier, unmarshalError)
-	}
-	return value
-}
-
 // ArchiveSet writes to the combination of domain and key int the archive.
 func ArchiveSet(self *Archive, domain string, key string, value []byte) {
 	self.set(domain, key, value)
-}
-
-// ArchiveSetAsJson marshals content and writes to the combination of domain and key int the archive.
-func ArchiveSetAsJson(self *Archive, domain string, key string, content any) {
-	readBytes, marshalError := json.Marshal(content)
-	if nil != marshalError {
-		NotifierSendError(self.notifier, marshalError)
-		return
-	}
-	self.set(domain, key, readBytes)
 }
 
 // ArchiveHas checks if the combination of domain and key exists in the archive.

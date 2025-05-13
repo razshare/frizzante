@@ -30,8 +30,8 @@ type View struct {
 	parameters         map[string]string
 	notifier           *Notifier
 	embeddedFileSystem *embed.FS
-	Render             Render
-	Data               map[string]any
+	render             Render
+	data               map[string]any
 }
 
 var noScriptPattern = regexp.MustCompile(`<script.*>.*</script>`)
@@ -43,11 +43,21 @@ type ViewProps struct {
 	Parameters map[string]string `json:"parameters"`
 }
 
+// ViewWithRender sets the render mode of the view.
+func ViewWithRender(self *View, render Render) {
+	self.render = render
+}
+
+// ViewWithData injects data into the view.
+func ViewWithData(self *View, key string, value any) {
+	self.data[key] = value
+}
+
 // ViewReference references a view in lib/components/views.
 func ViewReference(view string) *View {
 	return &View{
 		name:       view,
-		Data:       map[string]any{},
+		data:       map[string]any{},
 		parameters: map[string]string{},
 		functions:  map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value{},
 	}
@@ -96,7 +106,7 @@ func viewRender(self *View) (content string, compileError error) {
 	routerPropsBytes, jsonError := json.Marshal(ViewProps{
 		Views:      components,
 		View:       self.name,
-		Data:       self.Data,
+		Data:       self.data,
 		Parameters: self.parameters,
 	})
 
@@ -111,7 +121,7 @@ func viewRender(self *View) (content string, compileError error) {
 		return "", targetIdError
 	}
 
-	if RenderFull == self.Render {
+	if RenderFull == self.render {
 		head, body, renderError := viewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
@@ -142,7 +152,7 @@ func viewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderClient == self.Render {
+	if RenderClient == self.render {
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
@@ -169,7 +179,7 @@ func viewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderServer == self.Render {
+	if RenderServer == self.render {
 		head, body, renderError := viewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
@@ -197,7 +207,7 @@ func viewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderHeadless == self.Render {
+	if RenderHeadless == self.render {
 		_, body, renderError := viewExecuteRenderServerJs(self, routerPropsString)
 
 		if renderError != nil {
