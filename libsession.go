@@ -5,6 +5,7 @@ import (
 	uuid "github.com/nu7hatch/gouuid"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -138,6 +139,26 @@ func SessionGetString(self *Session, key string) string {
 	return string(self.get(key))
 }
 
+// SessionSetString creates or updates a property as string.
+func SessionSetString(self *Session, key string, value string) {
+	self.set(key, []byte(value))
+}
+
+// SessionGetBool gets a property as bool.
+func SessionGetBool(self *Session, key string) bool {
+	value := strings.ToLower(string(self.get(key)))
+	return "1" == value || "true" == value
+}
+
+// SessionSetBool creates or updates a property as bool.
+func SessionSetBool(self *Session, key string, value bool) {
+	if value {
+		self.set(key, []byte("1"))
+		return
+	}
+	self.set(key, []byte("0"))
+}
+
 // SessionGetInt64 gets a property as int64.
 func SessionGetInt64(self *Session, key string) int64 {
 	value, conversionError := strconv.ParseInt(string(self.get(key)), 10, 64)
@@ -203,11 +224,6 @@ func SessionGetJson[T any](self *Session, key string) T {
 		NotifierSendError(self.request.server.notifier, unmarshalError)
 	}
 	return value
-}
-
-// SessionSetString creates or updates a property as string.
-func SessionSetString(self *Session, key string, value string) {
-	self.set(key, []byte(value))
 }
 
 // SessionSetJson creates or updates a property as json.
