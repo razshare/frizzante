@@ -21,7 +21,7 @@ type Session struct {
 	id        string
 }
 
-func sessionCreate(request *Request, response *Response, builder SessionBuilder) *Session {
+func sessionCreate(request *Request, response *Response) *Session {
 	uuidV4, sessionIdError := uuid.NewV4()
 
 	if sessionIdError != nil {
@@ -35,7 +35,7 @@ func sessionCreate(request *Request, response *Response, builder SessionBuilder)
 		id:       uuidV4.String(),
 	}
 
-	builder(session)
+	request.server.sessionBuilder(session)
 
 	if nil == session.get {
 		session.get = func(key string) []byte { return nil }
@@ -66,7 +66,7 @@ func sessionCreate(request *Request, response *Response, builder SessionBuilder)
 var sessions = map[string]*Session{}
 
 // SessionStart starts the session and returns its state.
-func SessionStart(request *Request, response *Response, builder SessionBuilder) *Session {
+func SessionStart(request *Request, response *Response) *Session {
 	var sessionIdCookie *http.Cookie
 	sessionIdCookies := request.httpRequest.CookiesNamed("session-id")
 	sessionIdCookiesLen := 0
@@ -78,7 +78,7 @@ func SessionStart(request *Request, response *Response, builder SessionBuilder) 
 
 	if 0 == sessionIdCookiesLen || nil == sessionIdCookie {
 		// Create new session.
-		return sessionCreate(request, response, builder)
+		return sessionCreate(request, response)
 	}
 
 	// Try to retrieve session.
@@ -91,7 +91,7 @@ func SessionStart(request *Request, response *Response, builder SessionBuilder) 
 			id:       sessionIdCookie.Value,
 		}
 
-		builder(session)
+		request.server.sessionBuilder(session)
 
 		if nil == session.get {
 			session.get = func(key string) []byte { return nil }

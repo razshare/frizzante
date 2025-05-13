@@ -37,10 +37,11 @@ func TestSessionStart(test *testing.T) {
 	server := ServerCreate()
 	port := NextNumber(8080)
 	ServerWithPort(server, port)
+	ServerWithSessionBuilder(server, Memory)
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "GET /")
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart(request, response, Memory)
+			session := SessionStart(request, response)
 
 			if !SessionHas(session, "name") {
 				SessionSetString(session, "name", "world")
@@ -52,7 +53,7 @@ func TestSessionStart(test *testing.T) {
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "POST /")
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart(request, response, Memory)
+			session := SessionStart(request, response)
 			SessionSetString(session, "name", RequestReceiveMessage(request))
 			ResponseSendMessage(response, "")
 		})

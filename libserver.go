@@ -39,10 +39,12 @@ type Server struct {
 	embeddedFileSystem     embed.FS
 	webSocketUpgrader      *websocket.Upgrader
 	entryCreated           bool
+	sessionBuilder         SessionBuilder
 }
 
 // ServerCreate creates a server.
 func ServerCreate() *Server {
+	archive := ArchiveCreateOnDisk(".sessions", time.Second/2)
 	notifier := NotifierCreate()
 	webSocketUpgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -65,6 +67,25 @@ func ServerCreate() *Server {
 		notifier:               notifier,
 		webSocketUpgrader:      webSocketUpgrader,
 		entryCreated:           false,
+		sessionBuilder: func(session *Session) {
+			sessionId := SessionId(session)
+
+			SessionWithGetHandler(session, func(key string) []byte {
+				return ArchiveGet(archive, sessionId, key)
+			})
+
+			SessionWithSetHandler(session, func(key string, value []byte) {
+				ArchiveSet(archive, sessionId, key, value)
+			})
+
+			SessionWithHasHandler(session, func(key string) bool {
+				return ArchiveHas(archive, sessionId, key)
+			})
+
+			SessionWithDestroyHandler(session, func() {
+				ArchiveRemoveDomain(archive, sessionId)
+			})
+		},
 	}
 }
 
@@ -1285,4 +1306,9 @@ func ServerWithPageBuilder(self *Server, builder PageBuilder) {
 		serverMapRoute(self, "GET "+path_, routeCreateWithView(page.base, page.guards, page.view.name))
 		serverMapRoute(self, "POST "+path_, routeCreateWithView(page.action, page.guards, page.view.name))
 	}
+}
+
+// ServerWithSessionBuilder sets the session builder.
+func ServerWithSessionBuilder(self *Server, builder SessionBuilder) {
+	self.sessionBuilder = builder
 }
