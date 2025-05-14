@@ -22,6 +22,7 @@ type NameMetadata struct {
 	FullFileNameCamel            string
 	FullFileNameTitle            string
 	RelativeFileNameCamel        string
+	RelativeFileNameTitle        string
 	BaseFileNameNoExtensionTitle string
 	BaseDirectoryName            string
 	BaseFileNameTitle            string
@@ -72,7 +73,7 @@ func findNameMetadata(root string, template string, name string, message string)
 			relativeFileNameTitle = relativeFileNameTitle + string(filepath.Separator) + strings.ToTitle(section[0:1]) + section[1:]
 		}
 	}
-	relativeFileNameTitle = relativeFileNameTitle + extensionName
+	relativeFileNameTitle = relativeFileNameTitle[1:] + extensionName
 
 	relativeFileNameCamel := ""
 	for _, pageNameChunked := range strings.Split(baseFileName, "_") {
@@ -89,6 +90,7 @@ func findNameMetadata(root string, template string, name string, message string)
 	metadata.FullFileNameCamel = fullFileNameCamel
 	metadata.FullFileNameTitle = fullFileNameTitle
 	metadata.RelativeFileNameCamel = relativeFileNameCamel
+	metadata.RelativeFileNameTitle = relativeFileNameTitle
 	metadata.RelativeFileNameTemplate = template
 	metadata.BaseDirectoryName = filepath.Base(metadata.FullDirectoryNameCamel)
 	metadata.BaseFileNameTitle = filepath.Base(metadata.FullFileNameTitle)
@@ -133,7 +135,7 @@ func createApi(apiName string) {
 		}
 	}
 
-	if fileExists(metadata.FullFileNameCamel) {
+	if fileExists(metadata.FullFileNameTitle) {
 		fmt.Printf("Api `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
 		createApi("")
 		return
@@ -151,7 +153,7 @@ func createApi(apiName string) {
 
 	// Pattern.
 	oldName = []byte("\"GET /\"")
-	newName = []byte("\"GET /api/" + strings.ReplaceAll(strings.TrimSuffix(metadata.RelativeFileNameCamel, ".go"), string(filepath.Separator), "/") + "\"")
+	newName = []byte("\"GET /Api/" + strings.ReplaceAll(strings.TrimSuffix(metadata.RelativeFileNameTitle, ".go"), string(filepath.Separator), "/") + "\"")
 	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
 	// Api.
@@ -159,7 +161,7 @@ func createApi(apiName string) {
 	newName = []byte("func " + metadata.BaseFileNameNoExtensionTitle + "(")
 	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
-	writeError := os.WriteFile(metadata.FullFileNameCamel, readBytes, os.ModePerm)
+	writeError := os.WriteFile(metadata.FullFileNameTitle, readBytes, os.ModePerm)
 	if writeError != nil {
 		log.Fatal(writeError)
 	}
@@ -175,7 +177,7 @@ func createPage(pageName string) {
 		}
 	}
 
-	if fileExists(metadata.FullFileNameCamel) {
+	if fileExists(metadata.FullFileNameTitle) {
 		fmt.Printf("Page `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
 		createPage("")
 		return
@@ -203,15 +205,15 @@ func createPage(pageName string) {
 
 	// Path.
 	oldName = []byte("\"/path\"")
-	newName = []byte("\"/" + strings.ReplaceAll(strings.TrimSuffix(metadata.RelativeFileNameCamel, ".go"), string(filepath.Separator), "/") + "\"")
+	newName = []byte("\"/" + strings.ReplaceAll(strings.TrimSuffix(metadata.RelativeFileNameTitle, ".go"), string(filepath.Separator), "/") + "\"")
 	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
 
-	writeError := os.WriteFile(metadata.FullFileNameCamel, readBytes, os.ModePerm)
+	writeError := os.WriteFile(metadata.FullFileNameTitle, readBytes, os.ModePerm)
 	if writeError != nil {
 		log.Fatal(writeError)
 	}
 
-	metadata.FullFileNameCamel = strings.TrimSuffix(metadata.FullFileNameCamel, ".go") + ".svelte"
+	metadata.FullFileNameTitle = strings.TrimSuffix(metadata.FullFileNameTitle, ".go") + ".svelte"
 	metadata.RelativeFileNameTemplate = strings.TrimSuffix(metadata.RelativeFileNameTemplate, ".go") + ".svelte"
 	metadata.RelativeFileNameCamel = strings.TrimSuffix(metadata.RelativeFileNameCamel, ".go") + ".svelte"
 	createViewComponent(metadata.Name)
