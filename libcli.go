@@ -244,8 +244,8 @@ func createViewComponent(pageName string) {
 	}
 }
 
-// Make makes things.
-func Make() {
+// Cli makes things.
+func Cli() {
 	api := flag.Bool("api", false, "")
 	page := flag.Bool("page", false, "")
 	name := flag.String("name", "", "")
