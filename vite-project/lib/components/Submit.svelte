@@ -19,7 +19,7 @@
     const path = getContext("path")
     /** @type {function(string):{view:string,parameters:Record<string,string>}} */
     const loadView = getContext("view")
-    /** @type {function(string,Record<string,string>,false|Record<string,any>)} */
+    /** @type {function(string,Record<string,string>,false|Record<string,any>):void} */
     const navigate = getContext("navigate")
     /** @type {Record<string,any>} */
     const data = getContext("data")

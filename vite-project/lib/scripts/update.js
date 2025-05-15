@@ -62,7 +62,7 @@ function fail(reason) {
 /**
  * @typedef UpdatePayload
  * @property {function(string):{view:string,parameters:Record<string,string>}} view
- * @property {function(string,Record<string,string>,false|Record<string,any>)} navigate
+ * @property {function(string,Record<string,string>,false|Record<string,any>):void} navigate
  * @property {Record<string,any>} data
  */
 
