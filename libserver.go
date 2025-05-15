@@ -724,9 +724,17 @@ func ResponseSendUnauthorized(self *Response) {
 	ResponseSendStatus(self, http.StatusUnauthorized)
 }
 
-// ResponseSendBadRequest tris to send an empty message with status 400 Bad Request.
+// ResponseSendBadRequest sends an empty message with status 400 Bad Request.
 func ResponseSendBadRequest(self *Response) {
 	ResponseSendStatus(self, http.StatusBadRequest)
+}
+
+// ResponseSendInternalServerError sends an error message with status 500 Internal Server Error
+// and also sends the error to the server notifier.
+func ResponseSendInternalServerError(self *Response, err error) {
+	NotifierSendError(self.server.notifier, err)
+	ResponseSendStatus(self, http.StatusBadRequest)
+	ResponseSendMessage(self, err.Error())
 }
 
 // ResponseSendForbidden sends an empty message with status 403 Forbidden.
