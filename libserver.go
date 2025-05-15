@@ -1206,7 +1206,7 @@ func ApiWithRequestHandler(self *Api, handler func(request *Request, response *R
 	self.handler = handler
 }
 
-// ApiWithGuardHandler add a guard handler.
+// ApiWithGuardHandler adds a guard handler.
 func ApiWithGuardHandler(self *Api, handler func(request *Request, response *Response, pass func())) {
 	self.guards = append(self.guards, handler)
 }
@@ -1266,7 +1266,7 @@ func PageWithActionHandler(self *Page, handler func(request *Request, response *
 	self.action = handler
 }
 
-// PageWithGuardHandler add a guard handler.
+// PageWithGuardHandler adds a guard handler.
 func PageWithGuardHandler(self *Page, handler func(request *Request, response *Response, pass func())) {
 	self.guards = append(self.guards, handler)
 }

@@ -65,7 +65,20 @@ func sessionCreate(request *Request, response *Response) *Session {
 
 var sessions = map[string]*Session{}
 
-// SessionStart starts the session and returns its state.
+// SessionStart starts the session and returns it.
+//
+// SessionStart reads the request's cookies and tries to find a "session-id" cookie.
+// If such a cookie references an existing session, it returns that session.
+//
+// Otherwise, SessionStart automatically creates a new session and returns it instead.
+// The new session does not include any data from the old session.
+//
+// Finally, SessionStart modifies the response by applying a "session-id" cookie,
+// referencing the session that's currently being used by the server.
+//
+// This means there can be cases where a client sends a "session-id" cookie of value "AAA"
+// but the server responds with a cookie "session-id" of value "BBB", meaning the client's
+// "AAA" session doesn't exist, thus the client should use session "BBB" instead.
 func SessionStart(request *Request, response *Response) *Session {
 	var sessionIdCookie *http.Cookie
 	sessionIdCookies := request.httpRequest.CookiesNamed("session-id")
