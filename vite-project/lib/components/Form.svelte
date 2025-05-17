@@ -2,32 +2,29 @@
     import {getContext} from "svelte";
     import {update} from "../scripts/update.js";
 
-    /** @type {function(string):string} */
-    const path = getContext("path")
-    /** @type {function(string):{view:string,parameters:Record<string,string>}} */
-    const loadView = getContext("view")
-    /** @type {function(string,Record<string,string>,false|Record<string,any>)} */
-    const navigate = getContext("navigate")
-    /** @type {Record<string,any>} */
+    /** @type {function(string):(function(Record<string,any>):void)} */
+    const findNavigateByPath = getContext("findNavigateByPath")
     const data = getContext("data")
+    const onsubmit = update({findNavigateByPath, data})
 
-    const onsubmit = update({view: loadView, navigate, data})
-
+    /** @type {function(string,Record<string,any>):string} */
+    const findPathByPageName = getContext("findPathByPageName")
     /**
      * @typedef Props
+     * @property {string} [page]
+     * @property {Record<string,string>} [parameters]
      * @property {import("svelte").Snippet} children
-     * @property {string} [view]
      */
 
     /** @type {Props} */
-    let {children, view = '', ...rest} = $props()
-
-    if ('' !== view) {
-        view = path(view)
-    }
-
+    let {
+        page = '',
+        parameters = {},
+        children,
+        ...rest
+    } = $props()
 </script>
 
-<form method="POST" action={view} {...rest} {onsubmit}>
+<form method="POST" action={findPathByPageName(page, parameters)} {...rest} {onsubmit}>
     {@render children()}
 </form>

@@ -3,75 +3,52 @@
     import {setContext} from "svelte";
 
     /**
+     * @typedef PageMetadata
+     * @property {string} path
+     * @property {string} viewName
+     */
+
+    /**
      * @typedef Props
-     * @property {string} view
+     * @property {string} pageName
      * @property {Record<string,any>} data
-     * @property {Record<string,string>} views
-     * @property {Record<string,string>} parameters
+     * @property {Record<string,PageMetadata>} pagesMetadata
      */
 
     /** @type {Props} */
-    let {view, data, views, parameters} = $props()
-    let viewState = $state(view)
+    let {pageName, data, pagesMetadata} = $props()
+    let pageNameState = $state(pageName)
     let dataState = $state({...data})
     let navCounterPrevious = 0
     setContext("data", dataState)
-    setContext("navigate",
-        /**
-         * @param {string} view
-         * @param {Record<string,string>} [parameters]
-         * @param {false|Record<string,any>} [data]
-         */
-        function (view, parameters, data = false) {
-            navigate(view, "push", parameters, data)
-        }
-    )
-    setContext("path", path)
-    setContext("view", _view)
-
-    window.history.replaceState({
-        ...(window.history.state ?? {}),
-        view,
-        parameters,
-        navCounter: navCounterPrevious,
-    }, "", `${document.location.pathname}${document.location.hash}${document.location.search}`)
-
-    window.addEventListener("popstate", (e) => {
-        e.preventDefault()
-        const viewLocal = e.state?.view ?? ""
-        const parameters = e.state?.parameters ?? {}
-        const navCounterLocal = e.state?.navCounter ?? 0
-        if (navCounterLocal < navCounterPrevious) {
-            navigate(viewLocal, "back", parameters)
-            navCounterPrevious = navCounterLocal
-        } else if (navCounterLocal > navCounterPrevious) {
-            navigate(viewLocal, "forward", parameters)
-            navCounterPrevious = navCounterLocal
-        } else {
-            navigate(viewLocal, "push", parameters)
-        }
-    });
+    setContext("navigate", navigate)
+    setContext("findPathByPageName", findPathByPageName)
+    setContext("findNavigateByPath", findNavigateByPath)
 
     /**
-     * @param {string} string
+     * @param {string} pageName
+     * @param {Record<string,string>} [parameters]
+     * @param {false|Record<string,any>} [data]
      */
-    function escapeRegExp(string) {
-        return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+    function navigate(pageName, parameters, data = false) {
+        swap(pageName, "push", parameters, data)
     }
 
     /**
-     * @param {string} view
+     * @param {string} pageName
      * @param {Record<string,string>} [parameters]
+     * @returns {string}
      */
-    function path(view, parameters = {}) {
-        let result = views[view] ?? ""
-        if (!views[view]) {
+    function findPathByPageName(pageName, parameters = {}) {
+        if (!pagesMetadata[pageName]) {
             return ""
         }
 
+        let result = pagesMetadata[pageName].path ?? ""
+
         for (let key in parameters) {
             const value = parameters[key]
-            const regex = escapeRegExp(`{${key}}`)
+            const regex = `{${key}}`.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
             result = result.replaceAll(new RegExp(regex, "g"), value)
         }
 
@@ -80,12 +57,12 @@
 
     /**
      * @param {string} path
-     * @returns {{view:string,parameters:Record<string,string>}}
+     * @returns {function(Record<string,any>):void}
      */
-    function _view(path) {
+    function findNavigateByPath(path) {
         const partsGiven = path.split("/")
-        for (const view in views) {
-            const pathExpected = views[view]
+        for (const pageName in pagesMetadata) {
+            const pathExpected = pagesMetadata[pageName].path
             const partsExpected = pathExpected.split("/")
             if (partsExpected.length !== partsGiven.length) {
                 continue
@@ -100,13 +77,13 @@
                 const givenAndExpectedAreDifferent = partsGiven[index] !== partsExpected[index]
 
                 if (givenAndExpectedAreDifferent) {
-                    if(!expectedIsParameter){
+                    if (!expectedIsParameter) {
                         ok = false
                         break
                     }
-                    const key = partsExpected[index].substring(0,partsExpected[index].length-1).substring(1)
+                    const key = partsExpected[index].substring(0, partsExpected[index].length - 1).substring(1)
                     parameters[key] = partsGiven[index]
-                } else if(expectedIsParameter) {
+                } else if (expectedIsParameter) {
                     // Given part and expected part cannot be equal while expected part is a parameter.
                     // We reject that.
                     ok = false
@@ -115,42 +92,39 @@
             }
 
             if (ok) {
-                return {
-                    view,
-                    parameters,
+                return function (data) {
+                    swap(pageName, "push", parameters,  data)
                 }
             }
         }
 
-        return {
-            view: "",
-            parameters: {}
+        return function () {
         }
     }
 
     /**
      *
-     * @param {string} view
+     * @param {string} pageName
      * @param {"back"|"forward"|"push"} modifier
      * @param {Record<string,string>} [parameters]
      * @param {false|Record<string,any>} [data]
      */
-    function navigate(view, modifier, parameters, data = false) {
-        if (!views[view]) {
+    function swap(pageName, modifier, parameters, data = false) {
+        if (!pagesMetadata[pageName]) {
             return
         }
 
-        const pathLocal = path(view, parameters)
+        const pathLocal = findPathByPageName(pageName, parameters)
         if ("push" === modifier) {
             window.history.pushState({
-                view,
+                pageName,
                 parameters,
                 navCounter: ++navCounterPrevious,
             }, "", pathLocal);
         }
-        viewState = view
+        pageNameState = pageName
 
-        if(false !== data){
+        if (false !== data) {
             return
         }
 
@@ -166,6 +140,22 @@
             }
         })
     }
+
+    window.addEventListener("popstate", (e) => {
+        e.preventDefault()
+        const viewLocal = e.state?.pageName ?? ""
+        const parameters = e.state?.parameters ?? {}
+        const navCounterLocal = e.state?.navCounter ?? 0
+        if (navCounterLocal < navCounterPrevious) {
+            swap(viewLocal, "back", parameters)
+            navCounterPrevious = navCounterLocal
+        } else if (navCounterLocal > navCounterPrevious) {
+            swap(viewLocal, "forward", parameters)
+            navCounterPrevious = navCounterLocal
+        } else {
+            swap(viewLocal, "push", parameters)
+        }
+    });
 </script>
 
 <!--app-router-->

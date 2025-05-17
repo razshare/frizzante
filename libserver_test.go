@@ -79,7 +79,7 @@ func TestServerWithCertificateAndKey(test *testing.T) {
 
 func TestServerWithEmbeddedFileSystem(test *testing.T) {
 	server := ServerCreate()
-	expected := embeddedFileSystem
+	expected := &embeddedFileSystem
 	ServerWithEmbeddedFileSystem(server, expected)
 	actual := server.embeddedFileSystem
 	if actual != expected {

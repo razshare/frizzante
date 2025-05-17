@@ -7,6 +7,10 @@ import (
 	"time"
 )
 
+type WelcomeData struct {
+	Name string `json:"name"`
+}
+
 func TestRenderServer(test *testing.T) {
 	server := ServerCreate()
 	notifier := NotifierCreate()
@@ -14,13 +18,16 @@ func TestRenderServer(test *testing.T) {
 	ServerWithPort(server, port)
 	ServerWithHostName(server, "127.0.0.1")
 	ServerWithNotifier(server, notifier)
-	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
-	ServerWithPageBuilder(server, func(page *Page) {
+	ServerWithEmbeddedFileSystem(server, &embeddedFileSystem)
+	ServerWithPageBuilder(server, func(page *Page[WelcomeData]) {
 		PageWithPath(page, "/")
-		PageWithView(page, ViewReference("Welcome"))
-		PageWithBaseHandler(page, func(request *Request, response *Response, view *View) {
-			view.render = RenderServer
-			view.data["name"] = "world"
+		PageWithName(page, "Welcome")
+		PageWithView(page, "Welcome", func() WelcomeData {
+			return WelcomeData{}
+		})
+		PageWithBaseHandler(page, func(request *Request, response *Response, view *View[WelcomeData]) {
+			view.Render = RenderServer
+			view.Data.Name = "world"
 		})
 	})
 	go ServerStart(server)
@@ -46,13 +53,16 @@ func TestRenderClient(test *testing.T) {
 	ServerWithPort(server, port)
 	ServerWithNotifier(server, notifier)
 	ServerWithHostName(server, "127.0.0.1")
-	ServerWithEmbeddedFileSystem(server, embeddedFileSystem)
-	ServerWithPageBuilder(server, func(page *Page) {
+	ServerWithEmbeddedFileSystem(server, &embeddedFileSystem)
+	ServerWithPageBuilder(server, func(page *Page[WelcomeData]) {
 		PageWithPath(page, "/")
-		PageWithView(page, ViewReference("Welcome"))
-		PageWithBaseHandler(page, func(request *Request, response *Response, view *View) {
-			view.render = RenderClient
-			view.data["name"] = "world"
+		PageWithName(page, "Welcome")
+		PageWithView(page, "Welcome", func() WelcomeData {
+			return WelcomeData{}
+		})
+		PageWithBaseHandler(page, func(request *Request, response *Response, view *View[WelcomeData]) {
+			view.Render = RenderClient
+			view.Data.Name = "world"
 		})
 	})
 	go ServerStart(server)

@@ -12,160 +12,63 @@ import (
 //go:embed vite-project/*
 var viteProject embed.FS
 
-// Prepare prepares the `.frizzante` directory.
-func Prepare() {
-	// Prepare lib.
-	err := prepareLib()
-	if err != nil {
-		log.Fatal(err)
+func findLibrary(directoryName string) (map[string][]byte, error) {
+	contents := map[string][]byte{}
+	entries, readDirError := viteProject.ReadDir(directoryName)
+	if readDirError != nil {
+		return nil, readDirError
 	}
 
-	// Prepare view.
-	err = prepareViews()
-	if err != nil {
-		log.Fatal(err)
+	for _, entry := range entries {
+		fileName := filepath.Join(directoryName, entry.Name())
+		if entry.IsDir() {
+			innerContents, findError := findLibrary(fileName)
+			if nil != findError {
+				return nil, findError
+			}
+
+			for key, value := range innerContents {
+				contents[key] = value
+			}
+			continue
+		}
+		readBytes, readError := viteProject.ReadFile(fileName)
+		if readError != nil {
+			return nil, readError
+		}
+		contents[fileName] = readBytes
 	}
 
-	// Prepare vite-project/render.server.svelte.
-	err = prepareSsr()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Prepare vite-project/render.client.svelte.
-	err = prepareCsr()
-	if err != nil {
-		log.Fatal(err)
-	}
+	return contents, nil
 }
 
-func prepareLib() error {
-	asyncSvelte, asyncSvelteError := viteProject.ReadFile("vite-project/view.async.svelte")
-	if asyncSvelteError != nil {
-		return asyncSvelteError
-	}
+func dumpLibrary(library map[string][]byte) error {
+	for relativeFileName, content := range library {
+		fileName := filepath.Join(".frizzante", relativeFileName)
+		directoryName := filepath.Dir(fileName)
 
-	indexHtml, indexHtmlError := viteProject.ReadFile("vite-project/index.html")
-	if indexHtmlError != nil {
-		return indexHtmlError
-	}
-
-	renderClientJs, renderClientJsError := viteProject.ReadFile("vite-project/render.client.js")
-	if renderClientJsError != nil {
-		return renderClientJsError
-	}
-
-	renderServerJs, renderServerJsError := viteProject.ReadFile("vite-project/render.server.js")
-	if renderServerJsError != nil {
-		return renderServerJsError
-	}
-
-	formSvelte, formSvelteError := viteProject.ReadFile("vite-project/lib/components/Form.svelte")
-	if formSvelteError != nil {
-		return formSvelteError
-	}
-
-	submitSvelte, submitSvelteError := viteProject.ReadFile("vite-project/lib/components/Submit.svelte")
-	if submitSvelteError != nil {
-		return submitSvelteError
-	}
-
-	linkSvelte, linkSvelteError := viteProject.ReadFile("vite-project/lib/components/Link.svelte")
-	if linkSvelteError != nil {
-		return linkSvelteError
-	}
-
-	updateJs, updateJsError := viteProject.ReadFile("vite-project/lib/scripts/update.js")
-	if updateJsError != nil {
-		return updateJsError
-	}
-
-	uuidJs, uuidJsError := viteProject.ReadFile("vite-project/lib/scripts/uuid.js")
-	if uuidJsError != nil {
-		return uuidJsError
-	}
-
-	if !fileExists(".frizzante/vite-project") {
-		err := os.MkdirAll(".frizzante/vite-project", os.ModePerm)
-		if err != nil {
-			return err
+		if !fileExists(directoryName) {
+			mkdirError := os.MkdirAll(directoryName, os.ModePerm)
+			if mkdirError != nil {
+				return mkdirError
+			}
 		}
-	}
 
-	err := os.WriteFile(".frizzante/vite-project/view.async.svelte", asyncSvelte, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(".frizzante/vite-project/index.html", indexHtml, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(".frizzante/vite-project/render.client.js", renderClientJs, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(".frizzante/vite-project/render.server.js", renderServerJs, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	if !fileExists(".frizzante/vite-project/lib/components") {
-		err = os.MkdirAll(".frizzante/vite-project/lib/components", os.ModePerm)
-		if err != nil {
-			return err
-		}
-	}
-
-	if !fileExists(".frizzante/vite-project/lib/scripts") {
-		err = os.MkdirAll(".frizzante/vite-project/lib/scripts", os.ModePerm)
-		if err != nil {
-			return err
-		}
-	}
-
-	err = os.WriteFile(".frizzante/vite-project/lib/components/Form.svelte", formSvelte, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(".frizzante/vite-project/lib/components/Submit.svelte", submitSvelte, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(".frizzante/vite-project/lib/components/Link.svelte", linkSvelte, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(".frizzante/vite-project/lib/scripts/update.js", updateJs, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	err = os.WriteFile(".frizzante/vite-project/lib/scripts/uuid.js", uuidJs, os.ModePerm)
-	if err != nil {
-		return err
-	}
-
-	if !fileExists(".frizzante/vite-project") {
-		err = os.MkdirAll(".frizzante/vite-project", os.ModePerm)
-		if err != nil {
-			return err
+		writeError := os.WriteFile(fileName, content, os.ModePerm)
+		if writeError != nil {
+			return writeError
 		}
 	}
 
 	return nil
 }
 
-func prepareViews() error {
+func findViews() (map[string]string, error) {
 	libViews := filepath.Join("lib", "components", "views")
 	sep := string(filepath.Separator)
 	suffix := ".svelte"
-	return filepath.Walk(
+	views := map[string]string{}
+	walkError := filepath.Walk(
 		libViews,
 		func(fileName string, info os.FileInfo, err error) error {
 			if err != nil {
@@ -178,41 +81,47 @@ func prepareViews() error {
 
 			fileNameBase := strings.Trim(strings.TrimPrefix(fileName, libViews), sep)
 			view := strings.TrimSuffix(strings.ReplaceAll(fileNameBase, sep, "."), ".svelte")
-
 			importFileName, err := filepath.Rel(".frizzante/vite-project", fileName)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
-			components[view] = fmt.Sprintf("./%s", importFileName)
 
+			views[view] = fmt.Sprintf("./%s", importFileName)
 			return nil
 		},
 	)
+
+	if walkError != nil {
+		return nil, walkError
+	}
+
+	return views, nil
 }
 
-func prepareSsr() error {
+func dumpSsr(views map[string]string) error {
 	var builder strings.Builder
 	renderServerSvelte, readError := viteProject.ReadFile("vite-project/render.server.svelte")
 	if readError != nil {
 		return readError
 	}
-	for component, fileName := range components {
-		viewAsComponentName := strings.ToUpper(strings.ReplaceAll(component, ".", "_"))
-		builder.WriteString(fmt.Sprintf("    import %s from '%s'\n", viewAsComponentName, fileName))
+
+	for view, fileName := range views {
+		componentName := strings.ToUpper(strings.ReplaceAll(view, ".", "_"))
+		builder.WriteString(fmt.Sprintf("    import %s from './%s'\n", componentName, fileName))
 	}
 
 	renderServerSvelteString := strings.Replace(string(renderServerSvelte), "//:app-imports", builder.String(), 1)
 
 	builder.Reset()
 	counter := 0
-	for view, _ := range components {
-		viewAsComponentName := strings.ReplaceAll(view, ".", "_")
+	for viewName, _ := range views {
+		componentName := strings.ReplaceAll(viewName, ".", "_")
 		if 0 == counter {
-			builder.WriteString(fmt.Sprintf("{#if '%s' === view}\n", view))
+			builder.WriteString(fmt.Sprintf("{#if '%s' === pagesMetadata[pageName].viewName}\n", viewName))
 		} else {
-			builder.WriteString(fmt.Sprintf("{:else if '%s' === view}\n", view))
+			builder.WriteString(fmt.Sprintf("{:else if '%s' === pagesMetadata[pageName].viewName}\n", viewName))
 		}
-		builder.WriteString(fmt.Sprintf("    <%s />\n", strings.ToUpper(viewAsComponentName)))
+		builder.WriteString(fmt.Sprintf("    <%s />\n", strings.ToUpper(componentName)))
 		counter++
 	}
 	if counter > 0 {
@@ -228,7 +137,7 @@ func prepareSsr() error {
 	return nil
 }
 
-func prepareCsr() error {
+func dumpCsr(views map[string]string) error {
 	// Build client loader.
 	renderClientSvelte, readError := viteProject.ReadFile("vite-project/render.client.svelte")
 	if readError != nil {
@@ -241,13 +150,13 @@ func prepareCsr() error {
 
 	builder.Reset()
 	counter := 0
-	for view, fileName := range components {
+	for viewName, fileName := range views {
 		if 0 == counter {
-			builder.WriteString(fmt.Sprintf("{#if '%s' === viewState}\n", view))
+			builder.WriteString(fmt.Sprintf("{#if '%s' === pagesMetadata[pageNameState].viewName}\n", viewName))
 		} else {
-			builder.WriteString(fmt.Sprintf("{:else if '%s' === viewState}\n", view))
+			builder.WriteString(fmt.Sprintf("{:else if '%s' === pagesMetadata[pageNameState].viewName}\n", viewName))
 		}
-		builder.WriteString(fmt.Sprintf("    <View from={import('%s')} />\n", fileName))
+		builder.WriteString(fmt.Sprintf("    <View from={import('./%s')} />\n", fileName))
 		counter++
 	}
 	if counter > 0 {
@@ -262,4 +171,37 @@ func prepareCsr() error {
 	}
 
 	return nil
+}
+
+// Prepare prepares the `.frizzante` directory.
+func Prepare() {
+	// Find library.
+	library, libraryError := findLibrary("vite-project")
+	if nil != libraryError {
+		log.Fatal(libraryError)
+	}
+
+	// Dump library.
+	err := dumpLibrary(library)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Find views.
+	views, viewsError := findViews()
+	if nil != viewsError {
+		log.Fatal(viewsError)
+	}
+
+	// Dump vite-project/render.server.svelte.
+	err = dumpSsr(views)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Dump vite-project/render.client.svelte.
+	err = dumpCsr(views)
+	if err != nil {
+		log.Fatal(err)
+	}
 }

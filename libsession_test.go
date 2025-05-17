@@ -8,24 +8,28 @@ import (
 	"time"
 )
 
-var memory = map[string]map[string][]byte{}
+type State struct {
+	Name string
+}
+
+var memory = map[string]State{}
 
 // Memory builds sessions in memory.
-func Memory(session *Session) {
-	sessionId := SessionId(session)
-	memory[sessionId] = map[string][]byte{}
+func Memory(session *Session[State]) {
+	sessionId := session.Id
+	memory[sessionId] = State{}
 
-	SessionWithGetHandler(session, func(key string) []byte {
-		return memory[sessionId][key]
+	SessionWithExistsHandler(session, func() bool {
+		_, exists := memory[sessionId]
+		return exists
 	})
 
-	SessionWithSetHandler(session, func(key string, value []byte) {
-		memory[sessionId][key] = value
+	SessionWithLoadHandler(session, func() {
+		session.Data = memory[sessionId]
 	})
 
-	SessionWithHasHandler(session, func(key string) bool {
-		_, hasKey := memory[sessionId][key]
-		return hasKey
+	SessionWithSaveHandler(session, func() {
+		memory[sessionId] = session.Data
 	})
 
 	SessionWithDestroyHandler(session, func() {
@@ -37,24 +41,23 @@ func TestSessionStart(test *testing.T) {
 	server := ServerCreate()
 	port := NextNumber(8080)
 	ServerWithPort(server, port)
-	ServerWithSessionBuilder(server, Memory)
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "GET /")
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart(request, response)
+			session := SessionStart(request, response, Memory)
 
-			if !SessionHas(session, "name") {
-				SessionSetString(session, "name", "world")
+			if "" == session.Data.Name {
+				session.Data.Name = "world"
 			}
 
-			ResponseSendMessage(response, fmt.Sprintf("hello %s", SessionGetString(session, "name")))
+			ResponseSendMessage(response, fmt.Sprintf("hello %s", session.Data.Name))
 		})
 	})
 	ServerWithApiBuilder(server, func(api *Api) {
 		ApiWithPattern(api, "POST /")
 		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart(request, response)
-			SessionSetString(session, "name", RequestReceiveMessage(request))
+			session := SessionStart(request, response, Memory)
+			session.Data.Name = RequestReceiveMessage(request)
 			ResponseSendMessage(response, "")
 		})
 	})

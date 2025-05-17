@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-type Render int64
+type Render int
 
 const (
 	RenderServer   Render = 0 // Renders only on the server.
@@ -22,45 +22,37 @@ const (
 	RenderHeadless Render = 3 // Renders only on the server and omits the base template.
 )
 
-var components = map[string]string{}
+type ViewDataInitializer[T any] = func() T
 
-type View struct {
+type View[T any] struct {
 	name               string
 	functions          map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value
-	parameters         map[string]string
-	notifier           *Notifier
 	embeddedFileSystem *embed.FS
-	render             Render
-	data               map[string]any
+	dataInitializer    ViewDataInitializer[T]
+	Render             Render
+	Data               T
+}
+
+type ViewProps[T any] struct {
+	PageName      string                  `json:"pageName"`
+	Data          T                       `json:"data"`
+	PagesMetadata map[string]PageMetadata `json:"pagesMetadata"`
 }
 
 var noScriptPattern = regexp.MustCompile(`<script.*>.*</script>`)
 
-type ViewProps struct {
-	View       string            `json:"view"`
-	Data       map[string]any    `json:"data"`
-	Views      map[string]string `json:"views"`
-	Parameters map[string]string `json:"parameters"`
-}
-
-// ViewWithRender sets the render mode of the view.
-func ViewWithRender(self *View, render Render) {
-	self.render = render
-}
-
-// ViewWithData injects data into the view.
-func ViewWithData(self *View, key string, value any) {
-	self.data[key] = value
-}
-
-// ViewReference references a view in lib/components/views.
-func ViewReference(view string) *View {
-	return &View{
-		name:       view,
-		data:       map[string]any{},
-		parameters: map[string]string{},
-		functions:  map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value{},
+// ViewCreate creates a view.
+func ViewCreate[T any](name string, initializer ViewDataInitializer[T]) (*View[T], error) {
+	if "" == name {
+		return nil, fmt.Errorf("view name cannot be empty")
 	}
+	return &View[T]{
+		name:            name,
+		functions:       map[string]func(info *v8go.FunctionCallbackInfo) *v8go.Value{},
+		dataInitializer: initializer,
+		Render:          RenderFull,
+		Data:            initializer(),
+	}, nil
 }
 
 // ViewRender renders a view.
@@ -84,7 +76,7 @@ func ViewReference(view string) *View {
 //
 // If the View is using RenderHeadless, then ViewRender returns only the content of the view, without decorating it with an HTML document.
 // The output won't even contain a header, ignoring all <svelte:head> declarations and all css.
-func ViewRender(self *View) (content string, compileError error) {
+func ViewRender[T any](self *View[T]) (content string, compileError error) {
 	fileNameIndex := filepath.Join(".dist", "client", ".frizzante", "vite-project", "index.html")
 
 	var indexBytes []byte
@@ -103,11 +95,10 @@ func ViewRender(self *View) (content string, compileError error) {
 		indexBytes = indexBytesLocal
 	}
 
-	routerPropsBytes, jsonError := json.Marshal(ViewProps{
-		Views:      components,
-		View:       self.name,
-		Data:       self.data,
-		Parameters: self.parameters,
+	routerPropsBytes, jsonError := json.Marshal(ViewProps[T]{
+		PagesMetadata: pages,
+		PageName:      self.name,
+		Data:          self.Data,
 	})
 
 	if jsonError != nil {
@@ -121,7 +112,7 @@ func ViewRender(self *View) (content string, compileError error) {
 		return "", targetIdError
 	}
 
-	if RenderFull == self.render {
+	if RenderFull == self.Render {
 		head, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
@@ -152,7 +143,7 @@ func ViewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderClient == self.render {
+	if RenderClient == self.Render {
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
@@ -179,7 +170,7 @@ func ViewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderServer == self.render {
+	if RenderServer == self.Render {
 		head, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 		if renderError != nil {
 			return "", renderError
@@ -207,7 +198,7 @@ func ViewRender(self *View) (content string, compileError error) {
 		), nil
 	}
 
-	if RenderHeadless == self.render {
+	if RenderHeadless == self.Render {
 		_, body, renderError := ViewExecuteRenderServerJs(self, routerPropsString)
 
 		if renderError != nil {
@@ -227,7 +218,7 @@ func ViewRender(self *View) (content string, compileError error) {
 // If the environment variable DEV is set to 1, the file .dist/server/render.server.js is executed directly from the
 // local file system, otherwise ViewExecuteRenderServerJs executes the file .dist/server/render.server.js located within the
 // view's embedded file system.
-func ViewExecuteRenderServerJs(self *View, stringifiedProps string) (head string, body string, jsError error) {
+func ViewExecuteRenderServerJs[T any](self *View[T], stringifiedProps string) (head string, body string, jsError error) {
 	renderFileName := filepath.Join(".dist", "server", "render.server.js")
 
 	var renderEsmBytes []byte
@@ -318,4 +309,9 @@ func ViewExecuteRenderServerJs(self *View, stringifiedProps string) (head string
 	}
 
 	return head, body, nil
+}
+
+// ViewWithEmbeddedFileSystem sets the embedded file system.
+func ViewWithEmbeddedFileSystem[T any](self *View[T], embeddedFileSystem *embed.FS) {
+	self.embeddedFileSystem = embeddedFileSystem
 }

@@ -1,20 +1,14 @@
 package frizzante
 
 import (
-	"bytes"
 	"context"
 	"embed"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"io"
 	"log"
 	"net"
 	"net/http"
-	"net/url"
-	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -36,21 +30,18 @@ type Server struct {
 	certificate            string
 	certificateKey         string
 	notifier               *Notifier
-	embeddedFileSystem     embed.FS
+	embeddedFileSystem     *embed.FS
 	webSocketUpgrader      *websocket.Upgrader
 	entryCreated           bool
-	sessionBuilder         SessionBuilder
 }
 
 // ServerCreate creates a server.
 func ServerCreate() *Server {
-	archive := ArchiveCreateOnDisk(".sessions", time.Second/2)
 	notifier := NotifierCreate()
 	webSocketUpgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
-
 	return &Server{
 		hostName:               "127.0.0.1",
 		port:                   8081,
@@ -67,25 +58,6 @@ func ServerCreate() *Server {
 		notifier:               notifier,
 		webSocketUpgrader:      webSocketUpgrader,
 		entryCreated:           false,
-		sessionBuilder: func(session *Session) {
-			sessionId := SessionId(session)
-
-			SessionWithGetHandler(session, func(key string) []byte {
-				return ArchiveGet(archive, sessionId, key)
-			})
-
-			SessionWithSetHandler(session, func(key string, value []byte) {
-				ArchiveSet(archive, sessionId, key, value)
-			})
-
-			SessionWithHasHandler(session, func(key string) bool {
-				return ArchiveHas(archive, sessionId, key)
-			})
-
-			SessionWithDestroyHandler(session, func() {
-				ArchiveRemoveDomain(archive, sessionId)
-			})
-		},
 	}
 }
 
@@ -146,141 +118,13 @@ func ServerWithCertificateAndKey(self *Server, certificate string, key string) {
 //
 // The embedded file system should contain at least directory ".dist" so
 // that the server can properly render and serve svelte components.
-func ServerWithEmbeddedFileSystem(self *Server, embeddedFileSystem embed.FS) {
+func ServerWithEmbeddedFileSystem(self *Server, embeddedFileSystem *embed.FS) {
 	self.embeddedFileSystem = embeddedFileSystem
 }
 
 // ServerWithNotifier sets the server notifier.
 func ServerWithNotifier(self *Server, notifier *Notifier) {
 	self.notifier = notifier
-}
-
-// RequestReceiveCancellation returns a channel that's closed when the request is cancelled.
-func RequestReceiveCancellation(self *Request) <-chan struct{} {
-	return self.httpRequest.Context().Done()
-}
-
-// RequestReceiveCookie reads the contents of a cookie from the message and returns the value.
-//
-// Compatible with web sockets.
-func RequestReceiveCookie(self *Request, key string) string {
-	cookie, cookieError := self.httpRequest.Cookie(key)
-	if nil != cookieError {
-		NotifierSendError(self.server.notifier, cookieError)
-		return ""
-	}
-	value, unescapeError := url.QueryUnescape(cookie.Value)
-	if nil != unescapeError {
-		return ""
-	}
-
-	return value
-}
-
-// RequestReceiveMessage reads the contents of the message and returns the value.
-//
-// Compatible with web sockets.
-func RequestReceiveMessage(self *Request) string {
-	if self.webSocketConn != nil {
-		_, readBytes, readError := self.webSocketConn.ReadMessage()
-		if nil != readError {
-			NotifierSendError(self.server.notifier, readError)
-			return ""
-		}
-		return string(readBytes)
-	}
-
-	readBytes, readAllError := io.ReadAll(self.httpRequest.Body)
-	if nil != readAllError {
-		NotifierSendError(self.server.notifier, readAllError)
-		return ""
-	}
-	return string(readBytes)
-}
-
-// RequestReceiveJson reads the message as json and returns the value and a boolean,
-// which indicates success or failure.
-//
-// Compatible with web sockets.
-func RequestReceiveJson[T any](self *Request) *T {
-	var value T
-	if self.webSocketConn != nil {
-		jsonError := self.webSocketConn.ReadJSON(value)
-		if nil != jsonError {
-			NotifierSendError(self.server.notifier, jsonError)
-			return nil
-		}
-		return &value
-	}
-
-	readBytes, readAllError := io.ReadAll(self.httpRequest.Body)
-	if nil != readAllError {
-		NotifierSendError(self.server.notifier, readAllError)
-		return nil
-	}
-	unmarshalError := json.Unmarshal(readBytes, &value)
-	if nil != unmarshalError {
-		NotifierSendError(self.server.notifier, unmarshalError)
-		return nil
-	}
-	return &value
-}
-
-// RequestReceiveForm reads the message as a form and returns the value.
-func RequestReceiveForm(self *Request) *url.Values {
-	if self.webSocketConn != nil {
-		NotifierSendError(self.server.notifier, errors.New("web socket connections cannot receive form payloads"))
-		return &url.Values{}
-	}
-
-	parseMultipartFormError := self.httpRequest.ParseMultipartForm(self.server.multipartFormMaxMemory)
-	if nil != parseMultipartFormError {
-		if !errors.Is(parseMultipartFormError, http.ErrNotMultipart) {
-			NotifierSendError(self.server.notifier, parseMultipartFormError)
-		}
-
-		parseFormError := self.httpRequest.ParseForm()
-		if nil != parseFormError {
-			NotifierSendError(self.server.notifier, parseFormError)
-		}
-	}
-
-	return &self.httpRequest.Form
-}
-
-// RequestReceiveQuery reads a query field and returns the value.
-//
-// Compatible with web sockets.
-func RequestReceiveQuery(self *Request, name string) string {
-	return self.httpRequest.URL.Query().Get(name)
-}
-
-// RequestReceivePath reads a parameters fields and returns the value.
-//
-// Compatible with web sockets.
-func RequestReceivePath(self *Request, name string) string {
-	return self.httpRequest.PathValue(name)
-}
-
-// RequestReceiveHeader reads a header field and returns the value.
-//
-// Compatible with web sockets.
-func RequestReceiveHeader(self *Request, key string) string {
-	return self.httpRequest.Header.Get(key)
-}
-
-// RequestReceiveContentType reads the Content-Type header field and returns the value.
-//
-// Compatible with web sockets.
-func RequestReceiveContentType(self *Request) string {
-	return self.httpRequest.Header.Get("Content-Type")
-}
-
-func notFoundApi(api *Api) {
-	ApiWithPattern(api, "GET /")
-	ApiWithRequestHandler(api, func(request *Request, response *Response) {
-		ResponseSendStatus(response, 404)
-	})
 }
 
 // ServerStart starts the server.
@@ -298,7 +142,12 @@ func ServerStart(self *Server) {
 	}
 
 	if !self.entryCreated {
-		ServerWithApiBuilder(self, notFoundApi)
+		ServerWithApiBuilder(self, func(api *Api) {
+			ApiWithPattern(api, "GET /")
+			ApiWithRequestHandler(api, func(request *Request, response *Response) {
+				ResponseSendStatus(response, 404)
+			})
+		})
 	}
 
 	var waiter sync.WaitGroup
@@ -348,133 +197,6 @@ func ServerStop(self *Server) {
 
 var pathParametersPattern = regexp.MustCompile(`{([^{}]+)}`)
 
-type Route struct {
-	server  *Server
-	view    string
-	handler func(request *Request, response *Response)
-	guards  []func(request *Request, response *Response, pass func())
-	mount   func(pattern string)
-}
-
-// routeCreate creates a route configuration from a callback function.
-func routeCreate(
-	handler func(request *Request, response *Response),
-	guards []func(request *Request, response *Response, pass func()),
-) *Route {
-	return &Route{
-		view: "",
-		handler: func(request *Request, response *Response) {
-			pass := 0 == len(guards)
-			for _, guard := range guards {
-				guard(request, response, func() { pass = true })
-
-				if !pass {
-					break
-				}
-			}
-
-			if pass {
-				handler(request, response)
-			}
-		},
-		mount: func(pattern string) {},
-	}
-}
-
-// routeCreateWithPage creates a route configuration from a callback function, just like routeCreate.
-//
-// Unlike routeCreate, routeCreateWithView also creates a View, which is used to automatically
-// to serve a svelte view after invoking callback.
-//
-// Generally speaking, you should never manually invoke ResponseSendMessage or similar functions.
-//
-// However, it is safe to invoke receive functions, like RequestReceiveHeader, RequestReceiveCookie, etc.
-func routeCreateWithView(
-	handler func(request *Request, response *Response, view *View),
-	guards []func(request *Request, response *Response, pass func()),
-	view string,
-) *Route {
-	var pattern string
-
-	return &Route{
-		view: view,
-		handler: func(
-			request *Request,
-			response *Response,
-		) {
-			viewLocal := &View{
-				render:     RenderFull,
-				data:       map[string]any{},
-				name:       view,
-				parameters: map[string]string{},
-			}
-
-			pass := 0 == len(guards)
-			for _, guard := range guards {
-				guard(request, response, func() { pass = true })
-
-				if !pass {
-					break
-				}
-			}
-
-			if pass {
-				handler(request, response, viewLocal)
-			}
-
-			if nil != response.navigate {
-				ResponseSendRedirect(response, response.navigate.Location, http.StatusFound)
-				return
-			}
-
-			if "" != response.header.Get("Location") {
-				return
-			}
-
-			if nil == viewLocal {
-				NotifierSendError(request.server.notifier, fmt.Errorf("svelte page handler `%s` returned a nil page", pattern))
-				return
-			}
-
-			if nil == viewLocal.data {
-				viewLocal.data = map[string]any{}
-			}
-
-			if RequestVerifyAccept(request, "application/json") {
-				data, marshalError := json.Marshal(viewLocal.data)
-				if nil != marshalError {
-					NotifierSendError(request.server.notifier, marshalError)
-					return
-				}
-				ResponseSendHeader(response, "Content-Type", "application/json")
-				ResponseSendMessage(response, string(data))
-				return
-			}
-
-			if nil == viewLocal.parameters {
-				viewLocal.parameters = map[string]string{}
-			}
-
-			for _, name := range pathParametersPattern.FindAllStringSubmatch(pattern, -1) {
-				if len(name) < 1 {
-					continue
-				}
-				viewLocal.parameters[name[1]] = request.httpRequest.PathValue(name[1])
-			}
-
-			ResponseSendView(response, viewLocal)
-		},
-		mount: func(patternLocal string) {
-			pattern = patternLocal
-			patternParts := strings.Split(patternLocal, " ")
-			patternCounter := len(patternParts)
-			if patternCounter > 1 {
-				components[view] = path.Join(patternParts[1:]...)
-			}
-		},
-	}
-}
-
 // serverMapRoute maps a pattern to a given route.
 //
 // If the given pattern conflicts with one that is already registered, serverMapRoute crashes the program.
@@ -485,10 +207,6 @@ func serverMapRoute(self *Server, pattern string, route *Route) {
 
 	if isEntry && !self.entryCreated {
 		self.entryCreated = true
-	}
-
-	if route.mount != nil {
-		route.mount(pattern)
 	}
 
 	self.mux.HandleFunc(pattern, func(writer http.ResponseWriter, httpRequest *http.Request) {
@@ -538,701 +256,42 @@ func serverMapRoute(self *Server, pattern string, route *Route) {
 	})
 }
 
-type Request struct {
-	server        *Server
-	response      *Response
-	httpRequest   *http.Request
-	webSocketConn *websocket.Conn
-}
+// ServerWithPageBuilder adds a page.
+func ServerWithPageBuilder[T any](self *Server, builder PageBuilder[T]) {
+	page := PageCreate[T]()
+	PageWithServer(page, self)
 
-type navigate struct {
-	Page       string
-	Parameters map[string]string
-	Location   string
-}
+	builder(page)
 
-type Response struct {
-	server                *Server
-	request               *Request
-	writer                *http.ResponseWriter
-	lockedStatusAndHeader bool
-	statusCode            int
-	header                *http.Header
-	webSocket             *websocket.Conn
-	eventName             string
-	navigate              *navigate
-	eventId               int64
-	context               map[string]any
-}
-
-var pathFieldRegex = regexp.MustCompile(`\{(.*?)}`)
-
-// ResponseSendNavigateWithParameters sends the client an instruction to navigate.
-func ResponseSendNavigateWithParameters(self *Response, page string, parameters map[string]string) {
-	if nil == parameters {
-		parameters = map[string]string{}
-	}
-
-	p, pathFound := components[page]
-	if !pathFound {
-		NotifierSendError(self.server.notifier, fmt.Errorf("redirect to page `%s` failed because page id `%s` is unknown", page, page))
-	}
-
-	location := string(
-		pathFieldRegex.ReplaceAllFunc(
-			[]byte(p),
-			func(i []byte) []byte {
-				if nil == parameters {
-					return []byte{}
-				}
-				key := string(i[1 : len(i)-1])
-				return []byte(parameters[key])
-			},
-		),
-	)
-
-	self.navigate = &navigate{
-		Page:       page,
-		Parameters: parameters,
-		Location:   location,
-	}
-}
-
-// ResponseSendNavigate sends the client an instruction to navigate.
-func ResponseSendNavigate(self *Response, page string) {
-	ResponseSendNavigateWithParameters(self, page, map[string]string{})
-}
-
-// ResponseSendRedirect redirects the request.
-func ResponseSendRedirect(self *Response, location string, statusCode int) {
-	ResponseSendStatus(self, statusCode)
-	ResponseSendHeader(self, "Location", location)
-}
-
-// ResponseSendRedirectToSecure redirects the request to the https server.
-func ResponseSendRedirectToSecure(self *Response) {
-	request := self.request
-	if "" == request.server.certificate || "" == request.server.certificateKey || request.httpRequest.TLS != nil {
+	if "" == page.name {
+		NotifierSendError(self.notifier, fmt.Errorf("every page must have a name"))
 		return
 	}
 
-	insecureSuffix := fmt.Sprintf(":%d", request.server.port)
-	secureSuffix := fmt.Sprintf(":%d", request.server.securePort)
-	secureHost := strings.Replace(request.httpRequest.Host, insecureSuffix, secureSuffix, 1)
-	secureLocation := fmt.Sprintf("https://%s%s", secureHost, request.httpRequest.RequestURI)
-	ResponseSendRedirect(self, secureLocation, 302)
-	return
-}
-
-// ResponseSendStatus sets the status code.
-//
-// This will lock the status, which makes it
-// so that the increaseIndex time you invoke this
-// function it will fail with an error.
-//
-// All errors are sent to the server notifier.
-func ResponseSendStatus(self *Response, code int) {
-	if self.lockedStatusAndHeader {
-		NotifierSendError(self.server.notifier, errors.New("status is locked"))
-		return
-	}
-	self.statusCode = code
-}
-
-// ResponseSendHeader sets a header field.
-//
-// If the status has not been sent already, a default "200 OK" status will be sent immediately.
-//
-// This means the status will become locked and further attempts to send the status will fail with an error.
-//
-// All errors are sent to the server notifier.
-func ResponseSendHeader(self *Response, key string, value string) {
-	if self.lockedStatusAndHeader {
-		NotifierSendError(self.server.notifier, errors.New("headers locked"))
+	if nil == page.view {
+		NotifierSendError(self.notifier, fmt.Errorf("every page must have view, page `%s` doesn't", page.name))
 		return
 	}
 
-	self.header.Set(key, value)
-}
-
-// ResponseSendContentType sets the Content-Type header field.
-func ResponseSendContentType(self *Response, contentType string) {
-	ResponseSendHeader(self, "Content-Type", contentType)
-}
-
-// ResponseSendCookie sends a cookies to the client.
-func ResponseSendCookie(self *Response, key string, value string) {
-	ResponseSendHeader(self, "Set-Cookie", fmt.Sprintf("%s=%s; Path=/; HttpOnly", url.QueryEscape(key), url.QueryEscape(value)))
-}
-
-// ResponseSendContent sends binary safe content.
-//
-// If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
-//
-// The status code and the header will become locked and further attempts to send either of them will fail with an error.
-//
-// All errors are sent to the server notifier.
-//
-// Compatible with web sockets.
-func ResponseSendContent(self *Response, content []byte) {
-	if !self.lockedStatusAndHeader {
-		(*self.writer).WriteHeader(self.statusCode)
-		self.lockedStatusAndHeader = true
-	}
-
-	if self.webSocket != nil {
-		writeError := self.webSocket.WriteMessage(websocket.TextMessage, content)
-		if nil != writeError {
-			NotifierSendError(self.server.notifier, writeError)
-			return
-		}
+	if "" == page.path {
+		NotifierSendError(self.notifier, fmt.Errorf("every page must have a path, page `%s` desn't", page.name))
 		return
 	}
 
-	if "" != self.eventName {
-		sendEventContent(self, content)
-		return
+	pages[page.name] = PageMetadata{
+		Path:     page.path,
+		ViewName: page.view.name,
 	}
 
-	_, err := (*self.writer).Write(content)
-	if nil != err {
-		NotifierSendError(self.server.notifier, err)
-		return
-	}
-}
-
-// ResponseSendMessage sends utf-8 safe content.
-//
-// If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
-//
-// The status code and the header will become locked and further attempts to send either of them will fail with an error.
-//
-// All errors are sent to the server notifier.
-//
-// Compatible with web sockets.
-func ResponseSendMessage(self *Response, message string) {
-	ResponseSendContent(self, []byte(message))
-}
-
-// ResponseSendNotFound sends an empty message with status 404 Not Found.
-func ResponseSendNotFound(self *Response) {
-	ResponseSendStatus(self, http.StatusNotFound)
-}
-
-// ResponseSendUnauthorized sends an empty message with status 401 Unauthorized.
-func ResponseSendUnauthorized(self *Response) {
-	ResponseSendStatus(self, http.StatusUnauthorized)
-}
-
-// ResponseSendBadRequest sends an empty message with status 400 Bad Request.
-func ResponseSendBadRequest(self *Response) {
-	ResponseSendStatus(self, http.StatusBadRequest)
-}
-
-// ResponseSendInternalServerError sends an error message with status 500 Internal Server Error
-// and also sends the error to the server notifier.
-func ResponseSendInternalServerError(self *Response, err error) {
-	NotifierSendError(self.server.notifier, err)
-	ResponseSendStatus(self, http.StatusBadRequest)
-	ResponseSendMessage(self, err.Error())
-}
-
-// ResponseSendForbidden sends an empty message with status 403 Forbidden.
-func ResponseSendForbidden(self *Response) {
-	ResponseSendStatus(self, http.StatusForbidden)
-}
-
-// ResponseSendTooManyRequests sends and empty message with status 403 Forbidden.
-func ResponseSendTooManyRequests(self *Response) {
-	ResponseSendStatus(self, http.StatusTooManyRequests)
-}
-
-// ResponseSendJson sends json content.
-//
-// If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
-//
-// The status code and the header will become locked and further attempts to send either of them will fail with an error.
-//
-// All errors are sent to the server notifier.
-//
-// Compatible with web sockets.
-func ResponseSendJson(self *Response, payload any) {
-	content, marshalError := json.Marshal(payload)
-	if nil != marshalError {
-		NotifierSendError(self.server.notifier, marshalError)
-		return
-	}
-
-	if nil == self.webSocket {
-		contentType := self.header.Get("Content-Type")
-		if "" == contentType {
-			self.header.Set("Content-Type", "application/json")
-		}
-	}
-
-	ResponseSendContent(self, content)
-}
-
-// RequestVerifyContentType checks if the incoming request has any of the given content-types.
-func RequestVerifyContentType(self *Request, contentTypes ...string) bool {
-	requestedMime := self.httpRequest.Header.Get("Content-Type")
-	for _, acceptedMime := range contentTypes {
-		if acceptedMime == "*" || strings.HasPrefix(requestedMime, acceptedMime) {
-			return true
-		}
-	}
-
-	return false
-}
-
-// RequestVerifyAccept checks if the incoming request accepts any of the given content-types.
-func RequestVerifyAccept(self *Request, contentTypes ...string) bool {
-	requestedAcceptMime := self.httpRequest.Header.Get("Accept")
-	for _, acceptedMime := range contentTypes {
-		if acceptedMime == "*" || strings.Contains(requestedAcceptMime, acceptedMime) {
-			return true
-		}
-	}
-
-	return false
-}
-
-// sendEventContent sends content using the `server sent events` format.
-//
-// Usually this should be used internally in order to send content to a server sent event.
-//
-// That being said, other than the format, there is nothing else different between this function and ResponseSendContent.
-//
-// See https://html.spec.whatwg.org/multipage/server-sent-events.html for more details on the format.
-func sendEventContent(self *Response, content []byte) {
-	header := fmt.Sprintf("id: %d\r\nevent: %s\r\n", self.eventId, self.eventName)
-
-	_, writeEventError := (*self.writer).Write([]byte(header))
-	if nil != writeEventError {
-		NotifierSendError(self.server.notifier, writeEventError)
-		return
-	}
-
-	for _, line := range bytes.Split(content, []byte("\r\n")) {
-		_, writeEventError = (*self.writer).Write([]byte("data: "))
-		if nil != writeEventError {
-			NotifierSendError(self.server.notifier, writeEventError)
-			return
-		}
-
-		_, writeEventError = (*self.writer).Write(line)
-		if nil != writeEventError {
-			NotifierSendError(self.server.notifier, writeEventError)
-			return
-		}
-
-		_, writeEventError = (*self.writer).Write([]byte("\r\n"))
-		if nil != writeEventError {
-			NotifierSendError(self.server.notifier, writeEventError)
-			return
-		}
-	}
-
-	_, writeEventError = (*self.writer).Write([]byte("\r\n"))
-	if nil != writeEventError {
-		NotifierSendError(self.server.notifier, writeEventError)
-		return
-	}
-
-	flusher, flushedOk := (*self.writer).(http.Flusher)
-	if !flushedOk {
-		NotifierSendError(self.server.notifier, errors.New("could not retrieve flusher"))
-		return
-	}
-
-	flusher.Flush()
-
-	self.eventId++
-}
-
-// ResponseSendEmbeddedFileOrIndexOrElse sends the embedded file requested by the client,
-// or the closest index.html embedded file, or else falls back.
-func ResponseSendEmbeddedFileOrIndexOrElse(self *Response, orElse func()) {
-	request := self.request
-	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
-
-	if !existsInEmbeddedFileSystem(request.server.embeddedFileSystem, fileName) {
-		orElse()
-		return
-	}
-
-	if isEmbeddedDirectory(request.server.embeddedFileSystem, fileName) {
-		fileName = filepath.Join(fileName, "index.html")
-		if !isFile(fileName) {
-			orElse()
-			return
-		}
-	}
-
-	reader, info, readerError := createReaderFromEmbeddedFileName(&request.server.embeddedFileSystem, fileName)
-	if nil != readerError {
-		NotifierSendError(self.server.notifier, readerError)
-		return
-	}
-
-	if self.webSocket != nil {
-		content, readError := io.ReadAll(reader)
-		if nil != readError {
-			NotifierSendError(self.server.notifier, readError)
-			return
-		}
-		writeError := self.webSocket.WriteMessage(websocket.TextMessage, content)
-		if nil != writeError {
-			NotifierSendError(self.server.notifier, writeError)
-		}
-		return
-	}
-
-	if "" != self.eventName {
-		content, readError := io.ReadAll(reader)
-		if nil != readError {
-			NotifierSendError(self.server.notifier, readError)
-			return
-		}
-		sendEventContent(self, content)
-		return
-	}
-
-	if "" == self.header.Get("Content-Type") {
-		ResponseSendHeader(self, "Content-Type", mime(fileName))
-	}
-
-	if "" == self.header.Get("Content-Length") {
-		ResponseSendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
-	}
-	http.ServeContent(*self.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
-}
-
-// ResponseSendEmbeddedFileOrElse sends the embedded file requested by the client,
-// or the closest index.html embedded file, or else falls back.
-func ResponseSendEmbeddedFileOrElse(self *Response, orElse func()) {
-	request := self.request
-	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
-	fileName = strings.Split(fileName, "?")[0]
-	fileName = strings.Split(fileName, "&")[0]
-
-	if !existsInEmbeddedFileSystem(request.server.embeddedFileSystem, fileName) ||
-		isEmbeddedDirectory(request.server.embeddedFileSystem, fileName) {
-		orElse()
-		return
-	}
-
-	reader, info, readerError := createReaderFromEmbeddedFileName(&request.server.embeddedFileSystem, fileName)
-	if nil != readerError {
-		NotifierSendError(self.server.notifier, readerError)
-		return
-	}
-
-	if self.webSocket != nil {
-		content, readError := io.ReadAll(reader)
-		if nil != readError {
-			NotifierSendError(self.server.notifier, readError)
-			return
-		}
-		writeError := self.webSocket.WriteMessage(websocket.TextMessage, content)
-		if nil != writeError {
-			NotifierSendError(self.server.notifier, writeError)
-		}
-		return
-	}
-
-	if "" != self.eventName {
-		content, readError := io.ReadAll(reader)
-		if nil != readError {
-			NotifierSendError(self.server.notifier, readError)
-			return
-		}
-		sendEventContent(self, content)
-		return
-	}
-
-	if "" == self.header.Get("Content-Type") {
-		ResponseSendHeader(self, "Content-Type", mime(fileName))
-	}
-
-	if "" == self.header.Get("Content-Length") {
-		ResponseSendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
-	}
-	http.ServeContent(*self.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
-}
-
-// ResponseSendFileOrIndexOrElse sends the file requested by the client,
-// or the closest index.html file, or else falls back.
-func ResponseSendFileOrIndexOrElse(self *Response, orElse func()) {
-	request := self.request
-	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
-
-	if !fileExists(fileName) {
-		orElse()
-		return
-	}
-
-	if isDirectory(fileName) {
-		fileName = filepath.Join(fileName, "index.html")
-		if !isFile(fileName) {
-			orElse()
-			return
-		}
-	}
-
-	reader, info, readerError := createReaderFromFileName(fileName)
-	if nil != readerError {
-		NotifierSendError(self.server.notifier, readerError)
-		return
-	}
-
-	if self.webSocket != nil {
-		content, readError := io.ReadAll(reader)
-		if nil != readError {
-			NotifierSendError(self.server.notifier, readError)
-			return
-		}
-		writeError := self.webSocket.WriteMessage(websocket.TextMessage, content)
-		if nil != writeError {
-			NotifierSendError(self.server.notifier, writeError)
-		}
-		return
-	}
-
-	if "" != self.eventName {
-		content, readError := io.ReadAll(reader)
-		if nil != readError {
-			NotifierSendError(self.server.notifier, readError)
-			return
-		}
-		sendEventContent(self, content)
-		return
-	}
-
-	if "" == self.header.Get("Content-Type") {
-		ResponseSendHeader(self, "Content-Type", mime(fileName))
-	}
-
-	if "" == self.header.Get("Content-Length") {
-		ResponseSendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
-	}
-	http.ServeContent(*self.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
-}
-
-// ResponseSendFileOrElse sends the file requested by the client, or else falls back.
-func ResponseSendFileOrElse(self *Response, orElse func()) {
-	request := self.request
-	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
-
-	if !fileExists(fileName) || isDirectory(fileName) {
-		orElse()
-		return
-	}
-
-	reader, info, readerError := createReaderFromFileName(fileName)
-	if nil != readerError {
-		NotifierSendError(self.server.notifier, readerError)
-		return
-	}
-
-	if self.webSocket != nil {
-		content, readError := io.ReadAll(reader)
-		if nil != readError {
-			NotifierSendError(self.server.notifier, readError)
-			return
-		}
-		writeError := self.webSocket.WriteMessage(websocket.TextMessage, content)
-		if nil != writeError {
-			NotifierSendError(self.server.notifier, writeError)
-		}
-		return
-	}
-
-	if "" != self.eventName {
-		content, readError := io.ReadAll(reader)
-		if nil != readError {
-			NotifierSendError(self.server.notifier, readError)
-			return
-		}
-		sendEventContent(self, content)
-		return
-	}
-
-	if "" == self.header.Get("Content-Type") {
-		ResponseSendHeader(self, "Content-Type", mime(fileName))
-	}
-
-	if "" == self.header.Get("Content-Length") {
-		ResponseSendHeader(self, "Content-Length", fmt.Sprintf("%d", (*info).Size()))
-	}
-	http.ServeContent(*self.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
-}
-
-func createReaderFromEmbeddedFileName(efs *embed.FS, fileName string) (*bytes.Reader, *os.FileInfo, error) {
-	file, openError := efs.Open(fileName)
-	if nil != openError {
-		return nil, nil, openError
-	}
-
-	fileInfo, _ := file.Stat()
-
-	buffer := make([]byte, fileInfo.Size())
-	_, readError := file.Read(buffer)
-	if nil != readError {
-		closeError := file.Close()
-		if nil != closeError {
-			return nil, nil, closeError
-		}
-		return nil, nil, readError
-	}
-
-	closeError := file.Close()
-	if nil != closeError {
-		return nil, nil, closeError
-	}
-	return bytes.NewReader(buffer), &fileInfo, nil
-}
-
-func createReaderFromFileName(fileName string) (*bytes.Reader, *os.FileInfo, error) {
-	file, openError := os.Open(fileName)
-	if nil != openError {
-		return nil, nil, openError
-	}
-
-	fileInfo, _ := file.Stat()
-
-	buffer := make([]byte, fileInfo.Size())
-	_, readError := file.Read(buffer)
-	if nil != readError {
-		closeError := file.Close()
-		if nil != closeError {
-			return nil, nil, closeError
-		}
-		return nil, nil, readError
-	}
-
-	closeError := file.Close()
-	if nil != closeError {
-		return nil, nil, closeError
-	}
-	return bytes.NewReader(buffer), &fileInfo, nil
-}
-
-// ResponseSendSseUpgrade upgrades the http connection to server sent events
-// and returns a function that sets the name of the current event.
-//
-// The default event is "message".
-func ResponseSendSseUpgrade(self *Response) (setEventName func(eventName string)) {
-	ResponseSendHeader(self, "Access-Control-Allow-Origin", "*")
-	ResponseSendHeader(self, "Access-Control-Expose-Headers", "Content-Type")
-	ResponseSendHeader(self, "Content-Type", "text/event-stream")
-	ResponseSendHeader(self, "Cache-Control", "no-cache")
-	ResponseSendHeader(self, "Connection", "keep-alive")
-	self.eventName = "message"
-	setEventName = func(eventName string) {
-		if "" == eventName {
-			NotifierSendError(
-				self.server.notifier,
-				fmt.Errorf("renaming a server sent event (`%s`) to an empty string is not allowed", self.eventName),
-			)
-			return
-		}
-
-		self.eventName = eventName
-	}
-	return
-}
-
-// ResponseSendWsUpgrade upgrades the http connection to web sockets.
-func ResponseSendWsUpgrade(self *Response) {
-	request := self.request
-	conn, upgradeError := self.server.webSocketUpgrader.Upgrade(*self.writer, request.httpRequest, nil)
-	if nil != upgradeError {
-		NotifierSendError(request.server.notifier, upgradeError)
-		return
-	}
-	defer func(conn *websocket.Conn) {
-		closeError := conn.Close()
-		if nil != closeError {
-			NotifierSendError(request.server.notifier, closeError)
-		}
-	}(conn)
-	self.webSocket = conn
-	request.webSocketConn = conn
-	self.lockedStatusAndHeader = true
-}
-
-// ResponseSendView sends a view.
-func ResponseSendView(self *Response, view *View) {
-	embeddedFileSystem := view.embeddedFileSystem
-	if nil == embeddedFileSystem {
-		embeddedFileSystem = &self.server.embeddedFileSystem
-	}
-
-	notifier := view.notifier
-	if nil == embeddedFileSystem {
-		notifier = self.server.notifier
-	}
-
-	content, compileError := ViewRender(&View{
-		render:             view.render,
-		data:               view.data,
-		name:               view.name,
-		parameters:         view.parameters,
-		functions:          view.functions,
-		embeddedFileSystem: embeddedFileSystem,
-		notifier:           notifier,
-	})
-	if nil != compileError {
-		NotifierSendError(self.server.notifier, compileError)
-		return
-	}
-
-	if "" == self.header.Get("Content-Type") {
-		ResponseSendHeader(self, "Content-Type", "text/html")
-	}
-
-	ResponseSendMessage(self, content)
-}
-
-type Api struct {
-	patterns []string
-	handler  func(request *Request, response *Response)
-	guards   []func(request *Request, response *Response, pass func())
-}
-
-// ApiBuilder builds an api.
-type ApiBuilder = func(api *Api)
-
-// ApiWithPattern adds a pattern.
-func ApiWithPattern(self *Api, pattern string) {
-	self.patterns = append(self.patterns, pattern)
-}
-
-// ApiWithRequestHandler sets the request handler.
-func ApiWithRequestHandler(self *Api, handler func(request *Request, response *Response)) {
-	self.handler = handler
-}
-
-// ApiWithGuardHandler adds a guard handler.
-func ApiWithGuardHandler(self *Api, handler func(request *Request, response *Response, pass func())) {
-	self.guards = append(self.guards, handler)
+	serverMapRoute(self, "GET "+page.path, routeCreateWithView(page.base, page.guards, page.view))
+	serverMapRoute(self, "POST "+page.path, routeCreateWithView(page.action, page.guards, page.view))
 }
 
 // ServerWithApiBuilder adds an api.
 func ServerWithApiBuilder(self *Server, builder ApiBuilder) {
-	api := &Api{
-		patterns: []string{},
-		guards:   []func(request *Request, response *Response, pass func()){},
-	}
+	api := ApiCreate()
 
 	builder(api)
-
-	if nil == api.handler {
-		api.handler = func(request *Request, response *Response) {
-			// Noop.
-		}
-	}
 
 	for _, pattern := range api.patterns {
 		if "" == pattern {
@@ -1241,82 +300,4 @@ func ServerWithApiBuilder(self *Server, builder ApiBuilder) {
 		}
 		serverMapRoute(self, pattern, routeCreate(api.handler, api.guards))
 	}
-}
-
-type Page struct {
-	paths  []string
-	view   *View
-	base   func(request *Request, response *Response, view *View)
-	action func(request *Request, response *Response, view *View)
-	guards []func(request *Request, response *Response, pass func())
-}
-
-// PageBuilder builds a page.
-type PageBuilder = func(page *Page)
-
-// PageWithPath adds a path.
-func PageWithPath(self *Page, path string) {
-	self.paths = append(self.paths, path)
-}
-
-// PageWithView sets the view.
-func PageWithView(self *Page, view *View) {
-	self.view = view
-}
-
-// PageWithBaseHandler sets the base.
-func PageWithBaseHandler(self *Page, handler func(request *Request, response *Response, view *View)) {
-	self.base = handler
-}
-
-// PageWithActionHandler sets the action handler.
-func PageWithActionHandler(self *Page, handler func(request *Request, response *Response, view *View)) {
-	self.action = handler
-}
-
-// PageWithGuardHandler adds a guard handler.
-func PageWithGuardHandler(self *Page, handler func(request *Request, response *Response, pass func())) {
-	self.guards = append(self.guards, handler)
-}
-
-// ServerWithPageBuilder adds a page.
-func ServerWithPageBuilder(self *Server, builder PageBuilder) {
-	page := &Page{
-		view:   ViewReference("Default"),
-		paths:  []string{},
-		guards: []func(request *Request, response *Response, pass func()){},
-	}
-
-	builder(page)
-
-	if 0 == len(page.paths) {
-		page.paths = append(page.paths, "/"+strings.ReplaceAll(page.view.name, ".", "/"))
-	}
-
-	if "" == page.view.name {
-		NotifierSendError(self.notifier, fmt.Errorf("view name cannot be empty"))
-		return
-	}
-
-	if nil == page.base {
-		page.base = func(request *Request, response *Response, view *View) {
-			// Noop.
-		}
-	}
-
-	if nil == page.action {
-		page.action = func(request *Request, response *Response, view *View) {
-			// Noop.
-		}
-	}
-
-	for _, path_ := range page.paths {
-		serverMapRoute(self, "GET "+path_, routeCreateWithView(page.base, page.guards, page.view.name))
-		serverMapRoute(self, "POST "+path_, routeCreateWithView(page.action, page.guards, page.view.name))
-	}
-}
-
-// ServerWithSessionBuilder sets the session builder.
-func ServerWithSessionBuilder(self *Server, builder SessionBuilder) {
-	self.sessionBuilder = builder
 }

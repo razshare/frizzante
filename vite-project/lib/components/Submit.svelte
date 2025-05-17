@@ -11,43 +11,37 @@
 </style>
 
 <script>
-    import {update} from "../scripts/update.js";
     import {getContext} from "svelte";
+    import {update} from "../scripts/update.js";
     import {uuid} from "../scripts/uuid.js";
 
-    /** @type {function(string):string} */
-    const path = getContext("path")
-    /** @type {function(string):{view:string,parameters:Record<string,string>}} */
-    const loadView = getContext("view")
-    /** @type {function(string,Record<string,string>,false|Record<string,any>):void} */
-    const navigate = getContext("navigate")
-    /** @type {Record<string,any>} */
+    /** @type {function(string):(function(Record<string,any>):void)} */
+    const findNavigateByPath = getContext("findNavigateByPath")
     const data = getContext("data")
+    const onsubmit = update({findNavigateByPath, data})
 
-    const onsubmit = update({view: loadView, navigate, data})
+    /** @type {function(string,Record<string,any>):string} */
+    const findPathByPageName = getContext("findPathByPageName")
     const id = uuid()
 
     /**
      * @typedef Props
-     * @property {import("svelte").Snippet} children
-     * @property {string} [view]
+     * @property {string} [page]
      * @property {Record<string,string|number|boolean>} [form]
+     * @property {Record<string,string>} [parameters]
+     * @property {import("svelte").Snippet} children
      */
 
     /** @type {Props} */
     let {
-        view = '',
-        children,
+        page = '',
+        parameters = {},
         form = {},
+        children,
     } = $props()
-
-
-    if ('' !== view) {
-        view = path(view)
-    }
 </script>
 
-<form method="POST" action={view} {onsubmit}>
+<form method="POST" action={findPathByPageName(page, parameters)} {onsubmit}>
     {#each Object.keys(form) as key}
         {@const value = form[key]}
         <input type="hidden" name="{key}" value="{value}">

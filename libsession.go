@@ -1,27 +1,26 @@
 package frizzante
 
 import (
-	"encoding/json"
 	uuid "github.com/nu7hatch/gouuid"
 	"net/http"
-	"strconv"
-	"strings"
-	"time"
 )
 
-type SessionBuilder = func(session *Session)
-type Session struct {
+type SessionBuilder[T any] = func(session *Session[T])
+type Session[T any] struct {
 	request   *Request
 	response  *Response
-	get       func(key string) []byte
-	set       func(key string, value []byte)
-	has       func(key string) bool
+	exists    func() bool
+	load      func()
+	save      func()
 	destroy   func()
 	onDestroy func()
-	id        string
+	Id        string
+	Data      T
 }
 
-func sessionCreate(request *Request, response *Response) *Session {
+var sessions = map[string]any{}
+
+func sessionInitializeAndBuild[T any](request *Request, response *Response, builder SessionBuilder[T]) *Session[T] {
 	uuidV4, sessionIdError := uuid.NewV4()
 
 	if sessionIdError != nil {
@@ -29,41 +28,23 @@ func sessionCreate(request *Request, response *Response) *Session {
 		return nil
 	}
 
-	session := &Session{
+	session := &Session[T]{
 		request:  request,
 		response: response,
-		id:       uuidV4.String(),
+		Id:       uuidV4.String(),
 	}
 
-	request.server.sessionBuilder(session)
-
-	if nil == session.get {
-		session.get = func(key string) []byte { return nil }
-	}
-
-	if nil == session.set {
-		session.set = func(key string, value []byte) {}
-	}
-
-	if nil == session.has {
-		session.has = func(key string) bool { return false }
-	}
-
-	if nil == session.destroy {
-		session.destroy = func() {}
-	}
+	builder(session)
 
 	session.onDestroy = func() {
-		delete(sessions, session.id)
+		delete(sessions, session.Id)
 	}
 
-	sessions[session.id] = session
+	sessions[session.Id] = session
 
-	ResponseSendCookie(response, "session-id", session.id)
+	ResponseSendCookie(response, "session-id", session.Id)
 	return session
 }
-
-var sessions = map[string]*Session{}
 
 // SessionStart starts the session and returns it.
 //
@@ -79,7 +60,7 @@ var sessions = map[string]*Session{}
 // This means there can be cases where a client sends a "session-id" cookie of value "AAA"
 // but the server responds with a cookie "session-id" of value "BBB", meaning the client's
 // "AAA" session doesn't exist, thus the client should use session "BBB" instead.
-func SessionStart(request *Request, response *Response) *Session {
+func SessionStart[T any](request *Request, response *Response, builder SessionBuilder[T]) *Session[T] {
 	var sessionIdCookie *http.Cookie
 	sessionIdCookies := request.httpRequest.CookiesNamed("session-id")
 	sessionIdCookiesLen := 0
@@ -91,191 +72,70 @@ func SessionStart(request *Request, response *Response) *Session {
 
 	if 0 == sessionIdCookiesLen || nil == sessionIdCookie {
 		// Create new session.
-		return sessionCreate(request, response)
+		return sessionInitializeAndBuild[T](request, response, builder)
 	}
 
 	// Try to retrieve session.
-	session, sessionExists := sessions[sessionIdCookie.Value]
+	sessionAny, sessionExists := sessions[sessionIdCookie.Value]
 
-	if !sessionExists {
-		session = &Session{
-			request:  request,
-			response: response,
-			id:       sessionIdCookie.Value,
-		}
-
-		request.server.sessionBuilder(session)
-
-		if nil == session.get {
-			session.get = func(key string) []byte { return nil }
-		}
-
-		if nil == session.set {
-			session.set = func(key string, value []byte) {}
-		}
-
-		if nil == session.has {
-			session.has = func(key string) bool { return false }
-		}
-
-		if nil == session.destroy {
-			session.destroy = func() {}
-		}
-
-		session.onDestroy = func() {
-			delete(sessions, session.id)
-		}
-
-		sessions[session.id] = session
+	if sessionExists {
+		return sessionAny.(*Session[T])
 	}
+
+	session := &Session[T]{
+		request:  request,
+		response: response,
+		Id:       sessionIdCookie.Value,
+	}
+
+	builder(session)
+
+	session.onDestroy = func() {
+		delete(sessions, session.Id)
+	}
+
+	sessions[session.Id] = session
 
 	return session
 }
 
-// SessionId gets the session id.
-func SessionId(self *Session) string {
-	return self.id
+// SessionExists checks if the session exists.
+func SessionExists[T any](self *Session[T]) bool {
+	return self.exists()
 }
 
-// SessionGet gets a property.
-func SessionGet(self *Session, key string) []byte {
-	return self.get(key)
+// SessionLoad loads the session.
+func SessionLoad[T any](self *Session[T]) {
+	self.load()
 }
 
-// SessionSet creates or updates a property.
-func SessionSet(self *Session, key string, value []byte) {
-	self.set(key, value)
-}
-
-// SessionGetString gets a property as string.
-func SessionGetString(self *Session, key string) string {
-	return string(self.get(key))
-}
-
-// SessionSetString creates or updates a property as string.
-func SessionSetString(self *Session, key string, value string) {
-	self.set(key, []byte(value))
-}
-
-// SessionGetBool gets a property as bool.
-func SessionGetBool(self *Session, key string) bool {
-	value := strings.ToLower(string(self.get(key)))
-	return "1" == value || "true" == value
-}
-
-// SessionSetBool creates or updates a property as bool.
-func SessionSetBool(self *Session, key string, value bool) {
-	if value {
-		self.set(key, []byte("1"))
-		return
-	}
-	self.set(key, []byte("0"))
-}
-
-// SessionGetInt64 gets a property as int64.
-func SessionGetInt64(self *Session, key string) int64 {
-	value, conversionError := strconv.ParseInt(string(self.get(key)), 10, 64)
-	if nil != conversionError {
-		NotifierSendError(self.request.server.notifier, conversionError)
-	}
-	return value
-}
-
-// SessionSetInt64 creates or updates a property as int64.
-func SessionSetInt64(self *Session, key string, value int64) {
-	self.set(key, []byte(strconv.FormatInt(value, 10)))
-}
-
-// SessionGetFloat64 gets a property as string.
-func SessionGetFloat64(self *Session, key string) float64 {
-	value, conversionError := strconv.ParseFloat(string(self.get(key)), 64)
-	if nil != conversionError {
-		NotifierSendError(self.request.server.notifier, conversionError)
-	}
-	return value
-}
-
-// SessionSetFloat64 creates or updates a property as string.
-func SessionSetFloat64(self *Session, key string, value float64) {
-	self.set(key, []byte(strconv.FormatFloat(value, 'f', -1, 64)))
-}
-
-// SessionGetTime gets a property as time.
-func SessionGetTime(self *Session, key string) time.Time {
-	parsedTime, parseError := time.Parse(time.RFC3339, string(self.get(key)))
-	if nil != parseError {
-		NotifierSendError(self.request.server.notifier, parseError)
-	}
-	return parsedTime
-}
-
-// SessionSetTime creates or updates a property as time.
-func SessionSetTime(self *Session, key string, value time.Time) {
-	self.set(key, []byte(value.Format(time.RFC3339)))
-}
-
-// SessionGetTimeWithLayout gets a property as time.
-func SessionGetTimeWithLayout(self *Session, key string, layout string) time.Time {
-	parsedTime, parseError := time.Parse(layout, string(self.get(key)))
-	if nil != parseError {
-		NotifierSendError(self.request.server.notifier, parseError)
-	}
-	return parsedTime
-}
-
-// SessionSetTimeLayout creates or updates a property as time.
-func SessionSetTimeLayout(self *Session, key string, value time.Time, layout string) {
-	self.set(key, []byte(value.Format(layout)))
-}
-
-// SessionGetJson gets a property as json.
-func SessionGetJson[T any](self *Session, key string) T {
-	var value T
-	data := self.get(key)
-	unmarshalError := json.Unmarshal(data, &value)
-	if nil != unmarshalError {
-		NotifierSendError(self.request.server.notifier, unmarshalError)
-	}
-	return value
-}
-
-// SessionSetJson creates or updates a property as json.
-func SessionSetJson(self *Session, key string, value any) {
-	data, marshalError := json.Marshal(value)
-	if nil != marshalError {
-		NotifierSendError(self.request.server.notifier, marshalError)
-		return
-	}
-	self.set(key, data)
-}
-
-// SessionHas checks if the property exists.
-func SessionHas(self *Session, key string) bool {
-	return self.has(key)
+// SessionSave saves the session.
+func SessionSave[T any](self *Session[T]) {
+	self.save()
 }
 
 // SessionDestroy destroys the session.
-func SessionDestroy(self *Session) {
+func SessionDestroy[T any](self *Session[T]) {
 	self.destroy()
 }
 
-// SessionWithGetHandler sets the get handler.
-func SessionWithGetHandler(self *Session, handler func(key string) []byte) {
-	self.get = handler
+// SessionWithExistsHandler sets the exists handler.
+func SessionWithExistsHandler[T any](self *Session[T], handler func() bool) {
+	self.exists = handler
 }
 
-// SessionWithSetHandler sets the set handler.
-func SessionWithSetHandler(self *Session, handler func(key string, value []byte)) {
-	self.set = handler
+// SessionWithLoadHandler sets the load handler.
+func SessionWithLoadHandler[T any](self *Session[T], handler func()) {
+	self.load = handler
 }
 
-// SessionWithHasHandler sets the has handler.
-func SessionWithHasHandler(self *Session, handler func(key string) bool) {
-	self.has = handler
+// SessionWithSaveHandler sets the save handler.
+func SessionWithSaveHandler[T any](self *Session[T], handler func()) {
+	self.save = handler
 }
 
 // SessionWithDestroyHandler sets the destroy handler.
-func SessionWithDestroyHandler(self *Session, handler func()) {
+func SessionWithDestroyHandler[T any](self *Session[T], handler func()) {
 	self.destroy = func() {
 		self.onDestroy()
 		handler()

@@ -5,7 +5,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"slices"
 	"time"
 )
 
@@ -23,7 +22,6 @@ type Archive struct {
 	removeDomain func(domain string)
 
 	notifier *Notifier
-	alphabet []rune
 }
 
 // ArchiveGet reads the combination of domain and key from the archive.
@@ -56,50 +54,6 @@ func ArchiveRemoveDomain(self *Archive, domain string) {
 	self.removeDomain(domain)
 }
 
-// ArchiveAcceptsDomain checks if a domain is accepted by the alphabet of the archive.
-//
-// Generally speaking alphabets should not accept runes like "/", "\", ".." and so on.
-//
-// This is so that "sneaky" or maliciously constructed domains injected by clients
-// can't change directories.
-//
-// You don't have to use ArchiveAcceptsDomain to manually check for these malicious strings,
-// this check is executed automatically by the archive internally, regardless of your implementation.
-//
-// This function is public only as a quality of life improvement, so that if you would like to
-// detect such strings before crashing the archive, you have a way to do so.
-func ArchiveAcceptsDomain(self *Archive, domain string) bool {
-	for _, char := range domain {
-		if !slices.Contains(self.alphabet, char) {
-			return false
-		}
-	}
-
-	return true
-}
-
-// ArchiveAcceptsKey checks if a key is accepted by the alphabet of the archive.
-//
-// Generally speaking alphabets should not accept runes like "/", "\", ".." and so on.
-//
-// This is so that "sneaky" or maliciously constructed keys injected by clients
-// can't change directories.
-//
-// You don't have to use ArchiveAcceptsDomain to manually check for these malicious strings,
-// this check is executed automatically by the archive internally, regardless of your implementation.
-//
-// This function is public only as a quality of life improvement, so that if you would like to
-// detect such strings before crashing the archive, you have a way to do so.
-func ArchiveAcceptsKey(self *Archive, key string) bool {
-	for _, char := range key {
-		if !slices.Contains(self.alphabet, char) {
-			return false
-		}
-	}
-
-	return true
-}
-
 // ArchiveWithName sets the name of the archive.
 func ArchiveWithName(self *Archive, name string) {
 	self.name = name
@@ -109,13 +63,13 @@ func ArchiveWithName(self *Archive, name string) {
 // given its domain and key.
 func ArchiveWithKeyGetter(self *Archive, getter func(domain string, key string) []byte) {
 	self.get = func(domain string, key string) []byte {
-		if !ArchiveAcceptsDomain(self, domain) {
+		if !KeyIsSafe(domain) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
 			return nil
 		}
 
-		if !ArchiveAcceptsKey(self, key) {
+		if !KeyIsSafe(key) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", self.name, key))
 			return nil
@@ -130,13 +84,13 @@ func ArchiveWithKeyGetter(self *Archive, getter func(domain string, key string) 
 // domain and key.
 func ArchiveWithKeySetter(self *Archive, setter func(domain string, key string, value []byte)) {
 	self.set = func(domain string, key string, value []byte) {
-		if !ArchiveAcceptsDomain(self, domain) {
+		if !KeyIsSafe(domain) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
 			return
 		}
 
-		if !ArchiveAcceptsKey(self, key) {
+		if !KeyIsSafe(key) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", self.name, key))
 			return
@@ -150,7 +104,7 @@ func ArchiveWithKeySetter(self *Archive, setter func(domain string, key string, 
 // which removes a domain from the archive.
 func ArchiveWithDomainRemover(self *Archive, domainRemover func(domain string)) {
 	self.removeDomain = func(domain string) {
-		if !ArchiveAcceptsDomain(self, domain) {
+		if !KeyIsSafe(domain) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
 			return
@@ -164,13 +118,13 @@ func ArchiveWithDomainRemover(self *Archive, domainRemover func(domain string)) 
 // which removes a combination of domain and key from the archive.
 func ArchiveWithKeyRemover(self *Archive, remover func(domain string, key string)) {
 	self.remove = func(domain string, key string) {
-		if !ArchiveAcceptsDomain(self, domain) {
+		if !KeyIsSafe(domain) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
 			return
 		}
 
-		if !ArchiveAcceptsKey(self, key) {
+		if !KeyIsSafe(key) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", self.name, key))
 			return
@@ -184,7 +138,7 @@ func ArchiveWithKeyRemover(self *Archive, remover func(domain string, key string
 // which checks if a domain exists in the archive.
 func ArchiveWithDomainChecker(self *Archive, checker func(domain string) (exists bool)) {
 	self.domainExists = func(domain string) (exists bool) {
-		if !ArchiveAcceptsDomain(self, domain) {
+		if !KeyIsSafe(domain) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
 			return
@@ -198,13 +152,13 @@ func ArchiveWithDomainChecker(self *Archive, checker func(domain string) (exists
 // which checks if a combination of domain and key exists in the archive.
 func ArchiveWithKeyChecker(self *Archive, checker func(domain string, key string) (exists bool)) {
 	self.has = func(domain string, key string) (exists bool) {
-		if !ArchiveAcceptsDomain(self, domain) {
+		if !KeyIsSafe(domain) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
 			return
 		}
 
-		if !ArchiveAcceptsKey(self, key) {
+		if !KeyIsSafe(key) {
 			NotifierSendError(self.notifier,
 				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", self.name, key))
 			return
@@ -234,71 +188,6 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 	archive := &Archive{
 		name:     archiveName,
 		notifier: NotifierCreate(),
-		alphabet: []rune{
-			'A',
-			'B',
-			'C',
-			'D',
-			'E',
-			'F',
-			'G',
-			'H',
-			'I',
-			'J',
-			'K',
-			'L',
-			'M',
-			'N',
-			'O',
-			'P',
-			'Q',
-			'R',
-			'S',
-			'T',
-			'U',
-			'V',
-			'X',
-			'Y',
-			'Z',
-			'a',
-			'b',
-			'c',
-			'd',
-			'e',
-			'f',
-			'g',
-			'h',
-			'i',
-			'j',
-			'k',
-			'l',
-			'm',
-			'n',
-			'o',
-			'p',
-			'q',
-			'r',
-			's',
-			't',
-			'u',
-			'v',
-			'x',
-			'y',
-			'z',
-			'1',
-			'2',
-			'3',
-			'4',
-			'5',
-			'6',
-			'7',
-			'8',
-			'9',
-			'0',
-			'_',
-			'-',
-			'.',
-		},
 	}
 
 	builder(archive)

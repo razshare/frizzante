@@ -11,57 +11,42 @@
         cursor: default;
         text-decoration: none;
     }
-
-    .start {
-        text-align: start;
-    }
-
-    .center {
-        text-align: center;
-    }
-
-    .end {
-        text-align: end;
-    }
 </style>
 
 <script>
     import {getContext} from "svelte";
 
+    /** @type {function(string,Record<string,any>):string} */
+    const findPathByPageName = getContext("findPathByPageName")
+
+    /** @type {function(string,Record<string,any>):void} */
+    const navigate = getContext("navigate")
+
     /**
      * @typedef Props
-     * @property {string} view
-     * @property {import("svelte").Snippet} children
+     * @property {string} page
      * @property {"start"|"center"|"end"} [align]
      * @property {Record<string,string>} [parameters]
+     * @property {import("svelte").Snippet} children
      */
 
     /** @type {Props} */
     const {
-        view,
-        children,
-        align = "start",
+        page,
         parameters = {},
+        children,
         ...rest
     } = $props()
-    const navigate = getContext("navigate")
-    const path = getContext("path")
 
     /**
      * @param {Event} e
      */
     function onmouseup(e) {
         e.preventDefault()
-        navigate(view, parameters)
+        navigate(page, parameters)
     }
 </script>
 
-<a href="{path(view, parameters)}"
-   class:start={"start"===align}
-   class:center={"center"===align}
-   class:end={"end"===align}
-   {onmouseup}
-   {...rest}
->
+<a href="{findPathByPageName(page, parameters)}" {onmouseup} {...rest}>
     {@render children()}
 </a>
