@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "moduleResolution": "bundler",
+    "target": "ESNext",
+    "module": "ESNext",
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "checkJs": true,
+    "paths": {
+      "$frizzante/*": ["./.frizzante/vite-project/lib/*"],
+      "$lib/*": ["./lib/*"]
+    },
+    "lib": ["esnext", "DOM", "DOM.Iterable"],
+    "useDefineForClassFields": true,
+    "moduleDetection": "force"
+  },
+  "include": [
+    "./.frizzante/vite-project/**/*.svelte.js",
+    "./.frizzante/vite-project/**/*.svelte.ts",
+    "./.frizzante/vite-project/**/*.svelte",
+    "./.frizzante/vite-project/**/*.d.ts",
+    "./.frizzante/vite-project/**/*.js",
+    "./.frizzante/vite-project/**/*.ts",
+    "./lib/**/*.svelte.js",
+    "./lib/**/*.svelte.ts",
+    "./lib/**/*.svelte",
+    "./lib/**/*.d.ts",
+    "./lib/**/*.js",
+    "./lib/**/*.ts"
+  ],
+  "exclude": ["./node_modules/**"]
+}

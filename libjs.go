@@ -119,11 +119,11 @@ func JavaScriptBundle(rootDirectory string, format api.Format, source string) (b
 	return string(result.OutputFiles[0].Contents), nil
 }
 
-// JavaScriptRender executes the `.dist/server/render.server.js` file
+// JavaScriptRender executes the `.dist/server/render.server.ts` file
 // and returns the head of the document along with its body.
 //
-// If the environment variable DEV is set to 1, the file .dist/server/render.server.js is executed directly from the
-// local file system, otherwise RenderServerJs executes the file .dist/server/render.server.js located within the
+// If the environment variable DEV is set to 1, the file .dist/server/render.server.ts is executed directly from the
+// local file system, otherwise RenderServerJs executes the file .dist/server/render.server.ts located within the
 // view's embedded file system.
 func JavaScriptRender(embeddedFileSystem embed.FS, stringifiedProps string) (head string, body string, jsError error) {
 	renderFileName := filepath.Join(".dist", "server", "render.server.js")

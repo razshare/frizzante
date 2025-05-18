@@ -1,14 +1,13 @@
-<script>
+<script lang="ts">
     import Layout from '$lib/components/Layout.svelte'
-    import {getContext} from "svelte";
 
-    /**
-     * @typedef Data
-     * @property {string} name
-     */
+    type Props = {
+        server: ServerProperties<{
+            name: string
+        }>
+    }
 
-    /** @type {Data} */
-    const data = getContext("data")
+    let {server = $bindable()}:Props = $props()
 </script>
 
 <svelte:head>
@@ -16,5 +15,5 @@
 </svelte:head>
 
 <Layout>
-    <h1>Hello {data.name}.</h1>
+    <h1>Hello {server.data.name}.</h1>
 </Layout>

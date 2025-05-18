@@ -1,9 +1,9 @@
-<script module>
+<script lang="ts" module>
     let PreviousComponent = $state(false)
 </script>
-<script>
+<script lang="ts">
     let {from, server = $bindable()} = $props()
-    from.then((view) => {
+    from.then((view:any) => {
         PreviousComponent = view
     })
 </script>

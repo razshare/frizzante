@@ -420,7 +420,7 @@ func (response *Response) SendView(view *View) {
 	}
 
 	if response.request.VerifyAccept("application/json") {
-		response.SendJson(&ViewProperties{
+		response.SendJson(&ServerProperties{
 			Id:         response.id,
 			RenderMode: view.RenderMode,
 			Data:       view.Data,

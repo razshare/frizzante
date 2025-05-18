@@ -25,13 +25,6 @@ type View struct {
 	Data       any
 }
 
-type ViewProperties struct {
-	Id         string            `json:"id"`
-	RenderMode RenderMode        `json:"renderMode"`
-	Data       any               `json:"data"`
-	Ids        map[string]string `json:"ids"`
-}
-
 var noScriptPattern = regexp.MustCompile(`<script.*>.*</script>`)
 
 func NewView(data any) *View {
@@ -81,7 +74,7 @@ func (view *View) Render(id string, embeddedFileSystem *embed.FS) (content strin
 		indexBytes = indexBytesLocal
 	}
 
-	routerPropsBytes, jsonError := json.Marshal(&ViewProperties{
+	routerPropsBytes, jsonError := json.Marshal(&ServerProperties{
 		Id:         id,
 		RenderMode: view.RenderMode,
 		Data:       view.Data,

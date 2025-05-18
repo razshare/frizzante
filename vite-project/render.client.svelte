@@ -1,15 +1,11 @@
-<script>
+<script lang="ts">
     //:app-imports
-
-    /**
-     * @typedef Props
-     * @property {string} id
-     * @property {Record<string,any>} data
-     * @property {Record<string,string>} ids
-     */
-
-    /** @type {Props} */
-    let {id: idInput, data: dataInput, ids: idsInput} = $props()
+    // type Props = {
+    //         id: string
+    //         data: Record<string, any>
+    //     ids: Record<string, string>
+    // }
+    let {id: idInput, data: dataInput, ids: idsInput}:any = $props()
     let server = $state({id: idInput, data: dataInput, ids: idsInput})
 </script>
 

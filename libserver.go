@@ -37,6 +37,13 @@ type ApiController interface {
 	Handle(request *Request, response *Response)
 }
 
+type ServerProperties struct {
+	Id         string            `json:"id"`
+	RenderMode RenderMode        `json:"renderMode"`
+	Data       any               `json:"data"`
+	Ids        map[string]string `json:"ids"`
+}
+
 type Server struct {
 	hostName               string
 	port                   int

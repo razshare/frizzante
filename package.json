@@ -1,13 +1,21 @@
 {
-  "name": "www",
+  "name": "vite-project",
   "private": true,
+  "version": "0.0.0",
   "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "svelte-check --tsconfig ./tsconfig.app.json && tsc -p tsconfig.node.json"
+  },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
-    "compression": "^1.8.0",
-    "express": "^4.21.2",
-    "sirv": "^3.0.1",
+    "@tsconfig/svelte": "^5.0.4",
+    "@types/node": "^22.15.18",
     "svelte": "^5.30.2",
+    "svelte-check": "^4.2.1",
+    "typescript": "~5.8.3",
     "vite": "^6.3.5"
   }
 }
