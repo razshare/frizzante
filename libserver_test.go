@@ -7,14 +7,14 @@ import (
 	"time"
 )
 
-func TestServerCreate(test *testing.T) {
-	ServerCreate()
+func TestNewServer(test *testing.T) {
+	NewServer()
 }
 
 func TestServerWithHostName(test *testing.T) {
-	server := ServerCreate()
+	server := NewServer()
 	expected := "127.0.0.1"
-	ServerWithHostName(server, expected)
+	server.WithHostName(expected)
 	actual := server.hostName
 	if actual != expected {
 		test.Fatalf("server was expected to have host name '%s', received '%s' instead", expected, actual)
@@ -22,9 +22,9 @@ func TestServerWithHostName(test *testing.T) {
 }
 
 func TestServerWithPort(test *testing.T) {
-	server := ServerCreate()
+	server := NewServer()
 	expected := 80
-	ServerWithPort(server, expected)
+	server.WithPort(expected)
 	actual := server.port
 	if actual != expected {
 		test.Fatalf("server was expected to have port name %d, received %d instead", expected, actual)
@@ -32,9 +32,9 @@ func TestServerWithPort(test *testing.T) {
 }
 
 func TestServerWithReadTimeout(test *testing.T) {
-	server := ServerCreate()
+	server := NewServer()
 	expected := 10 * time.Second
-	ServerWithReadTimeout(server, expected)
+	server.WithReadTimeout(expected)
 	actual := server.readTimeout
 	if actual != expected {
 		test.Fatalf("server was expected to have read timeout '%d', received '%d' instead", expected, actual)
@@ -43,9 +43,9 @@ func TestServerWithReadTimeout(test *testing.T) {
 }
 
 func TestServerWithWriteTimeout(test *testing.T) {
-	server := ServerCreate()
+	server := NewServer()
 	expected := 10 * time.Second
-	ServerWithWriteTimeout(server, expected)
+	server.WithWriteTimeout(expected)
 	actual := server.writeTimeout
 	if actual != expected {
 		test.Fatalf("server was expected to have write timeout '%d', received '%d' instead", expected, actual)
@@ -53,9 +53,9 @@ func TestServerWithWriteTimeout(test *testing.T) {
 }
 
 func TestServerWithMaxHeaderBytes(test *testing.T) {
-	server := ServerCreate()
+	server := NewServer()
 	expected := 1 * MB
-	ServerWithMaxHeaderBytes(server, expected)
+	server.WithMaxHeaderBytes(expected)
 	actual := server.maxHeaderBytes
 	if actual != expected {
 		test.Fatalf("server was expected to have max header bytes '%d', received '%d' instead", expected, actual)
@@ -63,10 +63,10 @@ func TestServerWithMaxHeaderBytes(test *testing.T) {
 }
 
 func TestServerWithCertificateAndKey(test *testing.T) {
-	server := ServerCreate()
+	server := NewServer()
 	expectedCertificate := "certificate.crt"
 	expectedCertificateKey := "certificate.key"
-	ServerWithCertificateAndKey(server, expectedCertificate, expectedCertificateKey)
+	server.WithCertificateAndKey(expectedCertificate, expectedCertificateKey)
 	actualCertificate := server.certificate
 	if actualCertificate != expectedCertificate {
 		test.Fatalf("server was expected to have certificate '%s', received '%s' instead", expectedCertificate, actualCertificate)
@@ -78,9 +78,9 @@ func TestServerWithCertificateAndKey(test *testing.T) {
 }
 
 func TestServerWithEmbeddedFileSystem(test *testing.T) {
-	server := ServerCreate()
+	server := NewServer()
 	expected := &embeddedFileSystem
-	ServerWithEmbeddedFileSystem(server, expected)
+	server.WithEmbeddedFileSystem(expected)
 	actual := server.embeddedFileSystem
 	if actual != expected {
 		test.Fatalf("incorrect embedded file system detected")
@@ -88,20 +88,17 @@ func TestServerWithEmbeddedFileSystem(test *testing.T) {
 }
 
 func TestServerWithApi(test *testing.T) {
-	server := ServerCreate()
-	notifier := NotifierCreate()
+	server := NewServer()
+	notifier := NewNotifier()
 	port := NextNumber(8080)
-	ServerWithPort(server, port)
-	ServerWithNotifier(server, notifier)
+	server.WithPort(port)
+	server.WithNotifier(notifier)
 	expected := "hello"
-	ServerWithApiBuilder(server, func(api *Api) {
-		ApiWithPattern(api, "GET /")
-		ApiWithRequestHandler(api, func(_ *Request, response *Response) {
-			ResponseSendMessage(response, expected)
-		})
+	server.OnRequest("GET /", func(request *Request, response *Response) {
+		response.SendMessage(expected)
 	})
-	go ServerStart(server)
-	defer ServerStop(server)
+	go server.Start()
+	defer server.Stop()
 
 	time.Sleep(1 * time.Second)
 
@@ -117,20 +114,17 @@ func TestServerWithApi(test *testing.T) {
 
 func TestSendStatus(test *testing.T) {
 	expected := 201
-	server := ServerCreate()
-	notifier := NotifierCreate()
+	server := NewServer()
+	notifier := NewNotifier()
 	port := NextNumber(8080)
-	ServerWithPort(server, port)
-	ServerWithNotifier(server, notifier)
-	ServerWithApiBuilder(server, func(api *Api) {
-		ApiWithPattern(api, "GET /")
-		ApiWithRequestHandler(api, func(_ *Request, response *Response) {
-			ResponseSendStatus(response, expected)
-			ResponseSendMessage(response, "Ok")
-		})
+	server.WithPort(port)
+	server.WithNotifier(notifier)
+	server.OnRequest("GET /", func(request *Request, response *Response) {
+		response.SendStatus(expected)
+		response.SendMessage("ok")
 	})
-	go ServerStart(server)
-	defer ServerStop(server)
+	go server.Start()
+	defer server.Stop()
 
 	time.Sleep(1 * time.Second)
 
@@ -148,21 +142,18 @@ func TestSendStatus(test *testing.T) {
 }
 
 func TestSendHeader(test *testing.T) {
-	server := ServerCreate()
+	server := NewServer()
 	port := NextNumber(8080)
-	notifier := NotifierCreate()
-	ServerWithPort(server, port)
-	ServerWithNotifier(server, notifier)
+	notifier := NewNotifier()
+	server.WithPort(port)
+	server.WithNotifier(notifier)
 	expected := "application/json"
-	ServerWithApiBuilder(server, func(api *Api) {
-		ApiWithPattern(api, "GET /")
-		ApiWithRequestHandler(api, func(_ *Request, response *Response) {
-			ResponseSendHeader(response, "Content-Type", expected)
-			ResponseSendMessage(response, "{}")
-		})
+	server.OnRequest("GET /", func(req *Request, res *Response) {
+		res.SendHeader("Content-Type", expected)
+		res.SendMessage("{}")
 	})
-	go ServerStart(server)
-	defer ServerStop(server)
+	go server.Start()
+	defer server.Stop()
 
 	time.Sleep(1 * time.Second)
 

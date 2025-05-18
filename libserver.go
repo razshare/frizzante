@@ -9,12 +9,33 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"path/filepath"
-	"regexp"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
 )
+
+type GuardFunction = func(request *Request, response *Response) bool
+
+type PageConfiguration struct {
+	Path         string
+	TryFileFirst bool
+	Guards       []GuardFunction
+}
+type PageController interface {
+	Configure() PageConfiguration
+	Base(request *Request, response *Response)
+	Action(request *Request, response *Response)
+}
+
+type ApiConfiguration struct {
+	Pattern string
+	Guards  []GuardFunction
+}
+type ApiController interface {
+	Configure() ApiConfiguration
+	Handle(request *Request, response *Response)
+}
 
 type Server struct {
 	hostName               string
@@ -35,9 +56,9 @@ type Server struct {
 	entryCreated           bool
 }
 
-// ServerCreate creates a server.
-func ServerCreate() *Server {
-	notifier := NotifierCreate()
+// NewServer creates a server.
+func NewServer() *Server {
+	notifier := NewNotifier()
 	webSocketUpgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -57,97 +78,87 @@ func ServerCreate() *Server {
 		certificateKey:         "",
 		notifier:               notifier,
 		webSocketUpgrader:      webSocketUpgrader,
-		entryCreated:           false,
 	}
 }
 
-// ServerWithWebSocketReadBufferSize sets the maximum buffer size for each incoming web socket message.
+// WithWebSocketReadBufferSize sets the maximum buffer size for each incoming web socket message.
 // This will not limit the size of said messages.
-func ServerWithWebSocketReadBufferSize(self *Server, readBufferSize int) {
-	self.webSocketUpgrader.ReadBufferSize = readBufferSize
+func (server *Server) WithWebSocketReadBufferSize(readBufferSize int) {
+	server.webSocketUpgrader.ReadBufferSize = readBufferSize
 }
 
-// ServerWithWebSocketWriteBufferSize sets the maximum buffer size for each outgoing web socket message.
+// WithWebSocketWriteBufferSize sets the maximum buffer size for each outgoing web socket message.
 // This will not limit the size of said messages.
-func ServerWithWebSocketWriteBufferSize(self *Server, writeBufferSize int) {
-	self.webSocketUpgrader.WriteBufferSize = writeBufferSize
+func (server *Server) WithWebSocketWriteBufferSize(writeBufferSize int) {
+	server.webSocketUpgrader.WriteBufferSize = writeBufferSize
 }
 
-// ServerWithMultipartFormMaxMemory sets the maximum memory for multipart forms before they fall back to disk.
-func ServerWithMultipartFormMaxMemory(self *Server, multipartFormMaxMemory int64) {
-	self.multipartFormMaxMemory = multipartFormMaxMemory
+// WithMultipartFormMaxMemory sets the maximum memory for multipart forms before they fall back to disk.
+func (server *Server) WithMultipartFormMaxMemory(multipartFormMaxMemory int64) {
+	server.multipartFormMaxMemory = multipartFormMaxMemory
 }
 
-// ServerWithHostName sets the host name.
-func ServerWithHostName(self *Server, hostName string) {
-	self.hostName = hostName
+// WithHostName sets the host name.
+func (server *Server) WithHostName(hostName string) {
+	server.hostName = hostName
 }
 
-// ServerWithPort sets the port.
-func ServerWithPort(self *Server, port int) {
-	self.port = port
+// WithPort sets the port.
+func (server *Server) WithPort(port int) {
+	server.port = port
 }
 
-// ServerWithSecurePort sets the secure port.
-func ServerWithSecurePort(self *Server, securePort int) {
-	self.securePort = securePort
+// WithSecurePort sets the secure port.
+func (server *Server) WithSecurePort(securePort int) {
+	server.securePort = securePort
 }
 
-// ServerWithReadTimeout sets the read timeout.
-func ServerWithReadTimeout(self *Server, readTimeout time.Duration) {
-	self.readTimeout = readTimeout
+// WithReadTimeout sets the read timeout.
+func (server *Server) WithReadTimeout(readTimeout time.Duration) {
+	server.readTimeout = readTimeout
 }
 
-// ServerWithWriteTimeout sets the write timeout.
-func ServerWithWriteTimeout(self *Server, writeTimeout time.Duration) {
-	self.writeTimeout = writeTimeout
+// WithWriteTimeout sets the write timeout.
+func (server *Server) WithWriteTimeout(writeTimeout time.Duration) {
+	server.writeTimeout = writeTimeout
 }
 
-// ServerWithMaxHeaderBytes sets the maximum allowed bytes in the header of the request.
-func ServerWithMaxHeaderBytes(self *Server, maxHeaderBytes int) {
-	self.maxHeaderBytes = maxHeaderBytes
+// WithMaxHeaderBytes sets the maximum allowed bytes in the header of the request.
+func (server *Server) WithMaxHeaderBytes(maxHeaderBytes int) {
+	server.maxHeaderBytes = maxHeaderBytes
 }
 
-// ServerWithCertificateAndKey sets the tls configuration.
-func ServerWithCertificateAndKey(self *Server, certificate string, key string) {
-	self.certificate = certificate
-	self.certificateKey = key
+// WithCertificateAndKey sets the tls configuration.
+func (server *Server) WithCertificateAndKey(certificate string, key string) {
+	server.certificate = certificate
+	server.certificateKey = key
 }
 
-// ServerWithEmbeddedFileSystem sets the embedded file system.
+// WithEmbeddedFileSystem sets the embedded file system.
 //
 // The embedded file system should contain at least directory ".dist" so
 // that the server can properly render and serve svelte components.
-func ServerWithEmbeddedFileSystem(self *Server, embeddedFileSystem *embed.FS) {
-	self.embeddedFileSystem = embeddedFileSystem
+func (server *Server) WithEmbeddedFileSystem(embeddedFileSystem *embed.FS) {
+	server.embeddedFileSystem = embeddedFileSystem
 }
 
-// ServerWithNotifier sets the server notifier.
-func ServerWithNotifier(self *Server, notifier *Notifier) {
-	self.notifier = notifier
+// WithNotifier sets the server notifier.
+func (server *Server) WithNotifier(notifier *Notifier) {
+	server.notifier = notifier
 }
 
-// ServerStart starts the server.
+// Start starts the server.
 //
 // If the server fails to start, ServerStart crashes the program.
-func ServerStart(self *Server) {
-	logger := log.New(self.notifier.errorFile, "<error>", log.Ltime|log.Llongfile)
+func (server *Server) Start() {
+	logger := log.New(server.notifier.errorFile, "<error>", log.Ltime|log.Llongfile)
 
-	self.server = &http.Server{
-		Handler:        self.mux,
-		ReadTimeout:    self.readTimeout,
-		WriteTimeout:   self.writeTimeout,
-		MaxHeaderBytes: self.maxHeaderBytes,
+	server.server = &http.Server{
+		Handler:        server.mux,
+		ReadTimeout:    server.readTimeout,
+		WriteTimeout:   server.writeTimeout,
+		MaxHeaderBytes: server.maxHeaderBytes,
 		ErrorLog:       logger,
-	}
-
-	if !self.entryCreated {
-		ServerWithApiBuilder(self, func(api *Api) {
-			ApiWithPattern(api, "GET /")
-			ApiWithRequestHandler(api, func(request *Request, response *Response) {
-				ResponseSendStatus(response, 404)
-			})
-		})
 	}
 
 	var waiter sync.WaitGroup
@@ -155,29 +166,29 @@ func ServerStart(self *Server) {
 	waiter.Add(2)
 
 	go func() {
-		address := fmt.Sprintf("%s:%d", self.hostName, self.port)
-		NotifierSendMessage(self.notifier, fmt.Sprintf("listening for requests at http://%s", address))
-		err := http.ListenAndServe(address, self.mux)
-		if nil != err {
-			if errors.Is(err, http.ErrServerClosed) {
-				NotifierSendMessage(self.notifier, "shutting down server")
+		address := fmt.Sprintf("%s:%d", server.hostName, server.port)
+		server.notifier.SendMessage(fmt.Sprintf("listening for requests at http://%s", address))
+		serverError := http.ListenAndServe(address, server.mux)
+		if nil != serverError {
+			if errors.Is(serverError, http.ErrServerClosed) {
+				server.notifier.SendMessage("shutting down server")
 				return
 			}
-			log.Fatal(err)
+			log.Fatal(serverError)
 		}
 	}()
 
 	go func() {
-		secureAddress := fmt.Sprintf("%s:%d", self.hostName, self.securePort)
-		if "" != self.certificate && "" != self.certificateKey {
-			NotifierSendMessage(self.notifier, fmt.Sprintf("listening for requests at https://%s", secureAddress))
-			err := http.ListenAndServeTLS(secureAddress, self.certificate, self.certificateKey, self.mux)
-			if nil != err {
-				if errors.Is(err, http.ErrServerClosed) {
-					NotifierSendMessage(self.notifier, "shutting down server")
+		secureAddress := fmt.Sprintf("%s:%d", server.hostName, server.securePort)
+		if "" != server.certificate && "" != server.certificateKey {
+			server.notifier.SendMessage(fmt.Sprintf("listening for requests at https://%s", secureAddress))
+			serverError := http.ListenAndServeTLS(secureAddress, server.certificate, server.certificateKey, server.mux)
+			if nil != serverError {
+				if errors.Is(serverError, http.ErrServerClosed) {
+					server.notifier.SendMessage("shutting down server")
 					return
 				}
-				log.Fatal(err)
+				log.Fatal(serverError)
 			}
 		}
 	}()
@@ -185,40 +196,28 @@ func ServerStart(self *Server) {
 	waiter.Wait()
 }
 
-// ServerStop attempts to stop the server.
+// Stop attempts to stop the server.
 //
 // If the shutdown attempt fails, ServerStop crashes the program.
-func ServerStop(self *Server) {
-	err := self.server.Shutdown(context.Background())
-	if nil != err {
-		log.Fatal(err)
+func (server *Server) Stop() {
+	shutdownError := server.server.Shutdown(context.Background())
+	if nil != shutdownError {
+		log.Fatal(shutdownError)
 	}
 }
 
-var pathParametersPattern = regexp.MustCompile(`{([^{}]+)}`)
-
-// serverMapRoute maps a pattern to a given route.
-//
-// If the given pattern conflicts with one that is already registered, serverMapRoute crashes the program.
-func serverMapRoute(self *Server, pattern string, route *Route) {
-	patternParts := strings.Split(pattern, " ")
-	patternCounter := len(patternParts)
-	isEntry := patternCounter > 1 && strings.HasPrefix(strings.TrimPrefix(filepath.Join(patternParts[1:]...), " "), "/")
-
-	if isEntry && !self.entryCreated {
-		self.entryCreated = true
-	}
-
-	self.mux.HandleFunc(pattern, func(writer http.ResponseWriter, httpRequest *http.Request) {
+// OnRequest adds request handler.
+func (server *Server) OnRequest(pattern string, handler func(request *Request, response *Response)) {
+	server.mux.HandleFunc(pattern, func(writer http.ResponseWriter, httpRequest *http.Request) {
 		request := &Request{
-			server:      self,
+			server:      server,
 			httpRequest: httpRequest,
 		}
 
 		httpHeader := writer.Header()
 
 		response := &Response{
-			server:                self,
+			server:                server,
 			writer:                &writer,
 			lockedStatusAndHeader: false,
 			statusCode:            200,
@@ -230,74 +229,62 @@ func serverMapRoute(self *Server, pattern string, route *Route) {
 		request.response = response
 		response.request = request
 
-		if isEntry {
-			ResponseSendEmbeddedFileOrElse(response, func() {
-				ResponseSendFileOrElse(response, func() {
-					if route.handler != nil {
-						if "/favicon.ico" == request.httpRequest.RequestURI {
-							ResponseSendNotFound(response)
-							return
-						}
-						route.handler(request, response)
-
-						if !response.lockedStatusAndHeader {
-							ResponseSendMessage(response, "")
-						}
-					}
-				})
-			})
-		} else if route.handler != nil {
-			route.handler(request, response)
-
-			if !response.lockedStatusAndHeader {
-				ResponseSendMessage(response, "")
-			}
+		if nil == handler {
+			response.SendNotFound()
 		}
+
+		handler(request, response)
 	})
 }
 
-// ServerWithPageBuilder adds a page.
-func ServerWithPageBuilder[T any](self *Server, builder PageBuilder[T]) {
-	page := PageCreate[T]()
-	PageWithServer(page, self)
+var ids = map[string]string{}
 
-	builder(page)
-
-	if "" == page.name {
-		NotifierSendError(self.notifier, fmt.Errorf("every page must have a name"))
-		return
-	}
-
-	if nil == page.view {
-		NotifierSendError(self.notifier, fmt.Errorf("every page must have view, page `%s` doesn't", page.name))
-		return
-	}
-
-	if "" == page.path {
-		NotifierSendError(self.notifier, fmt.Errorf("every page must have a path, page `%s` desn't", page.name))
-		return
-	}
-
-	pages[page.name] = PageMetadata{
-		Path:     page.path,
-		ViewName: page.view.name,
-	}
-
-	serverMapRoute(self, "GET "+page.path, routeCreateWithView(page.base, page.guards, page.view))
-	serverMapRoute(self, "POST "+page.path, routeCreateWithView(page.action, page.guards, page.view))
+func (server *Server) WithPageController(controller PageController) {
+	configuration := controller.Configure()
+	reflectedType := reflect.TypeOf(controller)
+	id := strings.TrimSuffix(reflectedType.Name(), "Controller")
+	ids[id] = configuration.Path
+	tryFilesFirst := configuration.TryFileFirst || "/" == configuration.Path
+	server.OnRequest("GET "+configuration.Path, func(request *Request, response *Response) {
+		if tryFilesFirst {
+			response.SendFileOrElse(func() {
+				response.id = id
+				for _, guard := range configuration.Guards {
+					if !guard(request, response) {
+						return
+					}
+				}
+				controller.Base(request, response)
+			})
+		} else {
+			response.id = id
+			for _, guard := range configuration.Guards {
+				if !guard(request, response) {
+					return
+				}
+			}
+			controller.Base(request, response)
+		}
+	})
+	server.OnRequest("POST "+configuration.Path, func(request *Request, response *Response) {
+		response.id = id
+		for _, guard := range configuration.Guards {
+			if !guard(request, response) {
+				return
+			}
+		}
+		controller.Action(request, response)
+	})
 }
 
-// ServerWithApiBuilder adds an api.
-func ServerWithApiBuilder(self *Server, builder ApiBuilder) {
-	api := ApiCreate()
-
-	builder(api)
-
-	for _, pattern := range api.patterns {
-		if "" == pattern {
-			NotifierSendError(self.notifier, fmt.Errorf("could not add api because path is empty"))
-			return
+func (server *Server) WithApiController(controller ApiController) {
+	configuration := controller.Configure()
+	server.OnRequest(configuration.Pattern, func(request *Request, response *Response) {
+		for _, guard := range configuration.Guards {
+			if !guard(request, response) {
+				return
+			}
 		}
-		serverMapRoute(self, pattern, routeCreate(api.handler, api.guards))
-	}
+		controller.Handle(request, response)
+	})
 }

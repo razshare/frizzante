@@ -8,7 +8,7 @@ import (
 )
 
 func TestNewJavaScriptContext(test *testing.T) {
-	_, err := JavaScriptContextCreateWithGlobals(map[string]v8go.FunctionCallback{})
+	_, err := NewJavaScript(map[string]v8go.FunctionCallback{})
 	if err != nil {
 		test.Fatal(err)
 	}

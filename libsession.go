@@ -20,11 +20,11 @@ type Session[T any] struct {
 
 var sessions = map[string]any{}
 
-func sessionInitializeAndBuild[T any](request *Request, response *Response, builder SessionBuilder[T]) *Session[T] {
+func newSessionInitializedAndBuilt[T any](request *Request, response *Response, builder SessionBuilder[T]) *Session[T] {
 	uuidV4, sessionIdError := uuid.NewV4()
 
 	if sessionIdError != nil {
-		NotifierSendError(request.server.notifier, sessionIdError)
+		request.server.notifier.SendError(sessionIdError)
 		return nil
 	}
 
@@ -42,7 +42,7 @@ func sessionInitializeAndBuild[T any](request *Request, response *Response, buil
 
 	sessions[session.Id] = session
 
-	ResponseSendCookie(response, "session-id", session.Id)
+	response.SendCookie("session-id", session.Id)
 	return session
 }
 
@@ -72,7 +72,7 @@ func SessionStart[T any](request *Request, response *Response, builder SessionBu
 
 	if 0 == sessionIdCookiesLen || nil == sessionIdCookie {
 		// Create new session.
-		return sessionInitializeAndBuild[T](request, response, builder)
+		return newSessionInitializedAndBuilt[T](request, response, builder)
 	}
 
 	// Try to retrieve session.
@@ -99,45 +99,45 @@ func SessionStart[T any](request *Request, response *Response, builder SessionBu
 	return session
 }
 
-// SessionExists checks if the session exists.
-func SessionExists[T any](self *Session[T]) bool {
-	return self.exists()
+// Exists checks if the session exists.
+func (session *Session[T]) Exists() bool {
+	return session.exists()
 }
 
-// SessionLoad loads the session.
-func SessionLoad[T any](self *Session[T]) {
-	self.load()
+// Load loads the session.
+func (session *Session[T]) Load() {
+	session.load()
 }
 
-// SessionSave saves the session.
-func SessionSave[T any](self *Session[T]) {
-	self.save()
+// Save saves the session.
+func (session *Session[T]) Save() {
+	session.save()
 }
 
-// SessionDestroy destroys the session.
-func SessionDestroy[T any](self *Session[T]) {
-	self.destroy()
+// Destroy destroys the session.
+func (session *Session[T]) Destroy() {
+	session.destroy()
 }
 
-// SessionWithExistsHandler sets the exists handler.
-func SessionWithExistsHandler[T any](self *Session[T], handler func() bool) {
-	self.exists = handler
+// WithExistsHandler sets the exists handler.
+func (session *Session[T]) WithExistsHandler(handler func() bool) {
+	session.exists = handler
 }
 
-// SessionWithLoadHandler sets the load handler.
-func SessionWithLoadHandler[T any](self *Session[T], handler func()) {
-	self.load = handler
+// WithLoadHandler sets the load handler.
+func (session *Session[T]) WithLoadHandler(handler func()) {
+	session.load = handler
 }
 
-// SessionWithSaveHandler sets the save handler.
-func SessionWithSaveHandler[T any](self *Session[T], handler func()) {
-	self.save = handler
+// WithSaveHandler sets the save handler.
+func (session *Session[T]) WithSaveHandler(handler func()) {
+	session.save = handler
 }
 
-// SessionWithDestroyHandler sets the destroy handler.
-func SessionWithDestroyHandler[T any](self *Session[T], handler func()) {
-	self.destroy = func() {
-		self.onDestroy()
+// WithDestroyHandler sets the destroy handler.
+func (session *Session[T]) WithDestroyHandler(handler func()) {
+	session.destroy = func() {
+		session.onDestroy()
 		handler()
 	}
 }

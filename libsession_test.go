@@ -16,54 +16,48 @@ var memory = map[string]State{}
 
 // Memory builds sessions in memory.
 func Memory(session *Session[State]) {
-	sessionId := session.Id
-	memory[sessionId] = State{}
-
-	SessionWithExistsHandler(session, func() bool {
-		_, exists := memory[sessionId]
+	session.WithExistsHandler(func() bool {
+		_, exists := memory[session.Id]
 		return exists
 	})
 
-	SessionWithLoadHandler(session, func() {
-		session.Data = memory[sessionId]
+	session.WithLoadHandler(func() {
+		session.Data = memory[session.Id]
 	})
 
-	SessionWithSaveHandler(session, func() {
-		memory[sessionId] = session.Data
+	session.WithSaveHandler(func() {
+		memory[session.Id] = session.Data
 	})
 
-	SessionWithDestroyHandler(session, func() {
-		delete(memory, sessionId)
+	session.WithDestroyHandler(func() {
+		delete(memory, session.Id)
 	})
+
+	if session.Exists() {
+		session.Load()
+		return
+	}
+
+	session.Data = State{Name: "world"}
 }
 
 func TestSessionStart(test *testing.T) {
-	server := ServerCreate()
+	server := NewServer()
 	port := NextNumber(8080)
-	ServerWithPort(server, port)
-	ServerWithApiBuilder(server, func(api *Api) {
-		ApiWithPattern(api, "GET /")
-		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart(request, response, Memory)
-
-			if "" == session.Data.Name {
-				session.Data.Name = "world"
-			}
-
-			ResponseSendMessage(response, fmt.Sprintf("hello %s", session.Data.Name))
-		})
-	})
-	ServerWithApiBuilder(server, func(api *Api) {
-		ApiWithPattern(api, "POST /")
-		ApiWithRequestHandler(api, func(request *Request, response *Response) {
-			session := SessionStart(request, response, Memory)
-			session.Data.Name = RequestReceiveMessage(request)
-			ResponseSendMessage(response, "")
-		})
+	server.WithPort(port)
+	server.OnRequest("GET /", func(request *Request, response *Response) {
+		session := SessionStart(request, response, Memory)
+		response.SendMessage(fmt.Sprintf("hello %s", session.Data.Name))
 	})
 
-	go ServerStart(server)
-	defer ServerStop(server)
+	server.OnRequest("POST /", func(request *Request, response *Response) {
+		session := SessionStart(request, response, Memory)
+		session.Data.Name = request.ReceiveMessage()
+		response.SendMessage("")
+	})
+
+	go server.Start()
+	defer server.Stop()
 
 	time.Sleep(1 * time.Second)
 

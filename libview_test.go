@@ -11,26 +11,64 @@ type WelcomeData struct {
 	Name string `json:"name"`
 }
 
+// Ssr.
+type SsrController struct {
+	PageController
+}
+
+func (_ SsrController) Configure() PageConfiguration {
+	return PageConfiguration{
+		Path: "/",
+	}
+}
+
+func (_ SsrController) Base(request *Request, response *Response) {
+	view := NewView(WelcomeData{Name: "world"})
+	view.RenderMode = RenderModeServer
+	response.SendView(view)
+}
+
+func (_ SsrController) Action(request *Request, response *Response) {
+	view := NewView(WelcomeData{Name: "world"})
+	view.RenderMode = RenderModeServer
+	response.SendView(view)
+}
+
+// Csr.
+type CsrController struct {
+	PageController
+}
+
+func (_ CsrController) Configure() PageConfiguration {
+	return PageConfiguration{
+		Path: "/",
+	}
+}
+
+func (_ CsrController) Base(request *Request, response *Response) {
+	view := NewView(WelcomeData{Name: "world"})
+	view.RenderMode = RenderModeClient
+	response.SendView(view)
+}
+
+func (_ CsrController) Action(request *Request, response *Response) {
+	view := NewView(WelcomeData{Name: "world"})
+	view.RenderMode = RenderModeClient
+	response.SendView(view)
+}
+
 func TestRenderServer(test *testing.T) {
-	server := ServerCreate()
-	notifier := NotifierCreate()
+	server := NewServer()
+	notifier := NewNotifier()
 	port := NextNumber(8080)
-	ServerWithPort(server, port)
-	ServerWithHostName(server, "127.0.0.1")
-	ServerWithNotifier(server, notifier)
-	ServerWithEmbeddedFileSystem(server, &embeddedFileSystem)
-	ServerWithPageBuilder(server, func(page *Page[WelcomeData]) {
-		PageWithPath(page, "/")
-		PageWithName(page, "Welcome")
-		PageWithView(page, "Welcome", func() WelcomeData {
-			return WelcomeData{}
-		})
-		PageWithBaseHandler(page, func(request *Request, response *Response, view *View[WelcomeData]) {
-			view.Render = RenderServer
-			view.Data.Name = "world"
-		})
-	})
-	go ServerStart(server)
+	server.WithPort(port)
+	server.WithHostName("127.0.0.1")
+	server.WithNotifier(notifier)
+	server.WithEmbeddedFileSystem(&embeddedFileSystem)
+	server.WithPageController(SsrController{})
+
+	go server.Start()
+	defer server.Stop()
 	time.Sleep(1 * time.Second)
 
 	expected := "<h1>Hello world.</h1>"
@@ -47,25 +85,16 @@ func TestRenderServer(test *testing.T) {
 }
 
 func TestRenderClient(test *testing.T) {
-	server := ServerCreate()
-	notifier := NotifierCreate()
+	server := NewServer()
+	notifier := NewNotifier()
 	port := NextNumber(8080)
-	ServerWithPort(server, port)
-	ServerWithNotifier(server, notifier)
-	ServerWithHostName(server, "127.0.0.1")
-	ServerWithEmbeddedFileSystem(server, &embeddedFileSystem)
-	ServerWithPageBuilder(server, func(page *Page[WelcomeData]) {
-		PageWithPath(page, "/")
-		PageWithName(page, "Welcome")
-		PageWithView(page, "Welcome", func() WelcomeData {
-			return WelcomeData{}
-		})
-		PageWithBaseHandler(page, func(request *Request, response *Response, view *View[WelcomeData]) {
-			view.Render = RenderClient
-			view.Data.Name = "world"
-		})
-	})
-	go ServerStart(server)
+	server.WithPort(port)
+	server.WithNotifier(notifier)
+	server.WithHostName("127.0.0.1")
+	server.WithEmbeddedFileSystem(&embeddedFileSystem)
+	server.WithPageController(CsrController{})
+	go server.Start()
+	defer server.Stop()
 	time.Sleep(1 * time.Second)
 
 	expected := "<script type=\"application/javascript\">function target(){return document.getElementById("

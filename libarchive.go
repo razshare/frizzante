@@ -24,54 +24,54 @@ type Archive struct {
 	notifier *Notifier
 }
 
-// ArchiveGet reads the combination of domain and key from the archive.
-func ArchiveGet(self *Archive, domain string, key string) []byte {
-	return self.get(domain, key)
+// Get reads the combination of domain and key from the archive.
+func (archive *Archive) Get(domain string, key string) []byte {
+	return archive.get(domain, key)
 }
 
-// ArchiveSet writes to the combination of domain and key int the archive.
-func ArchiveSet(self *Archive, domain string, key string, value []byte) {
-	self.set(domain, key, value)
+// Set writes to the combination of domain and key int the archive.
+func (archive *Archive) Set(domain string, key string, value []byte) {
+	archive.set(domain, key, value)
 }
 
-// ArchiveHas checks if the combination of domain and key exists in the archive.
-func ArchiveHas(self *Archive, domain string, key string) bool {
-	return self.has(domain, key)
+// Has checks if the combination of domain and key exists in the archive.
+func (archive *Archive) Has(domain string, key string) bool {
+	return archive.has(domain, key)
 }
 
-// ArchiveRemove removes the combination of domain and key from the archive.
-func ArchiveRemove(self *Archive, domain string, key string) {
-	self.remove(domain, key)
+// Remove removes the combination of domain and key from the archive.
+func (archive *Archive) Remove(domain string, key string) {
+	archive.remove(domain, key)
 }
 
-// ArchiveDomainExists checks if the archive has a domain.
-func ArchiveDomainExists(self *Archive, domain string) bool {
-	return self.domainExists(domain)
+// DomainExists checks if the archive has a domain.
+func (archive *Archive) DomainExists(domain string) bool {
+	return archive.domainExists(domain)
 }
 
-// ArchiveRemoveDomain removes a domain from the archive.
-func ArchiveRemoveDomain(self *Archive, domain string) {
-	self.removeDomain(domain)
+// RemoveDomain removes a domain from the archive.
+func (archive *Archive) RemoveDomain(domain string) {
+	archive.removeDomain(domain)
 }
 
-// ArchiveWithName sets the name of the archive.
-func ArchiveWithName(self *Archive, name string) {
-	self.name = name
+// WithName sets the name of the archive.
+func (archive *Archive) WithName(name string) {
+	archive.name = name
 }
 
-// ArchiveWithKeyGetter sets the reader, which reads a value from the archive
+// WithKeyGetter sets the reader, which reads a value from the archive
 // given its domain and key.
-func ArchiveWithKeyGetter(self *Archive, getter func(domain string, key string) []byte) {
-	self.get = func(domain string, key string) []byte {
+func (archive *Archive) WithKeyGetter(getter func(domain string, key string) []byte) {
+	archive.get = func(domain string, key string) []byte {
 		if !KeyIsSafe(domain) {
-			NotifierSendError(self.notifier,
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
+			archive.notifier.SendError(
+				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
 			return nil
 		}
 
 		if !KeyIsSafe(key) {
-			NotifierSendError(self.notifier,
-				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", self.name, key))
+			archive.notifier.SendError(
+				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", archive.name, key))
 			return nil
 		}
 
@@ -79,20 +79,20 @@ func ArchiveWithKeyGetter(self *Archive, getter func(domain string, key string) 
 	}
 }
 
-// ArchiveWithKeySetter sets the writer,
+// WithKeySetter sets the writer,
 // which writes a value into the archive at a combination of
 // domain and key.
-func ArchiveWithKeySetter(self *Archive, setter func(domain string, key string, value []byte)) {
-	self.set = func(domain string, key string, value []byte) {
+func (archive *Archive) WithKeySetter(setter func(domain string, key string, value []byte)) {
+	archive.set = func(domain string, key string, value []byte) {
 		if !KeyIsSafe(domain) {
-			NotifierSendError(self.notifier,
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
+			archive.notifier.SendError(
+				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
 			return
 		}
 
 		if !KeyIsSafe(key) {
-			NotifierSendError(self.notifier,
-				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", self.name, key))
+			archive.notifier.SendError(
+				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", archive.name, key))
 			return
 		}
 
@@ -100,13 +100,13 @@ func ArchiveWithKeySetter(self *Archive, setter func(domain string, key string, 
 	}
 }
 
-// ArchiveWithDomainRemover sets the remover,
+// WithDomainRemover sets the remover,
 // which removes a domain from the archive.
-func ArchiveWithDomainRemover(self *Archive, domainRemover func(domain string)) {
-	self.removeDomain = func(domain string) {
+func (archive *Archive) WithDomainRemover(domainRemover func(domain string)) {
+	archive.removeDomain = func(domain string) {
 		if !KeyIsSafe(domain) {
-			NotifierSendError(self.notifier,
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
+			archive.notifier.SendError(
+				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
 			return
 		}
 
@@ -114,19 +114,19 @@ func ArchiveWithDomainRemover(self *Archive, domainRemover func(domain string)) 
 	}
 }
 
-// ArchiveWithKeyRemover sets the remover,
+// WithKeyRemover sets the remover,
 // which removes a combination of domain and key from the archive.
-func ArchiveWithKeyRemover(self *Archive, remover func(domain string, key string)) {
-	self.remove = func(domain string, key string) {
+func (archive *Archive) WithKeyRemover(remover func(domain string, key string)) {
+	archive.remove = func(domain string, key string) {
 		if !KeyIsSafe(domain) {
-			NotifierSendError(self.notifier,
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
+			archive.notifier.SendError(
+				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
 			return
 		}
 
 		if !KeyIsSafe(key) {
-			NotifierSendError(self.notifier,
-				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", self.name, key))
+			archive.notifier.SendError(
+				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", archive.name, key))
 			return
 		}
 
@@ -134,13 +134,13 @@ func ArchiveWithKeyRemover(self *Archive, remover func(domain string, key string
 	}
 }
 
-// ArchiveWithDomainChecker sets the domain checker,
+// WithDomainChecker sets the domain checker,
 // which checks if a domain exists in the archive.
-func ArchiveWithDomainChecker(self *Archive, checker func(domain string) (exists bool)) {
-	self.domainExists = func(domain string) (exists bool) {
+func (archive *Archive) WithDomainChecker(checker func(domain string) (exists bool)) {
+	archive.domainExists = func(domain string) (exists bool) {
 		if !KeyIsSafe(domain) {
-			NotifierSendError(self.notifier,
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
+			archive.notifier.SendError(
+				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
 			return
 		}
 
@@ -148,19 +148,19 @@ func ArchiveWithDomainChecker(self *Archive, checker func(domain string) (exists
 	}
 }
 
-// ArchiveWithKeyChecker sets the domain and key checker,
+// WithKeyChecker sets the domain and key checker,
 // which checks if a combination of domain and key exists in the archive.
-func ArchiveWithKeyChecker(self *Archive, checker func(domain string, key string) (exists bool)) {
-	self.has = func(domain string, key string) (exists bool) {
+func (archive *Archive) WithKeyChecker(checker func(domain string, key string) (exists bool)) {
+	archive.has = func(domain string, key string) (exists bool) {
 		if !KeyIsSafe(domain) {
-			NotifierSendError(self.notifier,
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", self.name, domain))
+			archive.notifier.SendError(
+				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
 			return
 		}
 
 		if !KeyIsSafe(key) {
-			NotifierSendError(self.notifier,
-				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", self.name, key))
+			archive.notifier.SendError(
+				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", archive.name, key))
 			return
 		}
 
@@ -168,26 +168,26 @@ func ArchiveWithKeyChecker(self *Archive, checker func(domain string, key string
 	}
 }
 
-// ArchiveWithNotifier sets the notifier.
-func ArchiveWithNotifier(self *Archive, notifier *Notifier) {
-	self.notifier = notifier
+// WithNotifier sets the notifier.
+func (archive *Archive) WithNotifier(notifier *Notifier) {
+	archive.notifier = notifier
 }
 
-// ArchiveCreate creates an archive.
+// NewArchive creates an archive.
 //
 // The alphabet of the archive is composed of the english alphabet (upper case letters and lowercase letters),
 // digits from 0 to 9, the "_" (underscore) character and the "-" (dash) character.
 //
 // Any domain or key received by the archive that is not in scope of the alphabet will be rejected automatically,
 // regardless of the custom implementations of the getter, setter, remover and checker functions.
-func ArchiveCreate(builder ArchiveBuilder) *Archive {
+func NewArchive(builder ArchiveBuilder) *Archive {
 	archiveName, archiveNameError := filepath.Abs("archive")
 	if nil != archiveNameError {
 		log.Fatal(archiveNameError)
 	}
 	archive := &Archive{
 		name:     archiveName,
-		notifier: NotifierCreate(),
+		notifier: NewNotifier(),
 	}
 
 	builder(archive)
@@ -195,42 +195,42 @@ func ArchiveCreate(builder ArchiveBuilder) *Archive {
 	return archive
 }
 
-// ArchiveCreateOnDisk creates an archive that uses the local file system as a backend.
-func ArchiveCreateOnDisk(name string, cacheTtl time.Duration) *Archive {
-	keys := CacheCreate[[]byte]()
-	domains := CacheCreate[bool]()
-	road := RoadCreate()
+// NewArchiveOnDisk creates an archive that uses the local file system as a backend.
+func NewArchiveOnDisk(name string, cacheTtl time.Duration) *Archive {
+	keys := NewCache[[]byte]()
+	domains := NewCache[bool]()
+	road := NewRoad()
 
-	return ArchiveCreate(func(archive *Archive) {
-		ArchiveWithName(archive, name)
-		ArchiveWithKeyGetter(archive, func(domain string, key string) []byte {
-			lane := RoadWithLane(road, domain, key)
+	return NewArchive(func(a *Archive) {
+		a.WithName(name)
+		a.WithKeyGetter(func(domain string, key string) []byte {
+			lane := road.WithLane(domain, key)
 			<-lane
-			fileName := filepath.Join(archive.name, domain, key)
-			if CacheIsNotExpired(keys, fileName) {
-				value := CacheGet(keys, fileName)
+			fileName := filepath.Join(a.name, domain, key)
+			if keys.IsNotExpired(fileName) {
+				value := keys.Get(fileName)
 				lane <- 0
 				return value
 			}
 			value, readError := os.ReadFile(fileName)
 			if nil != readError {
-				NotifierSendError(archive.notifier, readError)
+				a.notifier.SendError(readError)
 				lane <- 0
 				return nil
 			}
-			CacheSet(keys, cacheTtl, fileName, value)
+			keys.Set(cacheTtl, fileName, value)
 			lane <- 0
 			return value
 		})
 
-		ArchiveWithKeySetter(archive, func(domain string, key string, value []byte) {
-			lane := RoadWithLane(road, domain, key)
+		a.WithKeySetter(func(domain string, key string, value []byte) {
+			lane := road.WithLane(domain, key)
 			<-lane
-			directoryName := filepath.Join(archive.name, domain)
+			directoryName := filepath.Join(a.name, domain)
 			if !fileExists(directoryName) {
 				mkdirError := os.MkdirAll(directoryName, os.ModePerm)
 				if nil != mkdirError {
-					NotifierSendError(archive.notifier, mkdirError)
+					a.notifier.SendError(mkdirError)
 					lane <- 0
 					return
 				}
@@ -238,65 +238,65 @@ func ArchiveCreateOnDisk(name string, cacheTtl time.Duration) *Archive {
 			fileName := filepath.Join(directoryName, key)
 			writeError := os.WriteFile(fileName, value, os.ModePerm)
 			if nil != writeError {
-				NotifierSendError(archive.notifier, writeError)
+				a.notifier.SendError(writeError)
 			}
-			CacheSet(keys, cacheTtl, fileName, value)
+			keys.Set(cacheTtl, fileName, value)
 			lane <- 0
 		})
 
-		ArchiveWithDomainChecker(archive, func(domain string) bool {
-			lane := RoadWithLane(road, domain)
+		a.WithDomainChecker(func(domain string) bool {
+			lane := road.WithLane(domain)
 			<-lane
-			directoryName := filepath.Join(archive.name, domain)
-			if CacheIsNotExpired(domains, directoryName) {
-				value := CacheGet(domains, directoryName)
+			directoryName := filepath.Join(a.name, domain)
+			if domains.IsNotExpired(directoryName) {
+				value := domains.Get(directoryName)
 				lane <- 0
 				return value
 			}
 			ok := fileExists(directoryName)
-			CacheSet(domains, cacheTtl, directoryName, ok)
+			domains.Set(cacheTtl, directoryName, ok)
 			lane <- 0
 			return ok
 		})
 
-		ArchiveWithKeyChecker(archive, func(domain string, key string) bool {
-			lane := RoadWithLane(road, domain, key)
+		a.WithKeyChecker(func(domain string, key string) bool {
+			lane := road.WithLane(domain, key)
 			<-lane
-			fileName := filepath.Join(archive.name, domain, key)
-			if CacheIsNotExpired(domains, fileName) {
-				value := CacheGet(domains, fileName)
+			fileName := filepath.Join(a.name, domain, key)
+			if domains.IsNotExpired(fileName) {
+				value := domains.Get(fileName)
 				lane <- 0
 				return value
 			}
 			ok := fileExists(fileName)
-			CacheSet(domains, cacheTtl, fileName, ok)
+			domains.Set(cacheTtl, fileName, ok)
 			lane <- 0
 			return ok
 		})
 
-		ArchiveWithDomainRemover(archive, func(domain string) {
-			lane := RoadWithLane(road, domain)
+		a.WithDomainRemover(func(domain string) {
+			lane := road.WithLane(domain)
 			<-lane
-			directoryName := filepath.Join(archive.name, domain)
+			directoryName := filepath.Join(a.name, domain)
 			removeError := os.RemoveAll(directoryName)
 			if nil != removeError {
-				NotifierSendError(archive.notifier, removeError)
+				a.notifier.SendError(removeError)
 			}
-			CacheRemove(keys, directoryName)
+			keys.Remove(directoryName)
 			lane <- 0
 		})
 
-		ArchiveWithKeyRemover(archive, func(domain string, key string) {
-			lane := RoadWithLane(road, domain, key)
+		a.WithKeyRemover(func(domain string, key string) {
+			lane := road.WithLane(domain, key)
 			<-lane
-			fileName := filepath.Join(archive.name, domain, key)
+			fileName := filepath.Join(a.name, domain, key)
 			removeError := os.Remove(fileName)
 			if nil != removeError {
-				NotifierSendError(archive.notifier, removeError)
+				a.notifier.SendError(removeError)
 				lane <- 0
 				return
 			}
-			CacheRemove(keys, fileName)
+			keys.Remove(fileName)
 			lane <- 0
 		})
 	})

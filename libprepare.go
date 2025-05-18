@@ -80,7 +80,7 @@ func findViews() (map[string]string, error) {
 			}
 
 			fileNameBase := strings.Trim(strings.TrimPrefix(fileName, libViews), sep)
-			view := strings.TrimSuffix(strings.ReplaceAll(fileNameBase, sep, "."), ".svelte")
+			view := strings.TrimSuffix(strings.TrimSuffix(strings.ReplaceAll(fileNameBase, sep, "."), ".svelte"), "View")
 			importFileName, err := filepath.Rel(".frizzante/vite-project", fileName)
 			if err != nil {
 				return err
@@ -114,14 +114,14 @@ func dumpSsr(views map[string]string) error {
 
 	builder.Reset()
 	counter := 0
-	for viewName, _ := range views {
-		componentName := strings.ReplaceAll(viewName, ".", "_")
-		if 0 == counter {
-			builder.WriteString(fmt.Sprintf("{#if '%s' === pagesMetadata[pageName].viewName}\n", viewName))
+	for view := range views {
+		componentName := strings.ReplaceAll(view, ".", "_")
+		if counter == 0 {
+			builder.WriteString(fmt.Sprintf("{#if '%s' === server.id}\n", view))
 		} else {
-			builder.WriteString(fmt.Sprintf("{:else if '%s' === pagesMetadata[pageName].viewName}\n", viewName))
+			builder.WriteString(fmt.Sprintf("{:else if '%s' === server.id}\n", view))
 		}
-		builder.WriteString(fmt.Sprintf("    <%s />\n", strings.ToUpper(componentName)))
+		builder.WriteString(fmt.Sprintf("    <%s bind:server/>\n", strings.ToUpper(componentName)))
 		counter++
 	}
 	if counter > 0 {
@@ -150,13 +150,13 @@ func dumpCsr(views map[string]string) error {
 
 	builder.Reset()
 	counter := 0
-	for viewName, fileName := range views {
-		if 0 == counter {
-			builder.WriteString(fmt.Sprintf("{#if '%s' === pagesMetadata[pageNameState].viewName}\n", viewName))
+	for view, fileName := range views {
+		if counter == 0 {
+			builder.WriteString(fmt.Sprintf("{#if '%s' === server.id}\n", view))
 		} else {
-			builder.WriteString(fmt.Sprintf("{:else if '%s' === pagesMetadata[pageNameState].viewName}\n", viewName))
+			builder.WriteString(fmt.Sprintf("{:else if '%s' === server.id}\n", view))
 		}
-		builder.WriteString(fmt.Sprintf("    <View from={import('./%s')} />\n", fileName))
+		builder.WriteString(fmt.Sprintf("    <View from={import('./%s')} bind:server/>\n", fileName))
 		counter++
 	}
 	if counter > 0 {

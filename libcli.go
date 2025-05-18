@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"unicode"
 )
 
 //go:embed templates/*/**
@@ -26,6 +27,44 @@ type NameMetadata struct {
 	BaseFileNameNoExtensionTitle string
 	BaseDirectoryName            string
 	BaseFileNameTitle            string
+	BaseFileNameKebab            string
+}
+
+func toKebab(value string) string {
+	result := ""
+	for _, item := range value {
+		if unicode.IsUpper(item) {
+			result += "-" + string(unicode.ToLower(item))
+			continue
+		}
+		if '_' == item || '.' == item {
+			result += "-"
+		}
+		result += string(item)
+	}
+	return strings.Trim(result, "-")
+}
+
+func cleanUpName(name string) string {
+	return strings.Trim(
+		strings.Trim(
+			strings.Trim(
+				strings.Trim(
+					strings.Trim(
+						strings.Trim(
+							strings.Trim(name, "\r\n\t "),
+							"Api",
+						),
+						"api",
+					),
+					"controller",
+				),
+				"view",
+			),
+			"Controller",
+		),
+		"View",
+	)
 }
 
 func findNameMetadata(root string, template string, name string, message string) *NameMetadata {
@@ -36,30 +75,31 @@ func findNameMetadata(root string, template string, name string, message string)
 		}
 	}
 
-	trimmedName := strings.Trim(name, "\r\n\t ")
+	name = cleanUpName(name)
 
 	if "" == name {
 		reader := bufio.NewReader(os.Stdin)
 		fmt.Print(message)
 		name, _ = reader.ReadString('\n')
-		trimmedName = strings.Trim(name, "\r\n\t ")
 		if "" == name {
 			return findNameMetadata(root, template, name, message)
 		}
 	}
+
+	name = cleanUpName(name)
 
 	fullRoot, fullFileNameRootError := filepath.Abs(root)
 	if nil != fullFileNameRootError {
 		log.Fatal(fullFileNameRootError)
 	}
 
-	metadata := &NameMetadata{Name: trimmedName}
+	metadata := &NameMetadata{Name: name}
 
 	extensionName := filepath.Ext(template)
 
 	baseFileName := strings.ReplaceAll(
 		strings.ReplaceAll(
-			trimmedName,
+			name,
 			".",
 			string(filepath.Separator),
 		),
@@ -95,24 +135,25 @@ func findNameMetadata(root string, template string, name string, message string)
 	metadata.BaseDirectoryName = filepath.Base(metadata.FullDirectoryNameCamel)
 	metadata.BaseFileNameTitle = filepath.Base(metadata.FullFileNameTitle)
 	metadata.BaseFileNameNoExtensionTitle = strings.TrimSuffix(metadata.BaseFileNameTitle, extensionName)
+	metadata.BaseFileNameKebab = toKebab(metadata.BaseFileNameNoExtensionTitle)
 	return metadata
 }
 
 func findNameMetadataForApi(name string) *NameMetadata {
 	return findNameMetadata(
-		filepath.Join("lib", "api"),
+		filepath.Join("lib", "controllers", "api"),
 		filepath.Join("templates", "api", "example.go"),
 		name,
-		"Name the api: ",
+		"What's the name of this api? ",
 	)
 }
 
 func findNameMetadataForPage(name string) *NameMetadata {
 	return findNameMetadata(
-		filepath.Join("lib", "pages"),
+		filepath.Join("lib", "controllers", "pages"),
 		filepath.Join("templates", "pages", "example.go"),
 		name,
-		"Name the page: ",
+		"What's the name of this page? ",
 	)
 }
 
@@ -121,7 +162,7 @@ func findNameMetadataForView(name string) *NameMetadata {
 		filepath.Join("lib", "components", "views"),
 		filepath.Join("templates", "views", "example.svelte"),
 		name,
-		"Name the view: ",
+		"What is the name of this view? ",
 	)
 }
 
@@ -152,16 +193,16 @@ func createApi(apiName string) {
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	// Pattern.
-	oldName = []byte("\"GET /\"")
-	newName = []byte("\"GET /Api/" + strings.ReplaceAll(strings.TrimSuffix(metadata.RelativeFileNameTitle, ".go"), string(filepath.Separator), "/") + "\"")
-	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
+	oldName = []byte("/path")
+	newName = []byte("/api/" + strings.ReplaceAll(strings.TrimSuffix(metadata.BaseFileNameKebab, ".go"), string(filepath.Separator), "/"))
+	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	// Api.
-	oldName = []byte("func api(")
-	newName = []byte("func " + metadata.BaseFileNameNoExtensionTitle + "(")
-	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
+	oldName = []byte("apiController")
+	newName = []byte(metadata.BaseFileNameNoExtensionTitle + "Controller")
+	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	writeError := os.WriteFile(metadata.FullFileNameTitle, readBytes, os.ModePerm)
+	writeError := os.WriteFile(strings.TrimSuffix(metadata.FullFileNameTitle, ".go")+"Controller.go", readBytes, os.ModePerm)
 	if writeError != nil {
 		log.Fatal(writeError)
 	}
@@ -193,22 +234,22 @@ func createPage(pageName string) {
 	newName := []byte("package " + metadata.BaseDirectoryName)
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	// PageBuilder.
-	oldName = []byte("func page(")
-	newName = []byte("func " + metadata.BaseFileNameNoExtensionTitle + "(")
+	// PageController.
+	oldName = []byte("pageController")
+	newName = []byte(metadata.BaseFileNameNoExtensionTitle + "Controller")
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	// View.
-	oldName = []byte("\"ViewName\"")
-	newName = []byte("\"" + metadata.BaseFileNameNoExtensionTitle + "\"")
-	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
+	// PageData.
+	oldName = []byte("pageData")
+	newName = []byte(metadata.BaseFileNameNoExtensionTitle + "Data")
+	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	// Path.
-	oldName = []byte("\"/path\"")
-	newName = []byte("\"/" + strings.ReplaceAll(strings.TrimSuffix(metadata.RelativeFileNameTitle, ".go"), string(filepath.Separator), "/") + "\"")
-	readBytes = bytes.Replace(readBytes, oldName, newName, 1)
+	oldName = []byte("/path")
+	newName = []byte("/" + strings.ReplaceAll(strings.TrimSuffix(metadata.BaseFileNameKebab, ".go"), string(filepath.Separator), "/"))
+	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	writeError := os.WriteFile(metadata.FullFileNameTitle, readBytes, os.ModePerm)
+	writeError := os.WriteFile(strings.TrimSuffix(metadata.FullFileNameTitle, ".go")+"Controller.go", readBytes, os.ModePerm)
 	if writeError != nil {
 		log.Fatal(writeError)
 	}
@@ -240,7 +281,7 @@ func createViewComponent(pageName string) {
 	newName := []byte("Hello, this is " + metadata.BaseFileNameTitle + "!")
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	writeError := os.WriteFile(fileName, readBytes, os.ModePerm)
+	writeError := os.WriteFile(strings.TrimSuffix(fileName, ".svelte")+"View.svelte", readBytes, os.ModePerm)
 	if writeError != nil {
 		log.Fatal(writeError)
 	}

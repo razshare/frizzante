@@ -18,63 +18,62 @@ type Sql struct {
 	notifier *Notifier
 }
 
-// SqlCreate creates a sql wrapper.
-func SqlCreate() *Sql {
+// NewSql creates a sql wrapper.
+func NewSql() *Sql {
 	return &Sql{
 		dialect: SqlDialectMysql,
 	}
 }
 
-// SqlWithNotifier sets the sql notifier.
-func SqlWithNotifier(self *Sql, notifier *Notifier) {
-	self.notifier = notifier
+// WithNotifier sets the sql notifier.
+func (sql *Sql) WithNotifier(notifier *Notifier) {
+	sql.notifier = notifier
 }
 
-// SqlWithDatabase sets the sql database.
-func SqlWithDatabase(self *Sql, database *sql.DB) {
-	self.database = database
+// WithDatabase sets the sql database.
+func (sql *Sql) WithDatabase(database *sql.DB) {
+	sql.database = database
 }
 
-// SqlWithDialect sets the sql dialect.
-func SqlWithDialect(self *Sql, dialect SqlDialect) {
-	self.dialect = dialect
+// WithDialect sets the sql dialect.
+func (sql *Sql) WithDialect(dialect SqlDialect) {
+	sql.dialect = dialect
 }
 
-// SqlExecute executes sql queries that don't return rows, typically INSERT, UPDATE, DELETE queries.
-func SqlExecute(self *Sql, query string, props ...any) *sql.Result {
-	transaction, transactionError := self.database.Begin()
+// Execute executes sql queries that don't return rows, typically INSERT, UPDATE, DELETE queries.
+func (sql *Sql) Execute(query string, props ...any) *sql.Result {
+	transaction, transactionError := sql.database.Begin()
 	if transactionError != nil {
-		NotifierSendError(self.notifier, transactionError)
-		NotifierSendError(self.notifier, transactionError)
+		sql.notifier.SendError(transactionError)
 		return nil
 	}
 
 	statement, statementError := transaction.Prepare(query)
 	if nil != statementError {
-		NotifierSendError(self.notifier, statementError)
+		sql.notifier.SendError(statementError)
 		return nil
 	}
 
 	result, execError := statement.Exec(props...)
 	if execError != nil {
-		NotifierSendError(self.notifier, execError)
+		sql.notifier.SendError(execError)
 		rollbackError := transaction.Rollback()
 		if rollbackError != nil {
-			NotifierSendError(self.notifier, rollbackError)
+			sql.notifier.SendError(rollbackError)
 		}
 		return nil
 	}
 
 	commitError := transaction.Commit()
 	if commitError != nil {
-		NotifierSendError(self.notifier, commitError)
+		sql.notifier.SendError(commitError)
 		return nil
 	}
 
 	return &result
 }
 
-// SqlFind executes a sql query that returns rows, typically a SELECT query.
+// Find executes a sql query that returns rows, typically a SELECT query.
 //
 // It returns a next function and a close function.
 //
@@ -85,20 +84,20 @@ func SqlExecute(self *Sql, query string, props ...any) *sql.Result {
 // Use close to close the database context and prevent any subsequent enumerations.
 //
 // Whenever next returns false, the database context is closed automatically as if calling close.
-func SqlFind(self *Sql, query string, props ...any) (next func(dest ...any) bool, close func()) {
+func (sql *Sql) Find(query string, props ...any) (next func(dest ...any) bool, close func()) {
 	next = sqlFindNextFallback
 	close = sqlFindCloseFallback
 
-	statement, statementError := self.database.Prepare(query)
+	statement, statementError := sql.database.Prepare(query)
 	if nil != statementError {
-		NotifierSendError(self.notifier, statementError)
+		sql.notifier.SendError(statementError)
 		return
 	}
 	defer statement.Close()
 
 	rows, queryError := statement.Query(props...)
 	if queryError != nil {
-		NotifierSendError(self.notifier, queryError)
+		sql.notifier.SendError(queryError)
 		return
 	}
 
@@ -109,7 +108,7 @@ func SqlFind(self *Sql, query string, props ...any) (next func(dest ...any) bool
 
 		scanError := rows.Scan(dest...)
 		if scanError != nil {
-			NotifierSendError(self.notifier, scanError)
+			sql.notifier.SendError(scanError)
 			return false
 		}
 		return true
@@ -117,7 +116,7 @@ func SqlFind(self *Sql, query string, props ...any) (next func(dest ...any) bool
 	close = func() {
 		err := rows.Close()
 		if err != nil {
-			NotifierSendError(self.notifier, err)
+			sql.notifier.SendError(err)
 		}
 	}
 	return

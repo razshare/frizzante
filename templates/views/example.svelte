@@ -1,14 +1,10 @@
 <script>
-    import {getContext} from "svelte";
-
     /**
-     * Server data.
-     * @typedef Data
+     * @typedef ServerData
      * @property {any} prop1
      */
-
-    /** @type {Data} */
-    const data = getContext("data")
+    /** @type {ServerProperties<ServerData>} */
+    let {server = $bindable()} = $props()
 </script>
 
 <span>Hello, this is view!</span>

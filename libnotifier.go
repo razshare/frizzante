@@ -10,25 +10,26 @@ type Notifier struct {
 	messageFile *os.File
 }
 
-// NotifierCreate creates a notifier.
-func NotifierCreate() *Notifier {
+// NewNotifier creates a notifier.
+func NewNotifier() *Notifier {
 	return &Notifier{
 		errorFile:   os.Stderr,
 		messageFile: os.Stdout,
 	}
 }
 
-// NotifierSendError sends an error to the notifier.
-func NotifierSendError(self *Notifier, err error) {
-	_, errorLocal := self.errorFile.WriteString(err.Error() + "\n")
+// SendError sends an error to the notifier.
+// This will not limit the size of said messages.
+func (notifier *Notifier) SendError(err error) {
+	_, errorLocal := notifier.errorFile.WriteString(err.Error() + "\n")
 	if errorLocal != nil {
 		fmt.Printf("notifier could not write to error file")
 	}
 }
 
-// NotifierSendMessage sends a message to the notifier.
-func NotifierSendMessage(self *Notifier, message string) {
-	_, errorLocal := self.messageFile.WriteString(message + "\n")
+// SendMessage sends a message to the notifier.
+func (notifier *Notifier) SendMessage(message string) {
+	_, errorLocal := notifier.messageFile.WriteString(message + "\n")
 	if errorLocal != nil {
 		fmt.Printf("notifier could not write to message file")
 	}

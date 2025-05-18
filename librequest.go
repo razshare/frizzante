@@ -17,18 +17,28 @@ type Request struct {
 	webSocketConn *websocket.Conn
 }
 
-// RequestReceiveCancellation returns a channel that's closed when the request is cancelled.
-func RequestReceiveCancellation(self *Request) <-chan struct{} {
-	return self.httpRequest.Context().Done()
+// ReceiveCancellation returns a channel that's closed when the request is cancelled.
+func (request *Request) ReceiveCancellation() <-chan struct{} {
+	return request.httpRequest.Context().Done()
 }
 
-// RequestReceiveCookie reads the contents of a cookie from the message and returns the value.
+// IsAlive returns a bool which updates to false when the request gets cancelled.
+func (request *Request) IsAlive() *bool {
+	value := true
+	go func() {
+		<-request.ReceiveCancellation()
+		value = false
+	}()
+	return &value
+}
+
+// ReceiveCookie reads the contents of a cookie from the message and returns the value.
 //
 // Compatible with web sockets.
-func RequestReceiveCookie(self *Request, key string) string {
-	cookie, cookieError := self.httpRequest.Cookie(key)
+func (request *Request) ReceiveCookie(key string) string {
+	cookie, cookieError := request.httpRequest.Cookie(key)
 	if nil != cookieError {
-		NotifierSendError(self.server.notifier, cookieError)
+		request.server.notifier.SendError(cookieError)
 		return ""
 	}
 	value, unescapeError := url.QueryUnescape(cookie.Value)
@@ -39,108 +49,109 @@ func RequestReceiveCookie(self *Request, key string) string {
 	return value
 }
 
-// RequestReceiveMessage reads the contents of the message and returns the value.
+// ReceiveMessage reads the contents of the message and returns the value.
 //
 // Compatible with web sockets.
-func RequestReceiveMessage(self *Request) string {
-	if self.webSocketConn != nil {
-		_, readBytes, readError := self.webSocketConn.ReadMessage()
+func (request *Request) ReceiveMessage() string {
+	if request.webSocketConn != nil {
+		_, readBytes, readError := request.webSocketConn.ReadMessage()
 		if nil != readError {
-			NotifierSendError(self.server.notifier, readError)
+			request.server.notifier.SendError(readError)
 			return ""
 		}
 		return string(readBytes)
 	}
 
-	readBytes, readAllError := io.ReadAll(self.httpRequest.Body)
+	readBytes, readAllError := io.ReadAll(request.httpRequest.Body)
 	if nil != readAllError {
-		NotifierSendError(self.server.notifier, readAllError)
+		request.server.notifier.SendError(readAllError)
 		return ""
 	}
 	return string(readBytes)
 }
 
-// RequestReceiveJson reads the message as json and returns the value and a boolean,
-// which indicates success or failure.
+// ReceiveJson reads the next JSON-encoded message from the
+// connection and stores it in the value pointed to by v.
+//
+// ReceiveJson returns true on success or false on failure.
 //
 // Compatible with web sockets.
-func RequestReceiveJson[T any](self *Request) *T {
-	var value T
+func (request *Request) ReceiveJson(self *Request, out any) bool {
 	if self.webSocketConn != nil {
-		jsonError := self.webSocketConn.ReadJSON(value)
+		jsonError := self.webSocketConn.ReadJSON(out)
 		if nil != jsonError {
-			NotifierSendError(self.server.notifier, jsonError)
-			return nil
+			self.server.notifier.SendError(jsonError)
+			return false
 		}
-		return &value
+		return true
 	}
 
 	readBytes, readAllError := io.ReadAll(self.httpRequest.Body)
 	if nil != readAllError {
-		NotifierSendError(self.server.notifier, readAllError)
-		return nil
+		self.server.notifier.SendError(readAllError)
+		return false
 	}
-	unmarshalError := json.Unmarshal(readBytes, &value)
+	unmarshalError := json.Unmarshal(readBytes, out)
 	if nil != unmarshalError {
-		NotifierSendError(self.server.notifier, unmarshalError)
-		return nil
+		self.server.notifier.SendError(unmarshalError)
+		return false
 	}
-	return &value
+	return true
 }
 
-// RequestReceiveForm reads the message as a form and returns the value.
-func RequestReceiveForm(self *Request) *url.Values {
-	if self.webSocketConn != nil {
-		NotifierSendError(self.server.notifier, errors.New("web socket connections cannot receive form payloads"))
+// ReceiveForm reads the message as a form and returns the value.
+func (request *Request) ReceiveForm() *url.Values {
+	if request.webSocketConn != nil {
+		request.server.notifier.SendError(errors.New("web socket connections cannot receive form payloads"))
 		return &url.Values{}
 	}
 
-	parseMultipartFormError := self.httpRequest.ParseMultipartForm(self.server.multipartFormMaxMemory)
+	parseMultipartFormError := request.httpRequest.ParseMultipartForm(request.server.multipartFormMaxMemory)
 	if nil != parseMultipartFormError {
 		if !errors.Is(parseMultipartFormError, http.ErrNotMultipart) {
-			NotifierSendError(self.server.notifier, parseMultipartFormError)
+			request.server.notifier.SendError(parseMultipartFormError)
 		}
 
-		parseFormError := self.httpRequest.ParseForm()
+		parseFormError := request.httpRequest.ParseForm()
 		if nil != parseFormError {
-			NotifierSendError(self.server.notifier, parseFormError)
+			request.server.notifier.SendError(parseFormError)
 		}
 	}
 
-	return &self.httpRequest.Form
+	return &request.httpRequest.Form
 }
 
-// RequestReceiveQuery reads a query field and returns the value.
+// ReceiveQuery reads a query field and returns the value.
 //
 // Compatible with web sockets.
-func RequestReceiveQuery(self *Request, name string) string {
-	return self.httpRequest.URL.Query().Get(name)
+func (request *Request) ReceiveQuery(name string) string {
+	return request.httpRequest.URL.Query().Get(name)
 }
 
-// RequestReceivePath reads a parameters fields and returns the value.
+// ReceivePath reads a parameters fields and returns the value.
 //
 // Compatible with web sockets.
-func RequestReceivePath(self *Request, name string) string {
-	return self.httpRequest.PathValue(name)
+func (request *Request) ReceivePath(name string) string {
+	return request.httpRequest.PathValue(name)
 }
 
-// RequestReceiveHeader reads a header field and returns the value.
+// ReceiveHeader reads a header field and returns the value.
 //
 // Compatible with web sockets.
-func RequestReceiveHeader(self *Request, key string) string {
-	return self.httpRequest.Header.Get(key)
+func (request *Request) ReceiveHeader(key string) string {
+	return request.httpRequest.Header.Get(key)
 }
 
-// RequestReceiveContentType reads the Content-Type header field and returns the value.
+// ReceiveContentType reads the Content-Type header field and returns the value.
 //
 // Compatible with web sockets.
-func RequestReceiveContentType(self *Request) string {
-	return self.httpRequest.Header.Get("Content-Type")
+func (request *Request) ReceiveContentType() string {
+	return request.httpRequest.Header.Get("Content-Type")
 }
 
-// RequestVerifyContentType checks if the incoming request has any of the given content-types.
-func RequestVerifyContentType(self *Request, contentTypes ...string) bool {
-	requestedMime := self.httpRequest.Header.Get("Content-Type")
+// VerifyContentType checks if the incoming request has any of the given content-types.
+func (request *Request) VerifyContentType(contentTypes ...string) bool {
+	requestedMime := request.httpRequest.Header.Get("Content-Type")
 	for _, acceptedMime := range contentTypes {
 		if acceptedMime == "*" || strings.HasPrefix(requestedMime, acceptedMime) {
 			return true
@@ -150,9 +161,9 @@ func RequestVerifyContentType(self *Request, contentTypes ...string) bool {
 	return false
 }
 
-// RequestVerifyAccept checks if the incoming request accepts any of the given content-types.
-func RequestVerifyAccept(self *Request, contentTypes ...string) bool {
-	requestedAcceptMime := self.httpRequest.Header.Get("Accept")
+// VerifyAccept checks if the incoming request accepts any of the given content-types.
+func (request *Request) VerifyAccept(contentTypes ...string) bool {
+	requestedAcceptMime := request.httpRequest.Header.Get("Accept")
 	for _, acceptedMime := range contentTypes {
 		if acceptedMime == "*" || strings.Contains(requestedAcceptMime, acceptedMime) {
 			return true
