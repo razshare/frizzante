@@ -1,12 +1,16 @@
 <script lang="ts">
     //:app-imports
+    import {setContext} from "svelte"
+
     type Props = {
         id: string
-        data: Record<string, any>
+        data: any
         ids: Record<string, string>
     }
-    let {id: idInput, data: dataInput, ids: idsInput}:Props = $props()
-    let server = $state({id: idInput, data: dataInput, ids: idsInput})
+
+    let {id: idInput, data: dataInput, ids: idsInput}: any = $props()
+    let server = $state({id: idInput, data: dataInput, ids: idsInput}) as Props
+    setContext("server", server)
 </script>
 
 <!--app-router-->

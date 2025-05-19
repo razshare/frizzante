@@ -121,7 +121,7 @@ func dumpSsr(views map[string]string) error {
 		} else {
 			builder.WriteString(fmt.Sprintf("{:else if '%s' === server.id}\n", view))
 		}
-		builder.WriteString(fmt.Sprintf("    <%s bind:server/>\n", strings.ToUpper(componentName)))
+		builder.WriteString(fmt.Sprintf("    <%s />\n", strings.ToUpper(componentName)))
 		counter++
 	}
 	if counter > 0 {
@@ -156,7 +156,7 @@ func dumpCsr(views map[string]string) error {
 		} else {
 			builder.WriteString(fmt.Sprintf("{:else if '%s' === server.id}\n", view))
 		}
-		builder.WriteString(fmt.Sprintf("    <View from={import('./%s')} bind:server/>\n", fileName))
+		builder.WriteString(fmt.Sprintf("    <View from={import('./%s')} />\n", fileName))
 		counter++
 	}
 	if counter > 0 {
