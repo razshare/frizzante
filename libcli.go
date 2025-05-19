@@ -288,16 +288,16 @@ func createViewComponent(pageName string) {
 
 // Cli makes things.
 func Cli() {
-	//api := flag.Bool("api", false, "")
-	//page := flag.Bool("page", false, "")
+	api := flag.Bool("api", false, "")
+	page := flag.Bool("page", false, "")
 	name := flag.String("name", "", "")
 	flag.Parse()
 
-	//if *api {
-	//	createApi(*name)
-	//}
-	//
-	//if *page {
-	createPage(*name)
-	//}
+	if *api {
+		createApi(*name)
+	}
+
+	if *page {
+		createPage(*name)
+	}
 }
