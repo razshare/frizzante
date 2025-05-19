@@ -27,9 +27,16 @@ type View struct {
 
 var noScriptPattern = regexp.MustCompile(`<script.*>.*</script>`)
 
-func NewView(data any) *View {
+func NewView(render RenderMode) *View {
 	return &View{
-		RenderMode: RenderModeFull,
+		RenderMode: render,
+		Data:       map[string]string{},
+	}
+}
+
+func NewViewWithData(render RenderMode, data any) *View {
+	return &View{
+		RenderMode: render,
 		Data:       data,
 	}
 }
