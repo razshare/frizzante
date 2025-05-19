@@ -23,15 +23,11 @@ func (_ SsrController) Configure() PageConfiguration {
 }
 
 func (_ SsrController) Base(request *Request, response *Response) {
-	view := NewView(WelcomeData{Name: "world"})
-	view.RenderMode = RenderModeServer
-	response.SendView(view)
+	response.SendView(NewViewWithData(RenderModeServer, WelcomeData{Name: "world"}))
 }
 
 func (_ SsrController) Action(request *Request, response *Response) {
-	view := NewView(WelcomeData{Name: "world"})
-	view.RenderMode = RenderModeServer
-	response.SendView(view)
+	response.SendView(NewViewWithData(RenderModeServer, WelcomeData{Name: "world"}))
 }
 
 // Csr.
@@ -46,15 +42,11 @@ func (_ CsrController) Configure() PageConfiguration {
 }
 
 func (_ CsrController) Base(request *Request, response *Response) {
-	view := NewView(WelcomeData{Name: "world"})
-	view.RenderMode = RenderModeClient
-	response.SendView(view)
+	response.SendView(NewViewWithData(RenderModeClient, WelcomeData{Name: "world"}))
 }
 
 func (_ CsrController) Action(request *Request, response *Response) {
-	view := NewView(WelcomeData{Name: "world"})
-	view.RenderMode = RenderModeClient
-	response.SendView(view)
+	response.SendView(NewViewWithData(RenderModeClient, WelcomeData{Name: "world"}))
 }
 
 func TestRenderServer(test *testing.T) {
