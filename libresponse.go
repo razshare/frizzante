@@ -90,7 +90,23 @@ func (response *Response) SendNavigate(id string) {
 		response.server.notifier.SendError(fmt.Errorf("id `%s` doesn't exist", id))
 		return
 	}
+
 	response.SendRedirect(path, 302)
+	response.SendMessage("")
+}
+
+func (response *Response) SendNavigateWithQuery(id string, search string) {
+	path, idExists := ids[id]
+	if !idExists {
+		response.server.notifier.SendError(fmt.Errorf("id `%s` doesn't exist", id))
+		return
+	}
+
+	if !strings.HasPrefix(search, "?") {
+		search = "?" + search
+	}
+
+	response.SendRedirect(path+url.QueryEscape(search), 302)
 	response.SendMessage("")
 }
 
