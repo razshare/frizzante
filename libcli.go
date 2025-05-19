@@ -220,38 +220,36 @@ func createPage(pageName string) {
 
 	if fileExists(metadata.FullFileNameTitle) {
 		fmt.Printf("Page `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
-		createPage("")
-		return
-	}
+	} else {
+		readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
+		if nil != readError {
+			log.Fatal(readError)
+		}
 
-	readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
-	if nil != readError {
-		log.Fatal(readError)
-	}
+		// Package.
+		oldName := []byte("package pages")
+		newName := []byte("package " + metadata.BaseDirectoryName)
+		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	// Package.
-	oldName := []byte("package pages")
-	newName := []byte("package " + metadata.BaseDirectoryName)
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+		// PageController.
+		oldName = []byte("pageController")
+		newName = []byte(metadata.BaseFileNameNoExtensionTitle + "Controller")
+		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	// PageController.
-	oldName = []byte("pageController")
-	newName = []byte(metadata.BaseFileNameNoExtensionTitle + "Controller")
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+		// PageData.
+		oldName = []byte("pageData")
+		newName = []byte(metadata.BaseFileNameNoExtensionTitle + "Data")
+		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	// PageData.
-	oldName = []byte("pageData")
-	newName = []byte(metadata.BaseFileNameNoExtensionTitle + "Data")
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+		// Path.
+		oldName = []byte("/path")
+		newName = []byte("/" + strings.ReplaceAll(strings.TrimSuffix(metadata.BaseFileNameKebab, ".go"), string(filepath.Separator), "/"))
+		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	// Path.
-	oldName = []byte("/path")
-	newName = []byte("/" + strings.ReplaceAll(strings.TrimSuffix(metadata.BaseFileNameKebab, ".go"), string(filepath.Separator), "/"))
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
-
-	writeError := os.WriteFile(strings.TrimSuffix(metadata.FullFileNameTitle, ".go")+"Controller.go", readBytes, os.ModePerm)
-	if writeError != nil {
-		log.Fatal(writeError)
+		writeError := os.WriteFile(strings.TrimSuffix(metadata.FullFileNameTitle, ".go")+"Controller.go", readBytes, os.ModePerm)
+		if writeError != nil {
+			log.Fatal(writeError)
+		}
 	}
 
 	metadata.FullFileNameTitle = strings.TrimSuffix(metadata.FullFileNameTitle, ".go") + ".svelte"
@@ -263,27 +261,23 @@ func createPage(pageName string) {
 func createViewComponent(pageName string) {
 	metadata := findNameMetadataForView(pageName)
 
-	fileName := filepath.Join(metadata.FullDirectoryNameCamel, metadata.BaseFileNameTitle)
+	if fileExists(metadata.FullFileNameTitle) {
+		fmt.Printf("component `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
+	} else {
+		readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
+		if nil != readError {
+			log.Fatal(readError)
+		}
 
-	if fileExists(fileName) {
-		fmt.Printf("component `%s` already exists.\n", fileName)
-		createViewComponent("")
-		return
-	}
+		// Content.
+		oldName := []byte("Hello, this is view!")
+		newName := []byte("Hello, this is " + metadata.BaseFileNameTitle + "!")
+		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
-	if nil != readError {
-		log.Fatal(readError)
-	}
-
-	// Content.
-	oldName := []byte("Hello, this is view!")
-	newName := []byte("Hello, this is " + metadata.BaseFileNameTitle + "!")
-	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
-
-	writeError := os.WriteFile(strings.TrimSuffix(fileName, ".svelte")+"View.svelte", readBytes, os.ModePerm)
-	if writeError != nil {
-		log.Fatal(writeError)
+		writeError := os.WriteFile(strings.TrimSuffix(metadata.FullFileNameTitle, ".svelte")+"View.svelte", readBytes, os.ModePerm)
+		if writeError != nil {
+			log.Fatal(writeError)
+		}
 	}
 }
 
