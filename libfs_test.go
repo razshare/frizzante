@@ -8,12 +8,12 @@ import (
 //go:embed libfs.go
 //go:embed .github
 //go:embed .dist/*/**
-var embeddedFileSystem embed.FS
+var efs embed.FS
 
 func TestEmbeddedExists(test *testing.T) {
 	// Positive.
 	fileName := "libfs.go"
-	actual := existsInEmbeddedFileSystem(embeddedFileSystem, fileName)
+	actual := existsInEmbeddedFileSystem(efs, fileName)
 	expected := true
 	if !actual {
 		test.Fatalf("%s (embedded) was expected to exist", fileName)
@@ -21,7 +21,7 @@ func TestEmbeddedExists(test *testing.T) {
 
 	// Negative.
 	fileName = "qwerty"
-	actual = existsInEmbeddedFileSystem(embeddedFileSystem, fileName)
+	actual = existsInEmbeddedFileSystem(efs, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to exist", fileName)
@@ -31,7 +31,7 @@ func TestEmbeddedExists(test *testing.T) {
 func TestEmbeddedIsFile(test *testing.T) {
 	// Positive.
 	fileName := "libfs.go"
-	actual := isEmbeddedFile(embeddedFileSystem, fileName)
+	actual := isEmbeddedFile(efs, fileName)
 	expected := true
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to be a file", fileName)
@@ -39,14 +39,14 @@ func TestEmbeddedIsFile(test *testing.T) {
 
 	// Negatives.
 	fileName = ".github"
-	actual = isEmbeddedFile(embeddedFileSystem, fileName)
+	actual = isEmbeddedFile(efs, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a file", fileName)
 	}
 
 	fileName = "qwerty"
-	actual = isEmbeddedFile(embeddedFileSystem, fileName)
+	actual = isEmbeddedFile(efs, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a file", fileName)
@@ -56,7 +56,7 @@ func TestEmbeddedIsFile(test *testing.T) {
 func TestEmbeddedIsDirectory(test *testing.T) {
 	// Positive.
 	fileName := ".github"
-	actual := isEmbeddedDirectory(embeddedFileSystem, fileName)
+	actual := isEmbeddedDirectory(efs, fileName)
 	expected := true
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to be a directory", fileName)
@@ -64,14 +64,14 @@ func TestEmbeddedIsDirectory(test *testing.T) {
 
 	// Negatives.
 	fileName = "libfs.go"
-	actual = isEmbeddedDirectory(embeddedFileSystem, fileName)
+	actual = isEmbeddedDirectory(efs, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a directory", fileName)
 	}
 
 	fileName = "qwerty"
-	actual = isEmbeddedDirectory(embeddedFileSystem, fileName)
+	actual = isEmbeddedDirectory(efs, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a directory", fileName)

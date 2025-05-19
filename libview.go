@@ -25,7 +25,7 @@ type View struct {
 	Data       any
 }
 
-var noScriptPattern = regexp.MustCompile(`<script.*>.*</script>`)
+var noScript = regexp.MustCompile(`<script.*>.*</script>`)
 
 func NewView(render RenderMode) *View {
 	return &View{
@@ -62,7 +62,7 @@ func NewViewWithData(render RenderMode, data any) *View {
 //
 // If the View is using RenderModeHeadless, then ViewRender returns only the content of the view, without decorating it with an HTML document.
 // The output won't even contain a header, ignoring all <svelte:head> declarations and all css.
-func (view *View) Render(id string, embeddedFileSystem *embed.FS) (content string, compileError error) {
+func (view *View) Render(id string, efs *embed.FS) (content string, compileError error) {
 	fileNameIndex := filepath.Join(".dist", "client", ".frizzante", "vite-project", "index.html")
 
 	var indexBytes []byte
@@ -74,7 +74,7 @@ func (view *View) Render(id string, embeddedFileSystem *embed.FS) (content strin
 		}
 		indexBytes = indexBytesLocal
 	} else {
-		indexBytesLocal, readError := embeddedFileSystem.ReadFile(fileNameIndex)
+		indexBytesLocal, readError := efs.ReadFile(fileNameIndex)
 		if readError != nil {
 			return "", readError
 		}
@@ -100,7 +100,7 @@ func (view *View) Render(id string, embeddedFileSystem *embed.FS) (content strin
 	}
 
 	if RenderModeFull == view.RenderMode {
-		head, body, renderError := JavaScriptRender(*embeddedFileSystem, routerPropsString)
+		head, body, renderError := JavaScriptRender(*efs, routerPropsString)
 		if renderError != nil {
 			return "", renderError
 		}
@@ -158,7 +158,7 @@ func (view *View) Render(id string, embeddedFileSystem *embed.FS) (content strin
 	}
 
 	if RenderModeServer == view.RenderMode {
-		head, body, renderError := JavaScriptRender(*embeddedFileSystem, routerPropsString)
+		head, body, renderError := JavaScriptRender(*efs, routerPropsString)
 		if renderError != nil {
 			return "", renderError
 		}
@@ -166,7 +166,7 @@ func (view *View) Render(id string, embeddedFileSystem *embed.FS) (content strin
 			strings.Replace(
 				strings.Replace(
 					strings.Replace(
-						noScriptPattern.ReplaceAllString(string(indexBytes), ""),
+						noScript.ReplaceAllString(string(indexBytes), ""),
 						"<!--app-target-->",
 						"",
 						1,
@@ -186,7 +186,7 @@ func (view *View) Render(id string, embeddedFileSystem *embed.FS) (content strin
 	}
 
 	if RenderModeHeadless == view.RenderMode {
-		_, body, renderError := JavaScriptRender(*embeddedFileSystem, routerPropsString)
+		_, body, renderError := JavaScriptRender(*efs, routerPropsString)
 
 		if renderError != nil {
 			return "", renderError

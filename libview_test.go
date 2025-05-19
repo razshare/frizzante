@@ -56,7 +56,7 @@ func TestRenderServer(test *testing.T) {
 	server.WithPort(port)
 	server.WithHostName("127.0.0.1")
 	server.WithNotifier(notifier)
-	server.WithEmbeddedFileSystem(&embeddedFileSystem)
+	server.WithEmbeddedFileSystem(&efs)
 	server.WithPageController(SsrController{})
 
 	go server.Start()
@@ -83,7 +83,7 @@ func TestRenderClient(test *testing.T) {
 	server.WithPort(port)
 	server.WithNotifier(notifier)
 	server.WithHostName("127.0.0.1")
-	server.WithEmbeddedFileSystem(&embeddedFileSystem)
+	server.WithEmbeddedFileSystem(&efs)
 	server.WithPageController(CsrController{})
 	go server.Start()
 	defer server.Stop()

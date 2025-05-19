@@ -14,17 +14,17 @@ import (
 )
 
 type Response struct {
-	id                    string
-	server                *Server
-	request               *Request
-	writer                *http.ResponseWriter
-	lockedStatusAndHeader bool
-	statusCode            int
-	header                *http.Header
-	webSocket             *websocket.Conn
-	eventName             string
-	eventId               int64
-	context               map[string]any
+	id         string
+	server     *Server
+	request    *Request
+	writer     *http.ResponseWriter
+	locked     bool
+	statusCode int
+	header     *http.Header
+	webSocket  *websocket.Conn
+	eventName  string
+	eventId    int64
+	context    map[string]any
 }
 
 type Navigate struct {
@@ -139,7 +139,7 @@ func (response *Response) SendRedirect(location string, statusCode int) {
 // SendRedirectToSecure redirects the request to the https server.
 func (response *Response) SendRedirectToSecure() {
 	request := response.request
-	if "" == request.server.certificate || "" == request.server.certificateKey || request.httpRequest.TLS != nil {
+	if "" == request.server.certificate || "" == request.server.key || request.httpRequest.TLS != nil {
 		return
 	}
 
@@ -159,7 +159,7 @@ func (response *Response) SendRedirectToSecure() {
 //
 // All errors are sent to the server notifier.
 func (response *Response) SendStatus(code int) {
-	if response.lockedStatusAndHeader {
+	if response.locked {
 		response.server.notifier.SendError(errors.New("status is locked"))
 		return
 	}
@@ -174,7 +174,7 @@ func (response *Response) SendStatus(code int) {
 //
 // All errors are sent to the server notifier.
 func (response *Response) SendHeader(key string, value string) {
-	if response.lockedStatusAndHeader {
+	if response.locked {
 		response.server.notifier.SendError(errors.New("headers locked"))
 		return
 	}
@@ -202,9 +202,9 @@ func (response *Response) SendCookie(key string, value string) {
 //
 // Compatible with web sockets.
 func (response *Response) SendContent(content []byte) {
-	if !response.lockedStatusAndHeader {
+	if !response.locked {
 		(*response.writer).WriteHeader(response.statusCode)
-		response.lockedStatusAndHeader = true
+		response.locked = true
 	}
 
 	if response.webSocket != nil {
@@ -303,7 +303,7 @@ func (response *Response) SendJson(payload any) {
 // SendEmbeddedFileOrElse sends the embedded file requested by the client,
 // or the closest index.html embedded file, or else falls back.
 func (response *Response) SendEmbeddedFileOrElse(orElse func()) {
-	hasEmbeddedFileSystem := nil != response.request.server.embeddedFileSystem
+	hasEmbeddedFileSystem := nil != response.request.server.efs
 	if !hasEmbeddedFileSystem {
 		orElse()
 		return
@@ -314,14 +314,14 @@ func (response *Response) SendEmbeddedFileOrElse(orElse func()) {
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
-	if !existsInEmbeddedFileSystem(*request.server.embeddedFileSystem, fileName) ||
-		isEmbeddedDirectory(*request.server.embeddedFileSystem, fileName) {
+	if !existsInEmbeddedFileSystem(*request.server.efs, fileName) ||
+		isEmbeddedDirectory(*request.server.efs, fileName) {
 		orElse()
 		return
 	}
 
 	reader, info, readerError := createReaderFromEmbeddedFileName(
-		request.server.embeddedFileSystem,
+		request.server.efs,
 		fileName,
 	)
 	if nil != readerError {
@@ -438,7 +438,7 @@ func (response *Response) SendSseUpgrade() (setEventName func(eventName string))
 // SendWsUpgrade upgrades the http connection to web sockets.
 func (response *Response) SendWsUpgrade() {
 	request := response.request
-	conn, upgradeError := response.server.webSocketUpgrader.Upgrade(*response.writer, request.httpRequest, nil)
+	conn, upgradeError := response.server.upgrader.Upgrade(*response.writer, request.httpRequest, nil)
 	if nil != upgradeError {
 		request.server.notifier.SendError(upgradeError)
 		return
@@ -450,8 +450,8 @@ func (response *Response) SendWsUpgrade() {
 		}
 	}(conn)
 	response.webSocket = conn
-	request.webSocketConn = conn
-	response.lockedStatusAndHeader = true
+	request.webSocket = conn
+	response.locked = true
 }
 
 // SendView sends a view.
@@ -470,7 +470,7 @@ func (response *Response) SendView(view *View) {
 		return
 	}
 
-	content, compileError := view.Render(response.id, response.server.embeddedFileSystem)
+	content, compileError := view.Render(response.id, response.server.efs)
 	if nil != compileError {
 		response.server.notifier.SendError(compileError)
 		return

@@ -56,7 +56,7 @@ func TestServerWithMaxHeaderBytes(test *testing.T) {
 	server := NewServer()
 	expected := 1 * MB
 	server.WithMaxHeaderBytes(expected)
-	actual := server.maxHeaderBytes
+	actual := server.headerMaxMemory
 	if actual != expected {
 		test.Fatalf("server was expected to have max header bytes '%d', received '%d' instead", expected, actual)
 	}
@@ -66,12 +66,12 @@ func TestServerWithCertificateAndKey(test *testing.T) {
 	server := NewServer()
 	expectedCertificate := "certificate.crt"
 	expectedCertificateKey := "certificate.key"
-	server.WithCertificateAndKey(expectedCertificate, expectedCertificateKey)
+	server.WithCertificate(expectedCertificate, expectedCertificateKey)
 	actualCertificate := server.certificate
 	if actualCertificate != expectedCertificate {
 		test.Fatalf("server was expected to have certificate '%s', received '%s' instead", expectedCertificate, actualCertificate)
 	}
-	actualCertificateKey := server.certificateKey
+	actualCertificateKey := server.key
 	if actualCertificateKey != expectedCertificateKey {
 		test.Fatalf("server was expected to have certificate key '%s', received '%s' instead", expectedCertificateKey, actualCertificateKey)
 	}
@@ -79,9 +79,9 @@ func TestServerWithCertificateAndKey(test *testing.T) {
 
 func TestServerWithEmbeddedFileSystem(test *testing.T) {
 	server := NewServer()
-	expected := &embeddedFileSystem
+	expected := &efs
 	server.WithEmbeddedFileSystem(expected)
-	actual := server.embeddedFileSystem
+	actual := server.efs
 	if actual != expected {
 		test.Fatalf("incorrect embedded file system detected")
 	}

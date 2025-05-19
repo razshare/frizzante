@@ -15,10 +15,10 @@ func (_ pageController) Configure() f.PageConfiguration {
 	}
 }
 
-func (_ pageController) Base(request *f.Request, response *f.Response) {
-	response.SendView(f.NewViewWithData(f.RenderModeFull, pageData{}))
+func (_ pageController) Base(req *f.Request, res *f.Response) {
+	res.SendView(f.NewViewWithData(f.RenderModeFull, pageData{}))
 }
 
-func (_ pageController) Action(request *f.Request, response *f.Response) {
-	response.SendView(f.NewViewWithData(f.RenderModeFull, pageData{}))
+func (_ pageController) Action(req *f.Request, res *f.Response) {
+	res.SendView(f.NewViewWithData(f.RenderModeFull, pageData{}))
 }

@@ -14,6 +14,6 @@ func (_ apiController) Configure() f.ApiConfiguration {
 	}
 }
 
-func (_ apiController) Handle(request *f.Request, response *f.Response) {
-	// Noop.
+func (_ apiController) Handle(req *f.Request, res *f.Response) {
+	res.SendMessage("hello")
 }

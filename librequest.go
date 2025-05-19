@@ -11,10 +11,10 @@ import (
 )
 
 type Request struct {
-	server        *Server
-	response      *Response
-	httpRequest   *http.Request
-	webSocketConn *websocket.Conn
+	server      *Server
+	response    *Response
+	httpRequest *http.Request
+	webSocket   *websocket.Conn
 }
 
 // ReceiveCancellation returns a channel that's closed when the request is cancelled.
@@ -53,8 +53,8 @@ func (request *Request) ReceiveCookie(key string) string {
 //
 // Compatible with web sockets.
 func (request *Request) ReceiveMessage() string {
-	if request.webSocketConn != nil {
-		_, readBytes, readError := request.webSocketConn.ReadMessage()
+	if request.webSocket != nil {
+		_, readBytes, readError := request.webSocket.ReadMessage()
 		if nil != readError {
 			request.server.notifier.SendError(readError)
 			return ""
@@ -77,8 +77,8 @@ func (request *Request) ReceiveMessage() string {
 //
 // Compatible with web sockets.
 func (request *Request) ReceiveJson(self *Request, out any) bool {
-	if self.webSocketConn != nil {
-		jsonError := self.webSocketConn.ReadJSON(out)
+	if self.webSocket != nil {
+		jsonError := self.webSocket.ReadJSON(out)
 		if nil != jsonError {
 			self.server.notifier.SendError(jsonError)
 			return false
@@ -101,12 +101,12 @@ func (request *Request) ReceiveJson(self *Request, out any) bool {
 
 // ReceiveForm reads the message as a form and returns the value.
 func (request *Request) ReceiveForm() *url.Values {
-	if request.webSocketConn != nil {
+	if request.webSocket != nil {
 		request.server.notifier.SendError(errors.New("web socket connections cannot receive form payloads"))
 		return &url.Values{}
 	}
 
-	parseMultipartFormError := request.httpRequest.ParseMultipartForm(request.server.multipartFormMaxMemory)
+	parseMultipartFormError := request.httpRequest.ParseMultipartForm(request.server.formMaxMemory)
 	if nil != parseMultipartFormError {
 		if !errors.Is(parseMultipartFormError, http.ErrNotMultipart) {
 			request.server.notifier.SendError(parseMultipartFormError)

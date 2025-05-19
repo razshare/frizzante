@@ -24,8 +24,8 @@ type PageConfiguration struct {
 }
 type PageController interface {
 	Configure() PageConfiguration
-	Base(request *Request, response *Response)
-	Action(request *Request, response *Response)
+	Base(req *Request, res *Response)
+	Action(req *Request, res *Response)
 }
 
 type ApiConfiguration struct {
@@ -34,7 +34,7 @@ type ApiConfiguration struct {
 }
 type ApiController interface {
 	Configure() ApiConfiguration
-	Handle(request *Request, response *Response)
+	Handle(req *Request, res *Response)
 }
 
 type ServerProperties struct {
@@ -45,22 +45,22 @@ type ServerProperties struct {
 }
 
 type Server struct {
-	hostName               string
-	port                   int
-	securePort             int
-	multipartFormMaxMemory int64
-	server                 *http.Server
-	mux                    *http.ServeMux
-	connections            map[string]*net.Conn
-	readTimeout            time.Duration
-	writeTimeout           time.Duration
-	maxHeaderBytes         int
-	certificate            string
-	certificateKey         string
-	notifier               *Notifier
-	embeddedFileSystem     *embed.FS
-	webSocketUpgrader      *websocket.Upgrader
-	entryCreated           bool
+	hostName        string
+	port            int
+	securePort      int
+	formMaxMemory   int64
+	server          *http.Server
+	mux             *http.ServeMux
+	connections     map[string]*net.Conn
+	readTimeout     time.Duration
+	writeTimeout    time.Duration
+	headerMaxMemory int
+	certificate     string
+	key             string
+	notifier        *Notifier
+	efs             *embed.FS
+	upgrader        *websocket.Upgrader
+	hasEntry        bool
 }
 
 // NewServer creates a server.
@@ -71,38 +71,38 @@ func NewServer() *Server {
 		WriteBufferSize: 1024,
 	}
 	return &Server{
-		hostName:               "127.0.0.1",
-		port:                   8081,
-		securePort:             8383,
-		multipartFormMaxMemory: 4096,
-		server:                 nil,
-		mux:                    http.NewServeMux(),
-		connections:            map[string]*net.Conn{},
-		readTimeout:            10 * time.Second,
-		writeTimeout:           10 * time.Second,
-		maxHeaderBytes:         3 * MB,
-		certificate:            "",
-		certificateKey:         "",
-		notifier:               notifier,
-		webSocketUpgrader:      webSocketUpgrader,
+		hostName:        "127.0.0.1",
+		port:            8081,
+		securePort:      8383,
+		formMaxMemory:   4096,
+		server:          nil,
+		mux:             http.NewServeMux(),
+		connections:     map[string]*net.Conn{},
+		readTimeout:     10 * time.Second,
+		writeTimeout:    10 * time.Second,
+		headerMaxMemory: 3 * MB,
+		certificate:     "",
+		key:             "",
+		notifier:        notifier,
+		upgrader:        webSocketUpgrader,
 	}
 }
 
 // WithWebSocketReadBufferSize sets the maximum buffer size for each incoming web socket message.
 // This will not limit the size of said messages.
 func (server *Server) WithWebSocketReadBufferSize(readBufferSize int) {
-	server.webSocketUpgrader.ReadBufferSize = readBufferSize
+	server.upgrader.ReadBufferSize = readBufferSize
 }
 
 // WithWebSocketWriteBufferSize sets the maximum buffer size for each outgoing web socket message.
 // This will not limit the size of said messages.
 func (server *Server) WithWebSocketWriteBufferSize(writeBufferSize int) {
-	server.webSocketUpgrader.WriteBufferSize = writeBufferSize
+	server.upgrader.WriteBufferSize = writeBufferSize
 }
 
 // WithMultipartFormMaxMemory sets the maximum memory for multipart forms before they fall back to disk.
 func (server *Server) WithMultipartFormMaxMemory(multipartFormMaxMemory int64) {
-	server.multipartFormMaxMemory = multipartFormMaxMemory
+	server.formMaxMemory = multipartFormMaxMemory
 }
 
 // WithHostName sets the host name.
@@ -121,32 +121,32 @@ func (server *Server) WithSecurePort(securePort int) {
 }
 
 // WithReadTimeout sets the read timeout.
-func (server *Server) WithReadTimeout(readTimeout time.Duration) {
-	server.readTimeout = readTimeout
+func (server *Server) WithReadTimeout(timeout time.Duration) {
+	server.readTimeout = timeout
 }
 
 // WithWriteTimeout sets the write timeout.
-func (server *Server) WithWriteTimeout(writeTimeout time.Duration) {
-	server.writeTimeout = writeTimeout
+func (server *Server) WithWriteTimeout(timeout time.Duration) {
+	server.writeTimeout = timeout
 }
 
 // WithMaxHeaderBytes sets the maximum allowed bytes in the header of the request.
 func (server *Server) WithMaxHeaderBytes(maxHeaderBytes int) {
-	server.maxHeaderBytes = maxHeaderBytes
+	server.headerMaxMemory = maxHeaderBytes
 }
 
-// WithCertificateAndKey sets the tls configuration.
-func (server *Server) WithCertificateAndKey(certificate string, key string) {
+// WithCertificate sets the certificate ands ts key.
+func (server *Server) WithCertificate(certificate string, key string) {
 	server.certificate = certificate
-	server.certificateKey = key
+	server.key = key
 }
 
 // WithEmbeddedFileSystem sets the embedded file system.
 //
 // The embedded file system should contain at least directory ".dist" so
 // that the server can properly render and serve svelte components.
-func (server *Server) WithEmbeddedFileSystem(embeddedFileSystem *embed.FS) {
-	server.embeddedFileSystem = embeddedFileSystem
+func (server *Server) WithEmbeddedFileSystem(efs *embed.FS) {
+	server.efs = efs
 }
 
 // WithNotifier sets the server notifier.
@@ -164,7 +164,7 @@ func (server *Server) Start() {
 		Handler:        server.mux,
 		ReadTimeout:    server.readTimeout,
 		WriteTimeout:   server.writeTimeout,
-		MaxHeaderBytes: server.maxHeaderBytes,
+		MaxHeaderBytes: server.headerMaxMemory,
 		ErrorLog:       logger,
 	}
 
@@ -187,9 +187,9 @@ func (server *Server) Start() {
 
 	go func() {
 		secureAddress := fmt.Sprintf("%s:%d", server.hostName, server.securePort)
-		if "" != server.certificate && "" != server.certificateKey {
+		if "" != server.certificate && "" != server.key {
 			server.notifier.SendMessage(fmt.Sprintf("listening for requests at https://%s", secureAddress))
-			serverError := http.ListenAndServeTLS(secureAddress, server.certificate, server.certificateKey, server.mux)
+			serverError := http.ListenAndServeTLS(secureAddress, server.certificate, server.key, server.mux)
 			if nil != serverError {
 				if errors.Is(serverError, http.ErrServerClosed) {
 					server.notifier.SendMessage("shutting down server")
@@ -224,13 +224,13 @@ func (server *Server) OnRequest(pattern string, handler func(request *Request, r
 		httpHeader := writer.Header()
 
 		response := &Response{
-			server:                server,
-			writer:                &writer,
-			lockedStatusAndHeader: false,
-			statusCode:            200,
-			header:                &httpHeader,
-			eventName:             "",
-			eventId:               1,
+			server:     server,
+			writer:     &writer,
+			locked:     false,
+			statusCode: 200,
+			header:     &httpHeader,
+			eventName:  "",
+			eventId:    1,
 		}
 
 		request.response = response

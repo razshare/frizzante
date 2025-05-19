@@ -59,13 +59,13 @@ func createReaderFromFileName(fileName string) (*bytes.Reader, *os.FileInfo, err
 }
 
 // existsInEmbeddedFileSystem checks if file exists.
-func existsInEmbeddedFileSystem(embeddedFileSystem embed.FS, fileName string) bool {
-	return isEmbeddedFile(embeddedFileSystem, fileName) || isEmbeddedDirectory(embeddedFileSystem, fileName)
+func existsInEmbeddedFileSystem(efs embed.FS, fileName string) bool {
+	return isEmbeddedFile(efs, fileName) || isEmbeddedDirectory(efs, fileName)
 }
 
 // isEmbeddedFile check if file exists and is a file.
-func isEmbeddedFile(embeddedFileSystem embed.FS, fileName string) bool {
-	_, err := embeddedFileSystem.ReadFile(fileName)
+func isEmbeddedFile(efs embed.FS, fileName string) bool {
+	_, err := efs.ReadFile(fileName)
 	if err != nil {
 		return false
 	}
@@ -73,8 +73,8 @@ func isEmbeddedFile(embeddedFileSystem embed.FS, fileName string) bool {
 }
 
 // isEmbeddedDirectory checks if file exists and is a directory.
-func isEmbeddedDirectory(embeddedFileSystem embed.FS, fileName string) bool {
-	_, err := embeddedFileSystem.ReadDir(fileName)
+func isEmbeddedDirectory(efs embed.FS, fileName string) bool {
+	_, err := efs.ReadDir(fileName)
 	if err != nil {
 		return false
 	}
