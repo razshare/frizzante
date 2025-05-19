@@ -171,9 +171,10 @@ func createApi(apiName string) {
 		}
 	}
 
-	if fileExists(metadata.FullFileNameTitle) {
-		fmt.Printf("Api `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
-		createApi("")
+	fileName := strings.TrimSuffix(metadata.FullFileNameTitle, ".go") + "Controller.go"
+
+	if fileExists(fileName) {
+		fmt.Printf("file `%s` already exists.\n", fileName)
 		return
 	}
 
@@ -197,7 +198,7 @@ func createApi(apiName string) {
 	newName = []byte(metadata.BaseFileNameNoExtensionTitle + "Controller")
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	writeError := os.WriteFile(strings.TrimSuffix(metadata.FullFileNameTitle, ".go")+"Controller.go", readBytes, os.ModePerm)
+	writeError := os.WriteFile(fileName, readBytes, os.ModePerm)
 	if writeError != nil {
 		log.Fatal(writeError)
 	}
@@ -215,7 +216,7 @@ func createPage(pageName string) {
 
 	fileName := strings.TrimSuffix(metadata.FullFileNameTitle, ".go") + "Controller.go"
 
-	if !fileExists(metadata.FullFileNameTitle) {
+	if !fileExists(fileName) {
 		readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
 		if nil != readError {
 			log.Fatal(readError)
@@ -246,7 +247,7 @@ func createPage(pageName string) {
 			log.Fatal(writeError)
 		}
 	} else {
-		fmt.Printf("Page `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
+		fmt.Printf("file `%s` already exists.\n", fileName)
 	}
 
 	metadata.FullFileNameTitle = strings.TrimSuffix(metadata.FullFileNameTitle, ".go") + ".svelte"
@@ -257,7 +258,6 @@ func createPage(pageName string) {
 
 func createViewComponent(pageName string) {
 	metadata := findNameMetadataForView(pageName)
-	fileName := strings.TrimSuffix(metadata.FullFileNameTitle, ".svelte") + "View.svelte"
 
 	if !fileExists(metadata.FullDirectoryNameCamel) {
 		mkdirError := os.MkdirAll(metadata.FullDirectoryNameCamel, os.ModePerm)
@@ -266,7 +266,9 @@ func createViewComponent(pageName string) {
 		}
 	}
 
-	if !fileExists(metadata.FullFileNameTitle) {
+	fileName := strings.TrimSuffix(metadata.FullFileNameTitle, ".svelte") + "View.svelte"
+
+	if !fileExists(fileName) {
 		readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
 		if nil != readError {
 			log.Fatal(readError)
@@ -282,7 +284,7 @@ func createViewComponent(pageName string) {
 			log.Fatal(writeError)
 		}
 	} else {
-		fmt.Printf("component `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
+		fmt.Printf("file `%s` already exists.\n", fileName)
 	}
 }
 
