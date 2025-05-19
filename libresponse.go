@@ -102,11 +102,31 @@ func (response *Response) SendNavigateWithQuery(id string, search string) {
 		return
 	}
 
-	if !strings.HasPrefix(search, "?") {
-		search = "?" + search
+	var query string
+
+	for _, value := range strings.Split(strings.Trim(search, "?&"), "&") {
+		parts := strings.SplitN(value, "=", 2)
+		count := len(parts)
+		if 0 == count {
+			continue
+		}
+
+		if 1 == count {
+			query += "&" + url.QueryEscape(parts[0])
+			continue
+		}
+
+		query += "&" + url.QueryEscape(parts[0]) + "=" + url.QueryEscape(parts[1])
 	}
 
-	response.SendRedirect(path+url.QueryEscape(search), 302)
+	query = strings.TrimPrefix(query, "&")
+
+	if "" != query {
+		response.SendRedirect(path+"?"+query, 302)
+	} else {
+		response.SendRedirect(path, 302)
+	}
+
 	response.SendMessage("")
 }
 
