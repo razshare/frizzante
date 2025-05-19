@@ -24,15 +24,8 @@ export function action(id: string): {
 
             const json = await response.json()
 
-            server.data = {
-                ...server.data,
-                ...json.data,
-            }
-
-            server.ids = {
-                ...server.ids,
-                ...json.ids
-            }
+            server.data = json.data
+            server.ids = json.ids
 
             if (server.id !== json.id) {
                 navigate(server, json.id, server.data)

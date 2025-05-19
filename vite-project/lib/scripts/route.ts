@@ -24,14 +24,8 @@ async function swap(server: ServerContext<any>, id: string, modifier: Modifier, 
         headers: {Accept: "application/json"},
     });
     const json = await response.json();
-    server.data = {
-        ...server.data,
-        ...json.data,
-    }
-    server.ids = {
-        ...server.ids,
-        ...json.ids,
-    }
+    server.data = json.data
+    server.ids = json.ids
     server.id = json.id;
 
     const search = response.url.split('?', 2)[1] ?? ''
