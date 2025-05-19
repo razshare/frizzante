@@ -1,13 +1,8 @@
 <script lang="ts">
     import Layout from '$lib/components/Layout.svelte'
-
-    type Props = {
-        server: ServerProperties<{
-            name: string
-        }>
-    }
-
-    let {server = $bindable()}:Props = $props()
+    import {getContext} from "svelte";
+    import type {ServerContext} from "$frizzante/types.ts";
+    let server = getContext("server") as ServerContext<any>
 </script>
 
 <svelte:head>

@@ -1,10 +1,8 @@
 <script lang="ts">
+    import {getContext} from "svelte";
+    import type {ServerContext} from "$frizzante/types.ts";
 
-    type Props = {
-        server: ServerProperties<any>
-    }
-
-    let {server = $bindable()}: Props = $props()
+    const server = getContext("server") as ServerContext<any>
 </script>
 
 <span>Hello, this is view!</span>

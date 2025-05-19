@@ -15,14 +15,28 @@
     "skipLibCheck": true,
     "checkJs": true,
     "paths": {
-      "$frizzante/*": ["./.frizzante/vite-project/lib/*"],
-      "$lib/*": ["./lib/*"]
+      "$frizzante/*": [
+        "./.frizzante/vite-project/lib/*"
+      ],
+      "$lib/*": [
+        "./lib/*"
+      ]
     },
-    "lib": ["esnext", "DOM", "DOM.Iterable"],
+    "lib": [
+      "esnext",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "useDefineForClassFields": true,
     "moduleDetection": "force"
   },
   "include": [
+    "./templates/views/**/*.svelte.js",
+    "./templates/views/**/*.svelte.ts",
+    "./templates/views/**/*.svelte",
+    "./templates/views/**/*.d.ts",
+    "./templates/views/**/*.js",
+    "./templates/views/**/*.ts",
     "./.frizzante/vite-project/**/*.svelte.js",
     "./.frizzante/vite-project/**/*.svelte.ts",
     "./.frizzante/vite-project/**/*.svelte",
@@ -42,5 +56,7 @@
     "./lib/**/*.js",
     "./lib/**/*.ts"
   ],
-  "exclude": ["./node_modules/**"]
+  "exclude": [
+    "./node_modules/**"
+  ]
 }

@@ -7,7 +7,7 @@ export function action(id: string): {
     action: string
     onsubmit: (e: any) => Promise<void>
 } {
-    let server = getContext("server") as ServerContext<any>
+    const server = getContext("server") as ServerContext<any>
     return {
         method: "POST",
         action: server.ids[id],

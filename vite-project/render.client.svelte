@@ -9,7 +9,7 @@
     }
 
     let {id: idInput, data: dataInput, ids: idsInput}: any = $props()
-    let server = $state({id: idInput, data: dataInput, ids: idsInput}) as Props
+    const server = $state({id: idInput, data: dataInput, ids: idsInput}) as Props
     setContext("server", server)
 </script>
 

@@ -6,7 +6,7 @@ export function href(to: string): {
     href: string,
     onclick: (e: MouseEvent) => void
 } {
-    let server = getContext("server") as ServerContext<any>
+    const server = getContext("server") as ServerContext<any>
     return {
         href: server.ids[to],
         async onclick(e: MouseEvent) {
