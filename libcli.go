@@ -46,25 +46,20 @@ func toKebab(value string) string {
 }
 
 func cleanUpName(name string) string {
-	return strings.Trim(
-		strings.Trim(
-			strings.Trim(
-				strings.Trim(
-					strings.Trim(
-						strings.Trim(
-							strings.Trim(name, "\r\n\t "),
-							"Api",
-						),
-						"api",
-					),
-					"controller",
-				),
-				"view",
-			),
-			"Controller",
-		),
-		"View",
-	)
+	name = strings.Trim(name, "\r\n\t ")
+	name = strings.TrimPrefix(name, "Api")
+	name = strings.TrimSuffix(name, "Api")
+	name = strings.TrimPrefix(name, "api")
+	name = strings.TrimSuffix(name, "api")
+	name = strings.TrimPrefix(name, "Controller")
+	name = strings.TrimSuffix(name, "Controller")
+	name = strings.TrimPrefix(name, "controller")
+	name = strings.TrimSuffix(name, "controller")
+	name = strings.TrimPrefix(name, "View")
+	name = strings.TrimSuffix(name, "View")
+	name = strings.TrimPrefix(name, "view")
+	name = strings.TrimSuffix(name, "view")
+	return name
 }
 
 func findNameMetadata(root string, template string, name string, message string) *NameMetadata {
@@ -218,9 +213,9 @@ func createPage(pageName string) {
 		}
 	}
 
-	if fileExists(metadata.FullFileNameTitle) {
-		fmt.Printf("Page `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
-	} else {
+	fileName := strings.TrimSuffix(metadata.FullFileNameTitle, ".go") + "Controller.go"
+
+	if !fileExists(metadata.FullFileNameTitle) {
 		readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
 		if nil != readError {
 			log.Fatal(readError)
@@ -246,10 +241,12 @@ func createPage(pageName string) {
 		newName = []byte("/" + strings.ReplaceAll(strings.TrimSuffix(metadata.BaseFileNameKebab, ".go"), string(filepath.Separator), "/"))
 		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-		writeError := os.WriteFile(strings.TrimSuffix(metadata.FullFileNameTitle, ".go")+"Controller.go", readBytes, os.ModePerm)
+		writeError := os.WriteFile(fileName, readBytes, os.ModePerm)
 		if writeError != nil {
 			log.Fatal(writeError)
 		}
+	} else {
+		fmt.Printf("Page `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
 	}
 
 	metadata.FullFileNameTitle = strings.TrimSuffix(metadata.FullFileNameTitle, ".go") + ".svelte"
@@ -260,10 +257,16 @@ func createPage(pageName string) {
 
 func createViewComponent(pageName string) {
 	metadata := findNameMetadataForView(pageName)
+	fileName := strings.TrimSuffix(metadata.FullFileNameTitle, ".svelte") + "View.svelte"
 
-	if fileExists(metadata.FullFileNameTitle) {
-		fmt.Printf("component `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
-	} else {
+	if !fileExists(metadata.FullDirectoryNameCamel) {
+		mkdirError := os.MkdirAll(metadata.FullDirectoryNameCamel, os.ModePerm)
+		if mkdirError != nil {
+			log.Fatal(mkdirError)
+		}
+	}
+
+	if !fileExists(metadata.FullFileNameTitle) {
 		readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
 		if nil != readError {
 			log.Fatal(readError)
@@ -274,25 +277,27 @@ func createViewComponent(pageName string) {
 		newName := []byte("Hello, this is " + metadata.BaseFileNameTitle + "!")
 		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-		writeError := os.WriteFile(strings.TrimSuffix(metadata.FullFileNameTitle, ".svelte")+"View.svelte", readBytes, os.ModePerm)
+		writeError := os.WriteFile(fileName, readBytes, os.ModePerm)
 		if writeError != nil {
 			log.Fatal(writeError)
 		}
+	} else {
+		fmt.Printf("component `%s` already exists.\n", metadata.BaseFileNameNoExtensionTitle)
 	}
 }
 
 // Cli makes things.
 func Cli() {
-	api := flag.Bool("api", false, "")
-	page := flag.Bool("page", false, "")
+	//api := flag.Bool("api", false, "")
+	//page := flag.Bool("page", false, "")
 	name := flag.String("name", "", "")
 	flag.Parse()
 
-	if *api {
-		createApi(*name)
-	}
-
-	if *page {
-		createPage(*name)
-	}
+	//if *api {
+	//	createApi(*name)
+	//}
+	//
+	//if *page {
+	createPage(*name)
+	//}
 }
