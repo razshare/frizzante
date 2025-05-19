@@ -84,9 +84,14 @@ func (response *Response) sendEventContent(content []byte) {
 	response.eventId++
 }
 
-func (response *Response) SendNavigate(id string, view *View) {
-	response.id = id
-	response.SendView(view)
+func (response *Response) SendNavigate(id string) {
+	path, idExists := ids[id]
+	if !idExists {
+		response.server.notifier.SendError(fmt.Errorf("id `%s` doesn't exist", id))
+		return
+	}
+	response.SendRedirect(path, 302)
+	response.SendMessage("")
 }
 
 // SendRedirect redirects the request.
