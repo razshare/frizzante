@@ -1,6 +1,10 @@
 package frizzante
 
-import "database/sql"
+import (
+	"database/sql"
+	"errors"
+	"log"
+)
 
 func sqlFindNextFallback(dest ...any) bool { return false }
 func sqlFindCloseFallback()                {}
@@ -87,6 +91,15 @@ func (sql *Sql) Execute(query string, props ...any) *sql.Result {
 func (sql *Sql) Find(query string, props ...any) (next func(dest ...any) bool, close func()) {
 	next = sqlFindNextFallback
 	close = sqlFindCloseFallback
+
+	if nil == sql.notifier {
+		log.Fatal("sql notifier not provided")
+	}
+
+	if nil == sql.database {
+		sql.notifier.SendError(errors.New("sql database not provided"))
+		return
+	}
 
 	statement, statementError := sql.database.Prepare(query)
 	if nil != statementError {

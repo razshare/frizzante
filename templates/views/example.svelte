@@ -1,5 +1,10 @@
 <script lang="ts">
-    let {server = $bindable()}:ServerProperties<any> = $props()
+
+    type Props = {
+        server: ServerProperties<any>
+    }
+
+    let {server = $bindable()}: Props = $props()
 </script>
 
 <span>Hello, this is view!</span>
