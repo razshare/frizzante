@@ -44,7 +44,7 @@ func Memory(session *Session[State]) {
 func TestSessionStart(test *testing.T) {
 	server := NewServer()
 	port := NextNumber(8080)
-	server.WithPort(port)
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.OnRequest("GET /", func(request *Request, response *Response) {
 		session := SessionStart(request, response, Memory)
 		response.SendMessage(fmt.Sprintf("hello %s", session.Data.Name))

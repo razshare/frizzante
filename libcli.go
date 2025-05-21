@@ -62,7 +62,7 @@ func cleanUpName(name string) string {
 	return name
 }
 
-func findNameMetadata(root string, template string, name string, message string) *NameMetadata {
+func findNameMetadata(root string, template string, name string, base string, message string) *NameMetadata {
 	if !fileExists(root) {
 		writeError := os.MkdirAll(root, os.ModePerm)
 		if writeError != nil {
@@ -77,7 +77,7 @@ func findNameMetadata(root string, template string, name string, message string)
 		fmt.Print(message)
 		name, _ = reader.ReadString('\n')
 		if "" == name {
-			return findNameMetadata(root, template, name, message)
+			return findNameMetadata(root, template, name, base, message)
 		}
 	}
 
@@ -108,7 +108,7 @@ func findNameMetadata(root string, template string, name string, message string)
 			relativeFileNameTitle = relativeFileNameTitle + string(filepath.Separator) + strings.ToTitle(section[0:1]) + section[1:]
 		}
 	}
-	relativeFileNameTitle = relativeFileNameTitle[1:] + extensionName
+	relativeFileNameTitle = filepath.Join(relativeFileNameTitle[1:], base+extensionName)
 
 	relativeFileNameCamel := ""
 	for _, pageNameChunked := range strings.Split(baseFileName, "_") {
@@ -116,7 +116,7 @@ func findNameMetadata(root string, template string, name string, message string)
 			relativeFileNameCamel = relativeFileNameCamel + string(filepath.Separator) + strings.ToLower(section[0:1]) + section[1:]
 		}
 	}
-	relativeFileNameCamel = relativeFileNameCamel[1:] + extensionName
+	relativeFileNameCamel = filepath.Join(relativeFileNameCamel[1:], base+extensionName)
 
 	fullFileNameCamel := filepath.Join(fullRoot, relativeFileNameCamel)
 	fullFileNameTitle := filepath.Join(fullRoot, relativeFileNameTitle)
@@ -139,6 +139,7 @@ func findNameMetadataForApi(name string) *NameMetadata {
 		filepath.Join("lib", "controllers", "api"),
 		filepath.Join("templates", "api", "example.go"),
 		name,
+		"controller",
 		"What's the name of this api? ",
 	)
 }
@@ -148,15 +149,17 @@ func findNameMetadataForPage(name string) *NameMetadata {
 		filepath.Join("lib", "controllers", "pages"),
 		filepath.Join("templates", "pages", "example.go"),
 		name,
+		"controller",
 		"What's the name of this page? ",
 	)
 }
 
 func findNameMetadataForView(name string) *NameMetadata {
 	return findNameMetadata(
-		filepath.Join("lib", "components", "views"),
+		filepath.Join("lib", "controllers", "pages"),
 		filepath.Join("templates", "views", "example.svelte"),
 		name,
+		"view",
 		"What is the name of this view? ",
 	)
 }
@@ -171,7 +174,7 @@ func createApi(apiName string) {
 		}
 	}
 
-	fileName := strings.TrimSuffix(metadata.FullFileNameTitle, ".go") + "Controller.go"
+	fileName := metadata.FullFileNameCamel
 
 	if fileExists(fileName) {
 		fmt.Printf("file `%s` already exists.\n", fileName)
@@ -188,14 +191,14 @@ func createApi(apiName string) {
 	newName := []byte("package " + metadata.BaseDirectoryName)
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	// Pattern.
+	// Api path.
 	oldName = []byte("/path")
 	newName = []byte("/api/" + strings.ReplaceAll(strings.TrimSuffix(metadata.BaseFileNameKebab, ".go"), string(filepath.Separator), "/"))
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-	// Api.
-	oldName = []byte("apiController")
-	newName = []byte(metadata.BaseFileNameNoExtensionTitle + "Controller")
+	// Api name.
+	oldName = []byte("apiName")
+	newName = []byte("Api")
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	writeError := os.WriteFile(fileName, readBytes, os.ModePerm)
@@ -214,7 +217,7 @@ func createPage(pageName string) {
 		}
 	}
 
-	fileName := strings.TrimSuffix(metadata.FullFileNameTitle, ".go") + "Controller.go"
+	fileName := metadata.FullFileNameCamel
 
 	if !fileExists(fileName) {
 		readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
@@ -227,17 +230,12 @@ func createPage(pageName string) {
 		newName := []byte("package " + metadata.BaseDirectoryName)
 		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-		// PageController.
-		oldName = []byte("pageController")
-		newName = []byte(metadata.BaseFileNameNoExtensionTitle + "Controller")
+		// Page name.
+		oldName = []byte("pageName")
+		newName = []byte("Page")
 		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
-		// PageData.
-		oldName = []byte("pageData")
-		newName = []byte(metadata.BaseFileNameNoExtensionTitle + "Data")
-		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
-
-		// Path.
+		// Page path.
 		oldName = []byte("/path")
 		newName = []byte("/" + strings.ReplaceAll(strings.TrimSuffix(metadata.BaseFileNameKebab, ".go"), string(filepath.Separator), "/"))
 		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
@@ -266,7 +264,7 @@ func createViewComponent(pageName string) {
 		}
 	}
 
-	fileName := strings.TrimSuffix(metadata.FullFileNameTitle, ".svelte") + "View.svelte"
+	fileName := metadata.FullFileNameCamel
 
 	if !fileExists(fileName) {
 		readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))

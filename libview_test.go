@@ -7,57 +7,21 @@ import (
 	"time"
 )
 
-type WelcomeData struct {
+type Data struct {
 	Name string `json:"name"`
 }
 
-// Ssr.
-type SsrController struct {
-	PageController
-}
-
-func (_ SsrController) Configure() PageConfiguration {
-	return PageConfiguration{
-		Path: "/",
-	}
-}
-
-func (_ SsrController) Base(request *Request, response *Response) {
-	response.SendView(NewViewWithData(RenderModeServer, WelcomeData{Name: "world"}))
-}
-
-func (_ SsrController) Action(request *Request, response *Response) {
-	response.SendView(NewViewWithData(RenderModeServer, WelcomeData{Name: "world"}))
-}
-
-// Csr.
-type CsrController struct {
-	PageController
-}
-
-func (_ CsrController) Configure() PageConfiguration {
-	return PageConfiguration{
-		Path: "/",
-	}
-}
-
-func (_ CsrController) Base(request *Request, response *Response) {
-	response.SendView(NewViewWithData(RenderModeClient, WelcomeData{Name: "world"}))
-}
-
-func (_ CsrController) Action(request *Request, response *Response) {
-	response.SendView(NewViewWithData(RenderModeClient, WelcomeData{Name: "world"}))
-}
-
 func TestRenderServer(test *testing.T) {
-	server := NewServer()
-	notifier := NewNotifier()
 	port := NextNumber(8080)
-	server.WithPort(port)
-	server.WithHostName("127.0.0.1")
+	notifier := NewNotifier()
+	server := NewServer()
+	server.WithEfs(efs)
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.WithNotifier(notifier)
-	server.WithEmbeddedFileSystem(&efs)
-	server.WithPageController(SsrController{})
+	server.OnRequest("GET /welcome", func(req *Request, res *Response) {
+		res.id = "welcome"
+		res.SendView(NewViewWithData(RenderModeServer, Data{Name: "world"}))
+	})
 
 	go server.Start()
 	defer server.Stop()
@@ -77,20 +41,23 @@ func TestRenderServer(test *testing.T) {
 }
 
 func TestRenderClient(test *testing.T) {
-	server := NewServer()
-	notifier := NewNotifier()
 	port := NextNumber(8080)
-	server.WithPort(port)
+	notifier := NewNotifier()
+	server := NewServer()
+	server.WithEfs(efs)
 	server.WithNotifier(notifier)
-	server.WithHostName("127.0.0.1")
-	server.WithEmbeddedFileSystem(&efs)
-	server.WithPageController(CsrController{})
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
+	server.OnRequest("GET /welcome", func(req *Request, res *Response) {
+		res.id = "welcome"
+		res.SendView(NewViewWithData(RenderModeClient, Data{Name: "world"}))
+	})
+
 	go server.Start()
 	defer server.Stop()
 	time.Sleep(1 * time.Second)
 
 	expected := "<script type=\"application/javascript\">function target(){return document.getElementById("
-	actual, getError := HttpGet(fmt.Sprintf("http://127.0.0.1:%d/", port), nil)
+	actual, getError := HttpGet(fmt.Sprintf("http://127.0.0.1:%d/welcome", port), nil)
 	if getError != nil {
 		test.Fatal(getError)
 	}

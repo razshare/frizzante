@@ -1,19 +1,12 @@
 package api
 
-import (
-	f "github.com/razshare/frizzante"
-)
+import f "github.com/razshare/frizzante"
 
-type apiController struct {
-	f.ApiController
-}
+var apiName = f.
+	NewApiController().
+	WithPattern("GET /path").
+	WithHandler(handler)
 
-func (_ apiController) Configure() f.ApiConfiguration {
-	return f.ApiConfiguration{
-		Pattern: "GET /path",
-	}
-}
-
-func (_ apiController) Handle(req *f.Request, res *f.Response) {
+func handler(req *f.Request, res *f.Response) {
 	res.SendMessage("hello")
 }

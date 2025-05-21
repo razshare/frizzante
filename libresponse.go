@@ -136,21 +136,6 @@ func (response *Response) SendRedirect(location string, statusCode int) {
 	response.SendHeader("Location", location)
 }
 
-// SendRedirectToSecure redirects the request to the https server.
-func (response *Response) SendRedirectToSecure() {
-	request := response.request
-	if "" == request.server.certificate || "" == request.server.key || request.httpRequest.TLS != nil {
-		return
-	}
-
-	insecureSuffix := fmt.Sprintf(":%d", request.server.port)
-	secureSuffix := fmt.Sprintf(":%d", request.server.securePort)
-	secureHost := strings.Replace(request.httpRequest.Host, insecureSuffix, secureSuffix, 1)
-	secureLocation := fmt.Sprintf("https://%s%s", secureHost, request.httpRequest.RequestURI)
-	response.SendRedirect(secureLocation, 302)
-	return
-}
-
 // SendStatus sets the status code.
 //
 // This will lock the status, which makes it
@@ -303,25 +288,19 @@ func (response *Response) SendJson(payload any) {
 // SendEmbeddedFileOrElse sends the embedded file requested by the client,
 // or the closest index.html embedded file, or else falls back.
 func (response *Response) SendEmbeddedFileOrElse(orElse func()) {
-	hasEmbeddedFileSystem := nil != response.request.server.efs
-	if !hasEmbeddedFileSystem {
-		orElse()
-		return
-	}
-
 	request := response.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
-	if !existsInEmbeddedFileSystem(*request.server.efs, fileName) ||
-		isEmbeddedDirectory(*request.server.efs, fileName) {
+	if !existsInEmbeddedFileSystem(request.server.dist, fileName) ||
+		isEmbeddedDirectory(request.server.dist, fileName) {
 		orElse()
 		return
 	}
 
 	reader, info, readerError := createReaderFromEmbeddedFileName(
-		request.server.efs,
+		request.server.dist,
 		fileName,
 	)
 	if nil != readerError {
@@ -470,7 +449,7 @@ func (response *Response) SendView(view *View) {
 		return
 	}
 
-	content, compileError := view.Render(response.id, response.server.efs)
+	content, compileError := view.Render(response.server.dist, response.id)
 	if nil != compileError {
 		response.server.notifier.SendError(compileError)
 		return

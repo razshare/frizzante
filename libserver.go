@@ -9,32 +9,136 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"reflect"
+	"path"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
 )
 
-type GuardFunction = func(request *Request, response *Response) bool
-
-type PageConfiguration struct {
-	Path         string
-	TryFileFirst bool
-	Guards       []GuardFunction
-}
-type PageController interface {
-	Configure() PageConfiguration
-	Base(req *Request, res *Response)
-	Action(req *Request, res *Response)
+type PageMetadata struct {
+	packageName  string
+	fileName     string
+	functionName string
 }
 
-type ApiConfiguration struct {
-	Pattern string
-	Guards  []GuardFunction
+type PageController struct {
+	viewRoot     string
+	metadata     *PageMetadata
+	tryFileFirst bool
+	isRoot       bool
+	guards       []func(req *Request, res *Response) bool
+	base         func(req *Request, res *Response)
+	action       func(req *Request, res *Response)
 }
-type ApiController interface {
-	Configure() ApiConfiguration
-	Handle(req *Request, res *Response)
+
+func NewPageController() *PageController {
+	return &PageController{
+		viewRoot: PAGES_ROOT,
+		metadata: NewPageMetadata(),
+	}
+}
+
+func (page *PageController) FindPath() string {
+	parts := strings.SplitN(page.metadata.packageName, strings.Trim(page.viewRoot, "/"), 2)
+	if len(parts) < 2 {
+		log.Fatalf(
+			"controllers `%s` must be located under `%s`, but is located under `%s` instead",
+			page.metadata.fileName,
+			page.viewRoot,
+			page.metadata.packageName,
+		)
+	}
+
+	return "/" + strings.Trim(parts[1], "/")
+}
+
+func (page *PageController) FindId() string {
+	parts := strings.SplitN(page.metadata.packageName, strings.Trim(page.viewRoot, "/"), 2)
+	if len(parts) < 2 {
+		log.Fatalf(
+			"controllers `%s` must be located under `%s`, but is located under `%s` instead",
+			page.metadata.fileName,
+			page.viewRoot,
+			page.metadata.packageName,
+		)
+	}
+
+	return strings.ReplaceAll(strings.Trim(parts[1], "/"), "/", ".")
+}
+
+func (page *PageController) WithViewRoot(viewRoot string) *PageController {
+	page.viewRoot = viewRoot
+	return page
+}
+
+func (page *PageController) TryFileFirst() *PageController {
+	if nil == page.metadata {
+		page.metadata = NewPageMetadata()
+	}
+	page.tryFileFirst = true
+	return page
+}
+
+func (page *PageController) WithGuard(guard func(req *Request, res *Response) bool) *PageController {
+	if nil == page.metadata {
+		page.metadata = NewPageMetadata()
+	}
+	page.guards = append(page.guards, guard)
+	return page
+}
+
+func (page *PageController) WithLocalMetadata() *PageController {
+	page.metadata = NewPageMetadata()
+	return page
+}
+
+func (page *PageController) WithGuards(guards []func(req *Request, res *Response) bool) *PageController {
+	if nil == page.metadata {
+		page.metadata = NewPageMetadata()
+	}
+	page.guards = guards
+	return page
+}
+
+func (page *PageController) WithBase(handler func(req *Request, res *Response)) *PageController {
+	page.base = handler
+	return page
+}
+
+func (page *PageController) WithAction(handler func(req *Request, res *Response)) *PageController {
+	page.action = handler
+	return page
+}
+
+type ApiController struct {
+	pattern string
+	guards  []func(req *Request, res *Response) bool
+	action  func(req *Request, res *Response)
+}
+
+func NewApiController() *ApiController {
+	return &ApiController{}
+}
+
+func (api *ApiController) WithPattern(pattern string) *ApiController {
+	api.pattern = pattern
+	return api
+}
+
+func (api *ApiController) WithGuards(guards []func(req *Request, res *Response) bool) *ApiController {
+	api.guards = guards
+	return api
+}
+
+func (api *ApiController) WithGuard(guard func(req *Request, res *Response) bool) *ApiController {
+	api.guards = append(api.guards, guard)
+	return api
+}
+
+func (api *ApiController) WithHandler(handler func(req *Request, res *Response)) *ApiController {
+	api.action = handler
+	return api
 }
 
 type ServerProperties struct {
@@ -45,9 +149,8 @@ type ServerProperties struct {
 }
 
 type Server struct {
-	hostName        string
-	port            int
-	securePort      int
+	address         string
+	secureAddress   string
 	formMaxMemory   int64
 	server          *http.Server
 	mux             *http.ServeMux
@@ -58,7 +161,7 @@ type Server struct {
 	certificate     string
 	key             string
 	notifier        *Notifier
-	efs             *embed.FS
+	dist            embed.FS
 	upgrader        *websocket.Upgrader
 	hasEntry        bool
 }
@@ -66,14 +169,13 @@ type Server struct {
 // NewServer creates a server.
 func NewServer() *Server {
 	notifier := NewNotifier()
-	webSocketUpgrader := &websocket.Upgrader{
+	upgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 	}
 	return &Server{
-		hostName:        "127.0.0.1",
-		port:            8081,
-		securePort:      8383,
+		address:         "127.0.0.1:8080",
+		secureAddress:   "127.0.0.1:8383",
 		formMaxMemory:   4096,
 		server:          nil,
 		mux:             http.NewServeMux(),
@@ -84,74 +186,77 @@ func NewServer() *Server {
 		certificate:     "",
 		key:             "",
 		notifier:        notifier,
-		upgrader:        webSocketUpgrader,
+		upgrader:        upgrader,
 	}
 }
 
-// WithWebSocketReadBufferSize sets the maximum buffer size for each incoming web socket message.
+// WithEfs sets the embedded file system.
+func (server *Server) WithEfs(dist embed.FS) *Server {
+	server.dist = dist
+	return server
+}
+
+// WithWsMaxRedMemory sets the maximum buffer size for each incoming web socket message.
 // This will not limit the size of said messages.
-func (server *Server) WithWebSocketReadBufferSize(readBufferSize int) {
-	server.upgrader.ReadBufferSize = readBufferSize
+func (server *Server) WithWsMaxRedMemory(size int) *Server {
+	server.upgrader.ReadBufferSize = size
+	return server
 }
 
-// WithWebSocketWriteBufferSize sets the maximum buffer size for each outgoing web socket message.
+// WithWsMaxWriteMemory sets the maximum buffer size for each outgoing web socket message.
 // This will not limit the size of said messages.
-func (server *Server) WithWebSocketWriteBufferSize(writeBufferSize int) {
-	server.upgrader.WriteBufferSize = writeBufferSize
+func (server *Server) WithWsMaxWriteMemory(size int) *Server {
+	server.upgrader.WriteBufferSize = size
+	return server
 }
 
-// WithMultipartFormMaxMemory sets the maximum memory for multipart forms before they fall back to disk.
-func (server *Server) WithMultipartFormMaxMemory(multipartFormMaxMemory int64) {
-	server.formMaxMemory = multipartFormMaxMemory
+// WithFormMaxMemory sets the maximum memory for multipart forms before they fall back to disk.
+func (server *Server) WithFormMaxMemory(size int64) *Server {
+	server.formMaxMemory = size
+	return server
 }
 
-// WithHostName sets the host name.
-func (server *Server) WithHostName(hostName string) {
-	server.hostName = hostName
+// WithAddress sets the address.
+func (server *Server) WithAddress(address string) *Server {
+	server.address = address
+	return server
 }
 
-// WithPort sets the port.
-func (server *Server) WithPort(port int) {
-	server.port = port
-}
-
-// WithSecurePort sets the secure port.
-func (server *Server) WithSecurePort(securePort int) {
-	server.securePort = securePort
+// WithSecureAddress sets the secure address.
+func (server *Server) WithSecureAddress(secureAddress string) *Server {
+	server.secureAddress = secureAddress
+	return server
 }
 
 // WithReadTimeout sets the read timeout.
-func (server *Server) WithReadTimeout(timeout time.Duration) {
+func (server *Server) WithReadTimeout(timeout time.Duration) *Server {
 	server.readTimeout = timeout
+	return server
 }
 
 // WithWriteTimeout sets the write timeout.
-func (server *Server) WithWriteTimeout(timeout time.Duration) {
+func (server *Server) WithWriteTimeout(timeout time.Duration) *Server {
 	server.writeTimeout = timeout
+	return server
 }
 
-// WithMaxHeaderBytes sets the maximum allowed bytes in the header of the request.
-func (server *Server) WithMaxHeaderBytes(maxHeaderBytes int) {
+// WithHeaderMaxMemory sets the maximum allowed bytes in the header of the request.
+func (server *Server) WithHeaderMaxMemory(maxHeaderBytes int) *Server {
 	server.headerMaxMemory = maxHeaderBytes
+	return server
 }
 
 // WithCertificate sets the certificate ands ts key.
-func (server *Server) WithCertificate(certificate string, key string) {
+func (server *Server) WithCertificate(certificate string, key string) *Server {
 	server.certificate = certificate
 	server.key = key
-}
-
-// WithEmbeddedFileSystem sets the embedded file system.
-//
-// The embedded file system should contain at least directory ".dist" so
-// that the server can properly render and serve svelte components.
-func (server *Server) WithEmbeddedFileSystem(efs *embed.FS) {
-	server.efs = efs
+	return server
 }
 
 // WithNotifier sets the server notifier.
-func (server *Server) WithNotifier(notifier *Notifier) {
+func (server *Server) WithNotifier(notifier *Notifier) *Server {
 	server.notifier = notifier
+	return server
 }
 
 // Start starts the server.
@@ -168,14 +273,13 @@ func (server *Server) Start() {
 		ErrorLog:       logger,
 	}
 
-	var waiter sync.WaitGroup
+	var group sync.WaitGroup
 
-	waiter.Add(2)
+	group.Add(2)
 
 	go func() {
-		address := fmt.Sprintf("%s:%d", server.hostName, server.port)
-		server.notifier.SendMessage(fmt.Sprintf("listening for requests at http://%s", address))
-		serverError := http.ListenAndServe(address, server.mux)
+		server.notifier.SendMessage(fmt.Sprintf("listening for requests at http://%s", server.address))
+		serverError := http.ListenAndServe(server.address, server.mux)
 		if nil != serverError {
 			if errors.Is(serverError, http.ErrServerClosed) {
 				server.notifier.SendMessage("shutting down server")
@@ -186,10 +290,9 @@ func (server *Server) Start() {
 	}()
 
 	go func() {
-		secureAddress := fmt.Sprintf("%s:%d", server.hostName, server.securePort)
 		if "" != server.certificate && "" != server.key {
-			server.notifier.SendMessage(fmt.Sprintf("listening for requests at https://%s", secureAddress))
-			serverError := http.ListenAndServeTLS(secureAddress, server.certificate, server.key, server.mux)
+			server.notifier.SendMessage(fmt.Sprintf("listening for requests at https://%s", server.secureAddress))
+			serverError := http.ListenAndServeTLS(server.secureAddress, server.certificate, server.key, server.mux)
 			if nil != serverError {
 				if errors.Is(serverError, http.ErrServerClosed) {
 					server.notifier.SendMessage("shutting down server")
@@ -200,7 +303,7 @@ func (server *Server) Start() {
 		}
 	}()
 
-	waiter.Wait()
+	group.Wait()
 }
 
 // Stop attempts to stop the server.
@@ -214,7 +317,7 @@ func (server *Server) Stop() {
 }
 
 // OnRequest adds request handler.
-func (server *Server) OnRequest(pattern string, handler func(request *Request, response *Response)) {
+func (server *Server) OnRequest(pattern string, handler func(req *Request, res *Response)) *Server {
 	server.mux.HandleFunc(pattern, func(writer http.ResponseWriter, httpRequest *http.Request) {
 		request := &Request{
 			server:      server,
@@ -242,56 +345,121 @@ func (server *Server) OnRequest(pattern string, handler func(request *Request, r
 
 		handler(request, response)
 	})
+	return server
+}
+
+func NewPageMetadata() *PageMetadata {
+	pc, file, _, _ := runtime.Caller(2)
+	_, fileName := path.Split(file)
+	descriptor := runtime.FuncForPC(pc)
+	parts := strings.Split(descriptor.Name(), ".")
+	pl := len(parts)
+	packageName := ""
+	funcName := parts[pl-1]
+
+	if parts[pl-2][0] == '(' {
+		funcName = parts[pl-2] + "." + funcName
+		packageName = strings.Join(parts[0:pl-2], ".")
+	} else {
+		packageName = strings.Join(parts[0:pl-1], ".")
+	}
+
+	return &PageMetadata{
+		packageName:  packageName,
+		fileName:     fileName,
+		functionName: funcName,
+	}
 }
 
 var ids = map[string]string{}
 
-func (server *Server) WithPageController(controller PageController) {
-	configuration := controller.Configure()
-	reflectedType := reflect.TypeOf(controller)
-	id := strings.TrimSuffix(reflectedType.Name(), "Controller")
-	ids[id] = configuration.Path
-	tryFilesFirst := configuration.TryFileFirst || "/" == configuration.Path
-	server.OnRequest("GET "+configuration.Path, func(request *Request, response *Response) {
+func (server *Server) WithPageController(controller *PageController) *Server {
+	if nil == controller {
+		log.Fatal("controller cannot be nil")
+	}
+
+	if nil == controller.base {
+		controller.base = func(req *Request, res *Response) {
+			res.SendView(NewView(RenderModeFull))
+		}
+	}
+
+	if nil == controller.action {
+		controller.action = func(req *Request, res *Response) {
+			res.SendView(NewView(RenderModeFull))
+		}
+	}
+
+	var isRoot bool
+	var controllerPath string
+	id := controller.FindId()
+	if "" == id {
+		log.Fatalf(
+			"controller `%s/%s` resolved into a blank id, which is not allowed",
+			controller.metadata.packageName, controller.metadata.fileName,
+		)
+	}
+
+	if DEFAULT_PAGE_ID == id {
+		controllerPath = "/"
+		isRoot = true
+	} else {
+		controllerPath = controller.FindPath()
+		isRoot = "/" == controllerPath
+	}
+
+	ids[id] = controllerPath
+	tryFilesFirst := controller.tryFileFirst || isRoot
+	server.OnRequest("GET "+controllerPath, func(request *Request, response *Response) {
 		if tryFilesFirst {
 			response.SendFileOrElse(func() {
 				response.id = id
-				for _, guard := range configuration.Guards {
+				for _, guard := range controller.guards {
 					if !guard(request, response) {
 						return
 					}
 				}
-				controller.Base(request, response)
+				controller.base(request, response)
 			})
 		} else {
 			response.id = id
-			for _, guard := range configuration.Guards {
+			for _, guard := range controller.guards {
 				if !guard(request, response) {
 					return
 				}
 			}
-			controller.Base(request, response)
+			controller.base(request, response)
 		}
 	})
-	server.OnRequest("POST "+configuration.Path, func(request *Request, response *Response) {
+	server.OnRequest("POST "+controllerPath, func(request *Request, response *Response) {
 		response.id = id
-		for _, guard := range configuration.Guards {
+		for _, guard := range controller.guards {
 			if !guard(request, response) {
 				return
 			}
 		}
-		controller.Action(request, response)
+		controller.action(request, response)
 	})
+	return server
 }
 
-func (server *Server) WithApiController(controller ApiController) {
-	configuration := controller.Configure()
-	server.OnRequest(configuration.Pattern, func(request *Request, response *Response) {
-		for _, guard := range configuration.Guards {
+func (server *Server) WithApiController(controller *ApiController) *Server {
+	if nil == controller {
+		log.Fatal("controller cannot be nil")
+	}
+
+	if nil == controller.action {
+		controller.action = func(req *Request, res *Response) {
+			res.SendMessage("Not implemented.")
+		}
+	}
+	server.OnRequest(controller.pattern, func(request *Request, response *Response) {
+		for _, guard := range controller.guards {
 			if !guard(request, response) {
 				return
 			}
 		}
-		controller.Handle(request, response)
+		controller.action(request, response)
 	})
+	return server
 }

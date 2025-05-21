@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func createReaderFromEmbeddedFileName(efs *embed.FS, fileName string) (*bytes.Reader, *os.FileInfo, error) {
+func createReaderFromEmbeddedFileName(efs embed.FS, fileName string) (*bytes.Reader, *os.FileInfo, error) {
 	file, openError := efs.Open(fileName)
 	if nil != openError {
 		return nil, nil, openError

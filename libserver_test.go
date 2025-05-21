@@ -11,23 +11,13 @@ func TestNewServer(test *testing.T) {
 	NewServer()
 }
 
-func TestServerWithHostName(test *testing.T) {
+func TestServerWithAddress(test *testing.T) {
 	server := NewServer()
-	expected := "127.0.0.1"
-	server.WithHostName(expected)
-	actual := server.hostName
+	expected := "127.0.0.1:8080"
+	server.WithAddress("127.0.0.1:8080")
+	actual := server.address
 	if actual != expected {
 		test.Fatalf("server was expected to have host name '%s', received '%s' instead", expected, actual)
-	}
-}
-
-func TestServerWithPort(test *testing.T) {
-	server := NewServer()
-	expected := 80
-	server.WithPort(expected)
-	actual := server.port
-	if actual != expected {
-		test.Fatalf("server was expected to have port name %d, received %d instead", expected, actual)
 	}
 }
 
@@ -55,7 +45,7 @@ func TestServerWithWriteTimeout(test *testing.T) {
 func TestServerWithMaxHeaderBytes(test *testing.T) {
 	server := NewServer()
 	expected := 1 * MB
-	server.WithMaxHeaderBytes(expected)
+	server.WithHeaderMaxMemory(expected)
 	actual := server.headerMaxMemory
 	if actual != expected {
 		test.Fatalf("server was expected to have max header bytes '%d', received '%d' instead", expected, actual)
@@ -77,21 +67,11 @@ func TestServerWithCertificateAndKey(test *testing.T) {
 	}
 }
 
-func TestServerWithEmbeddedFileSystem(test *testing.T) {
-	server := NewServer()
-	expected := &efs
-	server.WithEmbeddedFileSystem(expected)
-	actual := server.efs
-	if actual != expected {
-		test.Fatalf("incorrect embedded file system detected")
-	}
-}
-
 func TestServerWithApi(test *testing.T) {
 	server := NewServer()
 	notifier := NewNotifier()
 	port := NextNumber(8080)
-	server.WithPort(port)
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.WithNotifier(notifier)
 	expected := "hello"
 	server.OnRequest("GET /", func(request *Request, response *Response) {
@@ -114,10 +94,11 @@ func TestServerWithApi(test *testing.T) {
 
 func TestSendStatus(test *testing.T) {
 	expected := 201
-	server := NewServer()
-	notifier := NewNotifier()
 	port := NextNumber(8080)
-	server.WithPort(port)
+	notifier := NewNotifier()
+	server := NewServer()
+	server.WithEfs(efs)
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.WithNotifier(notifier)
 	server.OnRequest("GET /", func(request *Request, response *Response) {
 		response.SendStatus(expected)
@@ -145,7 +126,7 @@ func TestSendHeader(test *testing.T) {
 	server := NewServer()
 	port := NextNumber(8080)
 	notifier := NewNotifier()
-	server.WithPort(port)
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.WithNotifier(notifier)
 	expected := "application/json"
 	server.OnRequest("GET /", func(req *Request, res *Response) {

@@ -62,7 +62,7 @@ func NewViewWithData(render RenderMode, data any) *View {
 //
 // If the View is using RenderModeHeadless, then ViewRender returns only the content of the view, without decorating it with an HTML document.
 // The output won't even contain a header, ignoring all <svelte:head> declarations and all css.
-func (view *View) Render(id string, efs *embed.FS) (content string, compileError error) {
+func (view *View) Render(efs embed.FS, id string) (content string, compileError error) {
 	fileNameIndex := filepath.Join(".dist", "client", ".frizzante", "vite-project", "index.html")
 
 	var indexBytes []byte
@@ -100,7 +100,7 @@ func (view *View) Render(id string, efs *embed.FS) (content string, compileError
 	}
 
 	if RenderModeFull == view.RenderMode {
-		head, body, renderError := JavaScriptRender(*efs, routerPropsString)
+		head, body, renderError := JavaScriptRender(efs, routerPropsString)
 		if renderError != nil {
 			return "", renderError
 		}
@@ -158,7 +158,7 @@ func (view *View) Render(id string, efs *embed.FS) (content string, compileError
 	}
 
 	if RenderModeServer == view.RenderMode {
-		head, body, renderError := JavaScriptRender(*efs, routerPropsString)
+		head, body, renderError := JavaScriptRender(efs, routerPropsString)
 		if renderError != nil {
 			return "", renderError
 		}
@@ -186,7 +186,7 @@ func (view *View) Render(id string, efs *embed.FS) (content string, compileError
 	}
 
 	if RenderModeHeadless == view.RenderMode {
-		_, body, renderError := JavaScriptRender(*efs, routerPropsString)
+		_, body, renderError := JavaScriptRender(efs, routerPropsString)
 
 		if renderError != nil {
 			return "", renderError
