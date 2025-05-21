@@ -4,15 +4,13 @@ import f "github.com/razshare/frizzante"
 
 var pageName = f.
 	NewPageController().
-	WithBase(base).
-	WithAction(action)
+	WithBase(pageBase).
+	WithAction(pageAction)
 
-type data struct{}
-
-func base(_ *f.Request, res *f.Response) {
-	res.SendView(f.NewViewWithData(f.RenderModeFull, data{}))
+func pageBase(_ *f.Request, res *f.Response) {
+	res.SendView(f.NewView(f.RenderModeFull))
 }
 
-func action(_ *f.Request, res *f.Response) {
-	res.SendView(f.NewViewWithData(f.RenderModeFull, data{}))
+func pageAction(_ *f.Request, res *f.Response) {
+	res.SendView(f.NewView(f.RenderModeFull))
 }

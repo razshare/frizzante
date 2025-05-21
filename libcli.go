@@ -25,8 +25,12 @@ type NameMetadata struct {
 	RelativeFileNameCamel        string
 	RelativeFileNameTitle        string
 	BaseFileNameNoExtensionTitle string
-	BaseDirectoryName            string
+	RelativeDirectoryNameCamel   string
+	RelativeDirectoryNameTitle   string
+	BaseDirectoryNameCamel       string
+	BaseDirectoryNameTitle       string
 	BaseFileNameTitle            string
+	BaseFileNameCamel            string
 	BaseFileNameKebab            string
 }
 
@@ -108,7 +112,7 @@ func findNameMetadata(root string, template string, name string, base string, me
 			relativeFileNameTitle = relativeFileNameTitle + string(filepath.Separator) + strings.ToTitle(section[0:1]) + section[1:]
 		}
 	}
-	relativeFileNameTitle = filepath.Join(relativeFileNameTitle[1:], base+extensionName)
+	relativeFileNameTitle = relativeFileNameTitle[1:] + extensionName
 
 	relativeFileNameCamel := ""
 	for _, pageNameChunked := range strings.Split(baseFileName, "_") {
@@ -116,7 +120,7 @@ func findNameMetadata(root string, template string, name string, base string, me
 			relativeFileNameCamel = relativeFileNameCamel + string(filepath.Separator) + strings.ToLower(section[0:1]) + section[1:]
 		}
 	}
-	relativeFileNameCamel = filepath.Join(relativeFileNameCamel[1:], base+extensionName)
+	relativeFileNameCamel = relativeFileNameCamel[1:] + extensionName
 
 	fullFileNameCamel := filepath.Join(fullRoot, relativeFileNameCamel)
 	fullFileNameTitle := filepath.Join(fullRoot, relativeFileNameTitle)
@@ -127,8 +131,12 @@ func findNameMetadata(root string, template string, name string, base string, me
 	metadata.RelativeFileNameCamel = relativeFileNameCamel
 	metadata.RelativeFileNameTitle = relativeFileNameTitle
 	metadata.RelativeFileNameTemplate = template
-	metadata.BaseDirectoryName = filepath.Base(metadata.FullDirectoryNameCamel)
+	metadata.RelativeDirectoryNameCamel = filepath.Dir(relativeFileNameCamel)
+	metadata.RelativeDirectoryNameTitle = filepath.Dir(relativeFileNameTitle)
+	metadata.BaseDirectoryNameCamel = filepath.Base(filepath.Dir(metadata.FullFileNameTitle))
+	metadata.BaseDirectoryNameTitle = filepath.Base(filepath.Dir(metadata.FullFileNameCamel))
 	metadata.BaseFileNameTitle = filepath.Base(metadata.FullFileNameTitle)
+	metadata.BaseFileNameCamel = filepath.Base(metadata.FullFileNameCamel)
 	metadata.BaseFileNameNoExtensionTitle = strings.TrimSuffix(metadata.BaseFileNameTitle, extensionName)
 	metadata.BaseFileNameKebab = toKebab(metadata.BaseFileNameNoExtensionTitle)
 	return metadata
@@ -188,17 +196,22 @@ func createApi(apiName string) {
 
 	// Package.
 	oldName := []byte("package api")
-	newName := []byte("package " + metadata.BaseDirectoryName)
+	newName := []byte("package " + metadata.BaseDirectoryNameCamel)
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	// Api path.
 	oldName = []byte("/path")
-	newName = []byte("/api/" + strings.ReplaceAll(strings.TrimSuffix(metadata.BaseFileNameKebab, ".go"), string(filepath.Separator), "/"))
+	newName = []byte("/api/" + strings.ReplaceAll(strings.TrimSuffix(metadata.RelativeFileNameCamel, ".go"), string(filepath.Separator), "/"))
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	// Api name.
 	oldName = []byte("apiName")
-	newName = []byte("Api")
+	newName = []byte(strings.TrimSuffix(metadata.BaseFileNameTitle, ".go"))
+	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+
+	// Api name.
+	oldName = []byte("apiGet")
+	newName = []byte(strings.TrimSuffix(metadata.BaseFileNameCamel, ".go") + "Get")
 	readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 	writeError := os.WriteFile(fileName, readBytes, os.ModePerm)
@@ -227,17 +240,27 @@ func createPage(pageName string) {
 
 		// Package.
 		oldName := []byte("package pages")
-		newName := []byte("package " + metadata.BaseDirectoryName)
+		newName := []byte("package " + metadata.BaseDirectoryNameCamel)
 		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 		// Page name.
 		oldName = []byte("pageName")
-		newName = []byte("Page")
+		newName = []byte(strings.TrimSuffix(metadata.BaseFileNameTitle, ".go"))
+		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+
+		// Page base.
+		oldName = []byte("pageBase")
+		newName = []byte(strings.TrimSuffix(metadata.BaseFileNameCamel, ".go") + "Base")
+		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
+
+		// Page action.
+		oldName = []byte("pageAction")
+		newName = []byte(strings.TrimSuffix(metadata.BaseFileNameCamel, ".go") + "Action")
 		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 		// Page path.
 		oldName = []byte("/path")
-		newName = []byte("/" + strings.ReplaceAll(strings.TrimSuffix(metadata.BaseFileNameKebab, ".go"), string(filepath.Separator), "/"))
+		newName = []byte("/" + strings.ReplaceAll(strings.TrimSuffix(metadata.RelativeFileNameCamel, ".go"), string(filepath.Separator), "/"))
 		readBytes = bytes.ReplaceAll(readBytes, oldName, newName)
 
 		writeError := os.WriteFile(fileName, readBytes, os.ModePerm)
@@ -248,9 +271,6 @@ func createPage(pageName string) {
 		fmt.Printf("file `%s` already exists.\n", fileName)
 	}
 
-	metadata.FullFileNameTitle = strings.TrimSuffix(metadata.FullFileNameTitle, ".go") + ".svelte"
-	metadata.RelativeFileNameTemplate = strings.TrimSuffix(metadata.RelativeFileNameTemplate, ".go") + ".svelte"
-	metadata.RelativeFileNameCamel = strings.TrimSuffix(metadata.RelativeFileNameCamel, ".go") + ".svelte"
 	createViewComponent(metadata.Name)
 }
 

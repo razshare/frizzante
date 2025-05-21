@@ -4,9 +4,9 @@ import f "github.com/razshare/frizzante"
 
 var apiName = f.
 	NewApiController().
-	WithPattern("GET /path").
-	WithHandler(handler)
+	WithPath("/path").
+	WithHandler("GET", apiGet)
 
-func handler(req *f.Request, res *f.Response) {
+func apiGet(req *f.Request, res *f.Response) {
 	res.SendMessage("hello")
 }
