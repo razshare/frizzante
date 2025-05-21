@@ -17,12 +17,14 @@ type Request struct {
 	webSocket   *websocket.Conn
 }
 
-// ReceiveCancellation returns a channel that's closed when the request is cancelled.
+// ReceiveCancellation returns a channel that closes when the request gets cancelled.
 func (request *Request) ReceiveCancellation() <-chan struct{} {
 	return request.httpRequest.Context().Done()
 }
 
-// IsAlive returns a bool which updates to false when the request gets cancelled.
+// IsAlive returns a reference to a bool which is initially set to `true`.
+//
+// This bool updates to `false` when the request gets cancelled.
 func (request *Request) IsAlive() *bool {
 	value := true
 	go func() {

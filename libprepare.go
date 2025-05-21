@@ -80,10 +80,7 @@ func findViews() (map[string]string, error) {
 			}
 
 			fileNameBase := strings.Trim(strings.TrimPrefix(fileName, libViews), sep)
-			id := strings.TrimSuffix(strings.ReplaceAll(fileNameBase, sep, "."), ".view.svelte")
-			if "view.svelte" == id {
-				return nil
-			}
+			id := strings.TrimSuffix(strings.ReplaceAll(fileNameBase, sep, "/"), ".svelte")
 			importFileName, err := filepath.Rel(".frizzante/vite-project", fileName)
 			if err != nil {
 				return err

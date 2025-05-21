@@ -3,10 +3,10 @@ package pages
 import "testing"
 
 func TestController(test *testing.T) {
-	pageName.WithViewRoot("templates")
+	pageName.WithViewRoot("templates/pages")
 	actual := pageName.FindId()
 
-	expected := "pages"
+	expected := "example"
 	if actual != expected {
 		test.Fatalf("package id was expected to be `%s`, but received `%s` instead", expected, actual)
 	}

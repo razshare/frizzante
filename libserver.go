@@ -41,6 +41,7 @@ func NewPageController() *PageController {
 
 func (page *PageController) FindPath() string {
 	parts := strings.SplitN(page.metadata.packageName, strings.Trim(page.viewRoot, "/"), 2)
+	name := strings.TrimSuffix(page.metadata.fileName, ".go")
 	if len(parts) < 2 {
 		log.Fatalf(
 			"controllers `%s` must be located under `%s`, but is located under `%s` instead",
@@ -50,11 +51,12 @@ func (page *PageController) FindPath() string {
 		)
 	}
 
-	return "/" + strings.Trim(parts[1], "/")
+	return "/" + strings.Trim(parts[1]+"/"+name, "/")
 }
 
 func (page *PageController) FindId() string {
 	parts := strings.SplitN(page.metadata.packageName, strings.Trim(page.viewRoot, "/"), 2)
+	name := strings.TrimSuffix(page.metadata.fileName, ".go")
 	if len(parts) < 2 {
 		log.Fatalf(
 			"controllers `%s` must be located under `%s`, but is located under `%s` instead",
@@ -64,7 +66,7 @@ func (page *PageController) FindId() string {
 		)
 	}
 
-	return strings.ReplaceAll(strings.Trim(parts[1], "/"), "/", ".")
+	return strings.ReplaceAll(strings.Trim(parts[1]+"/"+name, "/"), "/", ".")
 }
 
 func (page *PageController) WithViewRoot(viewRoot string) *PageController {
@@ -112,17 +114,19 @@ func (page *PageController) WithAction(handler func(req *Request, res *Response)
 }
 
 type ApiController struct {
-	pattern string
-	guards  []func(req *Request, res *Response) bool
-	action  func(req *Request, res *Response)
+	path     string
+	guards   []func(req *Request, res *Response) bool
+	handlers map[string]func(req *Request, res *Response)
 }
 
 func NewApiController() *ApiController {
-	return &ApiController{}
+	return &ApiController{
+		handlers: map[string]func(req *Request, res *Response){},
+	}
 }
 
-func (api *ApiController) WithPattern(pattern string) *ApiController {
-	api.pattern = pattern
+func (api *ApiController) WithPath(path string) *ApiController {
+	api.path = path
 	return api
 }
 
@@ -136,8 +140,8 @@ func (api *ApiController) WithGuard(guard func(req *Request, res *Response) bool
 	return api
 }
 
-func (api *ApiController) WithHandler(handler func(req *Request, res *Response)) *ApiController {
-	api.action = handler
+func (api *ApiController) WithHandler(verb string, handler func(req *Request, res *Response)) *ApiController {
+	api.handlers[verb] = handler
 	return api
 }
 
@@ -448,18 +452,15 @@ func (server *Server) WithApiController(controller *ApiController) *Server {
 		log.Fatal("controller cannot be nil")
 	}
 
-	if nil == controller.action {
-		controller.action = func(req *Request, res *Response) {
-			res.SendMessage("Not implemented.")
-		}
-	}
-	server.OnRequest(controller.pattern, func(request *Request, response *Response) {
-		for _, guard := range controller.guards {
-			if !guard(request, response) {
-				return
+	for verb, handler := range controller.handlers {
+		server.OnRequest(verb+" "+controller.path, func(request *Request, response *Response) {
+			for _, guard := range controller.guards {
+				if !guard(request, response) {
+					return
+				}
 			}
-		}
-		controller.action(request, response)
-	})
+			handler(request, response)
+		})
+	}
 	return server
 }
