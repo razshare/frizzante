@@ -30,18 +30,21 @@ func NewSql() *Sql {
 }
 
 // WithNotifier sets the sql notifier.
-func (sql *Sql) WithNotifier(notifier *Notifier) {
+func (sql *Sql) WithNotifier(notifier *Notifier) *Sql {
 	sql.notifier = notifier
+	return sql
 }
 
 // WithDatabase sets the sql database.
-func (sql *Sql) WithDatabase(database *sql.DB) {
+func (sql *Sql) WithDatabase(database *sql.DB) *Sql {
 	sql.database = database
+	return sql
 }
 
 // WithDialect sets the sql dialect.
-func (sql *Sql) WithDialect(dialect SqlDialect) {
+func (sql *Sql) WithDialect(dialect SqlDialect) *Sql {
 	sql.dialect = dialect
+	return sql
 }
 
 // Execute executes sql queries that don't return rows, typically INSERT, UPDATE, DELETE queries.

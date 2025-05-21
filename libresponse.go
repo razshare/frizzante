@@ -38,68 +38,70 @@ type Navigate struct {
 // That being said, other than the format, there is nothing else different between this function and ResponseSendContent.
 //
 // See https://html.spec.whatwg.org/multipage/server-sent-events.html for more details on the format.
-func (response *Response) sendEventContent(content []byte) {
+func (response *Response) sendEventContent(content []byte) *Response {
 	header := fmt.Sprintf("id: %d\r\nevent: %s\r\n", response.eventId, response.eventName)
 
 	_, writeEventError := (*response.writer).Write([]byte(header))
 	if nil != writeEventError {
 		response.server.notifier.SendError(writeEventError)
-		return
+		return response
 	}
 
 	for _, line := range bytes.Split(content, []byte("\r\n")) {
 		_, writeEventError = (*response.writer).Write([]byte("data: "))
 		if nil != writeEventError {
 			response.server.notifier.SendError(writeEventError)
-			return
+			return response
 		}
 
 		_, writeEventError = (*response.writer).Write(line)
 		if nil != writeEventError {
 			response.server.notifier.SendError(writeEventError)
-			return
+			return response
 		}
 
 		_, writeEventError = (*response.writer).Write([]byte("\r\n"))
 		if nil != writeEventError {
 			response.server.notifier.SendError(writeEventError)
-			return
+			return response
 		}
 	}
 
 	_, writeEventError = (*response.writer).Write([]byte("\r\n"))
 	if nil != writeEventError {
 		response.server.notifier.SendError(writeEventError)
-		return
+		return response
 	}
 
 	flusher, flushedOk := (*response.writer).(http.Flusher)
 	if !flushedOk {
 		response.server.notifier.SendError(errors.New("could not retrieve flusher"))
-		return
+		return response
 	}
 
 	flusher.Flush()
 
 	response.eventId++
+	return response
 }
 
-func (response *Response) SendNavigate(id string) {
+func (response *Response) SendNavigate(id string) *Response {
 	path, idExists := ids[id]
 	if !idExists {
 		response.server.notifier.SendError(fmt.Errorf("id `%s` doesn't exist", id))
-		return
+		return response
 	}
 
 	response.SendRedirect(path, 302)
 	response.SendMessage("")
+	return response
 }
 
-func (response *Response) SendNavigateWithQuery(id string, search string) {
+func (response *Response) SendNavigateWithQuery(id string, search string) *Response {
 	path, idExists := ids[id]
 	if !idExists {
 		response.server.notifier.SendError(fmt.Errorf("id `%s` doesn't exist", id))
-		return
+		return response
 	}
 
 	var query string
@@ -128,12 +130,14 @@ func (response *Response) SendNavigateWithQuery(id string, search string) {
 	}
 
 	response.SendMessage("")
+	return response
 }
 
 // SendRedirect redirects the request.
-func (response *Response) SendRedirect(location string, statusCode int) {
+func (response *Response) SendRedirect(location string, statusCode int) *Response {
 	response.SendStatus(statusCode)
 	response.SendHeader("Location", location)
+	return response
 }
 
 // SendStatus sets the status code.
@@ -143,12 +147,13 @@ func (response *Response) SendRedirect(location string, statusCode int) {
 // function it will fail with an error.
 //
 // All errors are sent to the server notifier.
-func (response *Response) SendStatus(code int) {
+func (response *Response) SendStatus(code int) *Response {
 	if response.locked {
 		response.server.notifier.SendError(errors.New("status is locked"))
-		return
+		return response
 	}
 	response.statusCode = code
+	return response
 }
 
 // SendHeader sets a header field.
@@ -158,23 +163,26 @@ func (response *Response) SendStatus(code int) {
 // This means the status will become locked and further attempts to send the status will fail with an error.
 //
 // All errors are sent to the server notifier.
-func (response *Response) SendHeader(key string, value string) {
+func (response *Response) SendHeader(key string, value string) *Response {
 	if response.locked {
 		response.server.notifier.SendError(errors.New("headers locked"))
-		return
+		return response
 	}
 
 	response.header.Set(key, value)
+	return response
 }
 
 // SendContentType sets the Content-Type header field.
-func (response *Response) SendContentType(contentType string) {
+func (response *Response) SendContentType(contentType string) *Response {
 	response.SendHeader("Content-Type", contentType)
+	return response
 }
 
 // SendCookie sends a cookies to the client.
-func (response *Response) SendCookie(key string, value string) {
+func (response *Response) SendCookie(key string, value string) *Response {
 	response.SendHeader("Set-Cookie", fmt.Sprintf("%s=%s; Path=/; HttpOnly", url.QueryEscape(key), url.QueryEscape(value)))
+	return response
 }
 
 // SendContent sends binary safe content.
@@ -186,7 +194,7 @@ func (response *Response) SendCookie(key string, value string) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func (response *Response) SendContent(content []byte) {
+func (response *Response) SendContent(content []byte) *Response {
 	if !response.locked {
 		(*response.writer).WriteHeader(response.statusCode)
 		response.locked = true
@@ -196,21 +204,22 @@ func (response *Response) SendContent(content []byte) {
 		writeError := response.webSocket.WriteMessage(websocket.TextMessage, content)
 		if nil != writeError {
 			response.server.notifier.SendError(writeError)
-			return
+			return response
 		}
-		return
+		return response
 	}
 
 	if "" != response.eventName {
 		response.sendEventContent(content)
-		return
+		return response
 	}
 
 	_, err := (*response.writer).Write(content)
 	if nil != err {
 		response.server.notifier.SendError(err)
-		return
+		return response
 	}
+	return response
 }
 
 // SendMessage sends utf-8 safe content.
@@ -222,41 +231,48 @@ func (response *Response) SendContent(content []byte) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func (response *Response) SendMessage(message string) {
+func (response *Response) SendMessage(message string) *Response {
 	response.SendContent([]byte(message))
+	return response
 }
 
 // SendNotFound sends an empty message with status 404 Not Found.
-func (response *Response) SendNotFound() {
+func (response *Response) SendNotFound() *Response {
 	response.SendStatus(http.StatusNotFound)
+	return response
 }
 
 // SendUnauthorized sends an empty message with status 401 Unauthorized.
-func (response *Response) SendUnauthorized() {
+func (response *Response) SendUnauthorized() *Response {
 	response.SendStatus(http.StatusUnauthorized)
+	return response
 }
 
 // SendBadRequest sends an empty message with status 400 Bad Request.
-func (response *Response) SendBadRequest() {
+func (response *Response) SendBadRequest() *Response {
 	response.SendStatus(http.StatusBadRequest)
+	return response
 }
 
 // SendInternalServerError sends an error message with status 500 Internal server Error
 // and also sends the error to the server notifier.
-func (response *Response) SendInternalServerError(err error) {
+func (response *Response) SendInternalServerError(err error) *Response {
 	response.server.notifier.SendError(err)
 	response.SendStatus(http.StatusBadRequest)
 	response.SendMessage(err.Error())
+	return response
 }
 
 // SendForbidden sends an empty message with status 403 Forbidden.
-func (response *Response) SendForbidden() {
+func (response *Response) SendForbidden() *Response {
 	response.SendStatus(http.StatusForbidden)
+	return response
 }
 
 // SendTooManyRequests sends and empty message with status 403 Forbidden.
-func (response *Response) SendTooManyRequests() {
+func (response *Response) SendTooManyRequests() *Response {
 	response.SendStatus(http.StatusTooManyRequests)
+	return response
 }
 
 // SendJson sends json content.
@@ -268,11 +284,11 @@ func (response *Response) SendTooManyRequests() {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func (response *Response) SendJson(payload any) {
+func (response *Response) SendJson(payload any) *Response {
 	content, marshalError := json.Marshal(payload)
 	if nil != marshalError {
 		response.server.notifier.SendError(marshalError)
-		return
+		return response
 	}
 
 	if nil == response.webSocket {
@@ -283,11 +299,12 @@ func (response *Response) SendJson(payload any) {
 	}
 
 	response.SendContent(content)
+	return response
 }
 
 // SendEmbeddedFileOrElse sends the embedded file requested by the client,
 // or the closest index.html embedded file, or else falls back.
-func (response *Response) SendEmbeddedFileOrElse(orElse func()) {
+func (response *Response) SendEmbeddedFileOrElse(orElse func()) *Response {
 	request := response.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 	fileName = strings.Split(fileName, "?")[0]
@@ -296,7 +313,7 @@ func (response *Response) SendEmbeddedFileOrElse(orElse func()) {
 	if !existsInEmbeddedFileSystem(request.server.dist, fileName) ||
 		isEmbeddedDirectory(request.server.dist, fileName) {
 		orElse()
-		return
+		return response
 	}
 
 	reader, info, readerError := createReaderFromEmbeddedFileName(
@@ -305,30 +322,30 @@ func (response *Response) SendEmbeddedFileOrElse(orElse func()) {
 	)
 	if nil != readerError {
 		response.server.notifier.SendError(readerError)
-		return
+		return response
 	}
 
 	if response.webSocket != nil {
 		content, readError := io.ReadAll(reader)
 		if nil != readError {
 			response.server.notifier.SendError(readError)
-			return
+			return response
 		}
 		writeError := response.webSocket.WriteMessage(websocket.TextMessage, content)
 		if nil != writeError {
 			response.server.notifier.SendError(writeError)
 		}
-		return
+		return response
 	}
 
 	if "" != response.eventName {
 		content, readError := io.ReadAll(reader)
 		if nil != readError {
 			response.server.notifier.SendError(readError)
-			return
+			return response
 		}
 		response.sendEventContent(content)
-		return
+		return response
 	}
 
 	if "" == response.header.Get("Content-Type") {
@@ -339,45 +356,46 @@ func (response *Response) SendEmbeddedFileOrElse(orElse func()) {
 		response.SendHeader("Content-Length", fmt.Sprintf("%d", (*info).Size()))
 	}
 	http.ServeContent(*response.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
+	return response
 }
 
 // SendFileOrElse sends the file requested by the client, or else falls back.
-func (response *Response) SendFileOrElse(orElse func()) {
+func (response *Response) SendFileOrElse(orElse func()) *Response {
 	request := response.request
 	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
 
 	if !fileExists(fileName) || isDirectory(fileName) {
 		response.SendEmbeddedFileOrElse(orElse)
-		return
+		return response
 	}
 
 	reader, info, readerError := createReaderFromFileName(fileName)
 	if nil != readerError {
 		response.server.notifier.SendError(readerError)
-		return
+		return response
 	}
 
 	if response.webSocket != nil {
 		content, readError := io.ReadAll(reader)
 		if nil != readError {
 			response.server.notifier.SendError(readError)
-			return
+			return response
 		}
 		writeError := response.webSocket.WriteMessage(websocket.TextMessage, content)
 		if nil != writeError {
 			response.server.notifier.SendError(writeError)
 		}
-		return
+		return response
 	}
 
 	if "" != response.eventName {
 		content, readError := io.ReadAll(reader)
 		if nil != readError {
 			response.server.notifier.SendError(readError)
-			return
+			return response
 		}
 		response.sendEventContent(content)
-		return
+		return response
 	}
 
 	if "" == response.header.Get("Content-Type") {
@@ -388,6 +406,7 @@ func (response *Response) SendFileOrElse(orElse func()) {
 		response.SendHeader("Content-Length", fmt.Sprintf("%d", (*info).Size()))
 	}
 	http.ServeContent(*response.writer, request.httpRequest, fileName, (*info).ModTime(), reader)
+	return response
 }
 
 // SendSseUpgrade upgrades the http connection to server sent events
@@ -415,12 +434,12 @@ func (response *Response) SendSseUpgrade() (setEventName func(eventName string))
 }
 
 // SendWsUpgrade upgrades the http connection to web sockets.
-func (response *Response) SendWsUpgrade() {
+func (response *Response) SendWsUpgrade() *Response {
 	request := response.request
 	conn, upgradeError := response.server.upgrader.Upgrade(*response.writer, request.httpRequest, nil)
 	if nil != upgradeError {
 		request.server.notifier.SendError(upgradeError)
-		return
+		return response
 	}
 	defer func(conn *websocket.Conn) {
 		closeError := conn.Close()
@@ -431,12 +450,13 @@ func (response *Response) SendWsUpgrade() {
 	response.webSocket = conn
 	request.webSocket = conn
 	response.locked = true
+	return response
 }
 
 // SendView sends a view.
-func (response *Response) SendView(view *View) {
+func (response *Response) SendView(view *View) *Response {
 	if "" != response.header.Get("Location") {
-		return
+		return response
 	}
 
 	if response.request.VerifyAccept("application/json") {
@@ -446,13 +466,13 @@ func (response *Response) SendView(view *View) {
 			Data:       view.Data,
 			Ids:        ids,
 		})
-		return
+		return response
 	}
 
 	content, compileError := view.Render(response.server.dist, response.id)
 	if nil != compileError {
 		response.server.notifier.SendError(compileError)
-		return
+		return response
 	}
 
 	if "" == response.header.Get("Content-Type") {
@@ -460,4 +480,5 @@ func (response *Response) SendView(view *View) {
 	}
 
 	response.SendMessage(content)
+	return response
 }

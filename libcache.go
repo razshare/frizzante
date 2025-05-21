@@ -47,24 +47,27 @@ func (cache *Cache[T]) Get(key string) T {
 }
 
 // Set sets a cache entry.
-func (cache *Cache[T]) Set(duration time.Duration, key string, value T) {
+func (cache *Cache[T]) Set(duration time.Duration, key string, value T) *Cache[T] {
 	cache.entries[key] = &CacheEntry[T]{
 		createdAt: time.Now(),
 		duration:  duration,
 		value:     value,
 	}
+	return cache
 }
 
 // Remove removes an entry from the cache.
-func (cache *Cache[T]) Remove(key string) {
+func (cache *Cache[T]) Remove(key string) *Cache[T] {
 	delete(cache.entries, key)
+	return cache
 }
 
 // RemoveExpiredEntries removes all entries that have expired.
-func (cache *Cache[T]) RemoveExpiredEntries() {
+func (cache *Cache[T]) RemoveExpiredEntries() *Cache[T] {
 	for key, entry := range cache.entries {
 		if time.Since(entry.createdAt) >= entry.duration {
 			delete(cache.entries, key)
 		}
 	}
+	return cache
 }

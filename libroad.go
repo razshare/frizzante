@@ -25,7 +25,8 @@ func (road *Road) WithLane(key ...string) chan int {
 	return lane
 }
 
-func (road *Road) WithoutLane(key ...string) {
+func (road *Road) WithoutLane(key ...string) *Road {
 	path := strings.Join(key, ":")
 	delete(road.lanes, path)
+	return road
 }

@@ -20,17 +20,19 @@ func NewNotifier() *Notifier {
 
 // SendError sends an error to the notifier.
 // This will not limit the size of said messages.
-func (notifier *Notifier) SendError(err error) {
+func (notifier *Notifier) SendError(err error) *Notifier {
 	_, errorLocal := notifier.errorFile.WriteString(err.Error() + "\n")
 	if errorLocal != nil {
 		fmt.Printf("notifier could not write to error file")
 	}
+	return notifier
 }
 
 // SendMessage sends a message to the notifier.
-func (notifier *Notifier) SendMessage(message string) {
+func (notifier *Notifier) SendMessage(message string) *Notifier {
 	_, errorLocal := notifier.messageFile.WriteString(message + "\n")
 	if errorLocal != nil {
 		fmt.Printf("notifier could not write to message file")
 	}
+	return notifier
 }

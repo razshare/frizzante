@@ -30,8 +30,9 @@ func (archive *Archive) Get(domain string, key string) []byte {
 }
 
 // Set writes to the combination of domain and key int the archive.
-func (archive *Archive) Set(domain string, key string, value []byte) {
+func (archive *Archive) Set(domain string, key string, value []byte) *Archive {
 	archive.set(domain, key, value)
+	return archive
 }
 
 // Has checks if the combination of domain and key exists in the archive.
@@ -40,8 +41,9 @@ func (archive *Archive) Has(domain string, key string) bool {
 }
 
 // Remove removes the combination of domain and key from the archive.
-func (archive *Archive) Remove(domain string, key string) {
+func (archive *Archive) Remove(domain string, key string) *Archive {
 	archive.remove(domain, key)
+	return archive
 }
 
 // DomainExists checks if the archive has a domain.
@@ -50,18 +52,20 @@ func (archive *Archive) DomainExists(domain string) bool {
 }
 
 // RemoveDomain removes a domain from the archive.
-func (archive *Archive) RemoveDomain(domain string) {
+func (archive *Archive) RemoveDomain(domain string) *Archive {
 	archive.removeDomain(domain)
+	return archive
 }
 
 // WithName sets the name of the archive.
-func (archive *Archive) WithName(name string) {
+func (archive *Archive) WithName(name string) *Archive {
 	archive.name = name
+	return archive
 }
 
 // WithKeyGetter sets the reader, which reads a value from the archive
 // given its domain and key.
-func (archive *Archive) WithKeyGetter(getter func(domain string, key string) []byte) {
+func (archive *Archive) WithKeyGetter(getter func(domain string, key string) []byte) *Archive {
 	archive.get = func(domain string, key string) []byte {
 		if !KeyIsSafe(domain) {
 			archive.notifier.SendError(
@@ -77,12 +81,13 @@ func (archive *Archive) WithKeyGetter(getter func(domain string, key string) []b
 
 		return getter(domain, key)
 	}
+	return archive
 }
 
 // WithKeySetter sets the writer,
 // which writes a value into the archive at a combination of
 // domain and key.
-func (archive *Archive) WithKeySetter(setter func(domain string, key string, value []byte)) {
+func (archive *Archive) WithKeySetter(setter func(domain string, key string, value []byte)) *Archive {
 	archive.set = func(domain string, key string, value []byte) {
 		if !KeyIsSafe(domain) {
 			archive.notifier.SendError(
@@ -98,11 +103,12 @@ func (archive *Archive) WithKeySetter(setter func(domain string, key string, val
 
 		setter(domain, key, value)
 	}
+	return archive
 }
 
 // WithDomainRemover sets the remover,
 // which removes a domain from the archive.
-func (archive *Archive) WithDomainRemover(domainRemover func(domain string)) {
+func (archive *Archive) WithDomainRemover(domainRemover func(domain string)) *Archive {
 	archive.removeDomain = func(domain string) {
 		if !KeyIsSafe(domain) {
 			archive.notifier.SendError(
@@ -112,11 +118,12 @@ func (archive *Archive) WithDomainRemover(domainRemover func(domain string)) {
 
 		domainRemover(domain)
 	}
+	return archive
 }
 
 // WithKeyRemover sets the remover,
 // which removes a combination of domain and key from the archive.
-func (archive *Archive) WithKeyRemover(remover func(domain string, key string)) {
+func (archive *Archive) WithKeyRemover(remover func(domain string, key string)) *Archive {
 	archive.remove = func(domain string, key string) {
 		if !KeyIsSafe(domain) {
 			archive.notifier.SendError(
@@ -132,11 +139,12 @@ func (archive *Archive) WithKeyRemover(remover func(domain string, key string)) 
 
 		remover(domain, key)
 	}
+	return archive
 }
 
 // WithDomainChecker sets the domain checker,
 // which checks if a domain exists in the archive.
-func (archive *Archive) WithDomainChecker(checker func(domain string) (exists bool)) {
+func (archive *Archive) WithDomainChecker(checker func(domain string) (exists bool)) *Archive {
 	archive.domainExists = func(domain string) (exists bool) {
 		if !KeyIsSafe(domain) {
 			archive.notifier.SendError(
@@ -146,11 +154,12 @@ func (archive *Archive) WithDomainChecker(checker func(domain string) (exists bo
 
 		return checker(domain)
 	}
+	return archive
 }
 
 // WithKeyChecker sets the domain and key checker,
 // which checks if a combination of domain and key exists in the archive.
-func (archive *Archive) WithKeyChecker(checker func(domain string, key string) (exists bool)) {
+func (archive *Archive) WithKeyChecker(checker func(domain string, key string) (exists bool)) *Archive {
 	archive.has = func(domain string, key string) (exists bool) {
 		if !KeyIsSafe(domain) {
 			archive.notifier.SendError(
@@ -166,11 +175,13 @@ func (archive *Archive) WithKeyChecker(checker func(domain string, key string) (
 
 		return checker(domain, key)
 	}
+	return archive
 }
 
 // WithNotifier sets the notifier.
-func (archive *Archive) WithNotifier(notifier *Notifier) {
+func (archive *Archive) WithNotifier(notifier *Notifier) *Archive {
 	archive.notifier = notifier
+	return archive
 }
 
 // NewArchive creates an archive.

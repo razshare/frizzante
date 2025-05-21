@@ -105,39 +105,46 @@ func (session *Session[T]) Exists() bool {
 }
 
 // Load loads the session.
-func (session *Session[T]) Load() {
+func (session *Session[T]) Load() *Session[T] {
 	session.load()
+	return session
 }
 
 // Save saves the session.
-func (session *Session[T]) Save() {
+func (session *Session[T]) Save() *Session[T] {
 	session.save()
+	return session
 }
 
 // Destroy destroys the session.
-func (session *Session[T]) Destroy() {
+func (session *Session[T]) Destroy() *Session[T] {
 	session.destroy()
+	return session
 }
 
 // WithExistsHandler sets the exists handler.
-func (session *Session[T]) WithExistsHandler(handler func() bool) {
+func (session *Session[T]) WithExistsHandler(handler func() bool) *Session[T] {
 	session.exists = handler
+	return session
 }
 
 // WithLoadHandler sets the load handler.
-func (session *Session[T]) WithLoadHandler(handler func()) {
+func (session *Session[T]) WithLoadHandler(handler func()) *Session[T] {
 	session.load = handler
+	return session
 }
 
 // WithSaveHandler sets the save handler.
-func (session *Session[T]) WithSaveHandler(handler func()) {
+func (session *Session[T]) WithSaveHandler(handler func()) *Session[T] {
 	session.save = handler
+	return session
 }
 
 // WithDestroyHandler sets the destroy handler.
-func (session *Session[T]) WithDestroyHandler(handler func()) {
+func (session *Session[T]) WithDestroyHandler(handler func()) *Session[T] {
 	session.destroy = func() {
 		session.onDestroy()
 		handler()
 	}
+	return session
 }
