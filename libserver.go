@@ -404,7 +404,7 @@ func (server *Server) WithPageController(controller *PageController) *Server {
 		)
 	}
 
-	if DEFAULT_PAGE_ID == id {
+	if strings.ToLower(DEFAULT_PAGE_ID) == strings.ToLower(id) {
 		controllerPath = "/"
 		isRoot = true
 	} else {

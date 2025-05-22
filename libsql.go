@@ -25,7 +25,8 @@ type Sql struct {
 // NewSql creates a sql wrapper.
 func NewSql() *Sql {
 	return &Sql{
-		dialect: SqlDialectMysql,
+		dialect:  SqlDialectMysql,
+		notifier: NewNotifier(),
 	}
 }
 

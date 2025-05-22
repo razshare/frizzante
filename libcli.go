@@ -22,6 +22,7 @@ type NameMetadata struct {
 	FullDirectoryNameCamel       string
 	FullFileNameCamel            string
 	FullFileNameTitle            string
+	FullFileName                 string
 	RelativeFileNameCamel        string
 	RelativeFileNameTitle        string
 	BaseFileNameNoExtensionTitle string
@@ -124,10 +125,12 @@ func findNameMetadata(root string, template string, name string, base string, me
 
 	fullFileNameCamel := filepath.Join(fullRoot, relativeFileNameCamel)
 	fullFileNameTitle := filepath.Join(fullRoot, relativeFileNameTitle)
+	fullFileName := filepath.Join(fullRoot, baseFileName)
 
 	metadata.FullDirectoryNameCamel = filepath.Dir(fullFileNameCamel)
 	metadata.FullFileNameCamel = fullFileNameCamel
 	metadata.FullFileNameTitle = fullFileNameTitle
+	metadata.FullFileName = fullFileName
 	metadata.RelativeFileNameCamel = relativeFileNameCamel
 	metadata.RelativeFileNameTitle = relativeFileNameTitle
 	metadata.RelativeFileNameTemplate = template
@@ -182,7 +185,7 @@ func createApi(apiName string) {
 		}
 	}
 
-	fileName := metadata.FullFileNameCamel
+	fileName := metadata.FullFileName
 
 	if fileExists(fileName) {
 		fmt.Printf("file `%s` already exists.\n", fileName)
@@ -230,7 +233,7 @@ func createPage(pageName string) {
 		}
 	}
 
-	fileName := metadata.FullFileNameCamel
+	fileName := metadata.FullFileName
 
 	if !fileExists(fileName) {
 		readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
@@ -284,7 +287,7 @@ func createViewComponent(pageName string) {
 		}
 	}
 
-	fileName := metadata.FullFileNameCamel
+	fileName := metadata.FullFileName
 
 	if !fileExists(fileName) {
 		readBytes, readError := templates.ReadFile(strings.ReplaceAll(metadata.RelativeFileNameTemplate, string(filepath.Separator), "/"))
