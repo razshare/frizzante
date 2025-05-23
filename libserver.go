@@ -24,13 +24,22 @@ type PageMetadata struct {
 	functionName string
 }
 
+type ControllerBase struct {
+	guards  []Guard
+	handler func(req *Request, res *Response)
+}
+
+type ControllerAction struct {
+	guards  []Guard
+	handler func(req *Request, res *Response)
+}
+
 type Controller struct {
 	metadata *PageMetadata
 	giveWay  bool
 	isRoot   bool
-	guards   []Guard
-	base     func(req *Request, res *Response)
-	action   func(req *Request, res *Response)
+	base     *ControllerBase
+	action   *ControllerAction
 }
 
 func (page *Controller) findPath() string {
@@ -64,23 +73,19 @@ func (page *Controller) GiveWay() *Controller {
 	return page
 }
 
-func (page *Controller) WithGuard(guard Guard) *Controller {
-	page.guards = append(page.guards, guard)
+func (page *Controller) WithBase(guards []Guard, handler func(req *Request, res *Response)) *Controller {
+	page.base = &ControllerBase{
+		guards:  guards,
+		handler: handler,
+	}
 	return page
 }
 
-func (page *Controller) WithGuards(guards []Guard) *Controller {
-	page.guards = guards
-	return page
-}
-
-func (page *Controller) WithBase(handler func(req *Request, res *Response)) *Controller {
-	page.base = handler
-	return page
-}
-
-func (page *Controller) WithAction(handler func(req *Request, res *Response)) *Controller {
-	page.action = handler
+func (page *Controller) WithAction(guards []Guard, handler func(req *Request, res *Response)) *Controller {
+	page.action = &ControllerAction{
+		guards:  guards,
+		handler: handler,
+	}
 	return page
 }
 
@@ -332,14 +337,20 @@ func (server *Server) LoadController(configure func(*Controller)) *Server {
 	}
 
 	if nil == controller.base {
-		controller.base = func(req *Request, res *Response) {
-			res.SendView(NewView(RenderModeFull))
+		controller.base = &ControllerBase{
+			guards: []Guard{},
+			handler: func(req *Request, res *Response) {
+				res.SendView(NewView(RenderModeFull))
+			},
 		}
 	}
 
 	if nil == controller.action {
-		controller.action = func(req *Request, res *Response) {
-			res.SendView(NewView(RenderModeFull))
+		controller.action = &ControllerAction{
+			guards: []Guard{},
+			handler: func(req *Request, res *Response) {
+				res.SendView(NewView(RenderModeFull))
+			},
 		}
 	}
 
@@ -367,31 +378,31 @@ func (server *Server) LoadController(configure func(*Controller)) *Server {
 		if tryFilesFirst {
 			response.SendFileOrElse(func() {
 				response.id = id
-				for _, guard := range controller.guards {
+				for _, guard := range controller.base.guards {
 					if !guard(request, response) {
 						return
 					}
 				}
-				controller.base(request, response)
+				controller.base.handler(request, response)
 			})
 		} else {
 			response.id = id
-			for _, guard := range controller.guards {
+			for _, guard := range controller.base.guards {
 				if !guard(request, response) {
 					return
 				}
 			}
-			controller.base(request, response)
+			controller.base.handler(request, response)
 		}
 	})
 	server.OnRequest("POST "+controllerPath, []Guard{}, func(request *Request, response *Response) {
 		response.id = id
-		for _, guard := range controller.guards {
+		for _, guard := range controller.base.guards {
 			if !guard(request, response) {
 				return
 			}
 		}
-		controller.action(request, response)
+		controller.action.handler(request, response)
 	})
 	return server
 }

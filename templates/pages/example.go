@@ -6,10 +6,13 @@ import (
 )
 
 var Server *f.Server
+var guards []f.Guard
 
 func init() {
 	Server.LoadController(func(controller *f.Controller) {
-		controller.WithBase(base).WithAction(action)
+		controller.
+			WithBase(guards, base).
+			WithAction(guards, action)
 	})
 }
 
