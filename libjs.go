@@ -126,7 +126,13 @@ func JavaScriptBundle(rootDirectory string, format api.Format, source string) (b
 // local file system, otherwise RenderServerJs executes the file .dist/server/render.server.ts located within the
 // view's embedded file system.
 func JavaScriptRender(efs embed.FS, stringifiedProps string) (head string, body string, jsError error) {
-	renderFileName := filepath.Join("lib", "config", ".dist", "server", "render.server.js")
+	var renderFileName string
+
+	if "1" == os.Getenv("DEV") {
+		renderFileName = filepath.Join(".dist", "server", "render.server.js")
+	} else {
+		renderFileName = ".dist/server/render.server.js"
+	}
 
 	var renderEsmBytes []byte
 	if "1" == os.Getenv("DEV") {

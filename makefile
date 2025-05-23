@@ -15,24 +15,24 @@ clean:
 	rm key.pem -f
 	rm node_modules -fr
 	rm .sessions -fr
-	rm lib/config/.dist -fr
+	rm .dist -fr
 	rm .frizzante -fr
-	mkdir lib/config/.dist/server -p
-	mkdir lib/config/.dist/client -p
-	touch lib/config/.dist/.gitkeep
-	touch lib/config/.dist/server/.gitkeep
-	touch lib/config/.dist/client/.gitkeep
+	mkdir .dist/server -p
+	mkdir .dist/client -p
+	touch .dist/.gitkeep
+	touch .dist/server/.gitkeep
+	touch .dist/client/.gitkeep
 
 update:
 	go mod tidy
 	bun update
 
 www-build-server:
-	bunx vite build --ssr .frizzante/vite-project/render.server.js --outDir lib/config/.dist/server --emptyOutDir && \
-	./node_modules/.bin/esbuild lib/config/.dist/server/render.server.js --bundle --outfile=lib/config/.dist/server/render.server.js --format=esm --allow-overwrite
+	bunx vite build --ssr .frizzante/vite-project/render.server.js --outDir .dist/server --emptyOutDir && \
+	./node_modules/.bin/esbuild .dist/server/render.server.js --bundle --outfile=.dist/server/render.server.js --format=esm --allow-overwrite
 
 www-build-client:
-	bunx vite build --outDir lib/config/.dist/client --emptyOutDir
+	bunx vite build --outDir .dist/client --emptyOutDir
 
 certificate-interactive:
 	openssl req -newkey rsa:2048 -new -nodes -x509 -days 3650 -keyout key.pem -out cert.pem

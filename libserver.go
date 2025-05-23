@@ -137,12 +137,6 @@ func NewServer() *Server {
 	}
 }
 
-// WithEfs sets the embedded file system.
-func (server *Server) WithEfs(dist embed.FS) *Server {
-	server.dist = dist
-	return server
-}
-
 // WithWsMaxRedMemory sets the maximum buffer size for each incoming web socket message.
 // This will not limit the size of said messages.
 func (server *Server) WithWsMaxRedMemory(size int) *Server {
@@ -209,7 +203,8 @@ func (server *Server) WithNotifier(notifier *Notifier) *Server {
 // Start starts the server.
 //
 // If the server fails to start, ServerStart crashes the program.
-func (server *Server) Start() {
+func (server *Server) Start(dist embed.FS) {
+	server.dist = dist
 	logger := log.New(server.notifier.errorFile, "<error>", log.Ltime|log.Llongfile)
 
 	server.server = &http.Server{
@@ -373,9 +368,9 @@ func (server *Server) LoadController(configure func(*Controller)) *Server {
 	}
 
 	ids[id] = controllerPath
-	tryFilesFirst := controller.giveWay || isRoot
+	giveWay := controller.giveWay || isRoot
 	server.OnRequest("GET "+controllerPath, []Guard{}, func(request *Request, response *Response) {
-		if tryFilesFirst {
+		if giveWay {
 			response.SendFileOrElse(func() {
 				response.id = id
 				for _, guard := range controller.base.guards {

@@ -15,7 +15,6 @@ func TestRenderServer(test *testing.T) {
 	port := NextNumber(8080)
 	notifier := NewNotifier()
 	server := NewServer()
-	server.WithEfs(efs)
 	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.WithNotifier(notifier)
 	server.OnRequest("GET /welcome", []Guard{}, func(req *Request, res *Response) {
@@ -23,7 +22,7 @@ func TestRenderServer(test *testing.T) {
 		res.SendView(NewViewWithData(RenderModeServer, Data{Name: "world"}))
 	})
 
-	go server.Start()
+	go server.Start(efs)
 	defer server.Stop()
 	time.Sleep(1 * time.Second)
 
@@ -44,7 +43,6 @@ func TestRenderClient(test *testing.T) {
 	port := NextNumber(8080)
 	notifier := NewNotifier()
 	server := NewServer()
-	server.WithEfs(efs)
 	server.WithNotifier(notifier)
 	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.OnRequest("GET /welcome", []Guard{}, func(req *Request, res *Response) {
@@ -52,7 +50,7 @@ func TestRenderClient(test *testing.T) {
 		res.SendView(NewViewWithData(RenderModeClient, Data{Name: "world"}))
 	})
 
-	go server.Start()
+	go server.Start(efs)
 	defer server.Stop()
 	time.Sleep(1 * time.Second)
 

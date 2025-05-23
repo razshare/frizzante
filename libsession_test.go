@@ -56,7 +56,7 @@ func TestSessionStart(test *testing.T) {
 		response.SendMessage("")
 	})
 
-	go server.Start()
+	go server.Start(efs)
 	defer server.Stop()
 
 	time.Sleep(1 * time.Second)

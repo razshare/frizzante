@@ -306,7 +306,7 @@ func (response *Response) SendJson(payload any) *Response {
 // or the closest index.html embedded file, or else falls back.
 func (response *Response) SendEmbeddedFileOrElse(orElse func()) *Response {
 	request := response.request
-	fileName := filepath.Join(".dist", "client", request.httpRequest.RequestURI)
+	fileName := ".dist/client" + request.httpRequest.RequestURI
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 

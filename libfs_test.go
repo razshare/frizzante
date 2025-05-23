@@ -7,7 +7,7 @@ import (
 
 //go:embed libfs.go
 //go:embed .github
-//go:embed lib/config/.dist/*/**
+//go:embed .dist/*/**
 var efs embed.FS
 
 func TestEmbeddedExists(test *testing.T) {
