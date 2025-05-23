@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-type SessionBuilder[T any] = func(session *Session[T])
+type SessionAdapter[T any] = func(session *Session[T])
 type Session[T any] struct {
 	request   *Request
 	response  *Response
@@ -20,7 +20,7 @@ type Session[T any] struct {
 
 var sessions = map[string]any{}
 
-func newSessionInitializedAndBuilt[T any](request *Request, response *Response, builder SessionBuilder[T]) *Session[T] {
+func newSessionInitializedAndBuilt[T any](request *Request, response *Response, adapter SessionAdapter[T]) *Session[T] {
 	uuidV4, sessionIdError := uuid.NewV4()
 
 	if sessionIdError != nil {
@@ -34,7 +34,7 @@ func newSessionInitializedAndBuilt[T any](request *Request, response *Response, 
 		Id:       uuidV4.String(),
 	}
 
-	builder(session)
+	adapter(session)
 
 	session.onDestroy = func() {
 		delete(sessions, session.Id)
@@ -60,7 +60,7 @@ func newSessionInitializedAndBuilt[T any](request *Request, response *Response, 
 // This means there can be cases where a client sends a "session-id" cookie of value "AAA"
 // but the server responds with a cookie "session-id" of value "BBB", meaning the client's
 // "AAA" session doesn't exist, thus the client should use session "BBB" instead.
-func SessionStart[T any](request *Request, response *Response, builder SessionBuilder[T]) *Session[T] {
+func SessionStart[T any](request *Request, response *Response, adapter SessionAdapter[T]) *Session[T] {
 	var sessionIdCookie *http.Cookie
 	sessionIdCookies := request.httpRequest.CookiesNamed("session-id")
 	sessionIdCookiesLen := 0
@@ -72,7 +72,7 @@ func SessionStart[T any](request *Request, response *Response, builder SessionBu
 
 	if 0 == sessionIdCookiesLen || nil == sessionIdCookie {
 		// Create new session.
-		return newSessionInitializedAndBuilt[T](request, response, builder)
+		return newSessionInitializedAndBuilt[T](request, response, adapter)
 	}
 
 	// Try to retrieve session.
@@ -88,7 +88,7 @@ func SessionStart[T any](request *Request, response *Response, builder SessionBu
 		Id:       sessionIdCookie.Value,
 	}
 
-	builder(session)
+	adapter(session)
 
 	session.onDestroy = func() {
 		delete(sessions, session.Id)

@@ -8,7 +8,7 @@ import (
 var Server *f.Server
 
 func init() {
-	Server.OnRequest("GET /path", func(req *f.Request, res *f.Response) {
+	Server.OnRequest("GET /path", []f.Guard{}, func(req *f.Request, res *f.Response) {
 		res.SendMessage("hello")
 	})
 }

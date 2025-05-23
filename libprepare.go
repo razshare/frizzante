@@ -80,10 +80,14 @@ func findViews() (map[string]string, error) {
 			}
 
 			fileNameRelative := strings.Trim(strings.TrimPrefix(fileName, libViews), sep)
-			id := strings.TrimSuffix(strings.TrimSuffix(strings.ReplaceAll(fileNameRelative, sep, "/"), "view.svelte"), "/")
+			id := strings.TrimSuffix(filepath.Dir(strings.ReplaceAll(fileNameRelative, sep, "/")), "/")
 			importFileName, err := filepath.Rel(".frizzante/vite-project", fileName)
 			if err != nil {
 				return err
+			}
+
+			if "" == id {
+				return fmt.Errorf("views cannot be located in `%s`, consider moving your views into sub-directories", PAGES_ROOT)
 			}
 
 			views[id] = fmt.Sprintf("./%s", importFileName)
@@ -106,7 +110,7 @@ func dumpSsr(views map[string]string) error {
 	}
 
 	for view, fileName := range views {
-		componentName := strings.ToUpper(strings.ReplaceAll(view, ".", "_"))
+		componentName := strings.ToUpper(strings.ReplaceAll(strings.ReplaceAll(view, "/", "__"), ".", "_"))
 		builder.WriteString(fmt.Sprintf("    import %s from './%s'\n", componentName, fileName))
 	}
 

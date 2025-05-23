@@ -8,7 +8,7 @@ import (
 var Server *f.Server
 
 func init() {
-	Server.LoadPageController(func(controller *f.PageController) {
+	Server.LoadController(func(controller *f.Controller) {
 		controller.WithBase(base).WithAction(action)
 	})
 }
