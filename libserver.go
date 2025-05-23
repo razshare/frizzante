@@ -25,12 +25,12 @@ type PageMetadata struct {
 }
 
 type Controller struct {
-	metadata     *PageMetadata
-	tryFileFirst bool
-	isRoot       bool
-	guards       []Guard
-	base         func(req *Request, res *Response)
-	action       func(req *Request, res *Response)
+	metadata *PageMetadata
+	giveWay  bool
+	isRoot   bool
+	guards   []Guard
+	base     func(req *Request, res *Response)
+	action   func(req *Request, res *Response)
 }
 
 func (page *Controller) findPath() string {
@@ -59,8 +59,8 @@ func (page *Controller) findId() string {
 	return id
 }
 
-func (page *Controller) TryFileFirst() *Controller {
-	page.tryFileFirst = true
+func (page *Controller) GiveWay() *Controller {
+	page.giveWay = true
 	return page
 }
 
@@ -362,7 +362,7 @@ func (server *Server) LoadController(configure func(*Controller)) *Server {
 	}
 
 	ids[id] = controllerPath
-	tryFilesFirst := controller.tryFileFirst || isRoot
+	tryFilesFirst := controller.giveWay || isRoot
 	server.OnRequest("GET "+controllerPath, []Guard{}, func(request *Request, response *Response) {
 		if tryFilesFirst {
 			response.SendFileOrElse(func() {
