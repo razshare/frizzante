@@ -64,7 +64,7 @@ func dumpLibrary(library map[string][]byte) error {
 }
 
 func findViews() (map[string]string, error) {
-	libViews := filepath.Join("lib", "controllers", "pages")
+	libViews := filepath.Join(PAGES_ROOT)
 	sep := string(filepath.Separator)
 	suffix := ".svelte"
 	views := map[string]string{}
@@ -79,8 +79,8 @@ func findViews() (map[string]string, error) {
 				return nil
 			}
 
-			fileNameBase := strings.Trim(strings.TrimPrefix(fileName, libViews), sep)
-			id := strings.TrimSuffix(strings.ReplaceAll(fileNameBase, sep, "/"), ".svelte")
+			fileNameRelative := strings.Trim(strings.TrimPrefix(fileName, libViews), sep)
+			id := strings.TrimSuffix(strings.TrimSuffix(strings.ReplaceAll(fileNameRelative, sep, "/"), "view.svelte"), "/")
 			importFileName, err := filepath.Rel(".frizzante/vite-project", fileName)
 			if err != nil {
 				return err

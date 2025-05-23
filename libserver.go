@@ -32,14 +32,7 @@ type PageController struct {
 	action       func(req *Request, res *Response)
 }
 
-func NewPageController() *PageController {
-	return &PageController{
-		viewRoot: PAGES_ROOT,
-		metadata: NewPageMetadata(),
-	}
-}
-
-func (page *PageController) FindPath() string {
+func (page *PageController) findPath() string {
 	parts := strings.SplitN(page.metadata.packageName, strings.Trim(page.viewRoot, "/"), 2)
 	name := strings.TrimSuffix(page.metadata.fileName, ".go")
 	if len(parts) < 2 {
@@ -54,9 +47,8 @@ func (page *PageController) FindPath() string {
 	return "/" + strings.Trim(parts[1]+"/"+name, "/")
 }
 
-func (page *PageController) FindId() string {
+func (page *PageController) findId() string {
 	parts := strings.SplitN(page.metadata.packageName, strings.Trim(page.viewRoot, "/"), 2)
-	name := strings.TrimSuffix(page.metadata.fileName, ".go")
 	if len(parts) < 2 {
 		log.Fatalf(
 			"controllers `%s` must be located under `%s`, but is located under `%s` instead",
@@ -66,39 +58,28 @@ func (page *PageController) FindId() string {
 		)
 	}
 
-	return strings.ReplaceAll(strings.Trim(parts[1]+"/"+name, "/"), "/", ".")
-}
+	fullId := strings.Trim(parts[1], "/")
 
-func (page *PageController) WithViewRoot(viewRoot string) *PageController {
-	page.viewRoot = viewRoot
-	return page
+	if !strings.HasSuffix(fullId, ".init") {
+		log.Fatalf("page `%s` must be created during package initialization, consider creating it inside the `init` function", fullId)
+	}
+
+	id := strings.TrimSuffix(fullId, ".init")
+
+	return id
 }
 
 func (page *PageController) TryFileFirst() *PageController {
-	if nil == page.metadata {
-		page.metadata = NewPageMetadata()
-	}
 	page.tryFileFirst = true
 	return page
 }
 
 func (page *PageController) WithGuard(guard func(req *Request, res *Response) bool) *PageController {
-	if nil == page.metadata {
-		page.metadata = NewPageMetadata()
-	}
 	page.guards = append(page.guards, guard)
 	return page
 }
 
-func (page *PageController) WithLocalMetadata() *PageController {
-	page.metadata = NewPageMetadata()
-	return page
-}
-
 func (page *PageController) WithGuards(guards []func(req *Request, res *Response) bool) *PageController {
-	if nil == page.metadata {
-		page.metadata = NewPageMetadata()
-	}
 	page.guards = guards
 	return page
 }
@@ -111,38 +92,6 @@ func (page *PageController) WithBase(handler func(req *Request, res *Response)) 
 func (page *PageController) WithAction(handler func(req *Request, res *Response)) *PageController {
 	page.action = handler
 	return page
-}
-
-type ApiController struct {
-	path     string
-	guards   []func(req *Request, res *Response) bool
-	handlers map[string]func(req *Request, res *Response)
-}
-
-func NewApiController() *ApiController {
-	return &ApiController{
-		handlers: map[string]func(req *Request, res *Response){},
-	}
-}
-
-func (api *ApiController) WithPath(path string) *ApiController {
-	api.path = path
-	return api
-}
-
-func (api *ApiController) WithGuards(guards []func(req *Request, res *Response) bool) *ApiController {
-	api.guards = guards
-	return api
-}
-
-func (api *ApiController) WithGuard(guard func(req *Request, res *Response) bool) *ApiController {
-	api.guards = append(api.guards, guard)
-	return api
-}
-
-func (api *ApiController) WithHandler(verb string, handler func(req *Request, res *Response)) *ApiController {
-	api.handlers[verb] = handler
-	return api
 }
 
 type ServerProperties struct {
@@ -170,7 +119,6 @@ type Server struct {
 	hasEntry        bool
 }
 
-// NewServer creates a server.
 func NewServer() *Server {
 	notifier := NewNotifier()
 	upgrader := &websocket.Upgrader{
@@ -352,7 +300,7 @@ func (server *Server) OnRequest(pattern string, handler func(req *Request, res *
 	return server
 }
 
-func NewPageMetadata() *PageMetadata {
+func newPageMetadata() *PageMetadata {
 	pc, file, _, _ := runtime.Caller(2)
 	_, fileName := path.Split(file)
 	descriptor := runtime.FuncForPC(pc)
@@ -377,30 +325,35 @@ func NewPageMetadata() *PageMetadata {
 
 var ids = map[string]string{}
 
-func (server *Server) WithPageController(controller *PageController) *Server {
-	if nil == controller {
-		log.Fatal("controller cannot be nil")
+func (server *Server) LoadPageController(loader func(*PageController)) *Server {
+	page := &PageController{
+		viewRoot: PAGES_ROOT,
+		metadata: newPageMetadata(),
 	}
 
-	if nil == controller.base {
-		controller.base = func(req *Request, res *Response) {
+	if nil != loader {
+		loader(page)
+	}
+
+	if nil == page.base {
+		page.base = func(req *Request, res *Response) {
 			res.SendView(NewView(RenderModeFull))
 		}
 	}
 
-	if nil == controller.action {
-		controller.action = func(req *Request, res *Response) {
+	if nil == page.action {
+		page.action = func(req *Request, res *Response) {
 			res.SendView(NewView(RenderModeFull))
 		}
 	}
 
 	var isRoot bool
 	var controllerPath string
-	id := controller.FindId()
+	id := page.findId()
 	if "" == id {
 		log.Fatalf(
-			"controller `%s/%s` resolved into a blank id, which is not allowed",
-			controller.metadata.packageName, controller.metadata.fileName,
+			"page controller `%s/%s` resolved into a blank id, which is not allowed",
+			page.metadata.packageName, page.metadata.fileName,
 		)
 	}
 
@@ -408,59 +361,41 @@ func (server *Server) WithPageController(controller *PageController) *Server {
 		controllerPath = "/"
 		isRoot = true
 	} else {
-		controllerPath = controller.FindPath()
+		controllerPath = page.findPath()
 		isRoot = "/" == controllerPath
 	}
 
 	ids[id] = controllerPath
-	tryFilesFirst := controller.tryFileFirst || isRoot
+	tryFilesFirst := page.tryFileFirst || isRoot
 	server.OnRequest("GET "+controllerPath, func(request *Request, response *Response) {
 		if tryFilesFirst {
 			response.SendFileOrElse(func() {
 				response.id = id
-				for _, guard := range controller.guards {
+				for _, guard := range page.guards {
 					if !guard(request, response) {
 						return
 					}
 				}
-				controller.base(request, response)
+				page.base(request, response)
 			})
 		} else {
 			response.id = id
-			for _, guard := range controller.guards {
+			for _, guard := range page.guards {
 				if !guard(request, response) {
 					return
 				}
 			}
-			controller.base(request, response)
+			page.base(request, response)
 		}
 	})
 	server.OnRequest("POST "+controllerPath, func(request *Request, response *Response) {
 		response.id = id
-		for _, guard := range controller.guards {
+		for _, guard := range page.guards {
 			if !guard(request, response) {
 				return
 			}
 		}
-		controller.action(request, response)
+		page.action(request, response)
 	})
-	return server
-}
-
-func (server *Server) WithApiController(controller *ApiController) *Server {
-	if nil == controller {
-		log.Fatal("controller cannot be nil")
-	}
-
-	for verb, handler := range controller.handlers {
-		server.OnRequest(verb+" "+controller.path, func(request *Request, response *Response) {
-			for _, guard := range controller.guards {
-				if !guard(request, response) {
-					return
-				}
-			}
-			handler(request, response)
-		})
-	}
 	return server
 }

@@ -1,12 +1,14 @@
 package api
 
-import f "github.com/razshare/frizzante"
+import (
+	f "github.com/razshare/frizzante"
+	//config.Server
+)
 
-var apiName = f.
-	NewApiController().
-	WithPath("/path").
-	WithHandler("GET", apiGet)
+var Server *f.Server
 
-func apiGet(req *f.Request, res *f.Response) {
-	res.SendMessage("hello")
+func init() {
+	Server.OnRequest("GET /path", func(req *f.Request, res *f.Response) {
+		res.SendMessage("hello")
+	})
 }

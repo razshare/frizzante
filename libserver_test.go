@@ -54,8 +54,8 @@ func TestServerWithMaxHeaderBytes(test *testing.T) {
 
 func TestServerWithCertificateAndKey(test *testing.T) {
 	server := NewServer()
-	expectedCertificate := "certificate.crt"
-	expectedCertificateKey := "certificate.key"
+	expectedCertificate := "cert.pem"
+	expectedCertificateKey := "key.pem"
 	server.WithCertificate(expectedCertificate, expectedCertificateKey)
 	actualCertificate := server.certificate
 	if actualCertificate != expectedCertificate {

@@ -1,16 +1,22 @@
 package pages
 
-import f "github.com/razshare/frizzante"
+import (
+	f "github.com/razshare/frizzante"
+	//config.Server
+)
 
-var pageName = f.
-	NewPageController().
-	WithBase(pageBase).
-	WithAction(pageAction)
+var Server *f.Server
 
-func pageBase(_ *f.Request, res *f.Response) {
+func init() {
+	Server.LoadPageController(func(controller *f.PageController) {
+		controller.WithBase(base).WithAction(action)
+	})
+}
+
+func base(_ *f.Request, res *f.Response) {
 	res.SendView(f.NewView(f.RenderModeFull))
 }
 
-func pageAction(_ *f.Request, res *f.Response) {
+func action(_ *f.Request, res *f.Response) {
 	res.SendView(f.NewView(f.RenderModeFull))
 }
