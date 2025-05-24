@@ -1,15 +1,15 @@
 package api
 
-import (
-	f "github.com/razshare/frizzante"
-	//config.Server
-)
+import f "github.com/razshare/frizzante"
 
-var Server *f.Server
-var guards []f.Guard
+type Controller struct{}
 
-func init() {
-	Server.OnRequest("GET /path", guards, func(req *f.Request, res *f.Response) {
-		res.SendMessage("hello")
-	})
+func (_ Controller) Configure() f.ApiConfiguration {
+	return f.ApiConfiguration{
+		Pattern: "GET /path",
+	}
+}
+
+func (_ Controller) Handle(req *f.Request, res *f.Response) {
+	res.SendMessage("Hello.")
 }

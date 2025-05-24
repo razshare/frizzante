@@ -19,75 +19,93 @@ import (
 
 type Guard = func(req *Request, res *Response) bool
 
+type PageIdentifier struct {
+	value string
+}
+
+type PageConfiguration struct {
+	Metadata PageMetadata
+	GiveWay  bool
+	Guards   []Guard
+}
+
+type PageController interface {
+	Configure(meta func() PageMetadata) PageConfiguration
+	Base(req *Request, res *Response)
+	Action(req *Request, res *Response)
+}
+
+type ApiConfiguration struct {
+	Pattern string
+	GiveWay bool
+	Guards  []Guard
+}
+
+type ApiController interface {
+	Configure() ApiConfiguration
+	Handle(req *Request, res *Response)
+}
+
 type PageMetadata struct {
-	packageName  string
-	fileName     string
-	functionName string
+	PackageName  string
+	FileName     string
+	FunctionName string
 }
 
-type ControllerBase struct {
-	guards  []Guard
-	handler func(req *Request, res *Response)
+func newPageMetadata() PageMetadata {
+	pc, file, _, _ := runtime.Caller(1)
+	_, fileName := path.Split(file)
+	descriptor := runtime.FuncForPC(pc)
+	parts := strings.Split(descriptor.Name(), ".")
+	pl := len(parts)
+	packageName := ""
+	funcName := parts[pl-1]
+
+	if parts[pl-2][0] == '(' {
+		funcName = parts[pl-2] + "." + funcName
+		packageName = strings.Join(parts[0:pl-2], ".")
+	} else {
+		packageName = strings.Join(parts[0:pl-1], ".")
+	}
+
+	return PageMetadata{
+		PackageName:  packageName,
+		FileName:     fileName,
+		FunctionName: funcName,
+	}
 }
 
-type ControllerAction struct {
-	guards  []Guard
-	handler func(req *Request, res *Response)
+func (metadata *PageMetadata) FindPath() string {
+	return "/" + metadata.FindId()
 }
 
-type Controller struct {
-	metadata *PageMetadata
-	giveWay  bool
-	isRoot   bool
-	base     *ControllerBase
-	action   *ControllerAction
-}
-
-func (page *Controller) findPath() string {
-	return "/" + page.findId()
-}
-
-func (page *Controller) findId() string {
-	parts := strings.SplitN(page.metadata.packageName, strings.Trim(PAGES_ROOT, "/"), 2)
+func (metadata *PageMetadata) FindId() string {
+	parts := strings.SplitN(metadata.PackageName, strings.Trim(PAGES_ROOT, "/"), 2)
 	if len(parts) < 2 {
 		log.Fatalf(
 			"controllers `%s` must be located under `%s`, but is located under `%s` instead",
-			page.metadata.fileName,
+			metadata.FileName,
 			PAGES_ROOT,
-			page.metadata.packageName,
+			metadata.PackageName,
 		)
 	}
 
 	fullId := strings.Trim(parts[1], "/")
+	pageNameParts := strings.SplitN(fullId, ".", 2)
 
-	if !strings.HasSuffix(fullId, ".init") {
-		log.Fatalf("page `%s` must be created during package initialization, consider creating it inside the `init` function", fullId)
+	if len(pageNameParts) < 2 {
+		log.Fatalf("page controllers must always be named `Controller`, received empty string in `%s`", fullId)
 	}
 
-	id := strings.TrimSuffix(fullId, ".init")
+	pageName := pageNameParts[1]
+
+	if "Controller" != pageName && !strings.HasSuffix(pageName, ".Controller") {
+		log.Fatalf("page controllers must always be named `Controller`, found `%s` instead in `%s`", pageName, fullId)
+	}
+
+	id := strings.TrimSuffix(fullId, ".Controller")
 
 	return id
-}
-
-func (page *Controller) GiveWay() *Controller {
-	page.giveWay = true
-	return page
-}
-
-func (page *Controller) WithBase(guards []Guard, handler func(req *Request, res *Response)) *Controller {
-	page.base = &ControllerBase{
-		guards:  guards,
-		handler: handler,
-	}
-	return page
-}
-
-func (page *Controller) WithAction(guards []Guard, handler func(req *Request, res *Response)) *Controller {
-	page.action = &ControllerAction{
-		guards:  guards,
-		handler: handler,
-	}
-	return page
 }
 
 type ServerProperties struct {
@@ -260,7 +278,7 @@ func (server *Server) Stop() {
 }
 
 // OnRequest adds request handler.
-func (server *Server) OnRequest(pattern string, guards []Guard, handle func(req *Request, res *Response)) *Server {
+func (server *Server) OnRequest(pattern string, handle func(req *Request, res *Response)) *Server {
 	server.mux.HandleFunc(pattern, func(writer http.ResponseWriter, httpRequest *http.Request) {
 		request := &Request{
 			server:      server,
@@ -286,119 +304,91 @@ func (server *Server) OnRequest(pattern string, guards []Guard, handle func(req 
 			response.SendNotFound("")
 		}
 
-		for _, guard := range guards {
-			if !guard(request, response) {
-				return
-			}
-		}
-
 		handle(request, response)
 	})
 	return server
 }
 
-func newControllerMetadata() *PageMetadata {
-	pc, file, _, _ := runtime.Caller(2)
-	_, fileName := path.Split(file)
-	descriptor := runtime.FuncForPC(pc)
-	parts := strings.Split(descriptor.Name(), ".")
-	pl := len(parts)
-	packageName := ""
-	funcName := parts[pl-1]
-
-	if parts[pl-2][0] == '(' {
-		funcName = parts[pl-2] + "." + funcName
-		packageName = strings.Join(parts[0:pl-2], ".")
-	} else {
-		packageName = strings.Join(parts[0:pl-1], ".")
-	}
-
-	return &PageMetadata{
-		packageName:  packageName,
-		fileName:     fileName,
-		functionName: funcName,
-	}
-}
-
 var ids = map[string]string{}
 
-// LoadController loads the current package as a controller.
-func (server *Server) LoadController(configure func(*Controller)) *Server {
-	controller := &Controller{
-		metadata: newControllerMetadata(),
-	}
-
-	if nil != configure {
-		configure(controller)
-	}
-
-	if nil == controller.base {
-		controller.base = &ControllerBase{
-			guards: []Guard{},
-			handler: func(req *Request, res *Response) {
-				res.SendView(NewView(RenderModeFull))
-			},
-		}
-	}
-
-	if nil == controller.action {
-		controller.action = &ControllerAction{
-			guards: []Guard{},
-			handler: func(req *Request, res *Response) {
-				res.SendView(NewView(RenderModeFull))
-			},
-		}
-	}
-
+func (server *Server) WithPageController(controller PageController) *Server {
+	conf := controller.Configure(newPageMetadata)
 	var isRoot bool
 	var controllerPath string
-	id := controller.findId()
+	id := conf.Metadata.FindId()
 	if "" == id {
 		log.Fatalf(
-			"page controller `%s/%s` resolved into a blank id, which is not allowed",
-			controller.metadata.packageName, controller.metadata.fileName,
+			"page `%s/%s` resolved into a blank id, which is not allowed",
+			conf.Metadata.PackageName, conf.Metadata.FileName,
 		)
 	}
 
-	if strings.ToLower(DEFAULT_PAGE_ID) == strings.ToLower(id) {
+	if strings.ToLower("any") == strings.ToLower(id) {
 		controllerPath = "/"
 		isRoot = true
 	} else {
-		controllerPath = controller.findPath()
+		controllerPath = conf.Metadata.FindPath()
 		isRoot = "/" == controllerPath
 	}
 
 	ids[id] = controllerPath
-	giveWay := controller.giveWay || isRoot
-	server.OnRequest("GET "+controllerPath, []Guard{}, func(request *Request, response *Response) {
+	giveWay := conf.GiveWay || isRoot
+	server.OnRequest("GET "+controllerPath, func(request *Request, response *Response) {
 		if giveWay {
 			response.SendFileOrElse(func() {
 				response.id = id
-				for _, guard := range controller.base.guards {
+				for _, guard := range conf.Guards {
 					if !guard(request, response) {
 						return
 					}
 				}
-				controller.base.handler(request, response)
+				controller.Base(request, response)
 			})
 		} else {
 			response.id = id
-			for _, guard := range controller.base.guards {
+			for _, guard := range conf.Guards {
 				if !guard(request, response) {
 					return
 				}
 			}
-			controller.base.handler(request, response)
+			controller.Base(request, response)
 		}
 	})
-	server.OnRequest("POST "+controllerPath, []Guard{}, func(request *Request, response *Response) {
+	server.OnRequest("POST "+controllerPath, func(request *Request, response *Response) {
 		response.id = id
-		for _, guard := range controller.base.guards {
+		for _, guard := range conf.Guards {
 			if !guard(request, response) {
 				return
 			}
 		}
-		controller.action.handler(request, response)
+		controller.Action(request, response)
+	})
+	return server
+}
+
+func (server *Server) WithApiController(controller ApiController) *Server {
+	conf := controller.Configure()
+	parts := strings.SplitN(conf.Pattern, " ", 2)
+	isRoot := len(parts) > 1 && "/" == parts[1]
+	giveWay := conf.GiveWay || isRoot
+	server.OnRequest(conf.Pattern, func(request *Request, response *Response) {
+		if giveWay {
+			response.SendFileOrElse(func() {
+				for _, guard := range conf.Guards {
+					if !guard(request, response) {
+						return
+					}
+				}
+				controller.Handle(request, response)
+			})
+		} else {
+			for _, guard := range conf.Guards {
+				if !guard(request, response) {
+					return
+				}
+			}
+			controller.Handle(request, response)
+		}
 	})
 	return server
 }

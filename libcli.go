@@ -24,6 +24,11 @@ type CliMetadataPayload struct {
 }
 
 func template(from string, to string, replacements map[string]string) {
+	if fileExists(to) {
+		fmt.Printf("file `%s` already exists\n", to)
+		return
+	}
+
 	readBytes, readError := templates.ReadFile(from)
 	if nil != readError {
 		log.Fatal(readError)
@@ -41,7 +46,6 @@ func template(from string, to string, replacements map[string]string) {
 			log.Fatal(err)
 		}
 	}
-
 	err := os.WriteFile(to, readBytes, os.ModePerm)
 	if nil != err {
 		log.Fatal(err)
@@ -68,12 +72,10 @@ func Cli() {
 
 		template(
 			filepath.Join("templates", "api", "example.go"),
-			filepath.Join("lib", "api", *name+".go"),
+			filepath.Join("lib", "controllers", *name, "controller.go"),
 			map[string]string{
-				"var Server *f.Server\n": "",
-				"//config.Server":        "\"main/lib/config\"",
-				"Server.":                "config.Server.",
-				"/path":                  fmt.Sprintf("/api/%s", *name),
+				"package api": fmt.Sprintf("package %s", *name),
+				"/path":       fmt.Sprintf("/api/%s", *name),
 			},
 		)
 	}
@@ -89,21 +91,16 @@ func Cli() {
 
 		template(
 			filepath.Join("templates", "pages", "example.go"),
-			filepath.Join("lib", "controllers", *name, "page.go"),
+			filepath.Join("lib", "controllers", *name, "controller.go"),
 			map[string]string{
-				"package pages":          fmt.Sprintf("package %s", *name),
-				"var Server *f.Server\n": "",
-				"//config.Server":        "\"main/lib/config\"",
-				"Server.":                "config.Server.",
+				"package pages": fmt.Sprintf("package %s", *name),
 			},
 		)
 
 		template(
 			filepath.Join("templates", "views", "example.svelte"),
 			filepath.Join("lib", "controllers", *name, "view.svelte"),
-			map[string]string{
-				"this is view": fmt.Sprintf("this is %s", *name),
-			},
+			map[string]string{},
 		)
 	}
 }

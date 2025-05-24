@@ -7,5 +7,5 @@
 </script>
 
 <Router/>
-<span>Hello, this is view!</span>
+<span>Hello.</span>
 <!-- Content. -->

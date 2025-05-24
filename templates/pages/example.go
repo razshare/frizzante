@@ -1,25 +1,19 @@
 package pages
 
-import (
-	f "github.com/razshare/frizzante"
-	//config.Server
-)
+import f "github.com/razshare/frizzante"
 
-var Server *f.Server
-var guards []f.Guard
+type Controller struct{}
 
-func init() {
-	Server.LoadController(func(controller *f.Controller) {
-		controller.
-			WithBase(guards, base).
-			WithAction(guards, action)
-	})
+func (_ Controller) Configure(meta func() f.PageMetadata) f.PageConfiguration {
+	return f.PageConfiguration{
+		Metadata: meta(),
+	}
 }
 
-func base(_ *f.Request, res *f.Response) {
+func (_ Controller) Base(req *f.Request, res *f.Response) {
 	res.SendView(f.NewView(f.RenderModeFull))
 }
 
-func action(_ *f.Request, res *f.Response) {
+func (_ Controller) Action(req *f.Request, res *f.Response) {
 	res.SendView(f.NewView(f.RenderModeFull))
 }
