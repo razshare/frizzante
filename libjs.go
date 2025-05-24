@@ -21,8 +21,7 @@ func NewJavaScript(globals map[string]v8go.FunctionCallback) (*JavaScript, error
 	global := v8go.NewObjectTemplate(isolate)
 
 	for key, callback := range globals {
-		template := v8go.NewFunctionTemplate(isolate, callback)
-		setError := global.Set(key, template)
+		setError := global.Set(key, v8go.NewFunctionTemplate(isolate, callback))
 		if setError != nil {
 			return nil, setError
 		}
@@ -126,22 +125,17 @@ func JavaScriptBundle(rootDirectory string, format api.Format, source string) (b
 // local file system, otherwise RenderServerJs executes the file .dist/server/render.server.ts located within the
 // view's embedded file system.
 func JavaScriptRender(efs embed.FS, stringifiedProps string) (head string, body string, jsError error) {
-	var renderFileName string
-
-	if "1" == os.Getenv("DEV") {
-		renderFileName = filepath.Join(".dist", "server", "render.server.js")
-	} else {
-		renderFileName = ".dist/server/render.server.js"
-	}
-
 	var renderEsmBytes []byte
+
 	if "1" == os.Getenv("DEV") {
+		renderFileName := filepath.Join(".dist", "server", "render.server.js")
 		renderEsmBytesLocal, readError := os.ReadFile(renderFileName)
 		if readError != nil {
 			return "", "", readError
 		}
 		renderEsmBytes = renderEsmBytesLocal
 	} else {
+		renderFileName := ".dist/server/render.server.js"
 		renderEsmBytesLocal, readError := efs.ReadFile(renderFileName)
 		if readError != nil {
 			return "", "", readError
@@ -174,42 +168,39 @@ func JavaScriptRender(efs embed.FS, stringifiedProps string) (head string, body 
 		return "", "", bundleError
 	}
 
-	globals := map[string]v8go.FunctionCallback{}
-
-	globals["stringifiedProps"] = func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-		value, valueError := v8go.NewValue(info.Context().Isolate(), stringifiedProps)
-		if nil != valueError {
+	globals := map[string]v8go.FunctionCallback{
+		"stringifiedProps": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
+			value, valueError := v8go.NewValue(info.Context().Isolate(), stringifiedProps)
+			if nil != valueError {
+				return nil
+			}
+			return value
+		},
+		"inspect": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
+			args := info.Args()
+			if len(args) > 0 {
+				message := args[0].String()
+				println(message)
+			}
 			return nil
-		}
-		return value
+		},
+		"head": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
+			args := info.Args()
+			if len(args) > 0 {
+				head = args[0].String()
+			}
+			return nil
+		},
+		"body": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
+			args := info.Args()
+			if len(args) > 0 {
+				body = args[0].String()
+			}
+			return nil
+		},
 	}
 
-	globals["inspect"] = func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-		args := info.Args()
-		if len(args) > 0 {
-			message := args[0].String()
-			println(message)
-		}
-		return nil
-	}
-
-	globals["head"] = func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-		args := info.Args()
-		if len(args) > 0 {
-			head = args[0].String()
-		}
-		return nil
-	}
-
-	globals["body"] = func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-		args := info.Args()
-		if len(args) > 0 {
-			body = args[0].String()
-		}
-		return nil
-	}
-
-	_, destroy, javaScriptError := JavaScriptRun(renderFileName, doneCjs, globals)
+	_, destroy, javaScriptError := JavaScriptRun("render.server.js", doneCjs, globals)
 	defer destroy()
 	if javaScriptError != nil {
 		return head, body, javaScriptError

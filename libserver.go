@@ -213,5 +213,3 @@ func (server *Server) WithRequestHandler(pattern string, handle func(req *Reques
 	})
 	return server
 }
-
-var views = map[string]string{}

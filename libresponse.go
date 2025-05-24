@@ -85,25 +85,13 @@ func (response *Response) sendEventContent(content []byte) *Response {
 	return response
 }
 
-func (response *Response) SendNavigate(view string) *Response {
-	path, idExists := views[view]
-	if !idExists {
-		response.server.notifier.SendError(fmt.Errorf("id `%s` doesn't exist", view))
-		return response
-	}
-
+func (response *Response) SendNavigate(path string) *Response {
 	response.SendRedirect(path, 302)
 	response.SendMessage("")
 	return response
 }
 
-func (response *Response) SendNavigateWithQuery(view string, search string) *Response {
-	path, idExists := views[view]
-	if !idExists {
-		response.server.notifier.SendError(fmt.Errorf("view `%s` doesn't exist", view))
-		return response
-	}
-
+func (response *Response) SendNavigateWithQuery(path string, search string) *Response {
 	var query string
 
 	for _, value := range strings.Split(strings.Trim(search, "?&"), "&") {
@@ -462,6 +450,10 @@ func (response *Response) SendWsUpgrade() *Response {
 func (response *Response) SendView(view View) *Response {
 	if "" != response.header.Get("Location") {
 		return response
+	}
+
+	if nil == view.Data {
+		view.Data = map[string]string{}
 	}
 
 	if response.request.VerifyAccept("application/json") {

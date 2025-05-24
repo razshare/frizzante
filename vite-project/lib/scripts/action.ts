@@ -1,7 +1,7 @@
 import {getContext} from "svelte";
-import type {ServerContext} from "$frizzante/types.ts";
-import {route} from "$frizzante/scripts/route.ts";
-import {swap} from "./route.ts";
+import type {ServerContext} from "../types.ts";
+import {route} from "./route.ts";
+import {swaps} from "./swaps.ts";
 
 export function action(path: string): {
     method: "POST"
@@ -17,8 +17,13 @@ export function action(path: string): {
             e.preventDefault()
             const form = e.target
             const body = new FormData(form)
-            await swap(server,{modifier: "push", method: "GET", path })
-            await swap(server,{modifier: "push", method: "POST", path, body})
+
+            await swaps
+                .swap(server)
+                .withMethod("POST")
+                .withPath(path)
+                .withBody(body)
+                .play(true)
         }
     }
 }
