@@ -15,7 +15,6 @@ import (
 )
 
 type Response struct {
-	id         string
 	server     *Server
 	request    *Request
 	writer     *http.ResponseWriter
@@ -86,10 +85,10 @@ func (response *Response) sendEventContent(content []byte) *Response {
 	return response
 }
 
-func (response *Response) SendNavigate(id string) *Response {
-	path, idExists := ids[id]
+func (response *Response) SendNavigate(view string) *Response {
+	path, idExists := views[view]
 	if !idExists {
-		response.server.notifier.SendError(fmt.Errorf("id `%s` doesn't exist", id))
+		response.server.notifier.SendError(fmt.Errorf("id `%s` doesn't exist", view))
 		return response
 	}
 
@@ -98,10 +97,10 @@ func (response *Response) SendNavigate(id string) *Response {
 	return response
 }
 
-func (response *Response) SendNavigateWithQuery(id string, search string) *Response {
-	path, idExists := ids[id]
+func (response *Response) SendNavigateWithQuery(view string, search string) *Response {
+	path, idExists := views[view]
 	if !idExists {
-		response.server.notifier.SendError(fmt.Errorf("id `%s` doesn't exist", id))
+		response.server.notifier.SendError(fmt.Errorf("view `%s` doesn't exist", view))
 		return response
 	}
 
@@ -460,22 +459,21 @@ func (response *Response) SendWsUpgrade() *Response {
 }
 
 // SendView sends a view.
-func (response *Response) SendView(view *View) *Response {
+func (response *Response) SendView(view View) *Response {
 	if "" != response.header.Get("Location") {
 		return response
 	}
 
 	if response.request.VerifyAccept("application/json") {
 		response.SendJson(&ServerProperties{
-			Id:         response.id,
+			View:       view.Name,
 			RenderMode: view.RenderMode,
 			Data:       view.Data,
-			Ids:        ids,
 		})
 		return response
 	}
 
-	content, compileError := view.Render(response.server.dist, response.id)
+	content, compileError := view.Render(response.server.dist)
 	if nil != compileError {
 		response.server.notifier.SendError(compileError)
 		return response

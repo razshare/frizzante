@@ -1,17 +1,19 @@
 import {getContext} from "svelte";
-import {navigate} from "$frizzante/scripts/route.ts";
 import type {ServerContext} from "$frizzante/types.ts";
+import {route} from "$frizzante/scripts/route.ts";
+import {swap} from "./route.ts";
 
-export function href(to: string): {
+export function href(path: string): {
     href: string,
     onclick: (e: MouseEvent) => void
 } {
     const server = getContext("server") as ServerContext<any>
+    route(server)
     return {
-        href: server.ids[to],
+        href: path,
         async onclick(e: MouseEvent) {
             e.preventDefault()
-            await navigate(server, to)
+            await swap(server,{modifier: "push", method: "GET", path })
             return false
         }
     }

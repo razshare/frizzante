@@ -9,4 +9,4 @@ const TB = 1024 * GB
 const PB = 1024 * TB
 const EB = 1024 * PB
 
-var PAGES_ROOT = filepath.Join("lib", "controllers")
+var ViewsLocation = filepath.Join("lib", "components", "views")

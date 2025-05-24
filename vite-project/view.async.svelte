@@ -2,7 +2,7 @@
     let PreviousComponent = $state(false)
 </script>
 <script lang="ts">
-    let {from, server = $bindable()} = $props()
+    let {from} = $props()
     from.then((view:any) => {
         PreviousComponent = view
     })
@@ -10,8 +10,8 @@
 
 {#await from}
     {#if PreviousComponent}
-        <PreviousComponent.default bind:server/>
+        <PreviousComponent.default />
     {/if}
 {:then Component}
-    <Component.default bind:server/>
+    <Component.default />
 {/await}

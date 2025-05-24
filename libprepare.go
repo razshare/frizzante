@@ -64,10 +64,10 @@ func dumpLibrary(library map[string][]byte) error {
 }
 
 func findViews() (map[string]string, error) {
-	libViews := filepath.Join(PAGES_ROOT)
+	libViews := filepath.Join(ViewsLocation)
 	sep := string(filepath.Separator)
 	suffix := ".svelte"
-	views := map[string]string{}
+	viewsLocal := map[string]string{}
 	walkError := filepath.Walk(
 		libViews,
 		func(fileName string, info os.FileInfo, err error) error {
@@ -80,17 +80,13 @@ func findViews() (map[string]string, error) {
 			}
 
 			fileNameRelative := strings.Trim(strings.TrimPrefix(fileName, libViews), sep)
-			id := strings.TrimSuffix(filepath.Dir(strings.ReplaceAll(fileNameRelative, sep, "/")), "/")
+			id := strings.TrimSuffix(strings.ReplaceAll(fileNameRelative, sep, "/"), ".svelte")
 			importFileName, err := filepath.Rel(".frizzante/vite-project", fileName)
 			if err != nil {
 				return err
 			}
 
-			if "" == id {
-				return fmt.Errorf("views cannot be located in `%s`, consider moving your views into sub-directories", PAGES_ROOT)
-			}
-
-			views[id] = fmt.Sprintf("./%s", importFileName)
+			viewsLocal[id] = fmt.Sprintf("./%s", importFileName)
 			return nil
 		},
 	)
@@ -99,7 +95,7 @@ func findViews() (map[string]string, error) {
 		return nil, walkError
 	}
 
-	return views, nil
+	return viewsLocal, nil
 }
 
 func dumpSsr(views map[string]string) error {
@@ -121,9 +117,9 @@ func dumpSsr(views map[string]string) error {
 	for view := range views {
 		componentName := strings.ReplaceAll(view, ".", "_")
 		if counter == 0 {
-			builder.WriteString(fmt.Sprintf("{#if '%s' === server.id}\n", view))
+			builder.WriteString(fmt.Sprintf("{#if '%s' === server.view}\n", view))
 		} else {
-			builder.WriteString(fmt.Sprintf("{:else if '%s' === server.id}\n", view))
+			builder.WriteString(fmt.Sprintf("{:else if '%s' === server.view}\n", view))
 		}
 		builder.WriteString(fmt.Sprintf("    <%s />\n", strings.ToUpper(componentName)))
 		counter++
@@ -156,9 +152,9 @@ func dumpCsr(views map[string]string) error {
 	counter := 0
 	for view, fileName := range views {
 		if counter == 0 {
-			builder.WriteString(fmt.Sprintf("{#if '%s' === server.id}\n", view))
+			builder.WriteString(fmt.Sprintf("{#if '%s' === server.view}\n", view))
 		} else {
-			builder.WriteString(fmt.Sprintf("{:else if '%s' === server.id}\n", view))
+			builder.WriteString(fmt.Sprintf("{:else if '%s' === server.view}\n", view))
 		}
 		builder.WriteString(fmt.Sprintf("    <View from={import('./%s')} />\n", fileName))
 		counter++

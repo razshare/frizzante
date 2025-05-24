@@ -2,49 +2,38 @@ import type {ServerContext} from "$frizzante/types.ts";
 
 type Modifier = "push" | "back" | "forward"
 
-let counter = 0;
+type SwapPayload = {
+    modifier: Modifier
+    method: string
+    path: string
+    body?: any
+    counter?: number
+}
 
-async function swap(server: ServerContext<any>, id: string, modifier: Modifier, data: any = false): Promise<void> {
-    if (!server.ids[id]) {
-        return;
-    }
+let counter = 0
+let started = false
 
-    const path = server.ids[id];
-
-
-    if (false !== data) {
-        if ("push" === modifier) {
-            window.history.pushState({id, counter: ++counter}, "", path);
-        }
-        server.id = id;
-        return;
-    }
-
+export async function swap(server: ServerContext<any>, payload: SwapPayload): Promise<void> {
+    const {method, body, path, modifier} = payload
     const response = await fetch(path, {
+        method,
         headers: {Accept: "application/json"},
+        body
     });
     const json = await response.json();
     server.data = json.data
-    server.ids = json.ids
-    server.id = json.id;
+    server.view = json.view;
 
     const search = response.url.split('?', 2)[1] ?? ''
-
     if ("push" === modifier) {
+        counter++
         if ('' !== search) {
-            window.history.pushState({id, counter: ++counter}, "", `${path}?${search}`);
+            window.history.pushState({method, body, path, modifier, counter}, "", `${path}?${search}`);
             return
         }
-        window.history.pushState({id, counter: ++counter}, "", path);
+        window.history.pushState({method, body, path, modifier, counter}, "", path);
     }
 }
-
-
-export function navigate(server: ServerContext<any>, id: string, data: any = false): Promise<void> {
-    return swap(server, id, "push", data);
-}
-
-let started = false
 
 export function route(server: ServerContext<any>): void {
     if (started) {
@@ -53,26 +42,23 @@ export function route(server: ServerContext<any>): void {
 
     const listener = async function pop(e: PopStateEvent) {
         e.preventDefault();
-        let id = e.state?.id ?? "";
+        let {method, body, path, modifier, counter: counterLocal} = (e.state ?? {
+            method: "GET",
+            path: "/",
+            modifier: "push",
+            counter: 0
+        }) as SwapPayload
 
-        if ('' === id) {
-            for (const idLocal in server.ids) {
-                const path = server.ids[idLocal]
-                if ('/' === path || '' === path) {
-                    id = idLocal
-                    break
-                }
-            }
-        }
-        const counterLocal = e.state?.counter ?? 0;
-        if (counterLocal < counter) {
+        counterLocal = counterLocal ?? 0
+
+        if (counterLocal <= counter) {
             counter = counterLocal;
-            await swap(server, id, "back");
+            await swap(server,{modifier: "back", method, path, body})
         } else if (counterLocal > counter) {
             counter = counterLocal;
-            await swap(server, id, "forward");
+            await swap(server,{modifier: "forward", method, path, body})
         } else {
-            await swap(server, id, "push");
+            await swap(server,{modifier: "push", method, path, body})
         }
     }
     window.addEventListener("popstate", listener);

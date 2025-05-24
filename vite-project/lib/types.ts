@@ -1,5 +1,4 @@
 export type ServerContext<T> = {
-    id: string
-    ids: Record<string, string>
+    view: string
     data: T
 }

@@ -1,38 +1,24 @@
 import {getContext} from "svelte";
-import {navigate} from "$frizzante/scripts/route.ts";
 import type {ServerContext} from "$frizzante/types.ts";
+import {route} from "$frizzante/scripts/route.ts";
+import {swap} from "./route.ts";
 
-export function action(id: string): {
+export function action(path: string): {
     method: "POST"
     action: string
     onsubmit: (e: any) => Promise<void>
 } {
     const server = getContext("server") as ServerContext<any>
+    route(server)
     return {
         method: "POST",
-        action: server.ids[id],
+        action: path,
         async onsubmit(e: any) {
             e.preventDefault()
             const form = e.target
             const body = new FormData(form)
-            const method = form.method.toUpperCase()
-            const headers = {"Accept": "application/json"}
-            const response = await fetch(form.action, {method, headers, body})
-            if (response.status >= 300) {
-                return
-            }
-
-            const json = await response.json()
-
-            server.data = json.data
-            server.ids = json.ids
-
-            if (server.id !== json.id) {
-                navigate(server, json.id, server.data)
-                    .then(function done() {
-                        server.id = json.id
-                    })
-            }
+            await swap(server,{modifier: "push", method: "GET", path })
+            await swap(server,{modifier: "push", method: "POST", path, body})
         }
     }
 }

@@ -8,118 +8,16 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"path"
-	"runtime"
-	"strings"
 	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
 )
 
-type Identifier = func() Identity
-
-type Guard = func(req *Request, res *Response) bool
-
-type PageIdentifier struct {
-	value string
-}
-
-type PageConfiguration struct {
-	Id      Identity
-	GiveWay bool
-	Guards  []Guard
-}
-
-type PageController interface {
-	Configure(id Identifier) PageConfiguration
-	Base(req *Request, res *Response)
-	Action(req *Request, res *Response)
-}
-
-type ApiConfiguration struct {
-	Id      Identity
-	Pattern string
-	GiveWay bool
-	Guards  []Guard
-}
-
-type ApiController interface {
-	Configure(meta Identifier) ApiConfiguration
-	Handle(req *Request, res *Response)
-}
-
-type Identity struct {
-	PackageName  string
-	FileName     string
-	FunctionName string
-}
-
-func identify() Identity {
-	pc, file, _, _ := runtime.Caller(1)
-	_, fileName := path.Split(file)
-	descriptor := runtime.FuncForPC(pc)
-	parts := strings.Split(descriptor.Name(), ".")
-	pl := len(parts)
-	packageName := ""
-	funcName := parts[pl-1]
-
-	if parts[pl-2][0] == '(' {
-		funcName = parts[pl-2] + "." + funcName
-		packageName = strings.Join(parts[0:pl-2], ".")
-	} else {
-		packageName = strings.Join(parts[0:pl-1], ".")
-	}
-
-	return Identity{
-		PackageName:  packageName,
-		FileName:     fileName,
-		FunctionName: funcName,
-	}
-}
-
-func (id *Identity) FindPath() string {
-	return "/" + id.FindValue()
-}
-
-func (id *Identity) FindValue() string {
-	if "controller.go" != id.FileName {
-		log.Fatalf("controllers must be located inside a file named `controller.go`, received `%s` instead\n", id.FileName)
-	}
-
-	parts := strings.SplitN(id.PackageName, strings.Trim(PAGES_ROOT, "/"), 2)
-	if len(parts) < 2 {
-		log.Fatalf(
-			"controllers `%s` must be located under `%s`, but is located under `%s` instead\n",
-			id.FileName,
-			PAGES_ROOT,
-			id.PackageName,
-		)
-	}
-
-	fullId := strings.Trim(parts[1], "/")
-	pageNameParts := strings.SplitN(fullId, ".", 2)
-
-	if len(pageNameParts) < 2 {
-		log.Fatalf("page controllers must always be named `Controller`, received empty string in `%s`\n", fullId)
-	}
-
-	pageName := pageNameParts[1]
-
-	if "Controller" != pageName && !strings.HasSuffix(pageName, ".Controller") {
-		log.Fatalf("page controllers must always be named `Controller`, found `%s` instead in `%s`\n", pageName, fullId)
-	}
-
-	value := strings.TrimSuffix(fullId, ".Controller")
-
-	return value
-}
-
 type ServerProperties struct {
-	Id         string            `json:"id"`
-	RenderMode RenderMode        `json:"renderMode"`
-	Data       any               `json:"data"`
-	Ids        map[string]string `json:"ids"`
+	View       string     `json:"view"`
+	RenderMode RenderMode `json:"renderMode"`
+	Data       any        `json:"data"`
 }
 
 type Server struct {
@@ -284,8 +182,8 @@ func (server *Server) Stop() {
 	}
 }
 
-// OnRequest adds request handler.
-func (server *Server) OnRequest(pattern string, handle func(req *Request, res *Response)) *Server {
+// WithRequestHandler adds request handler.
+func (server *Server) WithRequestHandler(pattern string, handle func(req *Request, res *Response)) *Server {
 	server.mux.HandleFunc(pattern, func(writer http.ResponseWriter, httpRequest *http.Request) {
 		request := &Request{
 			server:      server,
@@ -316,87 +214,4 @@ func (server *Server) OnRequest(pattern string, handle func(req *Request, res *R
 	return server
 }
 
-var ids = map[string]string{}
-
-func (server *Server) WithPageController(controller PageController) *Server {
-	conf := controller.Configure(identify)
-	var isRoot bool
-	var controllerPath string
-	id := conf.Id.FindValue()
-	if "" == id {
-		log.Fatalf(
-			"page `%s/%s` resolved into a blank id, which is not allowed",
-			conf.Id.PackageName, conf.Id.FileName,
-		)
-	}
-
-	if strings.ToLower("any") == strings.ToLower(id) {
-		controllerPath = "/"
-		isRoot = true
-	} else {
-		controllerPath = conf.Id.FindPath()
-		isRoot = "/" == controllerPath
-	}
-
-	ids[id] = controllerPath
-	giveWay := conf.GiveWay || isRoot
-	server.OnRequest("GET "+controllerPath, func(request *Request, response *Response) {
-		if giveWay {
-			response.SendFileOrElse(func() {
-				response.id = id
-				for _, guard := range conf.Guards {
-					if !guard(request, response) {
-						return
-					}
-				}
-				controller.Base(request, response)
-			})
-		} else {
-			response.id = id
-			for _, guard := range conf.Guards {
-				if !guard(request, response) {
-					return
-				}
-			}
-			controller.Base(request, response)
-		}
-	})
-	server.OnRequest("POST "+controllerPath, func(request *Request, response *Response) {
-		response.id = id
-		for _, guard := range conf.Guards {
-			if !guard(request, response) {
-				return
-			}
-		}
-		controller.Action(request, response)
-	})
-	return server
-}
-
-func (server *Server) WithApiController(controller ApiController) *Server {
-	conf := controller.Configure(identify)
-	conf.Id.FindValue()
-	parts := strings.SplitN(conf.Pattern, " ", 2)
-	isRoot := len(parts) > 1 && "/" == parts[1]
-	giveWay := conf.GiveWay || isRoot
-	server.OnRequest(conf.Pattern, func(request *Request, response *Response) {
-		if giveWay {
-			response.SendFileOrElse(func() {
-				for _, guard := range conf.Guards {
-					if !guard(request, response) {
-						return
-					}
-				}
-				controller.Handle(request, response)
-			})
-		} else {
-			for _, guard := range conf.Guards {
-				if !guard(request, response) {
-					return
-				}
-			}
-			controller.Handle(request, response)
-		}
-	})
-	return server
-}
+var views = map[string]string{}

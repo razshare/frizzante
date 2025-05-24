@@ -14,21 +14,22 @@
     import type {Snippet} from "svelte";
     import {action} from "$frizzante/scripts/action.ts";
     import {uuid} from "../scripts/uuid.ts";
-    const id  = uuid()
+
+    const id = uuid()
     type Props = {
-        of: string
+        path: string
         using?: any
         children: Snippet
     }
 
     let {
-        of,
+        path,
         using,
         children,
     }: Props = $props()
 </script>
 
-<form {...action(of)}>
+<form {...action(path)}>
     {#each Object.keys(using ?? {}) as key}
         {@const value = using[key]}
         <input type="hidden" name="{key}" value="{value}">

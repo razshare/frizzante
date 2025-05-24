@@ -3,13 +3,12 @@
     import {setContext} from "svelte"
 
     type Props = {
-        id: string
+        view: string
         data: any
-        ids: Record<string, string>
     }
 
-    let {id: idInput, data: dataInput, ids: idsInput}: any = $props()
-    const server = $state({id: idInput, data: dataInput, ids: idsInput}) as Props
+    let {view: viewInput, data: dataInput}: any = $props()
+    const server = $state({view: viewInput, data: dataInput}) as Props
     setContext("server", server)
 </script>
 
