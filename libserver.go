@@ -17,6 +17,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+type Identifier = func() Identity
+
 type Guard = func(req *Request, res *Response) bool
 
 type PageIdentifier struct {
@@ -24,36 +26,36 @@ type PageIdentifier struct {
 }
 
 type PageConfiguration struct {
-	Metadata Metadata
-	GiveWay  bool
-	Guards   []Guard
+	Id      Identity
+	GiveWay bool
+	Guards  []Guard
 }
 
 type PageController interface {
-	Configure(meta func() Metadata) PageConfiguration
+	Configure(id Identifier) PageConfiguration
 	Base(req *Request, res *Response)
 	Action(req *Request, res *Response)
 }
 
 type ApiConfiguration struct {
-	Metadata Metadata
-	Pattern  string
-	GiveWay  bool
-	Guards   []Guard
+	Id      Identity
+	Pattern string
+	GiveWay bool
+	Guards  []Guard
 }
 
 type ApiController interface {
-	Configure(meta func() Metadata) ApiConfiguration
+	Configure(meta Identifier) ApiConfiguration
 	Handle(req *Request, res *Response)
 }
 
-type Metadata struct {
+type Identity struct {
 	PackageName  string
 	FileName     string
 	FunctionName string
 }
 
-func newControllerMetadata() Metadata {
+func identify() Identity {
 	pc, file, _, _ := runtime.Caller(1)
 	_, fileName := path.Split(file)
 	descriptor := runtime.FuncForPC(pc)
@@ -69,29 +71,29 @@ func newControllerMetadata() Metadata {
 		packageName = strings.Join(parts[0:pl-1], ".")
 	}
 
-	return Metadata{
+	return Identity{
 		PackageName:  packageName,
 		FileName:     fileName,
 		FunctionName: funcName,
 	}
 }
 
-func (metadata *Metadata) FindPath() string {
-	return "/" + metadata.FindId()
+func (id *Identity) FindPath() string {
+	return "/" + id.FindValue()
 }
 
-func (metadata *Metadata) FindId() string {
-	if "controller.go" != metadata.FileName {
-		log.Fatalf("controllers must be located inside a file named `controller.go`, received `%s` instead\n", metadata.FileName)
+func (id *Identity) FindValue() string {
+	if "controller.go" != id.FileName {
+		log.Fatalf("controllers must be located inside a file named `controller.go`, received `%s` instead\n", id.FileName)
 	}
 
-	parts := strings.SplitN(metadata.PackageName, strings.Trim(PAGES_ROOT, "/"), 2)
+	parts := strings.SplitN(id.PackageName, strings.Trim(PAGES_ROOT, "/"), 2)
 	if len(parts) < 2 {
 		log.Fatalf(
 			"controllers `%s` must be located under `%s`, but is located under `%s` instead\n",
-			metadata.FileName,
+			id.FileName,
 			PAGES_ROOT,
-			metadata.PackageName,
+			id.PackageName,
 		)
 	}
 
@@ -108,9 +110,9 @@ func (metadata *Metadata) FindId() string {
 		log.Fatalf("page controllers must always be named `Controller`, found `%s` instead in `%s`\n", pageName, fullId)
 	}
 
-	id := strings.TrimSuffix(fullId, ".Controller")
+	value := strings.TrimSuffix(fullId, ".Controller")
 
-	return id
+	return value
 }
 
 type ServerProperties struct {
@@ -317,14 +319,14 @@ func (server *Server) OnRequest(pattern string, handle func(req *Request, res *R
 var ids = map[string]string{}
 
 func (server *Server) WithPageController(controller PageController) *Server {
-	conf := controller.Configure(newControllerMetadata)
+	conf := controller.Configure(identify)
 	var isRoot bool
 	var controllerPath string
-	id := conf.Metadata.FindId()
+	id := conf.Id.FindValue()
 	if "" == id {
 		log.Fatalf(
 			"page `%s/%s` resolved into a blank id, which is not allowed",
-			conf.Metadata.PackageName, conf.Metadata.FileName,
+			conf.Id.PackageName, conf.Id.FileName,
 		)
 	}
 
@@ -332,7 +334,7 @@ func (server *Server) WithPageController(controller PageController) *Server {
 		controllerPath = "/"
 		isRoot = true
 	} else {
-		controllerPath = conf.Metadata.FindPath()
+		controllerPath = conf.Id.FindPath()
 		isRoot = "/" == controllerPath
 	}
 
@@ -372,8 +374,8 @@ func (server *Server) WithPageController(controller PageController) *Server {
 }
 
 func (server *Server) WithApiController(controller ApiController) *Server {
-	conf := controller.Configure(newControllerMetadata)
-	conf.Metadata.FindId()
+	conf := controller.Configure(identify)
+	conf.Id.FindValue()
 	parts := strings.SplitN(conf.Pattern, " ", 2)
 	isRoot := len(parts) > 1 && "/" == parts[1]
 	giveWay := conf.GiveWay || isRoot
