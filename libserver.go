@@ -283,7 +283,7 @@ func (server *Server) OnRequest(pattern string, guards []Guard, handle func(req 
 		response.request = request
 
 		if nil == handle {
-			response.SendNotFound()
+			response.SendNotFound("")
 		}
 
 		for _, guard := range guards {

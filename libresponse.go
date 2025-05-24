@@ -5,12 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gorilla/websocket"
 	"io"
 	"net/http"
 	"net/url"
 	"path/filepath"
 	"strings"
+
+	"github.com/gorilla/websocket"
 )
 
 type Response struct {
@@ -236,25 +237,28 @@ func (response *Response) SendMessage(message string) *Response {
 	return response
 }
 
-// SendNotFound sends an empty message with status 404 Not Found.
-func (response *Response) SendNotFound() *Response {
+// SendNotFound sends a message with status 404 Not Found.
+func (response *Response) SendNotFound(message string) *Response {
 	response.SendStatus(http.StatusNotFound)
+	response.SendMessage(message)
 	return response
 }
 
-// SendUnauthorized sends an empty message with status 401 Unauthorized.
-func (response *Response) SendUnauthorized() *Response {
+// SendUnauthorized sends a message with status 401 Unauthorized.
+func (response *Response) SendUnauthorized(message string) *Response {
 	response.SendStatus(http.StatusUnauthorized)
+	response.SendMessage(message)
 	return response
 }
 
-// SendBadRequest sends an empty message with status 400 Bad Request.
-func (response *Response) SendBadRequest() *Response {
+// SendBadRequest sends a message with status 400 Bad Request.
+func (response *Response) SendBadRequest(message string) *Response {
 	response.SendStatus(http.StatusBadRequest)
+	response.SendMessage(message)
 	return response
 }
 
-// SendInternalServerError sends an error message with status 500 Internal server Error
+// SendInternalServerError sends a message with status 500 Internal server Error
 // and also sends the error to the server notifier.
 func (response *Response) SendInternalServerError(err error) *Response {
 	response.server.notifier.SendError(err)
@@ -263,15 +267,17 @@ func (response *Response) SendInternalServerError(err error) *Response {
 	return response
 }
 
-// SendForbidden sends an empty message with status 403 Forbidden.
-func (response *Response) SendForbidden() *Response {
+// SendForbidden sends a message with status 403 Forbidden.
+func (response *Response) SendForbidden(message string) *Response {
 	response.SendStatus(http.StatusForbidden)
+	response.SendMessage(message)
 	return response
 }
 
-// SendTooManyRequests sends and empty message with status 403 Forbidden.
-func (response *Response) SendTooManyRequests() *Response {
+// SendTooManyRequests sends a message with status 403 Forbidden.
+func (response *Response) SendTooManyRequests(message string) *Response {
 	response.SendStatus(http.StatusTooManyRequests)
+	response.SendMessage(message)
 	return response
 }
 
