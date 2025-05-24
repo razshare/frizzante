@@ -4,7 +4,7 @@ import f "github.com/razshare/frizzante"
 
 type Controller struct{}
 
-func (_ Controller) Configure(meta func() f.PageMetadata) f.PageConfiguration {
+func (_ Controller) Configure(meta func() f.Metadata) f.PageConfiguration {
 	return f.PageConfiguration{
 		Metadata: meta(),
 	}

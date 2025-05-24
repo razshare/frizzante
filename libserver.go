@@ -24,35 +24,36 @@ type PageIdentifier struct {
 }
 
 type PageConfiguration struct {
-	Metadata PageMetadata
+	Metadata Metadata
 	GiveWay  bool
 	Guards   []Guard
 }
 
 type PageController interface {
-	Configure(meta func() PageMetadata) PageConfiguration
+	Configure(meta func() Metadata) PageConfiguration
 	Base(req *Request, res *Response)
 	Action(req *Request, res *Response)
 }
 
 type ApiConfiguration struct {
-	Pattern string
-	GiveWay bool
-	Guards  []Guard
+	Metadata Metadata
+	Pattern  string
+	GiveWay  bool
+	Guards   []Guard
 }
 
 type ApiController interface {
-	Configure() ApiConfiguration
+	Configure(meta func() Metadata) ApiConfiguration
 	Handle(req *Request, res *Response)
 }
 
-type PageMetadata struct {
+type Metadata struct {
 	PackageName  string
 	FileName     string
 	FunctionName string
 }
 
-func newPageMetadata() PageMetadata {
+func newControllerMetadata() Metadata {
 	pc, file, _, _ := runtime.Caller(1)
 	_, fileName := path.Split(file)
 	descriptor := runtime.FuncForPC(pc)
@@ -68,22 +69,26 @@ func newPageMetadata() PageMetadata {
 		packageName = strings.Join(parts[0:pl-1], ".")
 	}
 
-	return PageMetadata{
+	return Metadata{
 		PackageName:  packageName,
 		FileName:     fileName,
 		FunctionName: funcName,
 	}
 }
 
-func (metadata *PageMetadata) FindPath() string {
+func (metadata *Metadata) FindPath() string {
 	return "/" + metadata.FindId()
 }
 
-func (metadata *PageMetadata) FindId() string {
+func (metadata *Metadata) FindId() string {
+	if "controller.go" != metadata.FileName {
+		log.Fatalf("controllers must be located inside a file named `controller.go`, received `%s` instead\n", metadata.FileName)
+	}
+
 	parts := strings.SplitN(metadata.PackageName, strings.Trim(PAGES_ROOT, "/"), 2)
 	if len(parts) < 2 {
 		log.Fatalf(
-			"controllers `%s` must be located under `%s`, but is located under `%s` instead",
+			"controllers `%s` must be located under `%s`, but is located under `%s` instead\n",
 			metadata.FileName,
 			PAGES_ROOT,
 			metadata.PackageName,
@@ -94,13 +99,13 @@ func (metadata *PageMetadata) FindId() string {
 	pageNameParts := strings.SplitN(fullId, ".", 2)
 
 	if len(pageNameParts) < 2 {
-		log.Fatalf("page controllers must always be named `Controller`, received empty string in `%s`", fullId)
+		log.Fatalf("page controllers must always be named `Controller`, received empty string in `%s`\n", fullId)
 	}
 
 	pageName := pageNameParts[1]
 
 	if "Controller" != pageName && !strings.HasSuffix(pageName, ".Controller") {
-		log.Fatalf("page controllers must always be named `Controller`, found `%s` instead in `%s`", pageName, fullId)
+		log.Fatalf("page controllers must always be named `Controller`, found `%s` instead in `%s`\n", pageName, fullId)
 	}
 
 	id := strings.TrimSuffix(fullId, ".Controller")
@@ -312,7 +317,7 @@ func (server *Server) OnRequest(pattern string, handle func(req *Request, res *R
 var ids = map[string]string{}
 
 func (server *Server) WithPageController(controller PageController) *Server {
-	conf := controller.Configure(newPageMetadata)
+	conf := controller.Configure(newControllerMetadata)
 	var isRoot bool
 	var controllerPath string
 	id := conf.Metadata.FindId()
@@ -367,7 +372,8 @@ func (server *Server) WithPageController(controller PageController) *Server {
 }
 
 func (server *Server) WithApiController(controller ApiController) *Server {
-	conf := controller.Configure()
+	conf := controller.Configure(newControllerMetadata)
+	conf.Metadata.FindId()
 	parts := strings.SplitN(conf.Pattern, " ", 2)
 	isRoot := len(parts) > 1 && "/" == parts[1]
 	giveWay := conf.GiveWay || isRoot
