@@ -1,49 +1,52 @@
 # Get started
 
-Create a new project using the starter template.
+Frizzante is an opinionated web server framework that uses Svelte to render web pages.
 
-```bash
-git clone https://github.com/razshare/frizzante-starter && cd frizzante-starter && rm .git -fr
+
+### Prerequisites
+
+Make sure you have [Go](https://go.dev/doc/install),
+[build-essential](https://askubuntu.com/questions/398489/how-to-install-build-essential) and
+[Bun](https://bun.sh/) installed.
+
+:::note
+Frizzante is aimed mainly at linux distributions.
+:::
+
+### Create Project
+
+Create a new project by cloning the started template.
+
+```sh
+git clone https://github.com/razshare/frizzante-starter && \
+rm frizzante-starter/.git -fr
 ```
 
-> [!NOTE]
-> Make sure you have [Go](https://go.dev/doc/install) and [Bun](https://bun.sh) installed.\
-> If you'd rather use a different runtime than Bun to update your javascript dependencies, 
-> see [makefile](https://github.com/razshare/frizzante-starter/blob/main/makefile) and change all occurrences of 
-> `bun` and `bunx` with the equivalent of whatever runtime you'd like to use.
+### Configure Project
 
-Update dependencies
+Configure the project
 
-```bash
-make update
+```sh
+cd frizzante-starter && \
+make configure
 ```
 
-> [!NOTE]
-> Make sure you have `build-essential` installed
-> ```bash
-> sudo apt install build-essential
-> ```
+### Start Development Mode
 
-Then start the server
+Start the server in development mode with
 
-```bash
-make start
+```sh
+make dev
 ```
 
-or build it
+### Build Project
 
-```bash
+Build the project it into a standalone executable for production with
+
+```sh
 make build
 ```
 
-> [!NOTE]
-> The `.dist` directory is embedded, which makes the final executable completely portable.
-> 
-> That being said, you can still create a ".dist" directory near your executable.\
-> Whenever the server will try to access a file missing from the embedded file system, the server will fall 
-> back to the nearby ".dist" directory instead.
-
-> [!NOTE]
-> This project is aimed mainly at linux distributions.\
-> Feel free to contribute any fixes for other platforms.
-
+:::note
+The final output is a standalone executable.
+:::
