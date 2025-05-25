@@ -91,36 +91,6 @@ func (response *Response) SendNavigate(path string) *Response {
 	return response
 }
 
-func (response *Response) SendNavigateWithQuery(path string, search string) *Response {
-	var query string
-
-	for _, value := range strings.Split(strings.Trim(search, "?&"), "&") {
-		parts := strings.SplitN(value, "=", 2)
-		count := len(parts)
-		if 0 == count {
-			continue
-		}
-
-		if 1 == count {
-			query += "&" + url.QueryEscape(parts[0])
-			continue
-		}
-
-		query += "&" + url.QueryEscape(parts[0]) + "=" + url.QueryEscape(parts[1])
-	}
-
-	query = strings.TrimPrefix(query, "&")
-
-	if "" != query {
-		response.SendRedirect(path+"?"+query, 302)
-	} else {
-		response.SendRedirect(path, 302)
-	}
-
-	response.SendMessage("")
-	return response
-}
-
 // SendRedirect redirects the request.
 func (response *Response) SendRedirect(location string, statusCode int) *Response {
 	response.SendStatus(statusCode)
