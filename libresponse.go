@@ -85,8 +85,9 @@ func (response *Response) sendEventContent(content []byte) *Response {
 	return response
 }
 
-func (response *Response) SendNavigate(path string) *Response {
-	response.SendRedirect(path, 302)
+// SendNavigate redirects the request with status 302.
+func (response *Response) SendNavigate(location string) *Response {
+	response.SendRedirect(location, 302)
 	response.SendMessage("")
 	return response
 }
