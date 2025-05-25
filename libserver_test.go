@@ -74,7 +74,7 @@ func TestServerWithApi(test *testing.T) {
 	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.WithNotifier(notifier)
 	expected := "hello"
-	server.WithRequestHandler("GET /", func(request *Request, response *Response) {
+	server.WithRoute("GET /", func(request *Request, response *Response) {
 		response.SendMessage(expected)
 	})
 	go server.Start(efs)
@@ -99,7 +99,7 @@ func TestSendStatus(test *testing.T) {
 	server := NewServer()
 	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.WithNotifier(notifier)
-	server.WithRequestHandler("GET /", func(request *Request, response *Response) {
+	server.WithRoute("GET /", func(request *Request, response *Response) {
 		response.SendStatus(expected)
 		response.SendMessage("ok")
 	})
@@ -128,7 +128,7 @@ func TestSendHeader(test *testing.T) {
 	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.WithNotifier(notifier)
 	expected := "application/json"
-	server.WithRequestHandler("GET /", func(req *Request, res *Response) {
+	server.WithRoute("GET /", func(req *Request, res *Response) {
 		res.SendHeader("Content-Type", expected)
 		res.SendMessage("{}")
 	})

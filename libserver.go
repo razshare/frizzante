@@ -182,8 +182,8 @@ func (server *Server) Stop() {
 	}
 }
 
-// WithRequestHandler adds request handler.
-func (server *Server) WithRequestHandler(pattern string, handle func(req *Request, res *Response)) *Server {
+// WithRoute adds a route.
+func (server *Server) WithRoute(pattern string, handle func(req *Request, res *Response)) *Server {
 	server.mux.HandleFunc(pattern, func(writer http.ResponseWriter, httpRequest *http.Request) {
 		request := &Request{
 			server:      server,

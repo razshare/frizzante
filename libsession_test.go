@@ -45,12 +45,12 @@ func TestSessionStart(test *testing.T) {
 	server := NewServer()
 	port := NextNumber(8080)
 	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
-	server.WithRequestHandler("GET /", func(request *Request, response *Response) {
+	server.WithRoute("GET /", func(request *Request, response *Response) {
 		session := SessionStart(request, response, Memory)
 		response.SendMessage(fmt.Sprintf("hello %s", session.Data.Name))
 	})
 
-	server.WithRequestHandler("POST /", func(request *Request, response *Response) {
+	server.WithRoute("POST /", func(request *Request, response *Response) {
 		session := SessionStart(request, response, Memory)
 		session.Data.Name = request.ReceiveMessage()
 		response.SendMessage("")

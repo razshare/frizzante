@@ -17,7 +17,7 @@ func TestRenderServer(test *testing.T) {
 	server := NewServer()
 	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.WithNotifier(notifier)
-	server.WithRequestHandler("GET /welcome", func(req *Request, res *Response) {
+	server.WithRoute("GET /welcome", func(req *Request, res *Response) {
 		res.SendView(View{
 			Name:       "Welcome",
 			RenderMode: RenderModeServer,
@@ -48,7 +48,7 @@ func TestRenderClient(test *testing.T) {
 	server := NewServer()
 	server.WithNotifier(notifier)
 	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
-	server.WithRequestHandler("GET /welcome", func(req *Request, res *Response) {
+	server.WithRoute("GET /welcome", func(req *Request, res *Response) {
 		res.SendView(View{
 			Name:       "Welcome",
 			RenderMode: RenderModeClient,
