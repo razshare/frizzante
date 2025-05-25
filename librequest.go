@@ -78,24 +78,24 @@ func (request *Request) ReceiveMessage() string {
 // ReceiveJson returns true on success or false on failure.
 //
 // Compatible with web sockets.
-func (request *Request) ReceiveJson(self *Request, out any) bool {
-	if self.webSocket != nil {
-		jsonError := self.webSocket.ReadJSON(out)
+func (request *Request) ReceiveJson(out any) bool {
+	if request.webSocket != nil {
+		jsonError := request.webSocket.ReadJSON(out)
 		if nil != jsonError {
-			self.server.notifier.SendError(jsonError)
+			request.server.notifier.SendError(jsonError)
 			return false
 		}
 		return true
 	}
 
-	readBytes, readAllError := io.ReadAll(self.httpRequest.Body)
+	readBytes, readAllError := io.ReadAll(request.httpRequest.Body)
 	if nil != readAllError {
-		self.server.notifier.SendError(readAllError)
+		request.server.notifier.SendError(readAllError)
 		return false
 	}
 	unmarshalError := json.Unmarshal(readBytes, out)
 	if nil != unmarshalError {
-		self.server.notifier.SendError(unmarshalError)
+		request.server.notifier.SendError(unmarshalError)
 		return false
 	}
 	return true
