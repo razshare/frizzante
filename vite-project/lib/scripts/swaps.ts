@@ -60,6 +60,7 @@ function swap(server: ServerContext<any>): SwapAction {
             const json = await response.json();
             server.data = json.data
             server.view = json.view;
+            server.error = json.error;
 
             if (update) {
                 const id = uuid()
