@@ -6,9 +6,8 @@ Make sure you have [Go](https://go.dev/doc/install),
 [build-essential](https://askubuntu.com/questions/398489/how-to-install-build-essential) and
 [Bun](https://bun.sh/) installed.
 
-:::note
-Frizzante is aimed mainly at linux distributions.
-:::
+> [!NOTE]
+> Frizzante is aimed mainly at linux distributions.
 
 Create a new project by cloning the started template.
 
@@ -36,6 +35,5 @@ Build the project it into a standalone executable for production with
 make build
 ```
 
-:::note
-The final output is a standalone executable.
-:::
+> [!NOTE]
+> The final output is a standalone executable.
