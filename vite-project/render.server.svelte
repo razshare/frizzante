@@ -7,8 +7,8 @@
         data: any
     }
 
-    let {view: viewInput, data: dataInput}: any = $props()
-    const server = $state({view: viewInput, data: dataInput}) as Props
+    let {view: viewInput, data: dataInput, error: errorInput}: any = $props()
+    const server = $state({view: viewInput, data: dataInput, error: errorInput}) as Props
     setContext("server", server)
 </script>
 

@@ -427,10 +427,15 @@ func (response *Response) SendView(view View) *Response {
 	}
 
 	if response.request.VerifyAccept("application/json") {
+		err := ""
+		if nil != view.Error {
+			err = view.Error.Error()
+		}
 		response.SendJson(&ServerProperties{
 			View:       view.Name,
 			RenderMode: view.RenderMode,
 			Data:       view.Data,
+			Error:      err,
 		})
 		return response
 	}

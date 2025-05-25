@@ -23,6 +23,7 @@ const (
 type View struct {
 	Name       string
 	Data       any
+	Error      error
 	RenderMode RenderMode
 }
 
@@ -74,10 +75,16 @@ func (view *View) Render(efs embed.FS) (content string, compileError error) {
 		indexBytes = indexBytesLocal
 	}
 
+	err := ""
+	if nil != view.Error {
+		err = view.Error.Error()
+	}
+
 	routerPropsBytes, jsonError := json.Marshal(&ServerProperties{
 		View:       view.Name,
 		RenderMode: view.RenderMode,
 		Data:       view.Data,
+		Error:      err,
 	})
 
 	if jsonError != nil {

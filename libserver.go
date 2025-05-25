@@ -18,6 +18,7 @@ type ServerProperties struct {
 	View       string     `json:"view"`
 	RenderMode RenderMode `json:"renderMode"`
 	Data       any        `json:"data"`
+	Error      string     `json:"error"`
 }
 
 type Server struct {
