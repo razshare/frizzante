@@ -22,8 +22,8 @@ const (
 
 type View struct {
 	Name       string
-	RenderMode RenderMode
 	Data       any
+	RenderMode RenderMode
 }
 
 var noScript = regexp.MustCompile(`<script.*>.*</script>`)
