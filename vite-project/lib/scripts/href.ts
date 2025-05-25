@@ -3,7 +3,7 @@ import type {ServerContext} from "../types.ts";
 import {route} from "./route.ts";
 import {swaps} from "./swaps.ts";
 
-export function href(path: string): {
+export function href(path = ""): {
     href: string,
     onclick: (e: MouseEvent) => void
 } {

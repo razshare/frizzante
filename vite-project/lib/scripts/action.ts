@@ -3,7 +3,7 @@ import type {ServerContext} from "../types.ts";
 import {route} from "./route.ts";
 import {swaps} from "./swaps.ts";
 
-export function action(path: string): {
+export function action(path = ""): {
     method: "POST"
     action: string
     onsubmit: (e: any) => Promise<void>
