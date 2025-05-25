@@ -62,14 +62,9 @@ function swap(server: ServerContext<any>): SwapAction {
             server.view = json.view;
 
             if (update) {
-                const search = response.url.split('?', 2)[1] ?? ''
                 const id = uuid()
                 record[id] = this
-                if ('' !== search) {
-                    window.history.pushState(id, "", `${swapPath}?${search}`);
-                    return
-                }
-                window.history.pushState(id, "", swapPath);
+                window.history.pushState(id, "", response.url);
             }
         }
     }
