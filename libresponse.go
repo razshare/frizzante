@@ -24,7 +24,6 @@ type Response struct {
 	webSocket  *websocket.Conn
 	eventName  string
 	eventId    int64
-	context    map[string]any
 }
 
 type Navigate struct {
