@@ -123,7 +123,7 @@ func (response *Response) SendStatus(code int) *Response {
 // All errors are sent to the server notifier.
 func (response *Response) SendHeader(key string, value string) *Response {
 	if response.locked {
-		response.server.notifier.SendError(errors.New("headers locked"))
+		response.server.notifier.SendError(errors.New("header is locked"))
 		return response
 	}
 
