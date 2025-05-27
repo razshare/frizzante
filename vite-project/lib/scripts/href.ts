@@ -3,7 +3,7 @@ import type {ServerContext} from "../types.ts";
 import {route} from "./route.ts";
 import {swaps} from "./swaps.ts";
 
-export function href(path = ""): {
+export function href(path = "", options = {merge: false}): {
     href: string,
     onclick: (e: MouseEvent) => void
 } {
@@ -13,7 +13,11 @@ export function href(path = ""): {
         href: path,
         async onclick(e: MouseEvent) {
             e.preventDefault()
-            await swaps.swap(server).withPath(path).play(true)
+            await swaps
+                .swap(server)
+                .withMerge(options.merge)
+                .withPath(path)
+                .play(true)
             return false
         }
     }

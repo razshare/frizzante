@@ -9,6 +9,7 @@ type SwapAction = {
     withMethod: (method: "GET" | "POST") => SwapAction
     withPath: (path: string) => SwapAction
     withBody: (body: any) => SwapAction
+    withMerge: (merge: boolean) => SwapAction
     play: (update: boolean) => Promise<void>
 }
 
@@ -24,6 +25,7 @@ function swap(server: ServerContext<any>): SwapAction {
     let swapPath = location.pathname
     let swapBody: any
     let swapPosition = nextPosition++
+    let swapMerge = false
 
     return {
         method() {
@@ -50,6 +52,10 @@ function swap(server: ServerContext<any>): SwapAction {
             swapBody = body
             return this
         },
+        withMerge(merge: boolean) {
+            swapMerge = merge
+            return this
+        },
         async play(update: boolean) {
             const response = await fetch(swapPath, {
                 method: swapMethod,
@@ -58,7 +64,16 @@ function swap(server: ServerContext<any>): SwapAction {
             });
 
             const json = await response.json();
-            server.data = json.data
+
+            if (swapMerge) {
+                server.data = {
+                    ...server.data,
+                    ...json.data,
+                }
+            } else {
+                server.data = json.data
+            }
+
             server.view = json.view;
             server.error = json.error;
 

@@ -3,7 +3,7 @@ import type {ServerContext} from "../types.ts";
 import {route} from "./route.ts";
 import {swaps} from "./swaps.ts";
 
-export function action(path = ""): {
+export function action(path = "", options = {merge: false}): {
     method: "POST"
     action: string
     onsubmit: (e: any) => Promise<void>
@@ -20,6 +20,7 @@ export function action(path = ""): {
 
             await swaps
                 .swap(server)
+                .withMerge(options.merge)
                 .withMethod("POST")
                 .withPath(path)
                 .withBody(body)
