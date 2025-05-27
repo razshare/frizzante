@@ -1,6 +1,5 @@
 test: configure
-	CGO_ENABLED=1 go test && \
-	CGO_ENABLED=1 go test ./templates/pages
+	CGO_ENABLED=1 go test
 
 configure: clean update
 	go run lib/prepare/main.go

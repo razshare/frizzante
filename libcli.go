@@ -6,6 +6,8 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"log"
 	"os"
 	"path/filepath"
@@ -54,52 +56,40 @@ func template(from string, to string, replacements map[string]string) {
 
 // Cli makes things.
 func Cli() {
-	api := flag.Bool("api", false, "")
-	page := flag.Bool("page", false, "")
+	titleCase := cases.Title(language.English)
+	route := flag.Bool("route", false, "")
 	name := flag.String("name", "", "")
 	flag.Parse()
 
 	*name = strings.Trim(*name, "\r\n\t ")
 
-	if *api {
+	if *route {
 		for "" == *name {
 			reader := bufio.NewReader(os.Stdin)
-			fmt.Print("What's the name of this api? ")
+			fmt.Print("What's the name of the route? ")
 			*name, _ = reader.ReadString('\n')
 		}
 
-		*name = strings.Trim(*name, "\r\n\t ")
+		fixedName := strings.Trim(*name, "\r\n\t ")
+		packageName := fixedName
+		fileNameGo := fixedName + ".go"
+		fileNameSvelte := titleCase.String(fixedName) + ".svelte"
+		functionName := "Get" + titleCase.String(fixedName)
+		viewName := titleCase.String(fixedName)
 
 		template(
-			filepath.Join("templates", "api", "example.go"),
-			filepath.Join("lib", "controllers", *name, "controller.go"),
+			filepath.Join("templates", "routes", "example.go"),
+			filepath.Join("lib", "routes", fileNameGo),
 			map[string]string{
-				"package api": fmt.Sprintf("package %s", *name),
-				"/path":       fmt.Sprintf("/api/%s", *name),
-			},
-		)
-	}
-
-	if *page {
-		for "" == *name {
-			reader := bufio.NewReader(os.Stdin)
-			fmt.Print("What's the name of this page? ")
-			*name, _ = reader.ReadString('\n')
-		}
-
-		*name = strings.Trim(*name, "\r\n\t ")
-
-		template(
-			filepath.Join("templates", "pages", "example.go"),
-			filepath.Join("lib", "controllers", *name, "controller.go"),
-			map[string]string{
-				"package pages": fmt.Sprintf("package %s", *name),
+				"package pages": fmt.Sprintf("package %s", packageName),
+				"functionName":  functionName,
+				"viewName":      viewName,
 			},
 		)
 
 		template(
 			filepath.Join("templates", "views", "example.svelte"),
-			filepath.Join("lib", "controllers", *name, "view.svelte"),
+			filepath.Join("lib", "components", "views", fileNameSvelte),
 			map[string]string{},
 		)
 	}
