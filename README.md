@@ -1,6 +1,6 @@
 # Get started
 
-Frizzante is an opinionated web server framework that uses Svelte to render web pages.
+Frizzante is an opinionated web server framework written in Go that uses Svelte to render web pages.
 
 Make sure you have [Go](https://go.dev/doc/install),
 [build-essential](https://askubuntu.com/questions/398489/how-to-install-build-essential) and
@@ -13,13 +13,13 @@ Create a new project by cloning the started template.
 
 ```sh
 git clone https://github.com/razshare/frizzante-starter && \
-rm frizzante-starter/.git -fr
+rm frizzante-starter/.git -fr && \
+cd frizzante-starter
 ```
 
 Configure the project
 
 ```sh
-cd frizzante-starter && \
 make configure
 ```
 
