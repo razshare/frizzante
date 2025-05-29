@@ -10,7 +10,7 @@ import (
 var client http.Client
 
 // HttpGet sends an http request using the GET verb.
-func HttpGet(path string, header map[string]string) (string, error) {
+func HttpGet(path string, header map[string]string) (res string, err error) {
 	if nil == header {
 		header = map[string]string{}
 	}
@@ -28,7 +28,7 @@ func HttpGet(path string, header map[string]string) (string, error) {
 	if doError != nil {
 		return "", doError
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) { err = Body.Close() }(response.Body)
 
 	bodyBytes, readError := io.ReadAll(response.Body)
 	if readError != nil {
@@ -44,7 +44,7 @@ func HttpGet(path string, header map[string]string) (string, error) {
 }
 
 // HttpDelete sends an http request using the DELETE verb.
-func HttpDelete(path string, header map[string]string) error {
+func HttpDelete(path string, header map[string]string) (err error) {
 	if nil == header {
 		header = map[string]string{}
 	}
@@ -62,7 +62,7 @@ func HttpDelete(path string, header map[string]string) error {
 	if doError != nil {
 		return doError
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) { err = Body.Close() }(response.Body)
 
 	if 200 != response.StatusCode {
 		return fmt.Errorf("server responded with status code '%d'", response.StatusCode)
@@ -72,7 +72,7 @@ func HttpDelete(path string, header map[string]string) error {
 }
 
 // HttpPost sends an http request using the POST verb.
-func HttpPost(path string, contents string, header map[string]string) (string, error) {
+func HttpPost(path string, contents string, header map[string]string) (res string, err error) {
 	if nil == header {
 		header = map[string]string{}
 	}
@@ -90,7 +90,7 @@ func HttpPost(path string, contents string, header map[string]string) (string, e
 	if doError != nil {
 		return "", doError
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) { err = Body.Close() }(response.Body)
 
 	if 200 != response.StatusCode {
 		return "", fmt.Errorf("server responded with status code '%d'", response.StatusCode)
@@ -107,7 +107,7 @@ func HttpPost(path string, contents string, header map[string]string) (string, e
 }
 
 // HttpPut sends an http request using the PUT verb.
-func HttpPut(path string, header map[string]string, contents string) (string, error) {
+func HttpPut(path string, header map[string]string, contents string) (res string, err error) {
 	if nil == header {
 		header = map[string]string{}
 	}
@@ -125,7 +125,7 @@ func HttpPut(path string, header map[string]string, contents string) (string, er
 	if doError != nil {
 		return "", doError
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) { err = Body.Close() }(response.Body)
 
 	if 200 != response.StatusCode {
 		return "", fmt.Errorf("server responded with status code '%d'", response.StatusCode)
