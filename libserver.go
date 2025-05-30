@@ -183,8 +183,10 @@ func (server *Server) Stop() {
 	}
 }
 
-// WithRequestHandler adds a request handler.
-func (server *Server) WithRequestHandler(pattern string, handle func(req *Request, res *Response)) *Server {
+type Guard = func(req *Request, res *Response, pass func())
+
+// WithRoute adds a request handler.
+func (server *Server) WithRoute(pattern string, guards []Guard, handler func(req *Request, res *Response)) *Server {
 	server.mux.HandleFunc(pattern, func(writer http.ResponseWriter, httpRequest *http.Request) {
 		request := &Request{
 			server:      server,
@@ -206,11 +208,19 @@ func (server *Server) WithRequestHandler(pattern string, handle func(req *Reques
 		request.response = response
 		response.request = request
 
-		if nil == handle {
+		ok := false
+		for _, guard := range guards {
+			guard(request, response, func() { ok = true })
+			if !ok {
+				return
+			}
+		}
+
+		if nil == handler {
 			response.SendNotFound("")
 		}
 
-		handle(request, response)
+		handler(request, response)
 	})
 	return server
 }
