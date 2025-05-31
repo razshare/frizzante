@@ -33,6 +33,13 @@ func NewSession[T any](connection *Connection) *Session[T] {
 	}
 }
 
+// WithState sets the initial state.
+func (session *Session[T]) WithState(state T) *Session[T] {
+	session.state = state
+	return session
+}
+
+// WithArchive sets the archive.
 func (session *Session[T]) WithArchive(archive Archive) *Session[T] {
 	session.archive = archive
 	return session
