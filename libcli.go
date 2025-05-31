@@ -17,16 +17,8 @@ import (
 //go:embed templates/*/**
 var templates embed.FS
 
-type CliMetadataPayload struct {
-	Root     string
-	Template string
-	Name     string
-	Base     string
-	Message  string
-}
-
-func template(from string, to string, replacements map[string]string) {
-	if fileExists(to) {
+func Template(from string, to string, replacements map[string]string) {
+	if FileExists(to) {
 		fmt.Printf("file `%s` already exists\n", to)
 		return
 	}
@@ -42,7 +34,7 @@ func template(from string, to string, replacements map[string]string) {
 
 	directory := filepath.Dir(to)
 
-	if !fileExists(directory) {
+	if !FileExists(directory) {
 		err := os.MkdirAll(directory, os.ModePerm)
 		if nil != err {
 			log.Fatal(err)
@@ -77,7 +69,7 @@ func Cli() {
 		functionName := "Get" + titleCase.String(fixedName)
 		viewName := titleCase.String(fixedName)
 
-		template(
+		Template(
 			filepath.Join("templates", "routes", "example.go"),
 			filepath.Join("lib", "routes", fileNameGo),
 			map[string]string{
@@ -87,7 +79,7 @@ func Cli() {
 			},
 		)
 
-		template(
+		Template(
 			filepath.Join("templates", "views", "example.svelte"),
 			filepath.Join("lib", "components", "views", fileNameSvelte),
 			map[string]string{},

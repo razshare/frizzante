@@ -13,19 +13,18 @@ type Data struct {
 
 func TestRenderServer(test *testing.T) {
 	port := NextNumber(8080)
-	notifier := NewNotifier()
-	server := NewServer()
-	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
-	server.WithNotifier(notifier)
-	server.WithRequestHandler("GET /welcome", func(req *Request, res *Response) {
-		res.SendView(View{
-			Name:       "Welcome",
-			RenderMode: RenderModeServer,
-			Data:       Data{Name: "world"},
+	server := NewServer().
+		WithDist(efs).
+		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
+		WithRequestHandler("GET /welcome", func(c *Connection) {
+			c.SendView(View{
+				Name:       "Welcome",
+				RenderMode: RenderModeServer,
+				Data:       Data{Name: "world"},
+			})
 		})
-	})
 
-	go server.Start(efs)
+	go server.Start()
 	defer server.Stop()
 	time.Sleep(1 * time.Second)
 
@@ -44,19 +43,18 @@ func TestRenderServer(test *testing.T) {
 
 func TestRenderClient(test *testing.T) {
 	port := NextNumber(8080)
-	notifier := NewNotifier()
-	server := NewServer()
-	server.WithNotifier(notifier)
-	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
-	server.WithRequestHandler("GET /welcome", func(req *Request, res *Response) {
-		res.SendView(View{
-			Name:       "Welcome",
-			RenderMode: RenderModeClient,
-			Data:       Data{Name: "world"},
+	server := NewServer().
+		WithDist(efs).
+		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
+		WithRequestHandler("GET /welcome", func(c *Connection) {
+			c.SendView(View{
+				Name:       "Welcome",
+				RenderMode: RenderModeClient,
+				Data:       Data{Name: "world"},
+			})
 		})
-	})
 
-	go server.Start(efs)
+	go server.Start()
 	defer server.Stop()
 	time.Sleep(1 * time.Second)
 

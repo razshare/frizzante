@@ -7,13 +7,6 @@ import (
 	"testing"
 )
 
-func TestNewJavaScriptContext(test *testing.T) {
-	_, err := NewJavaScript(map[string]v8go.FunctionCallback{})
-	if err != nil {
-		test.Fatal(err)
-	}
-}
-
 func TestJavaScriptRun(test *testing.T) {
 	// Simple.
 	script := "1+1"

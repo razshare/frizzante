@@ -1,8 +1,6 @@
 package frizzante
 
-import (
-	"strings"
-)
+import "strings"
 
 type Road struct {
 	lanes map[string]chan int

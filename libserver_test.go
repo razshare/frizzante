@@ -68,16 +68,16 @@ func TestServerWithCertificateAndKey(test *testing.T) {
 }
 
 func TestServerWithApi(test *testing.T) {
-	server := NewServer()
-	notifier := NewNotifier()
-	port := NextNumber(8080)
-	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
-	server.WithNotifier(notifier)
 	expected := "hello"
-	server.WithRequestHandler("GET /", func(request *Request, response *Response) {
-		response.SendMessage(expected)
-	})
-	go server.Start(efs)
+	port := NextNumber(8080)
+	server := NewServer().
+		WithDist(efs).
+		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
+		WithRequestHandler("GET /", func(c *Connection) {
+			c.SendMessage(expected)
+		})
+
+	go server.Start()
 	defer server.Stop()
 
 	time.Sleep(1 * time.Second)
@@ -95,15 +95,15 @@ func TestServerWithApi(test *testing.T) {
 func TestSendStatus(test *testing.T) {
 	expected := 201
 	port := NextNumber(8080)
-	notifier := NewNotifier()
-	server := NewServer()
-	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
-	server.WithNotifier(notifier)
-	server.WithRequestHandler("GET /", func(request *Request, response *Response) {
-		response.SendStatus(expected)
-		response.SendMessage("ok")
-	})
-	go server.Start(efs)
+	server := NewServer().
+		WithDist(efs).
+		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
+		WithRequestHandler("GET /", func(c *Connection) {
+			c.SendStatus(expected)
+			c.SendMessage("ok")
+		})
+
+	go server.Start()
 	defer server.Stop()
 
 	time.Sleep(1 * time.Second)
@@ -122,17 +122,17 @@ func TestSendStatus(test *testing.T) {
 }
 
 func TestSendHeader(test *testing.T) {
-	server := NewServer()
-	port := NextNumber(8080)
-	notifier := NewNotifier()
-	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
-	server.WithNotifier(notifier)
 	expected := "application/json"
-	server.WithRequestHandler("GET /", func(req *Request, res *Response) {
-		res.SendHeader("Content-Type", expected)
-		res.SendMessage("{}")
-	})
-	go server.Start(efs)
+	port := NextNumber(8080)
+	server := NewServer().
+		WithDist(efs).
+		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
+		WithRequestHandler("GET /", func(c *Connection) {
+			c.SendHeader("Content-Type", expected)
+			c.SendMessage("{}")
+		})
+
+	go server.Start()
 	defer server.Stop()
 
 	time.Sleep(1 * time.Second)

@@ -1,26 +1,23 @@
 package frizzante
 
-import (
-	"time"
-)
+import "time"
 
-type CacheEntry[T any] struct {
+type CacheEntry struct {
 	duration  time.Duration
 	createdAt time.Time
-	value     T
+	value     any
 }
 
-type Cache[T any] struct {
-	entries map[string]*CacheEntry[T]
+type Cache struct {
+	entries map[string]*CacheEntry
 }
 
-// NewCache creates a cache.
-func NewCache[T any]() *Cache[T] {
-	return &Cache[T]{entries: map[string]*CacheEntry[T]{}}
+func NewCache() *Cache {
+	return &Cache{entries: map[string]*CacheEntry{}}
 }
 
 // IsNotExpired checks if a cache entry exists and is not expired.
-func (cache *Cache[T]) IsNotExpired(key string) bool {
+func (cache *Cache) IsNotExpired(key string) bool {
 	entry, entryExists := cache.entries[key]
 	if entryExists && time.Since(entry.createdAt) >= entry.duration {
 		delete(cache.entries, key)
@@ -31,13 +28,13 @@ func (cache *Cache[T]) IsNotExpired(key string) bool {
 }
 
 // Has checks if a cache entry exists.
-func (cache *Cache[T]) Has(key string) bool {
+func (cache *Cache) Has(key string) bool {
 	_, entryExists := cache.entries[key]
 	return entryExists
 }
 
 // Get gets an entry from the cache.
-func (cache *Cache[T]) Get(key string) T {
+func (cache *Cache) Get(key string) any {
 	entry, entryExists := cache.entries[key]
 	if entryExists && time.Since(entry.createdAt) >= entry.duration {
 		delete(cache.entries, key)
@@ -47,27 +44,24 @@ func (cache *Cache[T]) Get(key string) T {
 }
 
 // Set sets a cache entry.
-func (cache *Cache[T]) Set(duration time.Duration, key string, value T) *Cache[T] {
-	cache.entries[key] = &CacheEntry[T]{
+func (cache *Cache) Set(duration time.Duration, key string, value any) {
+	cache.entries[key] = &CacheEntry{
 		createdAt: time.Now(),
 		duration:  duration,
 		value:     value,
 	}
-	return cache
 }
 
 // Remove removes an entry from the cache.
-func (cache *Cache[T]) Remove(key string) *Cache[T] {
+func (cache *Cache) Remove(key string) {
 	delete(cache.entries, key)
-	return cache
 }
 
-// RemoveExpiredEntries removes all entries that have expired.
-func (cache *Cache[T]) RemoveExpiredEntries() *Cache[T] {
+// Evict removes all entries that have expired.
+func (cache *Cache) Evict() {
 	for key, entry := range cache.entries {
 		if time.Since(entry.createdAt) >= entry.duration {
 			delete(cache.entries, key)
 		}
 	}
-	return cache
 }

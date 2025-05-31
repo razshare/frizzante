@@ -1,314 +1,162 @@
 package frizzante
 
 import (
-	"fmt"
-	"log"
+	"errors"
 	"os"
 	"path/filepath"
 	"time"
 )
 
-type ArchiveBuilder = func(archive *Archive)
+type ArchiveBuilder = func(archive *ArchiveInterface)
 
-type Archive struct {
-	name string
-
-	get    func(domain string, key string) []byte
-	set    func(domain string, key string, value []byte)
-	has    func(domain string, key string) bool
-	remove func(domain string, key string)
-
-	domainExists func(domain string) bool
-	removeDomain func(domain string)
-
-	notifier *Notifier
+type ArchiveInterface interface {
+	Get(domain string, key string) []byte
+	Set(domain string, key string, value []byte)
+	Has(domain string, key string) bool
+	Remove(domain string, key string)
+	HasDomain(domain string) bool
+	RemoveDomain(domain string)
 }
 
-// Get reads the combination of domain and key from the archive.
-func (archive *Archive) Get(domain string, key string) []byte {
-	return archive.get(domain, key)
+type DiskArchive struct {
+	name     string
+	ttl      time.Duration
+	keys     *Cache
+	domains  *Cache
+	road     *Road
+	notifier Notifier
 }
 
-// Set writes to the combination of domain and key int the archive.
-func (archive *Archive) Set(domain string, key string, value []byte) *Archive {
-	archive.set(domain, key, value)
-	return archive
-}
-
-// Has checks if the combination of domain and key exists in the archive.
-func (archive *Archive) Has(domain string, key string) bool {
-	return archive.has(domain, key)
-}
-
-// Remove removes the combination of domain and key from the archive.
-func (archive *Archive) Remove(domain string, key string) *Archive {
-	archive.remove(domain, key)
-	return archive
-}
-
-// DomainExists checks if the archive has a domain.
-func (archive *Archive) DomainExists(domain string) bool {
-	return archive.domainExists(domain)
-}
-
-// RemoveDomain removes a domain from the archive.
-func (archive *Archive) RemoveDomain(domain string) *Archive {
-	archive.removeDomain(domain)
-	return archive
-}
-
-// WithName sets the name of the archive.
-func (archive *Archive) WithName(name string) *Archive {
-	archive.name = name
-	return archive
-}
-
-// WithKeyGetter sets the reader, which reads a value from the archive
-// given its domain and key.
-func (archive *Archive) WithKeyGetter(getter func(domain string, key string) []byte) *Archive {
-	archive.get = func(domain string, key string) []byte {
-		if !KeyIsSafe(domain) {
-			archive.notifier.SendError(
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
-			return nil
-		}
-
-		if !KeyIsSafe(key) {
-			archive.notifier.SendError(
-				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", archive.name, key))
-			return nil
-		}
-
-		return getter(domain, key)
+func NewDiskArchive(name string, ttl time.Duration, notifier Notifier) *DiskArchive {
+	return &DiskArchive{
+		name:     name,
+		ttl:      ttl,
+		notifier: notifier,
+		keys:     NewCache(),
+		domains:  NewCache(),
+		road:     NewRoad(),
 	}
-	return archive
 }
 
-// WithKeySetter sets the writer,
-// which writes a value into the archive at a combination of
-// domain and key.
-func (archive *Archive) WithKeySetter(setter func(domain string, key string, value []byte)) *Archive {
-	archive.set = func(domain string, key string, value []byte) {
-		if !KeyIsSafe(domain) {
-			archive.notifier.SendError(
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
-			return
-		}
-
-		if !KeyIsSafe(key) {
-			archive.notifier.SendError(
-				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", archive.name, key))
-			return
-		}
-
-		setter(domain, key, value)
+func (archive *DiskArchive) Get(domain string, key string) []byte {
+	if "" == archive.name {
+		archive.notifier.SendError(errors.New("disk archive name is blank"))
+		return make([]byte, 0)
 	}
-	return archive
-}
-
-// WithDomainRemover sets the remover,
-// which removes a domain from the archive.
-func (archive *Archive) WithDomainRemover(domainRemover func(domain string)) *Archive {
-	archive.removeDomain = func(domain string) {
-		if !KeyIsSafe(domain) {
-			archive.notifier.SendError(
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
-			return
-		}
-
-		domainRemover(domain)
+	lane := archive.road.WithLane(domain, key)
+	<-lane
+	fileName := filepath.Join(archive.name, domain, key)
+	if archive.keys.IsNotExpired(fileName) {
+		value := archive.keys.Get(fileName).([]byte)
+		lane <- 0
+		return value
 	}
-	return archive
-}
-
-// WithKeyRemover sets the remover,
-// which removes a combination of domain and key from the archive.
-func (archive *Archive) WithKeyRemover(remover func(domain string, key string)) *Archive {
-	archive.remove = func(domain string, key string) {
-		if !KeyIsSafe(domain) {
-			archive.notifier.SendError(
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
-			return
-		}
-
-		if !KeyIsSafe(key) {
-			archive.notifier.SendError(
-				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", archive.name, key))
-			return
-		}
-
-		remover(domain, key)
+	value, readError := os.ReadFile(fileName)
+	if nil != readError {
+		lane <- 0
+		archive.notifier.SendError(readError)
+		return make([]byte, 0)
 	}
-	return archive
+	archive.keys.Set(archive.ttl, fileName, value)
+	lane <- 0
+	return value
 }
 
-// WithDomainChecker sets the domain checker,
-// which checks if a domain exists in the archive.
-func (archive *Archive) WithDomainChecker(checker func(domain string) (exists bool)) *Archive {
-	archive.domainExists = func(domain string) (exists bool) {
-		if !KeyIsSafe(domain) {
-			archive.notifier.SendError(
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
-			return
-		}
-
-		return checker(domain)
+func (archive *DiskArchive) Set(domain string, key string, value []byte) {
+	if "" == archive.name {
+		archive.notifier.SendError(errors.New("disk archive name is blank"))
+		return
 	}
-	return archive
-}
-
-// WithKeyChecker sets the domain and key checker,
-// which checks if a combination of domain and key exists in the archive.
-func (archive *Archive) WithKeyChecker(checker func(domain string, key string) (exists bool)) *Archive {
-	archive.has = func(domain string, key string) (exists bool) {
-		if !KeyIsSafe(domain) {
-			archive.notifier.SendError(
-				fmt.Errorf("archive `%s` has rejected domain `%s` because it looks malicious", archive.name, domain))
-			return
-		}
-
-		if !KeyIsSafe(key) {
-			archive.notifier.SendError(
-				fmt.Errorf("archive `%s` has rejected key `%s` because it looks malicious", archive.name, key))
-			return
-		}
-
-		return checker(domain, key)
-	}
-	return archive
-}
-
-// WithNotifier sets the notifier.
-func (archive *Archive) WithNotifier(notifier *Notifier) *Archive {
-	archive.notifier = notifier
-	return archive
-}
-
-// NewArchive creates an archive.
-//
-// The alphabet of the archive is composed of the english alphabet (upper case letters and lowercase letters),
-// digits from 0 to 9, the "_" (underscore) character and the "-" (dash) character.
-//
-// Any domain or key received by the archive that is not in scope of the alphabet will be rejected automatically,
-// regardless of the custom implementations of the getter, setter, remover and checker functions.
-func NewArchive(builder ArchiveBuilder) *Archive {
-	archiveName, archiveNameError := filepath.Abs("archive")
-	if nil != archiveNameError {
-		log.Fatal(archiveNameError)
-	}
-	archive := &Archive{
-		name:     archiveName,
-		notifier: NewNotifier(),
-	}
-
-	builder(archive)
-
-	return archive
-}
-
-// NewArchiveOnDisk creates an archive that uses the local file system as a backend.
-func NewArchiveOnDisk(name string, cacheTtl time.Duration) *Archive {
-	keys := NewCache[[]byte]()
-	domains := NewCache[bool]()
-	road := NewRoad()
-
-	return NewArchive(func(a *Archive) {
-		a.WithName(name)
-		a.WithKeyGetter(func(domain string, key string) []byte {
-			lane := road.WithLane(domain, key)
-			<-lane
-			fileName := filepath.Join(a.name, domain, key)
-			if keys.IsNotExpired(fileName) {
-				value := keys.Get(fileName)
-				lane <- 0
-				return value
-			}
-			value, readError := os.ReadFile(fileName)
-			if nil != readError {
-				a.notifier.SendError(readError)
-				lane <- 0
-				return nil
-			}
-			keys.Set(cacheTtl, fileName, value)
+	lane := archive.road.WithLane(domain, key)
+	<-lane
+	directoryName := filepath.Join(archive.name, domain)
+	if !FileExists(directoryName) {
+		mkdirError := os.MkdirAll(directoryName, os.ModePerm)
+		if nil != mkdirError {
 			lane <- 0
-			return value
-		})
+			archive.notifier.SendError(mkdirError)
+			return
+		}
+	}
+	fileName := filepath.Join(directoryName, key)
+	writeError := os.WriteFile(fileName, value, os.ModePerm)
+	if nil != writeError {
+		lane <- 0
+		archive.notifier.SendError(writeError)
+		return
+	}
+	archive.keys.Set(archive.ttl, fileName, value)
+	lane <- 0
+}
 
-		a.WithKeySetter(func(domain string, key string, value []byte) {
-			lane := road.WithLane(domain, key)
-			<-lane
-			directoryName := filepath.Join(a.name, domain)
-			if !fileExists(directoryName) {
-				mkdirError := os.MkdirAll(directoryName, os.ModePerm)
-				if nil != mkdirError {
-					a.notifier.SendError(mkdirError)
-					lane <- 0
-					return
-				}
-			}
-			fileName := filepath.Join(directoryName, key)
-			writeError := os.WriteFile(fileName, value, os.ModePerm)
-			if nil != writeError {
-				a.notifier.SendError(writeError)
-			}
-			keys.Set(cacheTtl, fileName, value)
-			lane <- 0
-		})
+func (archive *DiskArchive) Has(domain string, key string) bool {
+	if "" == archive.name {
+		archive.notifier.SendError(errors.New("disk archive name is blank"))
+		return false
+	}
+	lane := archive.road.WithLane(domain, key)
+	<-lane
+	fileName := filepath.Join(archive.name, domain, key)
+	if archive.domains.IsNotExpired(fileName) {
+		value := archive.domains.Get(fileName).(bool)
+		lane <- 0
+		return value
+	}
+	ok := FileExists(fileName)
+	archive.domains.Set(archive.ttl, fileName, ok)
+	lane <- 0
+	return ok
+}
 
-		a.WithDomainChecker(func(domain string) bool {
-			lane := road.WithLane(domain)
-			<-lane
-			directoryName := filepath.Join(a.name, domain)
-			if domains.IsNotExpired(directoryName) {
-				value := domains.Get(directoryName)
-				lane <- 0
-				return value
-			}
-			ok := fileExists(directoryName)
-			domains.Set(cacheTtl, directoryName, ok)
-			lane <- 0
-			return ok
-		})
+func (archive *DiskArchive) Remove(domain string, key string) {
+	if "" == archive.name {
+		archive.notifier.SendError(errors.New("disk archive name is blank"))
+		return
+	}
+	lane := archive.road.WithLane(domain, key)
+	<-lane
+	fileName := filepath.Join(archive.name, domain, key)
+	removeError := os.Remove(fileName)
+	if nil != removeError {
+		lane <- 0
+		archive.notifier.SendError(removeError)
+		return
+	}
+	archive.keys.Remove(fileName)
+	lane <- 0
+}
 
-		a.WithKeyChecker(func(domain string, key string) bool {
-			lane := road.WithLane(domain, key)
-			<-lane
-			fileName := filepath.Join(a.name, domain, key)
-			if domains.IsNotExpired(fileName) {
-				value := domains.Get(fileName)
-				lane <- 0
-				return value
-			}
-			ok := fileExists(fileName)
-			domains.Set(cacheTtl, fileName, ok)
-			lane <- 0
-			return ok
-		})
+func (archive *DiskArchive) HasDomain(domain string) bool {
+	if "" == archive.name {
+		archive.notifier.SendError(errors.New("disk archive name is blank"))
+		return false
+	}
+	lane := archive.road.WithLane(domain)
+	<-lane
+	directoryName := filepath.Join(archive.name, domain)
+	if archive.domains.IsNotExpired(directoryName) {
+		value := archive.domains.Get(directoryName).(bool)
+		lane <- 0
+		return value
+	}
+	ok := FileExists(directoryName)
+	archive.domains.Set(archive.ttl, directoryName, ok)
+	lane <- 0
+	return ok
+}
 
-		a.WithDomainRemover(func(domain string) {
-			lane := road.WithLane(domain)
-			<-lane
-			directoryName := filepath.Join(a.name, domain)
-			removeError := os.RemoveAll(directoryName)
-			if nil != removeError {
-				a.notifier.SendError(removeError)
-			}
-			keys.Remove(directoryName)
-			lane <- 0
-		})
-
-		a.WithKeyRemover(func(domain string, key string) {
-			lane := road.WithLane(domain, key)
-			<-lane
-			fileName := filepath.Join(a.name, domain, key)
-			removeError := os.Remove(fileName)
-			if nil != removeError {
-				a.notifier.SendError(removeError)
-				lane <- 0
-				return
-			}
-			keys.Remove(fileName)
-			lane <- 0
-		})
-	})
+func (archive *DiskArchive) RemoveDomain(domain string) {
+	if "" == archive.name {
+		archive.notifier.SendError(errors.New("disk archive name is blank"))
+		return
+	}
+	lane := archive.road.WithLane(domain)
+	<-lane
+	directoryName := filepath.Join(archive.name, domain)
+	removeError := os.RemoveAll(directoryName)
+	if nil != removeError {
+		archive.notifier.SendError(removeError)
+	}
+	archive.keys.Remove(directoryName)
+	lane <- 0
 }

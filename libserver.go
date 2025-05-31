@@ -36,7 +36,6 @@ type Server struct {
 	notifier        *Notifier
 	dist            embed.FS
 	upgrader        *websocket.Upgrader
-	hasEntry        bool
 }
 
 func NewServer() *Server {
@@ -112,24 +111,29 @@ func (server *Server) WithHeaderMaxMemory(maxHeaderBytes int) *Server {
 	return server
 }
 
-// WithCertificate sets the certificate ands ts key.
+// WithCertificate sets certificate and key.
 func (server *Server) WithCertificate(certificate string, key string) *Server {
 	server.certificate = certificate
 	server.key = key
 	return server
 }
 
-// WithNotifier sets the server notifier.
+// WithNotifier sets the notifier.
 func (server *Server) WithNotifier(notifier *Notifier) *Server {
 	server.notifier = notifier
+	return server
+}
+
+// WithDist sets the dist directory.
+func (server *Server) WithDist(dist embed.FS) *Server {
+	server.dist = dist
 	return server
 }
 
 // Start starts the server.
 //
 // If the server fails to start, ServerStart crashes the program.
-func (server *Server) Start(dist embed.FS) {
-	server.dist = dist
+func (server *Server) Start() {
 	logger := log.New(server.notifier.errorFile, "<error>", log.Ltime|log.Llongfile)
 
 	server.server = &http.Server{
@@ -184,33 +188,19 @@ func (server *Server) Stop() {
 }
 
 // WithRequestHandler adds a request handler.
-func (server *Server) WithRequestHandler(pattern string, handle func(req *Request, res *Response)) *Server {
-	server.mux.HandleFunc(pattern, func(writer http.ResponseWriter, httpRequest *http.Request) {
-		request := &Request{
-			server:      server,
-			httpRequest: httpRequest,
+func (server *Server) WithRequestHandler(pattern string, handle func(connection *Connection)) *Server {
+	server.mux.HandleFunc(pattern, func(writer http.ResponseWriter, request *http.Request) {
+		connection := &Connection{
+			server:    server,
+			request:   request,
+			writer:    writer,
+			locked:    false,
+			status:    200,
+			header:    writer.Header(),
+			eventName: "",
+			eventId:   1,
 		}
-
-		httpHeader := writer.Header()
-
-		response := &Response{
-			server:     server,
-			writer:     &writer,
-			locked:     false,
-			statusCode: 200,
-			header:     &httpHeader,
-			eventName:  "",
-			eventId:    1,
-		}
-
-		request.response = response
-		response.request = request
-
-		if nil == handle {
-			response.SendNotFound("")
-		}
-
-		handle(request, response)
+		handle(connection)
 	})
 	return server
 }

@@ -12,7 +12,7 @@ import (
 //go:embed vite-project/*
 var viteProject embed.FS
 
-func findLibrary(directoryName string) (map[string][]byte, error) {
+func FindLibrary(directoryName string) (map[string][]byte, error) {
 	contents := map[string][]byte{}
 	entries, readDirError := viteProject.ReadDir(directoryName)
 	if readDirError != nil {
@@ -22,7 +22,7 @@ func findLibrary(directoryName string) (map[string][]byte, error) {
 	for _, entry := range entries {
 		fileName := filepath.Join(directoryName, entry.Name())
 		if entry.IsDir() {
-			innerContents, findError := findLibrary(fileName)
+			innerContents, findError := FindLibrary(fileName)
 			if nil != findError {
 				return nil, findError
 			}
@@ -42,12 +42,12 @@ func findLibrary(directoryName string) (map[string][]byte, error) {
 	return contents, nil
 }
 
-func dumpLibrary(library map[string][]byte) error {
+func DumpLibrary(library map[string][]byte) error {
 	for relativeFileName, content := range library {
 		fileName := filepath.Join(".frizzante", relativeFileName)
 		directoryName := filepath.Dir(fileName)
 
-		if !fileExists(directoryName) {
+		if !FileExists(directoryName) {
 			mkdirError := os.MkdirAll(directoryName, os.ModePerm)
 			if mkdirError != nil {
 				return mkdirError
@@ -63,7 +63,7 @@ func dumpLibrary(library map[string][]byte) error {
 	return nil
 }
 
-func findViews() (map[string]string, error) {
+func FindViews() (map[string]string, error) {
 	libViews := filepath.Join(ViewsLocation)
 	sep := string(filepath.Separator)
 	suffix := ".svelte"
@@ -98,7 +98,7 @@ func findViews() (map[string]string, error) {
 	return viewsLocal, nil
 }
 
-func dumpSsr(views map[string]string) error {
+func DumpSsr(views map[string]string) error {
 	var builder strings.Builder
 	renderServerSvelte, readError := viteProject.ReadFile("vite-project/render.server.svelte")
 	if readError != nil {
@@ -137,7 +137,7 @@ func dumpSsr(views map[string]string) error {
 	return nil
 }
 
-func dumpCsr(views map[string]string) error {
+func DumpCsr(views map[string]string) error {
 	// Build client loader.
 	renderClientSvelte, readError := viteProject.ReadFile("vite-project/render.client.svelte")
 	if readError != nil {
@@ -176,31 +176,31 @@ func dumpCsr(views map[string]string) error {
 // Prepare prepares the `.frizzante` directory.
 func Prepare() {
 	// Find library.
-	library, libraryError := findLibrary("vite-project")
+	library, libraryError := FindLibrary("vite-project")
 	if nil != libraryError {
 		log.Fatal(libraryError)
 	}
 
 	// Dump library.
-	err := dumpLibrary(library)
+	err := DumpLibrary(library)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Find views.
-	views, viewsError := findViews()
+	views, viewsError := FindViews()
 	if nil != viewsError {
 		log.Fatal(viewsError)
 	}
 
 	// Dump vite-project/render.server.svelte.
-	err = dumpSsr(views)
+	err = DumpSsr(views)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// Dump vite-project/render.client.svelte.
-	err = dumpCsr(views)
+	err = DumpCsr(views)
 	if err != nil {
 		log.Fatal(err)
 	}

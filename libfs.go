@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func createReaderFromEmbeddedFileName(efs embed.FS, fileName string) (*bytes.Reader, *os.FileInfo, error) {
+func ReaderFromEmbeddedFileName(efs embed.FS, fileName string) (*bytes.Reader, *os.FileInfo, error) {
 	file, openError := efs.Open(fileName)
 	if nil != openError {
 		return nil, nil, openError
@@ -33,7 +33,7 @@ func createReaderFromEmbeddedFileName(efs embed.FS, fileName string) (*bytes.Rea
 	return bytes.NewReader(buffer), &fileInfo, nil
 }
 
-func createReaderFromFileName(fileName string) (*bytes.Reader, *os.FileInfo, error) {
+func ReaderFromFileName(fileName string) (*bytes.Reader, *os.FileInfo, error) {
 	file, openError := os.Open(fileName)
 	if nil != openError {
 		return nil, nil, openError
@@ -58,9 +58,9 @@ func createReaderFromFileName(fileName string) (*bytes.Reader, *os.FileInfo, err
 	return bytes.NewReader(buffer), &fileInfo, nil
 }
 
-// existsInEmbeddedFileSystem checks if file exists.
-func existsInEmbeddedFileSystem(efs embed.FS, fileName string) bool {
-	return isEmbeddedFile(efs, fileName) || isEmbeddedDirectory(efs, fileName)
+// ExistsInEmbeddedFileSystem checks if file exists.
+func ExistsInEmbeddedFileSystem(efs embed.FS, fileName string) bool {
+	return isEmbeddedFile(efs, fileName) || IsEmbeddedDirectory(efs, fileName)
 }
 
 // isEmbeddedFile check if file exists and is a file.
@@ -72,8 +72,8 @@ func isEmbeddedFile(efs embed.FS, fileName string) bool {
 	return true
 }
 
-// isEmbeddedDirectory checks if file exists and is a directory.
-func isEmbeddedDirectory(efs embed.FS, fileName string) bool {
+// IsEmbeddedDirectory checks if file exists and is a directory.
+func IsEmbeddedDirectory(efs embed.FS, fileName string) bool {
 	_, err := efs.ReadDir(fileName)
 	if err != nil {
 		return false
@@ -81,20 +81,20 @@ func isEmbeddedDirectory(efs embed.FS, fileName string) bool {
 	return true
 }
 
-// fileExists checks if file exists.
-func fileExists(fileName string) bool {
+// FileExists checks if file exists.
+func FileExists(fileName string) bool {
 	_, statError := os.Stat(fileName)
 	return nil == statError || !errors.Is(statError, os.ErrNotExist)
 }
 
-// deleteFile deletes a file.
-func deleteFile(fileName string) bool {
+// DeleteFile deletes a file.
+func DeleteFile(fileName string) bool {
 	removeError := os.Remove(fileName)
 	return nil == removeError || !errors.Is(removeError, os.ErrNotExist)
 }
 
-// isFile check if file exists and is a file.
-func isFile(fileName string) bool {
+// IsFile check if file exists and is a file.
+func IsFile(fileName string) bool {
 	stat, statError := os.Stat(fileName)
 	if statError != nil {
 		return !errors.Is(statError, os.ErrNotExist)
@@ -102,8 +102,8 @@ func isFile(fileName string) bool {
 	return !stat.IsDir()
 }
 
-// isDirectory checks if file exists and is a directory.
-func isDirectory(fileName string) bool {
+// IsDirectory checks if file exists and is a directory.
+func IsDirectory(fileName string) bool {
 	stat, statError := os.Stat(fileName)
 	if statError != nil {
 		return !errors.Is(statError, os.ErrNotExist)
@@ -180,7 +180,7 @@ var mimes = map[string]string{
 	".ogx":   "application/ogg",
 }
 
-func mime(fileName string) string {
+func Mime(fileName string) string {
 	extensionName := filepath.Ext(fileName)
 	mimeName, ok := mimes[extensionName]
 
