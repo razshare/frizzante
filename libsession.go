@@ -140,39 +140,6 @@ func (session *Session[T]) Destroy() {
 	}
 }
 
-// Start checks if the session given by the user already exists in the archive.
-// If it does exist, it loads the state, otherwise it saves the state into the archive.
-//
-// Once a session is obtained, SessionStart checks for guards.
-// If they don't pass it skips the handler.
-//
-// Finally, if all guards pass, Start is invoked with the session state.
-func (session *Session[T]) Start(handler SessionHandler[T]) {
-	state := session.State()
-
-	for _, guard := range session.guards {
-		passed := false
-		guard(session.connection, state, func() { passed = true })
-		if !passed {
-			if nil == state {
-				session.Destroy()
-				return
-			}
-			session.Save()
-			return
-		}
-	}
-
-	handler(state)
-
-	if nil == state {
-		session.Destroy()
-		return
-	}
-
-	session.Save()
-}
-
 func (session *Session[T]) State() *T {
 	if !session.Exists() {
 		session.Save()
