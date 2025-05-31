@@ -547,16 +547,25 @@ func SendSseUpgrade(connection *Connection) func(eventName string) {
 	}
 }
 
-// SendWsUpgrade upgrades the http connection to web sockets.
-func (connection *Connection) SendWsUpgrade(upgrader websocket.Upgrader) (err error) {
+// SendWsUpgrade upgrades to web sockets.
+func (connection *Connection) SendWsUpgrade() {
+	connection.SendConfiguredWsUpgrade(websocket.Upgrader{
+		ReadBufferSize:  10 * KB,
+		WriteBufferSize: 10 * KB,
+	})
+}
+
+// SendConfiguredWsUpgrade upgrades to web sockets.
+func (connection *Connection) SendConfiguredWsUpgrade(upgrader websocket.Upgrader) {
 	conn, upgradeError := upgrader.Upgrade(connection.writer, connection.request, nil)
 	if nil != upgradeError {
-		return upgradeError
+		connection.server.notifier.SendError(upgradeError)
+		return
 	}
 	defer func(conn *websocket.Conn) {
 		closeError := conn.Close()
 		if nil != closeError {
-			err = closeError
+			connection.server.notifier.SendError(closeError)
 		}
 	}(conn)
 	connection.webSocket = conn
