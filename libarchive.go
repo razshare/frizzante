@@ -4,159 +4,119 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"time"
 )
 
-type ArchiveBuilder = func(archive *ArchiveInterface)
-
-type ArchiveInterface interface {
-	Get(domain string, key string) []byte
-	Set(domain string, key string, value []byte)
-	Has(domain string, key string) bool
-	Remove(domain string, key string)
-	HasDomain(domain string) bool
-	RemoveDomain(domain string)
+type Archive interface {
+	Get(domain string, key string) ([]byte, error)
+	Set(domain string, key string, value []byte) error
+	Has(domain string, key string) (bool, error)
+	Remove(domain string, key string) error
+	HasDomain(domain string) (bool, error)
+	RemoveDomain(domain string) error
 }
 
 type DiskArchive struct {
-	name     string
-	ttl      time.Duration
-	keys     *Cache
-	domains  *Cache
-	road     *Road
-	notifier Notifier
+	name string
+	road *Road
 }
 
-func NewDiskArchive(name string, ttl time.Duration, notifier Notifier) *DiskArchive {
+func NewDiskArchive() *DiskArchive {
 	return &DiskArchive{
-		name:     name,
-		ttl:      ttl,
-		notifier: notifier,
-		keys:     NewCache(),
-		domains:  NewCache(),
-		road:     NewRoad(),
+		name: ".archive",
+		road: NewRoad(),
 	}
 }
 
-func (archive *DiskArchive) Get(domain string, key string) []byte {
+// WithName sets the name of the archive and thus the directory.
+func (archive *DiskArchive) WithName(name string) *DiskArchive {
+	archive.name = name
+	return archive
+}
+
+func (archive *DiskArchive) Get(domain string, key string) ([]byte, error) {
 	if "" == archive.name {
-		archive.notifier.SendError(errors.New("disk archive name is blank"))
-		return make([]byte, 0)
+		return make([]byte, 0), errors.New("disk archive name is blank")
 	}
 	lane := archive.road.WithLane(domain, key)
-	<-lane
+	lane.Lock()
+	defer lane.Unlock()
 	fileName := filepath.Join(archive.name, domain, key)
-	if archive.keys.IsNotExpired(fileName) {
-		value := archive.keys.Get(fileName).([]byte)
-		lane <- 0
-		return value
-	}
 	value, readError := os.ReadFile(fileName)
 	if nil != readError {
-		lane <- 0
-		archive.notifier.SendError(readError)
-		return make([]byte, 0)
+		return make([]byte, 0), readError
 	}
-	archive.keys.Set(archive.ttl, fileName, value)
-	lane <- 0
-	return value
+	return value, nil
 }
 
-func (archive *DiskArchive) Set(domain string, key string, value []byte) {
+func (archive *DiskArchive) Set(domain string, key string, value []byte) error {
 	if "" == archive.name {
-		archive.notifier.SendError(errors.New("disk archive name is blank"))
-		return
+		return errors.New("disk archive name is blank")
 	}
 	lane := archive.road.WithLane(domain, key)
-	<-lane
+	lane.Lock()
+	defer lane.Unlock()
 	directoryName := filepath.Join(archive.name, domain)
 	if !FileExists(directoryName) {
 		mkdirError := os.MkdirAll(directoryName, os.ModePerm)
 		if nil != mkdirError {
-			lane <- 0
-			archive.notifier.SendError(mkdirError)
-			return
+			return mkdirError
 		}
 	}
 	fileName := filepath.Join(directoryName, key)
 	writeError := os.WriteFile(fileName, value, os.ModePerm)
 	if nil != writeError {
-		lane <- 0
-		archive.notifier.SendError(writeError)
-		return
+		return writeError
 	}
-	archive.keys.Set(archive.ttl, fileName, value)
-	lane <- 0
+	return nil
 }
 
-func (archive *DiskArchive) Has(domain string, key string) bool {
+func (archive *DiskArchive) Has(domain string, key string) (bool, error) {
 	if "" == archive.name {
-		archive.notifier.SendError(errors.New("disk archive name is blank"))
-		return false
+		return false, errors.New("disk archive name is blank")
 	}
 	lane := archive.road.WithLane(domain, key)
-	<-lane
+	lane.Lock()
+	defer lane.Unlock()
 	fileName := filepath.Join(archive.name, domain, key)
-	if archive.domains.IsNotExpired(fileName) {
-		value := archive.domains.Get(fileName).(bool)
-		lane <- 0
-		return value
-	}
-	ok := FileExists(fileName)
-	archive.domains.Set(archive.ttl, fileName, ok)
-	lane <- 0
-	return ok
+	return FileExists(fileName), nil
 }
 
-func (archive *DiskArchive) Remove(domain string, key string) {
+func (archive *DiskArchive) Remove(domain string, key string) error {
 	if "" == archive.name {
-		archive.notifier.SendError(errors.New("disk archive name is blank"))
-		return
+		return errors.New("disk archive name is blank")
 	}
 	lane := archive.road.WithLane(domain, key)
-	<-lane
+	lane.Lock()
+	defer lane.Unlock()
 	fileName := filepath.Join(archive.name, domain, key)
 	removeError := os.Remove(fileName)
 	if nil != removeError {
-		lane <- 0
-		archive.notifier.SendError(removeError)
-		return
+		return removeError
 	}
-	archive.keys.Remove(fileName)
-	lane <- 0
+	return nil
 }
 
-func (archive *DiskArchive) HasDomain(domain string) bool {
+func (archive *DiskArchive) HasDomain(domain string) (bool, error) {
 	if "" == archive.name {
-		archive.notifier.SendError(errors.New("disk archive name is blank"))
-		return false
+		return false, errors.New("disk archive name is blank")
 	}
 	lane := archive.road.WithLane(domain)
-	<-lane
-	directoryName := filepath.Join(archive.name, domain)
-	if archive.domains.IsNotExpired(directoryName) {
-		value := archive.domains.Get(directoryName).(bool)
-		lane <- 0
-		return value
-	}
-	ok := FileExists(directoryName)
-	archive.domains.Set(archive.ttl, directoryName, ok)
-	lane <- 0
-	return ok
+	lane.Lock()
+	defer lane.Unlock()
+	return FileExists(filepath.Join(archive.name, domain)), nil
 }
 
-func (archive *DiskArchive) RemoveDomain(domain string) {
+func (archive *DiskArchive) RemoveDomain(domain string) error {
 	if "" == archive.name {
-		archive.notifier.SendError(errors.New("disk archive name is blank"))
-		return
+		return errors.New("disk archive name is blank")
 	}
 	lane := archive.road.WithLane(domain)
-	<-lane
+	lane.Lock()
+	defer lane.Unlock()
 	directoryName := filepath.Join(archive.name, domain)
 	removeError := os.RemoveAll(directoryName)
 	if nil != removeError {
-		archive.notifier.SendError(removeError)
+		return removeError
 	}
-	archive.keys.Remove(directoryName)
-	lane <- 0
+	return nil
 }

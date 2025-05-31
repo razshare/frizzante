@@ -9,4 +9,6 @@ const TB = 1024 * GB
 const PB = 1024 * TB
 const EB = 1024 * PB
 
+const SessionKey = "session.json"
+
 var ViewsLocation = filepath.Join("lib", "components", "views")

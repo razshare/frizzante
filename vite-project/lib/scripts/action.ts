@@ -15,7 +15,7 @@ export function action(path = "", options = {merge: false}): {
         action: path,
         async onsubmit(e: any) {
             e.preventDefault()
-            const form = e.target
+            const form = e.target as HTMLFormElement
             const body = new FormData(form)
 
             await swaps
@@ -24,7 +24,9 @@ export function action(path = "", options = {merge: false}): {
                 .withMethod("POST")
                 .withPath(path)
                 .withBody(body)
-                .play(true)
+                .play(true).then(function done(){
+                    form.reset()
+                })
         }
     }
 }

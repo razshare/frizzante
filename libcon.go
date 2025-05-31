@@ -24,6 +24,7 @@ type Connection struct {
 	webSocket *websocket.Conn
 	eventName string
 	eventId   int64
+	sessionId string
 }
 
 /////////////////////////////////////////////////////////////
@@ -37,17 +38,17 @@ type Connection struct {
 /////////////////////////////////////////////////////////////
 
 // ReceiveCancellation returns a channel that closes when the request gets cancelled.
-func ReceiveCancellation(connection *Connection) <-chan struct{} {
+func (connection *Connection) ReceiveCancellation() <-chan struct{} {
 	return connection.request.Context().Done()
 }
 
 // IsAlive returns a reference to a bool which is initially set to `true`.
 //
 // This bool updates to `false` when the request gets cancelled.
-func IsAlive(connection *Connection) *bool {
+func (connection *Connection) IsAlive() *bool {
 	value := true
 	go func() {
-		<-ReceiveCancellation(connection)
+		<-connection.ReceiveCancellation()
 		value = false
 	}()
 	return &value
@@ -96,36 +97,9 @@ func ReceiveMessage(connection *Connection) (string, error) {
 // ReceiveJson returns true on success or false on failure.
 //
 // Compatible with web sockets.
-func ReceiveJson[T any](connection *Connection) (T, error) {
-	var value T
+func (connection *Connection) ReceiveJson(v any) bool {
 	if connection.webSocket != nil {
-		jsonError := connection.webSocket.ReadJSON(&value)
-		if nil != jsonError {
-			return value, jsonError
-		}
-		return value, nil
-	}
-
-	readBytes, readAllError := io.ReadAll(connection.request.Body)
-	if nil != readAllError {
-		return value, readAllError
-	}
-	unmarshalError := json.Unmarshal(readBytes, &value)
-	if nil != unmarshalError {
-		return value, unmarshalError
-	}
-	return value, nil
-}
-
-// ReceiveJson reads the next JSON-encoded message from the
-// connection and stores it in the value pointed to by v.
-//
-// ReceiveJson returns true on success or false on failure.
-//
-// Compatible with web sockets.
-func (connection *Connection) ReceiveJson(out any) bool {
-	if connection.webSocket != nil {
-		jsonError := connection.webSocket.ReadJSON(out)
+		jsonError := connection.webSocket.ReadJSON(v)
 		if nil != jsonError {
 			connection.server.notifier.SendError(jsonError)
 			return false
@@ -138,7 +112,7 @@ func (connection *Connection) ReceiveJson(out any) bool {
 		connection.server.notifier.SendError(readAllError)
 		return false
 	}
-	unmarshalError := json.Unmarshal(readBytes, out)
+	unmarshalError := json.Unmarshal(readBytes, v)
 	if nil != unmarshalError {
 		connection.server.notifier.SendError(unmarshalError)
 		return false
