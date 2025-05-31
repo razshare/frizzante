@@ -12,6 +12,7 @@ type SessionOperator[T any] interface {
 	Save()
 	Destroy()
 	Start(func(state T, save func(T)))
+	State() *T
 }
 
 type SessionHandler[T any] = func(state *T)
@@ -176,4 +177,8 @@ func (session *Session[T]) Start(handler SessionHandler[T]) {
 	}
 
 	session.Save()
+}
+
+func (session *Session[T]) State() *T {
+	return &session.state
 }
