@@ -148,13 +148,7 @@ func (session *Session[T]) Destroy() {
 //
 // Finally, if all guards pass, Start is invoked with the session state.
 func (session *Session[T]) Start(handler SessionHandler[T]) {
-	if !session.Exists() {
-		session.Save()
-	} else {
-		session.Load()
-	}
-
-	state := &session.state
+	state := session.State()
 
 	for _, guard := range session.guards {
 		passed := false
@@ -180,5 +174,10 @@ func (session *Session[T]) Start(handler SessionHandler[T]) {
 }
 
 func (session *Session[T]) State() *T {
+	if !session.Exists() {
+		session.Save()
+	} else {
+		session.Load()
+	}
 	return &session.state
 }
