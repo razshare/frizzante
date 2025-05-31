@@ -187,8 +187,11 @@ func (server *Server) Stop() {
 	}
 }
 
-// WithRequestHandler adds a request handler.
-func (server *Server) WithRequestHandler(pattern string, handle func(connection *Connection)) *Server {
+type Guard = func(c *Connection, allow func())
+type RequestHandler = func(c *Connection)
+
+// Map maps a pattern to a request handler and a series of guards.
+func (server *Server) Map(guards []Guard, pattern string, handler RequestHandler) *Server {
 	server.mux.HandleFunc(pattern, func(writer http.ResponseWriter, request *http.Request) {
 		connection := &Connection{
 			server:    server,
@@ -200,7 +203,16 @@ func (server *Server) WithRequestHandler(pattern string, handle func(connection 
 			eventName: "",
 			eventId:   1,
 		}
-		handle(connection)
+
+		for _, guard := range guards {
+			allowed := false
+			guard(connection, func() { allowed = true })
+			if !allowed {
+				return
+			}
+		}
+
+		handler(connection)
 	})
 	return server
 }

@@ -16,7 +16,7 @@ func TestRenderServer(test *testing.T) {
 	server := NewServer().
 		WithDist(efs).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		WithRequestHandler("GET /welcome", func(c *Connection) {
+		Map([]Guard{}, "GET /welcome", func(c *Connection) {
 			c.SendView(View{
 				Name:       "Welcome",
 				RenderMode: RenderModeServer,
@@ -46,7 +46,7 @@ func TestRenderClient(test *testing.T) {
 	server := NewServer().
 		WithDist(efs).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		WithRequestHandler("GET /welcome", func(c *Connection) {
+		Map([]Guard{}, "GET /welcome", func(c *Connection) {
 			c.SendView(View{
 				Name:       "Welcome",
 				RenderMode: RenderModeClient,

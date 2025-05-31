@@ -73,7 +73,7 @@ func TestServerWithApi(test *testing.T) {
 	server := NewServer().
 		WithDist(efs).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		WithRequestHandler("GET /", func(c *Connection) {
+		Map([]Guard{}, "GET /", func(c *Connection) {
 			c.SendMessage(expected)
 		})
 
@@ -98,7 +98,7 @@ func TestSendStatus(test *testing.T) {
 	server := NewServer().
 		WithDist(efs).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		WithRequestHandler("GET /", func(c *Connection) {
+		Map([]Guard{}, "GET /", func(c *Connection) {
 			c.SendStatus(expected)
 			c.SendMessage("ok")
 		})
@@ -127,7 +127,7 @@ func TestSendHeader(test *testing.T) {
 	server := NewServer().
 		WithDist(efs).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		WithRequestHandler("GET /", func(c *Connection) {
+		Map([]Guard{}, "GET /", func(c *Connection) {
 			c.SendHeader("Content-Type", expected)
 			c.SendMessage("{}")
 		})
