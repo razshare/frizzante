@@ -16,13 +16,13 @@ func TestRenderServer(test *testing.T) {
 	server := NewServer().
 		WithDist(efs).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		Map([]Guard{}, "GET /welcome", func(c *Connection) {
+		AddRoute(Route{Pattern: "GET /welcome", Handler: func(c *Connection) {
 			c.SendView(View{
 				Name:       "Welcome",
 				RenderMode: RenderModeServer,
 				Data:       Data{Name: "world"},
 			})
-		})
+		}})
 
 	go server.Start()
 	defer server.Stop()
@@ -46,13 +46,13 @@ func TestRenderClient(test *testing.T) {
 	server := NewServer().
 		WithDist(efs).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		Map([]Guard{}, "GET /welcome", func(c *Connection) {
+		AddRoute(Route{Pattern: "GET /welcome", Handler: func(c *Connection) {
 			c.SendView(View{
 				Name:       "Welcome",
 				RenderMode: RenderModeClient,
 				Data:       Data{Name: "world"},
 			})
-		})
+		}})
 
 	go server.Start()
 	defer server.Stop()

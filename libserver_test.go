@@ -73,9 +73,9 @@ func TestServerWithApi(test *testing.T) {
 	server := NewServer().
 		WithDist(efs).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		Map([]Guard{}, "GET /", func(c *Connection) {
+		AddRoute(Route{Pattern: "GET /", Handler: func(c *Connection) {
 			c.SendMessage(expected)
-		})
+		}})
 
 	go server.Start()
 	defer server.Stop()
@@ -98,10 +98,10 @@ func TestSendStatus(test *testing.T) {
 	server := NewServer().
 		WithDist(efs).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		Map([]Guard{}, "GET /", func(c *Connection) {
+		AddRoute(Route{Pattern: "GET /", Handler: func(c *Connection) {
 			c.SendStatus(expected)
 			c.SendMessage("ok")
-		})
+		}})
 
 	go server.Start()
 	defer server.Stop()
@@ -127,10 +127,10 @@ func TestSendHeader(test *testing.T) {
 	server := NewServer().
 		WithDist(efs).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		Map([]Guard{}, "GET /", func(c *Connection) {
+		AddRoute(Route{Pattern: "GET /", Handler: func(c *Connection) {
 			c.SendHeader("Content-Type", expected)
 			c.SendMessage("{}")
-		})
+		}})
 
 	go server.Start()
 	defer server.Stop()

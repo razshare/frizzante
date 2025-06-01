@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"slices"
 	"sync"
 	"time"
 
@@ -36,6 +37,7 @@ type Server struct {
 	notifier        *Notifier
 	dist            embed.FS
 	upgrader        *websocket.Upgrader
+	guards          []Guard
 }
 
 func NewServer() *Server {
@@ -187,12 +189,25 @@ func (server *Server) Stop() {
 	}
 }
 
-type Guard = func(c *Connection, allow func())
-type RequestHandler = func(c *Connection)
+type Guard struct {
+	Handler func(c *Connection, allow func())
+	Tags    []string
+}
+type Route struct {
+	Pattern string
+	Handler func(c *Connection)
+	Tags    []string
+}
 
-// Map maps a pattern to a request handler and a series of guards.
-func (server *Server) Map(guards []Guard, pattern string, handler RequestHandler) *Server {
-	server.mux.HandleFunc(pattern, func(writer http.ResponseWriter, request *http.Request) {
+// AddGuard adds a guard.
+func (server *Server) AddGuard(guard Guard) *Server {
+	server.guards = append(server.guards, guard)
+	return server
+}
+
+// AddRoute adds a route.
+func (server *Server) AddRoute(route Route) *Server {
+	server.mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 		connection := &Connection{
 			server:    server,
 			request:   request,
@@ -204,15 +219,20 @@ func (server *Server) Map(guards []Guard, pattern string, handler RequestHandler
 			eventId:   1,
 		}
 
-		for _, guard := range guards {
-			allowed := false
-			guard(connection, func() { allowed = true })
-			if !allowed {
-				return
+		for _, tag := range route.Tags {
+			for _, guard := range server.guards {
+				if !slices.Contains(guard.Tags, tag) {
+					continue
+				}
+				allowed := false
+				guard.Handler(connection, func() { allowed = true })
+				if !allowed {
+					return
+				}
 			}
 		}
 
-		handler(connection)
+		route.Handler(connection)
 	})
 	return server
 }
