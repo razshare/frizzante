@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"runtime"
 	"slices"
 	"sync"
 	"time"
@@ -136,14 +137,12 @@ func (server *Server) WithDist(dist embed.FS) *Server {
 //
 // If the server fails to start, ServerStart crashes the program.
 func (server *Server) Start() {
-	logger := log.New(server.notifier.errorFile, "<error>", log.Ltime|log.Llongfile)
-
 	server.server = &http.Server{
 		Handler:        server.mux,
 		ReadTimeout:    server.readTimeout,
 		WriteTimeout:   server.writeTimeout,
 		MaxHeaderBytes: server.headerMaxMemory,
-		ErrorLog:       logger,
+		ErrorLog:       server.notifier.errorLogger,
 	}
 
 	var group sync.WaitGroup
@@ -190,6 +189,7 @@ func (server *Server) Stop() {
 }
 
 type Guard struct {
+	Name    string
 	Handler func(c *Connection, allow func())
 	Tags    []string
 }
@@ -207,6 +207,7 @@ func (server *Server) AddGuard(guard Guard) *Server {
 
 // AddRoute adds a route.
 func (server *Server) AddRoute(route Route) *Server {
+	_, file, line, _ := runtime.Caller(1)
 	server.mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 		connection := &Connection{
 			server:    server,
@@ -227,6 +228,9 @@ func (server *Server) AddRoute(route Route) *Server {
 				allowed := false
 				guard.Handler(connection, func() { allowed = true })
 				if !allowed {
+					server.notifier.SendMessageNoTrace(
+						fmt.Sprintf("%s:%d route `%s` tagged with `%s` denied the request because guard `%s` did not pass", file, line, route.Pattern, tag, guard.Name),
+					)
 					return
 				}
 			}
