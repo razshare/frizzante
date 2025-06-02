@@ -32,18 +32,6 @@ func (notifier *Notifier) WithErrorLogger(logger *log.Logger) *Notifier {
 
 // SendMessage sends a message to the notifier.
 func (notifier *Notifier) SendMessage(message string) *Notifier {
-	_, file, line, ok := runtime.Caller(1)
-	if ok {
-		notifier.messageLogger.Println(fmt.Sprintf("%s:%d %s", file, line, message))
-	} else {
-		notifier.messageLogger.Println(message)
-	}
-
-	return notifier
-}
-
-// SendMessageNoTrace sends a message to the notifier without tracing the caller.
-func (notifier *Notifier) SendMessageNoTrace(message string) *Notifier {
 	notifier.messageLogger.Println(message)
 	return notifier
 }

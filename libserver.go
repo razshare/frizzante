@@ -8,7 +8,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"runtime"
 	"slices"
 	"sync"
 	"time"
@@ -207,7 +206,6 @@ func (server *Server) AddGuard(guard Guard) *Server {
 
 // AddRoute adds a route.
 func (server *Server) AddRoute(route Route) *Server {
-	_, file, line, _ := runtime.Caller(1)
 	server.mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 		connection := &Connection{
 			server:    server,
@@ -228,8 +226,8 @@ func (server *Server) AddRoute(route Route) *Server {
 				allowed := false
 				guard.Handler(connection, func() { allowed = true })
 				if !allowed {
-					server.notifier.SendMessageNoTrace(
-						fmt.Sprintf("%s:%d route `%s` tagged with `%s` denied the request because guard `%s` did not pass", file, line, route.Pattern, tag, guard.Name),
+					server.notifier.SendMessage(
+						fmt.Sprintf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", route.Pattern, tag, guard.Name),
 					)
 					return
 				}
