@@ -36,9 +36,9 @@ func (notifier *Notifier) SendMessage(message string) *Notifier {
 	return notifier
 }
 
-// SendError sends an error to the notifier.
-func (notifier *Notifier) SendError(err error) *Notifier {
-	_, file, line, ok := runtime.Caller(1)
+// SendErrorAndTrace sends an error to the notifier.
+func (notifier *Notifier) SendErrorAndTrace(err error) *Notifier {
+	_, file, line, ok := runtime.Caller(2)
 	if ok {
 		notifier.messageLogger.Println(fmt.Sprintf("%s:%d %s", file, line, err.Error()))
 	} else {
@@ -47,8 +47,8 @@ func (notifier *Notifier) SendError(err error) *Notifier {
 	return notifier
 }
 
-// SendErrorNoTrace sends an error to the notifier without tracing the caller.
-func (notifier *Notifier) SendErrorNoTrace(err error) *Notifier {
+// SendError sends an error to the notifier without tracing the caller.
+func (notifier *Notifier) SendError(err error) *Notifier {
 	notifier.messageLogger.Println(err.Error())
 	return notifier
 }

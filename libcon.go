@@ -101,7 +101,7 @@ func (connection *Connection) ReceiveJson(v any) bool {
 	if connection.webSocket != nil {
 		jsonError := connection.webSocket.ReadJSON(v)
 		if nil != jsonError {
-			connection.server.notifier.SendError(jsonError)
+			connection.server.notifier.SendErrorAndTrace(jsonError)
 			return false
 		}
 		return true
@@ -109,12 +109,12 @@ func (connection *Connection) ReceiveJson(v any) bool {
 
 	readBytes, readAllError := io.ReadAll(connection.request.Body)
 	if nil != readAllError {
-		connection.server.notifier.SendError(readAllError)
+		connection.server.notifier.SendErrorAndTrace(readAllError)
 		return false
 	}
 	unmarshalError := json.Unmarshal(readBytes, v)
 	if nil != unmarshalError {
-		connection.server.notifier.SendError(unmarshalError)
+		connection.server.notifier.SendErrorAndTrace(unmarshalError)
 		return false
 	}
 	return true
@@ -224,39 +224,39 @@ func (connection *Connection) SendEventContent(content []byte) {
 
 	_, writeEventError := connection.writer.Write([]byte(header))
 	if nil != writeEventError {
-		connection.server.notifier.SendError(writeEventError)
+		connection.server.notifier.SendErrorAndTrace(writeEventError)
 		return
 	}
 
 	for _, line := range bytes.Split(content, []byte("\r\n")) {
 		_, writeEventError = connection.writer.Write([]byte("data: "))
 		if nil != writeEventError {
-			connection.server.notifier.SendError(writeEventError)
+			connection.server.notifier.SendErrorAndTrace(writeEventError)
 			return
 		}
 
 		_, writeEventError = connection.writer.Write(line)
 		if nil != writeEventError {
-			connection.server.notifier.SendError(writeEventError)
+			connection.server.notifier.SendErrorAndTrace(writeEventError)
 			return
 		}
 
 		_, writeEventError = connection.writer.Write([]byte("\r\n"))
 		if nil != writeEventError {
-			connection.server.notifier.SendError(writeEventError)
+			connection.server.notifier.SendErrorAndTrace(writeEventError)
 			return
 		}
 	}
 
 	_, writeEventError = connection.writer.Write([]byte("\r\n"))
 	if nil != writeEventError {
-		connection.server.notifier.SendError(writeEventError)
+		connection.server.notifier.SendErrorAndTrace(writeEventError)
 		return
 	}
 
 	flusher, flushedOk := connection.writer.(http.Flusher)
 	if !flushedOk {
-		connection.server.notifier.SendError(errors.New("could not retrieve flusher"))
+		connection.server.notifier.SendErrorAndTrace(errors.New("could not retrieve flusher"))
 		return
 	}
 
@@ -286,7 +286,7 @@ func (connection *Connection) SendRedirect(location string, statusCode int) {
 // All errors are sent to the server notifier.
 func (connection *Connection) SendStatus(code int) {
 	if connection.locked {
-		connection.server.notifier.SendError(errors.New("status is locked"))
+		connection.server.notifier.SendErrorAndTrace(errors.New("status is locked"))
 	}
 	connection.status = code
 }
@@ -300,7 +300,7 @@ func (connection *Connection) SendStatus(code int) {
 // All errors are sent to the server notifier.
 func (connection *Connection) SendHeader(key string, value string) {
 	if connection.locked {
-		connection.server.notifier.SendError(errors.New("header is locked"))
+		connection.server.notifier.SendErrorAndTrace(errors.New("header is locked"))
 	}
 
 	connection.header.Set(key, value)
@@ -337,7 +337,7 @@ func (connection *Connection) SendContent(content []byte) {
 	if connection.webSocket != nil {
 		writeError := connection.webSocket.WriteMessage(websocket.TextMessage, content)
 		if nil != writeError {
-			connection.server.notifier.SendError(writeError)
+			connection.server.notifier.SendErrorAndTrace(writeError)
 		}
 		return
 	}
@@ -349,7 +349,7 @@ func (connection *Connection) SendContent(content []byte) {
 
 	_, writeError := connection.writer.Write(content)
 	if nil != writeError {
-		connection.server.notifier.SendError(writeError)
+		connection.server.notifier.SendErrorAndTrace(writeError)
 	}
 }
 
@@ -415,7 +415,7 @@ func (connection *Connection) SendTooManyRequests(message string) {
 func (connection *Connection) SendJson(payload any) {
 	content, marshalError := json.Marshal(payload)
 	if nil != marshalError {
-		connection.server.notifier.SendError(marshalError)
+		connection.server.notifier.SendErrorAndTrace(marshalError)
 		return
 	}
 
@@ -443,19 +443,19 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 
 	reader, info, readerError := ReaderFromEmbeddedFileName(efs, fileName)
 	if nil != readerError {
-		connection.server.notifier.SendError(readerError)
+		connection.server.notifier.SendErrorAndTrace(readerError)
 		return
 	}
 
 	if connection.webSocket != nil {
 		content, readError := io.ReadAll(reader)
 		if nil != readError {
-			connection.server.notifier.SendError(readError)
+			connection.server.notifier.SendErrorAndTrace(readError)
 			return
 		}
 		writeError := connection.webSocket.WriteMessage(websocket.TextMessage, content)
 		if nil != writeError {
-			connection.server.notifier.SendError(writeError)
+			connection.server.notifier.SendErrorAndTrace(writeError)
 		}
 		return
 	}
@@ -463,7 +463,7 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 	if "" != connection.eventName {
 		content, readError := io.ReadAll(reader)
 		if nil != readError {
-			connection.server.notifier.SendError(readError)
+			connection.server.notifier.SendErrorAndTrace(readError)
 		}
 		connection.SendEventContent(content)
 		return
@@ -490,19 +490,19 @@ func (connection *Connection) SendFileOrElse(orElse func()) {
 
 	reader, info, readerError := ReaderFromFileName(fileName)
 	if nil != readerError {
-		connection.server.notifier.SendError(readerError)
+		connection.server.notifier.SendErrorAndTrace(readerError)
 		return
 	}
 
 	if connection.webSocket != nil {
 		content, readError := io.ReadAll(reader)
 		if nil != readError {
-			connection.server.notifier.SendError(readError)
+			connection.server.notifier.SendErrorAndTrace(readError)
 			return
 		}
 		writeError := connection.webSocket.WriteMessage(websocket.TextMessage, content)
 		if nil != writeError {
-			connection.server.notifier.SendError(writeError)
+			connection.server.notifier.SendErrorAndTrace(writeError)
 		}
 		return
 	}
@@ -510,7 +510,7 @@ func (connection *Connection) SendFileOrElse(orElse func()) {
 	if "" != connection.eventName {
 		content, readError := io.ReadAll(reader)
 		if nil != readError {
-			connection.server.notifier.SendError(readError)
+			connection.server.notifier.SendErrorAndTrace(readError)
 			return
 		}
 		connection.SendEventContent(content)
@@ -539,7 +539,7 @@ func SendSseUpgrade(connection *Connection) func(eventName string) {
 	connection.eventName = "message"
 	return func(eventName string) {
 		if "" == eventName {
-			connection.server.notifier.SendError(
+			connection.server.notifier.SendErrorAndTrace(
 				fmt.Errorf("renaming a server sent event (`%s`) to an empty string is not allowed", connection.eventName),
 			)
 		}
@@ -559,13 +559,13 @@ func (connection *Connection) SendWsUpgrade() {
 func (connection *Connection) SendConfiguredWsUpgrade(upgrader websocket.Upgrader) {
 	conn, upgradeError := upgrader.Upgrade(connection.writer, connection.request, nil)
 	if nil != upgradeError {
-		connection.server.notifier.SendError(upgradeError)
+		connection.server.notifier.SendErrorAndTrace(upgradeError)
 		return
 	}
 	defer func(conn *websocket.Conn) {
 		closeError := conn.Close()
 		if nil != closeError {
-			connection.server.notifier.SendError(closeError)
+			connection.server.notifier.SendErrorAndTrace(closeError)
 		}
 	}(conn)
 	connection.webSocket = conn
@@ -599,7 +599,7 @@ func (connection *Connection) SendView(view View) {
 
 	content, compileError := view.Render(connection.server.dist)
 	if nil != compileError {
-		connection.server.notifier.SendError(compileError)
+		connection.server.notifier.SendErrorAndTrace(compileError)
 		return
 	}
 

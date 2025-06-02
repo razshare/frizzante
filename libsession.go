@@ -68,7 +68,7 @@ func (session *ConnectedSessionOperator) Id() string {
 	// Create new session.
 	id4, idError := uuid.NewV4()
 	if idError != nil {
-		session.connection.server.notifier.SendError(idError)
+		session.connection.server.notifier.SendErrorAndTrace(idError)
 		session.connection.sessionId = ""
 		return ""
 	}
@@ -83,7 +83,7 @@ func (session *ConnectedSessionOperator) Exists() bool {
 	id := session.Id()
 	has, hasError := session.archive.Has(id, SessionKey)
 	if hasError != nil {
-		session.connection.server.notifier.SendError(hasError)
+		session.connection.server.notifier.SendErrorAndTrace(hasError)
 	}
 	return has
 }
@@ -93,12 +93,12 @@ func (session *ConnectedSessionOperator) Save(state any) {
 	id := session.Id()
 	readBytes, marshalError := json.Marshal(state)
 	if marshalError != nil {
-		session.connection.server.notifier.SendError(marshalError)
+		session.connection.server.notifier.SendErrorAndTrace(marshalError)
 		return
 	}
 	setError := session.archive.Set(id, SessionKey, readBytes)
 	if setError != nil {
-		session.connection.server.notifier.SendError(setError)
+		session.connection.server.notifier.SendErrorAndTrace(setError)
 	}
 }
 
@@ -110,18 +110,18 @@ func (session *ConnectedSessionOperator) Load(state any) {
 
 	has, hasError := session.archive.Has(id, SessionKey)
 	if hasError != nil {
-		session.connection.server.notifier.SendError(hasError)
+		session.connection.server.notifier.SendErrorAndTrace(hasError)
 		return
 	}
 	if has {
 		readBytes, getError := session.archive.Get(id, SessionKey)
 		if getError != nil {
-			session.connection.server.notifier.SendError(getError)
+			session.connection.server.notifier.SendErrorAndTrace(getError)
 			return
 		}
 		unmarshalError := json.Unmarshal(readBytes, state)
 		if unmarshalError != nil {
-			session.connection.server.notifier.SendError(unmarshalError)
+			session.connection.server.notifier.SendErrorAndTrace(unmarshalError)
 		}
 	}
 	return
@@ -132,6 +132,6 @@ func (session *ConnectedSessionOperator) Destroy() {
 	id := session.Id()
 	destroyError := session.archive.RemoveDomain(id)
 	if destroyError != nil {
-		session.connection.server.notifier.SendError(destroyError)
+		session.connection.server.notifier.SendErrorAndTrace(destroyError)
 	}
 }
