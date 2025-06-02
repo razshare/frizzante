@@ -1,10 +1,10 @@
-import type {ServerContext} from "../types.ts";
+import type {View} from "../types.ts";
 import {swaps} from "./swaps.ts";
 
 let started = false
 const IS_BROWSER = typeof document !== 'undefined'
 
-export function route(server: ServerContext<any>): void {
+export function route(view: View<any>): void {
     if (!IS_BROWSER || started) {
         return
     }
@@ -16,7 +16,7 @@ export function route(server: ServerContext<any>): void {
         const current = swaps.find(id)
 
         if (!current) {
-            await swaps.swap(server).withPath("/").play(false)
+            await swaps.swap(view).withPath("/").play(false)
             return
         }
 

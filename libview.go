@@ -21,10 +21,10 @@ const (
 )
 
 type View struct {
-	Name       string
-	Data       any
-	Error      error
-	RenderMode RenderMode
+	Name       string     `json:"name"`
+	Data       any        `json:"data"`
+	Error      string     `json:"error"`
+	RenderMode RenderMode `json:"renderMode"`
 }
 
 var noScript = regexp.MustCompile(`<script.*>.*</script>`)
@@ -75,17 +75,7 @@ func (view *View) Render(efs embed.FS) (content string, compileError error) {
 		indexBytes = indexBytesLocal
 	}
 
-	err := ""
-	if nil != view.Error {
-		err = view.Error.Error()
-	}
-
-	routerPropsBytes, jsonError := json.Marshal(&ServerProperties{
-		View:       view.Name,
-		RenderMode: view.RenderMode,
-		Data:       view.Data,
-		Error:      err,
-	})
+	routerPropsBytes, jsonError := json.Marshal(view)
 
 	if jsonError != nil {
 		return "", jsonError

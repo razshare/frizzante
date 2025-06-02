@@ -585,16 +585,7 @@ func (connection *Connection) SendView(view View) {
 	}
 
 	if connection.VerifyAccept("application/json") {
-		err := ""
-		if nil != view.Error {
-			err = view.Error.Error()
-		}
-		connection.SendJson(&ServerProperties{
-			View:       view.Name,
-			RenderMode: view.RenderMode,
-			Data:       view.Data,
-			Error:      err,
-		})
+		connection.SendJson(view)
 		return
 	}
 

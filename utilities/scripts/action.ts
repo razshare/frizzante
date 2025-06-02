@@ -1,5 +1,5 @@
 import {getContext} from "svelte";
-import type {ServerContext} from "../types.ts";
+import type {View} from "../types.ts";
 import {route} from "./route.ts";
 import {swaps} from "./swaps.ts";
 
@@ -8,8 +8,8 @@ export function action(path = "", options = {merge: false}): {
     action: string
     onsubmit: (e: any) => Promise<void>
 } {
-    const server = getContext("server") as ServerContext<any>
-    route(server)
+    const view = getContext("view") as View<any>
+    route(view)
     return {
         method: "POST",
         action: path,
@@ -19,7 +19,7 @@ export function action(path = "", options = {merge: false}): {
             const body = new FormData(form)
 
             await swaps
-                .swap(server)
+                .swap(view)
                 .withMerge(options.merge)
                 .withMethod("POST")
                 .withPath(path)

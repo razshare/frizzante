@@ -1,4 +1,4 @@
-import type {ServerContext} from "../types.ts";
+import type {View} from "../types.ts";
 import {uuid} from './uuid.ts'
 
 type SwapAction = {
@@ -20,7 +20,7 @@ function find(id: string): false | SwapAction {
     return record[id] ?? false
 }
 
-function swap(server: ServerContext<any>): SwapAction {
+function swap(view: View<any>): SwapAction {
     let swapMethod = 'GET' as "GET" | "POST"
     let swapPath = location.pathname
     let swapBody: any
@@ -66,16 +66,16 @@ function swap(server: ServerContext<any>): SwapAction {
             const json = await response.json();
 
             if (swapMerge) {
-                server.data = {
-                    ...server.data,
+                view.data = {
+                    ...view.data,
                     ...json.data,
                 }
             } else {
-                server.data = json.data
+                view.data = json.data
             }
 
-            server.view = json.view;
-            server.error = json.error;
+            view.name = json.name;
+            view.error = json.error;
 
             if (update) {
                 const id = uuid()

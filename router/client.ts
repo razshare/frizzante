@@ -1,5 +1,5 @@
 import { hydrate } from "svelte";
-import RenderClient from "./render.client.svelte";
+import RenderClient from "./client.svelte";
 // @ts-ignore
 target().innerHTML = "";
 // @ts-ignore

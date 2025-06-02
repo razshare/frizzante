@@ -1,5 +1,5 @@
 import {getContext} from "svelte";
-import type {ServerContext} from "../types.ts";
+import type {View} from "../types.ts";
 import {route} from "./route.ts";
 import {swaps} from "./swaps.ts";
 
@@ -7,14 +7,14 @@ export function href(path = "", options = {merge: false}): {
     href: string,
     onclick: (e: MouseEvent) => void
 } {
-    const server = getContext("server") as ServerContext<any>
-    route(server)
+    const view = getContext("view") as View<any>
+    route(view)
     return {
         href: path,
         async onclick(e: MouseEvent) {
             e.preventDefault()
             await swaps
-                .swap(server)
+                .swap(view)
                 .withMerge(options.merge)
                 .withPath(path)
                 .play(true)
