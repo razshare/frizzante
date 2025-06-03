@@ -4,38 +4,88 @@ import (
 	"bytes"
 	"embed"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-//go:embed utilities/*/**
-var utilitiesFs embed.FS
+//go:embed utilities/*
+var utilitiesEfs embed.FS
 
-//go:embed router/*
-var routerFs embed.FS
-
-type AssetsManager interface {
-	CreateUtilities() error
-	CreateRouter() error
+type AotUtilities struct {
+	efs embed.FS
 }
 
-type Assets struct {
-	utilitiesFs embed.FS
-	routerFs    embed.FS
-	views       []string
-	viewsBase   string
-}
-
-func NewAssets() *Assets {
-	return &Assets{
-		utilitiesFs: utilitiesFs,
-		routerFs:    routerFs,
+func NewAotUtilities() *AotUtilities {
+	return &AotUtilities{
+		efs: utilitiesEfs,
 	}
 }
 
-func (assets *Assets) LoadViews(from string) error {
+func (assets *AotUtilities) CreateOnDisk() error {
+	var to = filepath.Join(".frz", "utilities")
+	var create func(from string, to string) error
+
+	create = func(from string, to string) error {
+		embeddedFiles, readDirError := assets.efs.ReadDir(from)
+		if readDirError != nil {
+			return readDirError
+		}
+
+		if !IsDirectory(to) {
+			mkdirError := os.MkdirAll(to, os.ModePerm)
+			if mkdirError != nil {
+				return mkdirError
+			}
+		}
+
+		for _, embeddedFile := range embeddedFiles {
+			fromFileName := strings.Join([]string{from, embeddedFile.Name()}, "/")
+			toFileName := filepath.Join(to, strings.ReplaceAll(embeddedFile.Name(), "/", string(filepath.Separator)))
+			if embeddedFile.IsDir() {
+				createError := create(fromFileName, toFileName)
+				if createError != nil {
+					return createError
+				}
+				continue
+			}
+
+			embeddedContents, readError := utilitiesEfs.ReadFile(fromFileName)
+			if readError != nil {
+				return readError
+			}
+
+			writeError := os.WriteFile(toFileName, embeddedContents, os.ModePerm)
+			if writeError != nil {
+				return writeError
+			}
+		}
+		return nil
+	}
+
+	return create("utilities", to)
+}
+
+//go:embed router/*
+var routerEfs embed.FS
+
+type AotRouter struct {
+	efs       embed.FS
+	views     []string
+	viewsBase string
+}
+
+func NewAotRouter() *AotRouter {
+	return &AotRouter{
+		efs: routerEfs,
+	}
+}
+
+func (assets *AotRouter) LoadViews() error {
+	var from = filepath.Join("lib", "components", "views")
 	var load func(from string) error
+	assets.views = []string{}
 
 	load = func(from string) error {
 		views, readDirError := os.ReadDir(from)
@@ -70,54 +120,17 @@ func (assets *Assets) LoadViews(from string) error {
 	return load(from)
 }
 
-func (assets *Assets) CreateUtilities(to string) error {
+func (assets *AotRouter) CreateOnDisk() error {
+	var to = filepath.Join(".frz", "router")
 	var create func(from string, to string) error
 
-	create = func(from string, to string) error {
-		embeddedFiles, readDirError := assets.utilitiesFs.ReadDir(from)
-		if readDirError != nil {
-			return readDirError
-		}
-
-		if !IsDirectory(to) {
-			mkdirError := os.MkdirAll(to, os.ModePerm)
-			if mkdirError != nil {
-				return mkdirError
-			}
-		}
-
-		for _, embeddedFile := range embeddedFiles {
-			fromFileName := strings.Join([]string{from, embeddedFile.Name()}, "/")
-			toFileName := filepath.Join(to, strings.ReplaceAll(embeddedFile.Name(), "/", string(filepath.Separator)))
-			if embeddedFile.IsDir() {
-				createError := create(fromFileName, toFileName)
-				if createError != nil {
-					return createError
-				}
-				continue
-			}
-
-			embeddedContents, readError := utilitiesFs.ReadFile(fromFileName)
-			if readError != nil {
-				return readError
-			}
-
-			writeError := os.WriteFile(toFileName, embeddedContents, os.ModePerm)
-			if writeError != nil {
-				return writeError
-			}
-		}
-		return nil
+	loadError := assets.LoadViews()
+	if loadError != nil {
+		return loadError
 	}
 
-	return create("utilities", to)
-}
-
-func (assets *Assets) CreateRouter(to string) error {
-	var create func(from string, to string) error
-
 	create = func(from string, to string) error {
-		embeddedFiles, readDirError := assets.routerFs.ReadDir(from)
+		embeddedFiles, readDirError := assets.efs.ReadDir(from)
 		if readDirError != nil {
 			return readDirError
 		}
@@ -140,7 +153,7 @@ func (assets *Assets) CreateRouter(to string) error {
 				continue
 			}
 
-			embeddedBytes, readError := routerFs.ReadFile(fromFileName)
+			embeddedBytes, readError := routerEfs.ReadFile(fromFileName)
 			if readError != nil {
 				return readError
 			}
@@ -223,4 +236,20 @@ func (assets *Assets) CreateRouter(to string) error {
 	}
 
 	return create("router", to)
+}
+
+func CreateAotRouterOnDisk() {
+	router := NewAotRouter()
+	routerError := router.CreateOnDisk()
+	if routerError != nil {
+		log.Fatal(routerError)
+	}
+}
+
+func CreateAotUtilitiesOnDisk() {
+	utilities := NewAotUtilities()
+	utilitiesError := utilities.CreateOnDisk()
+	if utilitiesError != nil {
+		log.Fatal(utilitiesError)
+	}
 }

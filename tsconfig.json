@@ -16,7 +16,7 @@
     "checkJs": true,
     "paths": {
       "$frizzante/*": [
-        "./.frizzante/vite-project/lib/*"
+        "./.frz/utilities/*"
       ],
       "$lib/*": [
         "./lib/*"
@@ -31,24 +31,18 @@
     "moduleDetection": "force"
   },
   "include": [
-    "./templates/views/**/*.svelte.js",
-    "./templates/views/**/*.svelte.ts",
-    "./templates/views/**/*.svelte",
-    "./templates/views/**/*.d.ts",
-    "./templates/views/**/*.js",
-    "./templates/views/**/*.ts",
-    "./.frizzante/vite-project/**/*.svelte.js",
-    "./.frizzante/vite-project/**/*.svelte.ts",
-    "./.frizzante/vite-project/**/*.svelte",
-    "./.frizzante/vite-project/**/*.d.ts",
-    "./.frizzante/vite-project/**/*.js",
-    "./.frizzante/vite-project/**/*.ts",
-    "./vite-project/**/*.svelte.js",
-    "./vite-project/**/*.svelte.ts",
-    "./vite-project/**/*.svelte",
-    "./vite-project/**/*.d.ts",
-    "./vite-project/**/*.js",
-    "./vite-project/**/*.ts",
+    "./router/**/*.svelte.js",
+    "./router/**/*.svelte.ts",
+    "./router/**/*.svelte",
+    "./router/**/*.d.ts",
+    "./router/**/*.js",
+    "./router/**/*.ts",
+    "./utilities/**/*.svelte.js",
+    "./utilities/**/*.svelte.ts",
+    "./utilities/**/*.svelte",
+    "./utilities/**/*.d.ts",
+    "./utilities/**/*.js",
+    "./utilities/**/*.ts",
     "./lib/**/*.svelte.js",
     "./lib/**/*.svelte.ts",
     "./lib/**/*.svelte",

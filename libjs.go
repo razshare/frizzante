@@ -1,11 +1,8 @@
 package frizzante
 
 import (
-	"embed"
 	"fmt"
 	"github.com/evanw/esbuild/pkg/api"
-	"os"
-	"path/filepath"
 	"rogchap.com/v8go"
 )
 
@@ -28,7 +25,7 @@ func JavaScriptInvalidate(id string) {
 // You should always call the destroyer function as soon as possible to limit memory usage.
 //
 // Each global function will be injected into the context of the module automatically so that you can invoke them from the script.
-func JavaScriptRun(id string, source string, functions map[string]v8go.FunctionCallback) (
+func JavaScriptRun(id string, source []byte, functions map[string]v8go.FunctionCallback) (
 	result *v8go.Value,
 	destroy func(),
 	scriptError error,
@@ -49,13 +46,13 @@ func JavaScriptRun(id string, source string, functions map[string]v8go.FunctionC
 
 	codeCache, hasCodeCash := javaScriptCache[id]
 	if hasCodeCash {
-		compiledScript, compilationError := isolate.CompileUnboundScript(source, id, v8go.CompileOptions{CachedData: codeCache})
+		compiledScript, compilationError := isolate.CompileUnboundScript(string(source), id, v8go.CompileOptions{CachedData: codeCache})
 		if compilationError != nil {
 			return nil, nil, compilationError
 		}
 		script = compiledScript
 	} else {
-		compiledScript, compilationError := isolate.CompileUnboundScript(source, id, v8go.CompileOptions{})
+		compiledScript, compilationError := isolate.CompileUnboundScript(string(source), id, v8go.CompileOptions{})
 		if compilationError != nil {
 			return nil, nil, compilationError
 		}
@@ -75,111 +72,20 @@ func JavaScriptRun(id string, source string, functions map[string]v8go.FunctionC
 }
 
 // JavaScriptBundle bundles JavaScript source code into a specific format.
-func JavaScriptBundle(rootDirectory string, format api.Format, source string) (bundle string, bundleError error) {
+func JavaScriptBundle(rootDirectory string, format api.Format, source []byte) (bundle []byte, bundleError error) {
 	result := api.Build(api.BuildOptions{
 		Bundle: true,
 		Format: format,
 		Write:  false,
 		Stdin: &api.StdinOptions{
-			Contents:   source,
+			Contents:   string(source),
 			ResolveDir: rootDirectory,
 		},
 	})
 
 	for _, err := range result.Errors {
-		return "", fmt.Errorf("%s in %s:%d:%d", err.Text, err.Location.File, err.Location.Line, err.Location.Column)
+		return make([]byte, 0), fmt.Errorf("%s in %s:%d:%d", err.Text, err.Location.File, err.Location.Line, err.Location.Column)
 	}
 
-	return string(result.OutputFiles[0].Contents), nil
-}
-
-// JavaScriptRender executes the `.dist/server/render.server.ts` file
-// and returns the head of the document along with its body.
-//
-// If the environment variable DEV is set to 1, the file .dist/server/render.server.ts is executed directly from the
-// local file system, otherwise RenderServerJs executes the file .dist/server/render.server.ts located within the
-// view's embedded file system.
-func JavaScriptRender(efs embed.FS, stringifiedProps string) (head string, body string, jsError error) {
-	var renderEsmBytes []byte
-
-	if "1" == os.Getenv("DEV") {
-		renderFileName := filepath.Join(".dist", "server", "render.server.js")
-		renderEsmBytesLocal, readError := os.ReadFile(renderFileName)
-		if readError != nil {
-			return "", "", readError
-		}
-		renderEsmBytes = renderEsmBytesLocal
-	} else {
-		renderFileName := ".dist/server/render.server.js"
-		renderEsmBytesLocal, readError := efs.ReadFile(renderFileName)
-		if readError != nil {
-			return "", "", readError
-		}
-		renderEsmBytes = renderEsmBytesLocal
-	}
-
-	renderEsm := string(renderEsmBytes)
-
-	renderCjs, javaScriptBundleError := JavaScriptBundle(".", api.FormatCommonJS, renderEsm)
-	if javaScriptBundleError != nil {
-		return "", "", javaScriptBundleError
-	}
-
-	renderIif := fmt.Sprintf("const module={exports:{}}; const render = \n(function(){\n%s\nreturn render;\n})()", renderCjs)
-
-	doneEsm := fmt.Sprintf(
-		`
-		%s
-		render(JSON.parse(stringifiedProps())).then(function done(rendered){
-			head(rendered.head??'');
-			body(rendered.body??'');
-		});
-		`,
-		renderIif,
-	)
-
-	doneCjs, bundleError := JavaScriptBundle(".", api.FormatCommonJS, doneEsm)
-	if bundleError != nil {
-		return "", "", bundleError
-	}
-
-	globals := map[string]v8go.FunctionCallback{
-		"stringifiedProps": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-			value, valueError := v8go.NewValue(info.Context().Isolate(), stringifiedProps)
-			if nil != valueError {
-				return nil
-			}
-			return value
-		},
-		"inspect": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-			args := info.Args()
-			if len(args) > 0 {
-				message := args[0].String()
-				println(message)
-			}
-			return nil
-		},
-		"head": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-			args := info.Args()
-			if len(args) > 0 {
-				head = args[0].String()
-			}
-			return nil
-		},
-		"body": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-			args := info.Args()
-			if len(args) > 0 {
-				body = args[0].String()
-			}
-			return nil
-		},
-	}
-
-	_, destroy, javaScriptError := JavaScriptRun("render.server.js", doneCjs, globals)
-	defer destroy()
-	if javaScriptError != nil {
-		return head, body, javaScriptError
-	}
-
-	return head, body, nil
+	return result.OutputFiles[0].Contents, nil
 }

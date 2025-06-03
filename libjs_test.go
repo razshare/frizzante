@@ -10,7 +10,7 @@ import (
 func TestJavaScriptRun(test *testing.T) {
 	// Simple.
 	script := "1+1"
-	actual, destroy, javaScriptError := JavaScriptRun("test", script, map[string]v8go.FunctionCallback{})
+	actual, destroy, javaScriptError := JavaScriptRun("test", []byte(script), map[string]v8go.FunctionCallback{})
 	defer destroy()
 	if javaScriptError != nil {
 		test.Fatal(javaScriptError)
@@ -44,7 +44,7 @@ func TestJavaScriptRun(test *testing.T) {
 	
 	result
 	`
-	actual, destroy, javaScriptError = JavaScriptRun("test", script, map[string]v8go.FunctionCallback{})
+	actual, destroy, javaScriptError = JavaScriptRun("test", []byte(script), map[string]v8go.FunctionCallback{})
 	defer destroy()
 	if javaScriptError != nil {
 		test.Fatal(javaScriptError)
@@ -90,7 +90,7 @@ func TestJavaScriptBundle(test *testing.T) {
 	})
 	`
 
-	cjs, bundleError := JavaScriptBundle(".", api.FormatCommonJS, script)
+	cjs, bundleError := JavaScriptBundle(".", api.FormatCommonJS, []byte(script))
 	if bundleError != nil {
 		test.Fatal(bundleError)
 	}

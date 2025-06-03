@@ -18,7 +18,7 @@ export default defineConfig({
   ],
   resolve: {
     alias: {
-      $frizzante: "./.frizzante/vite-project/lib",
+      $frizzante: "./.frz/utilities",
       $lib: "./lib",
     },
   },
@@ -26,7 +26,7 @@ export default defineConfig({
     sourcemap,
     rollupOptions: {
       input: {
-        index: "./.frizzante/vite-project/index.html",
+        index: "./.frz/router/index.html",
       },
     },
   },

@@ -1,9 +1,9 @@
 <script lang="ts">
     import Layout from '$lib/components/Layout.svelte'
     import {getContext} from "svelte";
-    import type {ServerContext} from "$frizzante/types.ts";
+    import type {View} from "$frizzante/types.ts";
 
-    const server = getContext("server") as ServerContext<any>
+    const view = getContext("view") as View<{ name: string }>
 </script>
 
 <svelte:head>
@@ -11,5 +11,5 @@
 </svelte:head>
 
 <Layout>
-    <h1>Hello {server.data.name}.</h1>
+    <h1>Hello {view.data.name}.</h1>
 </Layout>
