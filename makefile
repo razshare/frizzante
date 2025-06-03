@@ -1,5 +1,4 @@
 test:
-	make generate
 	CGO_ENABLED=1 go test
 
 generate:
@@ -17,3 +16,8 @@ clean:
 update:
 	go mod tidy
 	bun update
+
+hooks:
+	printf "#!/usr/bin/env bash\n" > .git/hooks/pre-commit
+	printf "make clean && make update && make generate && make test" >> .git/hooks/pre-commit
+	chmod +x .git/hooks/pre-commit

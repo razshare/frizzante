@@ -25,4 +25,4 @@ jobs:
         go-version: '1.23'
 
     - name: Test
-      run: make test
+      run: make clean && make update && make generate && make test
