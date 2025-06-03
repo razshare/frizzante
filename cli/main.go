@@ -3,16 +3,16 @@ package main
 import (
 	"flag"
 	"github.com/pterm/pterm"
-	"github.com/razshare/frizzante/cli"
+	"github.com/razshare/frizzante/cli/lib"
 	"log"
 )
 
 func main() {
 	flag.Parse()
 
-	if !*cli.FlagProject &&
-		!*cli.FlagRouter &&
-		!*cli.FlagUtilities {
+	if !*lib.FlagProject &&
+		!*lib.FlagRouter &&
+		!*lib.FlagUtilities {
 
 		generator, showError := pterm.
 			DefaultInteractiveSelect.
@@ -28,19 +28,19 @@ func main() {
 		}
 
 		if "Project" == generator {
-			*cli.FlagProject = true
+			*lib.FlagProject = true
 		}
 
 		if "Router" == generator {
-			*cli.FlagRouter = true
+			*lib.FlagRouter = true
 		}
 
 		if "Utilities" == generator {
-			*cli.FlagUtilities = true
+			*lib.FlagUtilities = true
 		}
 	}
 
-	cli.Router()
-	cli.Project()
-	cli.Utilities()
+	lib.Router()
+	lib.Project()
+	lib.Utilities()
 }
