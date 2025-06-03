@@ -12,6 +12,7 @@ test:
 	CGO_ENABLED=1 go test ./frz
 
 generate:
+	make update
 	go run main.go -generate -router -views="frz/components/views" -out=".frz/router"
 	go run main.go -generate -utilities -out=".frz/utilities"
 	bunx vite build --ssr .frz/router/server.ts --outDir frz/.dist/server --emptyOutDir
