@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/razshare/frizzante/fs"
 	"io"
 	"net/http"
 	"net/url"
@@ -436,12 +437,12 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
-	if !ExistsInEmbeddedFileSystem(efs, fileName) || IsEmbeddedDirectory(efs, fileName) {
+	if !fs.ExistsInEmbeddedFileSystem(efs, fileName) || fs.IsEmbeddedDirectory(efs, fileName) {
 		orElse()
 		return
 	}
 
-	reader, info, readerError := ReaderFromEmbeddedFileName(efs, fileName)
+	reader, info, readerError := fs.ReaderFromEmbeddedFileName(efs, fileName)
 	if nil != readerError {
 		connection.server.notifier.SendErrorAndTrace(readerError, 1)
 		return
@@ -470,7 +471,7 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 	}
 
 	if "" == connection.header.Get("Content-Type") {
-		connection.SendHeader("Content-Type", Mime(fileName))
+		connection.SendHeader("Content-Type", fs.Mime(fileName))
 	}
 
 	if "" == connection.header.Get("Content-Length") {
@@ -483,12 +484,12 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 func (connection *Connection) SendFileOrElse(orElse func()) {
 	fileName := filepath.Join(".dist", "client", connection.request.RequestURI)
 
-	if !FileExists(fileName) || IsDirectory(fileName) {
+	if !fs.FileExists(fileName) || fs.IsDirectory(fileName) {
 		connection.SendEmbeddedFileOrElse(connection.server.dist, orElse)
 		return
 	}
 
-	reader, info, readerError := ReaderFromFileName(fileName)
+	reader, info, readerError := fs.ReaderFromFileName(fileName)
 	if nil != readerError {
 		connection.server.notifier.SendErrorAndTrace(readerError, 1)
 		return
@@ -517,7 +518,7 @@ func (connection *Connection) SendFileOrElse(orElse func()) {
 	}
 
 	if "" == connection.header.Get("Content-Type") {
-		connection.SendHeader("Content-Type", Mime(fileName))
+		connection.SendHeader("Content-Type", fs.Mime(fileName))
 	}
 
 	if "" == connection.header.Get("Content-Length") {

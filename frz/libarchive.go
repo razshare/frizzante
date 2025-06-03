@@ -2,6 +2,7 @@ package frz
 
 import (
 	"errors"
+	"github.com/razshare/frizzante/fs"
 	"os"
 	"path/filepath"
 )
@@ -56,7 +57,7 @@ func (archive *DiskArchive) Set(domain string, key string, value []byte) error {
 	lane.Lock()
 	defer lane.Unlock()
 	directoryName := filepath.Join(archive.name, domain)
-	if !FileExists(directoryName) {
+	if !fs.FileExists(directoryName) {
 		mkdirError := os.MkdirAll(directoryName, os.ModePerm)
 		if nil != mkdirError {
 			return mkdirError
@@ -78,7 +79,7 @@ func (archive *DiskArchive) Has(domain string, key string) (bool, error) {
 	lane.Lock()
 	defer lane.Unlock()
 	fileName := filepath.Join(archive.name, domain, key)
-	return FileExists(fileName), nil
+	return fs.FileExists(fileName), nil
 }
 
 func (archive *DiskArchive) Remove(domain string, key string) error {
@@ -103,7 +104,7 @@ func (archive *DiskArchive) HasDomain(domain string) (bool, error) {
 	lane := archive.road.WithLane(domain)
 	lane.Lock()
 	defer lane.Unlock()
-	return FileExists(filepath.Join(archive.name, domain)), nil
+	return fs.FileExists(filepath.Join(archive.name, domain)), nil
 }
 
 func (archive *DiskArchive) RemoveDomain(domain string) error {

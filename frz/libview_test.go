@@ -1,11 +1,15 @@
 package frz
 
 import (
+	"embed"
 	"fmt"
 	"strings"
 	"testing"
 	"time"
 )
+
+//go:embed .dist/*/**
+var efs embed.FS
 
 type Data struct {
 	Name string `json:"name"`

@@ -1,19 +1,17 @@
 test:
 	make generate
-	CGO_ENABLED=1 go test ./frz
+	CGO_ENABLED=1 go test ./...
 
 generate:
-	frizzante-cli -generate -router -views="lib/components/views" -out=".frz/router"
-	frizzante-cli -generate -utilities -out=".frz/utilities"
-	bunx vite build --ssr .frz/router/server.ts --outDir frz/.dist/server --emptyOutDir
+	go run cli/main.go -generate -router -views="lib/components/views" -out="frz/.generated/router"
+	go run cli/main.go -generate -utilities -out="frz/.generated/utilities"
+	bunx vite build --ssr frz/.generated/router/server.ts --outDir frz/.dist/server --emptyOutDir
 	bunx vite build --outDir frz/.dist/client --emptyOutDir
-	rm .frz -fr
 
 clean:
 	go clean
 	rm node_modules -fr
-	rm cli/bin -fr
-	rm cli/.frz -fr
+	rm frz/.generated -fr
 	rm frz/.dist -fr
 
 update:
