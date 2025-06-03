@@ -1,4 +1,4 @@
-package lib
+package cli
 
 import (
 	"archive/zip"

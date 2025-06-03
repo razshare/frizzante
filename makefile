@@ -3,8 +3,8 @@ test:
 	CGO_ENABLED=1 go test ./...
 
 generate:
-	go run cli/main.go -generate -router -views="lib/components/views" -out="frz/.generated/router"
-	go run cli/main.go -generate -utilities -out="frz/.generated/utilities"
+	go run main.go -generate -router -views="frz/lib/components/views" -out="frz/.generated/router"
+	go run main.go -generate -utilities -out="frz/.generated/utilities"
 	bunx vite build --ssr frz/.generated/router/server.ts --outDir frz/.dist/server --emptyOutDir
 	bunx vite build --outDir frz/.dist/client --emptyOutDir
 

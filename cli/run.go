@@ -1,18 +1,18 @@
-package main
+package cli
 
 import (
 	"flag"
 	"github.com/pterm/pterm"
-	"github.com/razshare/frizzante/cli/lib"
 	"log"
 )
 
-func main() {
+func Run() {
+
 	flag.Parse()
 
-	if !*lib.FlagProject &&
-		!*lib.FlagRouter &&
-		!*lib.FlagUtilities {
+	if !*FlagProject &&
+		!*FlagRouter &&
+		!*FlagUtilities {
 
 		generator, showError := pterm.
 			DefaultInteractiveSelect.
@@ -28,19 +28,19 @@ func main() {
 		}
 
 		if "Project" == generator {
-			*lib.FlagProject = true
+			*FlagProject = true
 		}
 
 		if "Router" == generator {
-			*lib.FlagRouter = true
+			*FlagRouter = true
 		}
 
 		if "Utilities" == generator {
-			*lib.FlagUtilities = true
+			*FlagUtilities = true
 		}
 	}
 
-	lib.Router()
-	lib.Project()
-	lib.Utilities()
+	Router()
+	Project()
+	Utilities()
 }

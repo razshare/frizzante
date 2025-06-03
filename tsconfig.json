@@ -19,7 +19,7 @@
         "./frz/.generated/utilities/*"
       ],
       "$lib/*": [
-        "./cli/lib/*"
+        "./frz/lib/*"
       ]
     },
     "lib": [
@@ -37,12 +37,12 @@
     "./frz/.generated/**/*.d.ts",
     "./frz/.generated/**/*.js",
     "./frz/.generated/**/*.ts",
-    "./cli/lib/**/*.svelte.js",
-    "./cli/lib/**/*.svelte.ts",
-    "./cli/lib/**/*.svelte",
-    "./cli/lib/**/*.d.ts",
-    "./cli/lib/**/*.js",
-    "./cli/lib/**/*.ts"
+    "./frz/lib/**/*.svelte.js",
+    "./frz/lib/**/*.svelte.ts",
+    "./frz/lib/**/*.svelte",
+    "./frz/lib/**/*.d.ts",
+    "./frz/lib/**/*.js",
+    "./frz/lib/**/*.ts"
   ],
   "exclude": [
     "./node_modules/**"

@@ -1,4 +1,4 @@
-package lib
+package cli
 
 import (
 	"github.com/pterm/pterm"

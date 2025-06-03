@@ -1,7 +1,7 @@
 <script lang="ts">
     import Layout from '../Layout.svelte'
     import {getContext} from "svelte";
-    import type {View} from "$frizzante/types.ts";
+    import type {View} from "frz/.generated/utilities/types.ts";
 
     const view = getContext("view") as View<{ name: string }>
 </script>

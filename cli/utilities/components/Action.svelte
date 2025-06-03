@@ -12,7 +12,7 @@
 
 <script lang="ts">
     import type {Snippet} from "svelte";
-    import {action} from "$frizzante/scripts/action.ts";
+    import {action} from "../scripts/action.ts";
     import {uuid} from "../scripts/uuid.ts";
 
     const id = uuid()
