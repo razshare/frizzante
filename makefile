@@ -17,7 +17,6 @@ clean:
 	rm frz/.dist -fr
 
 update:
-
 	go mod tidy
 	bun update
 
