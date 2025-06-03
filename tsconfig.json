@@ -19,7 +19,7 @@
         "./.frz/utilities/*"
       ],
       "$lib/*": [
-        "./lib/*"
+        "./frz/*"
       ]
     },
     "lib": [
@@ -31,24 +31,12 @@
     "moduleDetection": "force"
   },
   "include": [
-    "./router/**/*.svelte.js",
-    "./router/**/*.svelte.ts",
-    "./router/**/*.svelte",
-    "./router/**/*.d.ts",
-    "./router/**/*.js",
-    "./router/**/*.ts",
-    "./utilities/**/*.svelte.js",
-    "./utilities/**/*.svelte.ts",
-    "./utilities/**/*.svelte",
-    "./utilities/**/*.d.ts",
-    "./utilities/**/*.js",
-    "./utilities/**/*.ts",
-    "./lib/**/*.svelte.js",
-    "./lib/**/*.svelte.ts",
-    "./lib/**/*.svelte",
-    "./lib/**/*.d.ts",
-    "./lib/**/*.js",
-    "./lib/**/*.ts"
+    "./frz/**/*.svelte.js",
+    "./frz/**/*.svelte.ts",
+    "./frz/**/*.svelte",
+    "./frz/**/*.d.ts",
+    "./frz/**/*.js",
+    "./frz/**/*.ts"
   ],
   "exclude": [
     "./node_modules/**"

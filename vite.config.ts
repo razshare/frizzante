@@ -19,14 +19,14 @@ export default defineConfig({
   resolve: {
     alias: {
       $frizzante: "./.frz/utilities",
-      $lib: "./lib",
+      $lib: "./frz",
     },
   },
   build: {
     sourcemap,
     rollupOptions: {
       input: {
-        index: "./.frz/router/index.html",
+        index: "./index.html",
       },
     },
   },
