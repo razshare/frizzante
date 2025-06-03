@@ -1,6 +1,4 @@
 test:
-	make update
-	make generate
 	CGO_ENABLED=1 go test ./...
 
 generate:
