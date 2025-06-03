@@ -1,4 +1,4 @@
-module github.com/razshare/frizzante
+module github.com/razshare/frizzante/frz
 
 go 1.24
 
