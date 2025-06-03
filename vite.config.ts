@@ -19,7 +19,7 @@ export default defineConfig({
   resolve: {
     alias: {
       $frizzante: "./.frz/utilities",
-      $lib: "./frz",
+      $lib: "./lib",
     },
   },
   build: {
