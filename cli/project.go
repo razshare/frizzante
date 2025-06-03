@@ -3,7 +3,6 @@ package cli
 import (
 	"archive/zip"
 	"github.com/pterm/pterm"
-	"github.com/razshare/frizzante/frz"
 	"io"
 	"log"
 	"net/http"
@@ -53,7 +52,7 @@ func Project() {
 	for _, file := range zipReader.File {
 		fileName := filepath.Join(*FlagOut, strings.TrimPrefix(file.Name, "frizzante-starter-main"))
 		fileIsDirectory := file.FileInfo().IsDir()
-		fileIsDirectoryOnDisk := frz.IsDirectory(fileName)
+		fileIsDirectoryOnDisk := isDirectory(fileName)
 
 		if fileIsDirectory && !fileIsDirectoryOnDisk {
 			mkdirError := os.MkdirAll(fileName, os.ModePerm)
@@ -69,7 +68,7 @@ func Project() {
 			continue
 		}
 
-		parentExists := frz.IsDirectory(directoryName)
+		parentExists := isDirectory(directoryName)
 
 		if !parentExists {
 			mkdirError := os.MkdirAll(directoryName, os.ModePerm)
@@ -94,7 +93,7 @@ func Project() {
 		}
 	}
 
-	frz.DeleteFile(zipFileName)
+	_ = os.Remove(zipFileName)
 
 	os.Exit(0)
 }

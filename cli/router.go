@@ -2,7 +2,6 @@ package cli
 
 import (
 	"github.com/pterm/pterm"
-	"github.com/razshare/frizzante/frz"
 	"log"
 	"os"
 	"path/filepath"
@@ -33,7 +32,7 @@ func Router() {
 		}
 	}
 
-	r := frz.NewAotRouter()
+	r := NewAotRouter()
 
 	if e = r.LoadViews(*FlagViews); e != nil {
 		log.Fatal(e)

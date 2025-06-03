@@ -1,15 +1,13 @@
 build:
 	make update
-	make generate
 	CGO_ENABLED=1 GOOS=linux GOARCH=386 go build -o bin/frizzante-cli-linux-386 .
 	CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o bin/frizzante-cli-linux-amd64 .
 	CGO_ENABLED=1 GOOS=windows GOARCH=386 go build -o bin/frizzante-cli-windows-386 .
 	CGO_ENABLED=1 GOOS=windows GOARCH=amd64 go build -o bin/frizzante-cli-windows-amd64 .
 
 test:
-	make update
 	make generate
-	CGO_ENABLED=1 go test ./frz
+	CGO_ENABLED=1 cd frz && go test
 
 generate:
 	make update

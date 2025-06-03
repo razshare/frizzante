@@ -2,7 +2,6 @@ package cli
 
 import (
 	"github.com/pterm/pterm"
-	"github.com/razshare/frizzante/frz"
 	"log"
 	"os"
 	"path/filepath"
@@ -25,7 +24,7 @@ func Utilities() {
 		}
 	}
 
-	u := frz.NewAotUtilities()
+	u := NewAotUtilities()
 
 	if e = u.CreateOnDisk(filepath.Join(*FlagOut)); e != nil {
 		log.Fatal(e)

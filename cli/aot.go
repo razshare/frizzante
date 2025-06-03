@@ -1,4 +1,4 @@
-package frz
+package cli
 
 import (
 	"bytes"
@@ -34,7 +34,7 @@ func (assets *AotUtilities) CreateOnDisk(to string) error {
 			return readDirError
 		}
 
-		if !IsDirectory(to) {
+		if !isDirectory(to) {
 			mkdirError := os.MkdirAll(to, os.ModePerm)
 			if mkdirError != nil {
 				return mkdirError
@@ -132,7 +132,7 @@ func (assets *AotRouter) CreateOnDisk(to string) error {
 			return readDirError
 		}
 
-		if !IsDirectory(to) {
+		if !isDirectory(to) {
 			mkdirError := os.MkdirAll(to, os.ModePerm)
 			if mkdirError != nil {
 				return mkdirError
