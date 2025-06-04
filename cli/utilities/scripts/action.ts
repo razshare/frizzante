@@ -6,7 +6,7 @@ import {swaps} from "./swaps.ts";
 export function action(path = ""): {
     method: "POST"
     action: string
-    onsubmit: (e: never) => Promise<void>
+    onsubmit: (e: Event) => Promise<void>
 } {
     const view = getContext("view") as View<never>
     route(view)

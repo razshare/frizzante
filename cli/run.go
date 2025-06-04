@@ -11,13 +11,11 @@ func Run() {
 	flag.Parse()
 
 	if !*FlagProject &&
-		!*FlagRender &&
 		!*FlagUtilities {
 
 		generator, showError := pterm.
 			DefaultInteractiveSelect.
 			WithOptions([]string{
-				"Render",
 				"Project",
 				"Utilities",
 			}).
@@ -25,10 +23,6 @@ func Run() {
 
 		if showError != nil {
 			log.Fatal(showError)
-		}
-
-		if "Render" == generator {
-			*FlagRender = true
 		}
 
 		if "Project" == generator {
@@ -40,7 +34,6 @@ func Run() {
 		}
 	}
 
-	Render()
 	Project()
 	Utilities()
 }

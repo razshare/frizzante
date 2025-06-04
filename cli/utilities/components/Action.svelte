@@ -18,7 +18,7 @@
     const id = uuid()
     type Props = {
         path: string
-        using?: any
+        using?: Record<string, unknown>
         children: Snippet
     }
 
@@ -30,8 +30,8 @@
 </script>
 
 <form {...action(path)}>
-    {#each Object.keys(using ?? {}) as key}
-        {@const value = using[key]}
+    {#each Object.keys(using ?? {}) as key(key)}
+        {@const value = (using??{})[key]??''}
         <input type="hidden" name="{key}" value="{value}">
     {/each}
 
