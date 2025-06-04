@@ -23,7 +23,7 @@ type ConnectedSessionOperator struct {
 
 // Session creates a new session.
 func Session[T any](c *Connection, state T) (*T, SessionOperator) {
-	archive := NewDiskArchive().WithName(".sessions")
+	archive := NewDiskArchive().WithName("sessions")
 	manager := &ConnectedSessionOperator{
 		archive:    archive,
 		connection: c,

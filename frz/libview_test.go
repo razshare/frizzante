@@ -8,8 +8,8 @@ import (
 	"time"
 )
 
-//go:embed .dist/*/**
-var efs embed.FS
+//go:embed dist/*
+var dist embed.FS
 
 type Data struct {
 	Name string `json:"name"`
@@ -18,7 +18,10 @@ type Data struct {
 func TestRenderServer(test *testing.T) {
 	port := NextNumber(8080)
 	server := NewServer().
-		WithDist(efs).
+		WithDist(dist).
+		WithPublicRoot("dist/client").
+		WithViewIndex("dist/client/index.html").
+		WithViewServer("dist/server/server.js").
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
 		AddRoute(Route{Pattern: "GET /welcome", Handler: func(c *Connection) {
 			c.SendView(View{
@@ -48,7 +51,10 @@ func TestRenderServer(test *testing.T) {
 func TestRenderClient(test *testing.T) {
 	port := NextNumber(8080)
 	server := NewServer().
-		WithDist(efs).
+		WithDist(dist).
+		WithPublicRoot("dist/client").
+		WithViewIndex("dist/client/index.html").
+		WithViewServer("dist/server/server.js").
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
 		AddRoute(Route{Pattern: "GET /welcome", Handler: func(c *Connection) {
 			c.SendView(View{

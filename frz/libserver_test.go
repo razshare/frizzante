@@ -71,7 +71,7 @@ func TestServerWithApi(test *testing.T) {
 	expected := "hello"
 	port := NextNumber(8080)
 	server := NewServer().
-		WithDist(efs).
+		WithDist(dist).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
 		AddRoute(Route{Pattern: "GET /", Handler: func(c *Connection) {
 			c.SendMessage(expected)
@@ -96,7 +96,7 @@ func TestSendStatus(test *testing.T) {
 	expected := 201
 	port := NextNumber(8080)
 	server := NewServer().
-		WithDist(efs).
+		WithDist(dist).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
 		AddRoute(Route{Pattern: "GET /", Handler: func(c *Connection) {
 			c.SendStatus(expected)
@@ -125,7 +125,7 @@ func TestSendHeader(test *testing.T) {
 	expected := "application/json"
 	port := NextNumber(8080)
 	server := NewServer().
-		WithDist(efs).
+		WithDist(dist).
 		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
 		AddRoute(Route{Pattern: "GET /", Handler: func(c *Connection) {
 			c.SendHeader("Content-Type", expected)

@@ -433,7 +433,7 @@ func (connection *Connection) SendJson(payload any) {
 // SendEmbeddedFileOrElse sends the embedded file requested by the client,
 // or the closest index.html embedded file, or else falls back.
 func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()) {
-	fileName := ".dist/client" + connection.request.RequestURI
+	fileName := connection.server.publicRoot + connection.request.RequestURI
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
@@ -482,7 +482,7 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 
 // SendFileOrElse sends the file requested by the client, or else falls back.
 func (connection *Connection) SendFileOrElse(orElse func()) {
-	fileName := filepath.Join(".dist", "client", connection.request.RequestURI)
+	fileName := filepath.Join(connection.server.publicRoot, connection.request.RequestURI)
 
 	if !fs.FileExists(fileName) || fs.IsDirectory(fileName) {
 		connection.SendEmbeddedFileOrElse(connection.server.dist, orElse)
@@ -590,7 +590,15 @@ func (connection *Connection) SendView(view View) {
 		return
 	}
 
-	content, compileError := view.Render(connection.server.dist)
+	if view.server == nil {
+		view.server = connection.server.viewServer
+	}
+
+	if view.index == nil {
+		view.index = connection.server.viewIndex
+	}
+
+	content, compileError := view.Render()
 	if nil != compileError {
 		connection.server.notifier.SendErrorAndTrace(compileError, 1)
 		return

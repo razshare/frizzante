@@ -15,36 +15,20 @@
     "skipLibCheck": true,
     "checkJs": true,
     "paths": {
-      "$frizzante/*": [
-        "./frz/.generated/utilities/*"
-      ],
-      "$lib/*": [
-        "./frz/lib/*"
-      ]
+      "$frz/*": ["./app/frz/*"],
+      "$lib/*": ["./app/lib/*"]
     },
-    "lib": [
-      "esnext",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["esnext", "DOM", "DOM.Iterable"],
     "useDefineForClassFields": true,
     "moduleDetection": "force"
   },
   "include": [
-    "./frz/.generated/**/*.svelte.js",
-    "./frz/.generated/**/*.svelte.ts",
-    "./frz/.generated/**/*.svelte",
-    "./frz/.generated/**/*.d.ts",
-    "./frz/.generated/**/*.js",
-    "./frz/.generated/**/*.ts",
-    "./frz/lib/**/*.svelte.js",
-    "./frz/lib/**/*.svelte.ts",
-    "./frz/lib/**/*.svelte",
-    "./frz/lib/**/*.d.ts",
-    "./frz/lib/**/*.js",
-    "./frz/lib/**/*.ts"
+    "./app/**/*.svelte.js",
+    "./app/**/*.svelte.ts",
+    "./app/**/*.svelte",
+    "./app/**/*.d.ts",
+    "./app/**/*.js",
+    "./app/**/*.ts"
   ],
-  "exclude": [
-    "./node_modules/**"
-  ]
+  "exclude": ["./node_modules/**"]
 }

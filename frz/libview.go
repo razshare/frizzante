@@ -1,13 +1,10 @@
 package frz
 
 import (
-	"embed"
 	"encoding/json"
 	"fmt"
 	"github.com/evanw/esbuild/pkg/api"
 	uuid "github.com/nu7hatch/gouuid"
-	"os"
-	"path/filepath"
 	"regexp"
 	"rogchap.com/v8go"
 	"strings"
@@ -27,6 +24,18 @@ type View struct {
 	Data       any        `json:"data"`
 	Error      string     `json:"error"`
 	RenderMode RenderMode `json:"renderMode"`
+	server     []byte
+	index      []byte
+}
+
+func (view *View) WithServer(data []byte) *View {
+	view.server = data
+	return view
+}
+
+func (view *View) WithIndex(data []byte) *View {
+	view.index = data
+	return view
 }
 
 var noScript = regexp.MustCompile(`<script.*>.*</script>`)
@@ -53,7 +62,7 @@ var bundle []byte
 //
 // If the View is using RenderModeHeadless, then ViewRender returns only the content of the view, without decorating it with an HTML document.
 // The output won't even contain a header, ignoring all <svelte:head> declarations and all css.
-func (view *View) Render(efs embed.FS) (html string, jsError error) {
+func (view *View) Render() (html string, jsError error) {
 	// CSR.
 	targetId, targetIdError := uuid.NewV4()
 	if targetIdError != nil {
@@ -67,28 +76,12 @@ func (view *View) Render(efs embed.FS) (html string, jsError error) {
 
 	props := string(propsBytes)
 
-	var appBytes []byte
-
-	if "1" == os.Getenv("DEV") {
-		var readError error
-		appBytes, readError = os.ReadFile(filepath.Join(".dist", "client", "index.html"))
-		if readError != nil {
-			return "", readError
-		}
-	} else {
-		var readError error
-		appBytes, readError = efs.ReadFile(".dist/client/index.html")
-		if readError != nil {
-			return "", readError
-		}
-	}
-
 	if RenderModeClient == view.RenderMode {
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
 					strings.Replace(
-						string(appBytes),
+						string(view.index),
 						"<!--app-target-->",
 						fmt.Sprintf("<script type=\"application/javascript\">function target(){return document.getElementById(\"%s\")}</script>", targetId),
 						1,
@@ -111,31 +104,13 @@ func (view *View) Render(efs embed.FS) (html string, jsError error) {
 	}
 
 	// SSR.
-	if bundle == nil {
-		var serverEsmBytes []byte
-		if "1" == os.Getenv("DEV") {
-			renderFileName := filepath.Join(".dist", "server", "server.js")
-			renderEsmBytesLocal, readError := os.ReadFile(renderFileName)
-			if readError != nil {
-				return "", readError
-			}
-			serverEsmBytes = renderEsmBytesLocal
-		} else {
-			renderFileName := ".dist/server/server.js"
-			renderEsmBytesLocal, readError := efs.ReadFile(renderFileName)
-			if readError != nil {
-				return "", readError
-			}
-			serverEsmBytes = renderEsmBytesLocal
-		}
+	serverCjsBytes, javaScriptBundleError := JavaScriptBundle(".", api.FormatCommonJS, view.server)
+	if javaScriptBundleError != nil {
+		return "", javaScriptBundleError
+	}
 
-		serverCjsBytes, javaScriptBundleError := JavaScriptBundle(".", api.FormatCommonJS, serverEsmBytes)
-		if javaScriptBundleError != nil {
-			return "", javaScriptBundleError
-		}
-
-		serverIif := fmt.Sprintf(
-			`
+	serverIif := fmt.Sprintf(
+		`
 		const module={exports:{}}; const render = (function(){
 			%s
 			return render;
@@ -145,15 +120,14 @@ func (view *View) Render(efs embed.FS) (html string, jsError error) {
 			body(rendered.body??'');
 		});
 		`,
-			serverCjsBytes,
-		)
+		serverCjsBytes,
+	)
 
-		bundleLocal, bundleError := JavaScriptBundle(".", api.FormatCommonJS, []byte(serverIif))
-		if bundleError != nil {
-			return "", bundleError
-		}
-		bundle = bundleLocal
+	bundleLocal, bundleError := JavaScriptBundle(".", api.FormatCommonJS, []byte(serverIif))
+	if bundleError != nil {
+		return "", bundleError
 	}
+	bundle = bundleLocal
 
 	var head string
 	var body string
@@ -205,7 +179,7 @@ func (view *View) Render(efs embed.FS) (html string, jsError error) {
 			strings.Replace(
 				strings.Replace(
 					strings.Replace(
-						noScript.ReplaceAllString(string(appBytes), ""),
+						noScript.ReplaceAllString(string(view.index), ""),
 						"<!--app-target-->",
 						"",
 						1,
@@ -229,7 +203,7 @@ func (view *View) Render(efs embed.FS) (html string, jsError error) {
 			strings.Replace(
 				strings.Replace(
 					strings.Replace(
-						string(appBytes),
+						string(view.index),
 						"<!--app-target-->",
 						fmt.Sprintf("<script type=\"application/javascript\">function target(){return document.getElementById(\"%s\")}</script>", targetId),
 						1,
