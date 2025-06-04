@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 )
 
-func Router() {
-	if !*FlagGenerate || !*FlagRouter {
+func Render() {
+	if !*FlagGenerate || !*FlagRender {
 		return
 	}
 
@@ -17,7 +17,7 @@ func Router() {
 	if "" == *FlagViews {
 		*FlagViews, e = pterm.
 			DefaultInteractiveTextInput.
-			Show("Views are located in")
+			Show("Pull views from")
 		if e != nil {
 			log.Fatal(e)
 		}

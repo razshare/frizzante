@@ -11,14 +11,14 @@ func Run() {
 	flag.Parse()
 
 	if !*FlagProject &&
-		!*FlagRouter &&
+		!*FlagRender &&
 		!*FlagUtilities {
 
 		generator, showError := pterm.
 			DefaultInteractiveSelect.
 			WithOptions([]string{
+				"Render",
 				"Project",
-				"Router",
 				"Utilities",
 			}).
 			Show("Generate")
@@ -27,12 +27,12 @@ func Run() {
 			log.Fatal(showError)
 		}
 
-		if "Project" == generator {
-			*FlagProject = true
+		if "Render" == generator {
+			*FlagRender = true
 		}
 
-		if "Router" == generator {
-			*FlagRouter = true
+		if "Project" == generator {
+			*FlagProject = true
 		}
 
 		if "Utilities" == generator {
@@ -40,7 +40,7 @@ func Run() {
 		}
 	}
 
-	Router()
+	Render()
 	Project()
 	Utilities()
 }
