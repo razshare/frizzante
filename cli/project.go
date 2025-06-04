@@ -49,6 +49,12 @@ func Project() {
 	if zipOpenError != nil {
 		log.Fatal(zipOpenError)
 	}
+	defer func(zipReader *zip.ReadCloser) {
+		err := zipReader.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}(zipReader)
 
 	for _, file := range zipReader.File {
 		fileName := filepath.Join(*FlagOut, strings.TrimPrefix(file.Name, "frizzante-starter-main"))
@@ -78,20 +84,22 @@ func Project() {
 			}
 		}
 
-		fileReader, openRawError := file.OpenRaw()
-		if openRawError != nil {
-			log.Fatal(openRawError)
+		dstFile, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
+		if err != nil {
+			panic(err)
 		}
 
-		data, readError := io.ReadAll(fileReader)
-		if readError != nil {
-			log.Fatal(readError)
+		fileInArchive, err := file.Open()
+		if err != nil {
+			panic(err)
 		}
 
-		writeError := os.WriteFile(fileName, data, os.ModePerm)
-		if writeError != nil {
-			log.Fatal(writeError)
+		if _, copyError := io.Copy(dstFile, fileInArchive); copyError != nil {
+			panic(copyError)
 		}
+
+		_ = dstFile.Close()
+		_ = fileInArchive.Close()
 	}
 
 	_ = os.Remove(zipFileName)
