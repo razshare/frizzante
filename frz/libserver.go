@@ -8,9 +8,7 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"slices"
-	"strings"
 	"sync"
 	"time"
 
@@ -32,8 +30,8 @@ type Server struct {
 	notifier        *Notifier
 	dist            embed.FS
 	publicRoot      string
-	viewServer      []byte
-	viewIndex       []byte
+	viewServer      string
+	viewIndex       string
 	upgrader        *websocket.Upgrader
 	guards          []Guard
 }
@@ -131,51 +129,17 @@ func (server *Server) WithDist(dist embed.FS) *Server {
 }
 
 func (server *Server) WithPublicRoot(fileName string) *Server {
-	if "1" == os.Getenv("DEV") {
-		server.publicRoot = fileName
-	} else {
-		server.publicRoot = strings.ReplaceAll(fileName, "\\", "/")
-	}
+	server.publicRoot = fileName
 	return server
 }
 
 func (server *Server) WithViewServer(fileName string) *Server {
-	if "1" == os.Getenv("DEV") {
-		data, readError := os.ReadFile(fileName)
-		if readError != nil {
-			server.notifier.SendErrorAndTrace(readError, 1)
-			return server
-		}
-		server.viewServer = data
-	} else {
-		data, readError := server.dist.ReadFile(strings.ReplaceAll(fileName, "\\", "/"))
-		if readError != nil {
-			server.notifier.SendErrorAndTrace(readError, 1)
-			return server
-		}
-		server.viewServer = data
-	}
-
+	server.viewServer = fileName
 	return server
 }
 
 func (server *Server) WithViewIndex(fileName string) *Server {
-	if "1" == os.Getenv("DEV") {
-		data, readError := os.ReadFile(fileName)
-		if readError != nil {
-			server.notifier.SendErrorAndTrace(readError, 1)
-			return server
-		}
-		server.viewIndex = data
-	} else {
-		data, readError := server.dist.ReadFile(strings.ReplaceAll(fileName, "\\", "/"))
-		if readError != nil {
-			server.notifier.SendErrorAndTrace(readError, 1)
-			return server
-		}
-		server.viewIndex = data
-	}
-
+	server.viewIndex = fileName
 	return server
 }
 

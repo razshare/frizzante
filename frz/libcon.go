@@ -590,15 +590,15 @@ func (connection *Connection) SendView(view View) {
 		return
 	}
 
-	if view.server == nil {
+	if "" == view.server {
 		view.server = connection.server.viewServer
 	}
 
-	if view.index == nil {
+	if "" == view.index {
 		view.index = connection.server.viewIndex
 	}
 
-	content, compileError := view.Render()
+	content, compileError := view.Render(connection.server.dist)
 	if nil != compileError {
 		connection.server.notifier.SendErrorAndTrace(compileError, 1)
 		return

@@ -1,10 +1,14 @@
 package frz
 
 import (
+	"embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/evanw/esbuild/pkg/api"
 	uuid "github.com/nu7hatch/gouuid"
+	"github.com/razshare/frizzante/fs"
+	"os"
 	"regexp"
 	"rogchap.com/v8go"
 	"strings"
@@ -24,17 +28,17 @@ type View struct {
 	Data       any        `json:"data"`
 	Error      string     `json:"error"`
 	RenderMode RenderMode `json:"renderMode"`
-	server     []byte
-	index      []byte
+	server     string
+	index      string
 }
 
-func (view *View) WithServer(data []byte) *View {
-	view.server = data
+func (view *View) WithServer(fileName string) *View {
+	view.server = fileName
 	return view
 }
 
-func (view *View) WithIndex(data []byte) *View {
-	view.index = data
+func (view *View) WithIndex(fileName string) *View {
+	view.index = fileName
 	return view
 }
 
@@ -62,7 +66,7 @@ var bundle []byte
 //
 // If the View is using RenderModeHeadless, then ViewRender returns only the content of the view, without decorating it with an HTML document.
 // The output won't even contain a header, ignoring all <svelte:head> declarations and all css.
-func (view *View) Render() (html string, jsError error) {
+func (view *View) Render(efs embed.FS) (html string, renderError error) {
 	// CSR.
 	targetId, targetIdError := uuid.NewV4()
 	if targetIdError != nil {
@@ -76,12 +80,30 @@ func (view *View) Render() (html string, jsError error) {
 
 	props := string(propsBytes)
 
+	var index []byte
+	var indexReadError error
+	if fs.FileExists(view.index) {
+		index, indexReadError = os.ReadFile(view.index)
+	}
+
+	if indexReadError != nil || index == nil {
+		fileNameFixed := strings.ReplaceAll(view.index, "\\", "/")
+		if fs.ExistsInEmbeddedFileSystem(efs, fileNameFixed) {
+			index, indexReadError = efs.ReadFile(fileNameFixed)
+			if indexReadError != nil {
+				return "", indexReadError
+			}
+		} else {
+			return "", errors.New("view index is missing from the host file system and the embedded file system")
+		}
+	}
+
 	if RenderModeClient == view.RenderMode {
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
 					strings.Replace(
-						string(view.index),
+						string(index),
 						"<!--app-target-->",
 						fmt.Sprintf("<script type=\"application/javascript\">function target(){return document.getElementById(\"%s\")}</script>", targetId),
 						1,
@@ -103,8 +125,26 @@ func (view *View) Render() (html string, jsError error) {
 		), nil
 	}
 
+	var server []byte
+	var serverReadError error
+	if fs.FileExists(view.server) {
+		server, serverReadError = os.ReadFile(view.server)
+	}
+
+	if serverReadError != nil || server == nil {
+		fileNameFixed := strings.ReplaceAll(view.server, "\\", "/")
+		if fs.ExistsInEmbeddedFileSystem(efs, fileNameFixed) {
+			server, serverReadError = efs.ReadFile(fileNameFixed)
+			if serverReadError != nil {
+				return "", serverReadError
+			}
+		} else {
+			return "", errors.New("view server is missing from the host file system and the embedded file system")
+		}
+	}
+
 	// SSR.
-	serverCjsBytes, javaScriptBundleError := JavaScriptBundle(".", api.FormatCommonJS, view.server)
+	serverCjsBytes, javaScriptBundleError := JavaScriptBundle(".", api.FormatCommonJS, server)
 	if javaScriptBundleError != nil {
 		return "", javaScriptBundleError
 	}
@@ -179,7 +219,7 @@ func (view *View) Render() (html string, jsError error) {
 			strings.Replace(
 				strings.Replace(
 					strings.Replace(
-						noScript.ReplaceAllString(string(view.index), ""),
+						noScript.ReplaceAllString(string(index), ""),
 						"<!--app-target-->",
 						"",
 						1,
@@ -203,7 +243,7 @@ func (view *View) Render() (html string, jsError error) {
 			strings.Replace(
 				strings.Replace(
 					strings.Replace(
-						string(view.index),
+						string(index),
 						"<!--app-target-->",
 						fmt.Sprintf("<script type=\"application/javascript\">function target(){return document.getElementById(\"%s\")}</script>", targetId),
 						1,
