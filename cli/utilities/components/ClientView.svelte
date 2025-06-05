@@ -1,7 +1,7 @@
 <script lang="ts">
     import {setContext} from 'svelte'
     import {views} from "$lib/components/views/client.ts";
-    import ViewComponent from "$frz/components/View.svelte";
+    import ClientViewLoader from "$frz/components/ClientViewLoader.svelte";
     import type {View} from "$frz/types.ts";
 
     let {name, data, error, renderMode} = $props() as View<false>
@@ -11,7 +11,7 @@
 
 {#each Object.keys(views) as key(key)}
     {#if key === view.name}
-        <ViewComponent from={views[key]}/>
+        <ClientViewLoader from={views[key]}/>
     {/if}
 {/each}
 
