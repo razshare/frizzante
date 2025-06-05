@@ -41,3 +41,7 @@ This will create a `bin/app` standalone executable.
 > \
 > For that reason, the first build or launch may take some time, just be patient.\
 > Once that is done, subsequent builds or launches will take considerably less time.
+
+# Documentation
+
+Visit [https://razshare.github.io/frizzante-docs/guides/get-started/](https://razshare.github.io/frizzante-docs/guides/get-started/) for a more in depth documentation.
