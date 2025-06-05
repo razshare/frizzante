@@ -7,6 +7,9 @@ rm frizzante-starter/.git -fr && \
 cd frizzante-starter
 ```
 
+> [!NOTE]
+> Make sure [Bun](https://bun.sh/) and [build-essential](https://askubuntu.com/questions/398489/how-to-install-build-essential) are installed.
+
 Start development with
 
 ```sh
