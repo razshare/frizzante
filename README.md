@@ -36,6 +36,7 @@ make build
 
 This will create a `bin/app` standalone executable.
 
+> [!NOTE]
 > The final executable uses [V8](https://v8.dev/) bindings to run JavaScript code on the server in order to render svelte components.\
 > \
 > For that reason, the first build or launch may take some time, just be patient.\
