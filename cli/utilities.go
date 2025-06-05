@@ -17,7 +17,6 @@ func Utilities() {
 	if "" == *FlagOut {
 		*FlagOut, e = pterm.
 			DefaultInteractiveTextInput.
-			WithDelimiter("").
 			Show("Drop utilities in")
 		if e != nil {
 			log.Fatal(e)
