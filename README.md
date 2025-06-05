@@ -44,4 +44,4 @@ This will create a `bin/app` standalone executable.
 
 # Documentation
 
-Visit [https://razshare.github.io/frizzante-docs/guides/get-started/](https://razshare.github.io/frizzante-docs/guides/get-started/) for a more in depth documentation.
+Visit [https://razshare.github.io/frizzante-docs/guides/get-started/](https://razshare.github.io/frizzante-docs/guides/get-started/) for a detailed documentation.
