@@ -18,7 +18,7 @@ type Data struct {
 func TestRenderServer(test *testing.T) {
 	port := NextNumber(8080)
 	server := NewServer().
-		WithDist(dist).
+		WithEfs(dist).
 		WithPublicRoot("dist/client").
 		WithViewIndex("dist/client/index.html").
 		WithViewServer("dist/server/server.js").
@@ -51,7 +51,7 @@ func TestRenderServer(test *testing.T) {
 func TestRenderClient(test *testing.T) {
 	port := NextNumber(8080)
 	server := NewServer().
-		WithDist(dist).
+		WithEfs(dist).
 		WithPublicRoot("dist/client").
 		WithViewIndex("dist/client/index.html").
 		WithViewServer("dist/server/server.js").

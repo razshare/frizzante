@@ -485,7 +485,7 @@ func (connection *Connection) SendFileOrElse(orElse func()) {
 	fileName := filepath.Join(connection.server.publicRoot, connection.request.RequestURI)
 
 	if !fs.FileExists(fileName) || fs.IsDirectory(fileName) {
-		connection.SendEmbeddedFileOrElse(connection.server.dist, orElse)
+		connection.SendEmbeddedFileOrElse(connection.server.efs, orElse)
 		return
 	}
 
@@ -598,7 +598,7 @@ func (connection *Connection) SendView(view View) {
 		view.index = connection.server.viewIndex
 	}
 
-	content, compileError := view.Render(connection.server.dist)
+	content, compileError := view.Render(connection.server.efs)
 	if nil != compileError {
 		connection.server.notifier.SendErrorAndTrace(compileError, 1)
 		return
