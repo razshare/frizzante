@@ -59,7 +59,7 @@ function swap(view: View<unknown>): SwapAction {
 
             let query = ""
 
-            if ("GET" === swapMethod) {
+            if ("GET" === swapMethod.toUpperCase()) {
                 if (swapBody && typeof swapBody === 'object') {
                     const params = new URLSearchParams()
                     swapBody.forEach(function each(value, key) {
