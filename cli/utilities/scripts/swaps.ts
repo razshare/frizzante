@@ -8,7 +8,7 @@ type SwapAction = {
     position: () => number
     withMethod: (method: "GET" | "POST") => SwapAction
     withPath: (path: string) => SwapAction
-    withBody: (body: unknown) => SwapAction
+    withBody: (body: FormData) => SwapAction
     play: (update: boolean) => Promise<void>
 }
 
@@ -22,7 +22,7 @@ function find(id: string): false | SwapAction {
 function swap(view: View<unknown>): SwapAction {
     let swapMethod = 'GET' as "GET" | "POST"
     let swapPath = location.pathname
-    let swapBody: unknown
+    let swapBody: FormData
     const swapPosition = nextPosition++
 
     return {
@@ -46,17 +46,32 @@ function swap(view: View<unknown>): SwapAction {
             swapPath = path
             return this
         },
-        withBody(body: unknown) {
+        withBody(body: FormData) {
             swapBody = body
             return this
         },
 
         async play(update: boolean) {
-            const response = await fetch(swapPath, {
+            const payload = {
                 method: swapMethod,
                 headers: {Accept: "application/json"},
-                body: swapBody as BodyInit
-            });
+            } as RequestInit
+
+            let query = ""
+
+            if ("GET" === swapMethod) {
+                if (swapBody && typeof swapBody === 'object') {
+                    const params = new URLSearchParams()
+                    swapBody.forEach(function each(value, key) {
+                        params.append(key, `${value}`)
+                    })
+                    query = `${params.toString()}`
+                }
+            } else {
+                payload.body = swapBody as BodyInit
+            }
+
+            const response = await fetch(`${swapPath}${query}`, payload);
 
             const json = await response.json();
 
