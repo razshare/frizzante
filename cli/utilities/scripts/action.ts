@@ -3,27 +3,23 @@ import type {View} from "../types.ts";
 import {route} from "./route.ts";
 import {swaps} from "./swaps.ts";
 
-export function action(
-    path = "",
-    options: { method: "GET" | "POST" } = {method: "GET"},
-): {
-    method: "GET" | "POST"
+export function action(path = ""): {
     action: string
     onsubmit: (e: Event) => Promise<void>
 } {
     const view = getContext("view") as View<never>
     route(view)
     return {
-        method: options.method,
         action: path,
         async onsubmit(e: Event) {
             e.preventDefault()
             const form = e.target as HTMLFormElement
             const body = new FormData(form)
+            const target = e.target as HTMLFormElement
 
             await swaps
                 .swap(view)
-                .withMethod(options.method)
+                .withMethod(target.method)
                 .withPath(path)
                 .withBody(body)
                 .play(true).then(function done() {
