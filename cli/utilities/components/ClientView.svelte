@@ -1,6 +1,6 @@
 <script lang="ts">
     import {setContext} from 'svelte'
-    import {views} from "$lib/components/views/client.ts";
+    import {views} from "$client";
     import ClientViewLoader from "$frz/components/ClientViewLoader.svelte";
     import type {View} from "$frz/types.ts";
 

@@ -1,7 +1,7 @@
 <script lang="ts">
     import {setContext} from "svelte";
     import type {View} from "$frz/types.ts";
-    import {views} from "$lib/components/views/server.ts";
+    import {views} from "$server";
 
     let {name, data, error, renderMode} = $props() as View<false>
     const view = $state({name, data, error, renderMode})

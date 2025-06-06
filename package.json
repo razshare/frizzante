@@ -11,7 +11,7 @@
     "eslint": "^9.28.0",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-svelte": "^3.9.1",
-    "svelte": "^5.33.14",
+    "svelte": "^5.33.15",
     "svelte-check": "^4.2.1",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.33.1",
