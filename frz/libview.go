@@ -28,6 +28,7 @@ type View struct {
 	Data       any        `json:"data"`
 	Error      string     `json:"error"`
 	RenderMode RenderMode `json:"renderMode"`
+	functions  map[string]v8go.FunctionCallback
 	server     string
 	index      string
 }
@@ -42,8 +43,58 @@ func (view *View) WithIndex(fileName string) *View {
 	return view
 }
 
+func (view *View) WithFunction(name string, function v8go.FunctionCallback) *View {
+	if nil == view.functions {
+		view.functions = map[string]v8go.FunctionCallback{}
+	}
+	view.functions[name] = function
+	return view
+}
+
+func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
+	var index []byte
+	var indexReadError error
+	if fs.FileExists(view.index) {
+		index, indexReadError = os.ReadFile(view.index)
+	}
+
+	if indexReadError != nil || index == nil {
+		fileNameFixed := strings.ReplaceAll(view.index, "\\", "/")
+		if fs.ExistsInEmbeddedFileSystem(efs, fileNameFixed) {
+			index, indexReadError = efs.ReadFile(fileNameFixed)
+			if indexReadError != nil {
+				return nil, indexReadError
+			}
+		} else {
+			return nil, errors.New("view index is missing from the host file system and the embedded file system")
+		}
+	}
+
+	return index, nil
+}
+
+func (view *View) ServerContents(efs embed.FS) ([]byte, error) {
+	var server []byte
+	var serverReadError error
+	if fs.FileExists(view.server) {
+		server, serverReadError = os.ReadFile(view.server)
+	}
+
+	if serverReadError != nil || server == nil {
+		fileNameFixed := strings.ReplaceAll(view.server, "\\", "/")
+		if fs.ExistsInEmbeddedFileSystem(efs, fileNameFixed) {
+			server, serverReadError = efs.ReadFile(fileNameFixed)
+			if serverReadError != nil {
+				return nil, serverReadError
+			}
+		} else {
+			return nil, errors.New("view server is missing from the host file system and the embedded file system")
+		}
+	}
+	return server, nil
+}
+
 var noScript = regexp.MustCompile(`<script.*>.*</script>`)
-var bundle []byte
 
 // Render renders the view.
 //
@@ -80,25 +131,11 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 
 	props := string(propsBytes)
 
-	var index []byte
-	var indexReadError error
-	if fs.FileExists(view.index) {
-		index, indexReadError = os.ReadFile(view.index)
-	}
-
-	if indexReadError != nil || index == nil {
-		fileNameFixed := strings.ReplaceAll(view.index, "\\", "/")
-		if fs.ExistsInEmbeddedFileSystem(efs, fileNameFixed) {
-			index, indexReadError = efs.ReadFile(fileNameFixed)
-			if indexReadError != nil {
-				return "", indexReadError
-			}
-		} else {
-			return "", errors.New("view index is missing from the host file system and the embedded file system")
-		}
-	}
-
 	if RenderModeClient == view.RenderMode {
+		index, indexError := view.IndexContents(efs)
+		if indexError != nil {
+			return "", indexError
+		}
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
@@ -125,22 +162,9 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 		), nil
 	}
 
-	var server []byte
-	var serverReadError error
-	if fs.FileExists(view.server) {
-		server, serverReadError = os.ReadFile(view.server)
-	}
-
-	if serverReadError != nil || server == nil {
-		fileNameFixed := strings.ReplaceAll(view.server, "\\", "/")
-		if fs.ExistsInEmbeddedFileSystem(efs, fileNameFixed) {
-			server, serverReadError = efs.ReadFile(fileNameFixed)
-			if serverReadError != nil {
-				return "", serverReadError
-			}
-		} else {
-			return "", errors.New("view server is missing from the host file system and the embedded file system")
-		}
+	server, serverError := view.ServerContents(efs)
+	if serverError != nil {
+		return "", serverError
 	}
 
 	// SSR.
@@ -155,36 +179,31 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 			%s
 			return render;
 		})()
-		render(JSON.parse(props())).then(function done(rendered){
-			head(rendered.head??'');
-			body(rendered.body??'');
+		render(%s).then(function success(r){
+			head(r.head??'');
+			body(r.body??'');
+		}).catch(function failure(e){
+			error(e.stack)
 		});
 		`,
 		serverCjsBytes,
+		props,
 	)
 
-	bundleLocal, bundleError := JavaScriptBundle(".", api.FormatCommonJS, []byte(serverIif))
+	bundle, bundleError := JavaScriptBundle(".", api.FormatCommonJS, []byte(serverIif))
 	if bundleError != nil {
 		return "", bundleError
 	}
-	bundle = bundleLocal
 
 	var head string
 	var body string
+	var err string
 
 	globals := map[string]v8go.FunctionCallback{
-		"props": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-			value, valueError := v8go.NewValue(info.Context().Isolate(), props)
-			if nil != valueError {
-				return nil
-			}
-			return value
-		},
-		"inspect": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
+		"error": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
 			args := info.Args()
 			if len(args) > 0 {
-				message := args[0].String()
-				println(message)
+				err = err + args[0].String() + "\n"
 			}
 			return nil
 		},
@@ -204,10 +223,20 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 		},
 	}
 
-	_, destroy, javaScriptError := JavaScriptRun("server.js", bundle, globals)
+	if nil != view.functions {
+		for name, function := range view.functions {
+			globals[name] = function
+		}
+	}
+
+	_, destroy, javaScriptError := JavaScriptRun(view.server, bundle, globals)
 	defer destroy()
 	if javaScriptError != nil {
 		return "", javaScriptError
+	}
+
+	if "" != err {
+		return "", errors.New(err)
 	}
 
 	if RenderModeHeadless == view.RenderMode {
@@ -215,6 +244,10 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 	}
 
 	if RenderModeServer == view.RenderMode {
+		index, indexError := view.IndexContents(efs)
+		if indexError != nil {
+			return "", indexError
+		}
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
@@ -239,6 +272,10 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 	}
 
 	if RenderModeFull == view.RenderMode {
+		index, indexError := view.IndexContents(efs)
+		if indexError != nil {
+			return "", indexError
+		}
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
