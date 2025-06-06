@@ -1,5 +1,5 @@
 import type {View} from "../types.ts";
-import {uuid} from './uuid.ts'
+import {uuid} from "./uuid.ts"
 
 type SwapAction = {
     method: () => string
@@ -20,7 +20,7 @@ function find(id: string): false | SwapAction {
 }
 
 function swap(view: View<unknown>): SwapAction {
-    let swapMethod = 'GET'
+    let swapMethod = "GET"
     let swapPath = location.pathname
     let swapBody: FormData
     const swapPosition = nextPosition++
@@ -39,7 +39,7 @@ function swap(view: View<unknown>): SwapAction {
             return swapPosition
         },
         withMethod(method: string) {
-            swapMethod = method
+            swapMethod = method.toUpperCase()
             return this
         },
         withPath(path: string) {
@@ -59,8 +59,8 @@ function swap(view: View<unknown>): SwapAction {
 
             let query = ""
 
-            if ("GET" === swapMethod.toUpperCase()) {
-                if (swapBody && typeof swapBody === 'object') {
+            if ("GET" === swapMethod) {
+                if (swapBody && typeof swapBody === "object") {
                     const params = new URLSearchParams()
                     swapBody.forEach(function each(value, key) {
                         params.append(key, `${value}`)
