@@ -15,9 +15,6 @@
     "skipLibCheck": true,
     "checkJs": true,
     "paths": {
-      "$client": ["./app/client.ts"],
-      "$server": ["./app/server.ts"],
-      "$frz/*": ["./app/frz/*"],
       "$lib/*": ["./app/lib/*"]
     },
     "lib": ["esnext", "DOM", "DOM.Iterable"],
@@ -25,14 +22,18 @@
     "moduleDetection": "force"
   },
   "include": [
-    "views.client.ts",
-    "views.server.ts",
     "./app/**/*.svelte.js",
     "./app/**/*.svelte.ts",
     "./app/**/*.svelte",
     "./app/**/*.d.ts",
     "./app/**/*.js",
-    "./app/**/*.ts"
+    "./app/**/*.ts",
+    "./cli/utilities/**/*.svelte.js",
+    "./cli/utilities/**/*.svelte.ts",
+    "./cli/utilities/**/*.svelte",
+    "./cli/utilities/**/*.d.ts",
+    "./cli/utilities/**/*.js",
+    "./cli/utilities/**/*.ts"
   ],
   "exclude": ["./node_modules/**"]
 }

@@ -18,9 +18,6 @@ export default defineConfig({
     ],
     resolve: {
         alias: {
-            "$client": "./app/client.ts",
-            "$server": "./app/server.ts",
-            "$frz": "./app/frz",
             "$lib": "./app/lib",
         },
     },

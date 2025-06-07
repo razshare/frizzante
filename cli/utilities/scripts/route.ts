@@ -1,5 +1,5 @@
-import type {View} from "../types.ts";
-import {swaps} from "./swaps.ts";
+import type {View} from "$lib/utilities/types.ts";
+import {swaps} from "$lib/utilities/scripts/swaps.ts";
 
 let started = false
 const IS_BROWSER = typeof document !== 'undefined'

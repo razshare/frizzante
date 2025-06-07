@@ -1,5 +1,5 @@
 import { hydrate } from "svelte";
-import ClientView from "$frz/components/ClientView.svelte";
+import ClientView from "$lib/utilities/components/ClientView.svelte";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 target().innerHTML = "";

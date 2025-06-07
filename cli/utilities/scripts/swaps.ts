@@ -1,5 +1,5 @@
-import type {View} from "../types.ts";
-import {uuid} from "./uuid.ts"
+import type {View} from "$lib/utilities/types.ts";
+import {uuid} from "$lib/utilities/scripts/uuid.ts"
 
 type SwapAction = {
     method: () => string
