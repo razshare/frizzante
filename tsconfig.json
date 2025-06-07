@@ -35,5 +35,5 @@
     "./cli/utilities/**/*.js",
     "./cli/utilities/**/*.ts"
   ],
-  "exclude": ["./node_modules/**"]
+  "exclude": ["./node_modules/**","./frz/dist/**"]
 }

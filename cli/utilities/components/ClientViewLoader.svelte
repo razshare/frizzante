@@ -1,5 +1,5 @@
 <script lang="ts" module>
-    import type {SvelteComponent} from "svelte";
+    import type {SvelteComponent} from "svelte"
     let PreviousComponent = $state(false) as false | SvelteComponent
 </script>
 <script lang="ts">

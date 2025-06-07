@@ -76,20 +76,22 @@ func (connection *Connection) ReceiveCookie(key string) string {
 // ReceiveMessage reads the contents of the message and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveMessage(connection *Connection) (string, error) {
+func (connection *Connection) ReceiveMessage() string {
 	if connection.webSocket != nil {
 		_, readBytes, readError := connection.webSocket.ReadMessage()
 		if nil != readError {
-			return "", readError
+			connection.server.notifier.SendErrorAndTrace(readError, 1)
+			return ""
 		}
-		return string(readBytes), nil
+		return string(readBytes)
 	}
 
 	readBytes, readAllError := io.ReadAll(connection.request.Body)
 	if nil != readAllError {
-		return "", readAllError
+		connection.server.notifier.SendErrorAndTrace(readAllError, 1)
+		return ""
 	}
-	return string(readBytes), nil
+	return string(readBytes)
 }
 
 // ReceiveJson reads the next JSON-encoded message from the
@@ -269,7 +271,7 @@ func (connection *Connection) SendEventContent(content []byte) {
 // SendNavigate redirects the request with status 302.
 func (connection *Connection) SendNavigate(location string) {
 	connection.SendRedirect(location, 302)
-	connection.SendMessage("")
+	connection.SendFlush()
 }
 
 // SendRedirect redirects the request.
@@ -318,6 +320,10 @@ func (connection *Connection) SendCookie(key string, value string) {
 		"Set-Cookie",
 		fmt.Sprintf("%s=%s; Path=/; HttpOnly", url.QueryEscape(key), url.QueryEscape(value)),
 	)
+}
+
+func (connection *Connection) SendFlush() {
+	connection.SendMessage("")
 }
 
 // SendContent sends binary safe content.

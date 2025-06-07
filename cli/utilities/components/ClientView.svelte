@@ -1,8 +1,8 @@
 <script lang="ts">
-    import {setContext} from 'svelte'
-    import {views} from "$lib/exports/client.ts";
-    import ClientViewLoader from "$lib/utilities/components/ClientViewLoader.svelte";
-    import type {View} from "$lib/utilities/types.ts";
+    import {setContext} from "svelte"
+    import {views} from "$lib/exports/client.ts"
+    import ClientViewLoader from "$lib/utilities/components/ClientViewLoader.svelte"
+    import type {View} from "$lib/utilities/types.ts"
 
     let {name, data, error, renderMode} = $props() as View<unknown>
     const view = $state({name, data, error, renderMode})
