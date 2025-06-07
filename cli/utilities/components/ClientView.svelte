@@ -4,7 +4,7 @@
     import ClientViewLoader from "$lib/utilities/components/ClientViewLoader.svelte";
     import type {View} from "$lib/utilities/types.ts";
 
-    let {name, data, error, renderMode} = $props() as View<false>
+    let {name, data, error, renderMode} = $props() as View<unknown>
     const view = $state({name, data, error, renderMode})
     setContext("view", view)
 </script>

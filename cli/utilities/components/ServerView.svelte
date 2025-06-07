@@ -3,7 +3,7 @@
     import type {View} from "$lib/utilities/types.ts";
     import {views} from "$lib/exports/server.ts";
 
-    let {name, data, error, renderMode} = $props() as View<false>
+    let {name, data, error, renderMode} = $props() as View<unknown>
     const view = $state({name, data, error, renderMode})
     setContext("view", view)
 </script>
