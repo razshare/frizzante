@@ -549,6 +549,30 @@ func SendSseUpgrade(connection *Connection) func(eventName string) {
 	}
 }
 
+// SendSseUpgrade upgrades to server sent events
+// and returns a function that sets the name of the current event.
+//
+// The default event name is "message".
+func (connection *Connection) SendSseUpgrade() (setEventName func(eventName string)) {
+	connection.SendHeader("Access-Control-Allow-Origin", "*")
+	connection.SendHeader("Access-Control-Expose-Headers", "Content-Type")
+	connection.SendHeader("Content-Type", "text/event-stream")
+	connection.SendHeader("Cache-Control", "no-cache")
+	connection.SendHeader("Connection", "keep-alive")
+	connection.eventName = "message"
+	setEventName = func(eventName string) {
+		if "" == eventName {
+			connection.server.notifier.SendError(
+				fmt.Errorf("renaming a server sent event (`%s`) to an empty string is not allowed", connection.eventName),
+			)
+			return
+		}
+
+		connection.eventName = eventName
+	}
+	return
+}
+
 // SendWsUpgrade upgrades to web sockets.
 func (connection *Connection) SendWsUpgrade() {
 	connection.SendConfiguredWsUpgrade(websocket.Upgrader{
