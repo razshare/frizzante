@@ -1,22 +1,22 @@
 {
-  "name": "vite-project",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "devDependencies": {
-    "@eslint/compat": "^1.2.9",
-    "@sveltejs/vite-plugin-svelte": "^5.1.0",
-    "@tsconfig/svelte": "^5.0.4",
-    "@types/node": "^22.15.30",
-    "eslint-config-prettier": "^10.1.5",
-    "prettier": "^3.5.3",
-    "prettier-plugin-svelte": "^3.4.0",
-    "eslint": "^9.28.0",
-    "eslint-plugin-svelte": "^3.9.1",
-    "svelte": "^5.33.17",
-    "svelte-check": "^4.2.1",
-    "typescript": "~5.8.3",
-    "typescript-eslint": "^8.33.1",
-    "vite": "^6.3.5"
-  }
+    "name": "vite-project",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "devDependencies": {
+        "@eslint/compat": "^1.2.9",
+        "@sveltejs/vite-plugin-svelte": "^5.1.0",
+        "@tsconfig/svelte": "^5.0.4",
+        "@types/node": "^22.15.30",
+        "eslint-config-prettier": "^10.1.5",
+        "prettier": "^3.5.3",
+        "prettier-plugin-svelte": "^3.4.0",
+        "eslint": "^9.28.0",
+        "eslint-plugin-svelte": "^3.9.1",
+        "svelte": "^5.33.17",
+        "svelte-check": "^4.2.1",
+        "typescript": "~5.8.3",
+        "typescript-eslint": "^8.33.1",
+        "vite": "^6.3.5"
+    }
 }

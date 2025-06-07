@@ -1,7 +1,7 @@
-import {getContext} from "svelte"
-import type {View} from "$lib/utilities/types.ts"
-import {route} from "$lib/utilities/scripts/route.ts"
-import {swaps} from "$lib/utilities/scripts/swaps.ts"
+import { getContext } from "svelte"
+import type { View } from "$lib/utilities/types.ts"
+import { route } from "$lib/utilities/scripts/route.ts"
+import { swaps } from "$lib/utilities/scripts/swaps.ts"
 
 export function action(path = ""): {
     action: string
@@ -22,9 +22,10 @@ export function action(path = ""): {
                 .withMethod(target.method)
                 .withPath(path)
                 .withBody(body)
-                .play(true).then(function done() {
+                .play(true)
+                .then(function done() {
                     form.reset()
                 })
-        }
+        },
     }
 }

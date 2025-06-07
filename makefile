@@ -1,9 +1,13 @@
 test:
 	make update
 	make generate
+	make check
 	rm frz/dist -fr
 	make package
 	CGO_ENABLED=1 cd frz && go test
+
+format:
+	bunx prettier --write .
 
 clean:
 	go clean
@@ -15,6 +19,10 @@ clean:
 update:
 	go mod tidy
 	bun update
+
+check:
+	bunx eslint .
+	bunx svelte-check --tsconfig ./tsconfig.json
 
 generate:
 	go run main.go -generate -utilities -out="app/lib/utilities"

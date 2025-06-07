@@ -1,8 +1,8 @@
-import type {View} from "$lib/utilities/types.ts"
-import {swaps} from "$lib/utilities/scripts/swaps.ts"
+import type { View } from "$lib/utilities/types.ts"
+import { swaps } from "$lib/utilities/scripts/swaps.ts"
 
+const IS_BROWSER = typeof document !== "undefined"
 let started = false
-const IS_BROWSER = typeof document !== 'undefined'
 
 export function route(view: View<never>): void {
     if (!IS_BROWSER || started) {
@@ -10,7 +10,7 @@ export function route(view: View<never>): void {
     }
 
     const listener = async function pop(e: PopStateEvent) {
-        e.preventDefault();
+        e.preventDefault()
 
         const id = e.state ?? ""
         const current = swaps.find(id)
@@ -27,6 +27,6 @@ export function route(view: View<never>): void {
             await current.play(true)
         }
     }
-    window.addEventListener("popstate", listener);
+    window.addEventListener("popstate", listener)
     started = true
 }
