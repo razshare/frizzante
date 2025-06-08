@@ -3,6 +3,8 @@ package frz
 import (
 	"embed"
 	"fmt"
+	"io"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
@@ -36,10 +38,17 @@ func TestRenderServer(test *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	expected := "<h1>Hello world.</h1>"
-	actual, getError := HttpGet(fmt.Sprintf("http://127.0.0.1:%d/welcome", port), nil)
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/welcome", port))
 	if getError != nil {
 		test.Fatal(getError)
 	}
+
+	readAllBytes, readAllError := io.ReadAll(response.Body)
+	if readAllError != nil {
+		test.Fatal(readAllError)
+	}
+
+	actual := string(readAllBytes)
 
 	ok := strings.Contains(actual, expected)
 
@@ -69,10 +78,17 @@ func TestRenderClient(test *testing.T) {
 	time.Sleep(1 * time.Second)
 
 	expected := "<script type=\"application/javascript\">function target(){return document.getElementById("
-	actual, getError := HttpGet(fmt.Sprintf("http://127.0.0.1:%d/welcome", port), nil)
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/welcome", port))
 	if getError != nil {
 		test.Fatal(getError)
 	}
+
+	readAllBytes, readAllError := io.ReadAll(response.Body)
+	if readAllError != nil {
+		test.Fatal(readAllError)
+	}
+
+	actual := string(readAllBytes)
 
 	ok := strings.Contains(actual, expected)
 

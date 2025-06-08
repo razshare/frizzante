@@ -2,6 +2,7 @@ package frz
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -82,10 +83,17 @@ func TestServerWithApi(test *testing.T) {
 
 	time.Sleep(1 * time.Second)
 
-	actual, getError := HttpGet(fmt.Sprintf("http://127.0.0.1:%d/", port), nil)
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", port))
 	if getError != nil {
 		test.Fatal(getError)
 	}
+
+	readAllBytes, readAllError := io.ReadAll(response.Body)
+	if readAllError != nil {
+		test.Fatal(readAllError)
+	}
+
+	actual := string(readAllBytes)
 
 	if actual != expected {
 		test.Fatalf("server was expected to respond with '%s', received '%s' instead", expected, actual)
