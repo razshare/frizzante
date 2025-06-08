@@ -21,33 +21,18 @@ type DiskArchive struct {
 	road *Road
 }
 
+// NewDiskArchive create a new archive backed by the file system.
 func NewDiskArchive() *DiskArchive {
 	return &DiskArchive{
-		name: ".archive",
+		name: "archive",
 		road: NewRoad(),
 	}
 }
 
-// WithName sets the name of the archive and thus the directory.
+// WithName sets the name of the archive and thus its root directory.
 func (archive *DiskArchive) WithName(name string) *DiskArchive {
 	archive.name = name
 	return archive
-}
-
-// Get gets a value from the archive based on domain and key.
-func (archive *DiskArchive) Get(domain string, key string) ([]byte, error) {
-	if "" == archive.name {
-		return make([]byte, 0), errors.New("disk archive name is blank")
-	}
-	lane := archive.road.WithLane(domain, key)
-	lane.Lock()
-	defer lane.Unlock()
-	fileName := filepath.Join(archive.name, domain, key)
-	value, readError := os.ReadFile(fileName)
-	if nil != readError {
-		return make([]byte, 0), readError
-	}
-	return value, nil
 }
 
 // Set sets a value to the archive based on the domain and key.
@@ -71,6 +56,22 @@ func (archive *DiskArchive) Set(domain string, key string, value []byte) error {
 		return writeError
 	}
 	return nil
+}
+
+// Get gets a value from the archive based on domain and key.
+func (archive *DiskArchive) Get(domain string, key string) ([]byte, error) {
+	if "" == archive.name {
+		return nil, errors.New("disk archive name is blank")
+	}
+	lane := archive.road.WithLane(domain, key)
+	lane.Lock()
+	defer lane.Unlock()
+	fileName := filepath.Join(archive.name, domain, key)
+	value, readError := os.ReadFile(fileName)
+	if nil != readError {
+		return nil, readError
+	}
+	return value, nil
 }
 
 // Has checks if the archive has a value based on a domain and key.

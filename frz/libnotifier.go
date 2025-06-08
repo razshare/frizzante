@@ -26,7 +26,7 @@ func (notifier *Notifier) WithMessageLogger(logger *log.Logger) *Notifier {
 }
 
 func (notifier *Notifier) WithErrorLogger(logger *log.Logger) *Notifier {
-	notifier.messageLogger = logger
+	notifier.errorLogger = logger
 	return notifier
 }
 

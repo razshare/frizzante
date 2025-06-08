@@ -55,5 +55,9 @@ go.work.sum
 # Frizzante
 /tmp
 /bin
+/archive
+/sessions
 /app/lib/utilities
 /frz/dist
+/frz/archive
+/frz/sessions

@@ -84,7 +84,7 @@ func JavaScriptBundle(rootDirectory string, format api.Format, source []byte) (b
 	})
 
 	for _, err := range result.Errors {
-		return make([]byte, 0), fmt.Errorf("%s in %s:%d:%d", err.Text, err.Location.File, err.Location.Line, err.Location.Column)
+		return nil, fmt.Errorf("%s in %s:%d:%d", err.Text, err.Location.File, err.Location.Line, err.Location.Column)
 	}
 
 	return result.OutputFiles[0].Contents, nil

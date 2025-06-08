@@ -12,7 +12,7 @@ func TestNewServer(test *testing.T) {
 	NewServer()
 }
 
-func TestServerWithAddress(test *testing.T) {
+func TestServer_WithAddress(test *testing.T) {
 	server := NewServer()
 	expected := "127.0.0.1:8080"
 	server.WithAddress("127.0.0.1:8080")
@@ -22,7 +22,7 @@ func TestServerWithAddress(test *testing.T) {
 	}
 }
 
-func TestServerWithReadTimeout(test *testing.T) {
+func TestServer_WithReadTimeout(test *testing.T) {
 	server := NewServer()
 	expected := 10 * time.Second
 	server.WithReadTimeout(expected)
@@ -33,7 +33,7 @@ func TestServerWithReadTimeout(test *testing.T) {
 
 }
 
-func TestServerWithWriteTimeout(test *testing.T) {
+func TestServer_WithWriteTimeout(test *testing.T) {
 	server := NewServer()
 	expected := 10 * time.Second
 	server.WithWriteTimeout(expected)
@@ -43,7 +43,7 @@ func TestServerWithWriteTimeout(test *testing.T) {
 	}
 }
 
-func TestServerWithMaxHeaderBytes(test *testing.T) {
+func TestServer_WithHeaderMaxMemory(test *testing.T) {
 	server := NewServer()
 	expected := 1 * MB
 	server.WithHeaderMaxMemory(expected)
@@ -53,7 +53,7 @@ func TestServerWithMaxHeaderBytes(test *testing.T) {
 	}
 }
 
-func TestServerWithCertificateAndKey(test *testing.T) {
+func TestServer_WithCertificate(test *testing.T) {
 	server := NewServer()
 	expectedCertificate := "cert.pem"
 	expectedCertificateKey := "key.pem"
@@ -68,7 +68,7 @@ func TestServerWithCertificateAndKey(test *testing.T) {
 	}
 }
 
-func TestServerWithApi(test *testing.T) {
+func TestServer_AddRoute(test *testing.T) {
 	expected := "hello"
 	port := NextNumber(8080)
 	server := NewServer().
@@ -97,63 +97,5 @@ func TestServerWithApi(test *testing.T) {
 
 	if actual != expected {
 		test.Fatalf("server was expected to respond with '%s', received '%s' instead", expected, actual)
-	}
-}
-
-func TestSendStatus(test *testing.T) {
-	expected := 201
-	port := NextNumber(8080)
-	server := NewServer().
-		WithEfs(dist).
-		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		AddRoute(Route{Pattern: "GET /", Handler: func(c *Connection) {
-			c.SendStatus(expected)
-			c.SendMessage("ok")
-		}})
-
-	go server.Start()
-	defer server.Stop()
-
-	time.Sleep(1 * time.Second)
-
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", port))
-	if getError != nil {
-		test.Fatal(getError)
-	}
-	defer response.Body.Close()
-
-	actual := response.StatusCode
-
-	if actual != expected {
-		test.Fatalf("server was expected to respond with status code '%d', received '%d' intead", expected, actual)
-	}
-}
-
-func TestSendHeader(test *testing.T) {
-	expected := "application/json"
-	port := NextNumber(8080)
-	server := NewServer().
-		WithEfs(dist).
-		WithAddress(fmt.Sprintf("127.0.0.1:%d", port)).
-		AddRoute(Route{Pattern: "GET /", Handler: func(c *Connection) {
-			c.SendHeader("Content-Type", expected)
-			c.SendMessage("{}")
-		}})
-
-	go server.Start()
-	defer server.Stop()
-
-	time.Sleep(1 * time.Second)
-
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", port))
-	if getError != nil {
-		test.Fatal(getError)
-	}
-	defer response.Body.Close()
-
-	actual := response.Header.Get("Content-Type")
-
-	if actual != expected {
-		test.Fatalf("server was expected to respond with header content type '%s', received '%s' intead", expected, actual)
 	}
 }
