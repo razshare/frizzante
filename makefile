@@ -1,8 +1,9 @@
 test:
 	make update
-	make generate
 	make check
 	rm frz/dist -fr
+	mkdir frz/dist/client -p
+	touch frz/dist/client/index.html
 	make package
 	CGO_ENABLED=1 cd frz && go test
 
@@ -13,7 +14,6 @@ clean:
 	go clean
 	rm bin/app -fr
 	rm frz/dist -fr
-	rm app/lib/utilities -fr
 	rm node_modules -fr
 
 update:
@@ -25,6 +25,7 @@ check:
 	bunx svelte-check --tsconfig ./tsconfig.json
 
 generate:
+	rm app/lib/utilities -fr
 	go run main.go -generate -utilities -out="app/lib/utilities"
 
 package:
