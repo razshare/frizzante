@@ -1,11 +1,7 @@
 import { defineConfig } from "vite"
 import { svelte } from "@sveltejs/vite-plugin-svelte"
 
-let sourcemap: false | "inline" = false
-
-if ("1" === (process.env.DEV ?? "")) {
-    sourcemap = "inline"
-}
+const IS_DEV = "1" === (process.env.DEV ?? "")
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -22,7 +18,7 @@ export default defineConfig({
         },
     },
     build: {
-        sourcemap,
+        sourcemap: IS_DEV ? "inline" : false,
         rollupOptions: {
             input: {
                 index: "./index.html",
