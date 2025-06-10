@@ -36,7 +36,8 @@ generate:
 package:
 	cd frz/app && \
 	bunx vite build --ssr lib/utilities/scripts/server.ts --outDir dist --emptyOutDir && \
-	bunx vite build --outDir dist/client --emptyOutDir
+	bunx vite build --outDir dist/client --emptyOutDir && \
+	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite
 
 hooks:
 	printf "#!/usr/bin/env bash\n" > .git/hooks/pre-commit

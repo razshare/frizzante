@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/evanw/esbuild/pkg/api"
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/razshare/frizzante/fs"
 	"os"
@@ -31,25 +30,28 @@ type View struct {
 	functions  map[string]v8go.FunctionCallback
 	server     string
 	index      string
-	appRoot    string
 }
 
+// WithServer sets the server script.
+//
+// This script must be in CommonJs format and it must declare a local "render" function.
+//
+// The render function takes a "props" map parameter and returns a RenderOutput.
+//
+// See https://svelte.dev/docs/svelte/svelte-server#render
 func (view *View) WithServer(fileName string) *View {
 	view.server = fileName
 	return view
 }
 
+// WithIndex sets the index html document that will wrap the final render output.
 func (view *View) WithIndex(fileName string) *View {
 	view.index = fileName
 	return view
 }
 
-func (view *View) WithAppRoot(appRoot string) *View {
-	view.appRoot = appRoot
-	return view
-}
-
-func (view *View) WithFunction(name string, function v8go.FunctionCallback) *View {
+// AddFunction adds a global function to the script's context.
+func (view *View) AddFunction(name string, function v8go.FunctionCallback) *View {
 	if nil == view.functions {
 		view.functions = map[string]v8go.FunctionCallback{}
 	}
@@ -57,6 +59,7 @@ func (view *View) WithFunction(name string, function v8go.FunctionCallback) *Vie
 	return view
 }
 
+// IndexContents gets the contents of the index html document.
 func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
 	var index []byte
 	var indexReadError error
@@ -79,6 +82,7 @@ func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
 	return index, nil
 }
 
+// ServerContents gets the contents of the server script.
 func (view *View) ServerContents(efs embed.FS) ([]byte, error) {
 	var server []byte
 	var serverReadError error
@@ -173,33 +177,23 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 		return "", serverError
 	}
 
-	// SSR.
-	serverCjsBytes, javaScriptBundleError := JavaScriptBundle(view.appRoot, api.FormatCommonJS, server)
-	if javaScriptBundleError != nil {
-		return "", javaScriptBundleError
-	}
-
 	serverIif := fmt.Sprintf(
 		`
 		const module={exports:{}}; const render = (function(){
 			%s
 			return render;
 		})()
-		render(%s).then(function success(r){
+		render(JSON.parse(props())).then(function success(r){
 			head(r.head??'');
 			body(r.body??'');
 		}).catch(function failure(e){
 			error(e.stack)
 		});
 		`,
-		serverCjsBytes,
-		props,
+		string(server),
 	)
 
-	bundle, bundleError := JavaScriptBundle(view.appRoot, api.FormatCommonJS, []byte(serverIif))
-	if bundleError != nil {
-		return "", bundleError
-	}
+	bundle := []byte(serverIif)
 
 	var head string
 	var body string
@@ -212,6 +206,13 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 				err = err + args[0].String() + "\n"
 			}
 			return nil
+		},
+		"props": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
+			value, valueError := v8go.NewValue(info.Context().Isolate(), props)
+			if valueError != nil {
+				return nil
+			}
+			return value
 		},
 		"head": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
 			args := info.Args()
