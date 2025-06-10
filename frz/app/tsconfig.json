@@ -15,25 +15,25 @@
         "skipLibCheck": true,
         "checkJs": true,
         "paths": {
-            "$lib/*": ["./app/lib/*"]
+            "$lib/*": ["./lib/*"]
         },
         "lib": ["esnext", "DOM", "DOM.Iterable"],
         "useDefineForClassFields": true,
         "moduleDetection": "force"
     },
     "include": [
-        "./app/**/*.svelte.js",
-        "./app/**/*.svelte.ts",
-        "./app/**/*.svelte",
-        "./app/**/*.d.ts",
-        "./app/**/*.js",
-        "./app/**/*.ts",
-        "./cli/utilities/**/*.svelte.js",
-        "./cli/utilities/**/*.svelte.ts",
-        "./cli/utilities/**/*.svelte",
-        "./cli/utilities/**/*.d.ts",
-        "./cli/utilities/**/*.js",
-        "./cli/utilities/**/*.ts"
+        "./**/*.svelte.js",
+        "./**/*.svelte.ts",
+        "./**/*.svelte",
+        "./**/*.d.ts",
+        "./**/*.js",
+        "./**/*.ts",
+        "../../cli/utilities/**/*.svelte.js",
+        "../../cli/utilities/**/*.svelte.ts",
+        "../../cli/utilities/**/*.svelte",
+        "../../cli/utilities/**/*.d.ts",
+        "../../cli/utilities/**/*.js",
+        "../../cli/utilities/**/*.ts"
     ],
-    "exclude": ["./node_modules/**", "./frz/dist/**"]
+    "exclude": ["./node_modules/**", "./dist/**"]
 }

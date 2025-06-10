@@ -31,6 +31,7 @@ type View struct {
 	functions  map[string]v8go.FunctionCallback
 	server     string
 	index      string
+	appRoot    string
 }
 
 func (view *View) WithServer(fileName string) *View {
@@ -40,6 +41,11 @@ func (view *View) WithServer(fileName string) *View {
 
 func (view *View) WithIndex(fileName string) *View {
 	view.index = fileName
+	return view
+}
+
+func (view *View) WithAppRoot(appRoot string) *View {
+	view.appRoot = appRoot
 	return view
 }
 
@@ -168,7 +174,7 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 	}
 
 	// SSR.
-	serverCjsBytes, javaScriptBundleError := JavaScriptBundle(".", api.FormatCommonJS, server)
+	serverCjsBytes, javaScriptBundleError := JavaScriptBundle(view.appRoot, api.FormatCommonJS, server)
 	if javaScriptBundleError != nil {
 		return "", javaScriptBundleError
 	}
@@ -190,7 +196,7 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 		props,
 	)
 
-	bundle, bundleError := JavaScriptBundle(".", api.FormatCommonJS, []byte(serverIif))
+	bundle, bundleError := JavaScriptBundle(view.appRoot, api.FormatCommonJS, []byte(serverIif))
 	if bundleError != nil {
 		return "", bundleError
 	}
