@@ -22,7 +22,7 @@ jobs:
           go-version: '1.24'
 
       - name: Install dev dependencies
-        run: apt install curl unzip
+        run: sudo apt install curl unzip
 
       - name: Configure
         run: make configure
