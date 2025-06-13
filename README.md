@@ -55,4 +55,3 @@ This will create a `bin/app` standalone executable.
 > For that reason, the first run may take some time, just be patient.
 > 
 > Subsequent runs will take considerably less time.
-:::
