@@ -1,5 +1,5 @@
 # What is this?
-Frizzante is a minimalistic and opinionated web server framework written in Go that uses Svelte to render pages.
+Frizzante is a minimalistic and opinionated web server framework written in [Go](https://go.dev/) that uses [Svelte](https://svelte.dev/docs/svelte/overview) to render pages.
 
 # Get started
 
