@@ -48,6 +48,7 @@ configure:
 
 generate: configure
 	# Generate utilities...
+	rm app/lib/utilities -fr
 	go run main.go -generate -utilities -out="frz/app/lib/utilities"
 
 format:
