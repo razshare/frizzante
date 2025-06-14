@@ -3,7 +3,7 @@ test: configure update check package
 
 build: configure
 	go mod tidy
-	CGO_ENABLED=1 GOARCH="amd64" GOOS=linux go build -o bin/app-amd64 main.go
+	CGO_ENABLED=1 GOARCH="amd64" GOOS=linux go build -o bin/frizzante-amd64 main.go
 
 update:
 	go mod tidy
