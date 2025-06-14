@@ -53,5 +53,5 @@ go.work.sum
 *.key
 
 # Frizzante
-/lib/utilities
+/lib/utilities/frz
 /dist

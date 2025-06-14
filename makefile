@@ -30,7 +30,7 @@ package:
 	mkdir frz/app/dist/client -p
 	touch frz/app/dist/client/index.html
 	cd frz/app && \
-	../../bin/bun x vite build --ssr lib/utilities/scripts/server.ts --outDir dist --emptyOutDir && \
+	../../bin/bun x vite build --ssr lib/utilities/frz/scripts/server.ts --outDir dist --emptyOutDir && \
 	../../bin/bun x vite build --outDir dist/client --emptyOutDir
 
 configure:
@@ -47,8 +47,8 @@ configure:
 
 generate: configure
 	# Generate utilities...
-	rm app/lib/utilities -fr
-	go run main.go -generate -utilities -out="frz/app/lib/utilities"
+	rm app/lib/utilities/frz -fr
+	go run main.go -generate -utilities -out="frz/app/lib/utilities/frz"
 
 format:
 	cd frz/app && \
@@ -58,7 +58,7 @@ clean:
 	go clean
 	rm bin -fr
 	rm frz/app/dist -fr
-	rm frz/app/lib/utilities -fr
+	rm frz/app/lib/utilities/frz -fr
 	mkdir frz/app/dist/client -p
 	touch frz/app/dist/client/index.html
 	rm frz/app/node_modules -fr

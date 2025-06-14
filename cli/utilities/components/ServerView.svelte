@@ -1,6 +1,6 @@
 <script lang="ts">
     import { setContext, type Component } from "svelte"
-    import type { View } from "$lib/utilities/types.ts"
+    import type { View } from "$lib/utilities/frz/types.ts"
     import { views } from "$lib/exports/server.ts"
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
