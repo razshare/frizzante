@@ -23,23 +23,14 @@ const (
 	RenderModeHeadless RenderMode = 3 // Renders only on the server and omits the base template.
 )
 
-type EsbuildMode int
-
-const (
-	EsbuildModeEnvironment EsbuildMode = 0 // Enables esbuild bundling if environment variable "BUNDLE_VIEW_SERVER_TO_CJS" equals "1".
-	EsbuildModeEnabled     EsbuildMode = 1 // Enables esbuild bundling.
-	EsbuildModeDisabled    EsbuildMode = 2 // Disables esbuild bundling.
-)
-
 type View struct {
-	Name        string         `json:"name"`
-	Data        map[string]any `json:"data"`
-	RenderMode  RenderMode     `json:"renderMode"`
-	EsbuildMode EsbuildMode    `json:"esbuildMode"`
-	root        string
-	functions   map[string]v8go.FunctionCallback
-	server      string
-	index       string
+	Name       string         `json:"name"`
+	Data       map[string]any `json:"data"`
+	RenderMode RenderMode     `json:"renderMode"`
+	root       string
+	functions  map[string]v8go.FunctionCallback
+	server     string
+	index      string
 }
 
 // WithRoot sets the root of the view.
@@ -201,11 +192,7 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 	var serverError error
 	var server []byte
 
-	convertToCjs :=
-		view.EsbuildMode == EsbuildModeEnabled ||
-			(view.EsbuildMode == EsbuildModeEnvironment && os.Getenv("BUNDLE_VIEW_SERVER_TO_CJS") == "1")
-
-	if convertToCjs {
+	if fs.FileExists(view.root) {
 		server, serverError = JavaScriptBundle(view.root, api.FormatCommonJS, readBytes)
 		if serverError != nil {
 			return "", serverError
