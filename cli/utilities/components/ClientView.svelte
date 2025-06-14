@@ -3,14 +3,16 @@
     import { views } from "$lib/exports/client.ts"
     import ClientViewLoader from "$lib/utilities/components/ClientViewLoader.svelte"
     import type { View } from "$lib/utilities/types.ts"
-
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
+    const components = views as Record<string, Component>
     let { name, data, renderMode } = $props() as View<Record<string,unknown>>
     const view = $state({ name, data, renderMode })
     setContext("view", view)
 </script>
 
-{#each Object.keys(views) as key (key)}
+{#each Object.keys(components) as key (key)}
     {#if key === view.name}
-        <ClientViewLoader from={views[key]} properties={view.data}/>
+        <ClientViewLoader from={components[key]} properties={view.data}/>
     {/if}
 {/each}
