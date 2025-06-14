@@ -31,8 +31,7 @@ package:
 	touch frz/app/dist/client/index.html
 	cd frz/app && \
 	../../bin/bun x vite build --ssr lib/utilities/scripts/server.ts --outDir dist --emptyOutDir && \
-	../../bin/bun x vite build --outDir dist/client --emptyOutDir && \
-	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite
+	../../bin/bun x vite build --outDir dist/client --emptyOutDir
 
 configure:
 	# Check requirements...
