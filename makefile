@@ -15,17 +15,17 @@ build:
 	zip bin/frizzante-amd64.zip bin/frizzante && \
 	rm bin/frizzante -f
 
-update: configure-bun
+update:
 	go mod tidy
 	cd frz/app && \
 	../../bin/bun update
 
-check: configure-bun
+check:
 	cd frz/app && \
 	../../bin/bun x eslint . && \
 	../../bin/bun x svelte-check --tsconfig ./tsconfig.json
 
-package: configure-bun
+package:
 	rm frz/app/dist -fr
 	mkdir frz/app/dist/client -p
 	touch frz/app/dist/client/index.html
@@ -51,7 +51,7 @@ generate:
 	rm app/lib/utilities/frz -fr
 	go run main.go -generate -utilities -out="frz/app/lib/utilities/frz"
 
-format: configure-bun
+format:
 	cd frz/app && \
 	../../bin/bun x prettier --write .
 
