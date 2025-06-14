@@ -1,22 +1,5 @@
-test:
-	make update
-	make check
-	rm frz/app/dist -fr
-	mkdir frz/app/dist/client -p
-	touch frz/app/dist/client/index.html
-	make package
+test: update check package
 	CGO_ENABLED=1 cd frz && go test
-
-format:
-	cd frz/app && \
-	../../bin/bun x prettier --write .
-
-clean:
-	go clean
-	rm frz/app/dist -fr
-	mkdir frz/app/dist/client -p
-	touch frz/app/dist/client/index.html
-	rm frz/app/node_modules -fr
 
 update:
 	go mod tidy
@@ -29,6 +12,9 @@ check:
 	../../bin/bun x svelte-check --tsconfig ./tsconfig.json
 
 package:
+	rm frz/app/dist -fr
+	mkdir frz/app/dist/client -p
+	touch frz/app/dist/client/index.html
 	cd frz/app && \
 	../../bin/bun x vite build --ssr lib/utilities/scripts/server.ts --outDir dist --emptyOutDir && \
 	../../bin/bun x vite build --outDir dist/client --emptyOutDir && \
@@ -46,6 +32,16 @@ configure:
 	# Generate utilities...
 	go run main.go -generate -utilities -out="frz/app/lib/utilities"
 
+format:
+	cd frz/app && \
+	../../bin/bun x prettier --write .
+
+clean:
+	go clean
+	rm frz/app/dist -fr
+	mkdir frz/app/dist/client -p
+	touch frz/app/dist/client/index.html
+	rm frz/app/node_modules -fr
 
 hooks:
 	printf "#!/usr/bin/env bash\n" > .git/hooks/pre-commit
