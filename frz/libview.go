@@ -35,7 +35,7 @@ type View struct {
 	Name        string         `json:"name"`
 	Data        map[string]any `json:"data"`
 	RenderMode  RenderMode     `json:"renderMode"`
-	EsbuildMode EsbuildMode
+	EsbuildMode EsbuildMode    `json:"esbuildMode"`
 	root        string
 	functions   map[string]v8go.FunctionCallback
 	server      string
