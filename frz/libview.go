@@ -200,6 +200,7 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 
 	var serverError error
 	var server []byte
+
 	convertToCjs :=
 		view.EsbuildMode == EsbuildModeEnabled ||
 			(view.EsbuildMode == EsbuildModeEnvironment && os.Getenv("DEV") == "1")
