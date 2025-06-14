@@ -1,8 +1,9 @@
 test: configure update check package
 	CGO_ENABLED=1 cd frz && go test
 
-build: configure update check package
-	CGO_ENABLED=1 go build main.go
+build: configure
+	go mod tidy
+	CGO_ENABLED=1 GOARCH="amd64" GOOS=linux go build -o bin/app-amd64 main.go
 
 update:
 	go mod tidy
