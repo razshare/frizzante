@@ -2,8 +2,18 @@ test: configure update check package
 	CGO_ENABLED=1 cd frz && go test
 
 build: configure
+	# Check requirements...
+	command -v unzip >/dev/null || error 'zip is required to build frizzante'
+	# Update...
 	go mod tidy
-	CGO_ENABLED=1 GOARCH="amd64" GOOS=linux go build -o bin/frizzante-amd64 main.go
+	# Make bin...
+	mkdir bin -p
+	# Cleanup...
+	rm bin/frizzante* -f
+	# Build...
+	CGO_ENABLED=1 GOARCH="amd64" GOOS=linux go build -o bin/frizzante main.go && \
+	zip bin/frizzante-amd64.zip bin/frizzante && \
+	rm bin/frizzante -f
 
 update:
 	go mod tidy
