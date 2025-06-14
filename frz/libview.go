@@ -23,14 +23,23 @@ const (
 	RenderModeHeadless RenderMode = 3 // Renders only on the server and omits the base template.
 )
 
+type EsbuildMode int
+
+const (
+	EsbuildModeEnvironment EsbuildMode = 0 // Enables esbuild bundling if environment variable "DEV" equals "1".
+	EsbuildModeEnabled     EsbuildMode = 1 // Enables esbuild bundling.
+	EsbuildModeDisabled    EsbuildMode = 2 // Disables esbuild bundling.
+)
+
 type View struct {
-	Name       string         `json:"name"`
-	Data       map[string]any `json:"data"`
-	RenderMode RenderMode     `json:"renderMode"`
-	root       string
-	functions  map[string]v8go.FunctionCallback
-	server     string
-	index      string
+	Name        string         `json:"name"`
+	Data        map[string]any `json:"data"`
+	RenderMode  RenderMode     `json:"renderMode"`
+	EsbuildMode EsbuildMode
+	root        string
+	functions   map[string]v8go.FunctionCallback
+	server      string
+	index       string
 }
 
 // WithRoot sets the root of the view.
@@ -136,6 +145,9 @@ var noScript = regexp.MustCompile(`<script.*>.*</script>`)
 //
 // If the View is using RenderModeHeadless, then ViewRender returns only the content of the view, without decorating it with an HTML document.
 // The output won't even contain a header, ignoring all <svelte:head> declarations and all css.
+//
+// When rendering the view on the server, the view server (which you can set with WithServer), is expected to be in common js format (cjs).
+// If for some reason your view server is not in cjs format, use WithEsbuildMode to enable esbuild and convert the view server script to cjs on the fly.
 func (view *View) Render(efs embed.FS) (html string, renderError error) {
 	// CSR.
 	targetId, targetIdError := uuid.NewV4()
@@ -188,8 +200,11 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 
 	var serverError error
 	var server []byte
+	convertToCjs :=
+		view.EsbuildMode == EsbuildModeEnabled ||
+			(view.EsbuildMode == EsbuildModeEnvironment && os.Getenv("DEV") == "1")
 
-	if os.Getenv("DEV") == "1" {
+	if convertToCjs {
 		server, serverError = JavaScriptBundle(view.root, api.FormatCommonJS, readBytes)
 		if serverError != nil {
 			return "", serverError
