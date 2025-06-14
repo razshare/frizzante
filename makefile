@@ -1,4 +1,4 @@
-test: configure update check package
+test: configure generate update check package
 	CGO_ENABLED=1 cd frz && go test
 
 build: configure
