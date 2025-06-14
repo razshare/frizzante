@@ -181,14 +181,21 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 		), nil
 	}
 
-	readBytes, serverError := view.ServerContents(efs)
-	if serverError != nil {
-		return "", serverError
+	readBytes, serverReadError := view.ServerContents(efs)
+	if serverReadError != nil {
+		return "", serverReadError
 	}
 
-	server, bundleError := JavaScriptBundle(view.root, api.FormatCommonJS, readBytes)
-	if bundleError != nil {
-		return "", bundleError
+	var serverError error
+	var server []byte
+
+	if os.Getenv("DEV") == "1" {
+		server, serverError = JavaScriptBundle(view.root, api.FormatCommonJS, readBytes)
+		if serverError != nil {
+			return "", serverError
+		}
+	} else {
+		server = readBytes
 	}
 
 	serverIif := fmt.Sprintf(
