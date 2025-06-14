@@ -9,7 +9,7 @@
         "@tsconfig/svelte": "^5.0.4",
         "@types/node": "^22.15.31",
         "esbuild": "^0.25.5",
-        "eslint": "^9.28.0",
+        "eslint": "^9.29.0",
         "eslint-config-prettier": "^10.1.5",
         "eslint-plugin-svelte": "^3.9.2",
         "prettier": "^3.5.3",
