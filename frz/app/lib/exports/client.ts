@@ -1,3 +1,3 @@
-export const views: Record<string, Promise<unknown>> = {
+export const views = {
     Welcome: import("$lib/components/views/Welcome.svelte"),
 }

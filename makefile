@@ -57,6 +57,7 @@ format:
 
 clean:
 	go clean
+	rm bin -fr
 	rm frz/app/dist -fr
 	rm frz/app/lib/utilities -fr
 	mkdir frz/app/dist/client -p
