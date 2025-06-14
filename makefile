@@ -1,5 +1,8 @@
-test: update check package
+test: configure update check package
 	CGO_ENABLED=1 cd frz && go test
+
+build: configure update check package
+	CGO_ENABLED=1 go build main.go
 
 update:
 	go mod tidy
@@ -27,6 +30,7 @@ configure:
 	# Make bin...
 	mkdir bin -p
 	# Get bun...
+	which bin/bun || \
 	(curl -fsSL https://github.com/oven-sh/bun/releases/download/bun-v1.2.16/bun-linux-x64.zip -o bin/bun.zip && \
 	unzip -j bin/bun.zip -d bin && rm bin/bun.zip -f)
 	# Generate utilities...
