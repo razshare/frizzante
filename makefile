@@ -35,11 +35,15 @@ package:
 	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite
 
 configure:
+	# Check requirements...
+	command -v unzip >/dev/null || error 'unzip is required to install and configure dependencies'
+	command -v curl >/dev/null || error 'curl is required to install and configure dependencies'
+	# Make bin...
 	mkdir bin -p
-	which bin/bun || \
-	(curl -fsSL https://github.com/oven-sh/bun/releases/latest/download/bun-linux-x64.zip -o bin/bun.zip && \
+	# Get bun...
+	(curl -fsSL https://github.com/oven-sh/bun/releases/download/bun-v1.2.16/bun-linux-x64.zip -o bin/bun.zip && \
 	unzip -j bin/bun.zip -d bin && rm bin/bun.zip -f)
-	which bin/air || curl -sSfL https://raw.githubusercontent.com/air-verse/air/master/install.sh | sh -s
+	# Generate utilities...
 	go run main.go -generate -utilities -out="frz/app/lib/utilities"
 
 
