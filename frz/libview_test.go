@@ -26,7 +26,7 @@ func TestRenderServer(test *testing.T) {
 			c.SendView(View{
 				Name:       "Welcome",
 				RenderMode: RenderModeServer,
-				Data:       Data{Name: "world"},
+				Data:       map[string]any{"name": "world"},
 			})
 		}})
 
@@ -63,7 +63,7 @@ func TestRenderClient(test *testing.T) {
 			c.SendView(View{
 				Name:       "Welcome",
 				RenderMode: RenderModeClient,
-				Data:       Data{Name: "world"},
+				Data:       map[string]any{"name": "world"},
 			})
 		}})
 

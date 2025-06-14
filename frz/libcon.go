@@ -612,7 +612,7 @@ func (connection *Connection) SendView(view View) {
 	}
 
 	if nil == view.Data {
-		view.Data = map[string]string{}
+		view.Data = map[string]any{}
 	}
 
 	if connection.VerifyAccept("application/json") {

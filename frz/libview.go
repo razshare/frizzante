@@ -23,10 +23,9 @@ const (
 )
 
 type View struct {
-	Name       string     `json:"name"`
-	Data       any        `json:"data"`
-	Error      string     `json:"error"`
-	RenderMode RenderMode `json:"renderMode"`
+	Name       string         `json:"name"`
+	Data       map[string]any `json:"data"`
+	RenderMode RenderMode     `json:"renderMode"`
 	functions  map[string]v8go.FunctionCallback
 	server     string
 	index      string

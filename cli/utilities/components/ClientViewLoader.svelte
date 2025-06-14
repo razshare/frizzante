@@ -1,10 +1,13 @@
 <script lang="ts" module>
     import type { SvelteComponent } from "svelte"
     let PreviousComponent = $state(false) as false | SvelteComponent
+    let PreviousProperties = $state({}) as Record<string, unknown>
 </script>
 
 <script lang="ts">
-    let { from } = $props()
+    let { from, properties } = $props()
+    PreviousProperties = properties
+    console.log({properties})
     from.then(function next(view: SvelteComponent) {
         PreviousComponent = view
     })
@@ -12,8 +15,8 @@
 
 {#await from}
     {#if PreviousComponent}
-        <PreviousComponent.default />
+        <PreviousComponent.default {...PreviousProperties} />
     {/if}
 {:then Component}
-    <Component.default />
+    <Component.default {...properties}/>
 {/await}

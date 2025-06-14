@@ -90,7 +90,7 @@ function swap(view: View<unknown>): SwapAction {
 
             view.data = json.data
             view.name = json.name
-            view.error = json.error
+            view.renderMode = json.renderMode
 
             if (update) {
                 const id = uuid()

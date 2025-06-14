@@ -57,6 +57,7 @@ format:
 clean:
 	go clean
 	rm frz/app/dist -fr
+	rm frz/app/lib/utilities -fr
 	mkdir frz/app/dist/client -p
 	touch frz/app/dist/client/index.html
 	rm frz/app/node_modules -fr
