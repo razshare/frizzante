@@ -24,8 +24,5 @@ jobs:
       - name: Install dev dependencies
         run: sudo apt install curl unzip
 
-      - name: Configure
-        run: make configure
-
       - name: Test
         run: make test

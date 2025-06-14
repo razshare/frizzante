@@ -44,6 +44,9 @@ configure:
 	which bin/bun || \
 	(curl -fsSL https://github.com/oven-sh/bun/releases/download/bun-v1.2.16/bun-linux-x64.zip -o bin/bun.zip && \
 	unzip -j bin/bun.zip -d bin && rm bin/bun.zip -f)
+	chmod +x bin/bun
+
+generate: configure
 	# Generate utilities...
 	go run main.go -generate -utilities -out="frz/app/lib/utilities"
 
