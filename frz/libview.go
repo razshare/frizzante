@@ -33,9 +33,10 @@ type View struct {
 	index      string
 }
 
-// WithRoot sets the root of the view.
+// WithRoot sets the root directory of the view.
 //
-// The root of the view should contain `node_modules` and `package.json`.
+// The root directory of the view should contain "node_modules", "package.json"
+// and it should exist in the host file system.
 func (view *View) WithRoot(root string) *View {
 	view.root = root
 	return view
@@ -138,7 +139,9 @@ var noScript = regexp.MustCompile(`<script.*>.*</script>`)
 // The output won't even contain a header, ignoring all <svelte:head> declarations and all css.
 //
 // When rendering the view on the server, the view server (which you can set with WithServer), is expected to be in common js format (cjs).
-// If for some reason your view server is not in cjs format, use WithEsbuildMode to enable esbuild and convert the view server script to cjs on the fly.
+//
+// If for some reason your view server is not in cjs format, Render will try to convert it to cjs on the fly using esbuild.
+// Esbuild will look for a "node_modules" in the view root directory, which you can set by invoking WithRoot.
 func (view *View) Render(efs embed.FS) (html string, renderError error) {
 	// CSR.
 	targetId, targetIdError := uuid.NewV4()
