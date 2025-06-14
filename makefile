@@ -1,7 +1,7 @@
-test: configure generate update check package
+test: configure-bun generate update check package
 	CGO_ENABLED=1 cd frz && go test
 
-build: configure
+build:
 	# Check requirements...
 	command -v unzip >/dev/null || error 'zip is required to build frizzante'
 	# Update...
@@ -15,17 +15,17 @@ build: configure
 	zip bin/frizzante-amd64.zip bin/frizzante && \
 	rm bin/frizzante -f
 
-update:
+update: configure-bun
 	go mod tidy
 	cd frz/app && \
 	../../bin/bun update
 
-check:
+check: configure-bun
 	cd frz/app && \
 	../../bin/bun x eslint . && \
 	../../bin/bun x svelte-check --tsconfig ./tsconfig.json
 
-package:
+package: configure-bun
 	rm frz/app/dist -fr
 	mkdir frz/app/dist/client -p
 	touch frz/app/dist/client/index.html
@@ -34,7 +34,7 @@ package:
 	../../bin/bun x vite build --outDir dist/client --emptyOutDir && \
 	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite
 
-configure:
+ configure-bun:
 	# Check requirements...
 	command -v unzip >/dev/null || error 'unzip is required to install and configure dependencies'
 	command -v curl >/dev/null || error 'curl is required to install and configure dependencies'
@@ -46,12 +46,12 @@ configure:
 	unzip -j bin/bun.zip -d bin && rm bin/bun.zip -f)
 	chmod +x bin/bun
 
-generate: configure
+generate:
 	# Generate utilities...
 	rm app/lib/utilities/frz -fr
 	go run main.go -generate -utilities -out="frz/app/lib/utilities/frz"
 
-format:
+format: configure-bun
 	cd frz/app && \
 	../../bin/bun x prettier --write .
 
