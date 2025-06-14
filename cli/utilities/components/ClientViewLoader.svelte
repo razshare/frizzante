@@ -7,7 +7,6 @@
 <script lang="ts">
     let { from, properties } = $props()
     PreviousProperties = properties
-    console.log({properties})
     from.then(function next(view: SvelteComponent) {
         PreviousComponent = view
     })
