@@ -2,7 +2,7 @@
     import Layout from "$lib/components/Layout.svelte"
 
     type Props = { name: string }
-    let {name}:Props = $props()
+    let { name }: Props = $props()
 </script>
 
 <svelte:head>

@@ -1,6 +1,5 @@
 import { type Readable, readable } from "svelte/store"
-
-const IS_BROWSER = typeof document !== "undefined"
+import { IS_BROWSER } from "$lib/utilities/frz/constants.ts"
 
 export function source(path: string) {
     if (!IS_BROWSER) {

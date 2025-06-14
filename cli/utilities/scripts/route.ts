@@ -1,7 +1,7 @@
 import type { View } from "$lib/utilities/frz/types.ts"
+import { IS_BROWSER } from "$lib/utilities/frz/constants.ts"
 import { swaps } from "$lib/utilities/frz/scripts/swaps.ts"
 
-const IS_BROWSER = typeof document !== "undefined"
 let started = false
 
 export function route(view: View<never>): void {
