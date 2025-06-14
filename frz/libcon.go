@@ -628,6 +628,10 @@ func (connection *Connection) SendView(view View) {
 		view.index = connection.server.viewIndex
 	}
 
+	if "" == view.root {
+		view.root = connection.server.viewRoot
+	}
+
 	content, compileError := view.Render(connection.server.efs)
 	if nil != compileError {
 		connection.server.notifier.SendErrorAndTrace(compileError, 1)

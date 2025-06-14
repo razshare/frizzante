@@ -29,7 +29,7 @@ type Server struct {
 	key             string
 	notifier        *Notifier
 	efs             embed.FS
-	viewAppRoot     string
+	viewRoot        string
 	publicRoot      string
 	viewServer      string
 	viewIndex       string
@@ -57,7 +57,7 @@ func NewServer() *Server {
 		key:             "",
 		notifier:        notifier,
 		upgrader:        upgrader,
-		viewAppRoot:     "app",
+		viewRoot:        "app",
 		publicRoot:      "app/dist/client",
 		viewServer:      "app/dist/server.js",
 		viewIndex:       "app/dist/client/index.html",
@@ -141,13 +141,11 @@ func (server *Server) WithPublicRoot(fileName string) *Server {
 	return server
 }
 
-// WithViewAppRoot sets the view application root directory,
-// which is usually `app`.
+// WithViewRoot sets the view root directory, which is usually `app`.
 //
-// The view application root directory should contain
-// a "node_modules" directory and a "package.json" file.
-func (server *Server) WithViewAppRoot(directoryName string) *Server {
-	server.viewAppRoot = directoryName
+// The view root directory should contain "node_modules" a "package.json".
+func (server *Server) WithViewRoot(directoryName string) *Server {
+	server.viewRoot = directoryName
 	return server
 }
 

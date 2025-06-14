@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/evanw/esbuild/pkg/api"
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/razshare/frizzante/fs"
 	"os"
@@ -26,9 +27,18 @@ type View struct {
 	Name       string         `json:"name"`
 	Data       map[string]any `json:"data"`
 	RenderMode RenderMode     `json:"renderMode"`
+	root       string
 	functions  map[string]v8go.FunctionCallback
 	server     string
 	index      string
+}
+
+// WithRoot sets the root of the view.
+//
+// The root of the view should contain `node_modules` and `package.json`.
+func (view *View) WithRoot(root string) *View {
+	view.root = root
+	return view
 }
 
 // WithServer sets the server script.
@@ -171,9 +181,14 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 		), nil
 	}
 
-	server, serverError := view.ServerContents(efs)
+	readBytes, serverError := view.ServerContents(efs)
 	if serverError != nil {
 		return "", serverError
+	}
+
+	server, bundleError := JavaScriptBundle(view.root, api.FormatCommonJS, readBytes)
+	if bundleError != nil {
+		return "", bundleError
 	}
 
 	serverIif := fmt.Sprintf(
