@@ -26,7 +26,7 @@ const (
 type EsbuildMode int
 
 const (
-	EsbuildModeEnvironment EsbuildMode = 0 // Enables esbuild bundling if environment variable "DEV" equals "1".
+	EsbuildModeEnvironment EsbuildMode = 0 // Enables esbuild bundling if environment variable "BUNDLE_VIEW_SERVER_TO_CJS" equals "1".
 	EsbuildModeEnabled     EsbuildMode = 1 // Enables esbuild bundling.
 	EsbuildModeDisabled    EsbuildMode = 2 // Disables esbuild bundling.
 )
@@ -203,7 +203,7 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 
 	convertToCjs :=
 		view.EsbuildMode == EsbuildModeEnabled ||
-			(view.EsbuildMode == EsbuildModeEnvironment && os.Getenv("DEV") == "1")
+			(view.EsbuildMode == EsbuildModeEnvironment && os.Getenv("BUNDLE_VIEW_SERVER_TO_CJS") == "1")
 
 	if convertToCjs {
 		server, serverError = JavaScriptBundle(view.root, api.FormatCommonJS, readBytes)
