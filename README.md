@@ -1,11 +1,15 @@
 # What is this?
 Frizzante is a minimalistic and opinionated web server framework written in [Go](https://go.dev/) that uses [Svelte](https://svelte.dev/docs/svelte/overview) to render pages.
 
-# Get started
+# Prerequisites
 
-> [!NOTE]
-> Frizzante is aimed mainly at debian-like distributions.\
-> Feel free to contribute improvements for other platforms.
+Make sure you have `build-essential`, `curl` and `unzip` installed on your machine.
+
+```sh
+sudo apt install build-essential unzip curl
+```
+
+# Get started
 
 Clone the basic starter template.
 ```sh
@@ -55,3 +59,7 @@ This will create a `bin/app` standalone executable.
 > For that reason, the first run may take some time, just be patient.
 > 
 > Subsequent runs will take considerably less time.
+
+> [!NOTE]
+> Frizzante is aimed mainly at debian-like distributions.\
+> Feel free to contribute improvements for other platforms.
