@@ -54,5 +54,5 @@ This will create a `bin/app` standalone executable.
 > Subsequent runs will take considerably less time.
 
 > [!NOTE]
-> Frizzante is aimed mainly at debian-like distributions.\
+> Frizzante is aimed mainly at debian based distributions.\
 > Feel free to contribute improvements for other platforms.
