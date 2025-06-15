@@ -14,14 +14,8 @@ sudo apt install build-essential unzip curl
 Clone the basic starter template.
 ```sh
 git clone https://github.com/razshare/frizzante-starter && \
-rm frizzante-starter/.git -fr
-```
-
-Install and configure development dependencies
-
-```sh
-sudo apt install build-essential curl unzip && \
-make configure
+rm frizzante-starter/.git -fr && \
+cd frizzante-starter
 ```
 
 Start development with
@@ -30,18 +24,17 @@ Start development with
 make dev
 ```
 
-
 > [!NOTE]
 > The default makefile uses [Bun](https://bun.sh/) to install
 > dependencies while in development mode.
->
-> You can swap Bun out with whatever runtime you want to use to develop
-> by replacing all `bun` references within the makefile with
+> 
+> You can swap Bun out with whatever runtime you want to use to develop 
+> by replacing all `bun` references within the makefile with 
 > the equivalent of whatever runtime you'd like to use.
 > 
-> This change will have no impact on your application's performance,
-> Bun is only used in development mode
-> in order to be able to run the Vite server.
+> This change will have no impact on your application's performance, 
+> Bun is only used to compile `.svelte` files into `.js` files 
+> in development mode or when building for production.
 
 Build with
 
