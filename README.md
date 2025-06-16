@@ -18,6 +18,12 @@ rm frizzante-starter/.git -fr && \
 cd frizzante-starter
 ```
 
+Update dependencies with
+
+```sh
+make update
+```
+
 Start development with
 
 ```sh
