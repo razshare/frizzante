@@ -21,8 +21,11 @@ jobs:
         with:
           go-version: '1.24'
 
-      - name: Install dev dependencies
+      - name: Install prerequisites
         run: sudo apt install curl unzip
+
+      - name: Install project dependencies
+        run: make update
 
       - name: Test
         run: make test

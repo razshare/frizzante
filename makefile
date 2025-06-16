@@ -1,31 +1,18 @@
-test: configure-bun generate update check package
+###### Composites ######
+test: configure-bun generate check package
 	CGO_ENABLED=1 cd frz && go test
 
-build:
-	# Check requirements...
-	command -v unzip >/dev/null || error 'zip is required to build frizzante'
-	# Update...
-	go mod tidy
-	# Make bin...
-	mkdir bin -p
-	# Cleanup...
-	rm bin/frizzante* -f
-	# Build...
-	CGO_ENABLED=1 GOARCH="amd64" GOOS=linux go build -o bin/frizzante main.go && \
-	zip bin/frizzante-amd64.zip bin/frizzante && \
-	rm bin/frizzante -f
-
-update:
+update: configure-bun
 	go mod tidy
 	cd frz/app && \
 	../../bin/bun update
 
-check:
+check: configure-bun
 	cd frz/app && \
 	../../bin/bun x eslint . && \
 	../../bin/bun x svelte-check --tsconfig ./tsconfig.json
 
-package:
+package: configure-bun
 	rm frz/app/dist -fr
 	mkdir frz/app/dist/client -p
 	touch frz/app/dist/client/index.html
@@ -33,6 +20,8 @@ package:
 	../../bin/bun x vite build --ssr lib/utilities/frz/scripts/server.ts --outDir dist --emptyOutDir && \
 	../../bin/bun x vite build --outDir dist/client --emptyOutDir && \
 	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite
+
+###### Primitives ######
 
  configure-bun:
 	# Check requirements...
@@ -68,3 +57,17 @@ hooks:
 	printf "#!/usr/bin/env bash\n" > .git/hooks/pre-commit
 	printf "make test" >> .git/hooks/pre-commit
 	chmod +x .git/hooks/pre-commit
+
+build:
+	# Check requirements...
+	command -v unzip >/dev/null || error 'zip is required to build frizzante'
+	# Update...
+	go mod tidy
+	# Make bin...
+	mkdir bin -p
+	# Cleanup...
+	rm bin/frizzante* -f
+	# Build...
+	CGO_ENABLED=1 GOARCH="amd64" GOOS=linux go build -o bin/frizzante main.go && \
+	zip bin/frizzante-amd64.zip bin/frizzante && \
+	rm bin/frizzante -f
