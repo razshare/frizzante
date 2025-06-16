@@ -10,8 +10,6 @@ import svelteConfig from "./svelte.config.js"
 const gitignorePath = fileURLToPath(new URL("./.gitignore", import.meta.url))
 
 export default ts.config(
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
     includeIgnoreFile(gitignorePath),
     js.configs.recommended,
     ...ts.configs.recommended,
