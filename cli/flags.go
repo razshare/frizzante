@@ -2,7 +2,7 @@ package cli
 
 import "flag"
 
-var FlagGenerate = flag.Bool("generate", true, "")
-var FlagProject = flag.Bool("project", false, "")
-var FlagUtilities = flag.Bool("utilities", false, "")
+var FlagDevelop = flag.Bool("develop", false, "")
+var FlagCreateProject = flag.Bool("project", false, "")
+var FlagGenerateUtilities = flag.Bool("utilities", false, "")
 var FlagOut = flag.String("out", "", "")

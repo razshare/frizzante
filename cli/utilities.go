@@ -8,7 +8,7 @@ import (
 )
 
 func Utilities() {
-	if !*FlagGenerate || !*FlagUtilities {
+	if !*FlagGenerateUtilities {
 		return
 	}
 

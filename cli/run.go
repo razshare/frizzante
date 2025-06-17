@@ -1,39 +1,50 @@
 package cli
 
 import (
+	"embed"
 	"flag"
 	"github.com/pterm/pterm"
 	"log"
 )
 
-func Run() {
+//go:embed .air.toml
+//go:embed bin
+var bin embed.FS
 
+func Run() {
 	flag.Parse()
 
-	if !*FlagProject &&
-		!*FlagUtilities {
+	if !*FlagCreateProject &&
+		!*FlagGenerateUtilities {
 
 		generator, showError := pterm.
 			DefaultInteractiveSelect.
 			WithOptions([]string{
-				"Project",
-				"Utilities",
+				"Create Project",
+				"Generate Utilities",
+				"Develop",
 			}).
-			Show("Generate")
+			Show("Welcome to Frizzante, pick an option")
 
 		if showError != nil {
 			log.Fatal(showError)
 		}
 
-		if "Project" == generator {
-			*FlagProject = true
+		if "Create Project" == generator {
+			*FlagCreateProject = true
 		}
 
-		if "Utilities" == generator {
-			*FlagUtilities = true
+		if "Generate Utilities" == generator {
+			*FlagGenerateUtilities = true
+		}
+
+		if "Develop" == generator {
+			*FlagDevelop = true
 		}
 	}
 
 	Project()
 	Utilities()
+	*FlagDevelop = true
+	Develop(bin)
 }

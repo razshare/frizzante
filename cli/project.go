@@ -1,19 +1,16 @@
 package cli
 
 import (
-	"archive/zip"
 	"github.com/pterm/pterm"
 	"github.com/razshare/frizzante/fs"
 	"io"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
-	"strings"
 )
 
 func Project() {
-	if !*FlagGenerate || !*FlagProject {
+	if !*FlagCreateProject {
 		return
 	}
 
@@ -45,64 +42,8 @@ func Project() {
 		log.Fatal(zipWriteError)
 	}
 
-	zipReader, zipOpenError := zip.OpenReader(zipFileName)
-	if zipOpenError != nil {
-		log.Fatal(zipOpenError)
+	unzipError := fs.UnzipFile(zipFileName, *FlagOut)
+	if unzipError != nil {
+		log.Fatal(unzipError)
 	}
-	defer func(zipReader *zip.ReadCloser) {
-		err := zipReader.Close()
-		if err != nil {
-			log.Fatal(err)
-		}
-	}(zipReader)
-
-	for _, file := range zipReader.File {
-		fileName := filepath.Join(*FlagOut, strings.TrimPrefix(file.Name, "frizzante-starter-main"))
-		fileIsDirectory := file.FileInfo().IsDir()
-		fileIsDirectoryOnDisk := fs.IsDirectory(fileName)
-
-		if fileIsDirectory && !fileIsDirectoryOnDisk {
-			mkdirError := os.MkdirAll(fileName, os.ModePerm)
-			if mkdirError != nil {
-				log.Fatal(mkdirError)
-			}
-			continue
-		}
-
-		directoryName := filepath.Dir(fileName)
-
-		if "." == directoryName {
-			continue
-		}
-
-		parentExists := fs.IsDirectory(directoryName)
-
-		if !parentExists {
-			mkdirError := os.MkdirAll(directoryName, os.ModePerm)
-			if mkdirError != nil {
-				log.Fatal(mkdirError)
-			}
-		}
-
-		dstFile, err := os.OpenFile(fileName, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
-		if err != nil {
-			panic(err)
-		}
-
-		fileInArchive, err := file.Open()
-		if err != nil {
-			panic(err)
-		}
-
-		if _, copyError := io.Copy(dstFile, fileInArchive); copyError != nil {
-			panic(copyError)
-		}
-
-		_ = dstFile.Close()
-		_ = fileInArchive.Close()
-	}
-
-	_ = os.Remove(zipFileName)
-
-	os.Exit(0)
 }
