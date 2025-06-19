@@ -8,15 +8,16 @@ import (
 )
 
 //go:embed .air.toml
-//go:embed bin
-var bin embed.FS
+//go:embed bin/air
+//go:embed bin/bun
+//go:embed utilities
+//go:embed starter.zip
+var efs embed.FS
 
 func Run() {
 	flag.Parse()
 
-	if !*FlagCreateProject &&
-		!*FlagGenerateUtilities {
-
+	if !*FlagCreateProject && !*FlagGenerateUtilities {
 		generator, showError := pterm.
 			DefaultInteractiveSelect.
 			WithOptions([]string{
@@ -43,8 +44,7 @@ func Run() {
 		}
 	}
 
-	Project()
-	Utilities()
-	*FlagDevelop = true
-	Develop(bin)
+	CreateProject(efs)
+	GenerateUtilities(efs)
+	Develop(efs)
 }

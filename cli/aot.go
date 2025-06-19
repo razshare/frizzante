@@ -9,16 +9,13 @@ import (
 	"strings"
 )
 
-//go:embed utilities/*
-var utilitiesEfs embed.FS
-
 type AotUtilities struct {
 	efs embed.FS
 }
 
-func NewAotUtilities() *AotUtilities {
+func NewAotUtilities(efs embed.FS) *AotUtilities {
 	return &AotUtilities{
-		efs: utilitiesEfs,
+		efs: efs,
 	}
 }
 
@@ -51,7 +48,7 @@ func (assets *AotUtilities) CreateOnDisk(to string) error {
 				continue
 			}
 
-			embeddedContents, readError := utilitiesEfs.ReadFile(fromFileName)
+			embeddedContents, readError := assets.efs.ReadFile(fromFileName)
 			if readError != nil {
 				return readError
 			}
@@ -67,8 +64,8 @@ func (assets *AotUtilities) CreateOnDisk(to string) error {
 	return create(from, to)
 }
 
-func CreateAotUtilitiesOnDisk(to string) {
-	utilities := NewAotUtilities()
+func CreateAotUtilitiesOnDisk(efs embed.FS, to string) {
+	utilities := NewAotUtilities(efs)
 	utilitiesError := utilities.CreateOnDisk(to)
 	if utilitiesError != nil {
 		log.Fatal(utilitiesError)

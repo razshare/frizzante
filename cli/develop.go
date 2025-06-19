@@ -12,7 +12,7 @@ import (
 	"syscall"
 )
 
-func Develop(bin embed.FS) {
+func Develop(efs embed.FS) {
 	if !*FlagDevelop {
 		return
 	}
@@ -22,7 +22,7 @@ func Develop(bin embed.FS) {
 	}
 
 	if !fs.FileExists(".air.toml") {
-		data, readError := bin.ReadFile(".air.toml")
+		data, readError := efs.ReadFile(".air.toml")
 		if readError != nil {
 			log.Fatal(readError)
 		}
@@ -35,9 +35,12 @@ func Develop(bin embed.FS) {
 
 	if !fs.FileExists(filepath.Join("bin", "bun")) {
 		// Configure bun...
-		spinner, _ := pterm.DefaultSpinner.WithShowTimer(false).WithRemoveWhenDone(true).Start("Configuring Bun...")
+		spinner, _ := pterm.DefaultSpinner.
+			WithShowTimer(false).
+			WithRemoveWhenDone(true).
+			Start("Configuring Bun...")
 
-		data, readError := bin.ReadFile("bin/bun")
+		data, readError := efs.ReadFile("bin/bun")
 		if readError != nil {
 			log.Fatal(readError)
 		}
@@ -46,6 +49,7 @@ func Develop(bin embed.FS) {
 		if writeError != nil {
 			log.Fatal(writeError)
 		}
+
 		stopError := spinner.Stop()
 		if stopError != nil {
 			log.Fatal(stopError)
@@ -54,9 +58,12 @@ func Develop(bin embed.FS) {
 
 	if !fs.FileExists(filepath.Join("bin", "air")) {
 		// Configure air...
-		spinner, _ := pterm.DefaultSpinner.WithShowTimer(false).WithRemoveWhenDone(true).Start("Configuring Air...")
+		spinner, _ := pterm.DefaultSpinner.
+			WithShowTimer(false).
+			WithRemoveWhenDone(true).
+			Start("Configuring Air...")
 
-		data, readError := bin.ReadFile("bin/air")
+		data, readError := efs.ReadFile("bin/air")
 		if readError != nil {
 			log.Fatal(readError)
 		}
@@ -65,6 +72,7 @@ func Develop(bin embed.FS) {
 		if writeError != nil {
 			log.Fatal(writeError)
 		}
+
 		stopError := spinner.Stop()
 		if stopError != nil {
 			log.Fatal(stopError)

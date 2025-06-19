@@ -1,5 +1,5 @@
 ###### Composites ######
-build: clean configure-bun configure-air
+build: configure-bun configure-air configure-starter
 	# Build for Linux Amd64...
 	CGO_ENABLED=1 GOARCH="amd64" GOOS=linux go build -o bin/frizzante main.go && \
 	zip bin/frizzante-amd64.zip bin/frizzante && \
@@ -28,7 +28,6 @@ package: configure-bun
 	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite
 
 ###### Primitives ######
-
 generate:
 	# Generate utilities...
 	rm app/lib/utilities/frz -fr
@@ -41,6 +40,7 @@ format:
 clean:
 	go clean
 	rm bin -fr
+	rm cli/starter.zip -fr
 	rm cli/bin -fr
 	rm frz/app/dist -fr
 	rm frz/app/lib/utilities/frz -fr
@@ -52,6 +52,10 @@ hooks:
 	printf "#!/usr/bin/env bash\n" > .git/hooks/pre-commit
 	printf "make test" >> .git/hooks/pre-commit
 	chmod +x .git/hooks/pre-commit
+
+configure-starter:
+	which cli/starter.zip || \
+	curl -fsSL https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip -o cli/starter.zip
 
 configure-bun:
 	# Check requirements...
@@ -73,3 +77,5 @@ configure-air:
 	# Get air...
 	which cli/bin/air || (curl -fsSL https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_amd64 -o cli/bin/air)
 	chmod +x cli/bin/air
+
+configure: clean configure-bun configure-air

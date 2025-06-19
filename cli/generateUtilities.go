@@ -1,13 +1,14 @@
 package cli
 
 import (
+	"embed"
 	"github.com/pterm/pterm"
 	"log"
 	"os"
 	"path/filepath"
 )
 
-func Utilities() {
+func GenerateUtilities(efs embed.FS) {
 	if !*FlagGenerateUtilities {
 		return
 	}
@@ -23,7 +24,7 @@ func Utilities() {
 		}
 	}
 
-	u := NewAotUtilities()
+	u := NewAotUtilities(efs)
 
 	if e = u.CreateOnDisk(filepath.Join(*FlagOut)); e != nil {
 		log.Fatal(e)
