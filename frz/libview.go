@@ -79,7 +79,7 @@ func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
 
 	if indexReadError != nil || index == nil {
 		fileNameFixed := strings.ReplaceAll(view.index, "\\", "/")
-		if fs.ExistsInEmbeddedFileSystem(efs, fileNameFixed) {
+		if fs.EfsFileExists(efs, fileNameFixed) {
 			index, indexReadError = efs.ReadFile(fileNameFixed)
 			if indexReadError != nil {
 				return nil, indexReadError
@@ -102,7 +102,7 @@ func (view *View) ServerContents(efs embed.FS) ([]byte, error) {
 
 	if serverReadError != nil || server == nil {
 		fileNameFixed := strings.ReplaceAll(view.server, "\\", "/")
-		if fs.ExistsInEmbeddedFileSystem(efs, fileNameFixed) {
+		if fs.EfsFileExists(efs, fileNameFixed) {
 			server, serverReadError = efs.ReadFile(fileNameFixed)
 			if serverReadError != nil {
 				return nil, serverReadError

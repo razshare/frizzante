@@ -53,6 +53,7 @@ go.work.sum
 *.key
 
 # Frizzante
+*.zip
 /tmp
 /bin
 /cli/bin

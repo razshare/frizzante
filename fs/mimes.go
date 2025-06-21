@@ -71,6 +71,7 @@ var mimes = map[string]string{
 	".ogx":   "application/ogg",
 }
 
+// Mime gets the mime type fo a file name.
 func Mime(fileName string) string {
 	extensionName := filepath.Ext(fileName)
 	mimeName, ok := mimes[extensionName]

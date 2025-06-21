@@ -3,29 +3,27 @@ package cli
 import (
 	"embed"
 	"github.com/razshare/frizzante/fs"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-type AotUtilities struct {
+type Utilities struct {
 	efs embed.FS
 }
 
-func NewAotUtilities(efs embed.FS) *AotUtilities {
-	return &AotUtilities{
+func NewUtilities(efs embed.FS) *Utilities {
+	return &Utilities{
 		efs: efs,
 	}
 }
 
-func (assets *AotUtilities) CreateOnDisk(to string) error {
+func (utilities *Utilities) CreateOnDisk(to string) error {
 	var from = "utilities"
-	//var to = filepath.Join("frz/.generated", "utilities")
 	var create func(from string, to string) error
 
 	create = func(from string, to string) error {
-		embeddedFiles, readDirError := assets.efs.ReadDir(from)
+		embeddedFiles, readDirError := utilities.efs.ReadDir(from)
 		if readDirError != nil {
 			return readDirError
 		}
@@ -48,7 +46,7 @@ func (assets *AotUtilities) CreateOnDisk(to string) error {
 				continue
 			}
 
-			embeddedContents, readError := assets.efs.ReadFile(fromFileName)
+			embeddedContents, readError := utilities.efs.ReadFile(fromFileName)
 			if readError != nil {
 				return readError
 			}
@@ -62,12 +60,4 @@ func (assets *AotUtilities) CreateOnDisk(to string) error {
 	}
 
 	return create(from, to)
-}
-
-func CreateAotUtilitiesOnDisk(efs embed.FS, to string) {
-	utilities := NewAotUtilities(efs)
-	utilitiesError := utilities.CreateOnDisk(to)
-	if utilitiesError != nil {
-		log.Fatal(utilitiesError)
-	}
 }

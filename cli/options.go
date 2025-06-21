@@ -2,6 +2,7 @@ package cli
 
 import (
 	"embed"
+	"flag"
 	"github.com/pterm/pterm"
 	"github.com/razshare/frizzante/fs"
 	"log"
@@ -11,6 +12,99 @@ import (
 	"path/filepath"
 	"syscall"
 )
+
+var FlagDevelop = flag.Bool("develop", false, "")
+var FlagCreateProject = flag.Bool("project", false, "")
+var FlagGenerateUtilities = flag.Bool("utilities", false, "")
+var FlagOut = flag.String("out", "", "")
+
+func GenerateUtilities(efs embed.FS) {
+	if !*FlagGenerateUtilities {
+		return
+	}
+
+	var e error
+
+	if "" == *FlagOut {
+		*FlagOut, e = pterm.
+			DefaultInteractiveTextInput.
+			Show("Drop utilities in")
+		if e != nil {
+			log.Fatal(e)
+		}
+	}
+
+	u := NewUtilities(efs)
+
+	if e = u.CreateOnDisk(filepath.Join(*FlagOut)); e != nil {
+		log.Fatal(e)
+	}
+
+	os.Exit(0)
+}
+
+func CreateProject(efs embed.FS) {
+	if !*FlagCreateProject {
+		return
+	}
+
+	var showError error
+
+	if "" == *FlagOut {
+		*FlagOut, showError = pterm.
+			DefaultInteractiveTextInput.
+			Show("The name of the project is")
+		if showError != nil {
+			log.Fatal(showError)
+		}
+	}
+
+	fileName := *FlagOut + ".zip"
+	directoryName := *FlagOut
+	directoryNameTemp := *FlagOut + ".tmp"
+
+	if fs.FileExists(directoryName) {
+		log.Fatal(pterm.Sprintf("%s already exists", directoryName))
+	}
+
+	if fs.FileExists(directoryNameTemp) {
+		log.Fatal(pterm.Sprintf("%s already exists", directoryNameTemp))
+	}
+
+	if fs.FileExists(fileName) {
+		log.Fatal(pterm.Sprintf("%s already exists", fileName))
+	}
+
+	data, readError := efs.ReadFile("starter.zip")
+	if readError != nil {
+		log.Fatal(readError)
+	}
+
+	writeError := os.WriteFile(fileName, data, os.ModePerm)
+	if writeError != nil {
+		log.Fatal(writeError)
+	}
+
+	unzipError := fs.UnzipFile(fileName, directoryNameTemp)
+	if unzipError != nil {
+		log.Fatal(unzipError)
+	}
+
+	removeError := os.Remove(fileName)
+	if removeError != nil {
+		log.Fatal(removeError)
+	}
+
+	renameError := os.Rename(filepath.Join(directoryNameTemp, "frizzante-starter-main"), directoryName)
+	if renameError != nil {
+		log.Fatal(renameError)
+	}
+
+	removeError = os.RemoveAll(directoryNameTemp)
+	if removeError != nil {
+		log.Fatal(removeError)
+	}
+}
 
 func Develop(efs embed.FS) {
 	if !*FlagDevelop {

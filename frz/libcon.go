@@ -443,12 +443,12 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
-	if !fs.ExistsInEmbeddedFileSystem(efs, fileName) || fs.IsEmbeddedDirectory(efs, fileName) {
+	if !fs.EfsFileExists(efs, fileName) || fs.EfsIsDirectory(efs, fileName) {
 		orElse()
 		return
 	}
 
-	reader, info, readerError := fs.ReaderFromEmbeddedFileName(efs, fileName)
+	reader, info, readerError := fs.EfsFileReader(efs, fileName)
 	if nil != readerError {
 		connection.server.notifier.SendErrorAndTrace(readerError, 1)
 		return
@@ -495,7 +495,7 @@ func (connection *Connection) SendFileOrElse(orElse func()) {
 		return
 	}
 
-	reader, info, readerError := fs.ReaderFromFileName(fileName)
+	reader, info, readerError := fs.FileReader(fileName)
 	if nil != readerError {
 		connection.server.notifier.SendErrorAndTrace(readerError, 1)
 		return

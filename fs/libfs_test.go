@@ -12,7 +12,7 @@ var Efs embed.FS
 func TestEmbeddedExists(test *testing.T) {
 	// Positive.
 	fileName := "mimes.go"
-	actual := ExistsInEmbeddedFileSystem(Efs, fileName)
+	actual := EfsFileExists(Efs, fileName)
 	expected := true
 	if !actual {
 		test.Fatalf("%s (embedded) was expected to exist", fileName)
@@ -20,7 +20,7 @@ func TestEmbeddedExists(test *testing.T) {
 
 	// Negative.
 	fileName = "qwerty"
-	actual = ExistsInEmbeddedFileSystem(Efs, fileName)
+	actual = EfsFileExists(Efs, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to exist", fileName)
@@ -30,7 +30,7 @@ func TestEmbeddedExists(test *testing.T) {
 func TestEmbeddedIsFile(test *testing.T) {
 	// Positive.
 	fileName := "mimes.go"
-	actual := isEmbeddedFile(Efs, fileName)
+	actual := EfsIsFile(Efs, fileName)
 	expected := true
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to be a file", fileName)
@@ -38,14 +38,14 @@ func TestEmbeddedIsFile(test *testing.T) {
 
 	// Negatives.
 	fileName = "test"
-	actual = isEmbeddedFile(Efs, fileName)
+	actual = EfsIsFile(Efs, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a file", fileName)
 	}
 
 	fileName = "qwerty"
-	actual = isEmbeddedFile(Efs, fileName)
+	actual = EfsIsFile(Efs, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a file", fileName)
@@ -55,7 +55,7 @@ func TestEmbeddedIsFile(test *testing.T) {
 func TestEmbeddedIsDirectory(test *testing.T) {
 	// Positive.
 	fileName := "test"
-	actual := IsEmbeddedDirectory(Efs, fileName)
+	actual := EfsIsDirectory(Efs, fileName)
 	expected := true
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to be a directory", fileName)
@@ -63,14 +63,14 @@ func TestEmbeddedIsDirectory(test *testing.T) {
 
 	// Negatives.
 	fileName = "mimes.go"
-	actual = IsEmbeddedDirectory(Efs, fileName)
+	actual = EfsIsDirectory(Efs, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a directory", fileName)
 	}
 
 	fileName = "qwerty"
-	actual = IsEmbeddedDirectory(Efs, fileName)
+	actual = EfsIsDirectory(Efs, fileName)
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a directory", fileName)
