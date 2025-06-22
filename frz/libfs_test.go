@@ -9,24 +9,6 @@ import (
 //go:embed test/*
 var Efs embed.FS
 
-func TestEmbeddedExists(test *testing.T) {
-	// Positive.
-	fileName := "libmimes.go"
-	actual := EfsFileExists(Efs, fileName)
-	expected := true
-	if !actual {
-		test.Fatalf("%s (embedded) was expected to exist", fileName)
-	}
-
-	// Negative.
-	fileName = "qwerty"
-	actual = EfsFileExists(Efs, fileName)
-	expected = false
-	if actual != expected {
-		test.Fatalf("%s (embedded) was expected to exist", fileName)
-	}
-}
-
 func TestEmbeddedIsFile(test *testing.T) {
 	// Positive.
 	fileName := "libmimes.go"
@@ -74,24 +56,6 @@ func TestEmbeddedIsDirectory(test *testing.T) {
 	expected = false
 	if actual != expected {
 		test.Fatalf("%s (embedded) was expected to not be a directory", fileName)
-	}
-}
-
-func TestExists(test *testing.T) {
-	// Positive.
-	fileName := "libmimes.go"
-	actual := FileExists(fileName)
-	expected := true
-	if actual != expected {
-		test.Fatalf("%s was expected to exist", fileName)
-	}
-
-	// Negative.
-	fileName = "qwerty"
-	actual = FileExists(fileName)
-	expected = false
-	if actual != expected {
-		test.Fatalf("%s was expected to not exist", fileName)
 	}
 }
 

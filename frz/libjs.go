@@ -44,8 +44,8 @@ func JavaScriptRun(id string, source []byte, functions map[string]v8go.FunctionC
 
 	var script *v8go.UnboundScript
 
-	codeCache, hasCodeCash := javaScriptCache[id]
-	if hasCodeCash {
+	codeCache, hasCodeCache := javaScriptCache[id]
+	if hasCodeCache {
 		compiledScript, compilationError := isolate.CompileUnboundScript(string(source), id, v8go.CompileOptions{CachedData: codeCache})
 		if compilationError != nil {
 			return nil, nil, compilationError

@@ -442,7 +442,7 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
-	if !EfsFileExists(efs, fileName) || EfsIsDirectory(efs, fileName) {
+	if !EfsIsFile(efs, fileName) || EfsIsDirectory(efs, fileName) {
 		orElse()
 		return
 	}
@@ -489,7 +489,7 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 func (connection *Connection) SendFileOrElse(orElse func()) {
 	fileName := filepath.Join(connection.server.publicRoot, connection.request.RequestURI)
 
-	if !FileExists(fileName) || IsDirectory(fileName) {
+	if !IsFile(fileName) || IsDirectory(fileName) {
 		connection.SendEmbeddedFileOrElse(connection.server.efs, orElse)
 		return
 	}

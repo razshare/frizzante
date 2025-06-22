@@ -72,22 +72,19 @@ func (view *View) AddFunction(name string, function v8go.FunctionCallback) *View
 func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
 	var index []byte
 	var indexReadError error
-	if FileExists(view.index) {
-		index, indexReadError = os.ReadFile(view.index)
+	if IsFile(view.index) {
+		return os.ReadFile(view.index)
 	}
 
-	if indexReadError != nil || index == nil {
-		fileNameFixed := strings.ReplaceAll(view.index, "\\", "/")
-		if EfsFileExists(efs, fileNameFixed) {
-			index, indexReadError = efs.ReadFile(fileNameFixed)
-			if indexReadError != nil {
-				return nil, indexReadError
-			}
-		} else {
-			return nil, errors.New("view index is missing from the host file system and the embedded file system")
+	fileNameFixed := strings.ReplaceAll(view.index, "\\", "/")
+	if EfsIsFile(efs, fileNameFixed) {
+		index, indexReadError = efs.ReadFile(fileNameFixed)
+		if indexReadError != nil {
+			return nil, indexReadError
 		}
+	} else {
+		return nil, errors.New("view index is missing from the host file system and the embedded file system")
 	}
-
 	return index, nil
 }
 
@@ -95,20 +92,18 @@ func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
 func (view *View) ServerContents(efs embed.FS) ([]byte, error) {
 	var server []byte
 	var serverReadError error
-	if FileExists(view.server) {
-		server, serverReadError = os.ReadFile(view.server)
+	if IsFile(view.server) {
+		return os.ReadFile(view.server)
 	}
 
-	if serverReadError != nil || server == nil {
-		fileNameFixed := strings.ReplaceAll(view.server, "\\", "/")
-		if EfsFileExists(efs, fileNameFixed) {
-			server, serverReadError = efs.ReadFile(fileNameFixed)
-			if serverReadError != nil {
-				return nil, serverReadError
-			}
-		} else {
-			return nil, errors.New("view server is missing from the host file system and the embedded file system")
+	fileNameFixed := strings.ReplaceAll(view.server, "\\", "/")
+	if EfsIsFile(efs, fileNameFixed) {
+		server, serverReadError = efs.ReadFile(fileNameFixed)
+		if serverReadError != nil {
+			return nil, serverReadError
 		}
+	} else {
+		return nil, errors.New("view server is missing from the host file system and the embedded file system")
 	}
 	return server, nil
 }
@@ -191,10 +186,10 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 		return "", serverReadError
 	}
 
-	var serverError error
 	var server []byte
 
-	if FileExists(view.root) {
+	if IsDirectory(view.root) {
+		var serverError error
 		server, serverError = JavaScriptBundle(view.root, api.FormatCommonJS, readBytes)
 		if serverError != nil {
 			return "", serverError
@@ -263,10 +258,10 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 	}
 
 	_, destroy, javaScriptError := JavaScriptRun(view.server, bundle, globals)
-	defer destroy()
 	if javaScriptError != nil {
 		return "", javaScriptError
 	}
+	defer destroy()
 
 	if "" != err {
 		return "", errors.New(err)

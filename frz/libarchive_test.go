@@ -14,7 +14,7 @@ func TestNewDiskArchive(t *testing.T) {
 	if len(archive.road.lanes) > 0 {
 		t.Fatal("archive lanes must be empty")
 	}
-	if FileExists("archive") {
+	if IsDirectory("archive") {
 		t.Fatal("archive directory must be created on first set, not on archive creation")
 	}
 }
@@ -30,7 +30,7 @@ func TestSet(t *testing.T) {
 	DeleteFile("archive/domain/key")
 	archive := NewDiskArchive()
 	_ = archive.Set("domain", "key", []byte("content"))
-	if !FileExists("archive/domain/key") {
+	if !IsFile("archive/domain/key") {
 		t.Fatal("domain value is missing")
 	}
 	readBytes, _ := os.ReadFile("archive/domain/key")
@@ -70,7 +70,7 @@ func TestRemove(t *testing.T) {
 	archive := NewDiskArchive()
 	_ = archive.Set("domain", "key", []byte("content"))
 	_ = archive.Remove("domain", "key")
-	if FileExists("archive/domain/key") {
+	if IsFile("archive/domain/key") {
 		t.Fatal("archive should not contain value")
 	}
 }

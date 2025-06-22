@@ -14,40 +14,37 @@ import (
 	"strings"
 )
 
-// EfsFileExists checks if file (or directory) exists.
-func EfsFileExists(efs embed.FS, fileName string) bool {
-	return EfsIsFile(efs, fileName) || EfsIsDirectory(efs, fileName)
-}
-
 // EfsIsFile check if file exists and is a file.
 func EfsIsFile(efs embed.FS, fileName string) bool {
-	_, err := efs.ReadFile(fileName)
+	file, err := efs.Open(fileName)
 	if err != nil {
 		return false
 	}
-	return true
+	stat, statError := file.Stat()
+	if statError != nil {
+		return false
+	}
+	return !stat.IsDir()
 }
 
 // EfsIsDirectory checks if file exists and is a directory.
 func EfsIsDirectory(efs embed.FS, fileName string) bool {
-	_, err := efs.ReadDir(fileName)
+	file, err := efs.Open(fileName)
 	if err != nil {
 		return false
 	}
-	return true
-}
-
-// FileExists checks if file (or directory) exists.
-func FileExists(fileName string) bool {
-	_, statError := os.Stat(fileName)
-	return nil == statError || !errors.Is(statError, os.ErrNotExist)
+	stat, statError := file.Stat()
+	if statError != nil {
+		return false
+	}
+	return stat.IsDir()
 }
 
 // IsFile check if file exists and is a file.
 func IsFile(fileName string) bool {
 	stat, statError := os.Stat(fileName)
 	if statError != nil {
-		return !errors.Is(statError, os.ErrNotExist)
+		return false
 	}
 	return !stat.IsDir()
 }
@@ -56,7 +53,7 @@ func IsFile(fileName string) bool {
 func IsDirectory(fileName string) bool {
 	stat, statError := os.Stat(fileName)
 	if statError != nil {
-		return !errors.Is(statError, os.ErrNotExist)
+		return false
 	}
 	return stat.IsDir()
 }

@@ -43,7 +43,7 @@ func (archive *DiskArchive) Set(domain string, key string, value []byte) error {
 	lane.Lock()
 	defer lane.Unlock()
 	directoryName := filepath.Join(archive.name, domain)
-	if !FileExists(directoryName) {
+	if !IsDirectory(directoryName) {
 		mkdirError := os.MkdirAll(directoryName, os.ModePerm)
 		if nil != mkdirError {
 			return mkdirError
@@ -82,7 +82,7 @@ func (archive *DiskArchive) Has(domain string, key string) (bool, error) {
 	lane.Lock()
 	defer lane.Unlock()
 	fileName := filepath.Join(archive.name, domain, key)
-	return FileExists(fileName), nil
+	return IsFile(fileName), nil
 }
 
 // Remove removes a value from the archive based on a domain and key.
@@ -109,7 +109,7 @@ func (archive *DiskArchive) HasDomain(domain string) (bool, error) {
 	lane := archive.road.WithLane(domain)
 	lane.Lock()
 	defer lane.Unlock()
-	return FileExists(filepath.Join(archive.name, domain)), nil
+	return IsDirectory(filepath.Join(archive.name, domain)), nil
 }
 
 // RemoveDomain removes a domain from the archive.
