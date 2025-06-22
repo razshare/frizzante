@@ -28,12 +28,6 @@
         "./**/*.d.ts",
         "./**/*.js",
         "./**/*.ts",
-        "../../cli/utilities/**/*.svelte.js",
-        "../../cli/utilities/**/*.svelte.ts",
-        "../../cli/utilities/**/*.svelte",
-        "../../cli/utilities/**/*.d.ts",
-        "../../cli/utilities/**/*.js",
-        "../../cli/utilities/**/*.ts"
     ],
     "exclude": ["./node_modules/**", "./dist/**"]
 }
