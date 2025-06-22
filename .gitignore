@@ -56,8 +56,5 @@ go.work.sum
 *.zip
 /tmp
 /bin
-/archive
-/sessions
 /frz/archive
 /frz/sessions
-/frizzante-starter

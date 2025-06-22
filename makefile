@@ -1,5 +1,5 @@
 ###### Composites ######
-test: configure-bun generate check package
+test: configure-bun check package
 	CGO_ENABLED=1 cd frz && go test
 
 update: configure-bun
@@ -22,11 +22,6 @@ package: configure-bun
 	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite
 
 ###### Primitives ######
-generate:
-	# Generate utilities...
-	rm app/lib/utilities/frz -fr
-	go run main.go -utilities -out="frz/app/lib/utilities/frz"
-
 format:
 	cd frz/app && \
 	../../bin/bun x prettier --write .

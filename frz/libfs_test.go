@@ -1,17 +1,17 @@
-package fs
+package frz
 
 import (
 	"embed"
 	"testing"
 )
 
-//go:embed mimes.go
+//go:embed libmimes.go
 //go:embed test/*
 var Efs embed.FS
 
 func TestEmbeddedExists(test *testing.T) {
 	// Positive.
-	fileName := "mimes.go"
+	fileName := "libmimes.go"
 	actual := EfsFileExists(Efs, fileName)
 	expected := true
 	if !actual {
@@ -29,7 +29,7 @@ func TestEmbeddedExists(test *testing.T) {
 
 func TestEmbeddedIsFile(test *testing.T) {
 	// Positive.
-	fileName := "mimes.go"
+	fileName := "libmimes.go"
 	actual := EfsIsFile(Efs, fileName)
 	expected := true
 	if actual != expected {
@@ -62,7 +62,7 @@ func TestEmbeddedIsDirectory(test *testing.T) {
 	}
 
 	// Negatives.
-	fileName = "mimes.go"
+	fileName = "libmimes.go"
 	actual = EfsIsDirectory(Efs, fileName)
 	expected = false
 	if actual != expected {
@@ -79,7 +79,7 @@ func TestEmbeddedIsDirectory(test *testing.T) {
 
 func TestExists(test *testing.T) {
 	// Positive.
-	fileName := "mimes.go"
+	fileName := "libmimes.go"
 	actual := FileExists(fileName)
 	expected := true
 	if actual != expected {
@@ -97,7 +97,7 @@ func TestExists(test *testing.T) {
 
 func TestIsFile(test *testing.T) {
 	// Positive.
-	fileName := "mimes.go"
+	fileName := "libmimes.go"
 	actual := IsFile(fileName)
 	expected := true
 	if actual != expected {
@@ -130,7 +130,7 @@ func TestIsDirectory(test *testing.T) {
 	}
 
 	// Negatives.
-	fileName = "mimes.go"
+	fileName = "libmimes.go"
 	actual = IsDirectory(fileName)
 	expected = false
 	if actual != expected {

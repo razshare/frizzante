@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/fs"
 	"io"
 	"net/http"
 	"net/url"
@@ -443,12 +442,12 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
-	if !fs.EfsFileExists(efs, fileName) || fs.EfsIsDirectory(efs, fileName) {
+	if !EfsFileExists(efs, fileName) || EfsIsDirectory(efs, fileName) {
 		orElse()
 		return
 	}
 
-	reader, info, readerError := fs.EfsFileReader(efs, fileName)
+	reader, info, readerError := EfsFileReader(efs, fileName)
 	if nil != readerError {
 		connection.server.notifier.SendErrorAndTrace(readerError, 1)
 		return
@@ -477,7 +476,7 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 	}
 
 	if "" == connection.header.Get("Content-Type") {
-		connection.SendHeader("Content-Type", fs.Mime(fileName))
+		connection.SendHeader("Content-Type", Mime(fileName))
 	}
 
 	if "" == connection.header.Get("Content-Length") {
@@ -490,12 +489,12 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 func (connection *Connection) SendFileOrElse(orElse func()) {
 	fileName := filepath.Join(connection.server.publicRoot, connection.request.RequestURI)
 
-	if !fs.FileExists(fileName) || fs.IsDirectory(fileName) {
+	if !FileExists(fileName) || IsDirectory(fileName) {
 		connection.SendEmbeddedFileOrElse(connection.server.efs, orElse)
 		return
 	}
 
-	reader, info, readerError := fs.FileReader(fileName)
+	reader, info, readerError := FileReader(fileName)
 	if nil != readerError {
 		connection.server.notifier.SendErrorAndTrace(readerError, 1)
 		return
@@ -524,7 +523,7 @@ func (connection *Connection) SendFileOrElse(orElse func()) {
 	}
 
 	if "" == connection.header.Get("Content-Type") {
-		connection.SendHeader("Content-Type", fs.Mime(fileName))
+		connection.SendHeader("Content-Type", Mime(fileName))
 	}
 
 	if "" == connection.header.Get("Content-Length") {

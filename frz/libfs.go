@@ -1,4 +1,4 @@
-package fs
+package frz
 
 import (
 	"archive/zip"

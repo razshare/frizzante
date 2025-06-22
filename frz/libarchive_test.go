@@ -1,7 +1,6 @@
 package frz
 
 import (
-	"github.com/razshare/frizzante/fs"
 	"os"
 	"testing"
 )
@@ -15,7 +14,7 @@ func TestNewDiskArchive(t *testing.T) {
 	if len(archive.road.lanes) > 0 {
 		t.Fatal("archive lanes must be empty")
 	}
-	if fs.FileExists("archive") {
+	if FileExists("archive") {
 		t.Fatal("archive directory must be created on first set, not on archive creation")
 	}
 }
@@ -28,10 +27,10 @@ func TestWithName(t *testing.T) {
 }
 
 func TestSet(t *testing.T) {
-	fs.DeleteFile("archive/domain/key")
+	DeleteFile("archive/domain/key")
 	archive := NewDiskArchive()
 	_ = archive.Set("domain", "key", []byte("content"))
-	if !fs.FileExists("archive/domain/key") {
+	if !FileExists("archive/domain/key") {
 		t.Fatal("domain value is missing")
 	}
 	readBytes, _ := os.ReadFile("archive/domain/key")
@@ -41,7 +40,7 @@ func TestSet(t *testing.T) {
 }
 
 func TestGet(t *testing.T) {
-	fs.DeleteFile("archive/domain/key")
+	DeleteFile("archive/domain/key")
 	archive := NewDiskArchive()
 	_ = archive.Set("domain", "key", []byte("content"))
 	readBytes, _ := archive.Get("domain", "key")
@@ -51,7 +50,7 @@ func TestGet(t *testing.T) {
 }
 
 func TestHas(t *testing.T) {
-	fs.DeleteFile("archive/domain/key")
+	DeleteFile("archive/domain/key")
 	archive := NewDiskArchive()
 	has, _ := archive.Has("domain", "key")
 	if has {
@@ -67,11 +66,11 @@ func TestHas(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	fs.DeleteFile("archive/domain/key")
+	DeleteFile("archive/domain/key")
 	archive := NewDiskArchive()
 	_ = archive.Set("domain", "key", []byte("content"))
 	_ = archive.Remove("domain", "key")
-	if fs.FileExists("archive/domain/key") {
+	if FileExists("archive/domain/key") {
 		t.Fatal("archive should not contain value")
 	}
 }

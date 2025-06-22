@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/evanw/esbuild/pkg/api"
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/razshare/frizzante/fs"
 	"os"
 	"regexp"
 	"rogchap.com/v8go"
@@ -73,13 +72,13 @@ func (view *View) AddFunction(name string, function v8go.FunctionCallback) *View
 func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
 	var index []byte
 	var indexReadError error
-	if fs.FileExists(view.index) {
+	if FileExists(view.index) {
 		index, indexReadError = os.ReadFile(view.index)
 	}
 
 	if indexReadError != nil || index == nil {
 		fileNameFixed := strings.ReplaceAll(view.index, "\\", "/")
-		if fs.EfsFileExists(efs, fileNameFixed) {
+		if EfsFileExists(efs, fileNameFixed) {
 			index, indexReadError = efs.ReadFile(fileNameFixed)
 			if indexReadError != nil {
 				return nil, indexReadError
@@ -96,13 +95,13 @@ func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
 func (view *View) ServerContents(efs embed.FS) ([]byte, error) {
 	var server []byte
 	var serverReadError error
-	if fs.FileExists(view.server) {
+	if FileExists(view.server) {
 		server, serverReadError = os.ReadFile(view.server)
 	}
 
 	if serverReadError != nil || server == nil {
 		fileNameFixed := strings.ReplaceAll(view.server, "\\", "/")
-		if fs.EfsFileExists(efs, fileNameFixed) {
+		if EfsFileExists(efs, fileNameFixed) {
 			server, serverReadError = efs.ReadFile(fileNameFixed)
 			if serverReadError != nil {
 				return nil, serverReadError
@@ -195,7 +194,7 @@ func (view *View) Render(efs embed.FS) (html string, renderError error) {
 	var serverError error
 	var server []byte
 
-	if fs.FileExists(view.root) {
+	if FileExists(view.root) {
 		server, serverError = JavaScriptBundle(view.root, api.FormatCommonJS, readBytes)
 		if serverError != nil {
 			return "", serverError
