@@ -481,9 +481,9 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 	}
 
 	if "" == connection.header.Get("Content-Length") {
-		connection.SendHeader("Content-Length", fmt.Sprintf("%d", (*info).Size()))
+		connection.SendHeader("Content-Length", fmt.Sprintf("%d", info.Size()))
 	}
-	http.ServeContent(connection.writer, connection.request, fileName, (*info).ModTime(), reader)
+	http.ServeContent(connection.writer, connection.request, fileName, info.ModTime(), reader)
 }
 
 // SendFileOrElse sends the file requested by the client, or else falls back.
@@ -528,9 +528,9 @@ func (connection *Connection) SendFileOrElse(orElse func()) {
 	}
 
 	if "" == connection.header.Get("Content-Length") {
-		connection.SendHeader("Content-Length", fmt.Sprintf("%d", (*info).Size()))
+		connection.SendHeader("Content-Length", fmt.Sprintf("%d", info.Size()))
 	}
-	http.ServeContent(connection.writer, connection.request, fileName, (*info).ModTime(), reader)
+	http.ServeContent(connection.writer, connection.request, fileName, info.ModTime(), reader)
 }
 
 // SendSseUpgrade upgrades the http connection to server sent events

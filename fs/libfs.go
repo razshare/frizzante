@@ -6,10 +6,12 @@ import (
 	"embed"
 	"errors"
 	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // EfsFileExists checks if file (or directory) exists.
@@ -65,9 +67,9 @@ func DeleteFile(fileName string) bool {
 	return nil == removeError || !errors.Is(removeError, os.ErrNotExist)
 }
 
-// UnzipFile unzips a file the disk.
-func UnzipFile(fileName string, directoryName string) (err error) {
-	zipReader, zipOpenError := zip.OpenReader(fileName)
+// UnzipFile unzips a file to the disk.
+func UnzipFile(zipFileName string, directoryName string) (err error) {
+	zipReader, zipOpenError := zip.OpenReader(zipFileName)
 	if zipOpenError != nil {
 		log.Fatal(zipOpenError)
 	}
@@ -128,6 +130,84 @@ func UnzipFile(fileName string, directoryName string) (err error) {
 	return nil
 }
 
+// ZipFile zips a file to the disk.
+func ZipFile(fileName string, zipFileName string) (err error) {
+	mkdirError := os.MkdirAll(filepath.Dir(zipFileName), os.ModePerm)
+	if mkdirError != nil {
+		return mkdirError
+	}
+
+	archive, createError := os.Create(zipFileName)
+	if createError != nil {
+		return createError
+	}
+	defer func(archive *os.File) { err = archive.Close() }(archive)
+
+	writer := zip.NewWriter(archive)
+	defer func(writer *zip.Writer) { err = writer.Close() }(writer)
+
+	entry, entryError := writer.Create(filepath.Base(fileName))
+	if entryError != nil {
+		return entryError
+	}
+
+	file, fileError := os.Open(fileName)
+	if fileError != nil {
+		return fileError
+	}
+
+	_, copyError := io.Copy(entry, file)
+	if copyError != nil {
+		return copyError
+	}
+
+	return nil
+}
+
+// ZipDirectory zips a directory to the disk.
+func ZipDirectory(directoryName string, zipFileName string) (err error) {
+	mkdirError := os.MkdirAll(filepath.Dir(zipFileName), os.ModePerm)
+	if mkdirError != nil {
+		return mkdirError
+	}
+
+	archive, archiveError := os.Create(zipFileName)
+	if archiveError != nil {
+		return archiveError
+	}
+	defer func(archive *os.File) { err = archive.Close() }(archive)
+
+	writer := zip.NewWriter(archive)
+	defer func(writer *zip.Writer) { err = writer.Close() }(writer)
+
+	return filepath.Walk(directoryName, func(path string, info fs.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			return nil
+		}
+
+		file, openError := os.Open(path)
+		if openError != nil {
+			return openError
+		}
+
+		entry, entryError := writer.Create(strings.TrimPrefix(path, directoryName+"/"))
+		if entryError != nil {
+			return entryError
+		}
+
+		_, copyError := io.Copy(entry, file)
+		if copyError != nil {
+			return copyError
+		}
+
+		return nil
+	})
+}
+
 // DownloadFile downloads a file to the disk.
 func DownloadFile(url string, fileName string) error {
 	response, getError := http.Get(url)
@@ -140,7 +220,7 @@ func DownloadFile(url string, fileName string) error {
 		return readError
 	}
 
-	parentName := filepath.Base(fileName)
+	parentName := filepath.Dir(fileName)
 	if !IsDirectory(parentName) {
 		mkdirError := os.MkdirAll(parentName, os.ModePerm)
 		if mkdirError != nil {
@@ -156,7 +236,7 @@ func DownloadFile(url string, fileName string) error {
 	return nil
 }
 
-func EfsFileReader(efs embed.FS, fileName string) (*bytes.Reader, *os.FileInfo, error) {
+func EfsFileReader(efs embed.FS, fileName string) (*bytes.Reader, os.FileInfo, error) {
 	file, openError := efs.Open(fileName)
 	if nil != openError {
 		return nil, nil, openError
@@ -178,10 +258,10 @@ func EfsFileReader(efs embed.FS, fileName string) (*bytes.Reader, *os.FileInfo, 
 	if nil != closeError {
 		return nil, nil, closeError
 	}
-	return bytes.NewReader(buffer), &fileInfo, nil
+	return bytes.NewReader(buffer), fileInfo, nil
 }
 
-func FileReader(fileName string) (*bytes.Reader, *os.FileInfo, error) {
+func FileReader(fileName string) (*bytes.Reader, os.FileInfo, error) {
 	file, openError := os.Open(fileName)
 	if nil != openError {
 		return nil, nil, openError
@@ -203,5 +283,62 @@ func FileReader(fileName string) (*bytes.Reader, *os.FileInfo, error) {
 	if nil != closeError {
 		return nil, nil, closeError
 	}
-	return bytes.NewReader(buffer), &fileInfo, nil
+
+	return bytes.NewReader(buffer), fileInfo, nil
+}
+
+// ReadFileInChunks reads a file in chunks.
+func ReadFileInChunks(fileName string, chunkSize int, callback func(data []byte) error) (err error) {
+	file, openError := os.Open(fileName)
+	if nil != openError {
+		return openError
+	}
+	defer func(file *os.File) { err = file.Close() }(file)
+
+	buffer := make([]byte, chunkSize)
+
+	for {
+		count, readError := file.Read(buffer)
+		if nil != readError {
+			return readError
+		}
+		if count == 0 {
+			return nil
+		}
+		if count < chunkSize {
+			callError := callback(buffer[:count-1])
+			if callError != nil {
+				return callError
+			}
+		}
+		callError := callback(buffer)
+		if callError != nil {
+			return callError
+		}
+	}
+}
+
+// EfsReadFileInChunks reads a file in chunks.
+func EfsReadFileInChunks(efs embed.FS, fileName string, chunkSize int, callback func([]byte)) (err error) {
+	file, openError := efs.Open(fileName)
+	if nil != openError {
+		return openError
+	}
+	defer func(file fs.File) { err = file.Close() }(file)
+
+	buffer := make([]byte, chunkSize)
+
+	for {
+		count, readError := file.Read(buffer)
+		if nil != readError {
+			return readError
+		}
+		if count == 0 {
+			return nil
+		}
+		if count < chunkSize {
+			callback(buffer[:count-1])
+		}
+		callback(buffer)
+	}
 }

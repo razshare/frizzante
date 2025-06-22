@@ -1,24 +1,18 @@
 package cli
 
 import (
-	"embed"
 	"flag"
 	"github.com/pterm/pterm"
 	"log"
 )
 
-//go:embed .air.toml
-//go:embed bin/air
-//go:embed bin/bun
-//go:embed utilities
-//go:embed starter.zip
-var efs embed.FS
-
 func Run() {
 	flag.Parse()
 
-	if !*FlagCreateProject && !*FlagGenerateUtilities {
-		generator, showError := pterm.
+	if !*FlagDevelop &&
+		!*FlagCreateProject &&
+		!*FlagGenerateUtilities {
+		request, showError := pterm.
 			DefaultInteractiveSelect.
 			WithOptions([]string{
 				"Create Project",
@@ -31,20 +25,20 @@ func Run() {
 			log.Fatal(showError)
 		}
 
-		if "Create Project" == generator {
+		if "Create Project" == request {
 			*FlagCreateProject = true
 		}
 
-		if "Generate Utilities" == generator {
+		if "Generate Utilities" == request {
 			*FlagGenerateUtilities = true
 		}
 
-		if "Develop" == generator {
+		if "Develop" == request {
 			*FlagDevelop = true
 		}
 	}
 
-	CreateProject(efs)
-	GenerateUtilities(efs)
-	Develop(efs)
+	CreateProject()
+	GenerateUtilities()
+	Develop()
 }

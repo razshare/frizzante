@@ -11,7 +11,7 @@
         "esbuild": "^0.25.5",
         "eslint": "^9.29.0",
         "eslint-config-prettier": "^10.1.5",
-        "eslint-plugin-svelte": "^3.9.2",
+        "eslint-plugin-svelte": "^3.9.3",
         "prettier": "^3.5.3",
         "prettier-plugin-svelte": "^3.4.0",
         "svelte": "^5.34.7",

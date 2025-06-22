@@ -56,7 +56,6 @@ go.work.sum
 *.zip
 /tmp
 /bin
-/cli/bin
 /archive
 /sessions
 /frz/archive
