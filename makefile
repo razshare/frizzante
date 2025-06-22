@@ -8,18 +8,18 @@ test: check package
 	rm app/dist -fr
 	CGO_ENABLED=1 go test ./...
 
-check: configure-bun dependencies
+check: configure-bun install
 	cd app && \
 	../.gen/bin/bun x eslint . && \
 	../.gen/bin/bun x svelte-check --tsconfig ./tsconfig.json
 
-package: configure-bun dependencies
+package: configure-bun install
 	cd app && \
 	../.gen/bin/bun x vite build --logLevel info --ssr lib/utilities/frz/scripts/server.ts --outDir dist --emptyOutDir && \
 	../.gen/bin/bun x vite build --logLevel info --outDir dist/client --emptyOutDir && \
 	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite
 
-dependencies: configure-bun
+install: configure-bun
 	go mod tidy
 	cd app && \
 	../.gen/bin/bun install

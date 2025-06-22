@@ -56,5 +56,6 @@ go.work.sum
 /.gen
 /app/dist
 /frz/app/dist
+/frz/.gen
 /frz/archive
 /frz/sessions
