@@ -53,8 +53,8 @@ go.work.sum
 *.key
 
 # Frizzante
-*.zip
-/tmp
-/bin
+/.gen
+/app/dist
+/frz/app/dist
 /frz/archive
 /frz/sessions
