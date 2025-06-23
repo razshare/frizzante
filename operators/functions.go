@@ -51,49 +51,51 @@ func (operator *Operator) Exists() bool {
 }
 
 // Save saves the session into the archive.
-func (operator *Operator) Save(val any) {
+func (operator *Operator) Save(val any) *Operator {
 	id := operator.Id()
 	readBytes, marshalError := json.Marshal(val)
 	if marshalError != nil {
 		operator.Connection.Notifier.SendErrorAndTrace(marshalError, 1)
-		return
+		return operator
 	}
 
 	setError := operator.Archive.Set(id, globals.SessionKey, readBytes)
 	if setError != nil {
 		operator.Connection.Notifier.SendErrorAndTrace(setError, 1)
 	}
+	return operator
 }
 
 // Load loads the session from the archive.
 //
 // If the session is not found in the archive it creates it.
-func (operator *Operator) Load(val any) {
+func (operator *Operator) Load(val any) *Operator {
 	id := operator.Id()
 	has, hasError := operator.Archive.Has(id, globals.SessionKey)
 	if hasError != nil {
 		operator.Connection.Notifier.SendErrorAndTrace(hasError, 1)
-		return
+		return operator
 	}
 	if has {
 		readBytes, getError := operator.Archive.Get(id, globals.SessionKey)
 		if getError != nil {
 			operator.Connection.Notifier.SendErrorAndTrace(getError, 1)
-			return
+			return operator
 		}
 		unmarshalError := json.Unmarshal(readBytes, val)
 		if unmarshalError != nil {
 			operator.Connection.Notifier.SendErrorAndTrace(unmarshalError, 1)
 		}
 	}
-	return
+	return operator
 }
 
 // Destroy removes the session from the archive.
-func (operator *Operator) Destroy() {
+func (operator *Operator) Destroy() *Operator {
 	id := operator.Id()
 	destroyError := operator.Archive.RemoveDomain(id)
 	if destroyError != nil {
 		operator.Connection.Notifier.SendErrorAndTrace(destroyError, 1)
 	}
+	return operator
 }

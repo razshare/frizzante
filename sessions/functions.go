@@ -7,13 +7,23 @@ import (
 	"path/filepath"
 )
 
+var archiveGlobal archives.Archive
+
+func init() {
+	diskArchive := archives.NewDiskArchive()
+	diskArchive.Name = filepath.Join(".gen", "sessions")
+	archiveGlobal = diskArchive
+}
+
+// WithArchive sets the sessions archive.
+func WithArchive(archive archives.Archive) {
+	archiveGlobal = archive
+}
+
 // Start starts a session.
-func Start[T any](con *connections.Connection) (*T, *operators.Operator) {
-	var state T
-	archive := archives.NewDiskArchive()
-	archive.Name = filepath.Join(".gen", "sessions")
+func Start[T any](con *connections.Connection, state T) (*T, *operators.Operator) {
 	operator := &operators.Operator{
-		Archive:    archive,
+		Archive:    archiveGlobal,
 		Connection: con,
 	}
 
@@ -24,4 +34,10 @@ func Start[T any](con *connections.Connection) (*T, *operators.Operator) {
 	}
 
 	return &state, operator
+}
+
+// StartEmpty starts a session with empty state.
+func StartEmpty[T any](con *connections.Connection) (*T, *operators.Operator) {
+	var state T
+	return Start(con, state)
 }
