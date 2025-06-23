@@ -54,7 +54,3 @@ go.work.sum
 
 # Frizzante
 /.gen
-/frz/app/dist
-/frz/.gen
-/frz/archive
-/frz/sessions
