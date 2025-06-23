@@ -2,11 +2,7 @@
 ###### Composites ######
 ########################
 test: check package
-	mkdir frz/app/dist -p
-	cp app/dist frz/app -r
-	cp app/node_modules frz/app -r
-	rm app/dist -fr
-	CGO_ENABLED=1 go test ./...
+	CGO_ENABLED=1 go test
 
 check: configure-bun install
 	cd app && \
@@ -17,7 +13,9 @@ package: configure-bun install
 	cd app && \
 	../.gen/bin/bun x vite build --logLevel info --ssr lib/utilities/frz/scripts/server.ts --outDir dist --emptyOutDir && \
 	../.gen/bin/bun x vite build --logLevel info --outDir dist/client --emptyOutDir && \
-	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite
+	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite && \
+	touch dist/.gitkeep
+
 
 install: configure-bun
 	go mod tidy
@@ -31,7 +29,6 @@ format: configure-bun
 ########################
 ###### Primitives ######
 ########################
-
 clean:
 ### Remove...
 	go clean
