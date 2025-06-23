@@ -21,7 +21,6 @@ import (
 
 var server *Server
 
-// New creates a new server.
 func init() {
 	Initialize()
 }
