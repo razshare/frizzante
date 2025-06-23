@@ -62,7 +62,7 @@ func TestServer_AddRoute(test *testing.T) {
 	go server.Start()
 	defer func() {
 		server.Stop()
-		server.Reset()
+		server.Initialize()
 	}()
 
 	time.Sleep(1 * time.Second)

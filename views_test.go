@@ -29,7 +29,7 @@ func TestRenderServer(test *testing.T) {
 	go server.Start()
 	defer func() {
 		server.Stop()
-		server.Reset()
+		server.Initialize()
 	}()
 	time.Sleep(1 * time.Second)
 
@@ -67,7 +67,7 @@ func TestRenderClient(test *testing.T) {
 	go server.Start()
 	defer func() {
 		server.Stop()
-		server.Reset()
+		server.Initialize()
 	}()
 
 	time.Sleep(1 * time.Second)

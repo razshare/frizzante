@@ -35,7 +35,7 @@ func TestSession(t *testing.T) {
 	go server.Start()
 	defer func() {
 		server.Stop()
-		server.Reset()
+		server.Initialize()
 	}()
 
 	time.Sleep(1 * time.Second)
@@ -91,7 +91,7 @@ func TestSessionExpectFail(t *testing.T) {
 	go server.Start()
 	defer func() {
 		server.Stop()
-		server.Reset()
+		server.Initialize()
 	}()
 
 	time.Sleep(1 * time.Second)

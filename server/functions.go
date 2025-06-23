@@ -23,10 +23,10 @@ var server *Server
 
 // New creates a new server.
 func init() {
-	Reset()
+	Initialize()
 }
 
-func Reset() {
+func Initialize() {
 	upgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
