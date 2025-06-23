@@ -22,6 +22,10 @@ install: configure-bun
 	cd app && \
 	../.gen/bin/bun install
 
+update: configure-bun
+	cd app && \
+	../.gen/bin/bun update
+
 format: configure-bun
 	cd app && \
 	../.gen/bin/bun x prettier --write .
