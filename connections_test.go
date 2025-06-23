@@ -5,7 +5,7 @@ import (
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/nums"
 	"github.com/razshare/frizzante/routes"
-	"github.com/razshare/frizzante/servers"
+	"github.com/razshare/frizzante/server"
 	ghttp "net/http"
 	"testing"
 	"time"
@@ -14,16 +14,18 @@ import (
 func TestConnection_SendStatus(test *testing.T) {
 	expected := 201
 	port := nums.NextNumber(8080)
-	server := servers.New()
-	server.Efs = emb
-	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
+	server.WithEfs(emb)
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
 		con.SendStatus(expected)
 		con.SendMessage("ok")
 	}})
 
 	go server.Start()
-	defer server.Stop()
+	defer func() {
+		server.Stop()
+		server.Reset()
+	}()
 
 	time.Sleep(1 * time.Second)
 
@@ -43,16 +45,18 @@ func TestConnection_SendStatus(test *testing.T) {
 func TestConnection_SendHeader(test *testing.T) {
 	expected := "application/json"
 	port := nums.NextNumber(8080)
-	server := servers.New()
-	server.Efs = emb
-	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
+	server.WithEfs(emb)
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
 		con.SendHeader("Content-Type", expected)
 		con.SendMessage("{}")
 	}})
 
 	go server.Start()
-	defer server.Stop()
+	defer func() {
+		server.Stop()
+		server.Reset()
+	}()
 
 	time.Sleep(1 * time.Second)
 

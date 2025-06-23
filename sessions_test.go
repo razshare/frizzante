@@ -6,7 +6,7 @@ import (
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/nums"
 	"github.com/razshare/frizzante/routes"
-	"github.com/razshare/frizzante/servers"
+	"github.com/razshare/frizzante/server"
 	"github.com/razshare/frizzante/sessions"
 	"io"
 	"net/http"
@@ -20,9 +20,8 @@ type State struct {
 
 func TestSession(t *testing.T) {
 	port := nums.NextNumber(8080)
-	server := servers.New()
-	server.Efs = emb
-	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
+	server.WithEfs(emb)
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
 		state, _ := sessions.Start(con, State{Name: "test"})
 		con.SendMessage(fmt.Sprintf("hello %s", state.Name))
@@ -34,7 +33,10 @@ func TestSession(t *testing.T) {
 	}})
 
 	go server.Start()
-	defer server.Stop()
+	defer func() {
+		server.Stop()
+		server.Reset()
+	}()
 
 	time.Sleep(1 * time.Second)
 
@@ -73,9 +75,8 @@ func TestSession(t *testing.T) {
 
 func TestSessionExpectFail(t *testing.T) {
 	port := nums.NextNumber(8080)
-	server := servers.New()
-	server.Efs = emb
-	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
+	server.WithEfs(emb)
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
 		state, _ := sessions.Start(con, State{Name: "test"})
 		con.SendMessage(fmt.Sprintf("hello %s", state.Name))
@@ -88,7 +89,10 @@ func TestSessionExpectFail(t *testing.T) {
 	}})
 
 	go server.Start()
-	defer server.Stop()
+	defer func() {
+		server.Stop()
+		server.Reset()
+	}()
 
 	time.Sleep(1 * time.Second)
 

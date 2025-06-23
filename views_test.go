@@ -5,7 +5,7 @@ import (
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/nums"
 	"github.com/razshare/frizzante/routes"
-	"github.com/razshare/frizzante/servers"
+	"github.com/razshare/frizzante/server"
 	"github.com/razshare/frizzante/views"
 	"io"
 	ghttp "net/http"
@@ -16,9 +16,8 @@ import (
 
 func TestRenderServer(test *testing.T) {
 	port := nums.NextNumber(8080)
-	server := servers.New()
-	server.Efs = emb
-	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
+	server.WithEfs(emb)
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.AddRoute(routes.Route{Pattern: "GET /welcome", Handler: func(con *connections.Connection) {
 		con.SendView(views.View{
 			Name:       "Welcome",
@@ -28,7 +27,10 @@ func TestRenderServer(test *testing.T) {
 	}})
 
 	go server.Start()
-	defer server.Stop()
+	defer func() {
+		server.Stop()
+		server.Reset()
+	}()
 	time.Sleep(1 * time.Second)
 
 	expected := "<h1>Hello world.</h1>"
@@ -53,9 +55,8 @@ func TestRenderServer(test *testing.T) {
 
 func TestRenderClient(test *testing.T) {
 	port := nums.NextNumber(8080)
-	server := servers.New()
-	server.Efs = emb
-	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
+	server.WithEfs(emb)
+	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
 	server.AddRoute(routes.Route{Pattern: "GET /welcome", Handler: func(con *connections.Connection) {
 		con.SendView(views.View{
 			Name:       "Welcome",
@@ -63,9 +64,12 @@ func TestRenderClient(test *testing.T) {
 			Data:       map[string]any{"name": "world"},
 		})
 	}})
-
 	go server.Start()
-	defer server.Stop()
+	defer func() {
+		server.Stop()
+		server.Reset()
+	}()
+
 	time.Sleep(1 * time.Second)
 
 	expected := "<script type=\"application/javascript\">function target(){return document.getElementById("
@@ -86,4 +90,5 @@ func TestRenderClient(test *testing.T) {
 	if !ok {
 		test.Fatalf("server was expected to respond with a string that contains '%s', received '%s' instead", expected, actual)
 	}
+
 }

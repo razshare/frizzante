@@ -1,4 +1,4 @@
-package servers
+package server
 
 import (
 	"embed"
@@ -28,6 +28,6 @@ type Server struct {
 	PublicRoot      string
 	ViewServer      string
 	ViewIndex       string
-	Upgrader        *websocket.Upgrader
+	WsUpgrader      *websocket.Upgrader
 	Guards          []guards.Guard
 }
