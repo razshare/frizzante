@@ -1,4 +1,4 @@
-package frizzante
+package main
 
 import (
 	"bytes"

@@ -1,4 +1,4 @@
-package frizzante
+package main
 
 import (
 	"github.com/razshare/frizzante/globals"
