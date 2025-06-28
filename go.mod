@@ -9,4 +9,7 @@ require (
 	rogchap.com/v8go v0.9.0
 )
 
-require golang.org/x/sys v0.33.0 // indirect
+require (
+	github.com/spf13/pflag v1.0.6 // indirect
+	golang.org/x/sys v0.33.0 // indirect
+)

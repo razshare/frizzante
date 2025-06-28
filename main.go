@@ -2,14 +2,20 @@ package main
 
 import (
 	"embed"
-	"flag"
+	"fmt"
 	"github.com/razshare/frizzante/fs"
+	flag "github.com/spf13/pflag"
 	"log"
 	"os"
+	"path/filepath"
 )
 
-var FlagRestoreUtilities = flag.Bool("restore-utilities", false, "")
-var FlagOut = flag.String("out", "", "")
+const version = "v1.2.5"
+
+var FlagHelp = flag.BoolP("help", "h", false, "shows the help document")
+var FlagVersion = flag.BoolP("version", "v", false, "shows the binary version")
+var FlagCreateProject = flag.StringP("create-project", "c", "", fmt.Sprintf("creates a frizzante project (%s) to a directory", version))
+var FlagRestoreUtilities = flag.StringP("restore-utilities", "r", "", fmt.Sprintf("restores frizzante utilities (%s) to a directory", version))
 
 //go:embed app/lib/utilities
 var utilities embed.FS
@@ -17,11 +23,34 @@ var utilities embed.FS
 func main() {
 	flag.Parse()
 
-	if *FlagRestoreUtilities {
-		if *FlagOut == "" {
-			log.Fatal("flag -out is required")
+	if *FlagCreateProject != "" {
+		downloadError := fs.DownloadFile(fmt.Sprintf("https://github.com/razshare/frizzante-starter/archive/refs/tags/%s.zip", version), *FlagCreateProject+".zip")
+		if downloadError != nil {
+			log.Fatal(downloadError)
 		}
 
+		unzipError := fs.UnzipFile(*FlagCreateProject+".zip", "."+*FlagCreateProject+".tmp")
+		if unzipError != nil {
+			log.Fatal(unzipError)
+		}
+
+		removeError := os.Remove(*FlagCreateProject + ".zip")
+		if removeError != nil {
+			log.Fatal(removeError)
+		}
+
+		renameError := os.Rename(filepath.Join("."+*FlagCreateProject+".tmp", "frizzante-starter-1.2.5"), *FlagCreateProject)
+		if renameError != nil {
+			log.Fatal(renameError)
+		}
+
+		removeError = os.RemoveAll("." + *FlagCreateProject + ".tmp")
+		if removeError != nil {
+			log.Fatal(removeError)
+		}
+	}
+
+	if *FlagRestoreUtilities != "" {
 		var restore func(from string, to string)
 		restore = func(from string, to string) {
 			if !fs.IsDirectory(to) {
@@ -59,6 +88,19 @@ func main() {
 			}
 		}
 
-		restore("app/lib/utilities", *FlagOut)
+		restore("app/lib/utilities", *FlagRestoreUtilities)
+		os.Exit(0)
 	}
+
+	if *FlagVersion {
+		println(version)
+		os.Exit(0)
+	}
+
+	if *FlagHelp {
+		flag.Usage()
+		os.Exit(0)
+	}
+
+	flag.Usage()
 }
