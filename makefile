@@ -32,14 +32,6 @@ format: configure-bun
 ########################
 ###### Primitives ######
 ########################
-build:
-	# Make .gen/out...
-	mkdir .gen/out -p
-	GOOS=linux GOARCH=amd64 go build -o ".gen/out/frizzante" && \
-	cd .gen/out/ && \
-	zip -9 frizzante-linux-am64.zip frizzante && \
-	rm frizzante
-
 clean:
 ### Remove...
 	go clean

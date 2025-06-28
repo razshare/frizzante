@@ -10,8 +10,8 @@ import (
 	"path/filepath"
 )
 
-const binaryVersion = "1.8.3"
-const projectVersion = "1.2.7"
+const binaryVersion = "1.8.4"
+const projectVersion = "1.2.8"
 
 var FlagHelp = flag.BoolP("help", "h", false, "shows the help document")
 var FlagVersion = flag.BoolP("version", "v", false, "shows the binary version and the project version")
