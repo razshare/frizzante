@@ -1,8 +1,6 @@
 # What is this?
 Frizzante is a minimalistic and opinionated web server framework written in [Go](https://go.dev/) that uses [Svelte](https://svelte.dev/docs/svelte/overview) to render pages.
 
-# Prerequisites
-
 > [!NOTE]
 > #### Prerequisites
 > Make sure you have `frizzante`, `build-essential`, `curl` and `unzip` installed on your machine.\
@@ -10,10 +8,6 @@ Frizzante is a minimalistic and opinionated web server framework written in [Go]
 > sudo apt install build-essential unzip curl && \
 > go install github.com/razshare/frizzante@latest
 > ``` 
-
-
-
-
 
 # Get started
 
