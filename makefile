@@ -8,6 +8,7 @@ check: configure-bun install
 	cd app && \
 	../.gen/bin/bun x eslint . && \
 	../.gen/bin/bun x svelte-check --tsconfig ./tsconfig.json
+	cd templates/project && make check
 
 package: configure-bun install
 	cd app && \
@@ -18,17 +19,16 @@ package: configure-bun install
 
 install: configure-bun
 	go mod tidy
-	cd app && \
-	../.gen/bin/bun install
+	cd app && ../.gen/bin/bun install
+	cd templates/project && make install
 
 update: configure-bun
-	cd app && \
-	../.gen/bin/bun update
+	cd app && ../.gen/bin/bun update
+	cd templates/project && make update
 
 format: configure-bun
-	cd app && \
-	../.gen/bin/bun x prettier --write .
-
+	cd app && ../.gen/bin/bun x prettier --write .
+	cd templates/project && make format
 
 ########################
 ###### Primitives ######
@@ -54,6 +54,7 @@ clean:
 	mkdir app/dist -p
 	touch app/dist/.gitkeep
 	touch app/dist/server.js
+	cd templates/project && make clean
 
 hooks:
 	printf "#!/usr/bin/env bash\n" > .git/hooks/pre-commit
