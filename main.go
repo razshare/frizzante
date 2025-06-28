@@ -11,7 +11,7 @@ import (
 )
 
 const binaryVersion = "v1.8.1"
-const projectTemplateVersion = "v1.2.5"
+const projectTemplateVersion = "v1.2.6"
 
 var FlagHelp = flag.BoolP("help", "h", false, "shows the help document")
 var FlagVersion = flag.BoolP("version", "v", false, "shows the binary version and the project version")
