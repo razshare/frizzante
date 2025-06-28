@@ -1,0 +1,35 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "forceConsistentCasingInFileNames": true,
+        "noEmit": true,
+        "allowImportingTsExtensions": true,
+        "strict": true,
+        "moduleResolution": "bundler",
+        "target": "ESNext",
+        "module": "ESNext",
+        "verbatimModuleSyntax": true,
+        "isolatedModules": true,
+        "resolveJsonModule": true,
+        "sourceMap": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "checkJs": true,
+        "paths": {
+            "$lib/*": ["./lib/*"]
+        },
+        "lib": ["esnext", "DOM", "DOM.Iterable"],
+        "useDefineForClassFields": true,
+        "moduleDetection": "force"
+    },
+    "include": [
+        "./**/*.svelte.js",
+        "./**/*.svelte.ts",
+        "./**/*.svelte",
+        "./**/*.d.ts",
+        "./**/*.js",
+        "./**/*.ts",
+        "./**/*.html"
+    ],
+    "exclude": ["./node_modules/**", "./dist/**"]
+}

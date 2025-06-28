@@ -1,59 +1,71 @@
 ########################
 ###### Composites ######
 ########################
-test: check package
-	CGO_ENABLED=1 go test
+test: configure-bun install check package
+	CGO_ENABLED=1 go test ./...
 
-check: configure-bun install
+build: configure-bun install check package
+	CGO_ENABLED=1 go build -o .gen/bin/app .
+
+dev: configure-air configure-bun install
+	mkdir .gen/tmp -p
+	mkdir app/dist -p
+	touch app/dist/.gitkeep
+	touch app/dist/server.js
+	DEV=1 CGO_ENABLED=1 ./.gen/bin/air & \
+	make package-watch & \
+	wait
+
+check: touch configure-bun
 	cd app && \
 	../.gen/bin/bun x eslint . && \
 	../.gen/bin/bun x svelte-check --tsconfig ./tsconfig.json
 
-package: configure-bun install
+package-watch: touch configure-bun
+	cd app && \
+	../.gen/bin/bun x vite build --logLevel info --ssr lib/utilities/frz/scripts/server.ts --outDir dist --watch & \
+	cd app && \
+	../.gen/bin/bun x vite build --logLevel info --outDir dist/client --watch & \
+	wait
+
+package: touch configure-bun
 	cd app && \
 	../.gen/bin/bun x vite build --logLevel info --ssr lib/utilities/frz/scripts/server.ts --outDir dist --emptyOutDir && \
 	../.gen/bin/bun x vite build --logLevel info --outDir dist/client --emptyOutDir && \
 	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite && \
 	touch dist/.gitkeep
 
-install: configure-bun
+install: touch configure-bun
 	go mod tidy
 	cd app && \
 	../.gen/bin/bun install
 
-update: configure-bun
+update: touch configure-bun
 	cd app && \
 	../.gen/bin/bun update
 
-format: configure-bun
+format: touch configure-bun
 	cd app && \
 	../.gen/bin/bun x prettier --write .
-
 
 ########################
 ###### Primitives ######
 ########################
-publish:
-### Clean project template...
-	rm templates/project/.gen -fr
-	rm templates/project/.idea -fr
-	rm templates/project/*.iml -fr
-	cd templates/project && make clean
-### Zip the project...
-	cd templates/project && zip -9r ../../project.zip ./*
-	chmod +x ./publish.sh
-	./publish.sh
-
 clean:
 ### Remove...
 	go clean
-	rm .gen/out -fr
 	rm app/dist -fr
 	rm app/node_modules -fr
+	make touch
+
+touch:
 ### Initialize...
 	mkdir app/dist -p
 	touch app/dist/.gitkeep
 	touch app/dist/server.js
+
+restore-frizzante-utilities:
+	go run github.com/razshare/frizzante -u "app/lib/utilities"
 
 hooks:
 	printf "#!/usr/bin/env bash\n" > .git/hooks/pre-commit
@@ -71,4 +83,14 @@ configure-bun:
 	unzip -j .gen/bin/bun.zip -d .gen/bin && rm .gen/bin/bun.zip -f)
 	chmod +x .gen/bin/bun
 
-configure: configure-bun
+configure-air:
+	# Check requirements...
+	command -v unzip >/dev/null || error 'unzip is required to install and configure dependencies'
+	command -v curl >/dev/null || error 'curl is required to install and configure dependencies'
+	# Make .gen/bin...
+	mkdir .gen/bin -p
+	# Get air...
+	which .gen/bin/air || (curl -fsSL https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_amd64 -o .gen/bin/air)
+	chmod +x .gen/bin/air
+
+configure: configure-bun configure-air

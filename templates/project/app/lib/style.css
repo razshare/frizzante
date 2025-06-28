@@ -1,0 +1,26 @@
+h1 {
+    color: cadetblue;
+    text-align: center;
+    width: 400px;
+}
+
+.link {
+    color: cadetblue;
+    text-decoration: none;
+    background: transparent;
+    border: 0;
+}
+
+.link:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.menu {
+    text-align: center;
+    width: 400px;
+}
+
+.error {
+    color: orangered;
+}
