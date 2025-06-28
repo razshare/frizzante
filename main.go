@@ -3,15 +3,15 @@ package main
 import (
 	"embed"
 	"fmt"
-	ffs "github.com/razshare/frizzante/fs"
+	"github.com/razshare/frizzante/fs"
 	flag "github.com/spf13/pflag"
-	"io"
-	"io/fs"
 	"log"
 	"os"
+	"path/filepath"
 )
 
-const binaryVersion = "v1.8.2"
+const binaryVersion = "1.8.3"
+const projectVersion = "1.2.7"
 
 var FlagHelp = flag.BoolP("help", "h", false, "shows the help document")
 var FlagVersion = flag.BoolP("version", "v", false, "shows the binary version and the project version")
@@ -19,7 +19,6 @@ var FlagCreateProject = flag.StringP("create-project", "c", "", fmt.Sprintf("cre
 var FlagRestoreUtilities = flag.StringP("restore-utilities", "r", "", fmt.Sprintf("restores frizzante utilities"))
 
 //go:embed app/lib/utilities
-//go:embed project.zip
 var embedded embed.FS
 
 func main() {
@@ -28,7 +27,7 @@ func main() {
 	if *FlagRestoreUtilities != "" {
 		var restore func(from string, to string)
 		restore = func(from string, to string) {
-			if !ffs.IsDirectory(to) {
+			if !fs.IsDirectory(to) {
 				mkdirAllError := os.MkdirAll(to, os.ModePerm)
 				if mkdirAllError != nil {
 					log.Fatal(mkdirAllError)
@@ -68,7 +67,7 @@ func main() {
 	}
 
 	if *FlagVersion {
-		println(binaryVersion)
+		fmt.Printf("v%s using project v%s", binaryVersion, projectVersion)
 		os.Exit(0)
 	}
 
@@ -78,39 +77,27 @@ func main() {
 	}
 
 	if *FlagCreateProject != "" {
-		srcFile, srcError := embedded.Open("project.zip")
-		if srcError != nil {
-			log.Fatal(srcError)
-		}
-		defer func(srcFile fs.File) {
-			err := srcFile.Close()
-			if err != nil {
-				log.Fatal(err)
-			}
-		}(srcFile)
-
-		destFile, destError := os.Create(*FlagCreateProject + ".zip")
-		if destError != nil {
-			log.Fatal(destError)
-		}
-		defer func(destFile *os.File) {
-			err := destFile.Close()
-			if err != nil {
-				log.Fatal(err)
-			}
-		}(destFile)
-
-		_, copyError := io.Copy(destFile, srcFile)
-		if copyError != nil {
-			return
+		downloadError := fs.DownloadFile(fmt.Sprintf("https://github.com/razshare/frizzante-starter/archive/refs/tags/v%s.zip", projectVersion), *FlagCreateProject+".zip")
+		if downloadError != nil {
+			log.Fatal(downloadError)
 		}
 
-		unzipError := ffs.UnzipFile(*FlagCreateProject+".zip", *FlagCreateProject)
+		unzipError := fs.UnzipFile(*FlagCreateProject+".zip", "."+*FlagCreateProject+".tmp")
 		if unzipError != nil {
 			log.Fatal(unzipError)
 		}
 
 		removeError := os.Remove(*FlagCreateProject + ".zip")
+		if removeError != nil {
+			log.Fatal(removeError)
+		}
+
+		renameError := os.Rename(filepath.Join("."+*FlagCreateProject+".tmp", fmt.Sprintf("frizzante-starter-%s", projectVersion)), *FlagCreateProject)
+		if renameError != nil {
+			log.Fatal(renameError)
+		}
+
+		removeError = os.RemoveAll("." + *FlagCreateProject + ".tmp")
 		if removeError != nil {
 			log.Fatal(removeError)
 		}
