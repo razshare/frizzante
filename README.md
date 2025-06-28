@@ -3,7 +3,7 @@ Frizzante is a minimalistic and opinionated web server framework written in [Go]
 
 > [!NOTE]
 > #### Prerequisites
-> Make sure you have `frizzante`, `build-essential`, `curl` and `unzip` installed on your machine.\
+> Make sure you have `frizzante`, `build-essential`, `curl` and `unzip` installed on your machine.
 > ```sh
 > sudo apt install build-essential unzip curl && \
 > go install github.com/razshare/frizzante@latest
