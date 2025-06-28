@@ -10,12 +10,13 @@ import (
 	"path/filepath"
 )
 
-const version = "v1.2.5"
+const binaryVersion = "v1.8.1"
+const projectTemplateVersion = "v1.2.5"
 
 var FlagHelp = flag.BoolP("help", "h", false, "shows the help document")
-var FlagVersion = flag.BoolP("version", "v", false, "shows the binary version")
-var FlagCreateProject = flag.StringP("create-project", "c", "", fmt.Sprintf("creates a frizzante project (%s) to a directory", version))
-var FlagRestoreUtilities = flag.StringP("restore-utilities", "r", "", fmt.Sprintf("restores frizzante utilities (%s) to a directory", version))
+var FlagVersion = flag.BoolP("version", "v", false, "shows the binary version and the project version")
+var FlagCreateProject = flag.StringP("create-project", "c", "", fmt.Sprintf("creates a frizzante project (%s) to a directory", projectTemplateVersion))
+var FlagRestoreUtilities = flag.StringP("restore-utilities", "r", "", fmt.Sprintf("restores frizzante utilities (%s) to a directory", projectTemplateVersion))
 
 //go:embed app/lib/utilities
 var utilities embed.FS
@@ -24,7 +25,7 @@ func main() {
 	flag.Parse()
 
 	if *FlagCreateProject != "" {
-		downloadError := fs.DownloadFile(fmt.Sprintf("https://github.com/razshare/frizzante-starter/archive/refs/tags/%s.zip", version), *FlagCreateProject+".zip")
+		downloadError := fs.DownloadFile(fmt.Sprintf("https://github.com/razshare/frizzante-starter/archive/refs/tags/%s.zip", projectTemplateVersion), *FlagCreateProject+".zip")
 		if downloadError != nil {
 			log.Fatal(downloadError)
 		}
@@ -93,7 +94,7 @@ func main() {
 	}
 
 	if *FlagVersion {
-		println(version)
+		fmt.Printf("%s using project %s\n", binaryVersion, projectTemplateVersion)
 		os.Exit(0)
 	}
 

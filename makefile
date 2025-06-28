@@ -16,7 +16,6 @@ package: configure-bun install
 	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite && \
 	touch dist/.gitkeep
 
-
 install: configure-bun
 	go mod tidy
 	cd app && \
