@@ -6,22 +6,21 @@ Frizzante is a minimalistic and opinionated web server framework written in [Go]
 Make sure you have `build-essential`, `curl` and `unzip` installed on your machine.
 
 ```sh
-sudo apt install build-essential unzip curl
+sudo apt install build-essential unzip curl && \
+go install github.com/razshare/frizzante@latest
 ```
 
 # Get started
 
-Clone the basic starter template.
+Create a project with
 ```sh
-git clone https://github.com/razshare/frizzante-starter && \
-rm frizzante-starter/.git -fr && \
-cd frizzante-starter
+frizzante -c MyProject
 ```
 
-Update dependencies with
+Install dependencies with
 
 ```sh
-make update
+make install
 ```
 
 Start development with
@@ -48,7 +47,7 @@ Build with
 make build
 ```
 
-This will create a `bin/app` standalone executable.
+This will create a `.gen/bin/app` standalone executable.
 
 
 > [!NOTE]
