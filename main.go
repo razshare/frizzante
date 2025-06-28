@@ -67,7 +67,7 @@ func main() {
 	}
 
 	if *FlagVersion {
-		fmt.Printf("v%s using project v%s", binaryVersion, projectVersion)
+		fmt.Printf("v%s using project v%s\n", binaryVersion, projectVersion)
 		os.Exit(0)
 	}
 
