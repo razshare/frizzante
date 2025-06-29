@@ -426,17 +426,17 @@ func (con *Connection) SendJson(val any) {
 
 // SendEmbeddedFileOrElse sends the embedded file requested by the client,
 // or the closest index.html embedded file, or else falls back.
-func (con *Connection) SendEmbeddedFileOrElse(emb embed.FS, fun func()) {
+func (con *Connection) SendEmbeddedFileOrElse(efs embed.FS, fun func()) {
 	fileName := con.PublicRoot + con.Request.RequestURI
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
-	if !embeds.IsFile(emb, fileName) || embeds.IsDirectory(emb, fileName) {
+	if !embeds.IsFile(efs, fileName) || embeds.IsDirectory(efs, fileName) {
 		fun()
 		return
 	}
 
-	reader, info, readerError := embeds.FileReader(emb, fileName)
+	reader, info, readerError := embeds.FileReader(efs, fileName)
 	if nil != readerError {
 		con.Notifier.SendErrorAndTrace(readerError, 1)
 		return

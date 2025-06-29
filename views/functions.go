@@ -26,7 +26,7 @@ func AddFunction(view *View, name string, fun v8go.FunctionCallback) *View {
 }
 
 // IndexContents gets the contents of the index html document.
-func IndexContents(view *View, emb embed.FS) ([]byte, error) {
+func IndexContents(view *View, efs embed.FS) ([]byte, error) {
 	var index []byte
 	var indexReadError error
 	if files.IsFile(view.Index) {
@@ -34,8 +34,8 @@ func IndexContents(view *View, emb embed.FS) ([]byte, error) {
 	}
 
 	fileNameFixed := strings.ReplaceAll(view.Index, "\\", "/")
-	if embeds.IsFile(emb, fileNameFixed) {
-		index, indexReadError = emb.ReadFile(fileNameFixed)
+	if embeds.IsFile(efs, fileNameFixed) {
+		index, indexReadError = efs.ReadFile(fileNameFixed)
 		if indexReadError != nil {
 			return nil, indexReadError
 		}
@@ -46,7 +46,7 @@ func IndexContents(view *View, emb embed.FS) ([]byte, error) {
 }
 
 // ServerContents gets the contents of the server script.
-func ServerContents(view *View, emb embed.FS) ([]byte, error) {
+func ServerContents(view *View, efs embed.FS) ([]byte, error) {
 	var server []byte
 	var serverReadError error
 	if files.IsFile(view.Server) {
@@ -54,8 +54,8 @@ func ServerContents(view *View, emb embed.FS) ([]byte, error) {
 	}
 
 	fileNameFixed := strings.ReplaceAll(view.Server, "\\", "/")
-	if embeds.IsFile(emb, fileNameFixed) {
-		server, serverReadError = os.ReadFile(fileNameFixed)
+	if embeds.IsFile(efs, fileNameFixed) {
+		server, serverReadError = efs.ReadFile(fileNameFixed)
 		if serverReadError != nil {
 			return nil, serverReadError
 		}
@@ -93,7 +93,7 @@ var noScript = regexp.MustCompile(`<script.*>.*</script>`)
 //
 // If for some reason your view server is not in cjs format, RenderMode will try to convert it to cjs on the fly using esbuild.
 // Esbuild will look for a "node_modules" in the view root directory, which you can set by invoking WithRoot.
-func (view *View) Render(emb embed.FS) (html string, err error) {
+func (view *View) Render(efs embed.FS) (html string, err error) {
 	// CSR.
 	targetId, targetIdError := uuid.NewV4()
 	if targetIdError != nil {
@@ -112,7 +112,7 @@ func (view *View) Render(emb embed.FS) (html string, err error) {
 	props := string(propsBytes)
 
 	if RenderModeClient == view.RenderMode {
-		index, indexError := IndexContents(view, emb)
+		index, indexError := IndexContents(view, efs)
 		if indexError != nil {
 			return "", indexError
 		}
@@ -142,7 +142,7 @@ func (view *View) Render(emb embed.FS) (html string, err error) {
 		), nil
 	}
 
-	readBytes, serverReadError := ServerContents(view, emb)
+	readBytes, serverReadError := ServerContents(view, efs)
 	if serverReadError != nil {
 		return "", serverReadError
 	}
@@ -233,7 +233,7 @@ func (view *View) Render(emb embed.FS) (html string, err error) {
 	}
 
 	if RenderModeServer == view.RenderMode {
-		index, indexError := IndexContents(view, emb)
+		index, indexError := IndexContents(view, efs)
 		if indexError != nil {
 			return "", indexError
 		}
@@ -261,7 +261,7 @@ func (view *View) Render(emb embed.FS) (html string, err error) {
 	}
 
 	if RenderModeFull == view.RenderMode {
-		index, indexError := IndexContents(view, emb)
+		index, indexError := IndexContents(view, efs)
 		if indexError != nil {
 			return "", indexError
 		}
