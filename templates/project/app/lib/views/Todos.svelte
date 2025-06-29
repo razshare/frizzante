@@ -29,8 +29,8 @@
 
 <script lang="ts">
     import Layout from "$lib/components/Layout.svelte"
-    import { action } from "$lib/utilities/frizzante/scripts/action.ts"
-    import { href } from "$lib/utilities/frizzante/scripts/href.ts"
+    import { action } from "$lib/frizzante/scripts/action.ts"
+    import { href } from "$lib/frizzante/scripts/href.ts"
 
     type Todo = {
         Checked: boolean

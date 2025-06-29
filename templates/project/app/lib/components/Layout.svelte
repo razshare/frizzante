@@ -17,7 +17,7 @@
 
 <script lang="ts">
     import { getContext, type Snippet } from "svelte"
-    import type { View } from "$lib/utilities/frizzante/types.ts"
+    import type { View } from "$lib/frizzante/types.ts"
 
     type Props = {
         title?: string

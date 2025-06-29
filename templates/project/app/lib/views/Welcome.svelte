@@ -1,6 +1,6 @@
 <script lang="ts">
     import Layout from "$lib/components/Layout.svelte"
-    import { href } from "$lib/utilities/frizzante/scripts/href.ts"
+    import { href } from "$lib/frizzante/scripts/href.ts"
 </script>
 
 <Layout title="Welcome">
