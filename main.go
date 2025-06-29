@@ -65,16 +65,6 @@ func main() {
 			log.Fatal(removeAllError)
 		}
 
-		removeError = os.Remove(filepath.Join(*FlagCreateProject, "version"))
-		if removeError != nil {
-			log.Fatal(removeError)
-		}
-
-		writeError := os.WriteFile(filepath.Join(*FlagCreateProject, "version"), []byte("v0.0.1"), os.ModePerm)
-		if writeError != nil {
-			log.Fatal(writeError)
-		}
-
 		os.Exit(0)
 	}
 
