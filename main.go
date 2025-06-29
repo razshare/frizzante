@@ -7,6 +7,7 @@ import (
 	flag "github.com/spf13/pflag"
 	"log"
 	"os"
+	"path/filepath"
 )
 
 var FlagHelp = flag.BoolP("help", "h", false, "shows the help document")
@@ -44,7 +45,7 @@ func main() {
 			log.Fatal(downloadError)
 		}
 
-		unzipError := files.UnzipFile(*FlagCreateProject+".zip", *FlagCreateProject)
+		unzipError := files.UnzipFile(*FlagCreateProject+".zip", *FlagCreateProject+".tmp")
 		if unzipError != nil {
 			log.Fatal(unzipError)
 		}
@@ -53,6 +54,17 @@ func main() {
 		if removeError != nil {
 			log.Fatal(removeError)
 		}
+
+		renameError := os.Rename(filepath.Join(*FlagCreateProject+".tmp", "frizzante-starter-main"), *FlagCreateProject)
+		if renameError != nil {
+			log.Fatal(renameError)
+		}
+
+		removeAllError := os.RemoveAll(filepath.Join(*FlagCreateProject + ".tmp"))
+		if removeAllError != nil {
+			log.Fatal(removeAllError)
+		}
+
 		os.Exit(0)
 	}
 
