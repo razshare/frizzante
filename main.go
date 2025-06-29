@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"github.com/razshare/frizzante/files"
 	flag "github.com/spf13/pflag"
-	"io"
-	"io/fs"
 	"log"
 	"os"
 )
@@ -41,31 +39,9 @@ func main() {
 	}
 
 	if *FlagCreateProject != "" {
-		srcFile, srcError := efs.Open("project.zip")
-		if srcError != nil {
-			log.Fatal(srcError)
-		}
-		defer func(srcFile fs.File) {
-			err := srcFile.Close()
-			if err != nil {
-				log.Fatal(err)
-			}
-		}(srcFile)
-
-		destFile, destError := os.Create(*FlagCreateProject + ".zip")
-		if destError != nil {
-			log.Fatal(destError)
-		}
-		defer func(destFile *os.File) {
-			err := destFile.Close()
-			if err != nil {
-				log.Fatal(err)
-			}
-		}(destFile)
-
-		_, copyError := io.Copy(destFile, srcFile)
-		if copyError != nil {
-			return
+		downloadError := files.DownloadFile("https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip", *FlagCreateProject+".zip")
+		if downloadError != nil {
+			log.Fatal(downloadError)
 		}
 
 		unzipError := files.UnzipFile(*FlagCreateProject+".zip", *FlagCreateProject)
