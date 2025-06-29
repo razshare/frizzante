@@ -6,6 +6,10 @@ github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d h1:VhgPp6v9qf9Agr/
 github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d/go.mod h1:YUTz3bUH2ZwIWBy3CJBeOBEugqcmXREj14T+iG/4k4U=
 github.com/razshare/frizzante v1.9.7 h1:sT0OmsJxI5mC5ZRp6d077I/zUy1q35Z5E1OoOwmJayw=
 github.com/razshare/frizzante v1.9.7/go.mod h1:YsPvxmlJ+OvQTRUhmQ/oykWxDtHl1JP4Mm87LY4taaY=
+github.com/razshare/frizzante v1.9.13 h1:X3erFWtVPXEWAioIIZ7QaiieniREApdUsn+5Cuq/3dQ=
+github.com/razshare/frizzante v1.9.13/go.mod h1:YsPvxmlJ+OvQTRUhmQ/oykWxDtHl1JP4Mm87LY4taaY=
+github.com/spf13/pflag v1.0.6 h1:jFzHGLGAlb3ruxLB8MhbI6A8+AQX/2eW4qeyNZXNp2o=
+github.com/spf13/pflag v1.0.6/go.mod h1:McXfInJRrz4CZXVZOBLb0bTZqETkiAhM9Iw0y3An2Bg=
 golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
 golang.org/x/sys v0.33.0 h1:q3i8TbbEz+JRD9ywIRlyRAQbM0qF7hu24q3teo2hbuw=
 golang.org/x/sys v0.33.0/go.mod h1:BJP2sWEmIv4KK5OTEluFJCKSidICx8ciO85XgH3Ak8k=
