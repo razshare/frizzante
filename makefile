@@ -5,7 +5,7 @@ test: install check package fadeout
 	CGO_ENABLED=1 go test || make fadein
 	make fadein
 
-publish: archive fadein
+publish: fadein archive
 ### Publish...
 	chmod +x ./publish.sh
 	./publish.sh
