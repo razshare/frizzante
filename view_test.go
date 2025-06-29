@@ -17,10 +17,6 @@ func TestRenderServer(test *testing.T) {
 	port := nums.NextNumber(8080)
 	server := web.NewServer()
 	server.Efs = testEfs
-	server.ViewRoot = "templates/project/app"
-	server.PublicRoot = "templates/project/app/dist/client"
-	server.ViewServer = "templates/project/app/dist/server.js"
-	server.ViewIndex = "templates/project/app/dist/client/index.html"
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
 	server.AddRoute(web.Route{Pattern: "GET /welcome", Handler: func(con *connections.Connection) {
 		con.SendView(views.View{
@@ -58,10 +54,6 @@ func TestRenderClient(test *testing.T) {
 	port := nums.NextNumber(8080)
 	server := web.NewServer()
 	server.Efs = testEfs
-	server.ViewRoot = "templates/project/app"
-	server.PublicRoot = "templates/project/app/dist/client"
-	server.ViewServer = "templates/project/app/dist/server.js"
-	server.ViewIndex = "templates/project/app/dist/client/index.html"
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
 	server.AddRoute(web.Route{Pattern: "GET /welcome", Handler: func(con *connections.Connection) {
 		con.SendView(views.View{

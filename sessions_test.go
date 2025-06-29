@@ -20,10 +20,6 @@ type State struct {
 func TestSession(t *testing.T) {
 	port := nums.NextNumber(8080)
 	server := web.NewServer()
-	server.ViewRoot = "templates/project"
-	server.PublicRoot = "templates/project/dist/client"
-	server.ViewServer = "templates/project/dist/server.js"
-	server.ViewIndex = "templates/project/dist/client/index.html"
 	server.Efs = testEfs
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
 	server.AddRoute(web.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
@@ -77,10 +73,6 @@ func TestSession(t *testing.T) {
 func TestSessionExpectFail(t *testing.T) {
 	port := nums.NextNumber(8080)
 	server := web.NewServer()
-	server.ViewRoot = "templates/project"
-	server.PublicRoot = "templates/project/dist/client"
-	server.ViewServer = "templates/project/dist/server.js"
-	server.ViewIndex = "templates/project/dist/client/index.html"
 	server.Efs = testEfs
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
 	server.AddRoute(web.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {

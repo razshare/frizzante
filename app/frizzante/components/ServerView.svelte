@@ -1,7 +1,7 @@
 <script lang="ts">
     import { setContext, type Component } from "svelte"
-    import type { View } from "$lib/frizzante/types.ts"
-    import { views } from "$lib/exports/server.ts"
+    import type { View } from "$frizzante/types.ts"
+    import { views } from "$exports/server.ts"
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     const components = views as Record<string, Component>

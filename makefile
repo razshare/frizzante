@@ -1,65 +1,69 @@
 ########################
 ###### Composites ######
 ########################
-test: install check package fadeout
-	CGO_ENABLED=1 go test || make fadein
-	make fadein
+test: install check package
+	CGO_ENABLED=1 go test
 
-publish: fadein archive
-### Publish...
-	chmod +x ./publish.sh
-	./publish.sh
+dev: install
+	mkdir .gen/tmp -p
+	mkdir app/dist -p
+	touch app/dist/.gitkeep
+	touch app/dist/server.js
+	DEV=1 CGO_ENABLED=1 air & \
+	make package-watch & \
+	wait
+
+check: touch
+	cd app && \
+	bunx eslint . && \
+	bunx svelte-check --tsconfig ./tsconfig.json
+
+package-watch: touch
+	cd app && \
+	bunx vite build --logLevel info --ssr frizzante/scripts/server.ts --outDir dist --watch & \
+	cd app && \
+	bunx vite build --logLevel info --outDir dist/client --watch & \
+	wait
+
+package: touch
+	cd app && \
+	bunx vite build --logLevel info --ssr frizzante/scripts/server.ts --outDir dist --emptyOutDir && \
+	bunx vite build --logLevel info --outDir dist/client --emptyOutDir && \
+	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite && \
+	touch dist/.gitkeep
+
+install: touch
+	go mod tidy
+	cd app && \
+	bun install
+
+update: touch
+	cd app && \
+	bun update
+
+format: touch
+	cd app && \
+	bunx prettier --write .
 
 ########################
 ###### Primitives ######
 ########################
-fadein:
-	test -f templates/project/main.go || mv templates/project/main.go.txt templates/project/main.go
-	test -f templates/project/go.mod || mv templates/project/go.mod.txt templates/project/go.mod
-	test -f templates/project/go.sum || mv templates/project/go.sum.txt templates/project/go.sum
-
-fadeout:
-	test -f templates/project/main.go.txt || mv templates/project/main.go templates/project/main.go.txt
-	test -f templates/project/go.mod.txt || mv templates/project/go.mod templates/project/go.mod.txt
-	test -f templates/project/go.sum.txt || mv templates/project/go.sum templates/project/go.sum.txt
-
-archive:
-### Clean existing archives...
-	rm project.zip -fr
-	rm library.zip -fr
-### Clean project template...
-	rm templates/project/.gen -fr
-	rm templates/project/.idea -fr
-	rm templates/project/*.iml -fr
-	cd templates/project && make clean
-### Zip the project...
-	cd templates/project && zip -9r ../../project.zip * .[^.]*
-### Zip the library...
-	cd templates/project/app/lib/frizzante && zip -9r ../../../../../library.zip * .[^.]*
-
-check:
-	cd templates/project && make check
-
-package:
-	cd templates/project && make package
-
-install:
-	go mod tidy
-	cd templates/project && make install
-
-update:
-	go mod tidy
-	cd templates/project && make update
-
-format:
-	cd templates/project && make format
+publish:
+### Publish...
+	./publish.sh
 
 clean:
-### Remove generated files...
+### Remove...
 	go clean
-	rm .gen/out -fr
-### Initialize template project...
-	cd templates/project && make clean
+	rm app/dist -fr
+	rm app/node_modules -fr
+	make touch
+
+touch:
+### Initialize...
+	mkdir app/dist -p
+	touch app/dist/.gitkeep
+	touch app/dist/server.js
 
 hooks:
 	printf "#!/usr/bin/env bash\n" > .git/hooks/pre-commit
