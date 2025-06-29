@@ -14,7 +14,7 @@ import (
 var FlagHelp = flag.BoolP("help", "h", false, "shows the help document")
 var FlagVersion = flag.BoolP("version", "v", false, "shows the binary version and the project version")
 var FlagCreateProject = flag.StringP("create-project", "c", "", fmt.Sprintf("creates a frizzante project"))
-var FlagRestoreUtilities = flag.StringP("restore-utilities", "r", "", fmt.Sprintf("restores frizzante utilities"))
+var FlagRestoreUtilities = flag.StringP("restore-library", "r", "", fmt.Sprintf("restores frizzante library"))
 
 //go:embed utilities.zip
 //go:embed project.zip

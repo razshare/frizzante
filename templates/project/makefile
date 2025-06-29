@@ -64,8 +64,8 @@ touch:
 	touch app/dist/.gitkeep
 	touch app/dist/server.js
 
-restore-frizzante-utilities:
-	go run github.com/razshare/frizzante -r "app/lib/utilities/frizzante"
+restore:
+	go run github.com/razshare/frizzante -r "app/lib/frizzante"
 
 hooks:
 	printf "#!/usr/bin/env bash\n" > .git/hooks/pre-commit
