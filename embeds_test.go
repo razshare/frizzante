@@ -4,4 +4,5 @@ import "embed"
 
 //go:embed .github
 //go:embed makefile
-var tefs embed.FS
+//go:embed templates/project/app/dist
+var testEfs embed.FS

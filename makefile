@@ -1,10 +1,11 @@
 ########################
 ###### Composites ######
 ########################
-test: install check package
-	CGO_ENABLED=1 go test
+test: install check package fadeout
+	CGO_ENABLED=1 go test || make fadein
+	make fadein
 
-publish: archive
+publish: archive fadein
 ### Publish...
 	chmod +x ./publish.sh
 	./publish.sh
@@ -12,6 +13,16 @@ publish: archive
 ########################
 ###### Primitives ######
 ########################
+fadein:
+	test -f templates/project/main.go || mv templates/project/main.go.txt templates/project/main.go
+	test -f templates/project/go.mod || mv templates/project/go.mod.txt templates/project/go.mod
+	test -f templates/project/go.sum || mv templates/project/go.sum.txt templates/project/go.sum
+
+fadeout:
+	test -f templates/project/main.go.txt || mv templates/project/main.go templates/project/main.go.txt
+	test -f templates/project/go.mod.txt || mv templates/project/go.mod templates/project/go.mod.txt
+	test -f templates/project/go.sum.txt || mv templates/project/go.sum templates/project/go.sum.txt
+
 archive:
 ### Clean existing archives...
 	rm project.zip -fr

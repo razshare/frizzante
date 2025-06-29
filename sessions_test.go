@@ -24,7 +24,7 @@ func TestSession(t *testing.T) {
 	server.PublicRoot = "templates/project/dist/client"
 	server.ViewServer = "templates/project/dist/server.js"
 	server.ViewIndex = "templates/project/dist/client/index.html"
-	server.Efs = tefs
+	server.Efs = testEfs
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
 	server.AddRoute(web.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
 		state, _ := sessions.Start(con, State{Name: "test"})
@@ -81,7 +81,7 @@ func TestSessionExpectFail(t *testing.T) {
 	server.PublicRoot = "templates/project/dist/client"
 	server.ViewServer = "templates/project/dist/server.js"
 	server.ViewIndex = "templates/project/dist/client/index.html"
-	server.Efs = tefs
+	server.Efs = testEfs
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
 	server.AddRoute(web.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
 		state, _ := sessions.Start(con, State{Name: "test"})
