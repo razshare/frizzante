@@ -17,7 +17,7 @@ import (
 )
 
 // AddFunction adds a global function to the script's context.
-func AddFunction(view *View, name string, fun v8go.FunctionCallback) *View {
+func (view *View) AddFunction(name string, fun v8go.FunctionCallback) *View {
 	if nil == view.Functions {
 		view.Functions = map[string]v8go.FunctionCallback{}
 	}
@@ -26,7 +26,7 @@ func AddFunction(view *View, name string, fun v8go.FunctionCallback) *View {
 }
 
 // IndexContents gets the contents of the index html document.
-func IndexContents(view *View, efs embed.FS) ([]byte, error) {
+func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
 	var index []byte
 	var indexReadError error
 	if files.IsFile(view.Index) {
@@ -46,7 +46,7 @@ func IndexContents(view *View, efs embed.FS) ([]byte, error) {
 }
 
 // ServerContents gets the contents of the server script.
-func ServerContents(view *View, efs embed.FS) ([]byte, error) {
+func (view *View) ServerContents(efs embed.FS) ([]byte, error) {
 	var server []byte
 	var serverReadError error
 	if files.IsFile(view.Server) {
@@ -112,7 +112,7 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 	props := string(propsBytes)
 
 	if RenderModeClient == view.RenderMode {
-		index, indexError := IndexContents(view, efs)
+		index, indexError := view.IndexContents(efs)
 		if indexError != nil {
 			return "", indexError
 		}
@@ -142,7 +142,7 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 		), nil
 	}
 
-	readBytes, serverReadError := ServerContents(view, efs)
+	readBytes, serverReadError := view.ServerContents(efs)
 	if serverReadError != nil {
 		return "", serverReadError
 	}
@@ -233,7 +233,7 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 	}
 
 	if RenderModeServer == view.RenderMode {
-		index, indexError := IndexContents(view, efs)
+		index, indexError := view.IndexContents(efs)
 		if indexError != nil {
 			return "", indexError
 		}
@@ -261,7 +261,7 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 	}
 
 	if RenderModeFull == view.RenderMode {
-		index, indexError := IndexContents(view, efs)
+		index, indexError := view.IndexContents(efs)
 		if indexError != nil {
 			return "", indexError
 		}
