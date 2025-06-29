@@ -26,7 +26,7 @@ fadeout:
 archive:
 ### Clean existing archives...
 	rm project.zip -fr
-	rm utilities.zip -fr
+	rm library.zip -fr
 ### Clean project template...
 	rm templates/project/.gen -fr
 	rm templates/project/.idea -fr
@@ -34,8 +34,8 @@ archive:
 	cd templates/project && make clean
 ### Zip the project...
 	cd templates/project && zip -9r ../../project.zip * .[^.]*
-### Zip the utilities...
-	cd templates/project/app/lib/frizzante && zip -9r ../../../../../../utilities.zip * .[^.]*
+### Zip the library...
+	cd templates/project/app/lib/frizzante && zip -9r ../../../../../library.zip * .[^.]*
 
 check:
 	cd templates/project && make check

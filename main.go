@@ -16,7 +16,7 @@ var FlagVersion = flag.BoolP("version", "v", false, "shows the binary version an
 var FlagCreateProject = flag.StringP("create-project", "c", "", fmt.Sprintf("creates a frizzante project"))
 var FlagRestoreUtilities = flag.StringP("restore-library", "r", "", fmt.Sprintf("restores frizzante library"))
 
-//go:embed utilities.zip
+//go:embed library.zip
 //go:embed project.zip
 //go:embed version
 var efs embed.FS
@@ -34,7 +34,7 @@ func main() {
 	version = string(versionData)
 
 	if *FlagRestoreUtilities != "" {
-		srcFile, srcError := efs.Open("utilities.zip")
+		srcFile, srcError := efs.Open("library.zip")
 		if srcError != nil {
 			log.Fatal(srcError)
 		}
