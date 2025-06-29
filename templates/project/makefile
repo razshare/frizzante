@@ -7,12 +7,12 @@ test: install check package
 build: install check package
 	CGO_ENABLED=1 go build -o .gen/bin/app .
 
-dev: configure-air install
+dev: install
 	mkdir .gen/tmp -p
 	mkdir app/dist -p
 	touch app/dist/.gitkeep
 	touch app/dist/server.js
-	DEV=1 CGO_ENABLED=1 ./.gen/bin/air & \
+	DEV=1 CGO_ENABLED=1 air & \
 	make package-watch & \
 	wait
 
@@ -71,15 +71,3 @@ hooks:
 	printf "#!/usr/bin/env bash\n" > .git/hooks/pre-commit
 	printf "make test" >> .git/hooks/pre-commit
 	chmod +x .git/hooks/pre-commit
-
-configure-air:
-	# Check requirements...
-	command -v unzip >/dev/null || error 'unzip is required to install and configure dependencies'
-	command -v curl >/dev/null || error 'curl is required to install and configure dependencies'
-	# Make .gen/bin...
-	mkdir .gen/bin -p
-	# Get air...
-	which .gen/bin/air || (curl -fsSL https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_amd64 -o .gen/bin/air)
-	chmod +x .gen/bin/air
-
-configure:
