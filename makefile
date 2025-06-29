@@ -33,9 +33,9 @@ archive:
 	rm templates/project/*.iml -fr
 	cd templates/project && make clean
 ### Zip the project...
-	cd templates/project && zip -9r ../../project.zip ./*
+	cd templates/project && zip -9r ../../project.zip * .[^.]*
 ### Zip the utilities...
-	cd templates/project/app/lib/utilities/frizzante && zip -9r ../../../../../../utilities.zip ./*
+	cd templates/project/app/lib/utilities/frizzante && zip -9r ../../../../../../utilities.zip * .[^.]*
 
 check:
 	cd templates/project && make check
