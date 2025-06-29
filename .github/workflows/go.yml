@@ -22,8 +22,5 @@ jobs:
         with:
           go-version: '1.24'
 
-      - name: Install prerequisites
-        run: sudo apt install curl unzip
-
       - name: Test
         run: make test
