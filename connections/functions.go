@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/efs"
-	"github.com/razshare/frizzante/fs"
+	"github.com/razshare/frizzante/embeds"
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/mimes"
 	"github.com/razshare/frizzante/views"
@@ -431,12 +431,12 @@ func (con *Connection) SendEmbeddedFileOrElse(emb embed.FS, fun func()) {
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
-	if !efs.IsFile(emb, fileName) || efs.IsDirectory(emb, fileName) {
+	if !embeds.IsFile(emb, fileName) || embeds.IsDirectory(emb, fileName) {
 		fun()
 		return
 	}
 
-	reader, info, readerError := efs.FileReader(emb, fileName)
+	reader, info, readerError := embeds.FileReader(emb, fileName)
 	if nil != readerError {
 		con.Notifier.SendErrorAndTrace(readerError, 1)
 		return
@@ -478,12 +478,12 @@ func (con *Connection) SendEmbeddedFileOrElse(emb embed.FS, fun func()) {
 func (con *Connection) SendFileOrElse(fun func()) {
 	fname := filepath.Join(con.PublicRoot, con.Request.RequestURI)
 
-	if !fs.IsFile(fname) || fs.IsDirectory(fname) {
+	if !files.IsFile(fname) || files.IsDirectory(fname) {
 		con.SendEmbeddedFileOrElse(con.Efs, fun)
 		return
 	}
 
-	reader, info, readerError := fs.FileReader(fname)
+	reader, info, readerError := files.FileReader(fname)
 	if nil != readerError {
 		con.Notifier.SendErrorAndTrace(readerError, 1)
 		return

@@ -3,7 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
-	ffs "github.com/razshare/frizzante/fs"
+	ffs "github.com/razshare/frizzante/files"
 	flag "github.com/spf13/pflag"
 	"io"
 	"io/fs"
@@ -16,17 +16,17 @@ var FlagVersion = flag.BoolP("version", "v", false, "shows the binary version an
 var FlagCreateProject = flag.StringP("create-project", "c", "", fmt.Sprintf("creates a frizzante project"))
 var FlagRestoreUtilities = flag.StringP("restore-utilities", "r", "", fmt.Sprintf("restores frizzante utilities"))
 
-//go:embed app/lib/utilities
+//go:embed utilities.zip
 //go:embed project.zip
 //go:embed version
-var embedded embed.FS
+var efs embed.FS
 
 func main() {
 	flag.Parse()
 
 	var version string
 
-	versionData, versionError := embedded.ReadFile("version")
+	versionData, versionError := efs.ReadFile("version")
 	if versionError != nil {
 		log.Fatal(versionError)
 	}
@@ -34,44 +34,42 @@ func main() {
 	version = string(versionData)
 
 	if *FlagRestoreUtilities != "" {
-		var restore func(from string, to string)
-		restore = func(from string, to string) {
-			if !ffs.IsDirectory(to) {
-				mkdirAllError := os.MkdirAll(to, os.ModePerm)
-				if mkdirAllError != nil {
-					log.Fatal(mkdirAllError)
-				}
+		srcFile, srcError := efs.Open("utilities.zip")
+		if srcError != nil {
+			log.Fatal(srcError)
+		}
+		defer func(srcFile fs.File) {
+			err := srcFile.Close()
+			if err != nil {
+				log.Fatal(err)
 			}
+		}(srcFile)
 
-			entries, readDirError := embedded.ReadDir(from)
-			if readDirError != nil {
-				log.Fatal(readDirError)
+		destFile, destError := os.Create(*FlagRestoreUtilities + ".zip")
+		if destError != nil {
+			log.Fatal(destError)
+		}
+		defer func(destFile *os.File) {
+			err := destFile.Close()
+			if err != nil {
+				log.Fatal(err)
 			}
+		}(destFile)
 
-			for _, entry := range entries {
-				if entry.IsDir() {
-					fromDirectoryName := from + "/" + entry.Name()
-					toDirectoryName := to + "/" + entry.Name()
-					restore(fromDirectoryName, toDirectoryName)
-					continue
-				}
-
-				fromFileName := from + "/" + entry.Name()
-				toFileName := to + "/" + entry.Name()
-
-				data, readError := embedded.ReadFile(fromFileName)
-				if readError != nil {
-					log.Fatal(readError)
-				}
-
-				writeError := os.WriteFile(toFileName, data, os.ModePerm)
-				if writeError != nil {
-					log.Fatal(readError)
-				}
-			}
+		_, copyError := io.Copy(destFile, srcFile)
+		if copyError != nil {
+			return
 		}
 
-		restore("app/lib/utilities", *FlagRestoreUtilities)
+		unzipError := ffs.UnzipFile(*FlagRestoreUtilities+".zip", *FlagRestoreUtilities)
+		if unzipError != nil {
+			log.Fatal(unzipError)
+		}
+
+		removeError := os.Remove(*FlagRestoreUtilities + ".zip")
+		if removeError != nil {
+			log.Fatal(removeError)
+		}
 		os.Exit(0)
 	}
 
@@ -86,7 +84,7 @@ func main() {
 	}
 
 	if *FlagCreateProject != "" {
-		srcFile, srcError := embedded.Open("project.zip")
+		srcFile, srcError := efs.Open("project.zip")
 		if srcError != nil {
 			log.Fatal(srcError)
 		}

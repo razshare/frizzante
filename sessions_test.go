@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/nums"
-	"github.com/razshare/frizzante/routes"
-	"github.com/razshare/frizzante/server"
 	"github.com/razshare/frizzante/sessions"
+	"github.com/razshare/frizzante/web"
 	"io"
 	"net/http"
 	"testing"
@@ -20,23 +19,25 @@ type State struct {
 
 func TestSession(t *testing.T) {
 	port := nums.NextNumber(8080)
-	server.WithEfs(emb)
-	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
-	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
+	server := web.NewServer()
+	server.ViewRoot = "templates/project"
+	server.PublicRoot = "templates/project/dist/client"
+	server.ViewServer = "templates/project/dist/server.js"
+	server.ViewIndex = "templates/project/dist/client/index.html"
+	server.Efs = tefs
+	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
+	server.AddRoute(web.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
 		state, _ := sessions.Start(con, State{Name: "test"})
 		con.SendMessage(fmt.Sprintf("hello %s", state.Name))
 	}})
-	server.AddRoute(routes.Route{Pattern: "POST /", Handler: func(con *connections.Connection) {
+	server.AddRoute(web.Route{Pattern: "POST /", Handler: func(con *connections.Connection) {
 		state, operator := sessions.Start(con, State{})
 		defer operator.Save(state)
 		state.Name = con.ReceiveMessage()
 	}})
 
 	go server.Start()
-	defer func() {
-		server.Stop()
-		server.Initialize()
-	}()
+	defer func() { server.Stop() }()
 
 	time.Sleep(1 * time.Second)
 
@@ -75,13 +76,18 @@ func TestSession(t *testing.T) {
 
 func TestSessionExpectFail(t *testing.T) {
 	port := nums.NextNumber(8080)
-	server.WithEfs(emb)
-	server.WithAddress(fmt.Sprintf("127.0.0.1:%d", port))
-	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
+	server := web.NewServer()
+	server.ViewRoot = "templates/project"
+	server.PublicRoot = "templates/project/dist/client"
+	server.ViewServer = "templates/project/dist/server.js"
+	server.ViewIndex = "templates/project/dist/client/index.html"
+	server.Efs = tefs
+	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
+	server.AddRoute(web.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
 		state, _ := sessions.Start(con, State{Name: "test"})
 		con.SendMessage(fmt.Sprintf("hello %s", state.Name))
 	}})
-	server.AddRoute(routes.Route{Pattern: "POST /", Handler: func(con *connections.Connection) {
+	server.AddRoute(web.Route{Pattern: "POST /", Handler: func(con *connections.Connection) {
 		state, _ := sessions.Start(con, State{})
 		// Without this, session state should not be updated.
 		//defer operator.Save(state)
@@ -89,10 +95,7 @@ func TestSessionExpectFail(t *testing.T) {
 	}})
 
 	go server.Start()
-	defer func() {
-		server.Stop()
-		server.Initialize()
-	}()
+	defer func() { server.Stop() }()
 
 	time.Sleep(1 * time.Second)
 

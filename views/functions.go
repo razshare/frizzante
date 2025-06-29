@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/evanw/esbuild/pkg/api"
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/razshare/frizzante/efs"
-	"github.com/razshare/frizzante/fs"
+	"github.com/razshare/frizzante/embeds"
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/js"
 	"os"
 	"regexp"
@@ -29,12 +29,12 @@ func AddFunction(view *View, name string, fun v8go.FunctionCallback) *View {
 func IndexContents(view *View, emb embed.FS) ([]byte, error) {
 	var index []byte
 	var indexReadError error
-	if fs.IsFile(view.Index) {
+	if files.IsFile(view.Index) {
 		return os.ReadFile(view.Index)
 	}
 
 	fileNameFixed := strings.ReplaceAll(view.Index, "\\", "/")
-	if efs.IsFile(emb, fileNameFixed) {
+	if embeds.IsFile(emb, fileNameFixed) {
 		index, indexReadError = emb.ReadFile(fileNameFixed)
 		if indexReadError != nil {
 			return nil, indexReadError
@@ -49,12 +49,12 @@ func IndexContents(view *View, emb embed.FS) ([]byte, error) {
 func ServerContents(view *View, emb embed.FS) ([]byte, error) {
 	var server []byte
 	var serverReadError error
-	if fs.IsFile(view.Server) {
+	if files.IsFile(view.Server) {
 		return os.ReadFile(view.Server)
 	}
 
 	fileNameFixed := strings.ReplaceAll(view.Server, "\\", "/")
-	if efs.IsFile(emb, fileNameFixed) {
+	if embeds.IsFile(emb, fileNameFixed) {
 		server, serverReadError = os.ReadFile(fileNameFixed)
 		if serverReadError != nil {
 			return nil, serverReadError
@@ -149,7 +149,7 @@ func (view *View) Render(emb embed.FS) (html string, err error) {
 
 	var server []byte
 
-	if fs.IsDirectory(view.Root) {
+	if files.IsDirectory(view.Root) {
 		var serverError error
 		server, serverError = js.JavaScriptBundle(view.Root, api.FormatCommonJS, readBytes)
 		if serverError != nil {

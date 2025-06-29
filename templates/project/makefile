@@ -23,14 +23,14 @@ check: touch configure-bun
 
 package-watch: touch configure-bun
 	cd app && \
-	../.gen/bin/bun x vite build --logLevel info --ssr lib/utilities/frz/scripts/server.ts --outDir dist --watch & \
+	../.gen/bin/bun x vite build --logLevel info --ssr lib/utilities/frizzante/scripts/server.ts --outDir dist --watch & \
 	cd app && \
 	../.gen/bin/bun x vite build --logLevel info --outDir dist/client --watch & \
 	wait
 
 package: touch configure-bun
 	cd app && \
-	../.gen/bin/bun x vite build --logLevel info --ssr lib/utilities/frz/scripts/server.ts --outDir dist --emptyOutDir && \
+	../.gen/bin/bun x vite build --logLevel info --ssr lib/utilities/frizzante/scripts/server.ts --outDir dist --emptyOutDir && \
 	../.gen/bin/bun x vite build --logLevel info --outDir dist/client --emptyOutDir && \
 	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite && \
 	touch dist/.gitkeep

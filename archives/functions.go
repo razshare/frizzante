@@ -2,7 +2,7 @@ package archives
 
 import (
 	"errors"
-	"github.com/razshare/frizzante/fs"
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/roads"
 	"os"
 	"path/filepath"
@@ -26,7 +26,7 @@ func (archive *DiskArchive) Set(domain string, key string, value []byte) error {
 	lane.Lock()
 	defer lane.Unlock()
 	directoryName := filepath.Join(archive.Name, domain)
-	if !fs.IsDirectory(directoryName) {
+	if !files.IsDirectory(directoryName) {
 		mkdirError := os.MkdirAll(directoryName, os.ModePerm)
 		if nil != mkdirError {
 			return mkdirError
@@ -65,7 +65,7 @@ func (archive *DiskArchive) Has(domain string, key string) (bool, error) {
 	lane.Lock()
 	defer lane.Unlock()
 	fileName := filepath.Join(archive.Name, domain, key)
-	return fs.IsFile(fileName), nil
+	return files.IsFile(fileName), nil
 }
 
 // Remove removes a value from the archive based on a domain and key.
@@ -92,7 +92,7 @@ func (archive *DiskArchive) HasDomain(domain string) (bool, error) {
 	lane := archive.Road.WithLane(domain)
 	lane.Lock()
 	defer lane.Unlock()
-	return fs.IsDirectory(filepath.Join(archive.Name, domain)), nil
+	return files.IsDirectory(filepath.Join(archive.Name, domain)), nil
 }
 
 // RemoveDomain removes a domain from the archive.
