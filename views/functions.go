@@ -100,10 +100,18 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 		return "", targetIdError
 	}
 
+	name := view.Name
+	data := view.Data
+	renderMode := view.RenderMode
+
+	if data == nil {
+		data = map[string]any{}
+	}
+
 	propsBytes, marshalError := json.Marshal(map[string]any{
-		"name":       view.Name,
-		"data":       view.Data,
-		"renderMode": view.RenderMode,
+		"name":       name,
+		"data":       data,
+		"renderMode": renderMode,
 	})
 	if marshalError != nil {
 		return "", marshalError

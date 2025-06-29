@@ -577,11 +577,10 @@ func (con *Connection) SendView(val views.View) {
 		return
 	}
 
-	if nil == val.Data {
-		val.Data = map[string]any{}
-	}
-
 	if con.VerifyAccept("application/json") {
+		if nil == val.Data {
+			val.Data = map[string]any{}
+		}
 		con.SendJson(map[string]any{
 			"name":       val.Name,
 			"data":       val.Data,
