@@ -221,8 +221,8 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 	}
 
 	if nil != view.Functions {
-		for name, function := range view.Functions {
-			globals[name] = function
+		for functionName, function := range view.Functions {
+			globals[functionName] = function
 		}
 	}
 
