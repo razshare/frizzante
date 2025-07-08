@@ -1,8 +1,14 @@
 package sessions
 
 import (
+	"github.com/razshare/frizzante/archives"
 	"github.com/razshare/frizzante/connections"
-	"github.com/razshare/frizzante/operators"
 )
 
-type SessionStarter[T any] = func(con *connections.Connection, state T) (*T, *operators.Operator)
+type SessionStarter[T any] = func(con *connections.Connection, state T) *Session[T]
+
+type Session[T any] struct {
+	Archive    archives.Archive
+	Connection *connections.Connection
+	State      *T
+}

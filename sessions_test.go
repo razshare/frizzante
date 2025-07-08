@@ -23,13 +23,13 @@ func TestSession(t *testing.T) {
 	server.Efs = testEfs
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
 	server.AddRoute(web.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
-		state, _ := sessions.Start(con, State{Name: "test"})
-		con.SendMessage(fmt.Sprintf("hello %s", state.Name))
+		session := sessions.Start(con, State{Name: "test"})
+		con.SendMessage(fmt.Sprintf("hello %s", session.State.Name))
 	}})
 	server.AddRoute(web.Route{Pattern: "POST /", Handler: func(con *connections.Connection) {
-		state, operator := sessions.Start(con, State{})
-		defer operator.Save(state)
-		state.Name = con.ReceiveMessage()
+		session := sessions.Start(con, State{})
+		defer session.Save()
+		session.State.Name = con.ReceiveMessage()
 	}})
 
 	go server.Start()
@@ -76,14 +76,14 @@ func TestSessionExpectFail(t *testing.T) {
 	server.Efs = testEfs
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
 	server.AddRoute(web.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
-		state, _ := sessions.Start(con, State{Name: "test"})
-		con.SendMessage(fmt.Sprintf("hello %s", state.Name))
+		session := sessions.Start(con, State{Name: "test"})
+		con.SendMessage(fmt.Sprintf("hello %s", session.State.Name))
 	}})
 	server.AddRoute(web.Route{Pattern: "POST /", Handler: func(con *connections.Connection) {
-		state, _ := sessions.Start(con, State{})
+		session := sessions.Start(con, State{})
 		// Without this, session state should not be updated.
 		//defer operator.Save(state)
-		state.Name = con.ReceiveMessage()
+		session.State.Name = con.ReceiveMessage()
 	}})
 
 	go server.Start()
