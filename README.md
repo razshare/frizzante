@@ -1,5 +1,7 @@
-# What is this?
-Frizzante is an opinionated web server framework written in [Go](https://go.dev/) that uses [Svelte](https://svelte.dev/docs/svelte/overview) to render web pages.
+# Frizzante
+
+<a href="https://github.com/razshare/frizzante/releases"><img src="https://img.shields.io/github/release/razshare/frizzante" alt="Latest Release"></a>
+<a href="https://github.com/razshare/frizzante/actions"><img src="https://github.com/razshare/frizzante/actions/workflows/tests.yml/badge.svg?branch=main" alt="Build Status"></a>
 
 # Prerequisites
 
