@@ -89,7 +89,7 @@ func main() {
 		}
 
 		for _, efsFileName := range efsFileNames {
-			fileName := fmt.Sprintf("%s/%s", *FlagCreateJsLibrary, strings.TrimPrefix(efsFileName, "app/"))
+			fileName := fmt.Sprintf("%s/%s", *FlagCreateJsLibrary, strings.TrimPrefix(efsFileName, "app/frizzante"))
 			directoryName := filepath.Dir(fileName)
 
 			if !files.IsDirectory(directoryName) {
