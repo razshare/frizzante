@@ -3,8 +3,10 @@ package embeds
 import (
 	"bytes"
 	"embed"
+	"fmt"
 	"io/fs"
 	"os"
+	"slices"
 )
 
 // IsFile check if file exists and is a file.
@@ -18,6 +20,30 @@ func IsFile(self embed.FS, fname string) bool {
 		return false
 	}
 	return !stat.IsDir()
+}
+
+func ReadDir(self embed.FS, dirname string) ([]string, error) {
+	items := make([]string, 0)
+	entries, readDirError := self.ReadDir(dirname)
+	if readDirError != nil {
+		return nil, readDirError
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			items2, readDirLocalError := ReadDir(self, fmt.Sprintf("%s/%s", dirname, entry.Name()))
+			if readDirLocalError != nil {
+				return nil, readDirLocalError
+			}
+
+			items = slices.Concat(items, items2)
+			continue
+		}
+
+		items = append(items, fmt.Sprintf("%s/%s", dirname, entry.Name()))
+	}
+
+	return items, nil
 }
 
 // IsDirectory checks if file exists and is a directory.

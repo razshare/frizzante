@@ -23,8 +23,8 @@ func IsFile(fname string) bool {
 }
 
 // IsDirectory checks if file exists and is a directory.
-func IsDirectory(fname string) bool {
-	stat, statError := os.Stat(fname)
+func IsDirectory(name string) bool {
+	stat, statError := os.Stat(name)
 	if statError != nil {
 		return false
 	}
@@ -32,8 +32,8 @@ func IsDirectory(fname string) bool {
 }
 
 // DeleteFile deletes a file from the disk.
-func DeleteFile(fname string) bool {
-	removeError := os.Remove(fname)
+func DeleteFile(name string) bool {
+	removeError := os.Remove(name)
 	return nil == removeError || !errors.Is(removeError, os.ErrNotExist)
 }
 
