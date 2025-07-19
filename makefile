@@ -20,14 +20,14 @@ check: touch
 
 package-watch: touch
 	cd app && \
-	bunx vite build --logLevel info --ssr frizzante/scripts/server.ts --outDir dist --watch & \
+	bunx vite build --logLevel info --ssr frizzante/core/scripts/server.ts --outDir dist --watch & \
 	cd app && \
 	bunx vite build --logLevel info --outDir dist/client --watch & \
 	wait
 
 package: touch
 	cd app && \
-	bunx vite build --logLevel info --ssr frizzante/scripts/server.ts --outDir dist --emptyOutDir && \
+	bunx vite build --logLevel info --ssr frizzante/core/scripts/server.ts --outDir dist --emptyOutDir && \
 	bunx vite build --logLevel info --outDir dist/client --emptyOutDir && \
 	node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite && \
 	touch dist/.gitkeep

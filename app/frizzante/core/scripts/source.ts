@@ -1,5 +1,5 @@
 import { type Readable, readable } from "svelte/store"
-import { IS_BROWSER } from "$frizzante/constants.ts"
+import { IS_BROWSER } from "$frizzante/core/constants.ts"
 
 export function source(path: string) {
     if (!IS_BROWSER) {

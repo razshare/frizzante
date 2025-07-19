@@ -17,5 +17,5 @@
         <PreviousComponent.default {...PreviousProperties} />
     {/if}
 {:then Component}
-    <Component.default {...properties}/>
+    <Component.default {...properties} />
 {/await}

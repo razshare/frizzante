@@ -29,8 +29,8 @@
 
 <script lang="ts">
     import Layout from "$lib/components/Layout.svelte"
-    import { action } from "$frizzante/scripts/action.ts"
-    import { href } from "$frizzante/scripts/href.ts"
+    import { action } from "$frizzante/core/scripts/action.ts"
+    import { href } from "$frizzante/core/scripts/href.ts"
 
     type Todo = {
         Checked: boolean
@@ -38,11 +38,11 @@
     }
 
     type Props = {
-        todos: Todo[],
-        error: string,
+        todos: Todo[]
+        error: string
     }
 
-    let {todos, error}:Props = $props()
+    let { todos, error }: Props = $props()
 </script>
 
 <Layout title="Todos">
