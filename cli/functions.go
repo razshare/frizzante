@@ -17,18 +17,18 @@ import (
 var FlagHelp = flag.BoolP("help", "h", false, "shows this help document")
 var FlagVersion = flag.BoolP("version", "v", false, "shows the Frizzante version used by this binary")
 var FlagCreateProject = flag.StringP("create-project", "c", "", "creates a frizzante project")
-var FlagAdd = flag.StringP("add", "a", "", fmt.Sprintf("adds features, see \"--add ?\" or \"-a?\" for more details"))
+var FlagAdd = flag.StringP("add", "a", "", fmt.Sprintf("adds features, see  \"-a?\" or \"--add ?\" for more details"))
 
 func (cli *Cli) Start() {
 	flag.Parse()
 
-	if *FlagVersion {
-		cli.OnVersion()
+	if *FlagHelp {
+		cli.OnHelp()
 		os.Exit(0)
 	}
 
-	if *FlagHelp {
-		cli.OnHelp()
+	if *FlagVersion {
+		cli.OnVersion()
 		os.Exit(0)
 	}
 
@@ -229,16 +229,16 @@ func (cli *Cli) AddFeatureByName(feature string) {
 
 func ShowFeaturesInfo() {
 	pterm.Info.Println(strings.Join([]string{
-		"You can use --add or -a in combination with --feature or -f",
+		"You can use -a or --add",
 		"in order to add new features to the project.",
 		"",
 		"The value passed in must follow",
-		"the syntax: `--add --feature {feature}`",
+		"the syntax: `-a{feature}`",
 		"where {feature} is the name of the feature.",
 		"",
 		"Generated source code will be dropped in `app/frizzante`.",
 		"",
-		"For example, `--add --feature core` will generate the core",
+		"For example, `-acore` will generate the core",
 		"features of frizzante in `app/frizzante/core`.",
 		"",
 		"NB: Feature names are not case-sensitive.",
