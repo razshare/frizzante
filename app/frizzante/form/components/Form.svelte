@@ -11,9 +11,7 @@
     type Props = {
         method?: "GET" | "POST"
         action: string
-        children: Snippet
-        error?: Snippet<[Error]>
-        pending?: Snippet
+        children: Snippet<[{ pending: boolean; error: false|Error }]>
         class?: string
         style?: string
     }
@@ -21,8 +19,6 @@
         method = "GET",
         action: actionPath,
         children,
-        error: onError,
-        pending: onPending,
         class: cls,
         style,
     }: Props = $props()
@@ -48,11 +44,5 @@
 </script>
 
 <form {method} {...options} class={cls} {style}>
-    {#if error && onError}
-        {@render onError(error)}
-    {:else if pending && onPending}
-        {@render onPending()}
-    {:else}
-        {@render children()}
-    {/if}
+    {@render children({pending,error})}
 </form>
