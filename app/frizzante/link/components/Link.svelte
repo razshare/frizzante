@@ -4,16 +4,11 @@
 
     type Props = {
         href: string
-        children: Snippet<[{ pending: boolean; error: false|Error }]>
+        children: Snippet<[{ pending: boolean; error: false | Error }]>
         class?: string
         style?: string
     }
-    let {
-        href: path,
-        children,
-        class: cls,
-        style,
-    }: Props = $props()
+    let { href: path, children, class: cls, style }: Props = $props()
 
     let pending: boolean = $state(false)
     let error: false | Error = $state(false)
@@ -38,5 +33,5 @@
 </script>
 
 <a {...options} class={cls} {style}>
-    {@render children({pending,error})}
+    {@render children({ pending, error })}
 </a>

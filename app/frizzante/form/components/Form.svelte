@@ -11,7 +11,7 @@
     type Props = {
         method?: "GET" | "POST"
         action: string
-        children: Snippet<[{ pending: boolean; error: false|Error }]>
+        children: Snippet<[{ pending: boolean; error: false | Error }]>
         class?: string
         style?: string
     }
@@ -44,5 +44,5 @@
 </script>
 
 <form {method} {...options} class={cls} {style}>
-    {@render children({pending,error})}
+    {@render children({ pending, error })}
 </form>
