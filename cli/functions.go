@@ -19,7 +19,7 @@ var FlagVersion = flag.BoolP("version", "v", false, "shows the Frizzante version
 var FlagCreateProject = flag.StringP("create-project", "c", "", "creates a frizzante project")
 var FlagAdd = flag.StringP("add", "a", "", fmt.Sprintf("adds features, see  \"-a?\" or \"--add ?\" for more details"))
 
-func (cli *Cli) Start() {
+func (cli *Cli) OnStart() {
 	flag.Parse()
 
 	if *FlagHelp {
@@ -97,50 +97,71 @@ func (cli *Cli) OnAddFeature(features string) {
 		os.Exit(0)
 	}
 
-	for _, feature := range strings.Split(features, ",") {
-		if feature == ":pick" {
-			selectedFeatures, showError := pterm.
-				DefaultInteractiveMultiselect.
-				WithKeySelect(keys.Space).
-				WithKeyConfirm(keys.Enter).
-				WithOptions([]string{
-					"Core",
-					"Form",
-					"Link",
-				}).
-				WithFilter(false).
-				Show("Pick a feature to add")
+	events := &FeatureAddEvents{
+		ConfirmFeatureOverwrite: func(feature string) bool {
+			return Confirm(
+				fmt.Sprintf(
+					"It looks like feature `%s` already exists, would you like to overwrite it?",
+					feature,
+				),
+			)
+		},
+		ConfirmAddMissingDependency: func(feature string, dependency string) bool {
+			return Confirm(
+				fmt.Sprintf(
+					"It looks like you're missing the `%s` feature, which is required by the `%s` feature, would you like to add it?",
+					feature,
+					dependency,
+				),
+			)
+		},
+	}
 
-			if showError != nil {
-				log.Fatal(showError)
-			}
+	if features == ":pick" {
+		selectedFeatures, showError := pterm.
+			DefaultInteractiveMultiselect.
+			WithKeySelect(keys.Space).
+			WithKeyConfirm(keys.Enter).
+			WithOptions([]string{
+				"Core",
+				"Form",
+				"Link",
+			}).
+			WithFilter(false).
+			Show("Pick a feature to add")
 
-			for _, selectedFeature := range selectedFeatures {
-				cli.AddFeatureByName(selectedFeature)
-			}
-			continue
+		if showError != nil {
+			log.Fatal(showError)
 		}
 
-		cli.AddFeatureByName(feature)
+		for _, selectedFeature := range selectedFeatures {
+			cli.AddFeatureByName(selectedFeature, events)
+		}
+		os.Exit(0)
+	}
+
+	splitFeatures := strings.Split(features, ",")
+
+	progress, progressError := pterm.
+		DefaultProgressbar.
+		WithTotal(len(splitFeatures)).
+		WithTitle("Adding features").
+		Start()
+
+	if progressError != nil {
+		log.Fatal(progressError)
+	}
+
+	for _, feature := range splitFeatures {
+		cli.AddFeatureByName(feature, events)
+		progress.Increment()
 	}
 	os.Exit(0)
 }
 
-func (cli *Cli) AddFeature(feature string, from string, to string) {
+func (cli *Cli) AddFeature(feature string, from string, to string, events *FeatureAddEvents) {
 	if files.IsDirectory(to) {
-		yes, _ := pterm.
-			DefaultInteractiveConfirm.
-			WithConfirmText("y").
-			WithDefaultText("N").
-			WithDefaultValue(false).
-			Show(
-				fmt.Sprintf(
-					"It looks like you've already added feature `%s`, would you like to overwrite it?",
-					feature,
-				),
-			)
-		pterm.Println()
-
+		yes := events.ConfirmFeatureOverwrite(feature)
 		if !yes {
 			pterm.Info.Printfln("Skipping feature `%s`.", feature)
 			return
@@ -185,13 +206,13 @@ func (cli *Cli) AddFeature(feature string, from string, to string) {
 		}
 	}
 
-	pterm.Info.Printfln("Feature `%s` added.", feature)
+	pterm.Success.Printfln("Feature `%s` added.", feature)
 }
 
-func (cli *Cli) AddFeatureByName(feature string) {
-	if feature == "core" {
+func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
+	if strings.ToLower(feature) == "core" {
 		core := filepath.Join("app", "frizzante", "core")
-		cli.AddFeature("Core", core, core)
+		cli.AddFeature("Core", core, core, events)
 		return
 	}
 
@@ -200,12 +221,12 @@ func (cli *Cli) AddFeatureByName(feature string) {
 		form := filepath.Join("app", "frizzante", "form")
 
 		if !files.IsDirectory(core) {
-			if Confirm("It looks like you're missing the `Core` feature, which is required by the `Form` feature, would you like to add it?") {
-				cli.AddFeature("Core", core, core)
+			if events.ConfirmAddMissingDependency(feature, "Core") {
+				cli.AddFeature("Core", core, core, events)
 			}
 		}
 
-		cli.AddFeature("Form", form, form)
+		cli.AddFeature("Form", form, form, events)
 		return
 	}
 
@@ -214,12 +235,12 @@ func (cli *Cli) AddFeatureByName(feature string) {
 		link := filepath.Join("app", "frizzante", "link")
 
 		if !files.IsDirectory(core) {
-			if Confirm("It looks like you're missing the `Core` feature, which is required by the `Link` feature, would you like to add it?") {
-				cli.AddFeature("Core", core, core)
+			if events.ConfirmAddMissingDependency(feature, "Core") {
+				cli.AddFeature("Core", core, core, events)
 			}
 		}
 
-		cli.AddFeature("Link", link, link)
+		cli.AddFeature("Link", link, link, events)
 		return
 	}
 
@@ -235,8 +256,6 @@ func ShowFeaturesInfo() {
 		"The value passed in must follow",
 		"the syntax: `-a{feature}`",
 		"where {feature} is the name of the feature.",
-		"",
-		"Generated source code will be dropped in `app/frizzante`.",
 		"",
 		"For example, `-acore` will generate the core",
 		"features of frizzante in `app/frizzante/core`.",
@@ -255,6 +274,8 @@ func ShowFeaturesInfo() {
 				"A bundle of scripts and components that manage",
 				"view rendering, view transitions, automatic state management,",
 				"provides commonly used functions.",
+				"",
+				"Source code will be dropped in `app/frizzante/core`.",
 			}, "\n"),
 		},
 		{
@@ -263,6 +284,8 @@ func ShowFeaturesInfo() {
 				"A <Form> component which behaves like a <form> element",
 				"with some additional features that facilitate",
 				"the usage of web standards.",
+				"",
+				"Source code will be dropped in `app/frizzante/form`.",
 				"",
 				"Requires `Core`.",
 			}, "\n"),
@@ -273,6 +296,8 @@ func ShowFeaturesInfo() {
 				"A <Link> component which behaves like an <a> element",
 				"with some additional features that facilitate",
 				"the usage of web standards.",
+				"",
+				"Source code will be dropped in `app/frizzante/link`.",
 				"",
 				"Requires `Core`.",
 			}, "\n"),

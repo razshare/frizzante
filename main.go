@@ -10,4 +10,4 @@ import (
 var efs embed.FS
 var cli = frizzanteCli.Cli{Efs: efs}
 
-func main() { cli.Start() }
+func main() { cli.OnStart() }
