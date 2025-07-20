@@ -137,6 +137,8 @@ func (cli *Cli) OnMenu() {
 
 	options := []string{
 		"Help",
+		"Update",
+		"Install",
 		"Version",
 		"Create Project",
 		"Add",
@@ -145,8 +147,6 @@ func (cli *Cli) OnMenu() {
 		"Package",
 		"Package Watch",
 		"Check",
-		"Update",
-		"Install",
 		"Format",
 		"Touch",
 		"Clean",
