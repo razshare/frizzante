@@ -3,8 +3,13 @@ package cli
 import "embed"
 
 type FeatureAddEvents struct {
-	ConfirmFeatureOverwrite     func(feature string) bool
+	ConfirmOverwrite            func(name string) bool
 	ConfirmAddMissingDependency func(feature string, dependency string) bool
+}
+
+type FeatureCopyInstruction struct {
+	From string
+	To   string
 }
 
 type Cli struct {

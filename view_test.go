@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/nums"
+	"github.com/razshare/frizzante/routes"
+	"github.com/razshare/frizzante/servers"
 	"github.com/razshare/frizzante/views"
-	"github.com/razshare/frizzante/web"
 	"io"
 	"net/http"
 	"strings"
@@ -15,10 +16,10 @@ import (
 
 func TestRenderServer(test *testing.T) {
 	port := nums.NextNumber(8080)
-	server := web.NewServer()
+	server := servers.New()
 	server.Efs = testEfs
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
-	server.AddRoute(web.Route{Pattern: "GET /welcome", Handler: func(con *connections.Connection) {
+	server.AddRoute(routes.Route{Pattern: "GET /welcome", Handler: func(con *connections.Connection) {
 		con.SendView(views.View{
 			Name:       "Welcome",
 			RenderMode: views.RenderModeServer,
@@ -52,10 +53,10 @@ func TestRenderServer(test *testing.T) {
 
 func TestRenderClient(test *testing.T) {
 	port := nums.NextNumber(8080)
-	server := web.NewServer()
+	server := servers.New()
 	server.Efs = testEfs
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
-	server.AddRoute(web.Route{Pattern: "GET /welcome", Handler: func(con *connections.Connection) {
+	server.AddRoute(routes.Route{Pattern: "GET /welcome", Handler: func(con *connections.Connection) {
 		con.SendView(views.View{
 			Name:       "Welcome",
 			RenderMode: views.RenderModeClient,

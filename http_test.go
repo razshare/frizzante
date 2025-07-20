@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/nums"
-	"github.com/razshare/frizzante/web"
+	"github.com/razshare/frizzante/routes"
+	"github.com/razshare/frizzante/servers"
 	"io"
 	"net/http"
 	"testing"
@@ -13,10 +14,10 @@ import (
 
 func TestServer_AddRoute(test *testing.T) {
 	expected := "hello"
-	server := web.NewServer()
+	server := servers.New()
 	port := nums.NextNumber(8080)
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
-	server.AddRoute(web.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
+	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
 		con.SendMessage(expected)
 	}})
 

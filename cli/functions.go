@@ -98,10 +98,10 @@ func (cli *Cli) OnAddFeature(features string) {
 	}
 
 	events := &FeatureAddEvents{
-		ConfirmFeatureOverwrite: func(feature string) bool {
+		ConfirmOverwrite: func(feature string) bool {
 			return Confirm(
 				fmt.Sprintf(
-					"It looks like feature `%s` already exists, would you like to overwrite it?",
+					"It looks like `%s` already exists, would you like to overwrite it?",
 					feature,
 				),
 			)
@@ -159,43 +159,85 @@ func (cli *Cli) OnAddFeature(features string) {
 	os.Exit(0)
 }
 
-func (cli *Cli) AddFeature(feature string, from string, to string, events *FeatureAddEvents) {
-	if files.IsDirectory(to) {
-		yes := events.ConfirmFeatureOverwrite(feature)
-		if !yes {
-			pterm.Info.Printfln("Skipping feature `%s`.", feature)
-			return
-		}
+func (cli *Cli) CopyFeatureDirectories(events *FeatureAddEvents, instructions []FeatureCopyInstruction) {
+	for _, instruction := range instructions {
+		from := instruction.From
+		to := instruction.To
 
-		removeAllError := os.RemoveAll(to)
-		if removeAllError != nil {
-			log.Fatal(removeAllError)
-		}
-	}
+		if files.IsDirectory(to) {
+			yes := events.ConfirmOverwrite(to)
+			if !yes {
+				pterm.Info.Printfln("Skipping `%s`.", to)
+				return
+			}
 
-	unixFrom := strings.ReplaceAll(from, "\\", "/")
-	unixFromFileNames, readDirError := embeds.ReadDir(cli.Efs, unixFrom)
-	if readDirError != nil {
-		log.Fatal(readDirError)
-	}
-
-	for _, unixFileName := range unixFromFileNames {
-		fileName := to + strings.ReplaceAll(strings.TrimPrefix(unixFileName, unixFrom), "/", string(filepath.Separator))
-		directoryName := filepath.Dir(fileName)
-
-		if !files.IsDirectory(directoryName) {
-			mkdirError := os.MkdirAll(directoryName, os.ModePerm)
-			if mkdirError != nil {
-				log.Fatal(mkdirError)
+			removeAllError := os.RemoveAll(to)
+			if removeAllError != nil {
+				log.Fatal(removeAllError)
 			}
 		}
 
-		file, openError := os.Create(fileName)
+		unixFrom := strings.ReplaceAll(from, "\\", "/")
+		unixFromFileNames, readDirError := embeds.ReadDir(cli.Efs, unixFrom)
+		if readDirError != nil {
+			log.Fatal(readDirError)
+		}
+
+		for _, unixFileName := range unixFromFileNames {
+			fileName := to + strings.ReplaceAll(strings.TrimPrefix(unixFileName, unixFrom), "/", string(filepath.Separator))
+			directoryName := filepath.Dir(fileName)
+
+			if !files.IsDirectory(directoryName) {
+				mkdirError := os.MkdirAll(directoryName, os.ModePerm)
+				if mkdirError != nil {
+					log.Fatal(mkdirError)
+				}
+			}
+
+			file, openError := os.Create(fileName)
+			if openError != nil {
+				log.Fatal(openError)
+			}
+
+			esfFile, esfOpenError := cli.Efs.Open(unixFileName)
+			if esfOpenError != nil {
+				log.Fatal(esfOpenError)
+			}
+
+			_, copyError := io.Copy(file, esfFile)
+			if copyError != nil {
+				log.Fatal(copyError)
+			}
+		}
+
+		pterm.Success.Printfln("Adding `%s`.", to)
+	}
+}
+
+func (cli *Cli) CopyFeatureFiles(events *FeatureAddEvents, feature string, instructions []FeatureCopyInstruction) {
+	for _, instruction := range instructions {
+		from := instruction.From
+		to := instruction.To
+
+		if files.IsFile(to) {
+			yes := events.ConfirmOverwrite(feature)
+			if !yes {
+				pterm.Info.Printfln("Skipping feature `%s`.", feature)
+				return
+			}
+
+			removeError := os.Remove(to)
+			if removeError != nil {
+				log.Fatal(removeError)
+			}
+		}
+
+		file, openError := os.Create(to)
 		if openError != nil {
 			log.Fatal(openError)
 		}
 
-		esfFile, esfOpenError := cli.Efs.Open(unixFileName)
+		esfFile, esfOpenError := cli.Efs.Open(strings.ReplaceAll(from, "\\", "/"))
 		if esfOpenError != nil {
 			log.Fatal(esfOpenError)
 		}
@@ -204,15 +246,15 @@ func (cli *Cli) AddFeature(feature string, from string, to string, events *Featu
 		if copyError != nil {
 			log.Fatal(copyError)
 		}
-	}
 
-	pterm.Success.Printfln("Feature `%s` added.", feature)
+		pterm.Success.Printfln("Feature `%s` added.", feature)
+	}
 }
 
 func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 	if strings.ToLower(feature) == "core" {
 		core := filepath.Join("app", "frizzante", "core")
-		cli.AddFeature("Core", core, core, events)
+		cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: core, To: core}})
 		return
 	}
 
@@ -222,11 +264,11 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 
 		if !files.IsDirectory(core) {
 			if events.ConfirmAddMissingDependency(feature, "Core") {
-				cli.AddFeature("Core", core, core, events)
+				cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: core, To: core}})
 			}
 		}
 
-		cli.AddFeature("Form", form, form, events)
+		cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: form, To: form}})
 		return
 	}
 
@@ -236,16 +278,15 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 
 		if !files.IsDirectory(core) {
 			if events.ConfirmAddMissingDependency(feature, "Core") {
-				cli.AddFeature("Core", core, core, events)
+				cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: core, To: core}})
 			}
 		}
 
-		cli.AddFeature("Link", link, link, events)
+		cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: link, To: link}})
 		return
 	}
 
 	log.Fatalf("unknown feature `%s`", feature)
-
 }
 
 func ShowFeaturesInfo() {

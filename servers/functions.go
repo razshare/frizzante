@@ -1,4 +1,4 @@
-package web
+package servers
 
 import (
 	"context"
@@ -7,7 +7,9 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/globals"
+	"github.com/razshare/frizzante/guards"
 	"github.com/razshare/frizzante/notifiers"
+	"github.com/razshare/frizzante/routes"
 	"log"
 	"net"
 	"net/http"
@@ -16,7 +18,7 @@ import (
 	"time"
 )
 
-func NewServer() *Server {
+func New() *Server {
 	upgrader := &websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -99,13 +101,13 @@ func (server *Server) Stop() {
 }
 
 // AddGuard adds a guard.
-func (server *Server) AddGuard(val Guard) *Server {
+func (server *Server) AddGuard(val guards.Guard) *Server {
 	server.Guards = append(server.Guards, val)
 	return server
 }
 
 // AddRoute adds a route.
-func (server *Server) AddRoute(val Route) *Server {
+func (server *Server) AddRoute(val routes.Route) *Server {
 	server.HttpMux.HandleFunc(val.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 		con := &connections.Connection{
 			PublicRoot: server.PublicRoot,

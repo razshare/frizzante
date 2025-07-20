@@ -1,9 +1,9 @@
-package web
+package servers
 
 import (
 	"embed"
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/connections"
+	"github.com/razshare/frizzante/guards"
 	"github.com/razshare/frizzante/notifiers"
 	"net"
 	"net/http"
@@ -29,17 +29,5 @@ type Server struct {
 	ViewServer      string
 	ViewIndex       string
 	WsUpgrader      *websocket.Upgrader
-	Guards          []Guard
-}
-
-type Route struct {
-	Pattern string
-	Handler func(c *connections.Connection)
-	Tags    []string
-}
-
-type Guard struct {
-	Name    string
-	Handler func(c *connections.Connection, allow func())
-	Tags    []string
+	Guards          []guards.Guard
 }

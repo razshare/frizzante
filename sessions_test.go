@@ -5,8 +5,9 @@ import (
 	"fmt"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/nums"
+	"github.com/razshare/frizzante/routes"
+	"github.com/razshare/frizzante/servers"
 	"github.com/razshare/frizzante/sessions"
-	"github.com/razshare/frizzante/web"
 	"io"
 	"net/http"
 	"testing"
@@ -19,14 +20,14 @@ type State struct {
 
 func TestSession(t *testing.T) {
 	port := nums.NextNumber(8080)
-	server := web.NewServer()
+	server := servers.New()
 	server.Efs = testEfs
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
-	server.AddRoute(web.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
+	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
 		session := sessions.Start(con, State{Name: "test"})
 		con.SendMessage(fmt.Sprintf("hello %s", session.State.Name))
 	}})
-	server.AddRoute(web.Route{Pattern: "POST /", Handler: func(con *connections.Connection) {
+	server.AddRoute(routes.Route{Pattern: "POST /", Handler: func(con *connections.Connection) {
 		session := sessions.Start(con, State{})
 		defer session.Save()
 		session.State.Name = con.ReceiveMessage()
@@ -72,14 +73,14 @@ func TestSession(t *testing.T) {
 
 func TestSessionExpectFail(t *testing.T) {
 	port := nums.NextNumber(8080)
-	server := web.NewServer()
+	server := servers.New()
 	server.Efs = testEfs
 	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
-	server.AddRoute(web.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
+	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
 		session := sessions.Start(con, State{Name: "test"})
 		con.SendMessage(fmt.Sprintf("hello %s", session.State.Name))
 	}})
-	server.AddRoute(web.Route{Pattern: "POST /", Handler: func(con *connections.Connection) {
+	server.AddRoute(routes.Route{Pattern: "POST /", Handler: func(con *connections.Connection) {
 		session := sessions.Start(con, State{})
 		// Without this, session state should not be updated.
 		//defer operator.Save(state)
