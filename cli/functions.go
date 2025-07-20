@@ -32,6 +32,13 @@ var FlagClean = flag.BoolP("clean", "", false, fmt.Sprintf("cleans project"))
 var FlagDev = flag.BoolP("dev", "d", false, fmt.Sprintf("starts dev mode"))
 var FlagBuild = flag.BoolP("build", "b", false, fmt.Sprintf("builds project"))
 var FlagHooks = flag.BoolP("hooks", "", false, fmt.Sprintf("adds git hooks"))
+var Extension = ""
+
+func init() {
+	if string(filepath.Separator) == "\\" {
+		Extension = ".exe"
+	}
+}
 
 func (cli *Cli) OnStart() {
 	if !cli.Parsed {
@@ -497,14 +504,22 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 	cli.Fatalf("unknown feature `%s`", feature)
 }
 
+func (cli *Cli) Cwd() string {
+	wd, wdDir := os.Getwd()
+	if wdDir != nil {
+		cli.Fatal(wdDir)
+	}
+	return wd
+}
+
 func (cli *Cli) OnTest() {
 	cli.OnPackage()
-
-	cmd := exec.Command("go", "test")
-	cmd.Env = append(os.Environ(), "CGO_ENABLED=1")
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	err := cmd.Run()
+	test := exec.Command("go"+Extension, "test")
+	test.Dir = cli.Cwd()
+	test.Env = append(os.Environ(), "CGO_ENABLED=1")
+	test.Stdout = os.Stdout
+	test.Stdin = os.Stdin
+	err := test.Run()
 	if err != nil {
 		cli.Fatal(err)
 	}
@@ -561,11 +576,12 @@ func (cli *Cli) OnTouch() {
 }
 
 func (cli *Cli) OnClean() {
-	cmd := exec.Command("go", "clean")
-	cmd.Env = append(os.Environ())
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	runError := cmd.Run()
+	clean := exec.Command("go"+Extension, "clean")
+	clean.Dir = cli.Cwd()
+	clean.Env = append(os.Environ())
+	clean.Stdout = os.Stdout
+	clean.Stdin = os.Stdin
+	runError := clean.Run()
 	if runError != nil {
 		cli.Fatal(runError)
 	}
@@ -596,7 +612,8 @@ func (cli *Cli) OnClean() {
 func (cli *Cli) OnFormat() {
 	cli.OnTouch()
 
-	gofmt := exec.Command("go", "fmt")
+	gofmt := exec.Command("go"+Extension, "fmt")
+	gofmt.Dir = cli.Cwd()
 	gofmt.Env = append(os.Environ())
 	gofmt.Stdout = os.Stdout
 	gofmt.Stdin = os.Stdin
@@ -605,8 +622,8 @@ func (cli *Cli) OnFormat() {
 		cli.Fatal(gofmtError)
 	}
 
-	prettier := exec.Command("bunx", "prettier", "--write", ".")
-	prettier.Dir = "app"
+	prettier := exec.Command("bunx"+Extension, "prettier", "--write", ".")
+	prettier.Dir = filepath.Join(cli.Cwd(), "app")
 	prettier.Env = append(os.Environ())
 	prettier.Stdout = os.Stdout
 	prettier.Stdin = os.Stdin
@@ -621,7 +638,8 @@ func (cli *Cli) OnFormat() {
 func (cli *Cli) OnUpdate() {
 	cli.OnTouch()
 
-	get := exec.Command("go", "get", "-u", "./...")
+	get := exec.Command("go"+Extension, "get", "-u", "./...")
+	get.Dir = cli.Cwd()
 	get.Env = append(os.Environ())
 	get.Stdout = os.Stdout
 	get.Stdin = os.Stdin
@@ -630,8 +648,8 @@ func (cli *Cli) OnUpdate() {
 		cli.Fatal(getError)
 	}
 
-	prettier := exec.Command("bun", "update")
-	prettier.Dir = "app"
+	prettier := exec.Command("bun"+Extension, "update")
+	prettier.Dir = filepath.Join(cli.Cwd(), "app")
 	prettier.Env = append(os.Environ())
 	prettier.Stdout = os.Stdout
 	prettier.Stdin = os.Stdin
@@ -646,7 +664,8 @@ func (cli *Cli) OnUpdate() {
 func (cli *Cli) OnInstall() {
 	cli.OnTouch()
 
-	tidy := exec.Command("go", "mod", "tidy")
+	tidy := exec.Command("go"+Extension, "mod", "tidy")
+	tidy.Dir = cli.Cwd()
 	tidy.Env = append(os.Environ())
 	tidy.Stdout = os.Stdout
 	tidy.Stdin = os.Stdin
@@ -655,8 +674,8 @@ func (cli *Cli) OnInstall() {
 		cli.Fatal(tidyError)
 	}
 
-	install := exec.Command("bun", "install")
-	install.Dir = "app"
+	install := exec.Command("bun"+Extension, "install")
+	install.Dir = filepath.Join(cli.Cwd(), "app")
 	install.Env = append(os.Environ())
 	install.Stdout = os.Stdout
 	install.Stdin = os.Stdin
@@ -671,8 +690,8 @@ func (cli *Cli) OnInstall() {
 func (cli *Cli) OnPackage() {
 	cli.OnTouch()
 
-	server := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
-	server.Dir = "app"
+	server := exec.Command("bunx"+Extension, "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
+	server.Dir = filepath.Join(cli.Cwd(), "app")
 	server.Env = append(os.Environ())
 	server.Stdout = os.Stdout
 	server.Stdin = os.Stdin
@@ -681,8 +700,8 @@ func (cli *Cli) OnPackage() {
 		cli.Fatal(serverError)
 	}
 
-	client := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
-	client.Dir = "app"
+	client := exec.Command("bunx"+Extension, "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
+	client.Dir = filepath.Join(cli.Cwd(), "app")
 	client.Env = append(os.Environ())
 	client.Stdout = os.Stdout
 	client.Stdin = os.Stdin
@@ -697,8 +716,8 @@ func (cli *Cli) OnPackage() {
 func (cli *Cli) OnPackageWatch() {
 	cli.OnTouch()
 
-	server := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
-	server.Dir = "app"
+	server := exec.Command("bunx"+Extension, "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
+	server.Dir = filepath.Join(cli.Cwd(), "app")
 	server.Env = append(os.Environ())
 	server.Stdout = os.Stdout
 	server.Stdin = os.Stdin
@@ -708,8 +727,8 @@ func (cli *Cli) OnPackageWatch() {
 	}
 	cli.Success("vite server watcher launched")
 
-	client := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
-	client.Dir = "app"
+	client := exec.Command("bunx"+Extension, "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
+	client.Dir = filepath.Join(cli.Cwd(), "app")
 	client.Env = append(os.Environ())
 	client.Stdout = os.Stdout
 	client.Stdin = os.Stdin
@@ -738,7 +757,8 @@ func (cli *Cli) OnDev() {
 		cli.Fatal(mkdirError)
 	}
 
-	air := exec.Command("air")
+	air := exec.Command("air" + Extension)
+	air.Dir = cli.Cwd()
 	air.Env = append(os.Environ(), "DEV=1", "CGO_ENABLED=1")
 	air.Stdout = os.Stdout
 	air.Stdin = os.Stdin
@@ -764,7 +784,8 @@ func (cli *Cli) OnDev() {
 func (cli *Cli) OnBuild() {
 	cli.OnTouch()
 
-	build := exec.Command("go", "build", "-o .gen/bin/app", ".")
+	build := exec.Command("go"+Extension, "build", "-o .gen/bin/app", ".")
+	build.Dir = cli.Cwd()
 	build.Env = append(os.Environ(), "CGO_ENABLED=1")
 	build.Stdout = os.Stdout
 	build.Stdin = os.Stdin
@@ -778,8 +799,8 @@ func (cli *Cli) OnBuild() {
 func (cli *Cli) OnCheck() {
 	cli.OnTouch()
 
-	eslint := exec.Command("bunx", "eslint")
-	eslint.Dir = "app"
+	eslint := exec.Command("bunx"+Extension, "eslint")
+	eslint.Dir = filepath.Join(cli.Cwd(), "app")
 	eslint.Env = append(os.Environ())
 	eslint.Stdout = os.Stdout
 	eslint.Stdin = os.Stdin
@@ -788,8 +809,8 @@ func (cli *Cli) OnCheck() {
 		cli.Fatal(eslintError)
 	}
 
-	svelteCheck := exec.Command("bunx", "svelte-check", "--tsconfig=./tsconfig.json")
-	svelteCheck.Dir = "app"
+	svelteCheck := exec.Command("bunx"+Extension, "svelte-check", "--tsconfig=./tsconfig.json")
+	svelteCheck.Dir = filepath.Join(cli.Cwd(), "app")
 	svelteCheck.Env = append(os.Environ())
 	svelteCheck.Stdout = os.Stdout
 	svelteCheck.Stdin = os.Stdin
