@@ -140,6 +140,7 @@ func (cli *Cli) OnMenu() {
 		"Version",
 		"Create Project",
 		"Add",
+		"Add?",
 		"Test",
 		"Package",
 		"Package Watch",
@@ -183,6 +184,12 @@ func (cli *Cli) OnMenu() {
 
 	if result == "Add" {
 		*FlagAdd = ":pick"
+		cli.OnStart()
+		return
+	}
+
+	if result == "Add?" {
+		*FlagAdd = "?"
 		cli.OnStart()
 		return
 	}
@@ -339,8 +346,8 @@ func (cli *Cli) OnAddFeature(features string) {
 			WithKeyConfirm(keys.Enter).
 			WithOptions([]string{
 				"Core",
-				"Form",
-				"Link",
+				"Forms",
+				"Links",
 			}).
 			WithFilter(false).
 			Show("Pick a feature to add")
@@ -357,19 +364,8 @@ func (cli *Cli) OnAddFeature(features string) {
 
 	splitFeatures := strings.Split(features, ",")
 
-	progress, progressError := pterm.
-		DefaultProgressbar.
-		WithTotal(len(splitFeatures)).
-		WithTitle("Adding features").
-		Start()
-
-	if progressError != nil {
-		cli.Fatal(progressError)
-	}
-
 	for _, feature := range splitFeatures {
 		cli.AddFeatureByName(feature, events)
-		progress.Increment()
 	}
 	os.Exit(0)
 }
@@ -473,9 +469,9 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 		return
 	}
 
-	if strings.ToLower(feature) == "form" {
+	if strings.ToLower(feature) == "forms" {
 		core := filepath.Join("app", "frizzante", "core")
-		form := filepath.Join("app", "frizzante", "form")
+		forms := filepath.Join("app", "frizzante", "forms")
 
 		if !files.IsDirectory(core) {
 			if events.ConfirmAddMissingDependency(feature, "Core") {
@@ -483,13 +479,13 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 			}
 		}
 
-		cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: form, To: form}})
+		cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: forms, To: forms}})
 		return
 	}
 
-	if strings.ToLower(feature) == "link" {
+	if strings.ToLower(feature) == "links" {
 		core := filepath.Join("app", "frizzante", "core")
-		link := filepath.Join("app", "frizzante", "link")
+		links := filepath.Join("app", "frizzante", "links")
 
 		if !files.IsDirectory(core) {
 			if events.ConfirmAddMissingDependency(feature, "Core") {
@@ -497,7 +493,7 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 			}
 		}
 
-		cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: link, To: link}})
+		cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: links, To: links}})
 		return
 	}
 
@@ -821,18 +817,20 @@ func (cli *Cli) OnCheck() {
 }
 
 func (cli *Cli) ShowFeaturesInfo() {
-	cli.Success(strings.Join([]string{
+	cli.Info(strings.Join([]string{
 		"You can use -a or --add",
 		"in order to add new features to the project.",
 		"",
 		"The value passed in must follow",
-		"the syntax: `-a{feature}`",
+		"the syntax: `-a{feature},{feature}`",
 		"where {feature} is the name of the feature.",
 		"",
-		"For example, `-acore` will generate the core",
-		"features of frizzante in `app/frizzante/core`.",
+		"For example, `-acore,forms` will generate the core and forms",
+		"features of frizzante respectively in `app/frizzante/core` and `app/frizzante/forms`.",
 		"",
-		"NB: Feature names are not case-sensitive.",
+		"Feature names are not case-sensitive.",
+		"",
+		"You can also use -a:pick or --add :pick to pick feature interactively.",
 	}, "\n"))
 
 	pterm.Println()
@@ -851,25 +849,25 @@ func (cli *Cli) ShowFeaturesInfo() {
 			}, "\n"),
 		},
 		{
-			"Form",
+			"Forms",
 			strings.Join([]string{
 				"A <Form> component which behaves like a <form> element",
 				"with some additional features that facilitate",
 				"the usage of web standards.",
 				"",
-				"Source code will be dropped in `app/frizzante/form`.",
+				"Source code will be dropped in `app/frizzante/forms`.",
 				"",
 				"Requires `Core`.",
 			}, "\n"),
 		},
 		{
-			"Link",
+			"Links",
 			strings.Join([]string{
 				"A <Link> component which behaves like an <a> element",
 				"with some additional features that facilitate",
 				"the usage of web standards.",
 				"",
-				"Source code will be dropped in `app/frizzante/link`.",
+				"Source code will be dropped in `app/frizzante/links`.",
 				"",
 				"Requires `Core`.",
 			}, "\n"),
