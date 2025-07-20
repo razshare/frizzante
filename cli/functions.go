@@ -4,23 +4,40 @@ import (
 	"atomicgo.dev/keyboard/keys"
 	"fmt"
 	"github.com/pterm/pterm"
+	"github.com/pterm/pterm/putils"
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	flag "github.com/spf13/pflag"
 	"io"
-	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
+	"sync"
 )
 
 var FlagHelp = flag.BoolP("help", "h", false, "shows this help document")
-var FlagVersion = flag.BoolP("version", "v", false, "shows the Frizzante version used by this binary")
+var FlagVersion = flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
 var FlagCreateProject = flag.StringP("create-project", "c", "", "creates a frizzante project")
 var FlagAdd = flag.StringP("add", "a", "", fmt.Sprintf("adds features, see  \"-a?\" or \"--add ?\" for more details"))
+var FlagTest = flag.BoolP("test", "t", false, fmt.Sprintf("runs tests"))
+var FlagPackage = flag.BoolP("package", "p", false, fmt.Sprintf("packages app, result will be dropped in app/dist"))
+var FlagPackageWatch = flag.BoolP("package-watch", "", false, fmt.Sprintf("watches and packages app, result will be dropped in app/dist"))
+var FlagCheck = flag.BoolP("check", "", false, fmt.Sprintf("checks source code for errors"))
+var FlagUpdate = flag.BoolP("update", "u", false, fmt.Sprintf("updates dependencies"))
+var FlagInstall = flag.BoolP("install", "i", false, fmt.Sprintf("installs dependencies"))
+var FlagFormat = flag.BoolP("format", "f", false, fmt.Sprintf("formats source code"))
+var FlagTouch = flag.BoolP("touch", "", false, fmt.Sprintf("creates placeholders in app/dist (useful for go:embed)"))
+var FlagClean = flag.BoolP("clean", "", false, fmt.Sprintf("cleans project"))
+var FlagDev = flag.BoolP("dev", "d", false, fmt.Sprintf("starts dev mode"))
+var FlagBuild = flag.BoolP("build", "b", false, fmt.Sprintf("builds project"))
+var FlagHooks = flag.BoolP("hooks", "", false, fmt.Sprintf("adds git hooks"))
 
 func (cli *Cli) OnStart() {
-	flag.Parse()
+	if !cli.Parsed {
+		flag.Parse()
+		cli.Parsed = true
+	}
 
 	if *FlagHelp {
 		cli.OnHelp()
@@ -42,7 +59,198 @@ func (cli *Cli) OnStart() {
 		os.Exit(0)
 	}
 
-	cli.OnHelp()
+	if *FlagTest {
+		cli.OnTest()
+		os.Exit(0)
+	}
+
+	if *FlagPackage {
+		cli.OnPackage()
+		os.Exit(0)
+	}
+
+	if *FlagPackageWatch {
+		cli.OnPackageWatch()
+		os.Exit(0)
+	}
+
+	if *FlagCheck {
+		cli.OnCheck()
+		os.Exit(0)
+	}
+
+	if *FlagUpdate {
+		cli.OnUpdate()
+		os.Exit(0)
+	}
+
+	if *FlagInstall {
+		cli.OnInstall()
+		os.Exit(0)
+	}
+
+	if *FlagFormat {
+		cli.OnFormat()
+		os.Exit(0)
+	}
+
+	if *FlagTouch {
+		cli.OnTouch()
+		os.Exit(0)
+	}
+
+	if *FlagClean {
+		cli.OnClean()
+		os.Exit(0)
+	}
+
+	if *FlagDev {
+		cli.OnDev()
+		os.Exit(0)
+	}
+
+	if *FlagBuild {
+		cli.OnBuild()
+		os.Exit(0)
+	}
+
+	if *FlagHooks {
+		cli.OnHooks()
+		os.Exit(0)
+	}
+
+	cli.OnMenu()
+}
+
+func (cli *Cli) OnMenu() {
+	err := pterm.DefaultBigText.WithLetters(putils.LettersFromStringWithStyle("Frizzante", pterm.FgCyan.ToStyle())).Render()
+	if err != nil {
+		cli.Fatal(err)
+	}
+
+	options := []string{
+		"Help",
+		"Version",
+		"Create Project",
+		"Add",
+		"Test",
+		"Package",
+		"Package Watch",
+		"Check",
+		"Update",
+		"Install",
+		"Format",
+		"Touch",
+		"Clean",
+		"Dev",
+		"Build",
+		"Hooks",
+	}
+
+	result, showError := pterm.DefaultInteractiveSelect.WithOptions(options).Show("Pick an option")
+	if showError != nil {
+		cli.Fatal(showError)
+	}
+
+	if result == "Help" {
+		*FlagHelp = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Version" {
+		*FlagVersion = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Create Project" {
+		projectName, projectNameError := pterm.DefaultInteractiveTextInput.Show("Give the project name")
+		if projectNameError != nil {
+			cli.Fatal(projectNameError)
+		}
+		*FlagCreateProject = projectName
+		cli.OnStart()
+		return
+	}
+
+	if result == "Add" {
+		*FlagAdd = ":pick"
+		cli.OnStart()
+		return
+	}
+
+	if result == "Test" {
+		*FlagTest = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Package" {
+		*FlagPackage = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Package Watch" {
+		*FlagPackageWatch = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Check" {
+		*FlagCheck = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Update" {
+		*FlagUpdate = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Install" {
+		*FlagInstall = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Format" {
+		*FlagFormat = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Touch" {
+		*FlagTouch = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Clean" {
+		*FlagClean = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Dev" {
+		*FlagDev = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Build" {
+		*FlagBuild = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Hooks" {
+		*FlagHooks = true
+		cli.OnStart()
+		return
+	}
 }
 
 func (cli *Cli) OnHelp() {
@@ -54,7 +262,7 @@ func (cli *Cli) OnVersion() {
 
 	versionData, versionError := cli.Efs.ReadFile("version")
 	if versionError != nil {
-		log.Fatal(versionError)
+		cli.Fatal(versionError)
 	}
 
 	version = string(versionData)
@@ -65,27 +273,27 @@ func (cli *Cli) OnVersion() {
 func (cli *Cli) OnCreateProject(project string) {
 	downloadError := files.DownloadFile("https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip", project+".zip")
 	if downloadError != nil {
-		log.Fatal(downloadError)
+		cli.Fatal(downloadError)
 	}
 
 	unzipError := files.UnzipFile(project+".zip", project+".tmp")
 	if unzipError != nil {
-		log.Fatal(unzipError)
+		cli.Fatal(unzipError)
 	}
 
 	removeError := os.Remove(project + ".zip")
 	if removeError != nil {
-		log.Fatal(removeError)
+		cli.Fatal(removeError)
 	}
 
 	renameError := os.Rename(filepath.Join(project+".tmp", "frizzante-starter-main"), project)
 	if renameError != nil {
-		log.Fatal(renameError)
+		cli.Fatal(renameError)
 	}
 
 	removeAllError := os.RemoveAll(filepath.Join(project + ".tmp"))
 	if removeAllError != nil {
-		log.Fatal(removeAllError)
+		cli.Fatal(removeAllError)
 	}
 
 	os.Exit(0)
@@ -93,13 +301,13 @@ func (cli *Cli) OnCreateProject(project string) {
 
 func (cli *Cli) OnAddFeature(features string) {
 	if features == "?" {
-		ShowFeaturesInfo()
+		cli.ShowFeaturesInfo()
 		os.Exit(0)
 	}
 
 	events := &FeatureAddEvents{
 		ConfirmOverwrite: func(feature string) bool {
-			return Confirm(
+			return cli.Confirm(
 				fmt.Sprintf(
 					"It looks like `%s` already exists, would you like to overwrite it?",
 					feature,
@@ -107,7 +315,7 @@ func (cli *Cli) OnAddFeature(features string) {
 			)
 		},
 		ConfirmAddMissingDependency: func(feature string, dependency string) bool {
-			return Confirm(
+			return cli.Confirm(
 				fmt.Sprintf(
 					"It looks like you're missing the `%s` feature, which is required by the `%s` feature, would you like to add it?",
 					feature,
@@ -131,7 +339,7 @@ func (cli *Cli) OnAddFeature(features string) {
 			Show("Pick a feature to add")
 
 		if showError != nil {
-			log.Fatal(showError)
+			cli.Fatal(showError)
 		}
 
 		for _, selectedFeature := range selectedFeatures {
@@ -149,7 +357,7 @@ func (cli *Cli) OnAddFeature(features string) {
 		Start()
 
 	if progressError != nil {
-		log.Fatal(progressError)
+		cli.Fatal(progressError)
 	}
 
 	for _, feature := range splitFeatures {
@@ -167,20 +375,20 @@ func (cli *Cli) CopyFeatureDirectories(events *FeatureAddEvents, instructions []
 		if files.IsDirectory(to) {
 			yes := events.ConfirmOverwrite(to)
 			if !yes {
-				pterm.Info.Printfln("Skipping `%s`.", to)
+				cli.Infof("Skipping `%s`.", to)
 				return
 			}
 
 			removeAllError := os.RemoveAll(to)
 			if removeAllError != nil {
-				log.Fatal(removeAllError)
+				cli.Fatal(removeAllError)
 			}
 		}
 
 		unixFrom := strings.ReplaceAll(from, "\\", "/")
 		unixFromFileNames, readDirError := embeds.ReadDir(cli.Efs, unixFrom)
 		if readDirError != nil {
-			log.Fatal(readDirError)
+			cli.Fatal(readDirError)
 		}
 
 		for _, unixFileName := range unixFromFileNames {
@@ -190,27 +398,27 @@ func (cli *Cli) CopyFeatureDirectories(events *FeatureAddEvents, instructions []
 			if !files.IsDirectory(directoryName) {
 				mkdirError := os.MkdirAll(directoryName, os.ModePerm)
 				if mkdirError != nil {
-					log.Fatal(mkdirError)
+					cli.Fatal(mkdirError)
 				}
 			}
 
 			file, openError := os.Create(fileName)
 			if openError != nil {
-				log.Fatal(openError)
+				cli.Fatal(openError)
 			}
 
 			esfFile, esfOpenError := cli.Efs.Open(unixFileName)
 			if esfOpenError != nil {
-				log.Fatal(esfOpenError)
+				cli.Fatal(esfOpenError)
 			}
 
 			_, copyError := io.Copy(file, esfFile)
 			if copyError != nil {
-				log.Fatal(copyError)
+				cli.Fatal(copyError)
 			}
 		}
 
-		pterm.Success.Printfln("Adding `%s`.", to)
+		cli.Successf("Adding `%s`.", to)
 	}
 }
 
@@ -222,32 +430,32 @@ func (cli *Cli) CopyFeatureFiles(events *FeatureAddEvents, feature string, instr
 		if files.IsFile(to) {
 			yes := events.ConfirmOverwrite(feature)
 			if !yes {
-				pterm.Info.Printfln("Skipping feature `%s`.", feature)
+				cli.Infof("Skipping feature `%s`.", feature)
 				return
 			}
 
 			removeError := os.Remove(to)
 			if removeError != nil {
-				log.Fatal(removeError)
+				cli.Fatal(removeError)
 			}
 		}
 
 		file, openError := os.Create(to)
 		if openError != nil {
-			log.Fatal(openError)
+			cli.Fatal(openError)
 		}
 
 		esfFile, esfOpenError := cli.Efs.Open(strings.ReplaceAll(from, "\\", "/"))
 		if esfOpenError != nil {
-			log.Fatal(esfOpenError)
+			cli.Fatal(esfOpenError)
 		}
 
 		_, copyError := io.Copy(file, esfFile)
 		if copyError != nil {
-			log.Fatal(copyError)
+			cli.Fatal(copyError)
 		}
 
-		pterm.Success.Printfln("Feature `%s` added.", feature)
+		cli.Successf("Feature `%s` added.", feature)
 	}
 }
 
@@ -286,11 +494,313 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 		return
 	}
 
-	log.Fatalf("unknown feature `%s`", feature)
+	cli.Fatalf("unknown feature `%s`", feature)
 }
 
-func ShowFeaturesInfo() {
-	pterm.Info.Println(strings.Join([]string{
+func (cli *Cli) OnTest() {
+	cli.OnPackage()
+
+	cmd := exec.Command("go", "test")
+	cmd.Env = append(os.Environ(), "CGO_ENABLED=1")
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	err := cmd.Run()
+	if err != nil {
+		cli.Fatal(err)
+	}
+}
+
+func (cli *Cli) OnHooks() {
+	fileName := ".git/hooks/pre-commit"
+	directoryName := filepath.Dir(fileName)
+	if !files.IsDirectory(directoryName) {
+		cli.Fatalf("directory `%s` not found", directoryName)
+		return
+	}
+
+	if files.IsFile(fileName) {
+		if !cli.Confirm("This git repository already defines a pre-commit script, would you like to overwrite it?") {
+			pterm.Info.Println("pre-commit hook skipped")
+			return
+		}
+		removeError := os.Remove(fileName)
+		if removeError != nil {
+			cli.Fatal(removeError)
+		}
+		cli.Success("pre-commit script overwritten")
+	}
+
+	err := os.WriteFile(fileName, []byte("frizzante --test"), os.ModePerm)
+	if err != nil {
+		cli.Fatal(err)
+	}
+
+	cli.Success("hooks added")
+}
+
+func (cli *Cli) OnTouch() {
+	touch := func(fileName string) {
+		file, openError := os.OpenFile(fileName, os.O_RDONLY|os.O_CREATE, 0666)
+		if openError != nil {
+			cli.Fatal(openError)
+		}
+
+		closeError := file.Close()
+		if closeError != nil {
+			cli.Fatal(closeError)
+		}
+	}
+
+	mkdirError := os.MkdirAll("app/dist", os.ModePerm)
+	if mkdirError != nil {
+		cli.Fatal(mkdirError)
+	}
+
+	touch("app/dist/.gitkeep")
+	touch("app/dist/server.js")
+}
+
+func (cli *Cli) OnClean() {
+	cmd := exec.Command("go", "clean")
+	cmd.Env = append(os.Environ())
+	cmd.Stdout = os.Stdout
+	cmd.Stdin = os.Stdin
+	runError := cmd.Run()
+	if runError != nil {
+		cli.Fatal(runError)
+	}
+
+	removeError := os.RemoveAll("app/dist")
+	if removeError != nil {
+		cli.Fatal(removeError)
+	}
+
+	removeError = os.RemoveAll("app/node_modules")
+	if removeError != nil {
+		cli.Fatal(removeError)
+	}
+
+	removeError = os.RemoveAll(".gen/tmp")
+	if removeError != nil {
+		cli.Fatal(removeError)
+	}
+
+	removeError = os.RemoveAll(".vite")
+	if removeError != nil {
+		cli.Fatal(removeError)
+	}
+
+	cli.Success("project cleaned")
+}
+
+func (cli *Cli) OnFormat() {
+	cli.OnTouch()
+
+	gofmt := exec.Command("go", "fmt")
+	gofmt.Env = append(os.Environ())
+	gofmt.Stdout = os.Stdout
+	gofmt.Stdin = os.Stdin
+	gofmtError := gofmt.Run()
+	if gofmtError != nil {
+		cli.Fatal(gofmtError)
+	}
+
+	prettier := exec.Command("bunx", "prettier", "--write", ".")
+	prettier.Dir = "app"
+	prettier.Env = append(os.Environ())
+	prettier.Stdout = os.Stdout
+	prettier.Stdin = os.Stdin
+	prettierError := prettier.Run()
+	if prettierError != nil {
+		cli.Fatal(prettierError)
+	}
+
+	cli.Success("project formatted")
+}
+
+func (cli *Cli) OnUpdate() {
+	cli.OnTouch()
+
+	get := exec.Command("go", "get", "-u", "./...")
+	get.Env = append(os.Environ())
+	get.Stdout = os.Stdout
+	get.Stdin = os.Stdin
+	getError := get.Run()
+	if getError != nil {
+		cli.Fatal(getError)
+	}
+
+	prettier := exec.Command("bun", "update")
+	prettier.Dir = "app"
+	prettier.Env = append(os.Environ())
+	prettier.Stdout = os.Stdout
+	prettier.Stdin = os.Stdin
+	prettierError := prettier.Run()
+	if prettierError != nil {
+		cli.Fatal(prettierError)
+	}
+
+	cli.Success("project dependencies updated")
+}
+
+func (cli *Cli) OnInstall() {
+	cli.OnTouch()
+
+	tidy := exec.Command("go", "mod", "tidy")
+	tidy.Env = append(os.Environ())
+	tidy.Stdout = os.Stdout
+	tidy.Stdin = os.Stdin
+	tidyError := tidy.Run()
+	if tidyError != nil {
+		cli.Fatal(tidyError)
+	}
+
+	install := exec.Command("bun", "install")
+	install.Dir = "app"
+	install.Env = append(os.Environ())
+	install.Stdout = os.Stdout
+	install.Stdin = os.Stdin
+	installError := install.Run()
+	if installError != nil {
+		cli.Fatal(installError)
+	}
+
+	cli.Success("project dependencies installed")
+}
+
+func (cli *Cli) OnPackage() {
+	cli.OnTouch()
+
+	server := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
+	server.Dir = "app"
+	server.Env = append(os.Environ())
+	server.Stdout = os.Stdout
+	server.Stdin = os.Stdin
+	serverError := server.Run()
+	if serverError != nil {
+		cli.Fatal(serverError)
+	}
+
+	client := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
+	client.Dir = "app"
+	client.Env = append(os.Environ())
+	client.Stdout = os.Stdout
+	client.Stdin = os.Stdin
+	clientError := client.Run()
+	if clientError != nil {
+		cli.Fatal(clientError)
+	}
+
+	cli.Success("project app package generated in app/dist")
+}
+
+func (cli *Cli) OnPackageWatch() {
+	cli.OnTouch()
+
+	server := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
+	server.Dir = "app"
+	server.Env = append(os.Environ())
+	server.Stdout = os.Stdout
+	server.Stdin = os.Stdin
+	serverError := server.Start()
+	if serverError != nil {
+		cli.Fatalf("vite server watcher failed to launch\n%s", serverError)
+	}
+	cli.Success("vite server watcher launched")
+
+	client := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
+	client.Dir = "app"
+	client.Env = append(os.Environ())
+	client.Stdout = os.Stdout
+	client.Stdin = os.Stdin
+	clientError := client.Start()
+	if clientError != nil {
+		cli.Fatalf("vite client watcher failed to launch\n%s", clientError)
+	}
+	cli.Success("vite client watcher launched")
+
+	clientWaitError := client.Wait()
+	if clientWaitError != nil {
+		cli.Fatal(clientWaitError)
+	}
+
+	serverWaitError := server.Wait()
+	if serverWaitError != nil {
+		cli.Fatal(serverWaitError)
+	}
+}
+
+func (cli *Cli) OnDev() {
+	cli.OnTouch()
+
+	mkdirError := os.MkdirAll(".gen/tmp", os.ModePerm)
+	if mkdirError != nil {
+		cli.Fatal(mkdirError)
+	}
+
+	air := exec.Command("air")
+	air.Env = append(os.Environ(), "DEV=1", "CGO_ENABLED=1")
+	air.Stdout = os.Stdout
+	air.Stdin = os.Stdin
+	airError := air.Start()
+	if airError != nil {
+		cli.Fatalf("air watcher faield to launch\n%s", airError)
+	}
+	cli.Success("air watcher launched")
+
+	var group sync.WaitGroup
+
+	group.Add(1)
+
+	go func() { cli.OnPackageWatch() }()
+
+	group.Wait()
+	tidyWaitError := air.Wait()
+	if tidyWaitError != nil {
+		cli.Fatal(tidyWaitError)
+	}
+}
+
+func (cli *Cli) OnBuild() {
+	cli.OnTouch()
+
+	build := exec.Command("go", "build", "-o .gen/bin/app", ".")
+	build.Env = append(os.Environ(), "CGO_ENABLED=1")
+	build.Stdout = os.Stdout
+	build.Stdin = os.Stdin
+	buildError := build.Run()
+	if buildError != nil {
+		cli.Fatal(buildError)
+	}
+	cli.Success("project built into .gen/bin/app")
+}
+
+func (cli *Cli) OnCheck() {
+	cli.OnTouch()
+
+	eslint := exec.Command("bunx", "eslint")
+	eslint.Dir = "app"
+	eslint.Env = append(os.Environ())
+	eslint.Stdout = os.Stdout
+	eslint.Stdin = os.Stdin
+	eslintError := eslint.Start()
+	if eslintError != nil {
+		cli.Fatal(eslintError)
+	}
+
+	svelteCheck := exec.Command("bunx", "svelte-check", "--tsconfig=./tsconfig.json")
+	svelteCheck.Dir = "app"
+	svelteCheck.Env = append(os.Environ())
+	svelteCheck.Stdout = os.Stdout
+	svelteCheck.Stdin = os.Stdin
+	svelteCheckError := svelteCheck.Run()
+	if svelteCheckError != nil {
+		cli.Fatal(svelteCheckError)
+	}
+}
+
+func (cli *Cli) ShowFeaturesInfo() {
+	cli.Success(strings.Join([]string{
 		"You can use -a or --add",
 		"in order to add new features to the project.",
 		"",
@@ -355,11 +865,11 @@ func ShowFeaturesInfo() {
 		WithHeaderRowSeparator("=").
 		Render()
 	if tableError != nil {
-		log.Fatal(tableError)
+		cli.Fatal(tableError)
 	}
 }
 
-func Confirm(text string) bool {
+func (cli *Cli) Confirm(text string) bool {
 	yes, showError := pterm.
 		DefaultInteractiveConfirm.
 		WithConfirmText("Y").
@@ -368,8 +878,44 @@ func Confirm(text string) bool {
 		Show(text)
 
 	if showError != nil {
-		log.Fatal(showError)
+		cli.Fatal(showError)
 	}
 
 	return yes
+}
+
+func (cli *Cli) Fatalf(template string, vars ...any) {
+	pterm.Fatal.Printfln(template, vars...)
+}
+
+func (cli *Cli) Warningf(template string, vars ...any) {
+	pterm.Warning.Printfln(template, vars...)
+}
+
+func (cli *Cli) Infof(template string, vars ...any) {
+	pterm.Info.Printfln(template, vars...)
+}
+
+func (cli *Cli) Successf(template string, vars ...any) {
+	pterm.Success.Printfln(template, vars...)
+}
+
+func (cli *Cli) Fatal(vars ...any) {
+	pterm.Fatal.Println(vars...)
+}
+
+func (cli *Cli) Warning(vars ...any) {
+	pterm.Warning.Println(vars...)
+}
+
+func (cli *Cli) Info(vars ...any) {
+	pterm.Info.Println(vars...)
+}
+
+func (cli *Cli) Success(vars ...any) {
+	pterm.Success.Println(vars...)
+}
+
+func (cli *Cli) Section(vars ...any) {
+	pterm.DefaultSection.Println(vars...)
 }

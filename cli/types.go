@@ -13,5 +13,6 @@ type FeatureCopyInstruction struct {
 }
 
 type Cli struct {
-	Efs embed.FS
+	Efs    embed.FS
+	Parsed bool
 }
