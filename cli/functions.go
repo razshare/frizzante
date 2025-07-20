@@ -706,6 +706,17 @@ func (cli *Cli) OnPackage() {
 		cli.Fatal(clientError)
 	}
 
+	//node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite
+	esbuild := exec.Command("node_modules/.bin/esbuild", "--bundle", "--outfile=dist/server.js", "--format=cjs", "--allow-overwrite", "dist/server.js")
+	esbuild.Dir = filepath.Join(cli.Cwd(), "app")
+	esbuild.Env = append(os.Environ())
+	esbuild.Stdout = os.Stdout
+	esbuild.Stdin = os.Stdin
+	esbuildError := esbuild.Run()
+	if esbuildError != nil {
+		cli.Fatal(esbuildError)
+	}
+
 	cli.Success("project app package generated in app/dist")
 }
 
