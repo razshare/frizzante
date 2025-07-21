@@ -551,6 +551,15 @@ func (cli *Cli) OnHooks() {
 
 func (cli *Cli) OnTouch() {
 	touch := func(fileName string) {
+		directoryName := filepath.Dir(fileName)
+
+		if !files.IsDirectory(directoryName) {
+			mkdirAllError := os.MkdirAll(directoryName, os.ModePerm)
+			if mkdirAllError != nil {
+				cli.Fatal(mkdirAllError)
+			}
+		}
+
 		file, openError := os.OpenFile(fileName, os.O_RDONLY|os.O_CREATE, 0666)
 		if openError != nil {
 			cli.Fatal(openError)
@@ -567,7 +576,6 @@ func (cli *Cli) OnTouch() {
 		cli.Fatal(mkdirError)
 	}
 
-	touch("app/dist/.gitkeep")
 	touch("app/dist/server.js")
 	touch("app/dist/client/index.html")
 }
