@@ -44,18 +44,6 @@ Start development with
 make dev
 ```
 
-> [!NOTE]
-> The default makefile uses [Bun](https://bun.sh/) to install
-> dependencies while in development mode.
->
-> You can swap Bun out with whatever runtime you want to use to develop
-> by replacing all `bun` references within the makefile with
-> the equivalent of whatever runtime you'd like to use.
->
-> This change will have no impact on your application's performance,
-> Bun is only used to compile `.svelte` files into `.js` files
-> in development mode or when building for production.
-
 Build with
 
 ```sh
