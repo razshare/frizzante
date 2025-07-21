@@ -611,6 +611,8 @@ func (cli *Cli) OnClean() {
 		cli.Fatal(removeError)
 	}
 
+	cli.OnTouch()
+
 	cli.Success("project cleaned")
 }
 
