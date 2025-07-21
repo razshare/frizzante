@@ -569,6 +569,7 @@ func (cli *Cli) OnTouch() {
 
 	touch("app/dist/.gitkeep")
 	touch("app/dist/server.js")
+	touch("app/dist/client/index.html")
 }
 
 func (cli *Cli) OnClean() {
