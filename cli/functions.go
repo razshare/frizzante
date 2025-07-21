@@ -40,9 +40,6 @@ func (cli *Cli) OnStart() {
 		cli.Parsed = true
 	}
 
-	cli.OnBun()
-	os.Exit(0)
-
 	if *FlagHelp {
 		cli.OnHelp()
 		os.Exit(0)
