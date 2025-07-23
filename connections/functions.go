@@ -88,8 +88,6 @@ func (con *Connection) ReceiveMessage() string {
 // ReceiveJson reads the next JSON-encoded message from the
 // connection and stores it in the value pointed to by val.
 //
-// ReceiveJson returns true on success or false on failure.
-//
 // Compatible with web sockets.
 func (con *Connection) ReceiveJson(val any) error {
 	if con.WebSocket != nil {

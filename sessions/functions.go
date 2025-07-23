@@ -2,30 +2,117 @@ package sessions
 
 import (
 	"encoding/json"
+	"errors"
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/razshare/frizzante/archives"
 	"github.com/razshare/frizzante/connections"
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/globals"
+	"github.com/razshare/frizzante/roads"
+	"os"
 	"path/filepath"
 )
 
-var archiveGlobal archives.Archive
+var Identity = filepath.Join(".gen/sessions")
+var Road = roads.New()
 
-func init() {
-	diskArchive := archives.NewDiskArchive()
-	diskArchive.Name = filepath.Join(".gen", "sessions")
-	archiveGlobal = diskArchive
+// Set sets a value to session.
+var Set = func(id string, key string, value []byte) error {
+	if "" == Identity {
+		return errors.New("sessions identity is blank")
+	}
+
+	lane := Road.WithLane(id, key)
+	lane.Lock()
+	defer lane.Unlock()
+	directoryName := filepath.Join(Identity, id)
+	if !files.IsDirectory(directoryName) {
+		mkdirError := os.MkdirAll(directoryName, os.ModePerm)
+		if nil != mkdirError {
+			return mkdirError
+		}
+	}
+	fileName := filepath.Join(directoryName, key)
+	writeError := os.WriteFile(fileName, value, os.ModePerm)
+	if nil != writeError {
+		return writeError
+	}
+	return nil
 }
 
-// WithArchive sets the sessions archive.
-func WithArchive(archive archives.Archive) {
-	archiveGlobal = archive
+// Get gets a value from the session.
+var Get = func(id string, key string) ([]byte, error) {
+	if "" == Identity {
+		return nil, errors.New("sessions identity is blank")
+	}
+	lane := Road.WithLane(id, key)
+	lane.Lock()
+	defer lane.Unlock()
+	fileName := filepath.Join(Identity, id, key)
+	value, readError := os.ReadFile(fileName)
+	if nil != readError {
+		return nil, readError
+	}
+	return value, nil
 }
 
-// Start starts a session.
-func Start[T any](con *connections.Connection, state T) *Session[T] {
+// Has checks if a sessions has a key.
+var Has = func(id string, key string) (bool, error) {
+	if "" == Identity {
+		return false, errors.New("sessions identity is blank")
+	}
+	lane := Road.WithLane(id, key)
+	lane.Lock()
+	defer lane.Unlock()
+	fileName := filepath.Join(Identity, id, key)
+	return files.IsFile(fileName), nil
+}
+
+// Remove removes a value from a session.
+var Remove = func(id string, key string) error {
+	if "" == Identity {
+		return errors.New("sessions identity is blank")
+	}
+	lane := Road.WithLane(id, key)
+	lane.Lock()
+	defer lane.Unlock()
+	fileName := filepath.Join(Identity, id, key)
+	removeError := os.Remove(fileName)
+	if nil != removeError {
+		return removeError
+	}
+	return nil
+}
+
+// HasId checks if a session exists.
+var HasId = func(id string) (bool, error) {
+	if "" == Identity {
+		return false, errors.New("sessions identity is blank")
+	}
+	lane := Road.WithLane(id)
+	lane.Lock()
+	defer lane.Unlock()
+	return files.IsDirectory(filepath.Join(Identity, id)), nil
+}
+
+// RemoveId removes a session.
+var RemoveId = func(id string) error {
+	if "" == Identity {
+		return errors.New("sessions identity is blank")
+	}
+	lane := Road.WithLane(id)
+	lane.Lock()
+	defer lane.Unlock()
+	directoryName := filepath.Join(Identity, id)
+	removeError := os.RemoveAll(directoryName)
+	if nil != removeError {
+		return removeError
+	}
+	return nil
+}
+
+// StartWith starts a session with a given initial state.
+func StartWith[T any](con *connections.Connection, state T) *Session[T] {
 	session := &Session[T]{
-		Archive:    archiveGlobal,
 		Connection: con,
 		State:      &state,
 	}
@@ -39,10 +126,10 @@ func Start[T any](con *connections.Connection, state T) *Session[T] {
 	return session
 }
 
-// StartEmpty starts a session with empty state.
-func StartEmpty[T any](con *connections.Connection) *Session[T] {
+// Start starts a session with zero state.
+func Start[T any](con *connections.Connection) *Session[T] {
 	var state T
-	return Start(con, state)
+	return StartWith(con, state)
 }
 
 // Id tries to find a session id among the user's cookies.
@@ -82,7 +169,7 @@ func (session *Session[T]) Id() string {
 // Exists checks if the session exists into the archive.
 func (session *Session[T]) Exists() bool {
 	id := session.Id()
-	has, hasError := session.Archive.Has(id, globals.SessionKey)
+	has, hasError := Has(id, globals.SessionKey)
 	if hasError != nil {
 		session.Connection.Notifier.SendErrorAndTrace(hasError, 1)
 	}
@@ -98,7 +185,7 @@ func (session *Session[T]) Save() *Session[T] {
 		return session
 	}
 
-	setError := session.Archive.Set(id, globals.SessionKey, readBytes)
+	setError := Set(id, globals.SessionKey, readBytes)
 	if setError != nil {
 		session.Connection.Notifier.SendErrorAndTrace(setError, 1)
 	}
@@ -110,13 +197,13 @@ func (session *Session[T]) Save() *Session[T] {
 // If the session is not found in the archive it creates it.
 func (session *Session[T]) Load() *Session[T] {
 	id := session.Id()
-	has, hasError := session.Archive.Has(id, globals.SessionKey)
+	has, hasError := Has(id, globals.SessionKey)
 	if hasError != nil {
 		session.Connection.Notifier.SendErrorAndTrace(hasError, 1)
 		return session
 	}
 	if has {
-		readBytes, getError := session.Archive.Get(id, globals.SessionKey)
+		readBytes, getError := Get(id, globals.SessionKey)
 		if getError != nil {
 			session.Connection.Notifier.SendErrorAndTrace(getError, 1)
 			return session
@@ -132,7 +219,7 @@ func (session *Session[T]) Load() *Session[T] {
 // Destroy removes the session from the archive.
 func (session *Session[T]) Destroy() *Session[T] {
 	id := session.Id()
-	destroyError := session.Archive.RemoveDomain(id)
+	destroyError := RemoveId(id)
 	if destroyError != nil {
 		session.Connection.Notifier.SendErrorAndTrace(destroyError, 1)
 	}
