@@ -13,7 +13,7 @@ export function href(path = ""): {
         href: path,
         async onclick(event: MouseEvent) {
             event.preventDefault()
-            await swaps.swap(view).withPath(path).play(true)
+            await swaps.swap(view).withPath(path).withUpdate(true).play()
             return false
         },
     }

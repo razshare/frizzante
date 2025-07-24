@@ -22,7 +22,8 @@ export function action(path = ""): {
                 .withMethod(target.method)
                 .withPath(path)
                 .withBody(body)
-                .play(true)
+                .withUpdate(true)
+                .play()
                 .then(function done() {
                     form.reset()
                 })

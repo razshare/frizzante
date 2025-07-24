@@ -9,7 +9,8 @@ type SwapAction = {
     withMethod: (method: string) => SwapAction
     withPath: (path: string) => SwapAction
     withBody: (body: FormData) => SwapAction
-    play: (update: boolean) => Promise<void>
+    withUpdate: (update: boolean) => SwapAction
+    play: () => Promise<void>
 }
 
 let nextPosition = 0
@@ -20,10 +21,11 @@ function find(id: string): false | SwapAction {
 }
 
 function swap(view: View<unknown>): SwapAction {
+    const swapPosition = nextPosition++
     let swapMethod = "GET"
     let swapPath = location.pathname
+    let swapUpdate = false
     let swapBody: FormData
-    const swapPosition = nextPosition++
 
     return {
         method() {
@@ -50,8 +52,11 @@ function swap(view: View<unknown>): SwapAction {
             swapBody = body
             return this
         },
-
-        async play(update: boolean) {
+        withUpdate(update: boolean): SwapAction {
+            swapUpdate = update
+            return this
+        },
+        async play() {
             const payload = {
                 method: swapMethod,
                 headers: { Accept: "application/json" },
@@ -92,7 +97,7 @@ function swap(view: View<unknown>): SwapAction {
             view.name = json.name
             view.renderMode = json.renderMode
 
-            if (update) {
+            if (swapUpdate) {
                 const id = uuid()
                 record[id] = this
                 window.history.pushState(id, "", response.url)
