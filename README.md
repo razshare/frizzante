@@ -66,3 +66,7 @@ This will create a `.gen/bin/app` standalone executable.
 > [!NOTE]
 > Frizzante is aimed mainly at linux distributions.\
 > Feel free to contribute improvements for other platforms.
+
+# Thanks
+
+Thanks to [cmjoseph07](https://github.com/cmjoseph07) for the octo mascot!
