@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"github.com/razshare/frizzante/archives"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/guards"
@@ -13,17 +14,13 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"path/filepath"
 	"slices"
 	"sync"
 	"time"
 )
 
 func New() *Server {
-	upgrader := &websocket.Upgrader{
-		ReadBufferSize:  1024,
-		WriteBufferSize: 1024,
-	}
-
 	return &Server{
 		Address:         "127.0.0.1:8080",
 		SecureAddress:   "127.0.0.1:8383",
@@ -37,11 +34,12 @@ func New() *Server {
 		Certificate:     "",
 		Key:             "",
 		Notifier:        notifiers.New(),
-		WsUpgrader:      upgrader,
+		WsUpgrader:      &websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024},
 		ViewRoot:        "app",
 		PublicRoot:      "app/dist/client",
 		ViewServer:      "app/dist/server.js",
 		ViewIndex:       "app/dist/client/index.html",
+		SessionArchive:  archives.NewDiskArchive(filepath.Join(".gen", "sessions")),
 	}
 }
 
@@ -110,18 +108,19 @@ func (server *Server) AddGuard(val guards.Guard) *Server {
 func (server *Server) AddRoute(val routes.Route) *Server {
 	server.HttpMux.HandleFunc(val.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 		con := &connections.Connection{
-			PublicRoot: server.PublicRoot,
-			Notifier:   server.Notifier,
-			Efs:        server.Efs,
-			ViewServer: server.ViewServer,
-			ViewIndex:  server.ViewIndex,
-			ViewRoot:   server.ViewRoot,
-			Request:    request,
-			Writer:     writer,
-			Locked:     false,
-			Status:     200,
-			Header:     writer.Header(),
-			EventId:    1,
+			PublicRoot:     server.PublicRoot,
+			Notifier:       server.Notifier,
+			Efs:            server.Efs,
+			ViewServer:     server.ViewServer,
+			ViewIndex:      server.ViewIndex,
+			ViewRoot:       server.ViewRoot,
+			Request:        request,
+			Writer:         writer,
+			Locked:         false,
+			Status:         200,
+			Header:         writer.Header(),
+			EventId:        1,
+			SessionArchive: server.SessionArchive,
 		}
 
 		for _, tag := range val.Tags {

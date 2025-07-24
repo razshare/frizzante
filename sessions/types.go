@@ -1,6 +1,8 @@
 package sessions
 
-import "github.com/razshare/frizzante/connections"
+import (
+	"github.com/razshare/frizzante/connections"
+)
 
 type Session[T any] struct {
 	Connection *connections.Connection

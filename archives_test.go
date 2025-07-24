@@ -10,7 +10,7 @@ import (
 
 func TestNewDiskArchive(t *testing.T) {
 	_ = os.RemoveAll(filepath.Join(".gen", "archive"))
-	archive := archives.NewDiskArchive()
+	archive := archives.NewDiskArchive(filepath.Join(".gen", "archive"))
 	if filepath.Join(".gen", "archive") != archive.Name {
 		t.Fatalf("archive name must be `%s`", filepath.Join(".gen", "archive"))
 	}
@@ -24,7 +24,7 @@ func TestNewDiskArchive(t *testing.T) {
 
 func TestSet(t *testing.T) {
 	files.DeleteFile(filepath.Join(".gen", "archive", "domain", "key"))
-	_ = archives.NewDiskArchive().Set("domain", "key", []byte("content"))
+	_ = archives.NewDiskArchive(filepath.Join(".gen", "archive")).Set("domain", "key", []byte("content"))
 	if !files.IsFile(filepath.Join(".gen", "archive", "domain", "key")) {
 		t.Fatal("domain value is missing")
 	}
@@ -36,7 +36,7 @@ func TestSet(t *testing.T) {
 
 func TestGet(t *testing.T) {
 	files.DeleteFile(filepath.Join(".gen", "archive", "domain", "key"))
-	archive := archives.NewDiskArchive()
+	archive := archives.NewDiskArchive(filepath.Join(".gen", "archive"))
 	_ = archive.Set("domain", "key", []byte("content"))
 	readBytes, _ := archive.Get("domain", "key")
 	if "content" != string(readBytes) {
@@ -46,7 +46,7 @@ func TestGet(t *testing.T) {
 
 func TestHas(t *testing.T) {
 	files.DeleteFile(filepath.Join(".gen", "archive", "domain", "key"))
-	archive := archives.NewDiskArchive()
+	archive := archives.NewDiskArchive(filepath.Join(".gen", "archive"))
 	has, _ := archive.Has("domain", "key")
 	if has {
 		t.Fatal("archive should not contain value yet")
@@ -62,7 +62,7 @@ func TestHas(t *testing.T) {
 
 func TestRemove(t *testing.T) {
 	files.DeleteFile(filepath.Join(".gen", "archive", "domain", "key"))
-	archive := archives.NewDiskArchive()
+	archive := archives.NewDiskArchive(filepath.Join(".gen", "archive"))
 	_ = archive.Set("domain", "key", []byte("content"))
 	_ = archive.Remove("domain", "key")
 	if files.IsFile("archive/domain/key") {
@@ -72,7 +72,7 @@ func TestRemove(t *testing.T) {
 
 func TestHasDomain(t *testing.T) {
 	_ = os.RemoveAll(filepath.Join(".gen", "archive", "domain", "key"))
-	archive := archives.NewDiskArchive()
+	archive := archives.NewDiskArchive(filepath.Join(".gen", "archive"))
 	_ = archive.Set("domain", "key", []byte("content"))
 	has, _ := archive.HasDomain("domain")
 	if !has {
@@ -87,7 +87,7 @@ func TestHasDomain(t *testing.T) {
 
 func TestRemoveDomain(t *testing.T) {
 	_ = os.RemoveAll(filepath.Join(".gen", "archive", "domain", "key"))
-	archive := archives.NewDiskArchive()
+	archive := archives.NewDiskArchive(filepath.Join(".gen", "archive"))
 	_ = archive.Set("domain", "key", []byte("content"))
 	_ = archive.RemoveDomain("domain")
 	has, _ := archive.Has("domain", "key")

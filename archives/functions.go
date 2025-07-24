@@ -9,9 +9,9 @@ import (
 )
 
 // NewDiskArchive creates a new archive backed by the file system.
-func NewDiskArchive() *DiskArchive {
+func NewDiskArchive(name string) *DiskArchive {
 	return &DiskArchive{
-		Name: filepath.Join(".gen", "archive"),
+		Name: name,
 		Road: roads.New(),
 	}
 }

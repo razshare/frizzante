@@ -3,6 +3,7 @@ package servers
 import (
 	"embed"
 	"github.com/gorilla/websocket"
+	"github.com/razshare/frizzante/archives"
 	"github.com/razshare/frizzante/guards"
 	"github.com/razshare/frizzante/notifiers"
 	"net"
@@ -30,4 +31,5 @@ type Server struct {
 	ViewIndex       string
 	WsUpgrader      *websocket.Upgrader
 	Guards          []guards.Guard
+	SessionArchive  archives.Archive
 }
