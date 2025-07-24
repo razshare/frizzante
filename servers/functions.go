@@ -121,7 +121,6 @@ func (server *Server) AddRoute(val routes.Route) *Server {
 			Locked:     false,
 			Status:     200,
 			Header:     writer.Header(),
-			EventName:  "",
 			EventId:    1,
 		}
 
