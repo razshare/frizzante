@@ -518,6 +518,7 @@ func (cli *Cli) OnTest() {
 	cli.OnPackage()
 	test := exec.Command("go", "test")
 	test.Env = append(os.Environ(), "CGO_ENABLED=1")
+	test.Stderr = os.Stderr
 	test.Stdout = os.Stdout
 	test.Stdin = os.Stdin
 	err := test.Run()
@@ -589,6 +590,7 @@ func (cli *Cli) OnClean() {
 	clean := exec.Command("go", "clean")
 	clean.Dir = cli.Cwd()
 	clean.Env = append(os.Environ())
+	clean.Stderr = os.Stderr
 	clean.Stdout = os.Stdout
 	clean.Stdin = os.Stdin
 	runError := clean.Run()
@@ -627,6 +629,7 @@ func (cli *Cli) OnFormat() {
 	gofmt := exec.Command("go", "fmt")
 	gofmt.Dir = cli.Cwd()
 	gofmt.Env = append(os.Environ())
+	gofmt.Stderr = os.Stderr
 	gofmt.Stdout = os.Stdout
 	gofmt.Stdin = os.Stdin
 	gofmtError := gofmt.Run()
@@ -637,6 +640,7 @@ func (cli *Cli) OnFormat() {
 	prettier := exec.Command("bunx", "prettier", "--write", ".")
 	prettier.Dir = "app"
 	prettier.Env = append(os.Environ())
+	prettier.Stderr = os.Stderr
 	prettier.Stdout = os.Stdout
 	prettier.Stdin = os.Stdin
 	prettierError := prettier.Run()
@@ -653,6 +657,7 @@ func (cli *Cli) OnUpdate() {
 	get := exec.Command("go", "get", "-u", "./...")
 	get.Dir = cli.Cwd()
 	get.Env = append(os.Environ())
+	get.Stderr = os.Stderr
 	get.Stdout = os.Stdout
 	get.Stdin = os.Stdin
 	getError := get.Run()
@@ -663,6 +668,7 @@ func (cli *Cli) OnUpdate() {
 	prettier := exec.Command("bun", "update")
 	prettier.Dir = "app"
 	prettier.Env = append(os.Environ())
+	prettier.Stderr = os.Stderr
 	prettier.Stdout = os.Stdout
 	prettier.Stdin = os.Stdin
 	prettierError := prettier.Run()
@@ -679,6 +685,7 @@ func (cli *Cli) OnInstall() {
 	tidy := exec.Command("go", "mod", "tidy")
 	tidy.Dir = cli.Cwd()
 	tidy.Env = append(os.Environ())
+	tidy.Stderr = os.Stderr
 	tidy.Stdout = os.Stdout
 	tidy.Stdin = os.Stdin
 	tidyError := tidy.Run()
@@ -689,6 +696,7 @@ func (cli *Cli) OnInstall() {
 	install := exec.Command("bun", "install")
 	install.Dir = "app"
 	install.Env = append(os.Environ())
+	install.Stderr = os.Stderr
 	install.Stdout = os.Stdout
 	install.Stdin = os.Stdin
 	installError := install.Run()
@@ -705,6 +713,7 @@ func (cli *Cli) OnPackage() {
 	server := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
 	server.Env = append(os.Environ())
+	server.Stderr = os.Stderr
 	server.Stdout = os.Stdout
 	server.Stdin = os.Stdin
 	serverError := server.Run()
@@ -715,6 +724,7 @@ func (cli *Cli) OnPackage() {
 	client := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
 	client.Dir = "app"
 	client.Env = append(os.Environ())
+	client.Stderr = os.Stderr
 	client.Stdout = os.Stdout
 	client.Stdin = os.Stdin
 	clientError := client.Run()
@@ -726,6 +736,7 @@ func (cli *Cli) OnPackage() {
 	esbuild := exec.Command("node_modules/.bin/esbuild", "--bundle", "--outfile=dist/server.js", "--format=cjs", "--allow-overwrite", "dist/server.js")
 	esbuild.Dir = "app"
 	esbuild.Env = append(os.Environ())
+	esbuild.Stderr = os.Stderr
 	esbuild.Stdout = os.Stdout
 	esbuild.Stdin = os.Stdin
 	esbuildError := esbuild.Run()
@@ -742,6 +753,7 @@ func (cli *Cli) OnPackageWatch() {
 	server := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
 	server.Env = append(os.Environ())
+	server.Stderr = os.Stderr
 	server.Stdout = os.Stdout
 	server.Stdin = os.Stdin
 	serverError := server.Start()
@@ -753,6 +765,7 @@ func (cli *Cli) OnPackageWatch() {
 	client := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
 	client.Dir = "app"
 	client.Env = append(os.Environ())
+	client.Stderr = os.Stderr
 	client.Stdout = os.Stdout
 	client.Stdin = os.Stdin
 	clientError := client.Start()
@@ -783,6 +796,7 @@ func (cli *Cli) OnDev() {
 	air := exec.Command("air")
 	air.Dir = cli.Cwd()
 	air.Env = append(os.Environ(), "DEV=1", "CGO_ENABLED=1")
+	air.Stderr = os.Stderr
 	air.Stdout = os.Stdout
 	air.Stdin = os.Stdin
 	airError := air.Start()
@@ -805,11 +819,12 @@ func (cli *Cli) OnDev() {
 }
 
 func (cli *Cli) OnBuild() {
-	cli.OnTouch()
+	cli.OnPackage()
 
-	build := exec.Command("go", "build", "-o .gen/bin/app", ".")
+	build := exec.Command("go", "build", "-o=.gen/bin/app", ".")
 	build.Dir = cli.Cwd()
 	build.Env = append(os.Environ(), "CGO_ENABLED=1")
+	build.Stderr = os.Stderr
 	build.Stdout = os.Stdout
 	build.Stdin = os.Stdin
 	buildError := build.Run()
