@@ -9,9 +9,9 @@ import (
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/js"
 	"os"
-	"regexp"
 	"rogchap.com/v8go"
 	"strings"
 )
@@ -64,8 +64,6 @@ func (view *View) ServerContents(efs embed.FS) ([]byte, error) {
 	}
 	return server, nil
 }
-
-var noScript = regexp.MustCompile(`<script.*>.*</script>`)
 
 // Render renders the view.
 //
@@ -189,7 +187,7 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 	var body string
 	var gerr string
 
-	globals := map[string]v8go.FunctionCallback{
+	functions := map[string]v8go.FunctionCallback{
 		"error": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
 			args := info.Args()
 			if len(args) > 0 {
@@ -222,11 +220,11 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 
 	if nil != view.Functions {
 		for functionName, function := range view.Functions {
-			globals[functionName] = function
+			functions[functionName] = function
 		}
 	}
 
-	_, destroy, javaScriptError := js.JavaScriptRun(view.Server, bundle, globals)
+	_, destroy, javaScriptError := js.JavaScriptRun(view.Server, bundle, functions)
 	if javaScriptError != nil {
 		return "", javaScriptError
 	}
@@ -249,7 +247,7 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 			strings.Replace(
 				strings.Replace(
 					strings.Replace(
-						noScript.ReplaceAllString(string(index), ""),
+						globals.NoScript.ReplaceAllString(string(index), ""),
 						"<!--app-target-->",
 						"",
 						1,
