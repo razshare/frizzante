@@ -7,8 +7,8 @@ import (
 	"github.com/razshare/frizzante/globals"
 )
 
-// StartWith starts a session with a given initial state.
-func StartWith[T any](con *connections.Connection, state T) *Session[T] {
+// StartWithState starts a session with a given initial state.
+func StartWithState[T any](con *connections.Connection, state T) *Session[T] {
 	session := &Session[T]{
 		Connection: con,
 		State:      &state,
@@ -26,7 +26,7 @@ func StartWith[T any](con *connections.Connection, state T) *Session[T] {
 // Start starts a session with zero state.
 func Start[T any](con *connections.Connection) *Session[T] {
 	var state T
-	return StartWith(con, state)
+	return StartWithState(con, state)
 }
 
 // Id tries to find a session id among the user's cookies.
