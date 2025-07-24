@@ -16,15 +16,15 @@ export function route(view: View<never>): void {
         const current = swaps.find(id)
 
         if (!current) {
-            await swaps.swap(view).withPath("/").play(false)
+            await swaps.swap(view).withPath("/").play()
             return
         }
 
         if (current.position() + 1 != swaps.position()) {
             swaps.teleport(current.position() + 1)
-            await current.play(false)
+            await current.play()
         } else {
-            await current.play(true)
+            await current.withUpdate(true).play()
         }
     }
     window.addEventListener("popstate", listener)
