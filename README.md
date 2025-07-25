@@ -10,13 +10,11 @@ Frizzante is an opinionated web server framework written in [Go](https://go.dev/
 
 # Prerequisites
 
-Install `frizzante`, `air`, `bun`, `build-essential`.
+Install `build-essential` and `frizzante`.
 
 ```sh
 sudo apt install build-essential
 go install github.com/razshare/frizzante@latest
-go install github.com/air-verse/air@latest
-which bun || curl -fsSL https://bun.sh/install | bash
 ```
 
 >[!TIP]
@@ -34,10 +32,10 @@ Create a project with
 frizzante -c MyProject
 ```
 
-Install dependencies with
+Configure project
 
 ```sh
-make install
+make configure
 ```
 
 Start development with
