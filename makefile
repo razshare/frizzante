@@ -2,7 +2,7 @@ configure:
 	go run main.go --configure --platform="Linux/x64"
 
 test:
-	go run main.go --test
+	go run main.go --test --bun="~/.bun/bin/bun"
 
 build:
 	go run main.go --build

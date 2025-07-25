@@ -9,6 +9,7 @@ import (
 	"github.com/razshare/frizzante/files"
 	flag "github.com/spf13/pflag"
 	"io"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -35,12 +36,19 @@ var FlagHooks = flag.BoolP("hooks", "", false, fmt.Sprintf("adds git hooks"))
 var FlagConfigure = flag.BoolP("configure", "", false, fmt.Sprintf("configures project by installing necessary binaries under \"./.gen\""))
 var FlagPlatform = flag.StringP("platform", "", "", fmt.Sprintf("sets the platform, accepts either \"Linux/x64\", \"Darwin/arm64\" or \"Darwin/x64\""))
 var FlagConfirmAll = flag.BoolP("confirm-all", "", false, fmt.Sprintf("confirms all binary promps silently"))
+var FlagBun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), fmt.Sprintf("sets the bun binary, defaults ti \".gen/bun/bun\""))
+var FlagSqlite = flag.StringP("sqlite", "", filepath.Join(".gen", "sqlite", "sqlite3"), fmt.Sprintf("sets the sqlite binary, defaults to \".gen/sqlite/sqlite3\""))
 
 func (cli *Cli) OnStart() {
 	if !cli.Parsed {
 		flag.Parse()
 		cli.Parsed = true
 	}
+
+	*FlagBun = "~/.bun/bin//bun"
+
+	cli.OnUpdate()
+	os.Exit(0)
 
 	if *FlagHelp {
 		cli.OnHelp()
@@ -475,7 +483,7 @@ func (cli *Cli) AddFeatureByName(feature string) {
 		}
 
 		if files.IsFile(fileName) {
-			renameError := os.Rename(fileName, cli.Bun())
+			renameError := os.Rename(fileName, cli.Bun("."))
 			if renameError != nil {
 				cli.Fatal(renameError)
 			}
@@ -647,7 +655,7 @@ func (cli *Cli) OnFormat() {
 		cli.Fatal(gofmtError)
 	}
 
-	prettier := exec.Command(filepath.Join("..", cli.Bun()), "x", "prettier", "--write", ".")
+	prettier := exec.Command(cli.Bun("app"), "x", "prettier", "--write", ".")
 	prettier.Dir = "app"
 	prettier.Env = append(os.Environ())
 	prettier.Stderr = os.Stderr
@@ -675,7 +683,7 @@ func (cli *Cli) OnUpdate() {
 		cli.Fatal(getError)
 	}
 
-	prettier := exec.Command(filepath.Join("..", cli.Bun()), "update")
+	prettier := exec.Command(cli.Bun("app"), "update")
 	prettier.Dir = "app"
 	prettier.Env = append(os.Environ())
 	prettier.Stderr = os.Stderr
@@ -703,7 +711,7 @@ func (cli *Cli) OnInstall() {
 		cli.Fatal(tidyError)
 	}
 
-	install := exec.Command(cli.Bun(), "install")
+	install := exec.Command(cli.Bun("app"), "install")
 	install.Dir = "app"
 	install.Env = append(os.Environ())
 	install.Stderr = os.Stderr
@@ -720,7 +728,7 @@ func (cli *Cli) OnInstall() {
 func (cli *Cli) OnPackage() {
 	cli.OnTouch()
 
-	server := exec.Command(filepath.Join("..", cli.Bun()), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
+	server := exec.Command(cli.Bun("app"), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
 	server.Env = append(os.Environ())
 	server.Stderr = os.Stderr
@@ -731,7 +739,7 @@ func (cli *Cli) OnPackage() {
 		cli.Fatal(serverError)
 	}
 
-	client := exec.Command(filepath.Join("..", cli.Bun()), "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
+	client := exec.Command(cli.Bun("app"), "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
 	client.Dir = "app"
 	client.Env = append(os.Environ())
 	client.Stderr = os.Stderr
@@ -760,7 +768,7 @@ func (cli *Cli) OnPackage() {
 func (cli *Cli) OnPackageWatch() {
 	cli.OnTouch()
 
-	server := exec.Command(cli.Bun(), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
+	server := exec.Command(cli.Bun("app"), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
 	server.Env = append(os.Environ())
 	server.Stderr = os.Stderr
@@ -772,7 +780,7 @@ func (cli *Cli) OnPackageWatch() {
 	}
 	cli.Success("vite server watcher launched")
 
-	client := exec.Command(cli.Bun(), "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
+	client := exec.Command(cli.Bun("app"), "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
 	client.Dir = "app"
 	client.Env = append(os.Environ())
 	client.Stderr = os.Stderr
@@ -847,7 +855,7 @@ func (cli *Cli) OnBuild() {
 func (cli *Cli) OnCheck() {
 	cli.OnTouch()
 
-	eslint := exec.Command(cli.Bun(), "x", "eslint")
+	eslint := exec.Command(cli.Bun("app"), "x", "eslint")
 	eslint.Dir = "app"
 	eslint.Env = append(os.Environ())
 	eslint.Stdout = os.Stdout
@@ -857,7 +865,7 @@ func (cli *Cli) OnCheck() {
 		cli.Fatal(eslintError)
 	}
 
-	svelteCheck := exec.Command(cli.Bun(), "x", "svelte-check", "--tsconfig=./tsconfig.json")
+	svelteCheck := exec.Command(cli.Bun("app"), "x", "svelte-check", "--tsconfig=./tsconfig.json")
 	svelteCheck.Dir = "app"
 	svelteCheck.Env = append(os.Environ())
 	svelteCheck.Stdout = os.Stdout
@@ -1065,12 +1073,56 @@ func (cli *Cli) Confirm(text string) bool {
 	return yes
 }
 
-func (cli *Cli) Bun() string {
-	return filepath.Join(".gen", "bun", "bun")
+func (cli *Cli) Bun(basepath string) string {
+	var bun string
+
+	if *FlagBun != "" {
+		bun = *FlagBun
+	} else {
+		bun = filepath.Join(".gen", "bun", "bun")
+	}
+
+	if strings.HasPrefix(bun, "~") {
+		dirname, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal(err)
+		}
+		bun = strings.Replace(bun, "~", dirname, 1)
+		return bun
+	}
+
+	path, pathError := filepath.Rel(basepath, bun)
+	if pathError != nil {
+		cli.Fatal(pathError)
+	}
+
+	return path
 }
 
-func (cli *Cli) Sqlite() string {
-	return filepath.Join(".gen", "sqlite", "sqlite3")
+func (cli *Cli) Sqlite(basepath string) string {
+	var sqlite string
+
+	if *FlagSqlite != "" {
+		sqlite = *FlagSqlite
+	} else {
+		sqlite = filepath.Join(".gen", "sqlite", "sqlite3")
+	}
+
+	if strings.HasPrefix(sqlite, "~") {
+		dirname, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal(err)
+		}
+		sqlite = strings.Replace(sqlite, "~", dirname, 1)
+		return sqlite
+	}
+
+	path, pathError := filepath.Rel(basepath, sqlite)
+	if pathError != nil {
+		cli.Fatal(pathError)
+	}
+
+	return path
 }
 
 func (cli *Cli) Confirmf(template string, vars ...any) bool {
