@@ -36,10 +36,10 @@ var FlagHooks = flag.BoolP("hooks", "", false, fmt.Sprintf("adds git hooks"))
 var FlagConfigure = flag.BoolP("configure", "", false, fmt.Sprintf("configures project by installing necessary binaries under \"./.gen\""))
 var FlagPlatform = flag.StringP("platform", "", "", fmt.Sprintf("sets the platform, accepts either \"linux/amd64\", \"darwin/arm64\" or \"darwin/amd64\""))
 var FlagYes = flag.BoolP("yes", "y", false, fmt.Sprintf("confirms all binary promps silently"))
-var FlagGo = flag.StringP("go", "", "go", fmt.Sprintf("sets the go binary, defaults to \"go\""))
-var FlagAir = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), fmt.Sprintf("sets the air binary, defaults to \".gen/air/air\""))
-var FlagBun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), fmt.Sprintf("sets the bun binary, defaults to \".gen/bun/bun\""))
-var FlagSqlite = flag.StringP("sqlite", "", filepath.Join(".gen", "sqlite", "sqlite3"), fmt.Sprintf("sets the sqlite binary, defaults to \".gen/sqlite/sqlite3\""))
+var FlagGo = flag.StringP("go", "", "go", fmt.Sprintf("sets the go binary"))
+var FlagAir = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), fmt.Sprintf("sets the air binary"))
+var FlagBun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), fmt.Sprintf("sets the bun binary"))
+var FlagSqlite = flag.StringP("sqlite", "", filepath.Join(".gen", "sqlite", "sqlite3"), fmt.Sprintf("sets the sqlite binary"))
 
 func (cli *Cli) OnStart() {
 	if !cli.Parsed {
