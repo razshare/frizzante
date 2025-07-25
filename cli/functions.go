@@ -34,9 +34,11 @@ var FlagDev = flag.BoolP("dev", "d", false, fmt.Sprintf("starts dev mode"))
 var FlagBuild = flag.BoolP("build", "b", false, fmt.Sprintf("builds project"))
 var FlagHooks = flag.BoolP("hooks", "", false, fmt.Sprintf("adds git hooks"))
 var FlagConfigure = flag.BoolP("configure", "", false, fmt.Sprintf("configures project by installing necessary binaries under \"./.gen\""))
-var FlagPlatform = flag.StringP("platform", "", "", fmt.Sprintf("sets the platform, accepts either \"Linux/x64\", \"Darwin/arm64\" or \"Darwin/x64\""))
+var FlagPlatform = flag.StringP("platform", "", "", fmt.Sprintf("sets the platform, accepts either \"Linux/amd64\", \"Darwin/arm64\" or \"Darwin/amd64\""))
 var FlagYes = flag.BoolP("yes", "y", false, fmt.Sprintf("confirms all binary promps silently"))
-var FlagBun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), fmt.Sprintf("sets the bun binary, defaults ti \".gen/bun/bun\""))
+var FlagGo = flag.StringP("go", "", "go", fmt.Sprintf("sets the go binary, defaults to \"go\""))
+var FlagAir = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), fmt.Sprintf("sets the air binary, defaults to \".gen/air/air\""))
+var FlagBun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), fmt.Sprintf("sets the bun binary, defaults to \".gen/bun/bun\""))
 var FlagSqlite = flag.StringP("sqlite", "", filepath.Join(".gen", "sqlite", "sqlite3"), fmt.Sprintf("sets the sqlite binary, defaults to \".gen/sqlite/sqlite3\""))
 
 func (cli *Cli) OnStart() {
@@ -157,6 +159,7 @@ func (cli *Cli) OnMenu() {
 		"Dev",
 		"Build",
 		"Hooks",
+		"Configure",
 	}
 
 	result, showError := pterm.DefaultInteractiveSelect.WithOptions(options).Show("Pick an option")
@@ -269,6 +272,12 @@ func (cli *Cli) OnMenu() {
 		cli.OnStart()
 		return
 	}
+
+	if result == "Configure" {
+		*FlagConfigure = true
+		cli.OnStart()
+		return
+	}
 }
 
 func (cli *Cli) OnHelp() {
@@ -332,6 +341,7 @@ func (cli *Cli) OnAddFeature(features string) {
 				"Core",
 				"Forms",
 				"Links",
+				"Air",
 				"Bun",
 				"Sqlite",
 			}).
@@ -455,9 +465,9 @@ func (cli *Cli) AddFeatureByName(feature string) {
 
 		if platform == PlatformDarwinArm64 {
 			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-aarch64.zip"
-		} else if platform == PlatformDarwin64 {
+		} else if platform == PlatformDarwinAmd64 {
 			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-x64.zip"
-		} else if platform == PlatformLinux64 {
+		} else if platform == PlatformLinuxAmd64 {
 			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-x64.zip"
 		} else {
 			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-x64.zip"
@@ -469,9 +479,9 @@ func (cli *Cli) AddFeatureByName(feature string) {
 
 		if platform == PlatformDarwinArm64 {
 			fileName = filepath.Join(directoryName, "bun-darwin-aarch64", "bun")
-		} else if platform == PlatformDarwin64 {
+		} else if platform == PlatformDarwinAmd64 {
 			fileName = filepath.Join(directoryName, "bun-darwin-x64", "bun")
-		} else if platform == PlatformLinux64 {
+		} else if platform == PlatformLinuxAmd64 {
 			fileName = filepath.Join(directoryName, "bun-linux-x64", "bun")
 		} else {
 			fileName = filepath.Join(directoryName, "bun-linux-x64", "bun")
@@ -503,15 +513,37 @@ func (cli *Cli) AddFeatureByName(feature string) {
 
 		if platform == PlatformDarwinArm64 {
 			url = "https://www.sqlite.org/2025/sqlite-tools-osx-arm64-3500300.zip"
-		} else if platform == PlatformDarwin64 {
+		} else if platform == PlatformDarwinAmd64 {
 			url = "https://www.sqlite.org/2025/sqlite-tools-osx-x64-3500300.zip"
-		} else if platform == PlatformLinux64 {
+		} else if platform == PlatformLinuxAmd64 {
 			url = "https://www.sqlite.org/2025/sqlite-tools-linux-x64-3500300.zip"
 		} else {
 			url = "https://www.sqlite.org/2025/sqlite-tools-linux-x64-3500300.zip"
 		}
 
 		cli.Install("sqlite", url, directoryName)
+
+		return
+	}
+
+	if strings.ToLower(feature) == "air" {
+		directoryName := filepath.Join(".gen", "air")
+
+		platform := cli.Platform()
+
+		var url string
+
+		if platform == PlatformDarwinArm64 {
+			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_darwin_arm64"
+		} else if platform == PlatformDarwinAmd64 {
+			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_darwin_amd64"
+		} else if platform == PlatformLinuxAmd64 {
+			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_amd64"
+		} else {
+			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_amd64"
+		}
+
+		cli.Install("air", url, directoryName)
 
 		return
 	}
@@ -529,7 +561,7 @@ func (cli *Cli) Cwd() string {
 
 func (cli *Cli) OnTest() {
 	cli.OnPackage()
-	test := exec.Command("go", "test")
+	test := exec.Command(cli.Go("."), "test")
 	test.Env = append(os.Environ(), "CGO_ENABLED=1")
 	test.Stderr = os.Stderr
 	test.Stdout = os.Stdout
@@ -600,8 +632,7 @@ func (cli *Cli) OnTouch() {
 }
 
 func (cli *Cli) OnClean() {
-	clean := exec.Command("go", "clean")
-	clean.Dir = cli.Cwd()
+	clean := exec.Command(cli.Go("."), "clean")
 	clean.Env = append(os.Environ())
 	clean.Stderr = os.Stderr
 	clean.Stdout = os.Stdout
@@ -639,8 +670,7 @@ func (cli *Cli) OnClean() {
 func (cli *Cli) OnFormat() {
 	cli.OnTouch()
 
-	gofmt := exec.Command("go", "fmt")
-	gofmt.Dir = cli.Cwd()
+	gofmt := exec.Command(cli.Go("."), "fmt")
 	gofmt.Env = append(os.Environ())
 	gofmt.Stderr = os.Stderr
 	gofmt.Stdout = os.Stdout
@@ -667,8 +697,7 @@ func (cli *Cli) OnFormat() {
 func (cli *Cli) OnUpdate() {
 	cli.OnTouch()
 
-	get := exec.Command("go", "get", "-u", "./...")
-	get.Dir = cli.Cwd()
+	get := exec.Command(cli.Go("."), "get", "-u", "./...")
 	get.Env = append(os.Environ())
 	get.Stderr = os.Stderr
 	get.Stdout = os.Stdout
@@ -695,8 +724,7 @@ func (cli *Cli) OnUpdate() {
 func (cli *Cli) OnInstall() {
 	cli.OnTouch()
 
-	tidy := exec.Command("go", "mod", "tidy")
-	tidy.Dir = cli.Cwd()
+	tidy := exec.Command(cli.Go("."), "mod", "tidy")
 	tidy.Env = append(os.Environ())
 	tidy.Stderr = os.Stderr
 	tidy.Stdout = os.Stdout
@@ -801,14 +829,14 @@ func (cli *Cli) OnPackageWatch() {
 func (cli *Cli) OnDev() {
 	cli.OnTouch()
 
-	mkdirError := os.MkdirAll(".gen/tmp", os.ModePerm)
+	mkdirError := os.MkdirAll(filepath.Join(".gen", "tmp"), os.ModePerm)
 	if mkdirError != nil {
 		cli.Fatal(mkdirError)
 	}
 
-	air := exec.Command("air")
-	air.Dir = cli.Cwd()
+	air := exec.Command(cli.Air("."))
 	air.Env = append(os.Environ(), "DEV=1", "CGO_ENABLED=1")
+	air.Dir = cli.Cwd()
 	air.Stderr = os.Stderr
 	air.Stdout = os.Stdout
 	air.Stdin = os.Stdin
@@ -834,8 +862,7 @@ func (cli *Cli) OnDev() {
 func (cli *Cli) OnBuild() {
 	cli.OnPackage()
 
-	build := exec.Command("go", "build", "-o=.gen/bin/app", ".")
-	build.Dir = cli.Cwd()
+	build := exec.Command(cli.Go("."), "build", "-o=.gen/bin/app", ".")
 	build.Env = append(os.Environ(), "CGO_ENABLED=1")
 	build.Stderr = os.Stderr
 	build.Stdout = os.Stdout
@@ -872,7 +899,8 @@ func (cli *Cli) OnCheck() {
 }
 
 func (cli *Cli) OnConfigure() {
-	cli.OnAddFeature("bun,core")
+	cli.OnAddFeature("bun,air,core")
+	cli.OnInstall()
 }
 
 func (cli *Cli) Install(name string, url string, destination string) {
@@ -888,8 +916,6 @@ func (cli *Cli) Install(name string, url string, destination string) {
 		}
 	}
 
-	zipFileName := destination + ".zip"
-
 	spinner, spinnerError := pterm.DefaultSpinner.WithRemoveWhenDone(true).Start(fmt.Sprintf("installing %s...", name))
 	if spinnerError != nil {
 		cli.Fatal(spinnerError)
@@ -901,6 +927,17 @@ func (cli *Cli) Install(name string, url string, destination string) {
 		}
 	}()
 
+	if !strings.HasSuffix(url, ".zip") {
+		downloadError := files.DownloadFile(url, filepath.Join(destination, name))
+		if downloadError != nil {
+			cli.Fatal(downloadError)
+		}
+
+		cli.Successf("%s installed in `%s`", name, destination)
+		return
+	}
+
+	zipFileName := destination + ".zip"
 	downloadError := files.DownloadFile(url, zipFileName)
 	if downloadError != nil {
 		cli.Fatal(downloadError)
@@ -1012,8 +1049,8 @@ func (cli *Cli) ShowFeaturesInfo() {
 
 type Platform uint
 
-const PlatformLinux64 Platform = 0
-const PlatformDarwin64 Platform = 1
+const PlatformLinuxAmd64 Platform = 0
+const PlatformDarwinAmd64 Platform = 1
 const PlatformDarwinArm64 Platform = 2
 
 func (cli *Cli) Platform() Platform {
@@ -1026,27 +1063,28 @@ func (cli *Cli) Platform() Platform {
 		platform, platformError = pterm.
 			DefaultInteractiveSelect.
 			WithOptions([]string{
-				"Linux/x64",
+				"Linux/amd64",
+				"Darwin/amd64",
 				"Darwin/arm64",
-				"Darwin/x64",
 			}).
 			WithFilter(false).
-			Show("Pick a sqlite platform")
+			Show("Pick a platform")
 
 		if platformError != nil {
 			cli.Fatal(platformError)
 		}
+		*FlagPlatform = platform
 	}
 
 	if platform == "Darwin/arm64" {
 		return PlatformDarwinArm64
 	}
 
-	if platform == "Darwin/x64" {
-		return PlatformDarwin64
+	if platform == "Darwin/amd64" {
+		return PlatformDarwinAmd64
 	}
 
-	return PlatformLinux64
+	return PlatformLinuxAmd64
 }
 
 func (cli *Cli) Confirm(text string) bool {
@@ -1068,6 +1106,66 @@ func (cli *Cli) Confirm(text string) bool {
 	return yes
 }
 
+func (cli *Cli) Go(basepath string) string {
+	var goBinary string
+
+	if *FlagGo != "" {
+		goBinary = *FlagGo
+	} else {
+		goBinary = cli.Go(".")
+	}
+
+	if strings.HasPrefix(goBinary, "~") {
+		dirname, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal(err)
+		}
+		goBinary = strings.Replace(goBinary, "~", dirname, 1)
+		return goBinary
+	}
+
+	if !strings.Contains(goBinary, string(filepath.Separator)) {
+		return goBinary
+	}
+
+	path, pathError := filepath.Rel(basepath, goBinary)
+	if pathError != nil {
+		cli.Fatal(pathError)
+	}
+
+	return path
+}
+
+func (cli *Cli) Air(basepath string) string {
+	var air string
+
+	if *FlagAir != "" {
+		air = *FlagAir
+	} else {
+		air = filepath.Join(".gen", "air", "air")
+	}
+
+	if strings.HasPrefix(air, "~") {
+		dirname, err := os.UserHomeDir()
+		if err != nil {
+			log.Fatal(err)
+		}
+		air = strings.Replace(air, "~", dirname, 1)
+		return air
+	}
+
+	if !strings.Contains(air, string(filepath.Separator)) {
+		return air
+	}
+
+	path, pathError := filepath.Rel(basepath, air)
+	if pathError != nil {
+		cli.Fatal(pathError)
+	}
+
+	return path
+}
+
 func (cli *Cli) Bun(basepath string) string {
 	var bun string
 
@@ -1083,6 +1181,10 @@ func (cli *Cli) Bun(basepath string) string {
 			log.Fatal(err)
 		}
 		bun = strings.Replace(bun, "~", dirname, 1)
+		return bun
+	}
+
+	if !strings.Contains(bun, string(filepath.Separator)) {
 		return bun
 	}
 
@@ -1109,6 +1211,10 @@ func (cli *Cli) Sqlite(basepath string) string {
 			log.Fatal(err)
 		}
 		sqlite = strings.Replace(sqlite, "~", dirname, 1)
+		return sqlite
+	}
+
+	if !strings.Contains(sqlite, string(filepath.Separator)) {
 		return sqlite
 	}
 
