@@ -1,3 +1,6 @@
+configure:
+	go run main.go --configure --platform="Linux/x64"
+
 test:
 	go run main.go --test
 

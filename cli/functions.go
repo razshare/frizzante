@@ -32,6 +32,8 @@ var FlagClean = flag.BoolP("clean", "", false, fmt.Sprintf("cleans project"))
 var FlagDev = flag.BoolP("dev", "d", false, fmt.Sprintf("starts dev mode"))
 var FlagBuild = flag.BoolP("build", "b", false, fmt.Sprintf("builds project"))
 var FlagHooks = flag.BoolP("hooks", "", false, fmt.Sprintf("adds git hooks"))
+var FlagConfigure = flag.BoolP("configure", "", false, fmt.Sprintf("configures project by installing necessary binaries under \"./.gen\""))
+var FlagPlatform = flag.StringP("platform", "", "", fmt.Sprintf("sets the platform, accepts either \"Linux/x64\", \"Darwin/arm64\" or \"Darwin/x64\""))
 
 func (cli *Cli) OnStart() {
 	if !cli.Parsed {
@@ -116,6 +118,11 @@ func (cli *Cli) OnStart() {
 
 	if *FlagHooks {
 		cli.OnHooks()
+		os.Exit(0)
+	}
+
+	if *FlagConfigure {
+		cli.OnConfigure()
 		os.Exit(0)
 	}
 
@@ -312,26 +319,6 @@ func (cli *Cli) OnAddFeature(features string) {
 		os.Exit(0)
 	}
 
-	events := &FeatureAddEvents{
-		ConfirmOverwrite: func(feature string) bool {
-			return cli.Confirm(
-				fmt.Sprintf(
-					"It looks like `%s` already exists, would you like to overwrite it?",
-					feature,
-				),
-			)
-		},
-		ConfirmAddMissingDependency: func(feature string, dependency string) bool {
-			return cli.Confirm(
-				fmt.Sprintf(
-					"It looks like you're missing the `%s` feature, which is required by the `%s` feature, would you like to add it?",
-					feature,
-					dependency,
-				),
-			)
-		},
-	}
-
 	if features == ":pick" {
 		selectedFeatures, showError := pterm.
 			DefaultInteractiveMultiselect.
@@ -352,7 +339,7 @@ func (cli *Cli) OnAddFeature(features string) {
 		}
 
 		for _, selectedFeature := range selectedFeatures {
-			cli.AddFeatureByName(selectedFeature, events)
+			cli.AddFeatureByName(selectedFeature)
 		}
 		os.Exit(0)
 	}
@@ -360,20 +347,20 @@ func (cli *Cli) OnAddFeature(features string) {
 	splitFeatures := strings.Split(features, ",")
 
 	for _, feature := range splitFeatures {
-		cli.AddFeatureByName(feature, events)
+		cli.AddFeatureByName(feature)
 	}
 	os.Exit(0)
 }
 
-func (cli *Cli) CopyFeatureDirectories(events *FeatureAddEvents, instructions []FeatureCopyInstruction) {
+func (cli *Cli) CopyFeatureDirectories(instructions []FeatureCopyInstruction) {
 	for _, instruction := range instructions {
-		from := instruction.From
-		to := instruction.To
+		name := instruction.FeatureName
+		from := instruction.OriginDirectory
+		to := instruction.DestinationDirectory
 
 		if files.IsDirectory(to) {
-			yes := events.ConfirmOverwrite(to)
-			if !yes {
-				cli.Infof("skipping `%s`", to)
+			if !cli.Confirmf("It looks like feature `%s` already exists in this project, would you like to overwrite it?", name) {
+				cli.Infof("skipping `%s`", name)
 				return
 			}
 
@@ -420,47 +407,10 @@ func (cli *Cli) CopyFeatureDirectories(events *FeatureAddEvents, instructions []
 	}
 }
 
-func (cli *Cli) CopyFeatureFiles(events *FeatureAddEvents, feature string, instructions []FeatureCopyInstruction) {
-	for _, instruction := range instructions {
-		from := instruction.From
-		to := instruction.To
-
-		if files.IsFile(to) {
-			yes := events.ConfirmOverwrite(feature)
-			if !yes {
-				cli.Infof("skipping feature `%s`", feature)
-				return
-			}
-
-			removeError := os.Remove(to)
-			if removeError != nil {
-				cli.Fatal(removeError)
-			}
-		}
-
-		file, openError := os.Create(to)
-		if openError != nil {
-			cli.Fatal(openError)
-		}
-
-		esfFile, esfOpenError := cli.Efs.Open(strings.ReplaceAll(from, "\\", "/"))
-		if esfOpenError != nil {
-			cli.Fatal(esfOpenError)
-		}
-
-		_, copyError := io.Copy(file, esfFile)
-		if copyError != nil {
-			cli.Fatal(copyError)
-		}
-
-		cli.Successf("feature `%s` added", feature)
-	}
-}
-
-func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
+func (cli *Cli) AddFeatureByName(feature string) {
 	if strings.ToLower(feature) == "core" {
 		core := filepath.Join("app", "frizzante", "core")
-		cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: core, To: core}})
+		cli.CopyFeatureDirectories([]FeatureCopyInstruction{{FeatureName: feature, OriginDirectory: core, DestinationDirectory: core}})
 		return
 	}
 
@@ -469,12 +419,12 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 		forms := filepath.Join("app", "frizzante", "forms")
 
 		if !files.IsDirectory(core) {
-			if events.ConfirmAddMissingDependency(feature, "Core") {
-				cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: core, To: core}})
+			if cli.Confirmf("It looks like you're missing the `%s` feature, which is required by the `%s` feature, would you like to add it?", feature, "Core") {
+				cli.CopyFeatureDirectories([]FeatureCopyInstruction{{FeatureName: feature, OriginDirectory: core, DestinationDirectory: core}})
 			}
 		}
 
-		cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: forms, To: forms}})
+		cli.CopyFeatureDirectories([]FeatureCopyInstruction{{FeatureName: feature, OriginDirectory: forms, DestinationDirectory: forms}})
 		return
 	}
 
@@ -483,19 +433,19 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 		links := filepath.Join("app", "frizzante", "links")
 
 		if !files.IsDirectory(core) {
-			if events.ConfirmAddMissingDependency(feature, "Core") {
-				cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: core, To: core}})
+			if cli.Confirmf("It looks like you're missing the `%s` feature, which is required by the `%s` feature, would you like to add it?", feature, "Core") {
+				cli.CopyFeatureDirectories([]FeatureCopyInstruction{{FeatureName: feature, OriginDirectory: core, DestinationDirectory: core}})
 			}
 		}
 
-		cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: links, To: links}})
+		cli.CopyFeatureDirectories([]FeatureCopyInstruction{{FeatureName: feature, OriginDirectory: links, DestinationDirectory: links}})
 		return
 	}
 
 	if strings.ToLower(feature) == "bun" {
 		directoryName := filepath.Join(".gen", "bun")
 
-		platform := cli.PickPlatform()
+		platform := cli.Platform()
 
 		var url string
 
@@ -523,14 +473,18 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 			fileName = filepath.Join(directoryName, "bun-linux-x64", "bun")
 		}
 
-		renameError := os.Rename(fileName, cli.Bun())
-		if renameError != nil {
-			cli.Fatal(renameError)
+		if files.IsFile(fileName) {
+			renameError := os.Rename(fileName, cli.Bun())
+			if renameError != nil {
+				cli.Fatal(renameError)
+			}
 		}
 
-		removeError := os.RemoveAll(filepath.Dir(fileName))
-		if removeError != nil {
-			cli.Fatal(removeError)
+		if files.IsDirectory(fileName) {
+			removeError := os.RemoveAll(filepath.Dir(fileName))
+			if removeError != nil {
+				cli.Fatal(removeError)
+			}
 		}
 
 		return
@@ -539,7 +493,7 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 	if strings.ToLower(feature) == "sqlite" {
 		directoryName := filepath.Join(".gen", "sqlite")
 
-		platform := cli.PickPlatform()
+		platform := cli.Platform()
 
 		var url string
 
@@ -913,9 +867,14 @@ func (cli *Cli) OnCheck() {
 	}
 }
 
+func (cli *Cli) OnConfigure() {
+	cli.OnAddFeature("bun,core")
+}
+
 func (cli *Cli) Install(name string, url string, destination string) {
 	if files.IsDirectory(destination) {
 		if !cli.Confirmf("It looks like `%s` is already installed in `%s`, would you like to overwrite it?", name, destination) {
+			cli.Infof("skipping `%s`", name)
 			return
 		}
 
@@ -1053,19 +1012,26 @@ const PlatformLinux64 Platform = 0
 const PlatformDarwin64 Platform = 1
 const PlatformDarwinArm64 Platform = 2
 
-func (cli *Cli) PickPlatform() Platform {
-	platform, platformError := pterm.
-		DefaultInteractiveSelect.
-		WithOptions([]string{
-			"Linux/x64",
-			"Darwin/arm64",
-			"Darwin/x64",
-		}).
-		WithFilter(false).
-		Show("Pick a sqlite platform")
+func (cli *Cli) Platform() Platform {
+	var platform string
 
-	if platformError != nil {
-		cli.Fatal(platformError)
+	if *FlagPlatform != "" {
+		platform = *FlagPlatform
+	} else {
+		var platformError error
+		platform, platformError = pterm.
+			DefaultInteractiveSelect.
+			WithOptions([]string{
+				"Linux/x64",
+				"Darwin/arm64",
+				"Darwin/x64",
+			}).
+			WithFilter(false).
+			Show("Pick a sqlite platform")
+
+		if platformError != nil {
+			cli.Fatal(platformError)
+		}
 	}
 
 	if platform == "Darwin/arm64" {
