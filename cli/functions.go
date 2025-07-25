@@ -35,7 +35,7 @@ var FlagBuild = flag.BoolP("build", "b", false, fmt.Sprintf("builds project"))
 var FlagHooks = flag.BoolP("hooks", "", false, fmt.Sprintf("adds git hooks"))
 var FlagConfigure = flag.BoolP("configure", "", false, fmt.Sprintf("configures project by installing necessary binaries under \"./.gen\""))
 var FlagPlatform = flag.StringP("platform", "", "", fmt.Sprintf("sets the platform, accepts either \"Linux/x64\", \"Darwin/arm64\" or \"Darwin/x64\""))
-var FlagConfirmAll = flag.BoolP("confirm-all", "", false, fmt.Sprintf("confirms all binary promps silently"))
+var FlagYes = flag.BoolP("yes", "y", false, fmt.Sprintf("confirms all binary promps silently"))
 var FlagBun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), fmt.Sprintf("sets the bun binary, defaults ti \".gen/bun/bun\""))
 var FlagSqlite = flag.StringP("sqlite", "", filepath.Join(".gen", "sqlite", "sqlite3"), fmt.Sprintf("sets the sqlite binary, defaults to \".gen/sqlite/sqlite3\""))
 
@@ -1050,7 +1050,7 @@ func (cli *Cli) Platform() Platform {
 }
 
 func (cli *Cli) Confirm(text string) bool {
-	if *FlagConfirmAll {
+	if *FlagYes {
 		return true
 	}
 
