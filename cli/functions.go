@@ -329,7 +329,7 @@ func (cli *Cli) OnCreateProject(project string) {
 func (cli *Cli) OnAddFeature(features string) {
 	if features == "?" {
 		cli.ShowFeaturesInfo()
-		os.Exit(0)
+		return
 	}
 
 	if features == ":pick" {
@@ -355,7 +355,7 @@ func (cli *Cli) OnAddFeature(features string) {
 		for _, selectedFeature := range selectedFeatures {
 			cli.AddFeatureByName(selectedFeature)
 		}
-		os.Exit(0)
+		return
 	}
 
 	splitFeatures := strings.Split(features, ",")
@@ -363,7 +363,7 @@ func (cli *Cli) OnAddFeature(features string) {
 	for _, feature := range splitFeatures {
 		cli.AddFeatureByName(feature)
 	}
-	os.Exit(0)
+	return
 }
 
 func (cli *Cli) CopyFeatureDirectories(instructions []FeatureCopyInstruction) {
@@ -836,7 +836,6 @@ func (cli *Cli) OnDev() {
 
 	air := exec.Command(cli.Air("."))
 	air.Env = append(os.Environ(), "DEV=1", "CGO_ENABLED=1")
-	air.Dir = cli.Cwd()
 	air.Stderr = os.Stderr
 	air.Stdout = os.Stdout
 	air.Stdin = os.Stdin
@@ -899,7 +898,7 @@ func (cli *Cli) OnCheck() {
 }
 
 func (cli *Cli) OnConfigure() {
-	cli.OnAddFeature("bun,air,core")
+	cli.OnAddFeature("bun,air")
 	cli.OnInstall()
 }
 
