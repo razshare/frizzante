@@ -32,7 +32,6 @@ var FlagClean = flag.BoolP("clean", "", false, fmt.Sprintf("cleans project"))
 var FlagDev = flag.BoolP("dev", "d", false, fmt.Sprintf("starts dev mode"))
 var FlagBuild = flag.BoolP("build", "b", false, fmt.Sprintf("builds project"))
 var FlagHooks = flag.BoolP("hooks", "", false, fmt.Sprintf("adds git hooks"))
-var FlagBun = flag.BoolP("bun", "", false, fmt.Sprintf("installs bun"))
 
 func (cli *Cli) OnStart() {
 	if !cli.Parsed {
@@ -120,11 +119,6 @@ func (cli *Cli) OnStart() {
 		os.Exit(0)
 	}
 
-	if *FlagBun {
-		cli.OnBun()
-		os.Exit(0)
-	}
-
 	cli.OnMenu()
 }
 
@@ -151,7 +145,6 @@ func (cli *Cli) OnMenu() {
 		"Clean",
 		"Dev",
 		"Build",
-		"Bun",
 		"Hooks",
 	}
 
@@ -260,12 +253,6 @@ func (cli *Cli) OnMenu() {
 		return
 	}
 
-	if result == "Bun" {
-		*FlagBun = true
-		cli.OnBun()
-		return
-	}
-
 	if result == "Hooks" {
 		*FlagHooks = true
 		cli.OnStart()
@@ -354,6 +341,8 @@ func (cli *Cli) OnAddFeature(features string) {
 				"Core",
 				"Forms",
 				"Links",
+				"Bun",
+				"Sqlite",
 			}).
 			WithFilter(false).
 			Show("Pick a feature to add")
@@ -384,7 +373,7 @@ func (cli *Cli) CopyFeatureDirectories(events *FeatureAddEvents, instructions []
 		if files.IsDirectory(to) {
 			yes := events.ConfirmOverwrite(to)
 			if !yes {
-				cli.Infof("Skipping `%s`.", to)
+				cli.Infof("skipping `%s`", to)
 				return
 			}
 
@@ -427,7 +416,7 @@ func (cli *Cli) CopyFeatureDirectories(events *FeatureAddEvents, instructions []
 			}
 		}
 
-		cli.Successf("Adding `%s`.", to)
+		cli.Successf("adding `%s`", to)
 	}
 }
 
@@ -439,7 +428,7 @@ func (cli *Cli) CopyFeatureFiles(events *FeatureAddEvents, feature string, instr
 		if files.IsFile(to) {
 			yes := events.ConfirmOverwrite(feature)
 			if !yes {
-				cli.Infof("Skipping feature `%s`.", feature)
+				cli.Infof("skipping feature `%s`", feature)
 				return
 			}
 
@@ -464,7 +453,7 @@ func (cli *Cli) CopyFeatureFiles(events *FeatureAddEvents, feature string, instr
 			cli.Fatal(copyError)
 		}
 
-		cli.Successf("Feature `%s` added.", feature)
+		cli.Successf("feature `%s` added", feature)
 	}
 }
 
@@ -500,6 +489,72 @@ func (cli *Cli) AddFeatureByName(feature string, events *FeatureAddEvents) {
 		}
 
 		cli.CopyFeatureDirectories(events, []FeatureCopyInstruction{{From: links, To: links}})
+		return
+	}
+
+	if strings.ToLower(feature) == "bun" {
+		directoryName := filepath.Join(".gen", "bun")
+
+		platform := cli.PickPlatform()
+
+		var url string
+
+		if platform == PlatformDarwinArm64 {
+			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-aarch64.zip"
+		} else if platform == PlatformDarwin64 {
+			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-x64.zip"
+		} else if platform == PlatformLinux64 {
+			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-x64.zip"
+		} else {
+			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-x64.zip"
+		}
+
+		cli.Install("bun", url, directoryName)
+
+		var fileName string
+
+		if platform == PlatformDarwinArm64 {
+			fileName = filepath.Join(directoryName, "bun-darwin-aarch64", "bun")
+		} else if platform == PlatformDarwin64 {
+			fileName = filepath.Join(directoryName, "bun-darwin-x64", "bun")
+		} else if platform == PlatformLinux64 {
+			fileName = filepath.Join(directoryName, "bun-linux-x64", "bun")
+		} else {
+			fileName = filepath.Join(directoryName, "bun-linux-x64", "bun")
+		}
+
+		renameError := os.Rename(fileName, cli.Bun())
+		if renameError != nil {
+			cli.Fatal(renameError)
+		}
+
+		removeError := os.RemoveAll(filepath.Dir(fileName))
+		if removeError != nil {
+			cli.Fatal(removeError)
+		}
+
+		return
+	}
+
+	if strings.ToLower(feature) == "sqlite" {
+		directoryName := filepath.Join(".gen", "sqlite")
+
+		platform := cli.PickPlatform()
+
+		var url string
+
+		if platform == PlatformDarwinArm64 {
+			url = "https://www.sqlite.org/2025/sqlite-tools-osx-arm64-3500300.zip"
+		} else if platform == PlatformDarwin64 {
+			url = "https://www.sqlite.org/2025/sqlite-tools-osx-x64-3500300.zip"
+		} else if platform == PlatformLinux64 {
+			url = "https://www.sqlite.org/2025/sqlite-tools-linux-x64-3500300.zip"
+		} else {
+			url = "https://www.sqlite.org/2025/sqlite-tools-linux-x64-3500300.zip"
+		}
+
+		cli.Install("sqlite", url, directoryName)
+
 		return
 	}
 
@@ -637,7 +692,7 @@ func (cli *Cli) OnFormat() {
 		cli.Fatal(gofmtError)
 	}
 
-	prettier := exec.Command("bunx", "prettier", "--write", ".")
+	prettier := exec.Command(filepath.Join("..", cli.Bun()), "x", "prettier", "--write", ".")
 	prettier.Dir = "app"
 	prettier.Env = append(os.Environ())
 	prettier.Stderr = os.Stderr
@@ -665,7 +720,7 @@ func (cli *Cli) OnUpdate() {
 		cli.Fatal(getError)
 	}
 
-	prettier := exec.Command("bun", "update")
+	prettier := exec.Command(filepath.Join("..", cli.Bun()), "update")
 	prettier.Dir = "app"
 	prettier.Env = append(os.Environ())
 	prettier.Stderr = os.Stderr
@@ -693,7 +748,7 @@ func (cli *Cli) OnInstall() {
 		cli.Fatal(tidyError)
 	}
 
-	install := exec.Command("bun", "install")
+	install := exec.Command(cli.Bun(), "install")
 	install.Dir = "app"
 	install.Env = append(os.Environ())
 	install.Stderr = os.Stderr
@@ -710,7 +765,7 @@ func (cli *Cli) OnInstall() {
 func (cli *Cli) OnPackage() {
 	cli.OnTouch()
 
-	server := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
+	server := exec.Command(cli.Bun(), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
 	server.Env = append(os.Environ())
 	server.Stderr = os.Stderr
@@ -721,7 +776,7 @@ func (cli *Cli) OnPackage() {
 		cli.Fatal(serverError)
 	}
 
-	client := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
+	client := exec.Command(cli.Bun(), "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
 	client.Dir = "app"
 	client.Env = append(os.Environ())
 	client.Stderr = os.Stderr
@@ -750,7 +805,7 @@ func (cli *Cli) OnPackage() {
 func (cli *Cli) OnPackageWatch() {
 	cli.OnTouch()
 
-	server := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
+	server := exec.Command(cli.Bun(), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
 	server.Env = append(os.Environ())
 	server.Stderr = os.Stderr
@@ -762,7 +817,7 @@ func (cli *Cli) OnPackageWatch() {
 	}
 	cli.Success("vite server watcher launched")
 
-	client := exec.Command("bunx", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
+	client := exec.Command(cli.Bun(), "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
 	client.Dir = "app"
 	client.Env = append(os.Environ())
 	client.Stderr = os.Stderr
@@ -837,7 +892,7 @@ func (cli *Cli) OnBuild() {
 func (cli *Cli) OnCheck() {
 	cli.OnTouch()
 
-	eslint := exec.Command("bunx", "eslint")
+	eslint := exec.Command(cli.Bun(), "x", "eslint")
 	eslint.Dir = "app"
 	eslint.Env = append(os.Environ())
 	eslint.Stdout = os.Stdout
@@ -847,7 +902,7 @@ func (cli *Cli) OnCheck() {
 		cli.Fatal(eslintError)
 	}
 
-	svelteCheck := exec.Command("bunx", "svelte-check", "--tsconfig=./tsconfig.json")
+	svelteCheck := exec.Command(cli.Bun(), "x", "svelte-check", "--tsconfig=./tsconfig.json")
 	svelteCheck.Dir = "app"
 	svelteCheck.Env = append(os.Environ())
 	svelteCheck.Stdout = os.Stdout
@@ -858,38 +913,48 @@ func (cli *Cli) OnCheck() {
 	}
 }
 
-func (cli *Cli) OnBun() {
-	spinner, spinnerError := pterm.DefaultSpinner.WithRemoveWhenDone(true).Start("installing bun...")
-	downloadError := files.DownloadFile("https://bun.sh/install", "bun.sh")
-	if downloadError != nil {
-		cli.Fatal(downloadError)
+func (cli *Cli) Install(name string, url string, destination string) {
+	if files.IsDirectory(destination) {
+		if !cli.Confirmf("It looks like `%s` is already installed in `%s`, would you like to overwrite it?", name, destination) {
+			return
+		}
+
+		removeError := os.RemoveAll(destination)
+		if removeError != nil {
+			cli.Fatal(removeError)
+		}
+	}
+
+	zipFileName := destination + ".zip"
+
+	spinner, spinnerError := pterm.DefaultSpinner.WithRemoveWhenDone(true).Start(fmt.Sprintf("installing %s...", name))
+	if spinnerError != nil {
+		cli.Fatal(spinnerError)
 	}
 	defer func() {
 		stopError := spinner.Stop()
 		if stopError != nil {
 			cli.Fatal(stopError)
 		}
-		removeError := os.Remove("bun.sh")
+	}()
+
+	downloadError := files.DownloadFile(url, zipFileName)
+	if downloadError != nil {
+		cli.Fatal(downloadError)
+	}
+	defer func() {
+		removeError := os.Remove(zipFileName)
 		if removeError != nil {
 			cli.Fatal(removeError)
 		}
 	}()
 
-	if spinnerError != nil {
-		cli.Fatal(spinnerError)
+	unzipError := files.UnzipFile(zipFileName, destination)
+	if unzipError != nil {
+		cli.Fatal(unzipError)
 	}
 
-	bash := exec.Command("bash", "./bun.sh")
-	bash.Env = append(os.Environ())
-	//bash.Stdout = os.Stdout
-	bash.Stdin = os.Stdin
-
-	bashError := bash.Run()
-	if bashError != nil {
-		cli.Fatal(bashError)
-	}
-
-	cli.Success("bun was installed")
+	cli.Successf("%s installed in `%s`", name, destination)
 }
 
 func (cli *Cli) ShowFeaturesInfo() {
@@ -916,7 +981,7 @@ func (cli *Cli) ShowFeaturesInfo() {
 		{
 			"Core",
 			strings.Join([]string{
-				"The core of frizzante.",
+				"Adds the core of frizzante.",
 				"A bundle of scripts and components that manage",
 				"view rendering, view transitions, automatic state management,",
 				"provides commonly used functions.",
@@ -927,7 +992,7 @@ func (cli *Cli) ShowFeaturesInfo() {
 		{
 			"Forms",
 			strings.Join([]string{
-				"A <Form> component which behaves like a <form> element",
+				"Adds a <Form> component which behaves like a <form> element",
 				"with some additional features that facilitate",
 				"the usage of web standards.",
 				"",
@@ -939,13 +1004,31 @@ func (cli *Cli) ShowFeaturesInfo() {
 		{
 			"Links",
 			strings.Join([]string{
-				"A <Link> component which behaves like an <a> element",
+				"Adds a <Link> component which behaves like an <a> element",
 				"with some additional features that facilitate",
 				"the usage of web standards.",
 				"",
 				"Source code will be dropped in `app/frizzante/links`.",
 				"",
 				"Requires `Core`.",
+			}, "\n"),
+		},
+		{
+			"Bun",
+			strings.Join([]string{
+				"Adds bun to the project.",
+				"",
+				"Binaries will be dropped in `.gen/bun`.",
+				"",
+				"Bun is required for development mode.",
+			}, "\n"),
+		},
+		{
+			"Sqlite",
+			strings.Join([]string{
+				"Adds sqlite to the project.",
+				"",
+				"Binaries will be dropped in `.gen/sqlite`.",
 			}, "\n"),
 		},
 	}
@@ -964,6 +1047,38 @@ func (cli *Cli) ShowFeaturesInfo() {
 	}
 }
 
+type Platform uint
+
+const PlatformLinux64 Platform = 0
+const PlatformDarwin64 Platform = 1
+const PlatformDarwinArm64 Platform = 2
+
+func (cli *Cli) PickPlatform() Platform {
+	platform, platformError := pterm.
+		DefaultInteractiveSelect.
+		WithOptions([]string{
+			"Linux/x64",
+			"Darwin/arm64",
+			"Darwin/x64",
+		}).
+		WithFilter(false).
+		Show("Pick a sqlite platform")
+
+	if platformError != nil {
+		cli.Fatal(platformError)
+	}
+
+	if platform == "Darwin/arm64" {
+		return PlatformDarwinArm64
+	}
+
+	if platform == "Darwin/x64" {
+		return PlatformDarwin64
+	}
+
+	return PlatformLinux64
+}
+
 func (cli *Cli) Confirm(text string) bool {
 	yes, showError := pterm.
 		DefaultInteractiveConfirm.
@@ -977,6 +1092,18 @@ func (cli *Cli) Confirm(text string) bool {
 	}
 
 	return yes
+}
+
+func (cli *Cli) Bun() string {
+	return filepath.Join(".gen", "bun", "bun")
+}
+
+func (cli *Cli) Sqlite() string {
+	return filepath.Join(".gen", "sqlite", "sqlite3")
+}
+
+func (cli *Cli) Confirmf(template string, vars ...any) bool {
+	return cli.Confirm(fmt.Sprintf(template, vars...))
 }
 
 func (cli *Cli) Fatalf(template string, vars ...any) {

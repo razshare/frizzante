@@ -7,6 +7,10 @@ type FeatureAddEvents struct {
 	ConfirmAddMissingDependency func(feature string, dependency string) bool
 }
 
+type InstallEvents struct {
+	ConfirmOverwrite func(name string) bool
+}
+
 type FeatureCopyInstruction struct {
 	From string
 	To   string
