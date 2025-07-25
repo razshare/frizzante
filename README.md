@@ -10,17 +10,20 @@ Frizzante is an opinionated web server framework written in [Go](https://go.dev/
 
 # Prerequisites
 
-Install build tools.
+### Install build tools
+
+On Linux
+```sh
+sudo apt-get install build-essential
+```
+
+On Darwin (MacOS)
 
 ```sh
-# For Linux
-sudo apt-get install build-essential
-
-# For Darwin (MacOS)
 xcode-select --install
 ```
 
-Install  `frizzante`.
+### Install  `frizzante`
 
 ```sh
 go install github.com/razshare/frizzante@latest
