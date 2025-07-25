@@ -45,11 +45,6 @@ func (cli *Cli) OnStart() {
 		cli.Parsed = true
 	}
 
-	*FlagBun = "~/.bun/bin//bun"
-
-	cli.OnUpdate()
-	os.Exit(0)
-
 	if *FlagHelp {
 		cli.OnHelp()
 		os.Exit(0)
