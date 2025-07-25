@@ -34,7 +34,7 @@ var FlagDev = flag.BoolP("dev", "d", false, fmt.Sprintf("starts dev mode"))
 var FlagBuild = flag.BoolP("build", "b", false, fmt.Sprintf("builds project"))
 var FlagHooks = flag.BoolP("hooks", "", false, fmt.Sprintf("adds git hooks"))
 var FlagConfigure = flag.BoolP("configure", "", false, fmt.Sprintf("configures project by installing necessary binaries under \"./.gen\""))
-var FlagPlatform = flag.StringP("platform", "", "", fmt.Sprintf("sets the platform, accepts either \"Linux/amd64\", \"Darwin/arm64\" or \"Darwin/amd64\""))
+var FlagPlatform = flag.StringP("platform", "", "", fmt.Sprintf("sets the platform, accepts either \"linux/amd64\", \"darwin/arm64\" or \"darwin/amd64\""))
 var FlagYes = flag.BoolP("yes", "y", false, fmt.Sprintf("confirms all binary promps silently"))
 var FlagGo = flag.StringP("go", "", "go", fmt.Sprintf("sets the go binary, defaults to \"go\""))
 var FlagAir = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), fmt.Sprintf("sets the air binary, defaults to \".gen/air/air\""))
@@ -1075,15 +1075,20 @@ func (cli *Cli) Platform() Platform {
 		*FlagPlatform = platform
 	}
 
-	if platform == "Darwin/arm64" {
+	if strings.ToLower(platform) == "Linux/amd64" {
+		return PlatformLinuxAmd64
+	}
+
+	if strings.ToLower(platform) == "Darwin/arm64" {
 		return PlatformDarwinArm64
 	}
 
-	if platform == "Darwin/amd64" {
+	if strings.ToLower(platform) == "Darwin/amd64" {
 		return PlatformDarwinAmd64
 	}
 
-	return PlatformLinuxAmd64
+	cli.Fatalf("unknown platform `%s`", platform)
+	return PlatformLinuxAmd64 // Noop, cli.Fatalf will crash intentionally.
 }
 
 func (cli *Cli) Confirm(text string) bool {
