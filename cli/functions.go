@@ -560,7 +560,7 @@ func (cli *Cli) OnHooks() {
 		cli.Success("pre-commit script overwritten")
 	}
 
-	err := os.WriteFile(fileName, []byte("frizzante --test"), os.ModePerm)
+	err := os.WriteFile(fileName, []byte("make test"), os.ModePerm)
 	if err != nil {
 		cli.Fatal(err)
 	}
