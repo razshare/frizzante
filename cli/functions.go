@@ -720,7 +720,7 @@ func (cli *Cli) OnInstall() {
 func (cli *Cli) OnPackage() {
 	cli.OnTouch()
 
-	server := exec.Command(cli.Bun(), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
+	server := exec.Command(filepath.Join("..", cli.Bun()), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
 	server.Env = append(os.Environ())
 	server.Stderr = os.Stderr
@@ -731,7 +731,7 @@ func (cli *Cli) OnPackage() {
 		cli.Fatal(serverError)
 	}
 
-	client := exec.Command(cli.Bun(), "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
+	client := exec.Command(filepath.Join("..", cli.Bun()), "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
 	client.Dir = "app"
 	client.Env = append(os.Environ())
 	client.Stderr = os.Stderr
