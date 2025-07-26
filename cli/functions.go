@@ -889,6 +889,17 @@ func (cli *Cli) OnBuild() {
 
 	build := exec.Command(cli.Go("."), "build", "-o=.gen/bin/app", ".")
 	build.Env = append(os.Environ(), "CGO_ENABLED=1")
+
+	if strings.ToLower(*FlagPlatform) == "linux/amd64" {
+		build.Env = append(build.Env, "GOOS=linux", "GOARCH=amd64")
+	} else if strings.ToLower(*FlagPlatform) == "linux/arm64" {
+		build.Env = append(build.Env, "GOOS=linux", "GOARCH=arm64")
+	} else if strings.ToLower(*FlagPlatform) == "linux/arm64" {
+		build.Env = append(build.Env, "GOOS=darwin", "GOARCH=amd64")
+	} else if strings.ToLower(*FlagPlatform) == "linux/arm64" {
+		build.Env = append(build.Env, "GOOS=darwin", "GOARCH=arm64")
+	}
+
 	build.Stderr = os.Stderr
 	build.Stdout = os.Stdout
 	build.Stdin = os.Stdin
