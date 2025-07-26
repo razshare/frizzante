@@ -40,6 +40,7 @@ var FlagGo = flag.StringP("go", "", "go", fmt.Sprintf("sets the go binary"))
 var FlagAir = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), fmt.Sprintf("sets the air binary"))
 var FlagBun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), fmt.Sprintf("sets the bun binary"))
 var FlagSqlite = flag.StringP("sqlite", "", filepath.Join(".gen", "sqlite", "sqlite3"), fmt.Sprintf("sets the sqlite binary"))
+var FlagSqlc = flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"), fmt.Sprintf("sets the sqlc binary"))
 
 func (cli *Cli) OnStart() {
 	if !cli.Parsed {
@@ -326,46 +327,6 @@ func (cli *Cli) OnCreateProject(project string) {
 	os.Exit(0)
 }
 
-func (cli *Cli) OnAddFeature(features string) {
-	if features == "?" {
-		cli.ShowFeaturesInfo()
-		return
-	}
-
-	if features == ":pick" {
-		selectedFeatures, showError := pterm.
-			DefaultInteractiveMultiselect.
-			WithKeySelect(keys.Space).
-			WithKeyConfirm(keys.Enter).
-			WithOptions([]string{
-				"Core",
-				"Forms",
-				"Links",
-				"Air",
-				"Bun",
-				"Sqlite",
-			}).
-			WithFilter(false).
-			Show("Pick a feature to add")
-
-		if showError != nil {
-			cli.Fatal(showError)
-		}
-
-		for _, selectedFeature := range selectedFeatures {
-			cli.AddFeatureByName(selectedFeature)
-		}
-		return
-	}
-
-	splitFeatures := strings.Split(features, ",")
-
-	for _, feature := range splitFeatures {
-		cli.AddFeatureByName(feature)
-	}
-	return
-}
-
 func (cli *Cli) CopyFeatureDirectories(instructions []FeatureCopyInstruction) {
 	for _, instruction := range instructions {
 		name := instruction.FeatureName
@@ -548,6 +509,28 @@ func (cli *Cli) AddFeatureByName(feature string) {
 		return
 	}
 
+	if strings.ToLower(feature) == "sqlc" {
+		directoryName := filepath.Join(".gen", "sqlc")
+
+		platform := cli.Platform()
+
+		var url string
+
+		if platform == PlatformDarwinArm64 {
+			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_arm64.zip"
+		} else if platform == PlatformDarwinAmd64 {
+			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_amd64.zip"
+		} else if platform == PlatformLinuxAmd64 {
+			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.zip"
+		} else {
+			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.zip"
+		}
+
+		cli.Install("sqlc", url, directoryName)
+
+		return
+	}
+
 	cli.Fatalf("unknown feature `%s`", feature)
 }
 
@@ -557,6 +540,47 @@ func (cli *Cli) Cwd() string {
 		cli.Fatal(wdDir)
 	}
 	return wd
+}
+
+func (cli *Cli) OnAddFeature(features string) {
+	if features == "?" {
+		cli.ShowFeaturesInfo()
+		return
+	}
+
+	if features == ":pick" {
+		selectedFeatures, showError := pterm.
+			DefaultInteractiveMultiselect.
+			WithKeySelect(keys.Space).
+			WithKeyConfirm(keys.Enter).
+			WithOptions([]string{
+				"Core",
+				"Forms",
+				"Links",
+				"Air",
+				"Bun",
+				"Sqlite",
+				"Sqlc",
+			}).
+			WithFilter(false).
+			Show("Pick a feature to add")
+
+		if showError != nil {
+			cli.Fatal(showError)
+		}
+
+		for _, selectedFeature := range selectedFeatures {
+			cli.AddFeatureByName(selectedFeature)
+		}
+		return
+	}
+
+	splitFeatures := strings.Split(features, ",")
+
+	for _, feature := range splitFeatures {
+		cli.AddFeatureByName(feature)
+	}
+	return
 }
 
 func (cli *Cli) OnTest() {
@@ -1056,7 +1080,7 @@ func (cli *Cli) Platform() Platform {
 	var platform string
 
 	if *FlagPlatform != "" {
-		platform = *FlagPlatform
+		platform = strings.ToLower(*FlagPlatform)
 	} else {
 		var platformError error
 		platform, platformError = pterm.
