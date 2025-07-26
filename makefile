@@ -11,6 +11,10 @@ build:
 	env GOOS=linux GOARCH=amd64 go build -o=.gen/bin/frizzante-linux-amd64 . && \
 	zip -9 .gen/bin/frizzante-linux-amd64.zip .gen/bin/frizzante-linux-amd64 && \
 	rm .gen/bin/frizzante-linux-amd64
+# linux-arm64
+	env GOOS=linux GOARCH=arm64 go build -o=.gen/bin/frizzante-linux-arm64 . && \
+	zip -9 .gen/bin/frizzante-linux-arm64.zip .gen/bin/frizzante-linux-arm64 && \
+	rm .gen/bin/frizzante-linux-arm64
 # darwin-amd64
 	env GOOS=darwin GOARCH=amd64 go build -o=.gen/bin/frizzante-darwin-amd64 . && \
 	zip -9 .gen/bin/frizzante-darwin-amd64.zip .gen/bin/frizzante-darwin-amd64 && \
