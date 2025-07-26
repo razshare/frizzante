@@ -442,9 +442,9 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			fileName = filepath.Join(directoryName, "bun-darwin-aarch64", "bun")
 		} else if platform == PlatformDarwinAmd64 {
 			fileName = filepath.Join(directoryName, "bun-darwin-x64", "bun")
+		} else if platform == PlatformLinuxArm64 {
+			fileName = filepath.Join(directoryName, "bun-linux-aarch64", "bun")
 		} else if platform == PlatformLinuxAmd64 {
-			fileName = filepath.Join(directoryName, "bun-linux-x64", "bun")
-		} else {
 			fileName = filepath.Join(directoryName, "bun-linux-x64", "bun")
 		}
 
@@ -455,8 +455,9 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			}
 		}
 
-		if files.IsDirectory(fileName) {
-			removeError := os.RemoveAll(filepath.Dir(fileName))
+		installDirectory := filepath.Dir(fileName)
+		if files.IsDirectory(directoryName) {
+			removeError := os.RemoveAll(installDirectory)
 			if removeError != nil {
 				cli.Fatal(removeError)
 			}
