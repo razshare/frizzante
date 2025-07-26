@@ -1080,7 +1080,7 @@ func (cli *Cli) Platform() Platform {
 	var platform string
 
 	if *FlagPlatform != "" {
-		platform = strings.ToLower(*FlagPlatform)
+		platform = *FlagPlatform
 	} else {
 		var platformError error
 		platform, platformError = pterm.
@@ -1099,15 +1099,15 @@ func (cli *Cli) Platform() Platform {
 		*FlagPlatform = platform
 	}
 
-	if strings.ToLower(platform) == "Linux/amd64" {
+	if strings.ToLower(platform) == "linux/amd64" {
 		return PlatformLinuxAmd64
 	}
 
-	if strings.ToLower(platform) == "Darwin/arm64" {
+	if strings.ToLower(platform) == "darwin/arm64" {
 		return PlatformDarwinArm64
 	}
 
-	if strings.ToLower(platform) == "Darwin/amd64" {
+	if strings.ToLower(platform) == "darwin/amd64" {
 		return PlatformDarwinAmd64
 	}
 
