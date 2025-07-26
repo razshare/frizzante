@@ -939,7 +939,7 @@ func (cli *Cli) Install(name string, url string, destination string) {
 		}
 	}
 
-	spinner, spinnerError := pterm.DefaultSpinner.WithRemoveWhenDone(true).Start(fmt.Sprintf("installing %s...", name))
+	spinner, spinnerError := pterm.DefaultSpinner.WithRemoveWhenDone(true).Start(fmt.Sprintf("installing `%s` from `%s`...", name, url))
 	if spinnerError != nil {
 		cli.Fatal(spinnerError)
 	}
