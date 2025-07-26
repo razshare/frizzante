@@ -34,7 +34,7 @@ var FlagDev = flag.BoolP("dev", "d", false, fmt.Sprintf("starts dev mode"))
 var FlagBuild = flag.BoolP("build", "b", false, fmt.Sprintf("builds project"))
 var FlagHooks = flag.BoolP("hooks", "", false, fmt.Sprintf("adds git hooks"))
 var FlagConfigure = flag.BoolP("configure", "", false, fmt.Sprintf("configures project by installing necessary binaries under \"./.gen\""))
-var FlagPlatform = flag.StringP("platform", "", "", fmt.Sprintf("sets the platform, accepts either \"linux/amd64\", \"darwin/arm64\" or \"darwin/amd64\""))
+var FlagPlatform = flag.StringP("platform", "", "", fmt.Sprintf("sets the platform, accepts either \"linux/amd64\", \"linux/arm64\", \"darwin/arm64\" or \"darwin/amd64\""))
 var FlagYes = flag.BoolP("yes", "y", false, fmt.Sprintf("confirms all binary promps silently"))
 var FlagGo = flag.StringP("go", "", "go", fmt.Sprintf("sets the go binary"))
 var FlagAir = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), fmt.Sprintf("sets the air binary"))
@@ -428,9 +428,9 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-aarch64.zip"
 		} else if platform == PlatformDarwinAmd64 {
 			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-x64.zip"
+		} else if platform == PlatformLinuxArm64 {
+			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-aarch64.zip"
 		} else if platform == PlatformLinuxAmd64 {
-			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-x64.zip"
-		} else {
 			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-x64.zip"
 		}
 
@@ -476,9 +476,9 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			url = "https://www.sqlite.org/2025/sqlite-tools-osx-arm64-3500300.zip"
 		} else if platform == PlatformDarwinAmd64 {
 			url = "https://www.sqlite.org/2025/sqlite-tools-osx-x64-3500300.zip"
+		} else if platform == PlatformLinuxArm64 {
+			cli.Fatal("sqlite doesn't support platform `linux/arm64`")
 		} else if platform == PlatformLinuxAmd64 {
-			url = "https://www.sqlite.org/2025/sqlite-tools-linux-x64-3500300.zip"
-		} else {
 			url = "https://www.sqlite.org/2025/sqlite-tools-linux-x64-3500300.zip"
 		}
 
@@ -498,9 +498,9 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_darwin_arm64"
 		} else if platform == PlatformDarwinAmd64 {
 			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_darwin_amd64"
+		} else if platform == PlatformLinuxArm64 {
+			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_arm64"
 		} else if platform == PlatformLinuxAmd64 {
-			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_amd64"
-		} else {
 			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_amd64"
 		}
 
@@ -520,6 +520,8 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_arm64.zip"
 		} else if platform == PlatformDarwinAmd64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_amd64.zip"
+		} else if platform == PlatformLinuxArm64 {
+			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_arm64.zip"
 		} else if platform == PlatformLinuxAmd64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.zip"
 		} else {
@@ -1073,8 +1075,9 @@ func (cli *Cli) ShowFeaturesInfo() {
 type Platform uint
 
 const PlatformLinuxAmd64 Platform = 0
-const PlatformDarwinAmd64 Platform = 1
-const PlatformDarwinArm64 Platform = 2
+const PlatformLinuxArm64 Platform = 1
+const PlatformDarwinAmd64 Platform = 2
+const PlatformDarwinArm64 Platform = 3
 
 func (cli *Cli) Platform() Platform {
 	var platform string
@@ -1087,6 +1090,7 @@ func (cli *Cli) Platform() Platform {
 			DefaultInteractiveSelect.
 			WithOptions([]string{
 				"Linux/amd64",
+				"Linux/arm64",
 				"Darwin/amd64",
 				"Darwin/arm64",
 			}).
@@ -1101,6 +1105,10 @@ func (cli *Cli) Platform() Platform {
 
 	if strings.ToLower(platform) == "linux/amd64" {
 		return PlatformLinuxAmd64
+	}
+
+	if strings.ToLower(platform) == "linux/arm64" {
+		return PlatformLinuxArm64
 	}
 
 	if strings.ToLower(platform) == "darwin/arm64" {
