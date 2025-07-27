@@ -22,8 +22,8 @@ import (
 
 func New() *Server {
 	return &Server{
-		Address:         "127.0.0.1:8080",
-		SecureAddress:   "127.0.0.1:8383",
+		Address:         "0.0.0.0:8080",
+		SecureAddress:   "0.0.0.0:8383",
 		FormMaxMemory:   4096,
 		HttpServer:      nil,
 		HttpMux:         http.NewServeMux(),
