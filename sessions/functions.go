@@ -8,6 +8,8 @@ import (
 )
 
 // StartWithState starts a session with a given initial state.
+//
+// Deprecated: Use sessions.New followed by Session.Start.
 func StartWithState[T any](con *connections.Connection, state T) *Session[T] {
 	session := &Session[T]{
 		Connection: con,
@@ -24,9 +26,29 @@ func StartWithState[T any](con *connections.Connection, state T) *Session[T] {
 }
 
 // Start starts a session with zero state.
+//
+// Deprecated: Use sessions.New followed by Session.Start.
 func Start[T any](con *connections.Connection) *Session[T] {
 	var state T
 	return StartWithState(con, state)
+}
+
+// New creates a new session with a zero initial state.
+func New[T any](con *connections.Connection, state T) *Session[T] {
+	return &Session[T]{Connection: con, State: &state}
+}
+
+// Start loads the State if the current connection defines a session-id cookie.
+//
+// If the session-id cookie is missing it will create a new one and send it to the user.
+func (session *Session[T]) Start() *Session[T] {
+	if !session.Exists() {
+		session.Save()
+	} else {
+		session.Load()
+	}
+
+	return session
 }
 
 // Id tries to find a session id among the user's cookies.
