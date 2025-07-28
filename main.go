@@ -7,7 +7,8 @@ import (
 
 //go:embed version
 //go:embed app/frizzante
-var efs embed.FS
-var cli = frizzanteCli.Cli{Efs: efs}
+//go:embed sqlc.yaml
+var cliEfs embed.FS
+var cli = frizzanteCli.Cli{Efs: cliEfs}
 
 func main() { cli.OnStart() }

@@ -2,37 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/razshare/frizzante/connections"
-	"github.com/razshare/frizzante/nums"
-	"github.com/razshare/frizzante/routes"
-	"github.com/razshare/frizzante/servers"
-	"github.com/razshare/frizzante/views"
 	"io"
 	"net/http"
 	"strings"
 	"testing"
-	"time"
 )
 
 func TestRenderServer(test *testing.T) {
-	port := nums.NextNumber(8080)
-	server := servers.New()
-	server.Efs = testEfs
-	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
-	server.AddRoute(routes.Route{Pattern: "GET /welcome", Handler: func(con *connections.Connection) {
-		con.SendView(views.View{
-			Name:       "Welcome",
-			RenderMode: views.RenderModeServer,
-			Data:       map[string]any{"name": "world"},
-		})
-	}})
-
-	go server.Start()
-	defer func() { server.Stop() }()
-	time.Sleep(1 * time.Second)
+	lock := <-server
+	defer func() { server <- lock }()
 
 	expected := "<h1>Welcome to Frizzante.</h1>"
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/welcome", port))
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderServer", port))
 	if getError != nil {
 		test.Fatal(getError)
 	}
@@ -52,24 +33,11 @@ func TestRenderServer(test *testing.T) {
 }
 
 func TestRenderClient(test *testing.T) {
-	port := nums.NextNumber(8080)
-	server := servers.New()
-	server.Efs = testEfs
-	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
-	server.AddRoute(routes.Route{Pattern: "GET /welcome", Handler: func(con *connections.Connection) {
-		con.SendView(views.View{
-			Name:       "Welcome",
-			RenderMode: views.RenderModeClient,
-			Data:       map[string]any{"name": "world"},
-		})
-	}})
-	go server.Start()
-	defer func() { server.Stop() }()
-
-	time.Sleep(1 * time.Second)
+	lock := <-server
+	defer func() { server <- lock }()
 
 	expected := "<script type=\"application/javascript\">function target(){return document.getElementById("
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/welcome", port))
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderClient", port))
 	if getError != nil {
 		test.Fatal(getError)
 	}

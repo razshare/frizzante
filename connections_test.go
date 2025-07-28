@@ -2,35 +2,27 @@ package main
 
 import (
 	"fmt"
-	"github.com/razshare/frizzante/connections"
-	"github.com/razshare/frizzante/nums"
-	"github.com/razshare/frizzante/routes"
-	"github.com/razshare/frizzante/servers"
+	"io"
+	"log"
 	"net/http"
 	"testing"
-	"time"
 )
 
-func TestConnection_SendStatus(test *testing.T) {
+func TestConnectionSendStatus(test *testing.T) {
+	lock := <-server
+	defer func() { server <- lock }()
+
 	expected := 201
-	port := nums.NextNumber(8080)
-	server := servers.New()
-	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
-	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
-		con.SendStatus(expected)
-		con.SendMessage("ok")
-	}})
-
-	go server.Start()
-	defer func() { server.Stop() }()
-
-	time.Sleep(1 * time.Second)
-
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", port))
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestConnectionSendStatus", port))
 	if getError != nil {
 		test.Fatal(getError)
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) {
+		closeError := Body.Close()
+		if closeError != nil {
+			log.Fatal(closeError)
+		}
+	}(response.Body)
 
 	actual := response.StatusCode
 
@@ -39,26 +31,21 @@ func TestConnection_SendStatus(test *testing.T) {
 	}
 }
 
-func TestConnection_SendHeader(test *testing.T) {
+func TestConnectionSendHeader(test *testing.T) {
+	lock := <-server
+	defer func() { server <- lock }()
+
 	expected := "application/json"
-	port := nums.NextNumber(8080)
-	server := servers.New()
-	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
-	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
-		con.SendHeader("Content-Type", expected)
-		con.SendMessage("{}")
-	}})
-
-	go server.Start()
-	defer func() { server.Stop() }()
-
-	time.Sleep(1 * time.Second)
-
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", port))
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestConnectionSendHeader", port))
 	if getError != nil {
 		test.Fatal(getError)
 	}
-	defer response.Body.Close()
+	defer func(Body io.ReadCloser) {
+		closeError := Body.Close()
+		if closeError != nil {
+			log.Fatal(closeError)
+		}
+	}(response.Body)
 
 	actual := response.Header.Get("Content-Type")
 

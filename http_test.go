@@ -2,31 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/razshare/frizzante/connections"
-	"github.com/razshare/frizzante/nums"
-	"github.com/razshare/frizzante/routes"
-	"github.com/razshare/frizzante/servers"
 	"io"
 	"net/http"
 	"testing"
-	"time"
 )
 
-func TestServer_AddRoute(test *testing.T) {
-	expected := "hello"
-	server := servers.New()
-	port := nums.NextNumber(8080)
-	server.Address = fmt.Sprintf("127.0.0.1:%d", port)
-	server.AddRoute(routes.Route{Pattern: "GET /", Handler: func(con *connections.Connection) {
-		con.SendMessage(expected)
-	}})
+func TestServerAddRoute(test *testing.T) {
+	lock := <-server
+	defer func() { server <- lock }()
 
-	go server.Start()
-	defer func() { server.Stop() }()
-
-	time.Sleep(1 * time.Second)
-
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", port))
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestServerAddRoute", port))
 	if getError != nil {
 		test.Fatal(getError)
 	}
@@ -36,6 +21,7 @@ func TestServer_AddRoute(test *testing.T) {
 		test.Fatal(readAllError)
 	}
 
+	expected := "hello"
 	actual := string(readAllBytes)
 
 	if actual != expected {

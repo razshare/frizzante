@@ -20,27 +20,27 @@ import (
 var FlagHelp = flag.BoolP("help", "h", false, "shows this help document")
 var FlagVersion = flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
 var FlagCreateProject = flag.StringP("create-project", "c", "", "creates a frizzante project")
-var FlagAdd = flag.StringP("add", "a", "", fmt.Sprintf("adds features, see  \"-a?\" or \"--add ?\" for more details"))
-var FlagTest = flag.BoolP("test", "t", false, fmt.Sprintf("runs tests"))
-var FlagPackage = flag.BoolP("package", "p", false, fmt.Sprintf("packages app, result will be dropped in app/dist"))
-var FlagPackageWatch = flag.BoolP("package-watch", "", false, fmt.Sprintf("watches and packages app, result will be dropped in app/dist"))
-var FlagCheck = flag.BoolP("check", "", false, fmt.Sprintf("checks source code for errors"))
-var FlagUpdate = flag.BoolP("update", "u", false, fmt.Sprintf("updates dependencies"))
-var FlagInstall = flag.BoolP("install", "i", false, fmt.Sprintf("installs dependencies"))
-var FlagFormat = flag.BoolP("format", "f", false, fmt.Sprintf("formats source code"))
-var FlagTouch = flag.BoolP("touch", "", false, fmt.Sprintf("creates placeholders in app/dist (useful for go:embed)"))
-var FlagClean = flag.BoolP("clean", "", false, fmt.Sprintf("cleans project"))
-var FlagDev = flag.BoolP("dev", "d", false, fmt.Sprintf("starts dev mode"))
-var FlagBuild = flag.BoolP("build", "b", false, fmt.Sprintf("builds project"))
-var FlagHooks = flag.BoolP("hooks", "", false, fmt.Sprintf("adds git hooks"))
-var FlagConfigure = flag.BoolP("configure", "", false, fmt.Sprintf("configures project by installing necessary binaries under \"./.gen\""))
-var FlagPlatform = flag.StringP("platform", "", "", fmt.Sprintf("sets the platform, accepts either \"linux/amd64\", \"linux/arm64\", \"darwin/arm64\" or \"darwin/amd64\""))
-var FlagYes = flag.BoolP("yes", "y", false, fmt.Sprintf("confirms all binary promps silently"))
-var FlagGo = flag.StringP("go", "", "go", fmt.Sprintf("sets the go binary"))
-var FlagAir = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), fmt.Sprintf("sets the air binary"))
-var FlagBun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), fmt.Sprintf("sets the bun binary"))
-var FlagSqlite = flag.StringP("sqlite", "", filepath.Join(".gen", "sqlite", "sqlite3"), fmt.Sprintf("sets the sqlite binary"))
-var FlagSqlc = flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"), fmt.Sprintf("sets the sqlc binary"))
+var FlagAdd = flag.StringP("add", "a", "", "adds features, see  \"-a?\" or \"--add ?\" for more details")
+var FlagTest = flag.BoolP("test", "t", false, "runs tests")
+var FlagPackage = flag.BoolP("package", "p", false, "packages app, result will be dropped in app/dist")
+var FlagPackageWatch = flag.BoolP("package-watch", "", false, "watches and packages app, result will be dropped in app/dist")
+var FlagCheck = flag.BoolP("check", "", false, "checks source code for errors")
+var FlagUpdate = flag.BoolP("update", "u", false, "updates dependencies")
+var FlagInstall = flag.BoolP("install", "i", false, "installs dependencies")
+var FlagFormat = flag.BoolP("format", "f", false, "formats source code")
+var FlagTouch = flag.BoolP("touch", "", false, "creates placeholders in app/dist (useful for go:embed)")
+var FlagClean = flag.BoolP("clean", "", false, "cleans project")
+var FlagDev = flag.BoolP("dev", "d", false, "starts dev mode")
+var FlagBuild = flag.BoolP("build", "b", false, "builds project")
+var FlagHooks = flag.BoolP("hooks", "", false, "adds git hooks")
+var FlagConfigure = flag.BoolP("configure", "", false, "configures project by installing necessary binaries under \"./.gen\"")
+var FlagPlatform = flag.StringP("platform", "", "", "sets the platform, accepts either \"linux/amd64\", \"linux/arm64\", \"darwin/arm64\" or \"darwin/amd64\"")
+var FlagYes = flag.BoolP("yes", "y", false, "confirms all binary prompts silently")
+var FlagGo = flag.StringP("go", "", "go", "sets the go binary")
+var FlagAir = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), "sets the air binary")
+var FlagBun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), "sets the bun binary")
+var FlagSqlc = flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"), "sets the sqlc binary")
+var FlagSqlcGenerate = flag.BoolP("sqlc-generate", "", false, "generates sqlc queries")
 
 func (cli *Cli) OnStart() {
 	if !cli.Parsed {
@@ -133,6 +133,11 @@ func (cli *Cli) OnStart() {
 		os.Exit(0)
 	}
 
+	if *FlagSqlcGenerate {
+		cli.OnSqlcGenerate()
+		os.Exit(0)
+	}
+
 	cli.OnMenu()
 }
 
@@ -161,6 +166,7 @@ func (cli *Cli) OnMenu() {
 		"Build",
 		"Hooks",
 		"Configure",
+		"Sqlc Generate",
 	}
 
 	result, showError := pterm.DefaultInteractiveSelect.WithOptions(options).Show("Pick an option")
@@ -276,6 +282,12 @@ func (cli *Cli) OnMenu() {
 
 	if result == "Configure" {
 		*FlagConfigure = true
+		cli.OnStart()
+		return
+	}
+
+	if result == "Sqlc Generate" {
+		*FlagSqlcGenerate = true
 		cli.OnStart()
 		return
 	}
@@ -466,28 +478,6 @@ func (cli *Cli) AddFeatureByName(feature string) {
 		return
 	}
 
-	if strings.ToLower(feature) == "sqlite" {
-		directoryName := filepath.Join(".gen", "sqlite")
-
-		platform := cli.Platform()
-
-		var url string
-
-		if platform == PlatformDarwinArm64 {
-			url = "https://www.sqlite.org/2025/sqlite-tools-osx-arm64-3500300.zip"
-		} else if platform == PlatformDarwinAmd64 {
-			url = "https://www.sqlite.org/2025/sqlite-tools-osx-x64-3500300.zip"
-		} else if platform == PlatformLinuxArm64 {
-			cli.Fatal("sqlite doesn't support platform `linux/arm64`")
-		} else if platform == PlatformLinuxAmd64 {
-			url = "https://www.sqlite.org/2025/sqlite-tools-linux-x64-3500300.zip"
-		}
-
-		cli.Install("sqlite", url, directoryName)
-
-		return
-	}
-
 	if strings.ToLower(feature) == "air" {
 		directoryName := filepath.Join(".gen", "air")
 
@@ -525,11 +515,54 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_arm64.zip"
 		} else if platform == PlatformLinuxAmd64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.zip"
-		} else {
-			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.zip"
 		}
 
 		cli.Install("sqlc", url, directoryName)
+
+		writeSchemaSql := true
+		writeQueriesSql := true
+		writeSqlcYaml := true
+
+		if files.IsFile("schema.sql") {
+			writeSchemaSql = cli.Confirm("File `schema.sql` already exists, would you like to overwrite it?")
+		}
+
+		if writeSchemaSql {
+			writeError := os.WriteFile("schema.sql", make([]byte, 0), os.ModePerm)
+			if writeError != nil {
+				cli.Fatal(writeError)
+			}
+			cli.Success("schema.sql created")
+		}
+
+		if files.IsFile("queries.sql") {
+			writeQueriesSql = cli.Confirm("File `queries.sql` already exists, would you like to overwrite it?")
+		}
+
+		if writeQueriesSql {
+			writeError := os.WriteFile("queries.sql", make([]byte, 0), os.ModePerm)
+			if writeError != nil {
+				cli.Fatal(writeError)
+			}
+			cli.Success("queries.sql created")
+		}
+
+		if files.IsFile("sqlc.yaml") {
+			writeSqlcYaml = cli.Confirm("File `sqlc.yaml` already exists, would you like to overwrite it?")
+		}
+
+		if writeSqlcYaml {
+			data, readError := cli.Efs.ReadFile("sqlc.yaml")
+			if readError != nil {
+				cli.Fatal(readError)
+			}
+
+			readError = os.WriteFile("sqlc.yaml", data, os.ModePerm)
+			if readError != nil {
+				cli.Fatal(readError)
+			}
+			cli.Success("sqlc.yaml created")
+		}
 
 		return
 	}
@@ -556,13 +589,13 @@ func (cli *Cli) OnAddFeature(features string) {
 			DefaultInteractiveMultiselect.
 			WithKeySelect(keys.Space).
 			WithKeyConfirm(keys.Enter).
+			WithFilter(true).
 			WithOptions([]string{
 				"Core",
 				"Forms",
 				"Links",
 				"Air",
 				"Bun",
-				"Sqlite",
 				"Sqlc",
 			}).
 			WithFilter(false).
@@ -588,14 +621,15 @@ func (cli *Cli) OnAddFeature(features string) {
 
 func (cli *Cli) OnTest() {
 	cli.OnPackage()
+
 	test := exec.Command(cli.Go("."), "test")
 	test.Env = append(os.Environ(), "CGO_ENABLED=1")
 	test.Stderr = os.Stderr
 	test.Stdout = os.Stdout
 	test.Stdin = os.Stdin
-	err := test.Run()
-	if err != nil {
-		cli.Fatal(err)
+	runError := test.Run()
+	if runError != nil {
+		cli.Fatal(runError)
 	}
 }
 
@@ -707,6 +741,12 @@ func (cli *Cli) OnFormat() {
 		cli.Fatal(gofmtError)
 	}
 
+	if !files.IsFile(cli.Bun(".")) {
+		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
+			cli.OnAddFeature("bun")
+		}
+	}
+
 	prettier := exec.Command(cli.Bun("app"), "x", "prettier", "--write", ".")
 	prettier.Dir = "app"
 	prettier.Env = append(os.Environ())
@@ -732,6 +772,12 @@ func (cli *Cli) OnUpdate() {
 	getError := get.Run()
 	if getError != nil {
 		cli.Fatal(getError)
+	}
+
+	if !files.IsFile(cli.Bun(".")) {
+		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
+			cli.OnAddFeature("bun")
+		}
 	}
 
 	prettier := exec.Command(cli.Bun("app"), "update")
@@ -761,6 +807,12 @@ func (cli *Cli) OnInstall() {
 		cli.Fatal(tidyError)
 	}
 
+	if !files.IsFile(cli.Bun(".")) {
+		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
+			cli.OnAddFeature("bun")
+		}
+	}
+
 	install := exec.Command(cli.Bun("app"), "install")
 	install.Dir = "app"
 	install.Env = append(os.Environ())
@@ -777,6 +829,12 @@ func (cli *Cli) OnInstall() {
 
 func (cli *Cli) OnPackage() {
 	cli.OnTouch()
+
+	if !files.IsFile(cli.Bun(".")) {
+		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
+			cli.OnAddFeature("bun")
+		}
+	}
 
 	server := exec.Command(cli.Bun("app"), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
@@ -800,7 +858,6 @@ func (cli *Cli) OnPackage() {
 		cli.Fatal(clientError)
 	}
 
-	//node_modules/.bin/esbuild dist/server.js --bundle --outfile=dist/server.js --format=cjs --allow-overwrite
 	esbuild := exec.Command("node_modules/.bin/esbuild", "--bundle", "--outfile=dist/server.js", "--format=cjs", "--allow-overwrite", "dist/server.js")
 	esbuild.Dir = "app"
 	esbuild.Env = append(os.Environ())
@@ -817,6 +874,12 @@ func (cli *Cli) OnPackage() {
 
 func (cli *Cli) OnPackageWatch() {
 	cli.OnTouch()
+
+	if !files.IsFile(cli.Bun(".")) {
+		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
+			cli.OnAddFeature("bun")
+		}
+	}
 
 	server := exec.Command(cli.Bun("app"), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
@@ -859,6 +922,12 @@ func (cli *Cli) OnDev() {
 	mkdirError := os.MkdirAll(filepath.Join(".gen", "tmp"), os.ModePerm)
 	if mkdirError != nil {
 		cli.Fatal(mkdirError)
+	}
+
+	if !files.IsFile(cli.Air(".")) {
+		if cli.Confirm("It looks like Air is not installed, would you like to install it?") {
+			cli.OnAddFeature("air")
+		}
 	}
 
 	air := exec.Command(cli.Air("."))
@@ -914,9 +983,16 @@ func (cli *Cli) OnBuild() {
 func (cli *Cli) OnCheck() {
 	cli.OnTouch()
 
+	if !files.IsFile(cli.Bun(".")) {
+		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
+			cli.OnAddFeature("bun")
+		}
+	}
+
 	eslint := exec.Command(cli.Bun("app"), "x", "eslint")
 	eslint.Dir = "app"
 	eslint.Env = append(os.Environ())
+	eslint.Stderr = os.Stderr
 	eslint.Stdout = os.Stdout
 	eslint.Stdin = os.Stdin
 	eslintError := eslint.Run()
@@ -927,6 +1003,7 @@ func (cli *Cli) OnCheck() {
 	svelteCheck := exec.Command(cli.Bun("app"), "x", "svelte-check", "--tsconfig=./tsconfig.json")
 	svelteCheck.Dir = "app"
 	svelteCheck.Env = append(os.Environ())
+	svelteCheck.Stderr = os.Stderr
 	svelteCheck.Stdout = os.Stdout
 	svelteCheck.Stdin = os.Stdin
 	svelteCheckError := svelteCheck.Run()
@@ -936,8 +1013,26 @@ func (cli *Cli) OnCheck() {
 }
 
 func (cli *Cli) OnConfigure() {
-	cli.OnAddFeature("bun,air")
+	cli.OnAddFeature("bun,air,sqlc")
 	cli.OnInstall()
+}
+
+func (cli *Cli) OnSqlcGenerate() {
+	if !files.IsFile(cli.Sqlc(".")) {
+		if cli.Confirm("It looks like sqlc is not installed, would you like to install it?") {
+			cli.OnAddFeature("sqlc")
+		}
+	}
+
+	sqlcGenerate := exec.Command(cli.Sqlc("."), "generate")
+	sqlcGenerate.Env = append(os.Environ())
+	sqlcGenerate.Stderr = os.Stderr
+	sqlcGenerate.Stdout = os.Stdout
+	sqlcGenerate.Stdin = os.Stdin
+	svelteCheckError := sqlcGenerate.Run()
+	if svelteCheckError != nil {
+		cli.Fatal(svelteCheckError)
+	}
 }
 
 func (cli *Cli) Install(name string, url string, destination string) {
@@ -1061,11 +1156,11 @@ func (cli *Cli) ShowFeaturesInfo() {
 			}, "\n"),
 		},
 		{
-			"Sqlite",
+			"Sqlc",
 			strings.Join([]string{
-				"Adds sqlite to the project.",
+				"Adds sqlc to the project.",
 				"",
-				"Binaries will be dropped in `.gen/sqlite`.",
+				"Binaries will be dropped in `.gen/sqlc`.",
 			}, "\n"),
 		},
 	}
@@ -1244,29 +1339,29 @@ func (cli *Cli) Bun(basepath string) string {
 	return path
 }
 
-func (cli *Cli) Sqlite(basepath string) string {
-	var sqlite string
+func (cli *Cli) Sqlc(basepath string) string {
+	var sqlc string
 
-	if *FlagSqlite != "" {
-		sqlite = *FlagSqlite
+	if *FlagSqlc != "" {
+		sqlc = *FlagSqlc
 	} else {
-		sqlite = filepath.Join(".gen", "sqlite", "sqlite3")
+		sqlc = filepath.Join(".gen", "sqlc", "sqlc")
 	}
 
-	if strings.HasPrefix(sqlite, "~") {
+	if strings.HasPrefix(sqlc, "~") {
 		dirname, err := os.UserHomeDir()
 		if err != nil {
 			log.Fatal(err)
 		}
-		sqlite = strings.Replace(sqlite, "~", dirname, 1)
-		return sqlite
+		sqlc = strings.Replace(sqlc, "~", dirname, 1)
+		return sqlc
 	}
 
-	if !strings.Contains(sqlite, string(filepath.Separator)) {
-		return sqlite
+	if !strings.Contains(sqlc, string(filepath.Separator)) {
+		return sqlc
 	}
 
-	path, pathError := filepath.Rel(basepath, sqlite)
+	path, pathError := filepath.Rel(basepath, sqlc)
 	if pathError != nil {
 		cli.Fatal(pathError)
 	}
