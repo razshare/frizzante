@@ -1013,7 +1013,7 @@ func (cli *Cli) OnCheck() {
 }
 
 func (cli *Cli) OnConfigure() {
-	cli.OnAddFeature("bun,air,sqlc")
+	cli.OnAddFeature("bun,air")
 	cli.OnInstall()
 }
 
