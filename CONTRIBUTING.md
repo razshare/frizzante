@@ -88,7 +88,7 @@ require github.com/razshare/frizzante v1.14.29
 
 This will make it so that changes to your local `frizzante` project are immediately picked up when building your local `frizzante-starter`.
 
-> [!DANGER]
+> [!CAUTION]
 > Another reason for using local packages is to avoid unnecessary mirror caching in https://proxy.golang.org/.
 > 
 > **Explanation**
