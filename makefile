@@ -51,5 +51,5 @@ update:
 hooks:
 	go run main.go --hooks
 
-tag:
-	./tag.sh
+publish:
+	./publish.sh
