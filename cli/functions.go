@@ -992,11 +992,17 @@ func (cli *Cli) OnSqlcGenerate() {
 }
 
 func (cli *Cli) OnWelcome() {
+	usingDocker := os.Getenv("FRIZZANTE_USING_DOCKER")
 	end := make(chan string, 0)
 	err := pterm.DefaultBigText.WithLetters(putils.LettersFromStringWithStyle("Frizzante", pterm.FgCyan.ToStyle())).Render()
 	if err != nil {
 		cli.Fatal(err)
 	}
+
+	if usingDocker != "" {
+		// TODO: add a custom message for docker.
+	}
+
 	<-end
 	cli.Success("Bye!")
 }
