@@ -41,6 +41,7 @@ var FlagAir = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), "sets
 var FlagBun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), "sets the bun binary")
 var FlagSqlc = flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"), "sets the sqlc binary")
 var FlagSqlcGenerate = flag.BoolP("sqlc-generate", "", false, "generates sqlc queries")
+var FlagWelcome = flag.BoolP("welcome", "", false, "shows a welcome message")
 
 func (cli *Cli) OnStart() {
 	if !cli.Parsed {
@@ -135,6 +136,11 @@ func (cli *Cli) OnStart() {
 
 	if *FlagSqlcGenerate {
 		cli.OnSqlcGenerate()
+		os.Exit(0)
+	}
+
+	if *FlagWelcome {
+		cli.OnWelcome()
 		os.Exit(0)
 	}
 
@@ -983,6 +989,16 @@ func (cli *Cli) OnSqlcGenerate() {
 	if svelteCheckError != nil {
 		cli.Fatal(svelteCheckError)
 	}
+}
+
+func (cli *Cli) OnWelcome() {
+	end := make(chan string, 0)
+	err := pterm.DefaultBigText.WithLetters(putils.LettersFromStringWithStyle("Frizzante", pterm.FgCyan.ToStyle())).Render()
+	if err != nil {
+		cli.Fatal(err)
+	}
+	<-end
+	cli.Success("Bye!")
 }
 
 func (cli *Cli) Install(name string, url string, destination string) {
