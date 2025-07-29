@@ -50,6 +50,3 @@ update:
 
 hooks:
 	go run main.go --hooks
-
-publish:
-	./publish.sh
