@@ -1,5 +1,5 @@
 configure:
-	go run main.go --configure --platform="linux/amd64"
+	go run main.go --configure
 
 test:
 	go run main.go --test
