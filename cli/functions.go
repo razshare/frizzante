@@ -335,8 +335,6 @@ func (cli *Cli) OnCreateProject(project string) {
 	if removeAllError != nil {
 		cli.Fatal(removeAllError)
 	}
-
-	os.Exit(0)
 }
 
 func (cli *Cli) CopyFeatureDirectories(instructions []FeatureCopyInstruction) {
@@ -741,12 +739,6 @@ func (cli *Cli) OnFormat() {
 		cli.Fatal(gofmtError)
 	}
 
-	if !files.IsFile(cli.Bun(".")) {
-		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
-			cli.OnAddFeature("bun")
-		}
-	}
-
 	prettier := exec.Command(cli.Bun("app"), "x", "prettier", "--write", ".")
 	prettier.Dir = "app"
 	prettier.Env = append(os.Environ())
@@ -772,12 +764,6 @@ func (cli *Cli) OnUpdate() {
 	getError := get.Run()
 	if getError != nil {
 		cli.Fatal(getError)
-	}
-
-	if !files.IsFile(cli.Bun(".")) {
-		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
-			cli.OnAddFeature("bun")
-		}
 	}
 
 	prettier := exec.Command(cli.Bun("app"), "update")
@@ -807,12 +793,6 @@ func (cli *Cli) OnInstall() {
 		cli.Fatal(tidyError)
 	}
 
-	if !files.IsFile(cli.Bun(".")) {
-		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
-			cli.OnAddFeature("bun")
-		}
-	}
-
 	install := exec.Command(cli.Bun("app"), "install")
 	install.Dir = "app"
 	install.Env = append(os.Environ())
@@ -829,12 +809,6 @@ func (cli *Cli) OnInstall() {
 
 func (cli *Cli) OnPackage() {
 	cli.OnTouch()
-
-	if !files.IsFile(cli.Bun(".")) {
-		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
-			cli.OnAddFeature("bun")
-		}
-	}
 
 	server := exec.Command(cli.Bun("app"), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
@@ -874,12 +848,6 @@ func (cli *Cli) OnPackage() {
 
 func (cli *Cli) OnPackageWatch() {
 	cli.OnTouch()
-
-	if !files.IsFile(cli.Bun(".")) {
-		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
-			cli.OnAddFeature("bun")
-		}
-	}
 
 	server := exec.Command(cli.Bun("app"), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
@@ -922,12 +890,6 @@ func (cli *Cli) OnDev() {
 	mkdirError := os.MkdirAll(filepath.Join(".gen", "tmp"), os.ModePerm)
 	if mkdirError != nil {
 		cli.Fatal(mkdirError)
-	}
-
-	if !files.IsFile(cli.Air(".")) {
-		if cli.Confirm("It looks like Air is not installed, would you like to install it?") {
-			cli.OnAddFeature("air")
-		}
 	}
 
 	air := exec.Command(cli.Air("."))
@@ -983,12 +945,6 @@ func (cli *Cli) OnBuild() {
 func (cli *Cli) OnCheck() {
 	cli.OnTouch()
 
-	if !files.IsFile(cli.Bun(".")) {
-		if cli.Confirm("It looks like Bun is not installed, would you like to install it?") {
-			cli.OnAddFeature("bun")
-		}
-	}
-
 	eslint := exec.Command(cli.Bun("app"), "x", "eslint")
 	eslint.Dir = "app"
 	eslint.Env = append(os.Environ())
@@ -1018,12 +974,6 @@ func (cli *Cli) OnConfigure() {
 }
 
 func (cli *Cli) OnSqlcGenerate() {
-	if !files.IsFile(cli.Sqlc(".")) {
-		if cli.Confirm("It looks like sqlc is not installed, would you like to install it?") {
-			cli.OnAddFeature("sqlc")
-		}
-	}
-
 	sqlcGenerate := exec.Command(cli.Sqlc("."), "generate")
 	sqlcGenerate.Env = append(os.Environ())
 	sqlcGenerate.Stderr = os.Stderr
