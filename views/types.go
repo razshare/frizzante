@@ -11,28 +11,15 @@ const (
 	RenderModeHeadless RenderMode = 3 // Renders only on the server and omits the base template.
 )
 
-type ApplicationConfiguration struct {
-	RootDirectoryName string
-}
-
-type ServerScriptConfiguration struct {
-	FileName string
-}
-
-type IndexDocumentConfiguration struct {
-	FileName string
-}
-
 type Configuration struct {
-	Application   ApplicationConfiguration
-	ServerScript  ServerScriptConfiguration
-	IndexDocument IndexDocumentConfiguration
 }
 
 type View struct {
-	Name          string
-	Data          map[string]any
-	RenderMode    RenderMode
-	Functions     map[string]v8go.FunctionCallback
-	Configuration Configuration
+	Name       string
+	Data       map[string]any
+	RenderMode RenderMode
+	Functions  map[string]v8go.FunctionCallback
+	AppRoot    string
+	ServerJs   string
+	IndexHtml  string
 }

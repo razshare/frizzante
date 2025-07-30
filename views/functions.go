@@ -29,11 +29,11 @@ func (view *View) AddFunction(name string, fun v8go.FunctionCallback) *View {
 func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
 	var index []byte
 	var indexReadError error
-	if files.IsFile(view.Configuration.IndexDocument.FileName) {
-		return os.ReadFile(view.Configuration.IndexDocument.FileName)
+	if files.IsFile(view.IndexHtml) {
+		return os.ReadFile(view.IndexHtml)
 	}
 
-	fileNameFixed := strings.ReplaceAll(view.Configuration.IndexDocument.FileName, "\\", "/")
+	fileNameFixed := strings.ReplaceAll(view.IndexHtml, "\\", "/")
 	if embeds.IsFile(efs, fileNameFixed) {
 		index, indexReadError = efs.ReadFile(fileNameFixed)
 		if indexReadError != nil {
@@ -49,11 +49,11 @@ func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
 func (view *View) ServerContents(efs embed.FS) ([]byte, error) {
 	var server []byte
 	var serverReadError error
-	if files.IsFile(view.Configuration.ServerScript.FileName) {
-		return os.ReadFile(view.Configuration.ServerScript.FileName)
+	if files.IsFile(view.ServerJs) {
+		return os.ReadFile(view.ServerJs)
 	}
 
-	fileNameFixed := strings.ReplaceAll(view.Configuration.ServerScript.FileName, "\\", "/")
+	fileNameFixed := strings.ReplaceAll(view.ServerJs, "\\", "/")
 	if embeds.IsFile(efs, fileNameFixed) {
 		server, serverReadError = efs.ReadFile(fileNameFixed)
 		if serverReadError != nil {
@@ -155,9 +155,9 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 
 	var server []byte
 
-	if files.IsDirectory(view.Configuration.Application.RootDirectoryName) {
+	if files.IsDirectory(view.AppRoot) {
 		var serverError error
-		server, serverError = js.JavaScriptBundle(view.Configuration.Application.RootDirectoryName, api.FormatCommonJS, readBytes)
+		server, serverError = js.JavaScriptBundle(view.AppRoot, api.FormatCommonJS, readBytes)
 		if serverError != nil {
 			return "", serverError
 		}
@@ -224,7 +224,7 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 		}
 	}
 
-	_, destroy, javaScriptError := js.JavaScriptRun(view.Configuration.ServerScript.FileName, bundle, functions)
+	_, destroy, javaScriptError := js.JavaScriptRun(view.ServerJs, bundle, functions)
 	if javaScriptError != nil {
 		return "", javaScriptError
 	}
