@@ -1202,6 +1202,9 @@ func (cli *Cli) Platform() Platform {
 	return PlatformLinuxAmd64 // Noop, cli.Fatalf will crash intentionally.
 }
 
+// Confirm shows a confirmation prompt.
+//
+// Returns true if the user confirms, otherwise false.
 func (cli *Cli) Confirm(text string) bool {
 	if *FlagYes {
 		return true
@@ -1341,42 +1344,54 @@ func (cli *Cli) Sqlc(basepath string) string {
 	return path
 }
 
+// Confirmf shows a confirmation prompt.
+//
+// Returns true if the user confirms, otherwise false.
 func (cli *Cli) Confirmf(template string, vars ...any) bool {
 	return cli.Confirm(fmt.Sprintf(template, vars...))
 }
 
+// Fatalf shows a fatal message and terminates the application.
 func (cli *Cli) Fatalf(template string, vars ...any) {
 	pterm.Fatal.Printfln(template, vars...)
 }
 
+// Warningf shows a warning message.
 func (cli *Cli) Warningf(template string, vars ...any) {
 	pterm.Warning.Printfln(template, vars...)
 }
 
+// Infof shows an info message.
 func (cli *Cli) Infof(template string, vars ...any) {
 	pterm.Info.Printfln(template, vars...)
 }
 
+// Successf shows a success message.
 func (cli *Cli) Successf(template string, vars ...any) {
 	pterm.Success.Printfln(template, vars...)
 }
 
+// Fatal shows a fatal message and terminates the application.
 func (cli *Cli) Fatal(vars ...any) {
 	pterm.Fatal.Println(vars...)
 }
 
+// Warning shows a warning message.
 func (cli *Cli) Warning(vars ...any) {
 	pterm.Warning.Println(vars...)
 }
 
+// Info shows an info message.
 func (cli *Cli) Info(vars ...any) {
 	pterm.Info.Println(vars...)
 }
 
+// Success shows a success message.
 func (cli *Cli) Success(vars ...any) {
 	pterm.Success.Println(vars...)
 }
 
+// Section shows the name of a section using Markdown semantics.
 func (cli *Cli) Section(vars ...any) {
 	pterm.DefaultSection.Println(vars...)
 }
