@@ -587,16 +587,16 @@ func (con *Connection) SendView(val views.View) {
 		return
 	}
 
-	if val.Server == "" {
-		val.Server = con.ViewServer
+	if val.Configuration.ServerScript.FileName == "" {
+		val.Configuration.ServerScript.FileName = con.ViewConfiguration.ServerScript.FileName
 	}
 
-	if val.Index == "" {
-		val.Index = con.ViewIndex
+	if val.Configuration.IndexDocument.FileName == "" {
+		val.Configuration.IndexDocument.FileName = con.ViewConfiguration.IndexDocument.FileName
 	}
 
-	if val.Root == "" {
-		val.Root = con.ViewRoot
+	if val.Configuration.Application.RootDirectoryName == "" {
+		val.Configuration.Application.RootDirectoryName = con.ViewConfiguration.Application.RootDirectoryName
 	}
 
 	txt, renderError := val.Render(con.Efs)

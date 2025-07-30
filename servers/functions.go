@@ -11,6 +11,7 @@ import (
 	"github.com/razshare/frizzante/guards"
 	"github.com/razshare/frizzante/notifiers"
 	"github.com/razshare/frizzante/routes"
+	"github.com/razshare/frizzante/views"
 	"log"
 	"net"
 	"net/http"
@@ -35,11 +36,19 @@ func New() *Server {
 		Key:             "",
 		Notifier:        notifiers.New(),
 		WsUpgrader:      &websocket.Upgrader{ReadBufferSize: 1024, WriteBufferSize: 1024},
-		ViewRoot:        "app",
-		PublicRoot:      "app/dist/client",
-		ViewServer:      "app/dist/server.js",
-		ViewIndex:       "app/dist/client/index.html",
-		SessionArchive:  archives.NewDiskArchive(filepath.Join(".gen", "sessions")),
+		ViewConfiguration: views.Configuration{
+			Application: views.ApplicationConfiguration{
+				RootDirectoryName: "app",
+			},
+			ServerScript: views.ServerScriptConfiguration{
+				FileName: "app/dist/server.js",
+			},
+			IndexDocument: views.IndexDocumentConfiguration{
+				FileName: "app/dist/client/index.html",
+			},
+		},
+		PublicRoot:     "app/dist/client",
+		SessionArchive: archives.NewDiskArchive(filepath.Join(".gen", "sessions")),
 	}
 }
 
@@ -108,19 +117,17 @@ func (server *Server) AddGuard(val guards.Guard) *Server {
 func (server *Server) AddRoute(val routes.Route) *Server {
 	server.HttpMux.HandleFunc(val.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 		con := &connections.Connection{
-			PublicRoot:     server.PublicRoot,
-			Notifier:       server.Notifier,
-			Efs:            server.Efs,
-			ViewServer:     server.ViewServer,
-			ViewIndex:      server.ViewIndex,
-			ViewRoot:       server.ViewRoot,
-			Request:        request,
-			Writer:         writer,
-			Locked:         false,
-			Status:         200,
-			Header:         writer.Header(),
-			EventId:        1,
-			SessionArchive: server.SessionArchive,
+			PublicRoot:        server.PublicRoot,
+			Notifier:          server.Notifier,
+			Efs:               server.Efs,
+			Request:           request,
+			Writer:            writer,
+			Locked:            false,
+			Status:            200,
+			Header:            writer.Header(),
+			EventId:           1,
+			SessionArchive:    server.SessionArchive,
+			ViewConfiguration: &server.ViewConfiguration,
 		}
 
 		for _, tag := range val.Tags {
