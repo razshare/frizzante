@@ -13,18 +13,6 @@ import (
 	"path/filepath"
 )
 
-// Start creates a new session with a given initial state and starts it.
-//
-// If the user provides a valid "session-id" cookie,
-// Start will retrieve the relative session.
-//
-// If the user doesn't provide a valid "session-id" cookie,
-// Start will create a new session along with a new "session-id",
-// which it sends to the user as a cookie.
-func Start[T any](connection *connections.Connection, initialState T) *Session[T] {
-	return New(connection, initialState).Start()
-}
-
 // New creates a new session with a given initial state.
 func New[T any](connection *connections.Connection, initialState T) *Session[T] {
 	name := filepath.Join(".gen", "sessions")
