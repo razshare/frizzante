@@ -22,6 +22,7 @@ func init() {
 	// Cli.
 	*frizzanteCli.FlagPlatform = "linux/amd64"
 	*frizzanteCli.FlagYes = true
+	*frizzanteCli.FlagBun = "bun"
 
 	// Server.
 	serverLocal := servers.New()
