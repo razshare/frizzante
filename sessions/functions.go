@@ -14,7 +14,13 @@ import (
 	"path/filepath"
 )
 
-// New creates a new session with a zero initial state.
+// Zero creates a new session with a zero initial state.
+func Zero[T any](connection *connections.Connection) *Session[T] {
+	var state T
+	return New(connection, state)
+}
+
+// New creates a new session with a given initial state.
 func New[T any](connection *connections.Connection, state T) *Session[T] {
 	name := filepath.Join(".gen", "sessions")
 	lock := locks.New()
@@ -122,7 +128,6 @@ func New[T any](connection *connections.Connection, state T) *Session[T] {
 //
 // If the session-id cookie is missing it will create a new one and send it to the user.
 func Start[T any](self *Session[T]) *Session[T] {
-
 	if !Exists(self) {
 		Save(self)
 		return self
