@@ -5,6 +5,8 @@ import (
 	"errors"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/globals"
+	"github.com/razshare/frizzante/guards"
+	"github.com/razshare/frizzante/routes"
 	"log"
 	"net"
 	"net/http"
@@ -114,4 +116,20 @@ func (server *Server) Stop() {
 	if err := server.Shutdown(context.Background()); err != nil {
 		log.Fatal(err)
 	}
+}
+
+// AddGuard adds a guard.
+//
+// Deprecated: append directly to Guards instead.
+func (server *Server) AddGuard(guard guards.Guard) *Server {
+	server.Guards = append(server.Guards, guard)
+	return server
+}
+
+// AddRoute adds a guard.
+//
+// Deprecated: append directly to Routes instead.
+func (server *Server) AddRoute(route routes.Route) *Server {
+	server.Routes = append(server.Routes, route)
+	return server
 }
