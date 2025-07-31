@@ -14,14 +14,14 @@ import (
 	"path/filepath"
 )
 
-// Zero creates a new session with a zero initial state.
-func Zero[T any](connection *connections.Connection) *Session[T] {
+// New creates a new session with a zero initial state.
+func New[T any](connection *connections.Connection) *Session[T] {
 	var initialState T
-	return New(connection, initialState)
+	return NewWithState(connection, initialState)
 }
 
-// New creates a new session with a given initial state.
-func New[T any](connection *connections.Connection, initialState T) *Session[T] {
+// NewWithState creates a new session with a given initial state.
+func NewWithState[T any](connection *connections.Connection, initialState T) *Session[T] {
 	name := filepath.Join(".gen", "sessions")
 	lock := locks.New()
 	return &Session[T]{
@@ -124,10 +124,16 @@ func New[T any](connection *connections.Connection, initialState T) *Session[T] 
 	}
 }
 
-// Start loads the state of the session if the connection defines a session-id cookie.
+// Start starts the user's session.
 //
-// If the session-id cookie is missing, Start will create a new one and send it to the user.
-func Start[T any](session *Session[T]) *Session[T] {
+// If the user provides a valid "session-id" cookie,
+// Start will retrieve the relative session.
+//
+// If the user doesn't provide a valid "session-id" cookie,
+// Start will create a new session along with a new "session-id",
+// which it sends to the user as a cookie.
+func Start[T any](connection *connections.Connection, initialState T) *Session[T] {
+	session := NewWithState(connection, initialState)
 	if !Exists(session) {
 		Save(session)
 		return session

@@ -31,20 +31,20 @@ func init() {
 	serverLocal.Routes = append(
 		serverLocal.Routes,
 		routes.Route{Pattern: "GET /TestSession", Handler: func(c *connections.Connection) {
-			s := sessions.Start(sessions.New(c, State{Name: "test"}))
+			s := sessions.Start(c, State{Name: "test"})
 			actions.SendMessage(c, fmt.Sprintf("hello %s", s.State.Name))
 		}},
 		routes.Route{Pattern: "POST /TestSession", Handler: func(c *connections.Connection) {
-			s := sessions.Start(sessions.New(c, State{}))
+			s := sessions.Start(c, State{})
 			defer sessions.Save(s)
 			s.State.Name = actions.ReceiveMessage(c)
 		}},
 		routes.Route{Pattern: "GET /TestSessionExpectFail", Handler: func(c *connections.Connection) {
-			s := sessions.Start(sessions.New(c, State{Name: "test"}))
+			s := sessions.Start(c, State{Name: "test"})
 			actions.SendMessage(c, fmt.Sprintf("hello %s", s.State.Name))
 		}},
 		routes.Route{Pattern: "POST /TestSessionExpectFail", Handler: func(c *connections.Connection) {
-			s := sessions.Start(sessions.New(c, State{}))
+			s := sessions.Start(c, State{})
 			// Without this, session state should not be updated.
 			// defer operator.Save(state)
 			s.State.Name = actions.ReceiveMessage(c)
