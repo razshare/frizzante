@@ -8,17 +8,17 @@ import (
 	"testing"
 )
 
-func TestJavaScriptRun(test *testing.T) {
+func TestJavaScriptRun(t *testing.T) {
 	// Simple.
 	script := "1+1"
 	actual, destroy, javaScriptError := js.JavaScriptRun("test", []byte(script), map[string]v8go.FunctionCallback{})
 	defer destroy()
 	if javaScriptError != nil {
-		test.Fatal(javaScriptError)
+		t.Fatal(javaScriptError)
 	}
 
 	if actual.Int32() != 2 {
-		test.Fatalf("script was expected to return 2, received '%d' instead", actual.Int32())
+		t.Fatalf("script was expected to return 2, received '%d' instead", actual.Int32())
 	}
 
 	// Complex and with JsDoc.
@@ -48,41 +48,41 @@ func TestJavaScriptRun(test *testing.T) {
 	actual, destroy, javaScriptError = js.JavaScriptRun("test", []byte(script), map[string]v8go.FunctionCallback{})
 	defer destroy()
 	if javaScriptError != nil {
-		test.Fatal(javaScriptError)
+		t.Fatal(javaScriptError)
 	}
 
 	obj := actual.Object()
 
 	if !obj.Has("long") {
-		test.Fatal("actual value was expected to have a 'long' key")
+		t.Fatal("actual value was expected to have a 'long' key")
 	}
 
 	if !obj.Has("short") {
-		test.Fatal("actual value was expected to have a 'short' key")
+		t.Fatal("actual value was expected to have a 'short' key")
 	}
 
 	long, longError := obj.Get("long")
 	if longError != nil {
-		test.Fatal(longError)
+		t.Fatal(longError)
 	}
 	short, shortError := obj.Get("short")
 	if shortError != nil {
-		test.Fatal(shortError)
+		t.Fatal(shortError)
 	}
 
 	longPieces := strings.Split(long.String(), "-")
 	if len(longPieces) != 5 {
-		test.Fatalf("long string was expected to be composed of 5 part separated by 4 -, received '%s' instead", long.String())
+		t.Fatalf("long string was expected to be composed of 5 part separated by 4 -, received '%s' instead", long.String())
 	}
 
 	shortPieces := strings.Split(short.String(), "-")
 	if len(shortPieces) != 1 {
-		test.Fatalf("string was expected to be composed of 1 part, received '%s' instead", short.String())
+		t.Fatalf("string was expected to be composed of 1 part, received '%s' instead", short.String())
 	}
 
 }
 
-func TestJavaScriptBundle(test *testing.T) {
+func TestJavaScriptBundle(t *testing.T) {
 	script := `
 	import { writable } from 'svelte/store'
 	const test = writable("hello")
@@ -93,7 +93,7 @@ func TestJavaScriptBundle(test *testing.T) {
 
 	cjs, bundleError := js.JavaScriptBundle("app", api.FormatCommonJS, []byte(script))
 	if bundleError != nil {
-		test.Fatal(bundleError)
+		t.Fatal(bundleError)
 	}
 	actual := ""
 	expected := "hello"
@@ -108,10 +108,10 @@ func TestJavaScriptBundle(test *testing.T) {
 	})
 	defer destroy()
 	if javaScriptError != nil {
-		test.Fatal(javaScriptError)
+		t.Fatal(javaScriptError)
 	}
 
 	if actual != expected {
-		test.Fatalf("script was expected to update the actual value to '%s', received '%s' instead.", expected, actual)
+		t.Fatalf("script was expected to update the actual value to '%s', received '%s' instead.", expected, actual)
 	}
 }

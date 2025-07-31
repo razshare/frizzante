@@ -6,6 +6,7 @@ require (
 	atomicgo.dev/keyboard v0.2.9
 	github.com/evanw/esbuild v0.25.8
 	github.com/gorilla/websocket v1.5.3
+	github.com/joho/godotenv v1.5.1
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/pterm/pterm v0.12.81
 	github.com/spf13/pflag v1.0.7

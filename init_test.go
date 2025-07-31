@@ -3,6 +3,7 @@ package main
 import (
 	"embed"
 	"fmt"
+	frizzanteCli "github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/routes"
 	"github.com/razshare/frizzante/servers"
@@ -18,6 +19,11 @@ var port = 8080
 var server = make(chan *servers.Server, 1)
 
 func init() {
+	// Cli.
+	*frizzanteCli.FlagPlatform = "linux/amd64"
+	*frizzanteCli.FlagYes = true
+
+	// Server.
 	serverLocal := servers.New()
 	serverLocal.Efs = efs
 	serverLocal.AddRoute(routes.Route{Pattern: "GET /TestSession", Handler: func(con *connections.Connection) {

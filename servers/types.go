@@ -32,4 +32,5 @@ type Server struct {
 	AppRoot         string
 	ServerJs        string
 	IndexHtml       string
+	Dotenv          string
 }

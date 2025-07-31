@@ -692,8 +692,8 @@ func (cli *Cli) OnTouch() {
 		cli.Fatal(mkdirError)
 	}
 
-	touch("app/dist/server.js")
-	touch("app/dist/client/index.html")
+	touch(filepath.Join("app", "dist", "server.js"))
+	touch(filepath.Join("app", "dist", "client", "index.html"))
 }
 
 func (cli *Cli) OnClean() {
@@ -707,17 +707,17 @@ func (cli *Cli) OnClean() {
 		cli.Fatal(runError)
 	}
 
-	removeError := os.RemoveAll("app/dist")
+	removeError := os.RemoveAll(filepath.Join("app", "dist"))
 	if removeError != nil {
 		cli.Fatal(removeError)
 	}
 
-	removeError = os.RemoveAll("app/node_modules")
+	removeError = os.RemoveAll(filepath.Join("app", "node_modules"))
 	if removeError != nil {
 		cli.Fatal(removeError)
 	}
 
-	removeError = os.RemoveAll(".gen/tmp")
+	removeError = os.RemoveAll(filepath.Join(".gen", "tmp"))
 	if removeError != nil {
 		cli.Fatal(removeError)
 	}
