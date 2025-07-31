@@ -579,14 +579,15 @@ func (con *Connection) SendView(val views.View) {
 	}
 
 	if con.VerifyAccept("application/json") {
-		if val.Data != nil {
+		if val.Data == nil {
 			val.Data = map[string]any{}
 		}
-		con.SendJson(map[string]any{
+		props := map[string]any{
 			"name":       val.Name,
 			"data":       val.Data,
 			"renderMode": val.RenderMode,
-		})
+		}
+		con.SendJson(props)
 		return
 	}
 
