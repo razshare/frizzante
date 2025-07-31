@@ -74,12 +74,12 @@ var expectedMimes = map[string]string{
 	"my.file.ogx":   "application/ogg",
 }
 
-func TestMime(test *testing.T) {
+func TestMime(t *testing.T) {
 	// Positives.
 	for fileName, expected := range expectedMimes {
 		actual := mimes.Mime(fileName)
 		if actual != expected {
-			test.Fatalf("file %s was expected to resolve into mime %s, received %s instead", fileName, expected, actual)
+			t.Fatalf("file %s was expected to resolve into mime %s, received %s instead", fileName, expected, actual)
 		}
 	}
 
@@ -88,6 +88,6 @@ func TestMime(test *testing.T) {
 	actual := mimes.Mime(fileName)
 	expected := "text/plain"
 	if actual != expected {
-		test.Fatalf("file %s was expected to resolve into mime %s, received %s instead", fileName, expected, actual)
+		t.Fatalf("file %s was expected to resolve into mime %s, received %s instead", fileName, expected, actual)
 	}
 }
