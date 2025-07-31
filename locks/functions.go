@@ -10,21 +10,21 @@ func New() *Lock {
 }
 
 // FindAndAcquire adds a new lane to the road.
-func FindAndAcquire(self *Lock, keys ...string) *sync.Mutex {
+func FindAndAcquire(lock *Lock, keys ...string) *sync.Mutex {
 	path := strings.Join(keys, ":")
-	lane, laneExists := self.Names[path]
+	lane, laneExists := lock.Names[path]
 	if laneExists {
 		return lane
 	}
 
 	var newLane sync.Mutex
-	self.Names[path] = &newLane
+	lock.Names[path] = &newLane
 	return &newLane
 }
 
 // Release unlocks the lane and removes it from the road.
-func Release(self *Lock, keys ...string) *Lock {
+func Release(lock *Lock, keys ...string) *Lock {
 	path := strings.Join(keys, ":")
-	delete(self.Names, path)
-	return self
+	delete(lock.Names, path)
+	return lock
 }

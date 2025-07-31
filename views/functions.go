@@ -17,13 +17,13 @@ import (
 )
 
 // IndexHtmlData gets the contents of the index html document.
-func IndexHtmlData(self *View, efs embed.FS) ([]byte, error) {
-	if files.IsFile(self.IndexHtml) {
-		return os.ReadFile(self.IndexHtml)
+func IndexHtmlData(view *View, efs embed.FS) ([]byte, error) {
+	if files.IsFile(view.IndexHtml) {
+		return os.ReadFile(view.IndexHtml)
 	}
 
 	var data []byte
-	fileNameFixed := strings.ReplaceAll(self.IndexHtml, "\\", "/")
+	fileNameFixed := strings.ReplaceAll(view.IndexHtml, "\\", "/")
 	if embeds.IsFile(efs, fileNameFixed) {
 		var readError error
 		data, readError = efs.ReadFile(fileNameFixed)
@@ -37,13 +37,13 @@ func IndexHtmlData(self *View, efs embed.FS) ([]byte, error) {
 }
 
 // ServerJsData gets the contents of the server script.
-func ServerJsData(self *View, efs embed.FS) ([]byte, error) {
-	if files.IsFile(self.ServerJs) {
-		return os.ReadFile(self.ServerJs)
+func ServerJsData(view *View, efs embed.FS) ([]byte, error) {
+	if files.IsFile(view.ServerJs) {
+		return os.ReadFile(view.ServerJs)
 	}
 
 	var data []byte
-	n := strings.ReplaceAll(self.ServerJs, "\\", "/")
+	n := strings.ReplaceAll(view.ServerJs, "\\", "/")
 	if embeds.IsFile(efs, n) {
 		var readError error
 		data, readError = efs.ReadFile(n)
@@ -63,7 +63,7 @@ func ServerJsData(self *View, efs embed.FS) ([]byte, error) {
 // The body of the document will contain the fully rendered content of the view as HTML.
 //
 // If the View is using RenderModeClient, then ViewRender returns an HTML document.
-// The document itself doesn't include any of the view content, instead, custom <script> tags are injected into the head of
+// The document itview doesn't include any of the view content, instead, custom <script> tags are injected into the head of
 // the document in order to asynchronously load a client JavaScript bundle that renders the view inside the client's browser,
 // thus ultimately loading the content into the document.
 //
@@ -82,16 +82,16 @@ func ServerJsData(self *View, efs embed.FS) ([]byte, error) {
 //
 // If for some reason your view server is not in cjs format, RenderMode will try to convert it to cjs on the fly using esbuild.
 // Esbuild will look for a "node_modules" in the view root directory, which you can set by invoking WithRoot.
-func Render(self *View, efs embed.FS) (html string, err error) {
+func Render(view *View, efs embed.FS) (html string, err error) {
 	// CSR.
 	idObject, idObjectError := uuid.NewV4()
 	if idObjectError != nil {
 		return "", idObjectError
 	}
 
-	viewName := self.Name
-	viewData := self.Data
-	viewRenderMode := self.RenderMode
+	viewName := view.Name
+	viewData := view.Data
+	viewRenderMode := view.RenderMode
 
 	if viewData == nil {
 		viewData = map[string]any{}
@@ -108,8 +108,8 @@ func Render(self *View, efs embed.FS) (html string, err error) {
 
 	properties := string(jsonData)
 
-	if RenderModeClient == self.RenderMode {
-		indexHtmlData, indexHtmlDataError := IndexHtmlData(self, efs)
+	if RenderModeClient == view.RenderMode {
+		indexHtmlData, indexHtmlDataError := IndexHtmlData(view, efs)
 		if indexHtmlDataError != nil {
 			return "", indexHtmlDataError
 		}
@@ -142,13 +142,13 @@ func Render(self *View, efs embed.FS) (html string, err error) {
 	var serverJsData []byte
 	var serverJsDataError error
 
-	serverJsData, serverJsDataError = ServerJsData(self, efs)
+	serverJsData, serverJsDataError = ServerJsData(view, efs)
 	if serverJsDataError != nil {
 		return "", serverJsDataError
 	}
 
-	if files.IsDirectory(self.AppRoot) {
-		serverJsData, serverJsDataError = js.JavaScriptBundle(self.AppRoot, api.FormatCommonJS, serverJsData)
+	if files.IsDirectory(view.AppRoot) {
+		serverJsData, serverJsDataError = js.JavaScriptBundle(view.AppRoot, api.FormatCommonJS, serverJsData)
 		if serverJsDataError != nil {
 			return "", serverJsDataError
 		}
@@ -207,13 +207,13 @@ func Render(self *View, efs embed.FS) (html string, err error) {
 		},
 	}
 
-	if self.Functions != nil {
-		for functionName, functionCallback := range self.Functions {
+	if view.Functions != nil {
+		for functionName, functionCallback := range view.Functions {
 			globalFunctions[functionName] = functionCallback
 		}
 	}
 
-	_, destroy, javaScriptError := js.JavaScriptRun(self.ServerJs, iifData, globalFunctions)
+	_, destroy, javaScriptError := js.JavaScriptRun(view.ServerJs, iifData, globalFunctions)
 	if javaScriptError != nil {
 		return "", javaScriptError
 	}
@@ -223,12 +223,12 @@ func Render(self *View, efs embed.FS) (html string, err error) {
 		return "", errors.New(jsError)
 	}
 
-	if RenderModeHeadless == self.RenderMode {
+	if RenderModeHeadless == view.RenderMode {
 		return body, nil
 	}
 
-	if RenderModeServer == self.RenderMode {
-		indexHtmlData, indexHtmlDataError := IndexHtmlData(self, efs)
+	if RenderModeServer == view.RenderMode {
+		indexHtmlData, indexHtmlDataError := IndexHtmlData(view, efs)
 		if indexHtmlDataError != nil {
 			return "", indexHtmlDataError
 		}
@@ -255,8 +255,8 @@ func Render(self *View, efs embed.FS) (html string, err error) {
 		), nil
 	}
 
-	if RenderModeFull == self.RenderMode {
-		indexHtmlData, indexHtmlDataError := IndexHtmlData(self, efs)
+	if RenderModeFull == view.RenderMode {
+		indexHtmlData, indexHtmlDataError := IndexHtmlData(view, efs)
 		if indexHtmlDataError != nil {
 			return "", indexHtmlDataError
 		}

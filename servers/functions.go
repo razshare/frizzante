@@ -37,33 +37,33 @@ func New() *Server {
 // Start starts the server.
 //
 // If the server fails to start, ServerStart crashes the program.
-func Start(self *Server) {
-	mux := self.Http.Handler.(*http.ServeMux)
+func Start(server *Server) {
+	mux := server.Http.Handler.(*http.ServeMux)
 
-	for _, route := range self.Routes {
+	for _, route := range server.Routes {
 		mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 			con := &connections.Connection{
-				Http:       self.Http,
+				Http:       server.Http,
 				Request:    request,
 				Writer:     writer,
-				Efs:        self.Efs,
+				Efs:        server.Efs,
 				Status:     200,
 				EventId:    1,
-				PublicRoot: self.PublicRoot,
-				AppRoot:    self.AppRoot,
-				ServerJs:   self.ServerJs,
-				IndexHtml:  self.IndexHtml,
+				PublicRoot: server.PublicRoot,
+				AppRoot:    server.AppRoot,
+				ServerJs:   server.ServerJs,
+				IndexHtml:  server.IndexHtml,
 			}
 
 			for _, tag := range route.Tags {
-				for _, guard := range self.Guards {
+				for _, guard := range server.Guards {
 					if !slices.Contains(guard.Tags, tag) {
 						continue
 					}
 					allowed := false
 					guard.Handler(con, func() { allowed = true })
 					if !allowed {
-						self.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", route.Pattern, tag, guard.Name)
+						server.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", route.Pattern, tag, guard.Name)
 						return
 					}
 				}
@@ -78,11 +78,11 @@ func Start(self *Server) {
 	group.Add(2)
 
 	go func() {
-		self.InfoLog.Printf("listening for requests at http://%s", self.Address)
-		serveError := http.ListenAndServe(self.Address, self.Http.Handler)
+		server.InfoLog.Printf("listening for requests at http://%s", server.Address)
+		serveError := http.ListenAndServe(server.Address, server.Http.Handler)
 		if serveError != nil {
 			if errors.Is(serveError, http.ErrServerClosed) {
-				self.InfoLog.Println("shutting down server")
+				server.InfoLog.Println("shutting down server")
 				return
 			}
 			log.Fatal(serveError)
@@ -90,12 +90,12 @@ func Start(self *Server) {
 	}()
 
 	go func() {
-		if "" != self.Certificate && "" != self.Key {
-			self.InfoLog.Printf("listening for requests at https://%s", self.SecureAddress)
-			serveError := http.ListenAndServeTLS(self.SecureAddress, self.Certificate, self.Key, self.Http.Handler)
+		if "" != server.Certificate && "" != server.Key {
+			server.InfoLog.Printf("listening for requests at https://%s", server.SecureAddress)
+			serveError := http.ListenAndServeTLS(server.SecureAddress, server.Certificate, server.Key, server.Http.Handler)
 			if serveError != nil {
 				if errors.Is(serveError, http.ErrServerClosed) {
-					self.InfoLog.Printf("shutting down server")
+					server.InfoLog.Printf("shutting down server")
 					return
 				}
 				log.Fatal(serveError)
@@ -109,8 +109,8 @@ func Start(self *Server) {
 // Stop attempts to stop the server.
 //
 // If the shutdown attempt fails, ServerStop crashes the program.
-func Stop(self *Server) {
-	if err := self.Http.Shutdown(context.Background()); err != nil {
+func Stop(server *Server) {
+	if err := server.Http.Shutdown(context.Background()); err != nil {
 		log.Fatal(err)
 	}
 }

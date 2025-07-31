@@ -32,17 +32,17 @@ import (
 /////////////////////////////////////////////////////////////
 
 // ReceiveCancellation returns a channel that closes when the request gets cancelled.
-func ReceiveCancellation(self *connections.Connection) <-chan struct{} {
-	return self.Request.Context().Done()
+func ReceiveCancellation(connection *connections.Connection) <-chan struct{} {
+	return connection.Request.Context().Done()
 }
 
 // IsAlive returns a reference to a bool which is initially set to `true`.
 //
 // This bool updates to `false` when the request gets cancelled.
-func IsAlive(self *connections.Connection) *bool {
+func IsAlive(connection *connections.Connection) *bool {
 	isAlive := true
 	go func() {
-		<-ReceiveCancellation(self)
+		<-ReceiveCancellation(connection)
 		isAlive = false
 	}()
 	return &isAlive
@@ -51,16 +51,16 @@ func IsAlive(self *connections.Connection) *bool {
 // ReceiveCookie reads the contents of a cookie from the message and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveCookie(self *connections.Connection, key string) string {
-	cookie, cookieError := self.Request.Cookie(key)
+func ReceiveCookie(connection *connections.Connection, key string) string {
+	cookie, cookieError := connection.Request.Cookie(key)
 	if cookieError != nil {
-		traces.Trace(self.Http.ErrorLog, cookieError)
+		traces.Trace(connection.Http.ErrorLog, cookieError)
 		return ""
 	}
 
 	data, queryError := url.QueryUnescape(cookie.Value)
 	if queryError != nil {
-		traces.Trace(self.Http.ErrorLog, queryError)
+		traces.Trace(connection.Http.ErrorLog, queryError)
 		return ""
 	}
 
@@ -70,19 +70,19 @@ func ReceiveCookie(self *connections.Connection, key string) string {
 // ReceiveMessage reads the contents of the message and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveMessage(self *connections.Connection) string {
-	if self.WebSocket != nil {
-		_, data, readError := self.WebSocket.ReadMessage()
+func ReceiveMessage(connection *connections.Connection) string {
+	if connection.WebSocket != nil {
+		_, data, readError := connection.WebSocket.ReadMessage()
 		if readError != nil {
-			traces.Trace(self.Http.ErrorLog, readError)
+			traces.Trace(connection.Http.ErrorLog, readError)
 			return ""
 		}
 		return string(data)
 	}
 
-	data, readError := io.ReadAll(self.Request.Body)
+	data, readError := io.ReadAll(connection.Request.Body)
 	if readError != nil {
-		traces.Trace(self.Http.ErrorLog, readError)
+		traces.Trace(connection.Http.ErrorLog, readError)
 		return ""
 	}
 	return string(data)
@@ -92,25 +92,25 @@ func ReceiveMessage(self *connections.Connection) string {
 // connection and stores it in the value pointed to by val.
 //
 // Compatible with web sockets.
-func ReceiveJson(self *connections.Connection, value any) {
-	if self.WebSocket != nil {
-		jsonError := self.WebSocket.ReadJSON(value)
+func ReceiveJson(connection *connections.Connection, value any) {
+	if connection.WebSocket != nil {
+		jsonError := connection.WebSocket.ReadJSON(value)
 		if jsonError != nil {
-			traces.Trace(self.Http.ErrorLog, jsonError)
+			traces.Trace(connection.Http.ErrorLog, jsonError)
 			return
 		}
 		return
 	}
 
-	data, readError := io.ReadAll(self.Request.Body)
+	data, readError := io.ReadAll(connection.Request.Body)
 	if readError != nil {
-		traces.Trace(self.Http.ErrorLog, readError)
+		traces.Trace(connection.Http.ErrorLog, readError)
 		return
 	}
 
 	jsonError := json.Unmarshal(data, value)
 	if jsonError != nil {
-		traces.Trace(self.Http.ErrorLog, jsonError)
+		traces.Trace(connection.Http.ErrorLog, jsonError)
 		return
 	}
 }
@@ -119,67 +119,67 @@ func ReceiveJson(self *connections.Connection, value any) {
 //
 // The whole request body is parsed and up to a total of 2MB
 // of its file parts are stored in memory, with the remainder stored on disk in temporary files.
-func ReceiveForm(self *connections.Connection) url.Values {
-	return ReceiveFormWithMaxMemory(self, 2*globals.MB)
+func ReceiveForm(connection *connections.Connection) url.Values {
+	return ReceiveFormWithMaxMemory(connection, 2*globals.MB)
 }
 
 // ReceiveFormWithMaxMemory reads the message as a form and returns the value.
 //
 // The whole request body is parsed and up to a total of maxMemory bytes
 // of its file parts are stored in memory, with the remainder stored on disk in temporary files.
-func ReceiveFormWithMaxMemory(self *connections.Connection, maxMemory int64) url.Values {
-	if self.WebSocket != nil {
-		traces.Trace(self.Http.ErrorLog, errors.New("connection is not of type web socket"))
+func ReceiveFormWithMaxMemory(connection *connections.Connection, maxMemory int64) url.Values {
+	if connection.WebSocket != nil {
+		traces.Trace(connection.Http.ErrorLog, errors.New("connection is not of type web socket"))
 		return url.Values{}
 	}
 
-	formError := self.Request.ParseMultipartForm(maxMemory)
+	formError := connection.Request.ParseMultipartForm(maxMemory)
 	if formError != nil {
 		if !errors.Is(formError, http.ErrNotMultipart) {
 			return url.Values{}
 		}
 
-		formError = self.Request.ParseForm()
+		formError = connection.Request.ParseForm()
 		if formError != nil {
-			traces.Trace(self.Http.ErrorLog, formError)
+			traces.Trace(connection.Http.ErrorLog, formError)
 			return url.Values{}
 		}
 	}
 
-	return self.Request.Form
+	return connection.Request.Form
 }
 
 // ReceiveQuery reads a query field and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveQuery(self *connections.Connection, key string) string {
-	return self.Request.URL.Query().Get(key)
+func ReceiveQuery(connection *connections.Connection, key string) string {
+	return connection.Request.URL.Query().Get(key)
 }
 
 // ReceivePath reads a parameters fields and returns the value.
 //
 // Compatible with web sockets.
-func ReceivePath(self *connections.Connection, key string) string {
-	return self.Request.PathValue(key)
+func ReceivePath(connection *connections.Connection, key string) string {
+	return connection.Request.PathValue(key)
 }
 
 // ReceiveHeader reads a header field and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveHeader(self *connections.Connection, key string) string {
-	return self.Request.Header.Get(key)
+func ReceiveHeader(connection *connections.Connection, key string) string {
+	return connection.Request.Header.Get(key)
 }
 
 // ReceiveContentType reads the Content-Type header field and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveContentType(self *connections.Connection) string {
-	return self.Request.Header.Get("Content-Type")
+func ReceiveContentType(connection *connections.Connection) string {
+	return connection.Request.Header.Get("Content-Type")
 }
 
 // VerifyContentType checks if the incoming request has any of the given content-types.
-func VerifyContentType(self *connections.Connection, contentType ...string) bool {
-	requestedMime := self.Request.Header.Get("Content-Type")
+func VerifyContentType(connection *connections.Connection, contentType ...string) bool {
+	requestedMime := connection.Request.Header.Get("Content-Type")
 	for _, acceptedMime := range contentType {
 		if acceptedMime == "*" || strings.HasPrefix(requestedMime, acceptedMime) {
 			return true
@@ -190,8 +190,8 @@ func VerifyContentType(self *connections.Connection, contentType ...string) bool
 }
 
 // VerifyAccept checks if the incoming request accepts any of the given content-types.
-func VerifyAccept(self *connections.Connection, accept ...string) bool {
-	requestedAcceptMime := self.Request.Header.Get("Accept")
+func VerifyAccept(connection *connections.Connection, accept ...string) bool {
+	requestedAcceptMime := connection.Request.Header.Get("Accept")
 	for _, acceptedMime := range accept {
 		if acceptedMime == "*" || strings.Contains(requestedAcceptMime, acceptedMime) {
 			return true
@@ -218,62 +218,62 @@ func VerifyAccept(self *connections.Connection, accept ...string) bool {
 // That being said, other than the format, there is nothing else different between this function and ResponseSendContent.
 //
 // See https://html.spec.whatwg.org/multipage/server-sent-events.html for more details on the format.
-func SendEventContent(self *connections.Connection, content []byte) {
-	header := fmt.Sprintf("id: %d\r\nevent: %s\r\n", self.EventId, self.EventName)
+func SendEventContent(connection *connections.Connection, content []byte) {
+	header := fmt.Sprintf("id: %d\r\nevent: %s\r\n", connection.EventId, connection.EventName)
 
-	_, writeError := self.Writer.Write([]byte(header))
+	_, writeError := connection.Writer.Write([]byte(header))
 	if writeError != nil {
-		traces.Trace(self.Http.ErrorLog, writeError)
+		traces.Trace(connection.Http.ErrorLog, writeError)
 		return
 	}
 
 	for _, line := range bytes.Split(content, []byte("\r\n")) {
-		_, writeError = self.Writer.Write([]byte("data: "))
+		_, writeError = connection.Writer.Write([]byte("data: "))
 		if writeError != nil {
-			traces.Trace(self.Http.ErrorLog, writeError)
+			traces.Trace(connection.Http.ErrorLog, writeError)
 			return
 		}
 
-		_, writeError = self.Writer.Write(line)
+		_, writeError = connection.Writer.Write(line)
 		if writeError != nil {
-			traces.Trace(self.Http.ErrorLog, writeError)
+			traces.Trace(connection.Http.ErrorLog, writeError)
 			return
 		}
 
-		_, writeError = self.Writer.Write([]byte("\r\n"))
+		_, writeError = connection.Writer.Write([]byte("\r\n"))
 		if writeError != nil {
-			traces.Trace(self.Http.ErrorLog, writeError)
+			traces.Trace(connection.Http.ErrorLog, writeError)
 			return
 		}
 	}
 
-	_, writeError = self.Writer.Write([]byte("\r\n"))
+	_, writeError = connection.Writer.Write([]byte("\r\n"))
 	if writeError != nil {
-		traces.Trace(self.Http.ErrorLog, writeError)
+		traces.Trace(connection.Http.ErrorLog, writeError)
 		return
 	}
 
-	flusher, flushedOk := self.Writer.(http.Flusher)
+	flusher, flushedOk := connection.Writer.(http.Flusher)
 	if !flushedOk {
-		traces.Trace(self.Http.ErrorLog, errors.New("could not retrieve flusher"))
+		traces.Trace(connection.Http.ErrorLog, errors.New("could not retrieve flusher"))
 		return
 	}
 
 	flusher.Flush()
 
-	self.EventId++
+	connection.EventId++
 }
 
 // SendNavigate redirects the request to a location with status 302.
-func SendNavigate(self *connections.Connection, location string) {
-	SendRedirect(self, location, 302)
-	SendFlush(self)
+func SendNavigate(connection *connections.Connection, location string) {
+	SendRedirect(connection, location, 302)
+	SendFlush(connection)
 }
 
 // SendRedirect redirects the request to a location with a status.
-func SendRedirect(self *connections.Connection, location string, status int) {
-	SendStatus(self, status)
-	SendHeader(self, "Location", location)
+func SendRedirect(connection *connections.Connection, location string, status int) {
+	SendStatus(connection, status)
+	SendHeader(connection, "Location", location)
 }
 
 // SendStatus sets the status code.
@@ -283,13 +283,13 @@ func SendRedirect(self *connections.Connection, location string, status int) {
 // function it will fail with an error.
 //
 // All errors are sent to the server notifier.
-func SendStatus(self *connections.Connection, status int) {
-	if self.Locked {
-		traces.Trace(self.Http.ErrorLog, "status is locked")
+func SendStatus(connection *connections.Connection, status int) {
+	if connection.Locked {
+		traces.Trace(connection.Http.ErrorLog, "status is locked")
 		return
 	}
 
-	self.Status = status
+	connection.Status = status
 }
 
 // SendHeader sets a header field.
@@ -299,38 +299,38 @@ func SendStatus(self *connections.Connection, status int) {
 // This means the status will become locked and further attempts to send the status will fail with an error.
 //
 // All errors are sent to the server notifier.
-func SendHeader(self *connections.Connection, key string, value string) {
-	if self.Locked {
-		traces.Trace(self.Http.ErrorLog, "header is locked")
+func SendHeader(connection *connections.Connection, key string, value string) {
+	if connection.Locked {
+		traces.Trace(connection.Http.ErrorLog, "header is locked")
 		return
 	}
 
-	self.Writer.Header().Set(key, value)
+	connection.Writer.Header().Set(key, value)
 }
 
-func SendHeaders(self *connections.Connection, headers map[string]string) {
-	if self.Locked {
-		traces.Trace(self.Http.ErrorLog, "header is locked")
+func SendHeaders(connection *connections.Connection, headers map[string]string) {
+	if connection.Locked {
+		traces.Trace(connection.Http.ErrorLog, "header is locked")
 		return
 	}
 
 	for key, value := range headers {
-		self.Writer.Header().Set(key, value)
+		connection.Writer.Header().Set(key, value)
 	}
 }
 
 // SendContentType sets the Content-Type header field.
-func SendContentType(self *connections.Connection, contentType string) {
-	SendHeader(self, "Content-Type", contentType)
+func SendContentType(connection *connections.Connection, contentType string) {
+	SendHeader(connection, "Content-Type", contentType)
 }
 
 // SendCookie sends a cookies to the client.
-func SendCookie(self *connections.Connection, key string, value string) {
-	SendHeader(self, "Set-Cookie", fmt.Sprintf("%s=%s; Path=/; HttpOnly", url.QueryEscape(key), url.QueryEscape(value)))
+func SendCookie(connection *connections.Connection, key string, value string) {
+	SendHeader(connection, "Set-Cookie", fmt.Sprintf("%s=%s; Path=/; HttpOnly", url.QueryEscape(key), url.QueryEscape(value)))
 }
 
-func SendFlush(self *connections.Connection) {
-	SendMessage(self, "")
+func SendFlush(connection *connections.Connection) {
+	SendMessage(connection, "")
 }
 
 // SendContent sends binary safe content.
@@ -342,28 +342,28 @@ func SendFlush(self *connections.Connection) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func SendContent(self *connections.Connection, content []byte) {
-	if !self.Locked {
-		self.Writer.WriteHeader(self.Status)
-		self.Locked = true
+func SendContent(connection *connections.Connection, content []byte) {
+	if !connection.Locked {
+		connection.Writer.WriteHeader(connection.Status)
+		connection.Locked = true
 	}
 
-	if self.WebSocket != nil {
-		writeError := self.WebSocket.WriteMessage(websocket.TextMessage, content)
+	if connection.WebSocket != nil {
+		writeError := connection.WebSocket.WriteMessage(websocket.TextMessage, content)
 		if writeError != nil {
-			traces.Trace(self.Http.ErrorLog, writeError)
+			traces.Trace(connection.Http.ErrorLog, writeError)
 		}
 		return
 	}
 
-	if "" != self.EventName {
-		SendEventContent(self, content)
+	if "" != connection.EventName {
+		SendEventContent(connection, content)
 		return
 	}
 
-	_, writeError := self.Writer.Write(content)
+	_, writeError := connection.Writer.Write(content)
 	if writeError != nil {
-		traces.Trace(self.Http.ErrorLog, writeError)
+		traces.Trace(connection.Http.ErrorLog, writeError)
 	}
 }
 
@@ -376,45 +376,45 @@ func SendContent(self *connections.Connection, content []byte) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func SendMessage(self *connections.Connection, value string) {
-	SendContent(self, []byte(value))
+func SendMessage(connection *connections.Connection, value string) {
+	SendContent(connection, []byte(value))
 }
 
 // SendNotFound sends a message with status 404 Not Found.
-func SendNotFound(self *connections.Connection, value string) {
-	SendStatus(self, http.StatusNotFound)
-	SendMessage(self, value)
+func SendNotFound(connection *connections.Connection, value string) {
+	SendStatus(connection, http.StatusNotFound)
+	SendMessage(connection, value)
 }
 
 // SendUnauthorized sends a message with status 401 Unauthorized.
-func SendUnauthorized(self *connections.Connection, value string) {
-	SendStatus(self, http.StatusUnauthorized)
-	SendMessage(self, value)
+func SendUnauthorized(connection *connections.Connection, value string) {
+	SendStatus(connection, http.StatusUnauthorized)
+	SendMessage(connection, value)
 }
 
 // SendBadRequest sends a message with status 400 Bad Request.
-func SendBadRequest(self *connections.Connection, value string) {
-	SendStatus(self, http.StatusBadRequest)
-	SendMessage(self, value)
+func SendBadRequest(connection *connections.Connection, value string) {
+	SendStatus(connection, http.StatusBadRequest)
+	SendMessage(connection, value)
 }
 
 // SendError sends a message with status 500 Internal server Error
 // and also sends the error to the server notifier.
-func SendError(self *connections.Connection, err error) {
-	SendStatus(self, http.StatusBadRequest)
-	SendMessage(self, err.Error())
+func SendError(connection *connections.Connection, err error) {
+	SendStatus(connection, http.StatusBadRequest)
+	SendMessage(connection, err.Error())
 }
 
 // SendForbidden sends a message with status 403 Forbidden.
-func SendForbidden(self *connections.Connection, v string) {
-	SendStatus(self, http.StatusForbidden)
-	SendMessage(self, v)
+func SendForbidden(connection *connections.Connection, v string) {
+	SendStatus(connection, http.StatusForbidden)
+	SendMessage(connection, v)
 }
 
 // SendTooManyRequests sends a message with status 403 Forbidden.
-func SendTooManyRequests(self *connections.Connection, v string) {
-	SendStatus(self, http.StatusTooManyRequests)
-	SendMessage(self, v)
+func SendTooManyRequests(connection *connections.Connection, v string) {
+	SendStatus(connection, http.StatusTooManyRequests)
+	SendMessage(connection, v)
 }
 
 // SendJson sends json content.
@@ -426,27 +426,27 @@ func SendTooManyRequests(self *connections.Connection, v string) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func SendJson(self *connections.Connection, value any) {
+func SendJson(connection *connections.Connection, value any) {
 	data, jsonError := json.Marshal(value)
 	if jsonError != nil {
-		traces.Trace(self.Http.ErrorLog, jsonError)
+		traces.Trace(connection.Http.ErrorLog, jsonError)
 		return
 	}
 
-	if nil == self.WebSocket {
-		contentType := self.Writer.Header().Get("Content-Type")
+	if nil == connection.WebSocket {
+		contentType := connection.Writer.Header().Get("Content-Type")
 		if "" == contentType {
-			self.Writer.Header().Set("Content-Type", "application/json")
+			connection.Writer.Header().Set("Content-Type", "application/json")
 		}
 	}
 
-	SendContent(self, data)
+	SendContent(connection, data)
 }
 
 // SendEmbeddedFileOrElse sends the embedded file requested by the client,
 // or the closest index.html embedded file, or else falls back.
-func SendEmbeddedFileOrElse(self *connections.Connection, efs embed.FS, orElse func()) {
-	fileName := self.PublicRoot + self.Request.RequestURI
+func SendEmbeddedFileOrElse(connection *connections.Connection, efs embed.FS, orElse func()) {
+	fileName := connection.PublicRoot + connection.Request.RequestURI
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
@@ -457,104 +457,104 @@ func SendEmbeddedFileOrElse(self *connections.Connection, efs embed.FS, orElse f
 
 	reader, readerInfo, readerError := embeds.FileReader(efs, fileName)
 	if readerError != nil {
-		traces.Trace(self.Http.ErrorLog, readerError)
+		traces.Trace(connection.Http.ErrorLog, readerError)
 		return
 	}
 
-	if self.WebSocket != nil {
+	if connection.WebSocket != nil {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			traces.Trace(self.Http.ErrorLog, readError)
+			traces.Trace(connection.Http.ErrorLog, readError)
 			return
 		}
 
-		writeError := self.WebSocket.WriteMessage(websocket.TextMessage, data)
+		writeError := connection.WebSocket.WriteMessage(websocket.TextMessage, data)
 		if writeError != nil {
-			traces.Trace(self.Http.ErrorLog, writeError)
+			traces.Trace(connection.Http.ErrorLog, writeError)
 			return
 		}
 		return
 	}
 
-	if "" != self.EventName {
+	if "" != connection.EventName {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			traces.Trace(self.Http.ErrorLog, readError)
+			traces.Trace(connection.Http.ErrorLog, readError)
 			return
 		}
 
-		SendEventContent(self, data)
+		SendEventContent(connection, data)
 		return
 	}
 
-	if "" == self.Writer.Header().Get("Content-Type") {
-		SendHeader(self, "Content-Type", mimes.Mime(fileName))
+	if "" == connection.Writer.Header().Get("Content-Type") {
+		SendHeader(connection, "Content-Type", mimes.Mime(fileName))
 	}
 
-	if "" == self.Writer.Header().Get("Content-Length") {
-		SendHeader(self, "Content-Length", fmt.Sprintf("%d", readerInfo.Size()))
+	if "" == connection.Writer.Header().Get("Content-Length") {
+		SendHeader(connection, "Content-Length", fmt.Sprintf("%d", readerInfo.Size()))
 	}
 
-	http.ServeContent(self.Writer, self.Request, fileName, readerInfo.ModTime(), reader)
+	http.ServeContent(connection.Writer, connection.Request, fileName, readerInfo.ModTime(), reader)
 }
 
 // SendFileOrElse sends the file requested by the client, or else falls back.
-func SendFileOrElse(self *connections.Connection, orElse func()) {
-	fileName := filepath.Join(self.PublicRoot, self.Request.RequestURI)
+func SendFileOrElse(connection *connections.Connection, orElse func()) {
+	fileName := filepath.Join(connection.PublicRoot, connection.Request.RequestURI)
 
 	if !files.IsFile(fileName) || files.IsDirectory(fileName) {
-		SendEmbeddedFileOrElse(self, self.Efs, orElse)
+		SendEmbeddedFileOrElse(connection, connection.Efs, orElse)
 		return
 	}
 
 	reader, readerInfo, readerError := files.FileReader(fileName)
 	if readerError != nil {
-		traces.Trace(self.Http.ErrorLog, readerError)
+		traces.Trace(connection.Http.ErrorLog, readerError)
 		return
 	}
 
-	if self.WebSocket != nil {
+	if connection.WebSocket != nil {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			traces.Trace(self.Http.ErrorLog, readError)
+			traces.Trace(connection.Http.ErrorLog, readError)
 			return
 		}
 
-		writeError := self.WebSocket.WriteMessage(websocket.TextMessage, data)
+		writeError := connection.WebSocket.WriteMessage(websocket.TextMessage, data)
 		if writeError != nil {
-			traces.Trace(self.Http.ErrorLog, writeError)
+			traces.Trace(connection.Http.ErrorLog, writeError)
 			return
 		}
 	}
 
-	if "" != self.EventName {
+	if "" != connection.EventName {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			traces.Trace(self.Http.ErrorLog, readError)
+			traces.Trace(connection.Http.ErrorLog, readError)
 			return
 		}
 
-		SendEventContent(self, data)
+		SendEventContent(connection, data)
 		return
 	}
 
-	if "" == self.Writer.Header().Get("Content-Type") {
-		SendHeader(self, "Content-Type", mimes.Mime(fileName))
+	if "" == connection.Writer.Header().Get("Content-Type") {
+		SendHeader(connection, "Content-Type", mimes.Mime(fileName))
 	}
 
-	if "" == self.Writer.Header().Get("Content-Length") {
-		SendHeader(self, "Content-Length", fmt.Sprintf("%d", readerInfo.Size()))
+	if "" == connection.Writer.Header().Get("Content-Length") {
+		SendHeader(connection, "Content-Length", fmt.Sprintf("%d", readerInfo.Size()))
 	}
 
-	http.ServeContent(self.Writer, self.Request, fileName, readerInfo.ModTime(), reader)
+	http.ServeContent(connection.Writer, connection.Request, fileName, readerInfo.ModTime(), reader)
 }
 
 // SendSseUpgrade upgrades to server sent events
 // and returns a function that sets the name of the current event.
 //
 // The default event name is "message".
-func SendSseUpgrade(self *connections.Connection) func(eventName string) {
-	SendHeaders(self, map[string]string{
+func SendSseUpgrade(connection *connections.Connection) func(eventName string) {
+	SendHeaders(connection, map[string]string{
 		"Access-Control-Allow-Origin":   "*",
 		"Access-Control-Expose-Headers": "Content-Type",
 		"Content-Type":                  "text/event-stream",
@@ -562,47 +562,47 @@ func SendSseUpgrade(self *connections.Connection) func(eventName string) {
 		"Connection":                    "keep-alive",
 	})
 
-	self.EventName = "message"
+	connection.EventName = "message"
 
-	return func(eventName string) { self.EventName = eventName }
+	return func(eventName string) { connection.EventName = eventName }
 }
 
 // SendWsUpgrade upgrades to web sockets.
-func SendWsUpgrade(self *connections.Connection) {
-	SendConfiguredWsUpgrade(self, websocket.Upgrader{
+func SendWsUpgrade(connection *connections.Connection) {
+	SendConfiguredWsUpgrade(connection, websocket.Upgrader{
 		ReadBufferSize:  10 * globals.KB,
 		WriteBufferSize: 10 * globals.KB,
 	})
 }
 
 // SendConfiguredWsUpgrade upgrades to web sockets.
-func SendConfiguredWsUpgrade(self *connections.Connection, upgrader websocket.Upgrader) {
-	webSocketConnection, upgradeError := upgrader.Upgrade(self.Writer, self.Request, nil)
+func SendConfiguredWsUpgrade(connection *connections.Connection, upgrader websocket.Upgrader) {
+	webSocketConnection, upgradeError := upgrader.Upgrade(connection.Writer, connection.Request, nil)
 	if upgradeError != nil {
-		traces.Trace(self.Http.ErrorLog, upgradeError)
+		traces.Trace(connection.Http.ErrorLog, upgradeError)
 		return
 	}
 
 	defer func(webSocketConnection *websocket.Conn) {
 		closeError := webSocketConnection.Close()
 		if closeError != nil {
-			traces.Trace(self.Http.ErrorLog, closeError)
+			traces.Trace(connection.Http.ErrorLog, closeError)
 		}
 	}(webSocketConnection)
 
-	self.WebSocket = webSocketConnection
-	self.Locked = true
+	connection.WebSocket = webSocketConnection
+	connection.Locked = true
 
 	return
 }
 
 // SendView sends a view.
-func SendView(self *connections.Connection, view views.View) {
-	if self.Writer.Header().Get("Location") != "" {
+func SendView(connection *connections.Connection, view views.View) {
+	if connection.Writer.Header().Get("Location") != "" {
 		return
 	}
 
-	if VerifyAccept(self, "application/json") {
+	if VerifyAccept(connection, "application/json") {
 		if view.Data == nil {
 			view.Data = map[string]any{}
 		}
@@ -611,30 +611,30 @@ func SendView(self *connections.Connection, view views.View) {
 			"data":       view.Data,
 			"renderMode": view.RenderMode,
 		}
-		SendJson(self, props)
+		SendJson(connection, props)
 		return
 	}
 
 	if view.ServerJs == "" {
-		view.ServerJs = self.ServerJs
+		view.ServerJs = connection.ServerJs
 	}
 
 	if view.IndexHtml == "" {
-		view.IndexHtml = self.IndexHtml
+		view.IndexHtml = connection.IndexHtml
 	}
 
 	if view.AppRoot == "" {
-		view.AppRoot = self.AppRoot
+		view.AppRoot = connection.AppRoot
 	}
 
-	html, renderError := views.Render(&view, self.Efs)
+	html, renderError := views.Render(&view, connection.Efs)
 	if renderError != nil {
-		traces.Trace(self.Http.ErrorLog, renderError)
+		traces.Trace(connection.Http.ErrorLog, renderError)
 	}
 
-	if "" == self.Writer.Header().Get("Content-Type") {
-		SendHeader(self, "Content-Type", "text/html")
+	if "" == connection.Writer.Header().Get("Content-Type") {
+		SendHeader(connection, "Content-Type", "text/html")
 	}
 
-	SendMessage(self, html)
+	SendMessage(connection, html)
 }
