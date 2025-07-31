@@ -375,8 +375,8 @@ func (connection *Connection) SendContent(content []byte) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func (connection *Connection) SendMessage(value string) {
-	connection.SendContent([]byte(value))
+func (connection *Connection) SendMessage(message string) {
+	connection.SendContent([]byte(message))
 }
 
 // SendMessagef sends utf-8 safe content using a format.
@@ -393,21 +393,21 @@ func (connection *Connection) SendMessagef(format string, values ...any) {
 }
 
 // SendNotFound sends a message with status 404 Not Found.
-func (connection *Connection) SendNotFound(value string) {
+func (connection *Connection) SendNotFound(message string) {
 	connection.SendStatus(http.StatusNotFound)
-	connection.SendMessage(value)
+	connection.SendMessage(message)
 }
 
 // SendUnauthorized sends a message with status 401 Unauthorized.
-func (connection *Connection) SendUnauthorized(value string) {
+func (connection *Connection) SendUnauthorized(message string) {
 	connection.SendStatus(http.StatusUnauthorized)
-	connection.SendMessage(value)
+	connection.SendMessage(message)
 }
 
 // SendBadRequest sends a message with status 400 Bad Request.
-func (connection *Connection) SendBadRequest(value string) {
+func (connection *Connection) SendBadRequest(message string) {
 	connection.SendStatus(http.StatusBadRequest)
-	connection.SendMessage(value)
+	connection.SendMessage(message)
 }
 
 // SendError sends a message with status 500 Internal server Error
@@ -418,15 +418,15 @@ func (connection *Connection) SendError(err error) {
 }
 
 // SendForbidden sends a message with status 403 Forbidden.
-func (connection *Connection) SendForbidden(v string) {
+func (connection *Connection) SendForbidden(message string) {
 	connection.SendStatus(http.StatusForbidden)
-	connection.SendMessage(v)
+	connection.SendMessage(message)
 }
 
 // SendTooManyRequests sends a message with status 403 Forbidden.
-func (connection *Connection) SendTooManyRequests(v string) {
+func (connection *Connection) SendTooManyRequests(message string) {
 	connection.SendStatus(http.StatusTooManyRequests)
-	connection.SendMessage(v)
+	connection.SendMessage(message)
 }
 
 // SendJson sends json content.
