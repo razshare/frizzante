@@ -2,8 +2,6 @@ package main
 
 import (
 	"embed"
-	"fmt"
-	"github.com/razshare/frizzante/actions"
 	frizzanteCli "github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/routes"
@@ -30,45 +28,45 @@ func init() {
 	serverLocal.Efs = efs
 	serverLocal.Routes = append(
 		serverLocal.Routes,
-		routes.Route{Pattern: "GET /TestSession", Handler: func(c *connections.Connection) {
-			s := sessions.Start(c, State{Name: "test"})
-			actions.SendMessage(c, fmt.Sprintf("hello %s", s.State.Name))
+		routes.Route{Pattern: "GET /TestSession", Handler: func(connection *connections.Connection) {
+			session := sessions.New(connection, State{Name: "test"}).Start()
+			connection.SendMessagef("hello %s", session.State.Name)
 		}},
-		routes.Route{Pattern: "POST /TestSession", Handler: func(c *connections.Connection) {
-			s := sessions.Start(c, State{})
-			defer sessions.Save(s)
-			s.State.Name = actions.ReceiveMessage(c)
+		routes.Route{Pattern: "POST /TestSession", Handler: func(connection *connections.Connection) {
+			session := sessions.New(connection, State{}).Start()
+			defer session.Save()
+			session.State.Name = connection.ReceiveMessage()
 		}},
-		routes.Route{Pattern: "GET /TestSessionExpectFail", Handler: func(c *connections.Connection) {
-			s := sessions.Start(c, State{Name: "test"})
-			actions.SendMessage(c, fmt.Sprintf("hello %s", s.State.Name))
+		routes.Route{Pattern: "GET /TestSessionExpectFail", Handler: func(connection *connections.Connection) {
+			session := sessions.New(connection, State{Name: "test"}).Start()
+			connection.SendMessagef("hello %s", session.State.Name)
 		}},
-		routes.Route{Pattern: "POST /TestSessionExpectFail", Handler: func(c *connections.Connection) {
-			s := sessions.Start(c, State{})
+		routes.Route{Pattern: "POST /TestSessionExpectFail", Handler: func(connection *connections.Connection) {
+			session := sessions.New(connection, State{}).Start().Start()
 			// Without this, session state should not be updated.
 			// defer operator.Save(state)
-			s.State.Name = actions.ReceiveMessage(c)
+			session.State.Name = connection.ReceiveMessage()
 		}},
-		routes.Route{Pattern: "GET /TestServerAddRoute", Handler: func(c *connections.Connection) {
-			actions.SendMessage(c, "hello")
+		routes.Route{Pattern: "GET /TestServerAddRoute", Handler: func(connection *connections.Connection) {
+			connection.SendMessage("hello")
 		}},
-		routes.Route{Pattern: "GET /TestConnectionSendStatus", Handler: func(c *connections.Connection) {
-			actions.SendStatus(c, 201)
-			actions.SendMessage(c, "ok")
+		routes.Route{Pattern: "GET /TestConnectionSendStatus", Handler: func(connection *connections.Connection) {
+			connection.SendStatus(201)
+			connection.SendMessage("ok")
 		}},
-		routes.Route{Pattern: "GET /TestConnectionSendHeader", Handler: func(c *connections.Connection) {
-			actions.SendHeader(c, "Content-Type", "application/json")
-			actions.SendMessage(c, "{}")
+		routes.Route{Pattern: "GET /TestConnectionSendHeader", Handler: func(connection *connections.Connection) {
+			connection.SendHeader("Content-Type", "application/json")
+			connection.SendMessage("{}")
 		}},
-		routes.Route{Pattern: "GET /TestRenderServer", Handler: func(c *connections.Connection) {
-			actions.SendView(c, views.View{
+		routes.Route{Pattern: "GET /TestRenderServer", Handler: func(connection *connections.Connection) {
+			connection.SendView(views.View{
 				Name:       "Welcome",
 				RenderMode: views.RenderModeServer,
 				Data:       map[string]any{"name": "world"},
 			})
 		}},
-		routes.Route{Pattern: "GET /TestRenderClient", Handler: func(c *connections.Connection) {
-			actions.SendView(c, views.View{
+		routes.Route{Pattern: "GET /TestRenderClient", Handler: func(connection *connections.Connection) {
+			connection.SendView(views.View{
 				Name:       "Welcome",
 				RenderMode: views.RenderModeClient,
 				Data:       map[string]any{"name": "world"},
@@ -76,7 +74,7 @@ func init() {
 		}},
 	)
 
-	go servers.Start(serverLocal)
+	go serverLocal.Start()
 
 	server <- serverLocal
 }

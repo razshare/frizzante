@@ -1,6 +1,8 @@
 package guards
 
-import "github.com/razshare/frizzante/connections"
+import (
+	"github.com/razshare/frizzante/connections"
+)
 
 type Guard struct {
 	Name    string

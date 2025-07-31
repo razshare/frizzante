@@ -37,7 +37,7 @@ func New() *Server {
 // Start starts the server.
 //
 // If the server fails to start, ServerStart crashes the program.
-func Start(server *Server) {
+func (server *Server) Start() {
 	mux := server.Http.Handler.(*http.ServeMux)
 
 	for _, route := range server.Routes {
@@ -109,7 +109,7 @@ func Start(server *Server) {
 // Stop attempts to stop the server.
 //
 // If the shutdown attempt fails, ServerStop crashes the program.
-func Stop(server *Server) {
+func (server *Server) Stop() {
 	if err := server.Http.Shutdown(context.Background()); err != nil {
 		log.Fatal(err)
 	}

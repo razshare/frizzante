@@ -2,7 +2,7 @@ package main
 
 import (
 	"embed"
-	frizzanteCli "github.com/razshare/frizzante/cli"
+	"github.com/razshare/frizzante/cli"
 )
 
 //go:embed version
@@ -11,6 +11,6 @@ import (
 //go:embed queries.sql
 //go:embed schema.sql
 var cliEfs embed.FS
-var cli = &frizzanteCli.Cli{Efs: cliEfs}
+var frizzante = &cli.Cli{Efs: cliEfs}
 
-func main() { frizzanteCli.OnStart(cli) }
+func main() { frizzante.OnStart() }

@@ -17,7 +17,7 @@ import (
 )
 
 // IndexHtmlData gets the contents of the index html document.
-func IndexHtmlData(view *View, efs embed.FS) ([]byte, error) {
+func (view *View) IndexHtmlData(efs embed.FS) ([]byte, error) {
 	if files.IsFile(view.IndexHtml) {
 		return os.ReadFile(view.IndexHtml)
 	}
@@ -37,16 +37,16 @@ func IndexHtmlData(view *View, efs embed.FS) ([]byte, error) {
 }
 
 // ServerJsData gets the contents of the server script.
-func ServerJsData(view *View, efs embed.FS) ([]byte, error) {
+func (view *View) ServerJsData(efs embed.FS) ([]byte, error) {
 	if files.IsFile(view.ServerJs) {
 		return os.ReadFile(view.ServerJs)
 	}
 
 	var data []byte
-	n := strings.ReplaceAll(view.ServerJs, "\\", "/")
-	if embeds.IsFile(efs, n) {
+	fileName := strings.ReplaceAll(view.ServerJs, "\\", "/")
+	if embeds.IsFile(efs, fileName) {
 		var readError error
-		data, readError = efs.ReadFile(n)
+		data, readError = efs.ReadFile(fileName)
 		if readError != nil {
 			return nil, readError
 		}
@@ -63,7 +63,7 @@ func ServerJsData(view *View, efs embed.FS) ([]byte, error) {
 // The body of the document will contain the fully rendered content of the view as HTML.
 //
 // If the View is using RenderModeClient, then ViewRender returns an HTML document.
-// The document itview doesn't include any of the view content, instead, custom <script> tags are injected into the head of
+// The document view doesn't include any of the view content, instead, custom <script> tags are injected into the head of
 // the document in order to asynchronously load a client JavaScript bundle that renders the view inside the client's browser,
 // thus ultimately loading the content into the document.
 //
@@ -82,7 +82,7 @@ func ServerJsData(view *View, efs embed.FS) ([]byte, error) {
 //
 // If for some reason your view server is not in cjs format, RenderMode will try to convert it to cjs on the fly using esbuild.
 // Esbuild will look for a "node_modules" in the view root directory, which you can set by invoking WithRoot.
-func Render(view *View, efs embed.FS) (html string, err error) {
+func (view *View) Render(efs embed.FS) (html string, err error) {
 	// CSR.
 	idObject, idObjectError := uuid.NewV4()
 	if idObjectError != nil {
@@ -109,7 +109,7 @@ func Render(view *View, efs embed.FS) (html string, err error) {
 	properties := string(jsonData)
 
 	if RenderModeClient == view.RenderMode {
-		indexHtmlData, indexHtmlDataError := IndexHtmlData(view, efs)
+		indexHtmlData, indexHtmlDataError := view.IndexHtmlData(efs)
 		if indexHtmlDataError != nil {
 			return "", indexHtmlDataError
 		}
@@ -142,7 +142,7 @@ func Render(view *View, efs embed.FS) (html string, err error) {
 	var serverJsData []byte
 	var serverJsDataError error
 
-	serverJsData, serverJsDataError = ServerJsData(view, efs)
+	serverJsData, serverJsDataError = view.ServerJsData(efs)
 	if serverJsDataError != nil {
 		return "", serverJsDataError
 	}
@@ -228,7 +228,7 @@ func Render(view *View, efs embed.FS) (html string, err error) {
 	}
 
 	if RenderModeServer == view.RenderMode {
-		indexHtmlData, indexHtmlDataError := IndexHtmlData(view, efs)
+		indexHtmlData, indexHtmlDataError := view.IndexHtmlData(efs)
 		if indexHtmlDataError != nil {
 			return "", indexHtmlDataError
 		}
@@ -256,7 +256,7 @@ func Render(view *View, efs embed.FS) (html string, err error) {
 	}
 
 	if RenderModeFull == view.RenderMode {
-		indexHtmlData, indexHtmlDataError := IndexHtmlData(view, efs)
+		indexHtmlData, indexHtmlDataError := view.IndexHtmlData(efs)
 		if indexHtmlDataError != nil {
 			return "", indexHtmlDataError
 		}

@@ -1,6 +1,8 @@
 package routes
 
-import "github.com/razshare/frizzante/connections"
+import (
+	"github.com/razshare/frizzante/connections"
+)
 
 type Route struct {
 	Pattern string

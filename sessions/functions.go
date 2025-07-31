@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/razshare/frizzante/actions"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/globals"
@@ -14,14 +13,8 @@ import (
 	"path/filepath"
 )
 
-// New creates a new session with a zero initial state.
-func New[T any](connection *connections.Connection) *Session[T] {
-	var initialState T
-	return NewWithState(connection, initialState)
-}
-
-// NewWithState creates a new session with a given initial state.
-func NewWithState[T any](connection *connections.Connection, initialState T) *Session[T] {
+// New creates a new session with a given initial state.
+func New[T any](connection *connections.Connection, initialState T) *Session[T] {
 	name := filepath.Join(".gen", "sessions")
 	lock := locks.New()
 	return &Session[T]{
@@ -30,7 +23,7 @@ func NewWithState[T any](connection *connections.Connection, initialState T) *Se
 				return nil, errors.New("disk archive name is blank")
 			}
 
-			mutex := locks.FindAndAcquire(lock, domain, key)
+			mutex := lock.Acquire(domain, key)
 			mutex.Lock()
 			defer mutex.Unlock()
 
@@ -46,7 +39,7 @@ func NewWithState[T any](connection *connections.Connection, initialState T) *Se
 				return errors.New("disk archive name is blank")
 			}
 
-			mutex := locks.FindAndAcquire(lock, domain, key)
+			mutex := lock.Acquire(domain, key)
 			mutex.Lock()
 			defer mutex.Unlock()
 
@@ -69,7 +62,7 @@ func NewWithState[T any](connection *connections.Connection, initialState T) *Se
 				return false, errors.New("disk archive name is blank")
 			}
 
-			mutex := locks.FindAndAcquire(lock, domain, key)
+			mutex := lock.Acquire(domain, key)
 			mutex.Lock()
 			defer mutex.Unlock()
 
@@ -81,7 +74,7 @@ func NewWithState[T any](connection *connections.Connection, initialState T) *Se
 				return errors.New("disk archive name is blank")
 			}
 
-			mutex := locks.FindAndAcquire(lock, domain, key)
+			mutex := lock.Acquire(domain, key)
 			mutex.Lock()
 			defer mutex.Unlock()
 
@@ -97,7 +90,7 @@ func NewWithState[T any](connection *connections.Connection, initialState T) *Se
 				return false, errors.New("disk archive name is blank")
 			}
 
-			mutex := locks.FindAndAcquire(lock, domain)
+			mutex := lock.Acquire(domain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
@@ -108,7 +101,7 @@ func NewWithState[T any](connection *connections.Connection, initialState T) *Se
 				return errors.New("disk archive name is blank")
 			}
 
-			mutex := locks.FindAndAcquire(lock, domain)
+			mutex := lock.Acquire(domain)
 			mutex.Lock()
 			defer mutex.Unlock()
 
@@ -132,20 +125,19 @@ func NewWithState[T any](connection *connections.Connection, initialState T) *Se
 // If the user doesn't provide a valid "session-id" cookie,
 // Start will create a new session along with a new "session-id",
 // which it sends to the user as a cookie.
-func Start[T any](connection *connections.Connection, initialState T) *Session[T] {
-	session := NewWithState(connection, initialState)
-	if !Exists(session) {
-		Save(session)
+func (session *Session[T]) Start() *Session[T] {
+	if !session.Exists() {
+		session.Save()
 		return session
 	}
 
-	Load(session)
+	session.Load()
 	return session
 }
 
 // Id tries to find a session id among the user's cookies.
 // If no session id is found, it creates a new one and returns it.
-func Id[T any](session *Session[T]) string {
+func (session *Session[T]) Id() string {
 	if "" != session.Connection.SessionId {
 		return session.Connection.SessionId
 	}
@@ -174,7 +166,7 @@ func Id[T any](session *Session[T]) string {
 
 	id = idObject.String()
 
-	actions.SendCookie(session.Connection, "session-id", id)
+	session.Connection.SendCookie("session-id", id)
 
 	session.Connection.SessionId = id
 
@@ -182,8 +174,8 @@ func Id[T any](session *Session[T]) string {
 }
 
 // Exists checks if the session exists into the archive.
-func Exists[T any](session *Session[T]) bool {
-	id := Id(session)
+func (session *Session[T]) Exists() bool {
+	id := session.Id()
 
 	exists, existsError := session.Has(id, globals.SessionKey)
 	if existsError != nil {
@@ -194,8 +186,8 @@ func Exists[T any](session *Session[T]) bool {
 }
 
 // Save saves the session into the archive.
-func Save[T any](session *Session[T]) {
-	id := Id(session)
+func (session *Session[T]) Save() {
+	id := session.Id()
 
 	data, jsonError := json.Marshal(session.State)
 	if jsonError != nil {
@@ -212,8 +204,8 @@ func Save[T any](session *Session[T]) {
 // Load loads the session from the archive.
 //
 // If the session is not found in the archive it creates it.
-func Load[T any](session *Session[T]) {
-	id := Id(session)
+func (session *Session[T]) Load() {
+	id := session.Id()
 
 	exists, existsError := session.Has(id, globals.SessionKey)
 	if existsError != nil {
@@ -237,8 +229,8 @@ func Load[T any](session *Session[T]) {
 }
 
 // Destroy removes the session from the archive.
-func Destroy[T any](session *Session[T]) {
-	id := Id(session)
+func (session *Session[T]) Destroy() {
+	id := session.Id()
 
 	archiveError := session.RemoveDomain(id)
 	if archiveError != nil {
