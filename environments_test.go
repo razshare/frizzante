@@ -7,7 +7,7 @@ import (
 )
 
 func TestLoadDotenv(t *testing.T) {
-	err := environments.LoadDotenv()
+	err := environments.LoadDotenv("env.test")
 	if err != nil {
 		t.Fatal(err)
 	}
