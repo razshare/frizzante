@@ -53,13 +53,13 @@ func (connection *Connection) IsAlive() *bool {
 func (connection *Connection) ReceiveCookie(key string) string {
 	cookie, cookieError := connection.Request.Cookie(key)
 	if cookieError != nil {
-		traces.Trace(connection.Http.ErrorLog, cookieError)
+		traces.Trace(connection.ErrorLog, cookieError)
 		return ""
 	}
 
 	data, queryError := url.QueryUnescape(cookie.Value)
 	if queryError != nil {
-		traces.Trace(connection.Http.ErrorLog, queryError)
+		traces.Trace(connection.ErrorLog, queryError)
 		return ""
 	}
 
@@ -73,7 +73,7 @@ func (connection *Connection) ReceiveMessage() string {
 	if connection.WebSocket != nil {
 		_, data, readError := connection.WebSocket.ReadMessage()
 		if readError != nil {
-			traces.Trace(connection.Http.ErrorLog, readError)
+			traces.Trace(connection.ErrorLog, readError)
 			return ""
 		}
 		return string(data)
@@ -81,7 +81,7 @@ func (connection *Connection) ReceiveMessage() string {
 
 	data, readError := io.ReadAll(connection.Request.Body)
 	if readError != nil {
-		traces.Trace(connection.Http.ErrorLog, readError)
+		traces.Trace(connection.ErrorLog, readError)
 		return ""
 	}
 	return string(data)
@@ -95,7 +95,7 @@ func (connection *Connection) ReceiveJson(value any) {
 	if connection.WebSocket != nil {
 		jsonError := connection.WebSocket.ReadJSON(value)
 		if jsonError != nil {
-			traces.Trace(connection.Http.ErrorLog, jsonError)
+			traces.Trace(connection.ErrorLog, jsonError)
 			return
 		}
 		return
@@ -103,13 +103,13 @@ func (connection *Connection) ReceiveJson(value any) {
 
 	data, readError := io.ReadAll(connection.Request.Body)
 	if readError != nil {
-		traces.Trace(connection.Http.ErrorLog, readError)
+		traces.Trace(connection.ErrorLog, readError)
 		return
 	}
 
 	jsonError := json.Unmarshal(data, value)
 	if jsonError != nil {
-		traces.Trace(connection.Http.ErrorLog, jsonError)
+		traces.Trace(connection.ErrorLog, jsonError)
 		return
 	}
 }
@@ -128,7 +128,7 @@ func (connection *Connection) ReceiveForm() url.Values {
 // of its file parts are stored in memory, with the remainder stored on disk in temporary files.
 func (connection *Connection) ReceiveFormWithMaxMemory(maxMemory int64) url.Values {
 	if connection.WebSocket != nil {
-		traces.Trace(connection.Http.ErrorLog, errors.New("connection is not of type web socket"))
+		traces.Trace(connection.ErrorLog, errors.New("connection is not of type web socket"))
 		return url.Values{}
 	}
 
@@ -140,7 +140,7 @@ func (connection *Connection) ReceiveFormWithMaxMemory(maxMemory int64) url.Valu
 
 		formError = connection.Request.ParseForm()
 		if formError != nil {
-			traces.Trace(connection.Http.ErrorLog, formError)
+			traces.Trace(connection.ErrorLog, formError)
 			return url.Values{}
 		}
 	}
@@ -222,39 +222,39 @@ func (connection *Connection) SendEventContent(content []byte) {
 
 	_, writeError := connection.Writer.Write([]byte(header))
 	if writeError != nil {
-		traces.Trace(connection.Http.ErrorLog, writeError)
+		traces.Trace(connection.ErrorLog, writeError)
 		return
 	}
 
 	for _, line := range bytes.Split(content, []byte("\r\n")) {
 		_, writeError = connection.Writer.Write([]byte("data: "))
 		if writeError != nil {
-			traces.Trace(connection.Http.ErrorLog, writeError)
+			traces.Trace(connection.ErrorLog, writeError)
 			return
 		}
 
 		_, writeError = connection.Writer.Write(line)
 		if writeError != nil {
-			traces.Trace(connection.Http.ErrorLog, writeError)
+			traces.Trace(connection.ErrorLog, writeError)
 			return
 		}
 
 		_, writeError = connection.Writer.Write([]byte("\r\n"))
 		if writeError != nil {
-			traces.Trace(connection.Http.ErrorLog, writeError)
+			traces.Trace(connection.ErrorLog, writeError)
 			return
 		}
 	}
 
 	_, writeError = connection.Writer.Write([]byte("\r\n"))
 	if writeError != nil {
-		traces.Trace(connection.Http.ErrorLog, writeError)
+		traces.Trace(connection.ErrorLog, writeError)
 		return
 	}
 
 	flusher, flushedOk := connection.Writer.(http.Flusher)
 	if !flushedOk {
-		traces.Trace(connection.Http.ErrorLog, errors.New("could not retrieve flusher"))
+		traces.Trace(connection.ErrorLog, errors.New("could not retrieve flusher"))
 		return
 	}
 
@@ -284,7 +284,7 @@ func (connection *Connection) SendRedirect(location string, status int) {
 // All errors are sent to the server notifier.
 func (connection *Connection) SendStatus(status int) {
 	if connection.Locked {
-		traces.Trace(connection.Http.ErrorLog, "status is locked")
+		traces.Trace(connection.ErrorLog, "status is locked")
 		return
 	}
 
@@ -300,7 +300,7 @@ func (connection *Connection) SendStatus(status int) {
 // All errors are sent to the server notifier.
 func (connection *Connection) SendHeader(key string, value string) {
 	if connection.Locked {
-		traces.Trace(connection.Http.ErrorLog, "header is locked")
+		traces.Trace(connection.ErrorLog, "header is locked")
 		return
 	}
 
@@ -309,7 +309,7 @@ func (connection *Connection) SendHeader(key string, value string) {
 
 func (connection *Connection) SendHeaders(headers map[string]string) {
 	if connection.Locked {
-		traces.Trace(connection.Http.ErrorLog, "header is locked")
+		traces.Trace(connection.ErrorLog, "header is locked")
 		return
 	}
 
@@ -350,7 +350,7 @@ func (connection *Connection) SendContent(content []byte) {
 	if connection.WebSocket != nil {
 		writeError := connection.WebSocket.WriteMessage(websocket.TextMessage, content)
 		if writeError != nil {
-			traces.Trace(connection.Http.ErrorLog, writeError)
+			traces.Trace(connection.ErrorLog, writeError)
 		}
 		return
 	}
@@ -362,7 +362,7 @@ func (connection *Connection) SendContent(content []byte) {
 
 	_, writeError := connection.Writer.Write(content)
 	if writeError != nil {
-		traces.Trace(connection.Http.ErrorLog, writeError)
+		traces.Trace(connection.ErrorLog, writeError)
 	}
 }
 
@@ -441,7 +441,7 @@ func (connection *Connection) SendTooManyRequests(v string) {
 func (connection *Connection) SendJson(value any) {
 	data, jsonError := json.Marshal(value)
 	if jsonError != nil {
-		traces.Trace(connection.Http.ErrorLog, jsonError)
+		traces.Trace(connection.ErrorLog, jsonError)
 		return
 	}
 
@@ -469,20 +469,20 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 
 	reader, readerInfo, readerError := embeds.FileReader(efs, fileName)
 	if readerError != nil {
-		traces.Trace(connection.Http.ErrorLog, readerError)
+		traces.Trace(connection.ErrorLog, readerError)
 		return
 	}
 
 	if connection.WebSocket != nil {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			traces.Trace(connection.Http.ErrorLog, readError)
+			traces.Trace(connection.ErrorLog, readError)
 			return
 		}
 
 		writeError := connection.WebSocket.WriteMessage(websocket.TextMessage, data)
 		if writeError != nil {
-			traces.Trace(connection.Http.ErrorLog, writeError)
+			traces.Trace(connection.ErrorLog, writeError)
 			return
 		}
 		return
@@ -491,7 +491,7 @@ func (connection *Connection) SendEmbeddedFileOrElse(efs embed.FS, orElse func()
 	if "" != connection.EventName {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			traces.Trace(connection.Http.ErrorLog, readError)
+			traces.Trace(connection.ErrorLog, readError)
 			return
 		}
 
@@ -521,20 +521,20 @@ func (connection *Connection) SendFileOrElse(orElse func()) {
 
 	reader, readerInfo, readerError := files.FileReader(fileName)
 	if readerError != nil {
-		traces.Trace(connection.Http.ErrorLog, readerError)
+		traces.Trace(connection.ErrorLog, readerError)
 		return
 	}
 
 	if connection.WebSocket != nil {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			traces.Trace(connection.Http.ErrorLog, readError)
+			traces.Trace(connection.ErrorLog, readError)
 			return
 		}
 
 		writeError := connection.WebSocket.WriteMessage(websocket.TextMessage, data)
 		if writeError != nil {
-			traces.Trace(connection.Http.ErrorLog, writeError)
+			traces.Trace(connection.ErrorLog, writeError)
 			return
 		}
 	}
@@ -542,7 +542,7 @@ func (connection *Connection) SendFileOrElse(orElse func()) {
 	if "" != connection.EventName {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			traces.Trace(connection.Http.ErrorLog, readError)
+			traces.Trace(connection.ErrorLog, readError)
 			return
 		}
 
@@ -591,14 +591,14 @@ func (connection *Connection) SendWsUpgrade() {
 func (connection *Connection) SendConfiguredWsUpgrade(upgrader websocket.Upgrader) {
 	webSocketConnection, upgradeError := upgrader.Upgrade(connection.Writer, connection.Request, nil)
 	if upgradeError != nil {
-		traces.Trace(connection.Http.ErrorLog, upgradeError)
+		traces.Trace(connection.ErrorLog, upgradeError)
 		return
 	}
 
 	defer func(webSocketConnection *websocket.Conn) {
 		closeError := webSocketConnection.Close()
 		if closeError != nil {
-			traces.Trace(connection.Http.ErrorLog, closeError)
+			traces.Trace(connection.ErrorLog, closeError)
 		}
 	}(webSocketConnection)
 
@@ -641,7 +641,7 @@ func (connection *Connection) SendView(view views.View) {
 
 	html, renderError := view.Render(connection.Efs)
 	if renderError != nil {
-		traces.Trace(connection.Http.ErrorLog, renderError)
+		traces.Trace(connection.ErrorLog, renderError)
 	}
 
 	if "" == connection.Writer.Header().Get("Content-Type") {

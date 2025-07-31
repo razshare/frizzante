@@ -160,7 +160,7 @@ func (session *Session[T]) Id() string {
 	idObject, idObjectError := uuid.NewV4()
 	if idObjectError != nil {
 		session.Connection.SessionId = ""
-		traces.Trace(session.Connection.Http.ErrorLog, idObjectError)
+		traces.Trace(session.Connection.ErrorLog, idObjectError)
 		return ""
 	}
 
@@ -179,7 +179,7 @@ func (session *Session[T]) Exists() bool {
 
 	exists, existsError := session.Has(id, globals.SessionKey)
 	if existsError != nil {
-		traces.Trace(session.Connection.Http.ErrorLog, existsError)
+		traces.Trace(session.Connection.ErrorLog, existsError)
 		return false
 	}
 	return exists
@@ -191,13 +191,13 @@ func (session *Session[T]) Save() {
 
 	data, jsonError := json.Marshal(session.State)
 	if jsonError != nil {
-		traces.Trace(session.Connection.Http.ErrorLog, jsonError)
+		traces.Trace(session.Connection.ErrorLog, jsonError)
 		return
 	}
 
 	archiveError := session.Set(id, globals.SessionKey, data)
 	if archiveError != nil {
-		traces.Trace(session.Connection.Http.ErrorLog, archiveError)
+		traces.Trace(session.Connection.ErrorLog, archiveError)
 	}
 }
 
@@ -209,20 +209,20 @@ func (session *Session[T]) Load() {
 
 	exists, existsError := session.Has(id, globals.SessionKey)
 	if existsError != nil {
-		traces.Trace(session.Connection.Http.ErrorLog, existsError)
+		traces.Trace(session.Connection.ErrorLog, existsError)
 		return
 	}
 
 	if exists {
 		data, getError := session.Get(id, globals.SessionKey)
 		if getError != nil {
-			traces.Trace(session.Connection.Http.ErrorLog, getError)
+			traces.Trace(session.Connection.ErrorLog, getError)
 			return
 		}
 
 		jsonError := json.Unmarshal(data, session.State)
 		if jsonError != nil {
-			traces.Trace(session.Connection.Http.ErrorLog, jsonError)
+			traces.Trace(session.Connection.ErrorLog, jsonError)
 			return
 		}
 	}
@@ -234,7 +234,7 @@ func (session *Session[T]) Destroy() {
 
 	archiveError := session.RemoveDomain(id)
 	if archiveError != nil {
-		traces.Trace(session.Connection.Http.ErrorLog, archiveError)
+		traces.Trace(session.Connection.ErrorLog, archiveError)
 		return
 	}
 }

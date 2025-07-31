@@ -24,7 +24,7 @@ func New() *Server {
 		AppRoot:       "app",
 		ServerJs:      "app/dist/server.js",
 		IndexHtml:     "app/dist/client/index.html",
-		Http: &http.Server{
+		Server: http.Server{
 			Handler:        http.NewServeMux(),
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
@@ -38,12 +38,11 @@ func New() *Server {
 //
 // If the server fails to start, ServerStart crashes the program.
 func (server *Server) Start() {
-	mux := server.Http.Handler.(*http.ServeMux)
+	mux := server.Handler.(*http.ServeMux)
 
 	for _, route := range server.Routes {
 		mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 			con := &connections.Connection{
-				Http:       server.Http,
 				Request:    request,
 				Writer:     writer,
 				Efs:        server.Efs,
@@ -53,6 +52,8 @@ func (server *Server) Start() {
 				AppRoot:    server.AppRoot,
 				ServerJs:   server.ServerJs,
 				IndexHtml:  server.IndexHtml,
+				ErrorLog:   server.ErrorLog,
+				InfoLog:    server.InfoLog,
 			}
 
 			for _, tag := range route.Tags {
@@ -79,7 +80,7 @@ func (server *Server) Start() {
 
 	go func() {
 		server.InfoLog.Printf("listening for requests at http://%s", server.Address)
-		serveError := http.ListenAndServe(server.Address, server.Http.Handler)
+		serveError := http.ListenAndServe(server.Address, server.Handler)
 		if serveError != nil {
 			if errors.Is(serveError, http.ErrServerClosed) {
 				server.InfoLog.Println("shutting down server")
@@ -92,7 +93,7 @@ func (server *Server) Start() {
 	go func() {
 		if "" != server.Certificate && "" != server.Key {
 			server.InfoLog.Printf("listening for requests at https://%s", server.SecureAddress)
-			serveError := http.ListenAndServeTLS(server.SecureAddress, server.Certificate, server.Key, server.Http.Handler)
+			serveError := http.ListenAndServeTLS(server.SecureAddress, server.Certificate, server.Key, server.Handler)
 			if serveError != nil {
 				if errors.Is(serveError, http.ErrServerClosed) {
 					server.InfoLog.Printf("shutting down server")
@@ -110,7 +111,7 @@ func (server *Server) Start() {
 //
 // If the shutdown attempt fails, ServerStop crashes the program.
 func (server *Server) Stop() {
-	if err := server.Http.Shutdown(context.Background()); err != nil {
+	if err := server.Shutdown(context.Background()); err != nil {
 		log.Fatal(err)
 	}
 }

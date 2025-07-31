@@ -3,12 +3,14 @@ package connections
 import (
 	"embed"
 	"github.com/gorilla/websocket"
+	"log"
 	"net/http"
 )
 
 type Connection struct {
+	ErrorLog   *log.Logger
+	InfoLog    *log.Logger
 	WebSocket  *websocket.Conn
-	Http       *http.Server
 	Request    *http.Request
 	Writer     http.ResponseWriter
 	Efs        embed.FS

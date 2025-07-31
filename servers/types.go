@@ -10,7 +10,6 @@ import (
 )
 
 type Server struct {
-	Http          *http.Server
 	Guards        []guards.Guard
 	Routes        []routes.Route
 	Efs           embed.FS
@@ -25,4 +24,5 @@ type Server struct {
 	Dotenv        string
 	Certificate   string
 	Key           string
+	http.Server
 }
