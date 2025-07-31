@@ -208,7 +208,7 @@ func DownloadFile(url string, fname string) error {
 
 func FileReader(fname string) (*bytes.Reader, os.FileInfo, error) {
 	file, openError := os.Open(fname)
-	if nil != openError {
+	if openError != nil {
 		return nil, nil, openError
 	}
 
@@ -216,16 +216,16 @@ func FileReader(fname string) (*bytes.Reader, os.FileInfo, error) {
 
 	buffer := make([]byte, fileInfo.Size())
 	_, readError := file.Read(buffer)
-	if nil != readError {
+	if readError != nil {
 		closeError := file.Close()
-		if nil != closeError {
+		if closeError != nil {
 			return nil, nil, closeError
 		}
 		return nil, nil, readError
 	}
 
 	closeError := file.Close()
-	if nil != closeError {
+	if closeError != nil {
 		return nil, nil, closeError
 	}
 
@@ -235,7 +235,7 @@ func FileReader(fname string) (*bytes.Reader, os.FileInfo, error) {
 // ReadFileInChunks reads a file in chunks.
 func ReadFileInChunks(fname string, chunk int, fun func(data []byte) error) (err error) {
 	file, openError := os.Open(fname)
-	if nil != openError {
+	if openError != nil {
 		return openError
 	}
 	defer func(file *os.File) { err = file.Close() }(file)
@@ -244,7 +244,7 @@ func ReadFileInChunks(fname string, chunk int, fun func(data []byte) error) (err
 
 	for {
 		count, readError := file.Read(buffer)
-		if nil != readError {
+		if readError != nil {
 			return readError
 		}
 		if count == 0 {

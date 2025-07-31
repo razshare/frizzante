@@ -48,16 +48,16 @@ func (con *Connection) IsAlive() *bool {
 
 // ReceiveCookie reads the contents of a cookie from the message and returns the value.
 //
-// It silently discards malformed values.
-//
 // Compatible with web sockets.
 func (con *Connection) ReceiveCookie(key string) string {
 	cookie, cookieError := con.Request.Cookie(key)
-	if nil != cookieError {
+	if cookieError != nil {
+		con.Notifier.SendErrorAndTrace(cookieError, 1)
 		return ""
 	}
-	value, unescapeError := url.QueryUnescape(cookie.Value)
-	if nil != unescapeError {
+	value, queryError := url.QueryUnescape(cookie.Value)
+	if queryError != nil {
+		con.Notifier.SendErrorAndTrace(queryError, 1)
 		return ""
 	}
 
@@ -70,7 +70,7 @@ func (con *Connection) ReceiveCookie(key string) string {
 func (con *Connection) ReceiveMessage() string {
 	if con.WebSocket != nil {
 		_, readBytes, readError := con.WebSocket.ReadMessage()
-		if nil != readError {
+		if readError != nil {
 			con.Notifier.SendErrorAndTrace(readError, 1)
 			return ""
 		}
@@ -78,7 +78,7 @@ func (con *Connection) ReceiveMessage() string {
 	}
 
 	readBytes, readAllError := io.ReadAll(con.Request.Body)
-	if nil != readAllError {
+	if readAllError != nil {
 		con.Notifier.SendErrorAndTrace(readAllError, 1)
 		return ""
 	}
@@ -92,18 +92,18 @@ func (con *Connection) ReceiveMessage() string {
 func (con *Connection) ReceiveJson(val any) error {
 	if con.WebSocket != nil {
 		jsonError := con.WebSocket.ReadJSON(val)
-		if nil != jsonError {
+		if jsonError != nil {
 			return jsonError
 		}
 		return nil
 	}
 
 	readBytes, readAllError := io.ReadAll(con.Request.Body)
-	if nil != readAllError {
+	if readAllError != nil {
 		return readAllError
 	}
 	unmarshalError := json.Unmarshal(readBytes, val)
-	if nil != unmarshalError {
+	if unmarshalError != nil {
 		return unmarshalError
 	}
 	return nil
@@ -111,27 +111,30 @@ func (con *Connection) ReceiveJson(val any) error {
 
 // ReceiveForm reads the message as a form and returns the value.
 //
-// It silently discards malformed values.
+// The whole request body is parsed and up to a total of 2MB
+// of its file parts are stored in memory, with the remainder stored on disk in temporary files.
 func (con *Connection) ReceiveForm() url.Values {
 	return con.ReceiveFormWithMaxMemory(2 * globals.MB)
 }
 
 // ReceiveFormWithMaxMemory reads the message as a form and returns the value.
 //
-// It silently discards malformed values.
-func (con *Connection) ReceiveFormWithMaxMemory(val int64) url.Values {
+// The whole request body is parsed and up to a total of maxMemory bytes
+// of its file parts are stored in memory, with the remainder stored on disk in temporary files.
+func (con *Connection) ReceiveFormWithMaxMemory(maxMemory int64) url.Values {
 	if con.WebSocket != nil {
 		return url.Values{}
 	}
 
-	parseMultipartFormError := con.Request.ParseMultipartForm(val)
-	if nil != parseMultipartFormError {
+	parseMultipartFormError := con.Request.ParseMultipartForm(maxMemory)
+	if parseMultipartFormError != nil {
 		if !errors.Is(parseMultipartFormError, http.ErrNotMultipart) {
 			return url.Values{}
 		}
 
 		parseFormError := con.Request.ParseForm()
-		if nil != parseFormError {
+		if parseFormError != nil {
+			con.Notifier.SendErrorAndTrace(parseFormError, 1)
 			return url.Values{}
 		}
 	}
@@ -212,33 +215,33 @@ func (con *Connection) SendEventContent(val []byte) {
 	header := fmt.Sprintf("id: %d\r\nevent: %s\r\n", con.EventId, con.EventName)
 
 	_, writeEventError := con.Writer.Write([]byte(header))
-	if nil != writeEventError {
+	if writeEventError != nil {
 		con.Notifier.SendErrorAndTrace(writeEventError, 1)
 		return
 	}
 
 	for _, line := range bytes.Split(val, []byte("\r\n")) {
 		_, writeEventError = con.Writer.Write([]byte("data: "))
-		if nil != writeEventError {
+		if writeEventError != nil {
 			con.Notifier.SendErrorAndTrace(writeEventError, 1)
 			return
 		}
 
 		_, writeEventError = con.Writer.Write(line)
-		if nil != writeEventError {
+		if writeEventError != nil {
 			con.Notifier.SendErrorAndTrace(writeEventError, 1)
 			return
 		}
 
 		_, writeEventError = con.Writer.Write([]byte("\r\n"))
-		if nil != writeEventError {
+		if writeEventError != nil {
 			con.Notifier.SendErrorAndTrace(writeEventError, 1)
 			return
 		}
 	}
 
 	_, writeEventError = con.Writer.Write([]byte("\r\n"))
-	if nil != writeEventError {
+	if writeEventError != nil {
 		con.Notifier.SendErrorAndTrace(writeEventError, 1)
 		return
 	}
@@ -329,7 +332,7 @@ func (con *Connection) SendContent(val []byte) {
 
 	if con.WebSocket != nil {
 		writeError := con.WebSocket.WriteMessage(websocket.TextMessage, val)
-		if nil != writeError {
+		if writeError != nil {
 			con.Notifier.SendErrorAndTrace(writeError, 1)
 		}
 		return
@@ -341,7 +344,7 @@ func (con *Connection) SendContent(val []byte) {
 	}
 
 	_, writeError := con.Writer.Write(val)
-	if nil != writeError {
+	if writeError != nil {
 		con.Notifier.SendErrorAndTrace(writeError, 1)
 	}
 }
@@ -407,7 +410,7 @@ func (con *Connection) SendTooManyRequests(val string) {
 // Compatible with web sockets.
 func (con *Connection) SendJson(val any) {
 	content, marshalError := json.Marshal(val)
-	if nil != marshalError {
+	if marshalError != nil {
 		con.Notifier.SendErrorAndTrace(marshalError, 1)
 		return
 	}
@@ -435,19 +438,19 @@ func (con *Connection) SendEmbeddedFileOrElse(efs embed.FS, fun func()) {
 	}
 
 	reader, info, readerError := embeds.FileReader(efs, fileName)
-	if nil != readerError {
+	if readerError != nil {
 		con.Notifier.SendErrorAndTrace(readerError, 1)
 		return
 	}
 
 	if con.WebSocket != nil {
 		content, readError := io.ReadAll(reader)
-		if nil != readError {
+		if readError != nil {
 			con.Notifier.SendErrorAndTrace(readError, 1)
 			return
 		}
 		writeError := con.WebSocket.WriteMessage(websocket.TextMessage, content)
-		if nil != writeError {
+		if writeError != nil {
 			con.Notifier.SendErrorAndTrace(writeError, 1)
 		}
 		return
@@ -455,7 +458,7 @@ func (con *Connection) SendEmbeddedFileOrElse(efs embed.FS, fun func()) {
 
 	if "" != con.EventName {
 		content, readError := io.ReadAll(reader)
-		if nil != readError {
+		if readError != nil {
 			con.Notifier.SendErrorAndTrace(readError, 1)
 		}
 		con.SendEventContent(content)
@@ -473,28 +476,28 @@ func (con *Connection) SendEmbeddedFileOrElse(efs embed.FS, fun func()) {
 }
 
 // SendFileOrElse sends the file requested by the client, or else falls back.
-func (con *Connection) SendFileOrElse(fun func()) {
-	fname := filepath.Join(con.PublicRoot, con.Request.RequestURI)
+func (con *Connection) SendFileOrElse(orElse func()) {
+	fileName := filepath.Join(con.PublicRoot, con.Request.RequestURI)
 
-	if !files.IsFile(fname) || files.IsDirectory(fname) {
-		con.SendEmbeddedFileOrElse(con.Efs, fun)
+	if !files.IsFile(fileName) || files.IsDirectory(fileName) {
+		con.SendEmbeddedFileOrElse(con.Efs, orElse)
 		return
 	}
 
-	reader, info, readerError := files.FileReader(fname)
-	if nil != readerError {
+	reader, info, readerError := files.FileReader(fileName)
+	if readerError != nil {
 		con.Notifier.SendErrorAndTrace(readerError, 1)
 		return
 	}
 
 	if con.WebSocket != nil {
 		content, readError := io.ReadAll(reader)
-		if nil != readError {
+		if readError != nil {
 			con.Notifier.SendErrorAndTrace(readError, 1)
 			return
 		}
 		writeError := con.WebSocket.WriteMessage(websocket.TextMessage, content)
-		if nil != writeError {
+		if writeError != nil {
 			con.Notifier.SendErrorAndTrace(writeError, 1)
 		}
 		return
@@ -502,7 +505,7 @@ func (con *Connection) SendFileOrElse(fun func()) {
 
 	if "" != con.EventName {
 		content, readError := io.ReadAll(reader)
-		if nil != readError {
+		if readError != nil {
 			con.Notifier.SendErrorAndTrace(readError, 1)
 			return
 		}
@@ -510,13 +513,13 @@ func (con *Connection) SendFileOrElse(fun func()) {
 	}
 
 	if "" == con.Header.Get("Content-Type") {
-		con.SendHeader("Content-Type", mimes.Mime(fname))
+		con.SendHeader("Content-Type", mimes.Mime(fileName))
 	}
 
 	if "" == con.Header.Get("Content-Length") {
 		con.SendHeader("Content-Length", fmt.Sprintf("%d", info.Size()))
 	}
-	http.ServeContent(con.Writer, con.Request, fname, info.ModTime(), reader)
+	http.ServeContent(con.Writer, con.Request, fileName, info.ModTime(), reader)
 }
 
 // SendSseUpgrade upgrades to server sent events
@@ -554,13 +557,13 @@ func (con *Connection) SendWsUpgrade() {
 // SendConfiguredWsUpgrade upgrades to web sockets.
 func (con *Connection) SendConfiguredWsUpgrade(up websocket.Upgrader) {
 	conn, upgradeError := up.Upgrade(con.Writer, con.Request, nil)
-	if nil != upgradeError {
+	if upgradeError != nil {
 		con.Notifier.SendErrorAndTrace(upgradeError, 1)
 		return
 	}
 	defer func(conn *websocket.Conn) {
 		closeError := conn.Close()
-		if nil != closeError {
+		if closeError != nil {
 			con.Notifier.SendErrorAndTrace(closeError, 1)
 		}
 	}(conn)
@@ -571,12 +574,12 @@ func (con *Connection) SendConfiguredWsUpgrade(up websocket.Upgrader) {
 
 // SendView sends a view.
 func (con *Connection) SendView(val views.View) {
-	if "" != con.Header.Get("Location") {
+	if con.Header.Get("Location") != "" {
 		return
 	}
 
 	if con.VerifyAccept("application/json") {
-		if nil == val.Data {
+		if val.Data != nil {
 			val.Data = map[string]any{}
 		}
 		con.SendJson(map[string]any{
@@ -600,7 +603,7 @@ func (con *Connection) SendView(val views.View) {
 	}
 
 	txt, renderError := val.Render(con.Efs)
-	if nil != renderError {
+	if renderError != nil {
 		con.Notifier.SendErrorAndTrace(renderError, 1)
 		return
 	}

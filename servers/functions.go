@@ -62,7 +62,7 @@ func (server *Server) Start() {
 	go func() {
 		server.Notifier.SendMessage(fmt.Sprintf("listening for requests at http://%s", server.Address))
 		serverError := http.ListenAndServe(server.Address, server.HttpMux)
-		if nil != serverError {
+		if serverError != nil {
 			if errors.Is(serverError, http.ErrServerClosed) {
 				server.Notifier.SendMessage("shutting down server")
 				return
@@ -75,7 +75,7 @@ func (server *Server) Start() {
 		if "" != server.Certificate && "" != server.Key {
 			server.Notifier.SendMessage(fmt.Sprintf("listening for requests at https://%s", server.SecureAddress))
 			serverError := http.ListenAndServeTLS(server.SecureAddress, server.Certificate, server.Key, server.HttpMux)
-			if nil != serverError {
+			if serverError != nil {
 				if errors.Is(serverError, http.ErrServerClosed) {
 					server.Notifier.SendMessage("shutting down server")
 					return
@@ -93,7 +93,7 @@ func (server *Server) Start() {
 // If the shutdown attempt fails, ServerStop crashes the program.
 func (server *Server) Stop() {
 	shutdownError := server.HttpServer.Shutdown(context.Background())
-	if nil != shutdownError {
+	if shutdownError != nil {
 		log.Fatal(shutdownError)
 	}
 }

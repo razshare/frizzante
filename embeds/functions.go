@@ -61,7 +61,7 @@ func IsDirectory(self embed.FS, fname string) bool {
 
 func FileReader(self embed.FS, fname string) (*bytes.Reader, os.FileInfo, error) {
 	file, openError := self.Open(fname)
-	if nil != openError {
+	if openError != nil {
 		return nil, nil, openError
 	}
 
@@ -69,16 +69,16 @@ func FileReader(self embed.FS, fname string) (*bytes.Reader, os.FileInfo, error)
 
 	buffer := make([]byte, fileInfo.Size())
 	_, readError := file.Read(buffer)
-	if nil != readError {
+	if readError != nil {
 		closeError := file.Close()
-		if nil != closeError {
+		if closeError != nil {
 			return nil, nil, closeError
 		}
 		return nil, nil, readError
 	}
 
 	closeError := file.Close()
-	if nil != closeError {
+	if closeError != nil {
 		return nil, nil, closeError
 	}
 	return bytes.NewReader(buffer), fileInfo, nil
@@ -87,7 +87,7 @@ func FileReader(self embed.FS, fname string) (*bytes.Reader, os.FileInfo, error)
 // ReadFileInChunks reads a file in chunks.
 func ReadFileInChunks(self embed.FS, fname string, chunk int, fun func([]byte)) (err error) {
 	file, openError := self.Open(fname)
-	if nil != openError {
+	if openError != nil {
 		return openError
 	}
 	defer func(file fs.File) { err = file.Close() }(file)
@@ -96,7 +96,7 @@ func ReadFileInChunks(self embed.FS, fname string, chunk int, fun func([]byte)) 
 
 	for {
 		count, readError := file.Read(buffer)
-		if nil != readError {
+		if readError != nil {
 			return readError
 		}
 		if count == 0 {

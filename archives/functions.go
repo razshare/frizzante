@@ -28,13 +28,13 @@ func (archive *DiskArchive) Set(domain string, key string, value []byte) error {
 	directoryName := filepath.Join(archive.Name, domain)
 	if !files.IsDirectory(directoryName) {
 		mkdirError := os.MkdirAll(directoryName, os.ModePerm)
-		if nil != mkdirError {
+		if mkdirError != nil {
 			return mkdirError
 		}
 	}
 	fileName := filepath.Join(directoryName, key)
 	writeError := os.WriteFile(fileName, value, os.ModePerm)
-	if nil != writeError {
+	if writeError != nil {
 		return writeError
 	}
 	return nil
@@ -50,7 +50,7 @@ func (archive *DiskArchive) Get(domain string, key string) ([]byte, error) {
 	defer lane.Unlock()
 	fileName := filepath.Join(archive.Name, domain, key)
 	value, readError := os.ReadFile(fileName)
-	if nil != readError {
+	if readError != nil {
 		return nil, readError
 	}
 	return value, nil
@@ -78,7 +78,7 @@ func (archive *DiskArchive) Remove(domain string, key string) error {
 	defer lane.Unlock()
 	fileName := filepath.Join(archive.Name, domain, key)
 	removeError := os.Remove(fileName)
-	if nil != removeError {
+	if removeError != nil {
 		return removeError
 	}
 	return nil
@@ -105,7 +105,7 @@ func (archive *DiskArchive) RemoveDomain(domain string) error {
 	defer lane.Unlock()
 	directoryName := filepath.Join(archive.Name, domain)
 	removeError := os.RemoveAll(directoryName)
-	if nil != removeError {
+	if removeError != nil {
 		return removeError
 	}
 	return nil

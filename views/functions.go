@@ -218,7 +218,7 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 		},
 	}
 
-	if nil != view.Functions {
+	if view.Functions != nil {
 		for functionName, function := range view.Functions {
 			functions[functionName] = function
 		}
