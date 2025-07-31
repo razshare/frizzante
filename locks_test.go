@@ -14,29 +14,29 @@ func TestNew(test *testing.T) {
 
 func TestLock(test *testing.T) {
 	lock := locks.New()
-	mutex := lock.Lock("asd", "asd")
+	mutex := locks.FindAndAcquire(lock, "asd", "asd")
 	if len(lock.Names) != 1 {
 		test.Fatal("road should count exactly 1 lane")
 	}
-	if lock.Lock("asd", "asd") != mutex {
+	if locks.FindAndAcquire(lock, "asd", "asd") != mutex {
 		test.Fatal("mutexes should match")
 	}
 }
 
 func TestRelease(test *testing.T) {
 	lock := locks.New()
-	mutex := lock.Lock("asd", "asd")
+	mutex := locks.FindAndAcquire(lock, "asd", "asd")
 	if len(lock.Names) != 1 {
 		test.Fatal("road should count exactly 1 lane")
 	}
 
-	lock.Release("asd", "asd")
+	locks.Release(lock, "asd", "asd")
 
 	if len(lock.Names) != 0 {
 		test.Fatal("road should not contain any lanes")
 	}
 
-	if lock.Lock("asd", "asd") == mutex {
+	if locks.FindAndAcquire(lock, "asd", "asd") == mutex {
 		test.Fatal("mutexes should not match")
 	}
 }

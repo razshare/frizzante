@@ -3,7 +3,10 @@ package main
 import (
 	"embed"
 	"fmt"
+	"github.com/razshare/frizzante/actions"
 	frizzanteCli "github.com/razshare/frizzante/cli"
+	"github.com/razshare/frizzante/connections"
+	"github.com/razshare/frizzante/routes"
 	"github.com/razshare/frizzante/servers"
 	"github.com/razshare/frizzante/sessions"
 	"github.com/razshare/frizzante/views"
@@ -27,49 +30,45 @@ func init() {
 	serverLocal.Efs = efs
 	serverLocal.Routes = append(
 		serverLocal.Routes,
-		servers.Route{Pattern: "GET /TestSession", Handler: func(con *servers.Connection) {
-			session := sessions.New(con, State{Name: "test"})
-			session.Start()
-			con.SendMessage(fmt.Sprintf("hello %s", session.State.Name))
+		routes.Route{Pattern: "GET /TestSession", Handler: func(c *connections.Connection) {
+			s := sessions.Start(sessions.New(c, State{Name: "test"}))
+			actions.SendMessage(c, fmt.Sprintf("hello %s", s.State.Name))
 		}},
-		servers.Route{Pattern: "POST /TestSession", Handler: func(con *servers.Connection) {
-			session := sessions.New(con, State{})
-			session.Start()
-			defer session.Save()
-			session.State.Name = con.ReceiveMessage()
+		routes.Route{Pattern: "POST /TestSession", Handler: func(c *connections.Connection) {
+			s := sessions.Start(sessions.New(c, State{}))
+			defer sessions.Save(s)
+			s.State.Name = actions.ReceiveMessage(c)
 		}},
-		servers.Route{Pattern: "GET /TestSessionExpectFail", Handler: func(con *servers.Connection) {
-			session := sessions.New(con, State{Name: "test"})
-			session.Start()
-			con.SendMessage(fmt.Sprintf("hello %s", session.State.Name))
+		routes.Route{Pattern: "GET /TestSessionExpectFail", Handler: func(c *connections.Connection) {
+			s := sessions.Start(sessions.New(c, State{Name: "test"}))
+			actions.SendMessage(c, fmt.Sprintf("hello %s", s.State.Name))
 		}},
-		servers.Route{Pattern: "POST /TestSessionExpectFail", Handler: func(con *servers.Connection) {
-			session := sessions.New(con, State{})
-			session.Start()
+		routes.Route{Pattern: "POST /TestSessionExpectFail", Handler: func(c *connections.Connection) {
+			s := sessions.Start(sessions.New(c, State{}))
 			// Without this, session state should not be updated.
 			// defer operator.Save(state)
-			session.State.Name = con.ReceiveMessage()
+			s.State.Name = actions.ReceiveMessage(c)
 		}},
-		servers.Route{Pattern: "GET /TestServerAddRoute", Handler: func(con *servers.Connection) {
-			con.SendMessage("hello")
+		routes.Route{Pattern: "GET /TestServerAddRoute", Handler: func(c *connections.Connection) {
+			actions.SendMessage(c, "hello")
 		}},
-		servers.Route{Pattern: "GET /TestConnectionSendStatus", Handler: func(con *servers.Connection) {
-			con.SendStatus(201)
-			con.SendMessage("ok")
+		routes.Route{Pattern: "GET /TestConnectionSendStatus", Handler: func(c *connections.Connection) {
+			actions.SendStatus(c, 201)
+			actions.SendMessage(c, "ok")
 		}},
-		servers.Route{Pattern: "GET /TestConnectionSendHeader", Handler: func(con *servers.Connection) {
-			con.SendHeader("Content-Type", "application/json")
-			con.SendMessage("{}")
+		routes.Route{Pattern: "GET /TestConnectionSendHeader", Handler: func(c *connections.Connection) {
+			actions.SendHeader(c, "Content-Type", "application/json")
+			actions.SendMessage(c, "{}")
 		}},
-		servers.Route{Pattern: "GET /TestRenderServer", Handler: func(con *servers.Connection) {
-			con.SendView(views.View{
+		routes.Route{Pattern: "GET /TestRenderServer", Handler: func(c *connections.Connection) {
+			actions.SendView(c, views.View{
 				Name:       "Welcome",
 				RenderMode: views.RenderModeServer,
 				Data:       map[string]any{"name": "world"},
 			})
 		}},
-		servers.Route{Pattern: "GET /TestRenderClient", Handler: func(con *servers.Connection) {
-			con.SendView(views.View{
+		routes.Route{Pattern: "GET /TestRenderClient", Handler: func(c *connections.Connection) {
+			actions.SendView(c, views.View{
 				Name:       "Welcome",
 				RenderMode: views.RenderModeClient,
 				Data:       map[string]any{"name": "world"},
@@ -77,7 +76,7 @@ func init() {
 		}},
 	)
 
-	go serverLocal.Start()
+	go servers.Start(serverLocal)
 
 	server <- serverLocal
 }

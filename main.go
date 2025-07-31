@@ -11,6 +11,6 @@ import (
 //go:embed queries.sql
 //go:embed schema.sql
 var cliEfs embed.FS
-var cli = frizzanteCli.Cli{Efs: cliEfs}
+var cli = &frizzanteCli.Cli{Efs: cliEfs}
 
-func main() { cli.OnStart() }
+func main() { frizzanteCli.OnStart(cli) }

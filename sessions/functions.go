@@ -2,18 +2,117 @@ package sessions
 
 import (
 	"encoding/json"
+	"errors"
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/razshare/frizzante/archives"
+	"github.com/razshare/frizzante/actions"
+	"github.com/razshare/frizzante/connections"
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/globals"
-	"github.com/razshare/frizzante/servers"
+	"github.com/razshare/frizzante/locks"
 	"github.com/razshare/frizzante/traces"
+	"os"
 	"path/filepath"
 )
 
 // New creates a new session with a zero initial state.
-func New[T any](connection *servers.Connection, state T) *Session[T] {
+func New[T any](connection *connections.Connection, state T) *Session[T] {
+	name := filepath.Join(".gen", "sessions")
+	lock := locks.New()
 	return &Session[T]{
-		Archive:    archives.NewDiskArchive(filepath.Join(".gen", "sessions")),
+		Get: func(domain string, key string) ([]byte, error) {
+			if "" == name {
+				return nil, errors.New("disk archive name is blank")
+			}
+
+			mutex := locks.FindAndAcquire(lock, domain, key)
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			fileName := filepath.Join(name, domain, key)
+			value, readError := os.ReadFile(fileName)
+			if readError != nil {
+				return nil, readError
+			}
+			return value, nil
+		},
+		Set: func(domain string, key string, value []byte) error {
+			if "" == name {
+				return errors.New("disk archive name is blank")
+			}
+
+			mutex := locks.FindAndAcquire(lock, domain, key)
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			directoryName := filepath.Join(name, domain)
+			if !files.IsDirectory(directoryName) {
+				mkdirError := os.MkdirAll(directoryName, os.ModePerm)
+				if mkdirError != nil {
+					return mkdirError
+				}
+			}
+			fileName := filepath.Join(directoryName, key)
+			writeError := os.WriteFile(fileName, value, os.ModePerm)
+			if writeError != nil {
+				return writeError
+			}
+			return nil
+		},
+		Has: func(domain string, key string) (bool, error) {
+			if "" == name {
+				return false, errors.New("disk archive name is blank")
+			}
+
+			mutex := locks.FindAndAcquire(lock, domain, key)
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			fileName := filepath.Join(name, domain, key)
+			return files.IsFile(fileName), nil
+		},
+		Remove: func(domain string, key string) error {
+			if "" == name {
+				return errors.New("disk archive name is blank")
+			}
+
+			mutex := locks.FindAndAcquire(lock, domain, key)
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			fileName := filepath.Join(name, domain, key)
+			removeError := os.Remove(fileName)
+			if removeError != nil {
+				return removeError
+			}
+			return nil
+		},
+		HasDomain: func(domain string) (bool, error) {
+			if "" == name {
+				return false, errors.New("disk archive name is blank")
+			}
+
+			mutex := locks.FindAndAcquire(lock, domain)
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			return files.IsDirectory(filepath.Join(name, domain)), nil
+		},
+		RemoveDomain: func(domain string) error {
+			if "" == name {
+				return errors.New("disk archive name is blank")
+			}
+
+			mutex := locks.FindAndAcquire(lock, domain)
+			mutex.Lock()
+			defer mutex.Unlock()
+
+			directoryName := filepath.Join(name, domain)
+			removeError := os.RemoveAll(directoryName)
+			if removeError != nil {
+				return removeError
+			}
+			return nil
+		},
 		Connection: connection,
 		State:      &state,
 	}
@@ -22,26 +121,26 @@ func New[T any](connection *servers.Connection, state T) *Session[T] {
 // Start loads the State if the current connection defines a session-id cookie.
 //
 // If the session-id cookie is missing it will create a new one and send it to the user.
-func (session *Session[T]) Start() {
-	exists := session.Exists()
+func Start[T any](self *Session[T]) *Session[T] {
 
-	if !exists {
-		session.Save()
-		return
+	if !Exists(self) {
+		Save(self)
+		return self
 	}
 
-	session.Load()
+	Load(self)
+	return self
 }
 
 // Id tries to find a session id among the user's cookies.
 // If no session id is found, it creates a new one and returns it.
-func (session *Session[T]) Id() string {
-	if "" != session.Connection.SessionId {
-		return session.Connection.SessionId
+func Id[T any](self *Session[T]) string {
+	if "" != self.Connection.SessionId {
+		return self.Connection.SessionId
 	}
 
 	var id string
-	cookies := session.Connection.Request.CookiesNamed("session-id")
+	cookies := self.Connection.Request.CookiesNamed("session-id")
 	connection := 0
 
 	for _, cookie := range cookies {
@@ -50,89 +149,89 @@ func (session *Session[T]) Id() string {
 	}
 
 	if connection > 0 {
-		session.Connection.SessionId = id
+		self.Connection.SessionId = id
 		return id
 	}
 
 	// Create new session.
 	idObject, idObjectError := uuid.NewV4()
 	if idObjectError != nil {
-		session.Connection.SessionId = ""
-		traces.Trace(session.Connection.Web.ErrorLog, idObjectError)
+		self.Connection.SessionId = ""
+		traces.Trace(self.Connection.Http.ErrorLog, idObjectError)
 		return ""
 	}
 
 	id = idObject.String()
 
-	session.Connection.SendCookie("session-id", id)
+	actions.SendCookie(self.Connection, "session-id", id)
 
-	session.Connection.SessionId = id
+	self.Connection.SessionId = id
 
 	return id
 }
 
 // Exists checks if the session exists into the archive.
-func (session *Session[T]) Exists() bool {
-	id := session.Id()
+func Exists[T any](self *Session[T]) bool {
+	id := Id(self)
 
-	exists, existsError := session.Archive.Has(id, globals.SessionKey)
+	exists, existsError := self.Has(id, globals.SessionKey)
 	if existsError != nil {
-		traces.Trace(session.Connection.Web.ErrorLog, existsError)
+		traces.Trace(self.Connection.Http.ErrorLog, existsError)
 		return false
 	}
 	return exists
 }
 
 // Save saves the session into the archive.
-func (session *Session[T]) Save() {
-	id := session.Id()
+func Save[T any](self *Session[T]) {
+	id := Id(self)
 
-	data, jsonError := json.Marshal(session.State)
+	data, jsonError := json.Marshal(self.State)
 	if jsonError != nil {
-		traces.Trace(session.Connection.Web.ErrorLog, jsonError)
+		traces.Trace(self.Connection.Http.ErrorLog, jsonError)
 		return
 	}
 
-	archiveError := session.Archive.Set(id, globals.SessionKey, data)
+	archiveError := self.Set(id, globals.SessionKey, data)
 	if archiveError != nil {
-		traces.Trace(session.Connection.Web.ErrorLog, archiveError)
+		traces.Trace(self.Connection.Http.ErrorLog, archiveError)
 	}
 }
 
 // Load loads the session from the archive.
 //
 // If the session is not found in the archive it creates it.
-func (session *Session[T]) Load() {
-	id := session.Id()
+func Load[T any](self *Session[T]) {
+	id := Id(self)
 
-	exists, existsError := session.Archive.Has(id, globals.SessionKey)
+	exists, existsError := self.Has(id, globals.SessionKey)
 	if existsError != nil {
-		traces.Trace(session.Connection.Web.ErrorLog, existsError)
+		traces.Trace(self.Connection.Http.ErrorLog, existsError)
 		return
 	}
 
 	if exists {
-		data, getError := session.Archive.Get(id, globals.SessionKey)
+		data, getError := self.Get(id, globals.SessionKey)
 		if getError != nil {
-			traces.Trace(session.Connection.Web.ErrorLog, getError)
+			traces.Trace(self.Connection.Http.ErrorLog, getError)
 			return
 		}
 
-		jsonError := json.Unmarshal(data, session.State)
+		jsonError := json.Unmarshal(data, self.State)
 		if jsonError != nil {
-			traces.Trace(session.Connection.Web.ErrorLog, jsonError)
+			traces.Trace(self.Connection.Http.ErrorLog, jsonError)
 			return
 		}
 	}
 }
 
 // Destroy removes the session from the archive.
-func (session *Session[T]) Destroy() {
-	id := session.Id()
+func Destroy[T any](self *Session[T]) {
+	id := Id(self)
 
-	archiveError := session.Archive.RemoveDomain(id)
+	archiveError := self.RemoveDomain(id)
 	if archiveError != nil {
-		traces.Trace(session.Connection.Web.ErrorLog, archiveError)
+		traces.Trace(self.Connection.Http.ErrorLog, archiveError)
 		return
 	}
 }
