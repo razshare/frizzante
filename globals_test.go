@@ -5,43 +5,43 @@ import (
 	"testing"
 )
 
-func TestKB(t *testing.T) {
+func TestKB(test *testing.T) {
 	if 1024 != globals.KB {
-		t.Fatalf("KB constant is not %d", 1024)
+		test.Fatalf("KB constant is not %d", 1024)
 	}
 }
 
-func TestMB(t *testing.T) {
+func TestMB(test *testing.T) {
 	expected := 1024 * 1024
 	if expected != globals.MB {
-		t.Fatalf("MB constant is not %d", expected)
+		test.Fatalf("MB constant is not %d", expected)
 	}
 }
 
-func TestGB(t *testing.T) {
+func TestGB(test *testing.T) {
 	expected := 1024 * 1024 * 1024
 	if expected != globals.GB {
-		t.Fatalf("GB constant is not %d", expected)
+		test.Fatalf("GB constant is not %d", expected)
 	}
 }
 
-func TestTB(t *testing.T) {
+func TestTB(test *testing.T) {
 	expected := 1024 * 1024 * 1024 * 1024
 	if expected != globals.TB {
-		t.Fatalf("TB constant is not %d", expected)
+		test.Fatalf("TB constant is not %d", expected)
 	}
 }
 
-func TestPB(t *testing.T) {
+func TestPB(test *testing.T) {
 	expected := 1024 * 1024 * 1024 * 1024 * 1024
 	if expected != globals.PB {
-		t.Fatalf("PB constant is not %d", expected)
+		test.Fatalf("PB constant is not %d", expected)
 	}
 }
 
-func TestEB(t *testing.T) {
+func TestEB(test *testing.T) {
 	expected := 1024 * 1024 * 1024 * 1024 * 1024 * 1024
 	if expected != globals.EB {
-		t.Fatalf("EB constant is not %d", expected)
+		test.Fatalf("EB constant is not %d", expected)
 	}
 }

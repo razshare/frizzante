@@ -1,10 +1,10 @@
 package archives
 
-import "github.com/razshare/frizzante/roads"
+import "github.com/razshare/frizzante/locks"
 
 type DiskArchive struct {
 	Name string
-	Road *roads.Road
+	Lock *locks.Lock
 }
 
 type Archive interface {

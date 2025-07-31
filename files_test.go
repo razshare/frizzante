@@ -6,13 +6,13 @@ import (
 	"testing"
 )
 
-func TestEmbeddedIsFile(t *testing.T) {
+func TestEmbeddedIsFile(test *testing.T) {
 	// Positive.
 	fileName := "makefile"
 	actual := embeds.IsFile(efs, fileName)
 	expected := true
 	if actual != expected {
-		t.Fatalf("%s (embedded) was expected to be a file", fileName)
+		test.Fatalf("%s (embedded) was expected to be a file", fileName)
 	}
 
 	// Negatives.
@@ -20,24 +20,24 @@ func TestEmbeddedIsFile(t *testing.T) {
 	actual = embeds.IsFile(efs, fileName)
 	expected = false
 	if actual != expected {
-		t.Fatalf("%s (embedded) was expected to not be a file", fileName)
+		test.Fatalf("%s (embedded) was expected to not be a file", fileName)
 	}
 
 	fileName = "qwerty"
 	actual = embeds.IsFile(efs, fileName)
 	expected = false
 	if actual != expected {
-		t.Fatalf("%s (embedded) was expected to not be a file", fileName)
+		test.Fatalf("%s (embedded) was expected to not be a file", fileName)
 	}
 }
 
-func TestEmbeddedIsDirectory(t *testing.T) {
+func TestEmbeddedIsDirectory(test *testing.T) {
 	// Positive.
 	fileName := ".github"
 	actual := embeds.IsDirectory(efs, fileName)
 	expected := true
 	if actual != expected {
-		t.Fatalf("%s (embedded) was expected to be a directory", fileName)
+		test.Fatalf("%s (embedded) was expected to be a directory", fileName)
 	}
 
 	// Negatives.
@@ -45,24 +45,24 @@ func TestEmbeddedIsDirectory(t *testing.T) {
 	actual = embeds.IsDirectory(efs, fileName)
 	expected = false
 	if actual != expected {
-		t.Fatalf("%s (embedded) was expected to not be a directory", fileName)
+		test.Fatalf("%s (embedded) was expected to not be a directory", fileName)
 	}
 
 	fileName = "qwerty"
 	actual = embeds.IsDirectory(efs, fileName)
 	expected = false
 	if actual != expected {
-		t.Fatalf("%s (embedded) was expected to not be a directory", fileName)
+		test.Fatalf("%s (embedded) was expected to not be a directory", fileName)
 	}
 }
 
-func TestIsFile(t *testing.T) {
+func TestIsFile(test *testing.T) {
 	// Positive.
 	fileName := "makefile"
 	actual := files.IsFile(fileName)
 	expected := true
 	if actual != expected {
-		t.Fatalf("%s was expected to be a file", fileName)
+		test.Fatalf("%s was expected to be a file", fileName)
 	}
 
 	// Negatives.
@@ -70,24 +70,24 @@ func TestIsFile(t *testing.T) {
 	actual = files.IsFile(fileName)
 	expected = false
 	if actual != expected {
-		t.Fatalf("%s was expected to not be a file", fileName)
+		test.Fatalf("%s was expected to not be a file", fileName)
 	}
 
 	fileName = "qwerty"
 	actual = files.IsFile(fileName)
 	expected = false
 	if actual != expected {
-		t.Fatalf("%s was expected to not be a file", fileName)
+		test.Fatalf("%s was expected to not be a file", fileName)
 	}
 }
 
-func TestIsDirectory(t *testing.T) {
+func TestIsDirectory(test *testing.T) {
 	// Positive.
 	fileName := ".github"
 	actual := files.IsDirectory(fileName)
 	expected := true
 	if actual != expected {
-		t.Fatalf("%s was expected to be a directory", fileName)
+		test.Fatalf("%s was expected to be a directory", fileName)
 	}
 
 	// Negatives.
@@ -95,13 +95,13 @@ func TestIsDirectory(t *testing.T) {
 	actual = files.IsDirectory(fileName)
 	expected = false
 	if actual != expected {
-		t.Fatalf("%s was expected to not be a directory", fileName)
+		test.Fatalf("%s was expected to not be a directory", fileName)
 	}
 
 	fileName = "qwerty"
 	actual = files.IsDirectory(fileName)
 	expected = false
 	if actual != expected {
-		t.Fatalf("%s was expected to not be a directory", fileName)
+		test.Fatalf("%s was expected to not be a directory", fileName)
 	}
 }

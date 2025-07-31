@@ -10,8 +10,8 @@ import (
 )
 
 // IsFile check if file exists and is a file.
-func IsFile(self embed.FS, fname string) bool {
-	file, err := self.Open(fname)
+func IsFile(efs embed.FS, fileName string) bool {
+	file, err := efs.Open(fileName)
 	if err != nil {
 		return false
 	}
@@ -22,16 +22,16 @@ func IsFile(self embed.FS, fname string) bool {
 	return !stat.IsDir()
 }
 
-func ReadDir(self embed.FS, dirname string) ([]string, error) {
+func ReadDir(efs embed.FS, dirname string) ([]string, error) {
 	items := make([]string, 0)
-	entries, readDirError := self.ReadDir(dirname)
+	entries, readDirError := efs.ReadDir(dirname)
 	if readDirError != nil {
 		return nil, readDirError
 	}
 
 	for _, entry := range entries {
 		if entry.IsDir() {
-			items2, readDirLocalError := ReadDir(self, fmt.Sprintf("%s/%s", dirname, entry.Name()))
+			items2, readDirLocalError := ReadDir(efs, fmt.Sprintf("%s/%s", dirname, entry.Name()))
 			if readDirLocalError != nil {
 				return nil, readDirLocalError
 			}
@@ -47,8 +47,8 @@ func ReadDir(self embed.FS, dirname string) ([]string, error) {
 }
 
 // IsDirectory checks if file exists and is a directory.
-func IsDirectory(self embed.FS, fname string) bool {
-	file, err := self.Open(fname)
+func IsDirectory(efs embed.FS, fileName string) bool {
+	file, err := efs.Open(fileName)
 	if err != nil {
 		return false
 	}
@@ -59,8 +59,8 @@ func IsDirectory(self embed.FS, fname string) bool {
 	return stat.IsDir()
 }
 
-func FileReader(self embed.FS, fname string) (*bytes.Reader, os.FileInfo, error) {
-	file, openError := self.Open(fname)
+func FileReader(efs embed.FS, fileName string) (*bytes.Reader, os.FileInfo, error) {
+	file, openError := efs.Open(fileName)
 	if openError != nil {
 		return nil, nil, openError
 	}
@@ -85,8 +85,8 @@ func FileReader(self embed.FS, fname string) (*bytes.Reader, os.FileInfo, error)
 }
 
 // ReadFileInChunks reads a file in chunks.
-func ReadFileInChunks(self embed.FS, fname string, chunk int, fun func([]byte)) (err error) {
-	file, openError := self.Open(fname)
+func ReadFileInChunks(efs embed.FS, fileName string, chunk int, callback func([]byte)) (err error) {
+	file, openError := efs.Open(fileName)
 	if openError != nil {
 		return openError
 	}
@@ -103,8 +103,8 @@ func ReadFileInChunks(self embed.FS, fname string, chunk int, fun func([]byte)) 
 			return nil
 		}
 		if count < chunk {
-			fun(buffer[:count-1])
+			callback(buffer[:count-1])
 		}
-		fun(buffer)
+		callback(buffer)
 	}
 }

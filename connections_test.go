@@ -8,14 +8,14 @@ import (
 	"testing"
 )
 
-func TestConnectionSendStatus(t *testing.T) {
+func TestConnectionSendStatus(test *testing.T) {
 	lock := <-server
 	defer func() { server <- lock }()
 
 	expected := 201
 	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestConnectionSendStatus", port))
 	if getError != nil {
-		t.Fatal(getError)
+		test.Fatal(getError)
 	}
 	defer func(Body io.ReadCloser) {
 		closeError := Body.Close()
@@ -27,18 +27,18 @@ func TestConnectionSendStatus(t *testing.T) {
 	actual := response.StatusCode
 
 	if actual != expected {
-		t.Fatalf("server was expected to respond with status code '%d', received '%d' intead", expected, actual)
+		test.Fatalf("server was expected to respond with status code '%d', received '%d' intead", expected, actual)
 	}
 }
 
-func TestConnectionSendHeader(t *testing.T) {
+func TestConnectionSendHeader(test *testing.T) {
 	lock := <-server
 	defer func() { server <- lock }()
 
 	expected := "application/json"
 	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestConnectionSendHeader", port))
 	if getError != nil {
-		t.Fatal(getError)
+		test.Fatal(getError)
 	}
 	defer func(Body io.ReadCloser) {
 		closeError := Body.Close()
@@ -50,6 +50,6 @@ func TestConnectionSendHeader(t *testing.T) {
 	actual := response.Header.Get("Content-Type")
 
 	if actual != expected {
-		t.Fatalf("server was expected to respond with header content type '%s', received '%s' intead", expected, actual)
+		test.Fatalf("server was expected to respond with header content type '%s', received '%s' intead", expected, actual)
 	}
 }

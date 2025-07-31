@@ -14,32 +14,32 @@ import (
 )
 
 // IsFile check if file exists and is a file.
-func IsFile(fname string) bool {
-	stat, statError := os.Stat(fname)
-	if statError != nil {
+func IsFile(n string) bool {
+	stat, err := os.Stat(n)
+	if err != nil {
 		return false
 	}
 	return !stat.IsDir()
 }
 
 // IsDirectory checks if file exists and is a directory.
-func IsDirectory(name string) bool {
-	stat, statError := os.Stat(name)
-	if statError != nil {
+func IsDirectory(directoryName string) bool {
+	stat, err := os.Stat(directoryName)
+	if err != nil {
 		return false
 	}
 	return stat.IsDir()
 }
 
 // DeleteFile deletes a file from the disk.
-func DeleteFile(name string) bool {
-	removeError := os.Remove(name)
-	return nil == removeError || !errors.Is(removeError, os.ErrNotExist)
+func DeleteFile(fileName string) bool {
+	e := os.Remove(fileName)
+	return nil == e || !errors.Is(e, os.ErrNotExist)
 }
 
 // UnzipFile unzips a file to the disk.
-func UnzipFile(zfname string, dname string) (err error) {
-	zipReader, zipOpenError := zip.OpenReader(zfname)
+func UnzipFile(zipFileName string, directoryName string) (err error) {
+	zipReader, zipOpenError := zip.OpenReader(zipFileName)
 	if zipOpenError != nil {
 		log.Fatal(zipOpenError)
 	}
@@ -52,7 +52,7 @@ func UnzipFile(zfname string, dname string) (err error) {
 	}(zipReader)
 
 	for _, file := range zipReader.File {
-		fileNameLocal := filepath.Join(dname, file.Name)
+		fileNameLocal := filepath.Join(directoryName, file.Name)
 		fileIsDirectory := file.FileInfo().IsDir()
 		fileIsDirectoryOnDisk := IsDirectory(fileNameLocal)
 
@@ -101,13 +101,13 @@ func UnzipFile(zfname string, dname string) (err error) {
 }
 
 // ZipFile zips a file to the disk.
-func ZipFile(fname string, zfname string) (err error) {
-	mkdirError := os.MkdirAll(filepath.Dir(zfname), os.ModePerm)
+func ZipFile(fileName string, zipFileName string) (err error) {
+	mkdirError := os.MkdirAll(filepath.Dir(zipFileName), os.ModePerm)
 	if mkdirError != nil {
 		return mkdirError
 	}
 
-	archive, createError := os.Create(zfname)
+	archive, createError := os.Create(zipFileName)
 	if createError != nil {
 		return createError
 	}
@@ -116,12 +116,12 @@ func ZipFile(fname string, zfname string) (err error) {
 	writer := zip.NewWriter(archive)
 	defer func(writer *zip.Writer) { err = writer.Close() }(writer)
 
-	entry, entryError := writer.Create(filepath.Base(fname))
+	entry, entryError := writer.Create(filepath.Base(fileName))
 	if entryError != nil {
 		return entryError
 	}
 
-	file, fileError := os.Open(fname)
+	file, fileError := os.Open(fileName)
 	if fileError != nil {
 		return fileError
 	}
@@ -135,13 +135,13 @@ func ZipFile(fname string, zfname string) (err error) {
 }
 
 // ZipDirectory zips a directory to the disk.
-func ZipDirectory(dname string, zfname string) (err error) {
-	mkdirError := os.MkdirAll(filepath.Dir(zfname), os.ModePerm)
+func ZipDirectory(directoryName string, zipFileName string) (err error) {
+	mkdirError := os.MkdirAll(filepath.Dir(zipFileName), os.ModePerm)
 	if mkdirError != nil {
 		return mkdirError
 	}
 
-	archive, archiveError := os.Create(zfname)
+	archive, archiveError := os.Create(zipFileName)
 	if archiveError != nil {
 		return archiveError
 	}
@@ -150,7 +150,7 @@ func ZipDirectory(dname string, zfname string) (err error) {
 	writer := zip.NewWriter(archive)
 	defer func(writer *zip.Writer) { err = writer.Close() }(writer)
 
-	return filepath.Walk(dname, func(path string, info fs.FileInfo, err error) error {
+	return filepath.Walk(directoryName, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -164,7 +164,7 @@ func ZipDirectory(dname string, zfname string) (err error) {
 			return openError
 		}
 
-		entry, entryError := writer.Create(strings.TrimPrefix(path, dname+"/"))
+		entry, entryError := writer.Create(strings.TrimPrefix(path, directoryName+"/"))
 		if entryError != nil {
 			return entryError
 		}
@@ -179,7 +179,7 @@ func ZipDirectory(dname string, zfname string) (err error) {
 }
 
 // DownloadFile downloads a file to the disk.
-func DownloadFile(url string, fname string) error {
+func DownloadFile(url string, fileName string) error {
 	response, getError := http.Get(url)
 	if getError != nil {
 		return getError
@@ -190,7 +190,7 @@ func DownloadFile(url string, fname string) error {
 		return readError
 	}
 
-	parentName := filepath.Dir(fname)
+	parentName := filepath.Dir(fileName)
 	if !IsDirectory(parentName) {
 		mkdirError := os.MkdirAll(parentName, os.ModePerm)
 		if mkdirError != nil {
@@ -198,7 +198,7 @@ func DownloadFile(url string, fname string) error {
 		}
 	}
 
-	writeErr := os.WriteFile(fname, data, os.ModePerm)
+	writeErr := os.WriteFile(fileName, data, os.ModePerm)
 	if writeErr != nil {
 		return writeErr
 	}
@@ -206,8 +206,8 @@ func DownloadFile(url string, fname string) error {
 	return nil
 }
 
-func FileReader(fname string) (*bytes.Reader, os.FileInfo, error) {
-	file, openError := os.Open(fname)
+func FileReader(fileName string) (*bytes.Reader, os.FileInfo, error) {
+	file, openError := os.Open(fileName)
 	if openError != nil {
 		return nil, nil, openError
 	}
@@ -233,8 +233,8 @@ func FileReader(fname string) (*bytes.Reader, os.FileInfo, error) {
 }
 
 // ReadFileInChunks reads a file in chunks.
-func ReadFileInChunks(fname string, chunk int, fun func(data []byte) error) (err error) {
-	file, openError := os.Open(fname)
+func ReadFileInChunks(fileName string, chunk int, callback func(data []byte) error) (err error) {
+	file, openError := os.Open(fileName)
 	if openError != nil {
 		return openError
 	}
@@ -251,12 +251,12 @@ func ReadFileInChunks(fname string, chunk int, fun func(data []byte) error) (err
 			return nil
 		}
 		if count < chunk {
-			callError := fun(buffer[:count-1])
+			callError := callback(buffer[:count-1])
 			if callError != nil {
 				return callError
 			}
 		}
-		callError := fun(buffer)
+		callError := callback(buffer)
 		if callError != nil {
 			return callError
 		}

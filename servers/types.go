@@ -3,34 +3,49 @@ package servers
 import (
 	"embed"
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/archives"
-	"github.com/razshare/frizzante/guards"
-	"github.com/razshare/frizzante/notifiers"
+	"log"
 	"net"
 	"net/http"
-	"time"
 )
 
 type Server struct {
-	Address         string
-	SecureAddress   string
-	FormMaxMemory   int64
-	HttpServer      *http.Server
-	HttpMux         *http.ServeMux
-	Connections     map[string]*net.Conn
-	ReadTimeout     time.Duration
-	WriteTimeout    time.Duration
-	HeaderMaxMemory int
-	Certificate     string
-	Key             string
-	Notifier        *notifiers.Notifier
-	Efs             embed.FS
-	WsUpgrader      *websocket.Upgrader
-	Guards          []guards.Guard
-	SessionArchive  archives.Archive
-	PublicRoot      string
-	AppRoot         string
-	ServerJs        string
-	IndexHtml       string
-	Dotenv          string
+	Guards        []Guard
+	Routes        []Route
+	Efs           embed.FS
+	Connections   map[string]*net.Conn
+	InfoLog       *log.Logger
+	Address       string
+	SecureAddress string
+	PublicRoot    string
+	AppRoot       string
+	ServerJs      string
+	IndexHtml     string
+	Dotenv        string
+	Certificate   string
+	Key           string
+	http.Server
+}
+
+type Connection struct {
+	WebSocket *websocket.Conn
+	Web       *Server
+	Request   *http.Request
+	Writer    http.ResponseWriter
+	Status    int
+	EventId   int64
+	EventName string
+	SessionId string
+	Locked    bool
+}
+
+type Route struct {
+	Pattern string
+	Handler func(c *Connection)
+	Tags    []string
+}
+
+type Guard struct {
+	Name    string
+	Handler func(c *Connection, allow func())
+	Tags    []string
 }

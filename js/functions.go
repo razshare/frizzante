@@ -6,14 +6,14 @@ import (
 	"rogchap.com/v8go"
 )
 
-var javaScriptCache = map[string]*v8go.CompilerCachedData{}
+var cache = map[string]*v8go.CompilerCachedData{}
 
 // JavaScriptInvalidate invalidates compiler cached data.
 //
 // Whenever you invoke JavaScriptRun, cache data is extracted from the script,
 // which is then used to speed up execution the next time a given script is executed.
 func JavaScriptInvalidate(id string) {
-	delete(javaScriptCache, id)
+	delete(cache, id)
 }
 
 // JavaScriptRun runs a javascript module.
@@ -25,16 +25,12 @@ func JavaScriptInvalidate(id string) {
 // You should always call the destroyer function as soon as possible to limit memory usage.
 //
 // Each global function will be injected into the context of the module automatically so that you can invoke them from the script.
-func JavaScriptRun(id string, src []byte, fs map[string]v8go.FunctionCallback) (
-	result *v8go.Value,
-	destroy func(),
-	scriptError error,
-) {
+func JavaScriptRun(id string, sourceCode []byte, globalFunctions map[string]v8go.FunctionCallback) (*v8go.Value, func(), error) {
 	isolate := v8go.NewIsolate()
 	globals := v8go.NewObjectTemplate(isolate)
 
-	for key, callback := range fs {
-		setError := globals.Set(key, v8go.NewFunctionTemplate(isolate, callback))
+	for functionName, functionCallback := range globalFunctions {
+		setError := globals.Set(functionName, v8go.NewFunctionTemplate(isolate, functionCallback))
 		if setError != nil {
 			return nil, nil, setError
 		}
@@ -44,47 +40,47 @@ func JavaScriptRun(id string, src []byte, fs map[string]v8go.FunctionCallback) (
 
 	var script *v8go.UnboundScript
 
-	codeCache, hasCodeCache := javaScriptCache[id]
-	if hasCodeCache {
-		compiledScript, compilationError := isolate.CompileUnboundScript(string(src), id, v8go.CompileOptions{CachedData: codeCache})
-		if compilationError != nil {
-			return nil, nil, compilationError
+	data, exists := cache[id]
+	if exists {
+		compiledScript, compileError := isolate.CompileUnboundScript(string(sourceCode), id, v8go.CompileOptions{CachedData: data})
+		if compileError != nil {
+			return nil, nil, compileError
 		}
 		script = compiledScript
 	} else {
-		compiledScript, compilationError := isolate.CompileUnboundScript(string(src), id, v8go.CompileOptions{})
-		if compilationError != nil {
-			return nil, nil, compilationError
+		compiledScript, compileError := isolate.CompileUnboundScript(string(sourceCode), id, v8go.CompileOptions{})
+		if compileError != nil {
+			return nil, nil, compileError
 		}
-		javaScriptCache[id] = compiledScript.CreateCodeCache()
+		cache[id] = compiledScript.CreateCodeCache()
 		script = compiledScript
 	}
 
-	scriptResult, scriptError := script.Run(context)
-	if scriptError != nil {
-		return nil, func() {}, scriptError
+	result, jsError := script.Run(context)
+	if jsError != nil {
+		return nil, func() {}, jsError
 	}
 
-	return scriptResult, func() {
+	return result, func() {
 		context.Close()
 		isolate.Dispose()
 	}, nil
 }
 
 // JavaScriptBundle bundles JavaScript source code into a specific format.
-func JavaScriptBundle(root string, format api.Format, src []byte) (bundle []byte, err error) {
+func JavaScriptBundle(root string, format api.Format, sourceCode []byte) (bundle []byte, err error) {
 	result := api.Build(api.BuildOptions{
 		Bundle: true,
 		Format: format,
 		Write:  false,
 		Stdin: &api.StdinOptions{
-			Contents:   string(src),
+			Contents:   string(sourceCode),
 			ResolveDir: root,
 		},
 	})
 
-	for _, errLocal := range result.Errors {
-		return nil, fmt.Errorf("%s in %s:%d:%d", errLocal.Text, errLocal.Location.File, errLocal.Location.Line, errLocal.Location.Column)
+	for _, buildError := range result.Errors {
+		return nil, fmt.Errorf("%s in %s:%d:%d", buildError.Text, buildError.Location.File, buildError.Location.Line, buildError.Location.Column)
 	}
 
 	return result.OutputFiles[0].Contents, nil

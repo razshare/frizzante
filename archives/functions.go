@@ -3,7 +3,7 @@ package archives
 import (
 	"errors"
 	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/roads"
+	"github.com/razshare/frizzante/locks"
 	"os"
 	"path/filepath"
 )
@@ -12,7 +12,7 @@ import (
 func NewDiskArchive(name string) *DiskArchive {
 	return &DiskArchive{
 		Name: name,
-		Road: roads.New(),
+		Lock: locks.New(),
 	}
 }
 
@@ -22,9 +22,9 @@ func (archive *DiskArchive) Set(domain string, key string, value []byte) error {
 		return errors.New("disk archive name is blank")
 	}
 
-	lane := archive.Road.WithLane(domain, key)
-	lane.Lock()
-	defer lane.Unlock()
+	lock := archive.Lock.Lock(domain, key)
+	lock.Lock()
+	defer lock.Unlock()
 	directoryName := filepath.Join(archive.Name, domain)
 	if !files.IsDirectory(directoryName) {
 		mkdirError := os.MkdirAll(directoryName, os.ModePerm)
@@ -45,9 +45,9 @@ func (archive *DiskArchive) Get(domain string, key string) ([]byte, error) {
 	if "" == archive.Name {
 		return nil, errors.New("disk archive name is blank")
 	}
-	lane := archive.Road.WithLane(domain, key)
-	lane.Lock()
-	defer lane.Unlock()
+	lock := archive.Lock.Lock(domain, key)
+	lock.Lock()
+	defer lock.Unlock()
 	fileName := filepath.Join(archive.Name, domain, key)
 	value, readError := os.ReadFile(fileName)
 	if readError != nil {
@@ -61,9 +61,9 @@ func (archive *DiskArchive) Has(domain string, key string) (bool, error) {
 	if "" == archive.Name {
 		return false, errors.New("disk archive name is blank")
 	}
-	lane := archive.Road.WithLane(domain, key)
-	lane.Lock()
-	defer lane.Unlock()
+	lock := archive.Lock.Lock(domain, key)
+	lock.Lock()
+	defer lock.Unlock()
 	fileName := filepath.Join(archive.Name, domain, key)
 	return files.IsFile(fileName), nil
 }
@@ -73,9 +73,9 @@ func (archive *DiskArchive) Remove(domain string, key string) error {
 	if "" == archive.Name {
 		return errors.New("disk archive name is blank")
 	}
-	lane := archive.Road.WithLane(domain, key)
-	lane.Lock()
-	defer lane.Unlock()
+	lock := archive.Lock.Lock(domain, key)
+	lock.Lock()
+	defer lock.Unlock()
 	fileName := filepath.Join(archive.Name, domain, key)
 	removeError := os.Remove(fileName)
 	if removeError != nil {
@@ -89,9 +89,9 @@ func (archive *DiskArchive) HasDomain(domain string) (bool, error) {
 	if "" == archive.Name {
 		return false, errors.New("disk archive name is blank")
 	}
-	lane := archive.Road.WithLane(domain)
-	lane.Lock()
-	defer lane.Unlock()
+	lock := archive.Lock.Lock(domain)
+	lock.Lock()
+	defer lock.Unlock()
 	return files.IsDirectory(filepath.Join(archive.Name, domain)), nil
 }
 
@@ -100,9 +100,9 @@ func (archive *DiskArchive) RemoveDomain(domain string) error {
 	if "" == archive.Name {
 		return errors.New("disk archive name is blank")
 	}
-	lane := archive.Road.WithLane(domain)
-	lane.Lock()
-	defer lane.Unlock()
+	lock := archive.Lock.Lock(domain)
+	lock.Lock()
+	defer lock.Unlock()
 	directoryName := filepath.Join(archive.Name, domain)
 	removeError := os.RemoveAll(directoryName)
 	if removeError != nil {

@@ -6,15 +6,15 @@ import (
 	"testing"
 )
 
-func TestLoadDotenv(t *testing.T) {
+func TestLoadDotenv(test *testing.T) {
 	err := environments.LoadDotenv("test.env")
 	if err != nil {
-		t.Fatal(err)
+		test.Fatal(err)
 	}
 
 	name := os.Getenv("name")
 
 	if name != "world" {
-		t.Fatal("environment variable name is not \"world\"")
+		test.Fatal("environment variable name is not \"world\"")
 	}
 }

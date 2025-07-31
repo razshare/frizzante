@@ -16,53 +16,44 @@ import (
 	"strings"
 )
 
-// AddFunction adds a global function to the script's context.
-func (view *View) AddFunction(name string, fun v8go.FunctionCallback) *View {
-	if nil == view.Functions {
-		view.Functions = map[string]v8go.FunctionCallback{}
-	}
-	view.Functions[name] = fun
-	return view
-}
-
-// IndexContents gets the contents of the index html document.
-func (view *View) IndexContents(efs embed.FS) ([]byte, error) {
-	var index []byte
-	var indexReadError error
+// IndexHtmlData gets the contents of the index html document.
+func (view *View) IndexHtmlData(efs embed.FS) ([]byte, error) {
 	if files.IsFile(view.IndexHtml) {
 		return os.ReadFile(view.IndexHtml)
 	}
 
+	var data []byte
 	fileNameFixed := strings.ReplaceAll(view.IndexHtml, "\\", "/")
 	if embeds.IsFile(efs, fileNameFixed) {
-		index, indexReadError = efs.ReadFile(fileNameFixed)
-		if indexReadError != nil {
-			return nil, indexReadError
+		var readError error
+		data, readError = efs.ReadFile(fileNameFixed)
+		if readError != nil {
+			return nil, readError
 		}
 	} else {
 		return nil, errors.New("view index is missing from the host file system and the embedded file system")
 	}
-	return index, nil
+	return data, nil
 }
 
-// ServerContents gets the contents of the server script.
-func (view *View) ServerContents(efs embed.FS) ([]byte, error) {
-	var server []byte
-	var serverReadError error
+// ServerJsData gets the contents of the server script.
+func (view *View) ServerJsData(efs embed.FS) ([]byte, error) {
 	if files.IsFile(view.ServerJs) {
 		return os.ReadFile(view.ServerJs)
 	}
 
-	fileNameFixed := strings.ReplaceAll(view.ServerJs, "\\", "/")
-	if embeds.IsFile(efs, fileNameFixed) {
-		server, serverReadError = efs.ReadFile(fileNameFixed)
-		if serverReadError != nil {
-			return nil, serverReadError
+	var data []byte
+	n := strings.ReplaceAll(view.ServerJs, "\\", "/")
+	if embeds.IsFile(efs, n) {
+		var readError error
+		data, readError = efs.ReadFile(n)
+		if readError != nil {
+			return nil, readError
 		}
 	} else {
 		return nil, errors.New("view server is missing from the host file system and the embedded file system")
 	}
-	return server, nil
+	return data, nil
 }
 
 // Render renders the view.
@@ -93,46 +84,46 @@ func (view *View) ServerContents(efs embed.FS) ([]byte, error) {
 // Esbuild will look for a "node_modules" in the view root directory, which you can set by invoking WithRoot.
 func (view *View) Render(efs embed.FS) (html string, err error) {
 	// CSR.
-	targetId, targetIdError := uuid.NewV4()
-	if targetIdError != nil {
-		return "", targetIdError
+	idObject, idObjectError := uuid.NewV4()
+	if idObjectError != nil {
+		return "", idObjectError
 	}
 
-	name := view.Name
-	data := view.Data
-	renderMode := view.RenderMode
+	viewName := view.Name
+	viewData := view.Data
+	viewRenderMode := view.RenderMode
 
-	if data == nil {
-		data = map[string]any{}
+	if viewData == nil {
+		viewData = map[string]any{}
 	}
 
-	propsBytes, marshalError := json.Marshal(map[string]any{
-		"name":       name,
-		"data":       data,
-		"renderMode": renderMode,
+	jsonData, jsonError := json.Marshal(map[string]any{
+		"name":       viewName,
+		"data":       viewData,
+		"renderMode": viewRenderMode,
 	})
-	if marshalError != nil {
-		return "", marshalError
+	if jsonError != nil {
+		return "", jsonError
 	}
 
-	props := string(propsBytes)
+	properties := string(jsonData)
 
 	if RenderModeClient == view.RenderMode {
-		index, indexError := view.IndexContents(efs)
-		if indexError != nil {
-			return "", indexError
+		indexHtmlData, indexHtmlDataError := view.IndexHtmlData(efs)
+		if indexHtmlDataError != nil {
+			return "", indexHtmlDataError
 		}
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
 					strings.Replace(
-						string(index),
+						string(indexHtmlData),
 						"<!--app-target-->",
-						fmt.Sprintf("<script type=\"application/javascript\">function target(){return document.getElementById(\"%s\")}</script>", targetId),
+						fmt.Sprintf("<script type=\"application/javascript\">function target(){return document.getElementById(\"%s\")}</script>", idObject),
 						1,
 					),
 					"<!--app-body-->",
-					fmt.Sprintf("<div id=\"%s\"></div>", targetId),
+					fmt.Sprintf("<div id=\"%s\"></div>", idObject),
 					1,
 				),
 				"<!--app-head-->",
@@ -142,30 +133,28 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 			"<!--app-data-->",
 			fmt.Sprintf(
 				"<script type=\"application/javascript\">function props(){return %s}</script>",
-				props,
+				properties,
 			),
 			1,
 		), nil
 	}
 
-	readBytes, serverReadError := view.ServerContents(efs)
-	if serverReadError != nil {
-		return "", serverReadError
-	}
+	var serverJsData []byte
+	var serverJsDataError error
 
-	var server []byte
+	serverJsData, serverJsDataError = view.ServerJsData(efs)
+	if serverJsDataError != nil {
+		return "", serverJsDataError
+	}
 
 	if files.IsDirectory(view.AppRoot) {
-		var serverError error
-		server, serverError = js.JavaScriptBundle(view.AppRoot, api.FormatCommonJS, readBytes)
-		if serverError != nil {
-			return "", serverError
+		serverJsData, serverJsDataError = js.JavaScriptBundle(view.AppRoot, api.FormatCommonJS, serverJsData)
+		if serverJsDataError != nil {
+			return "", serverJsDataError
 		}
-	} else {
-		server = readBytes
 	}
 
-	serverIif := fmt.Sprintf(
+	iif := fmt.Sprintf(
 		`
 		const module={exports:{}}; const render = (function(){
 			%s
@@ -178,60 +167,60 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 			error(e.stack)
 		});
 		`,
-		string(server),
+		string(serverJsData),
 	)
 
-	bundle := []byte(serverIif)
+	iifData := []byte(iif)
 
 	var head string
 	var body string
-	var gerr string
+	var jsError string
 
-	functions := map[string]v8go.FunctionCallback{
+	globalFunctions := map[string]v8go.FunctionCallback{
 		"error": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-			args := info.Args()
-			if len(args) > 0 {
-				gerr = gerr + args[0].String() + "\n"
+			arguments := info.Args()
+			if len(arguments) > 0 {
+				jsError = jsError + arguments[0].String() + "\n"
 			}
 			return nil
 		},
 		"props": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-			value, valueError := v8go.NewValue(info.Context().Isolate(), props)
+			value, valueError := v8go.NewValue(info.Context().Isolate(), properties)
 			if valueError != nil {
 				return nil
 			}
 			return value
 		},
 		"head": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-			args := info.Args()
-			if len(args) > 0 {
-				head = args[0].String()
+			arguments := info.Args()
+			if len(arguments) > 0 {
+				head = arguments[0].String()
 			}
 			return nil
 		},
 		"body": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-			args := info.Args()
-			if len(args) > 0 {
-				body = args[0].String()
+			arguments := info.Args()
+			if len(arguments) > 0 {
+				body = arguments[0].String()
 			}
 			return nil
 		},
 	}
 
 	if view.Functions != nil {
-		for functionName, function := range view.Functions {
-			functions[functionName] = function
+		for functionName, functionCallback := range view.Functions {
+			globalFunctions[functionName] = functionCallback
 		}
 	}
 
-	_, destroy, javaScriptError := js.JavaScriptRun(view.ServerJs, bundle, functions)
+	_, destroy, javaScriptError := js.JavaScriptRun(view.ServerJs, iifData, globalFunctions)
 	if javaScriptError != nil {
 		return "", javaScriptError
 	}
 	defer destroy()
 
-	if "" != gerr {
-		return "", errors.New(gerr)
+	if "" != jsError {
+		return "", errors.New(jsError)
 	}
 
 	if RenderModeHeadless == view.RenderMode {
@@ -239,21 +228,21 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 	}
 
 	if RenderModeServer == view.RenderMode {
-		index, indexError := view.IndexContents(efs)
-		if indexError != nil {
-			return "", indexError
+		indexHtmlData, indexHtmlDataError := view.IndexHtmlData(efs)
+		if indexHtmlDataError != nil {
+			return "", indexHtmlDataError
 		}
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
 					strings.Replace(
-						globals.NoScript.ReplaceAllString(string(index), ""),
+						globals.NoScript.ReplaceAllString(string(indexHtmlData), ""),
 						"<!--app-target-->",
 						"",
 						1,
 					),
 					"<!--app-body-->",
-					fmt.Sprintf("<div id=\"%s\">%s</div>", targetId, body),
+					fmt.Sprintf("<div id=\"%s\">%s</div>", indexHtmlData, body),
 					1,
 				),
 				"<!--app-head-->",
@@ -267,21 +256,21 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 	}
 
 	if RenderModeFull == view.RenderMode {
-		index, indexError := view.IndexContents(efs)
-		if indexError != nil {
-			return "", indexError
+		indexHtmlData, indexHtmlDataError := view.IndexHtmlData(efs)
+		if indexHtmlDataError != nil {
+			return "", indexHtmlDataError
 		}
 		return strings.Replace(
 			strings.Replace(
 				strings.Replace(
 					strings.Replace(
-						string(index),
+						string(indexHtmlData),
 						"<!--app-target-->",
-						fmt.Sprintf("<script type=\"application/javascript\">function target(){return document.getElementById(\"%s\")}</script>", targetId),
+						fmt.Sprintf("<script type=\"application/javascript\">function target(){return document.getElementById(\"%s\")}</script>", idObject),
 						1,
 					),
 					"<!--app-body-->",
-					fmt.Sprintf("<div id=\"%s\">%s</div>", targetId, body),
+					fmt.Sprintf("<div id=\"%s\">%s</div>", idObject, body),
 					1,
 				),
 				"<!--app-head-->",
@@ -291,7 +280,7 @@ func (view *View) Render(efs embed.FS) (html string, err error) {
 			"<!--app-data-->",
 			fmt.Sprintf(
 				"<script type=\"application/javascript\">function props(){return %s}</script>",
-				props,
+				properties,
 			),
 			1,
 		), nil

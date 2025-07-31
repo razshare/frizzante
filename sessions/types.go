@@ -1,10 +1,12 @@
 package sessions
 
 import (
-	"github.com/razshare/frizzante/connections"
+	"github.com/razshare/frizzante/archives"
+	"github.com/razshare/frizzante/servers"
 )
 
 type Session[T any] struct {
-	Connection *connections.Connection
+	Archive    archives.Archive
+	Connection *servers.Connection
 	State      *T
 }

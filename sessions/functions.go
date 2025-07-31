@@ -3,52 +3,34 @@ package sessions
 import (
 	"encoding/json"
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/razshare/frizzante/connections"
+	"github.com/razshare/frizzante/archives"
 	"github.com/razshare/frizzante/globals"
+	"github.com/razshare/frizzante/servers"
+	"github.com/razshare/frizzante/traces"
+	"path/filepath"
 )
 
-// StartWithState starts a session with a given initial state.
-//
-// Deprecated: Use sessions.New followed by Session.Start.
-func StartWithState[T any](con *connections.Connection, state T) *Session[T] {
-	session := &Session[T]{
-		Connection: con,
+// New creates a new session with a zero initial state.
+func New[T any](connection *servers.Connection, state T) *Session[T] {
+	return &Session[T]{
+		Archive:    archives.NewDiskArchive(filepath.Join(".gen", "sessions")),
+		Connection: connection,
 		State:      &state,
 	}
-
-	if !session.Exists() {
-		session.Save()
-	} else {
-		session.Load()
-	}
-
-	return session
-}
-
-// Start starts a session with zero state.
-//
-// Deprecated: Use sessions.New followed by Session.Start.
-func Start[T any](con *connections.Connection) *Session[T] {
-	var state T
-	return StartWithState(con, state)
-}
-
-// New creates a new session with a zero initial state.
-func New[T any](con *connections.Connection, state T) *Session[T] {
-	return &Session[T]{Connection: con, State: &state}
 }
 
 // Start loads the State if the current connection defines a session-id cookie.
 //
 // If the session-id cookie is missing it will create a new one and send it to the user.
-func (session *Session[T]) Start() *Session[T] {
-	if !session.Exists() {
+func (session *Session[T]) Start() {
+	exists := session.Exists()
+
+	if !exists {
 		session.Save()
-	} else {
-		session.Load()
+		return
 	}
 
-	return session
+	session.Load()
 }
 
 // Id tries to find a session id among the user's cookies.
@@ -58,89 +40,99 @@ func (session *Session[T]) Id() string {
 		return session.Connection.SessionId
 	}
 
-	var sessionId string
+	var id string
 	cookies := session.Connection.Request.CookiesNamed("session-id")
-	count := 0
+	connection := 0
 
 	for _, cookie := range cookies {
-		sessionId = cookie.Value
-		count++
+		id = cookie.Value
+		connection++
 	}
 
-	if count > 0 {
-		session.Connection.SessionId = sessionId
-		return sessionId
+	if connection > 0 {
+		session.Connection.SessionId = id
+		return id
 	}
 
 	// Create new session.
-	id4, idError := uuid.NewV4()
-	if idError != nil {
-		session.Connection.Notifier.SendErrorAndTrace(idError, 1)
+	idObject, idObjectError := uuid.NewV4()
+	if idObjectError != nil {
 		session.Connection.SessionId = ""
+		traces.Trace(session.Connection.Web.ErrorLog, idObjectError)
 		return ""
 	}
-	sessionId = id4.String()
-	session.Connection.SendCookie("session-id", sessionId)
-	session.Connection.SessionId = sessionId
-	return sessionId
+
+	id = idObject.String()
+
+	session.Connection.SendCookie("session-id", id)
+
+	session.Connection.SessionId = id
+
+	return id
 }
 
 // Exists checks if the session exists into the archive.
 func (session *Session[T]) Exists() bool {
 	id := session.Id()
-	has, hasError := session.Connection.SessionArchive.Has(id, globals.SessionKey)
-	if hasError != nil {
-		session.Connection.Notifier.SendErrorAndTrace(hasError, 1)
+
+	exists, existsError := session.Archive.Has(id, globals.SessionKey)
+	if existsError != nil {
+		traces.Trace(session.Connection.Web.ErrorLog, existsError)
+		return false
 	}
-	return has
+	return exists
 }
 
 // Save saves the session into the archive.
-func (session *Session[T]) Save() *Session[T] {
+func (session *Session[T]) Save() {
 	id := session.Id()
-	readBytes, marshalError := json.Marshal(session.State)
-	if marshalError != nil {
-		session.Connection.Notifier.SendErrorAndTrace(marshalError, 1)
-		return session
+
+	data, jsonError := json.Marshal(session.State)
+	if jsonError != nil {
+		traces.Trace(session.Connection.Web.ErrorLog, jsonError)
+		return
 	}
 
-	setError := session.Connection.SessionArchive.Set(id, globals.SessionKey, readBytes)
-	if setError != nil {
-		session.Connection.Notifier.SendErrorAndTrace(setError, 1)
+	archiveError := session.Archive.Set(id, globals.SessionKey, data)
+	if archiveError != nil {
+		traces.Trace(session.Connection.Web.ErrorLog, archiveError)
 	}
-	return session
 }
 
 // Load loads the session from the archive.
 //
 // If the session is not found in the archive it creates it.
-func (session *Session[T]) Load() *Session[T] {
+func (session *Session[T]) Load() {
 	id := session.Id()
-	has, hasError := session.Connection.SessionArchive.Has(id, globals.SessionKey)
-	if hasError != nil {
-		session.Connection.Notifier.SendErrorAndTrace(hasError, 1)
-		return session
+
+	exists, existsError := session.Archive.Has(id, globals.SessionKey)
+	if existsError != nil {
+		traces.Trace(session.Connection.Web.ErrorLog, existsError)
+		return
 	}
-	if has {
-		readBytes, getError := session.Connection.SessionArchive.Get(id, globals.SessionKey)
+
+	if exists {
+		data, getError := session.Archive.Get(id, globals.SessionKey)
 		if getError != nil {
-			session.Connection.Notifier.SendErrorAndTrace(getError, 1)
-			return session
+			traces.Trace(session.Connection.Web.ErrorLog, getError)
+			return
 		}
-		unmarshalError := json.Unmarshal(readBytes, session.State)
-		if unmarshalError != nil {
-			session.Connection.Notifier.SendErrorAndTrace(unmarshalError, 1)
+
+		jsonError := json.Unmarshal(data, session.State)
+		if jsonError != nil {
+			traces.Trace(session.Connection.Web.ErrorLog, jsonError)
+			return
 		}
 	}
-	return session
 }
 
 // Destroy removes the session from the archive.
-func (session *Session[T]) Destroy() *Session[T] {
+func (session *Session[T]) Destroy() {
 	id := session.Id()
-	destroyError := session.Connection.SessionArchive.RemoveDomain(id)
-	if destroyError != nil {
-		session.Connection.Notifier.SendErrorAndTrace(destroyError, 1)
+
+	archiveError := session.Archive.RemoveDomain(id)
+	if archiveError != nil {
+		traces.Trace(session.Connection.Web.ErrorLog, archiveError)
+		return
 	}
-	return session
 }
