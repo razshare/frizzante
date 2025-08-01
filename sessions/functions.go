@@ -2,116 +2,15 @@ package sessions
 
 import (
 	"encoding/json"
-	"errors"
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/razshare/frizzante/connections"
-	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/globals"
-	"github.com/razshare/frizzante/locks"
 	"github.com/razshare/frizzante/traces"
-	"os"
-	"path/filepath"
 )
 
 // New creates a new session with a given initial state.
 func New[T any](connection *connections.Connection, initialState T) *Session[T] {
-	name := filepath.Join(".gen", "sessions")
-	lock := locks.New()
 	return &Session[T]{
-		Get: func(domain string, key string) ([]byte, error) {
-			if "" == name {
-				return nil, errors.New("disk archive name is blank")
-			}
-
-			mutex := lock.Acquire(domain, key)
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			fileName := filepath.Join(name, domain, key)
-			value, readError := os.ReadFile(fileName)
-			if readError != nil {
-				return nil, readError
-			}
-			return value, nil
-		},
-		Set: func(domain string, key string, value []byte) error {
-			if "" == name {
-				return errors.New("disk archive name is blank")
-			}
-
-			mutex := lock.Acquire(domain, key)
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			directoryName := filepath.Join(name, domain)
-			if !files.IsDirectory(directoryName) {
-				mkdirError := os.MkdirAll(directoryName, os.ModePerm)
-				if mkdirError != nil {
-					return mkdirError
-				}
-			}
-			fileName := filepath.Join(directoryName, key)
-			writeError := os.WriteFile(fileName, value, os.ModePerm)
-			if writeError != nil {
-				return writeError
-			}
-			return nil
-		},
-		Has: func(domain string, key string) (bool, error) {
-			if "" == name {
-				return false, errors.New("disk archive name is blank")
-			}
-
-			mutex := lock.Acquire(domain, key)
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			fileName := filepath.Join(name, domain, key)
-			return files.IsFile(fileName), nil
-		},
-		Remove: func(domain string, key string) error {
-			if "" == name {
-				return errors.New("disk archive name is blank")
-			}
-
-			mutex := lock.Acquire(domain, key)
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			fileName := filepath.Join(name, domain, key)
-			removeError := os.Remove(fileName)
-			if removeError != nil {
-				return removeError
-			}
-			return nil
-		},
-		HasDomain: func(domain string) (bool, error) {
-			if "" == name {
-				return false, errors.New("disk archive name is blank")
-			}
-
-			mutex := lock.Acquire(domain)
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			return files.IsDirectory(filepath.Join(name, domain)), nil
-		},
-		RemoveDomain: func(domain string) error {
-			if "" == name {
-				return errors.New("disk archive name is blank")
-			}
-
-			mutex := lock.Acquire(domain)
-			mutex.Lock()
-			defer mutex.Unlock()
-
-			directoryName := filepath.Join(name, domain)
-			removeError := os.RemoveAll(directoryName)
-			if removeError != nil {
-				return removeError
-			}
-			return nil
-		},
 		Connection: connection,
 		State:      &initialState,
 	}
@@ -177,7 +76,7 @@ func (session *Session[T]) Id() string {
 func (session *Session[T]) Exists() bool {
 	id := session.Id()
 
-	exists, existsError := session.Has(id, globals.SessionKey)
+	exists, existsError := session.Connection.SessionArchive.Has(id, globals.SessionKey)
 	if existsError != nil {
 		traces.Trace(session.Connection.ErrorLog, existsError)
 		return false
@@ -195,7 +94,7 @@ func (session *Session[T]) Save() {
 		return
 	}
 
-	archiveError := session.Set(id, globals.SessionKey, data)
+	archiveError := session.Connection.SessionArchive.Set(id, globals.SessionKey, data)
 	if archiveError != nil {
 		traces.Trace(session.Connection.ErrorLog, archiveError)
 	}
@@ -207,14 +106,14 @@ func (session *Session[T]) Save() {
 func (session *Session[T]) Load() {
 	id := session.Id()
 
-	exists, existsError := session.Has(id, globals.SessionKey)
+	exists, existsError := session.Connection.SessionArchive.Has(id, globals.SessionKey)
 	if existsError != nil {
 		traces.Trace(session.Connection.ErrorLog, existsError)
 		return
 	}
 
 	if exists {
-		data, getError := session.Get(id, globals.SessionKey)
+		data, getError := session.Connection.SessionArchive.Get(id, globals.SessionKey)
 		if getError != nil {
 			traces.Trace(session.Connection.ErrorLog, getError)
 			return
@@ -232,7 +131,7 @@ func (session *Session[T]) Load() {
 func (session *Session[T]) Destroy() {
 	id := session.Id()
 
-	archiveError := session.RemoveDomain(id)
+	archiveError := session.Connection.SessionArchive.RemoveDomain(id)
 	if archiveError != nil {
 		traces.Trace(session.Connection.ErrorLog, archiveError)
 		return

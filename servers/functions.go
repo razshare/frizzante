@@ -3,6 +3,7 @@ package servers
 import (
 	"context"
 	"errors"
+	"github.com/razshare/frizzante/archives"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/guards"
@@ -11,6 +12,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"path/filepath"
 	"slices"
 	"sync"
 	"time"
@@ -18,14 +20,15 @@ import (
 
 func New() *Server {
 	return &Server{
-		Connections:   map[string]*net.Conn{},
-		InfoLog:       log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
-		Address:       "0.0.0.0:8080",
-		SecureAddress: "0.0.0.0:8383",
-		PublicRoot:    "app/dist/client",
-		AppRoot:       "app",
-		ServerJs:      "app/dist/server.js",
-		IndexHtml:     "app/dist/client/index.html",
+		Connections:    map[string]*net.Conn{},
+		InfoLog:        log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
+		SessionArchive: archives.NewDiskArchive(filepath.Join(".gen", "sessions")),
+		Address:        "0.0.0.0:8080",
+		SecureAddress:  "0.0.0.0:8383",
+		PublicRoot:     "app/dist/client",
+		AppRoot:        "app",
+		ServerJs:       "app/dist/server.js",
+		IndexHtml:      "app/dist/client/index.html",
 		Server: http.Server{
 			Handler:        http.NewServeMux(),
 			ReadTimeout:    10 * time.Second,
@@ -45,17 +48,18 @@ func (server *Server) Start() {
 	for _, route := range server.Routes {
 		mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 			con := &connections.Connection{
-				Request:    request,
-				Writer:     writer,
-				Efs:        server.Efs,
-				Status:     200,
-				EventId:    1,
-				PublicRoot: server.PublicRoot,
-				AppRoot:    server.AppRoot,
-				ServerJs:   server.ServerJs,
-				IndexHtml:  server.IndexHtml,
-				ErrorLog:   server.ErrorLog,
-				InfoLog:    server.InfoLog,
+				Request:        request,
+				Writer:         writer,
+				Efs:            server.Efs,
+				Status:         200,
+				EventId:        1,
+				PublicRoot:     server.PublicRoot,
+				AppRoot:        server.AppRoot,
+				ServerJs:       server.ServerJs,
+				IndexHtml:      server.IndexHtml,
+				ErrorLog:       server.ErrorLog,
+				InfoLog:        server.InfoLog,
+				SessionArchive: server.SessionArchive,
 			}
 
 			for _, tag := range route.Tags {
