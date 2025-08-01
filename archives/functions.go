@@ -9,7 +9,7 @@ import (
 )
 
 // New creates a new archive backed by the file system.
-func New(name string) *DiskArchive {
+func New(name string) Archive {
 	return &DiskArchive{
 		Name: name,
 		Lock: locks.New(),
