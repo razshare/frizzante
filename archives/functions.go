@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 )
 
-// NewDiskArchive creates a new archive backed by the file system.
-func NewDiskArchive(name string) *DiskArchive {
+// New creates a new archive backed by the file system.
+func New(name string) *DiskArchive {
 	return &DiskArchive{
 		Name: name,
 		Lock: locks.New(),

@@ -22,7 +22,7 @@ func New() *Server {
 	return &Server{
 		Connections:    map[string]*net.Conn{},
 		InfoLog:        log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
-		SessionArchive: archives.NewDiskArchive(filepath.Join(".gen", "sessions")),
+		SessionArchive: archives.New(filepath.Join(".gen", "sessions")),
 		Address:        "0.0.0.0:8080",
 		SecureAddress:  "0.0.0.0:8383",
 		PublicRoot:     "app/dist/client",
