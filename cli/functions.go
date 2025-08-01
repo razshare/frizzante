@@ -1008,6 +1008,7 @@ func (cli *Cli) OnWelcome() {
 		println("• Run environment in container:")
 		println("		• Dev environment: make dev")
 		println("		• Prod environment: make build")
+		println("				• To run the app: ./.gen/bin/app")
 		println("• Run prod via docker:")
 		println("		• Build image: docker build --target frizzante_prod -t my-app:prod .")
 		println("		• Run image: docker run -p 8080:8080 my-app:prod")
