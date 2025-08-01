@@ -1000,7 +1000,15 @@ func (cli *Cli) OnWelcome() {
 	}
 
 	if usingDocker != "" {
-		// TODO: add a custom message for docker.
+		println("")
+		println("🐙 You're running Frizzante in Docker!")
+		println("")
+		println("Simple workflow:")
+		println("• Attach to the container: docker exec -it frizzante-start sh")
+		println("• Run environment: make dev/prod")
+		println("• Enjoy!!")
+		println("")
+		cli.Info("For more info: https://razshare.github.io/frizzante-docs/guides/get-started/")
 	}
 
 	<-end
