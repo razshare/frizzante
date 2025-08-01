@@ -76,7 +76,7 @@ This will create a `.gen/bin/app` standalone executable.
 
 > [!NOTE]
 > Frizzante is aimed mainly at linux distributions.\
-> Feel free to contribute improvements for other platforms.
+> Feel free to contribute improvements for other platforms or use [Frizzante-Docker](https://github.com/cmjoseph07/frizzante-docker).
 
 # Thanks
 
