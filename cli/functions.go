@@ -511,7 +511,7 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_amd64.exe"
 		}
 
-		cli.Install("air", url, directoryName)
+		cli.Install("air"+cli.Extension(), url, directoryName)
 
 		return
 	}
