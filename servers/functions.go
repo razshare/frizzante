@@ -14,6 +14,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strings"
 	"sync"
 	"time"
 )
@@ -85,7 +86,8 @@ func (server *Server) Start() {
 	group.Add(2)
 
 	go func() {
-		server.InfoLog.Printf("listening for requests at http://%s", server.Addr)
+		readableAddress := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+		server.InfoLog.Printf("listening for requests at http://%s", readableAddress)
 		serveError := http.ListenAndServe(server.Addr, server.Handler)
 		if serveError != nil {
 			if errors.Is(serveError, http.ErrServerClosed) {
@@ -98,7 +100,8 @@ func (server *Server) Start() {
 
 	go func() {
 		if "" != server.Certificate && "" != server.Key {
-			server.InfoLog.Printf("listening for requests at https://%s", server.SecureAddr)
+			readableAddress := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+			server.InfoLog.Printf("listening for requests at https://%s", readableAddress)
 			serveError := http.ListenAndServeTLS(server.SecureAddr, server.Certificate, server.Key, server.Handler)
 			if serveError != nil {
 				if errors.Is(serveError, http.ErrServerClosed) {
