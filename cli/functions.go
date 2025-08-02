@@ -511,7 +511,7 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_amd64.exe"
 		}
 
-		cli.Install("air"+cli.Extension(), url, directoryName)
+		cli.Install("air", url, directoryName)
 
 		return
 	}
@@ -1063,7 +1063,12 @@ func (cli *Cli) Install(name string, url string, destination string) {
 	}()
 
 	if !strings.HasSuffix(url, ".zip") {
-		downloadError := files.DownloadFile(url, filepath.Join(destination, name))
+		nameFixed := name
+		if strings.HasSuffix(url, ".exe") {
+			nameFixed += cli.Extension()
+		}
+
+		downloadError := files.DownloadFile(url, filepath.Join(destination, nameFixed))
 		if downloadError != nil {
 			cli.Fatal(downloadError)
 		}
