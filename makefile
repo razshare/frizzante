@@ -23,6 +23,14 @@ build:
 	cd .gen/bin && env GOOS=darwin GOARCH=amd64 go build -o=frizzante-darwin-arm64 ../../ && \
 	zip -9 frizzante-darwin-arm64.zip frizzante-darwin-arm64 && \
 	rm frizzante-darwin-arm64
+# windows-amd64
+	cd .gen/bin && env GOOS=windows GOARCH=amd64 go build -o=frizzante-windows-amd64.exe ../../ && \
+	zip -9 frizzante-windows-amd64.zip frizzante-windows-amd64.exe && \
+	rm frizzante-windows-amd64.exe
+# windows-arm64
+	cd .gen/bin && env GOOS=windows GOARCH=amd64 go build -o=frizzante-windows-arm64.exe ../../ && \
+	zip -9 frizzante-windows-arm64.zip frizzante-windows-arm64.exe && \
+	rm frizzante-windows-arm64.exe
 
 dev:
 	go run main.go --dev
