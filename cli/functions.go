@@ -466,6 +466,10 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			fileName = filepath.Join(directoryName, "bun-linux-aarch64", "bun")
 		} else if platform == PlatformLinuxAmd64 {
 			fileName = filepath.Join(directoryName, "bun-linux-x64", "bun")
+		} else if platform == PlatformWindowsArm64 {
+			fileName = filepath.Join(directoryName, "bun-windows-x64-baseline", "bun")
+		} else if platform == PlatformWindowsAmd64 {
+			fileName = filepath.Join(directoryName, "bun-windows-x64-baseline", "bun")
 		}
 
 		if files.IsFile(fileName) {
@@ -1005,7 +1009,7 @@ func (cli *Cli) OnSqlcGenerate() {
 
 func (cli *Cli) OnWelcome() {
 	usingDocker := os.Getenv("FRIZZANTE_USING_DOCKER")
-	end := make(chan string, 0)
+	end := make(chan string)
 	err := pterm.DefaultBigText.WithLetters(putils.LettersFromStringWithStyle("Frizzante", pterm.FgCyan.ToStyle())).Render()
 	if err != nil {
 		cli.Fatal(err)
