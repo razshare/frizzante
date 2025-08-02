@@ -1,12 +1,7 @@
 package archives
 
-import (
-	"github.com/razshare/frizzante/locks"
-)
-
 type DiskArchive struct {
 	Name string
-	Lock *locks.Lock
 }
 
 type Archive interface {

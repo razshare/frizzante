@@ -5,26 +5,45 @@ import (
 	"sync"
 )
 
-func New() *Lock {
-	return &Lock{Names: map[string]*sync.Mutex{}}
-}
+var Map = map[string]*Lock{}
+var Mutex = &sync.Mutex{}
 
-// Acquire finds a mutex and acquires it.
-func (lock *Lock) Acquire(keys ...string) *sync.Mutex {
-	path := strings.Join(keys, ":")
-	lane, laneExists := lock.Names[path]
-	if laneExists {
-		return lane
+// Acquire acquires a LockSynchronizer from ParallelMap
+// based on the given key and returns its Mutex.
+//
+// If the LockSynchronizer doesn't exist, Lock creates it
+// and if the key is not empty it also saves it in Map.
+func Acquire(key ...string) *Lock {
+	if len(key) == 0 {
+		return &Lock{Mutex: sync.Mutex{}}
 	}
 
-	var newLane sync.Mutex
-	lock.Names[path] = &newLane
-	return &newLane
+	id := strings.Join(key, ":")
+
+	Mutex.Lock()
+	defer func() { Mutex.Unlock() }()
+
+	lock, exists := Map[id]
+	if exists {
+		return lock
+	}
+
+	lock = &Lock{Id: id, Mutex: sync.Mutex{}}
+
+	Map[id] = lock
+
+	return lock
 }
 
-// Remove releases.
-func (lock *Lock) Remove(keys ...string) *Lock {
-	path := strings.Join(keys, ":")
-	delete(lock.Names, path)
-	return lock
+// Destroy removes the LockSynchronizer from ParallelMap.
+func (lock *Lock) Destroy() {
+	Mutex.Lock()
+	lock.Mutex.Lock()
+
+	defer func() {
+		Mutex.Unlock()
+		lock.Mutex.Unlock()
+	}()
+
+	delete(Map, lock.Id)
 }

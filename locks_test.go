@@ -5,38 +5,30 @@ import (
 	"testing"
 )
 
-func TestNew(test *testing.T) {
-	lock := locks.New()
-	if len(lock.Names) > 0 {
-		test.Fatal("road lanes should be empty")
+func TestAcquire(test *testing.T) {
+	locks.Acquire("test")
+
+	// Cleanup.
+	defer func() { delete(locks.Map, "test") }()
+
+	if len(locks.Map) == 0 {
+		test.Fatal("locks should count 0")
 	}
 }
 
-func TestLock(test *testing.T) {
-	lock := locks.New()
-	mutex := lock.Acquire("asd", "asd")
-	if len(lock.Names) != 1 {
-		test.Fatal("road should count exactly 1 lane")
-	}
-	if lock.Acquire("asd", "asd") != mutex {
-		test.Fatal("mutexes should match")
-	}
-}
+func TestDestroy(test *testing.T) {
+	lock := locks.Acquire("test")
 
-func TestRelease(test *testing.T) {
-	lock := locks.New()
-	mutex := lock.Acquire("asd", "asd")
-	if len(lock.Names) != 1 {
-		test.Fatal("road should count exactly 1 lane")
+	// Cleanup.
+	defer func() { delete(locks.Map, "test") }()
+
+	if len(locks.Map) != 1 {
+		test.Fatal("parallels should count 1")
 	}
 
-	lock.Remove("asd", "asd")
+	lock.Destroy()
 
-	if len(lock.Names) != 0 {
-		test.Fatal("road should not contain any lanes")
-	}
-
-	if lock.Acquire("asd", "asd") == mutex {
-		test.Fatal("mutexes should not match")
+	if len(locks.Map) != 0 {
+		test.Fatal("parallels should count 0")
 	}
 }
