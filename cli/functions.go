@@ -636,7 +636,7 @@ func (cli *Cli) OnTest() {
 	cli.OnPackage()
 
 	test := exec.Command(cli.Go("."), "test")
-	test.Env = append(os.Environ(), "CGO_ENABLED=1")
+	test.Env = os.Environ()
 	test.Stderr = os.Stderr
 	test.Stdout = os.Stdout
 	test.Stdin = os.Stdin
@@ -880,7 +880,7 @@ func (cli *Cli) OnDev() {
 	}
 
 	air := exec.Command(cli.Air("."))
-	air.Env = append(os.Environ(), "DEV=1", "CGO_ENABLED=1")
+	air.Env = append(os.Environ(), "DEV=1")
 	air.Stderr = os.Stderr
 	air.Stdout = os.Stdout
 	air.Stdin = os.Stdin
@@ -907,7 +907,7 @@ func (cli *Cli) OnBuild() {
 	cli.OnPackage()
 
 	build := exec.Command(cli.Go("."), "build", "-o=.gen/bin/app", ".")
-	build.Env = append(os.Environ(), "CGO_ENABLED=1")
+	build.Env = os.Environ()
 
 	if strings.ToLower(*FlagPlatform) == "linux/amd64" {
 		build.Env = append(build.Env, "GOOS=linux", "GOARCH=amd64")
