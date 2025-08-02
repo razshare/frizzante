@@ -1213,7 +1213,6 @@ func (cli *Cli) Platform() Platform {
 				"Windows/amd64",
 				"Windows/arm64",
 			}).
-			WithFilter(false).
 			Show("Pick a platform")
 
 		if platformError != nil {
