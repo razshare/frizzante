@@ -32,7 +32,6 @@ var FlagTouch = flag.BoolP("touch", "", false, "creates placeholders in app/dist
 var FlagClean = flag.BoolP("clean", "", false, "cleans project")
 var FlagDev = flag.BoolP("dev", "d", false, "starts dev mode")
 var FlagBuild = flag.BoolP("build", "b", false, "builds project")
-var FlagHooks = flag.BoolP("hooks", "", false, "adds git hooks")
 var FlagConfigure = flag.BoolP("configure", "", false, "configures project by installing necessary binaries under \"./.gen\"")
 var FlagPlatform = flag.StringP("platform", "", "", "sets the platform, accepts \"linux/amd64\", \"linux/arm64\", \"darwin/arm64\", \"darwin/amd64\", \"windows/arm64\", \"windows/amd64\"")
 var FlagYes = flag.BoolP("yes", "y", false, "confirms all binary prompts silently")
@@ -124,11 +123,6 @@ func (cli *Cli) OnStart() {
 		os.Exit(0)
 	}
 
-	if *FlagHooks {
-		cli.OnHooks()
-		os.Exit(0)
-	}
-
 	if *FlagConfigure {
 		cli.OnConfigure()
 		os.Exit(0)
@@ -170,7 +164,6 @@ func (cli *Cli) OnMenu() {
 		"Clean",
 		"Dev",
 		"Build",
-		"Hooks",
 		"Configure",
 		"Sqlc Generate",
 	}
@@ -280,12 +273,6 @@ func (cli *Cli) OnMenu() {
 		return
 	}
 
-	if result == "Hooks" {
-		*FlagHooks = true
-		cli.OnStart()
-		return
-	}
-
 	if result == "Configure" {
 		*FlagConfigure = true
 		cli.OnStart()
@@ -313,7 +300,13 @@ func (cli *Cli) OnVersion() {
 
 	version = string(versionData)
 
-	println(version)
+	lines := strings.Split(version, "\n")
+
+	if len(lines) == 0 {
+		return
+	}
+
+	println(lines[0])
 }
 
 func (cli *Cli) OnCreateProject(project string) {
@@ -651,34 +644,6 @@ func (cli *Cli) OnTest() {
 	if runError != nil {
 		cli.Fatal(runError)
 	}
-}
-
-func (cli *Cli) OnHooks() {
-	fileName := ".git/hooks/pre-commit"
-	directoryName := filepath.Dir(fileName)
-	if !files.IsDirectory(directoryName) {
-		cli.Fatalf("directory `%s` not found", directoryName)
-		return
-	}
-
-	if files.IsFile(fileName) {
-		if !cli.Confirm("This git repository already defines a pre-commit script, would you like to overwrite it?") {
-			pterm.Info.Println("pre-commit hook skipped")
-			return
-		}
-		removeError := os.Remove(fileName)
-		if removeError != nil {
-			cli.Fatal(removeError)
-		}
-		cli.Success("pre-commit script overwritten")
-	}
-
-	err := os.WriteFile(fileName, []byte("make test"), os.ModePerm)
-	if err != nil {
-		cli.Fatal(err)
-	}
-
-	cli.Success("hooks added")
 }
 
 func (cli *Cli) OnTouch() {
