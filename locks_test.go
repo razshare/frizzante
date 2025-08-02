@@ -11,8 +11,8 @@ func TestAcquire(test *testing.T) {
 	// Cleanup.
 	defer func() { delete(locks.Map, "test") }()
 
-	if len(locks.Map) == 0 {
-		test.Fatal("locks should count 0")
+	if locks.Map["test"] == nil {
+		test.Fatal("locks should not contain test")
 	}
 }
 
@@ -22,13 +22,13 @@ func TestDestroy(test *testing.T) {
 	// Cleanup.
 	defer func() { delete(locks.Map, "test") }()
 
-	if len(locks.Map) != 1 {
-		test.Fatal("parallels should count 1")
+	if locks.Map["test"] == nil {
+		test.Fatal("locks should not contain test")
 	}
 
 	lock.Destroy()
 
-	if len(locks.Map) != 0 {
-		test.Fatal("parallels should count 0")
+	if locks.Map["test"] != nil {
+		test.Fatal("locks should contain test")
 	}
 }
