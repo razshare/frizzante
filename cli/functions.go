@@ -1251,9 +1251,7 @@ func (cli *Cli) Platform() Platform {
 }
 
 func (cli *Cli) Extension() string {
-	platform := cli.Platform()
-
-	if platform == PlatformWindowsArm64 || platform == PlatformWindowsAmd64 {
+	if string(filepath.Separator) == "\\" {
 		return ".exe"
 	}
 
