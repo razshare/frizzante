@@ -467,9 +467,9 @@ func (cli *Cli) AddFeatureByName(feature string) {
 		} else if platform == PlatformLinuxAmd64 {
 			fileName = filepath.Join(directoryName, "bun-linux-x64", "bun")
 		} else if platform == PlatformWindowsArm64 {
-			fileName = filepath.Join(directoryName, "bun-windows-x64-baseline", "bun")
+			fileName = filepath.Join(directoryName, "bun-windows-x64-baseline", "bun.exe")
 		} else if platform == PlatformWindowsAmd64 {
-			fileName = filepath.Join(directoryName, "bun-windows-x64-baseline", "bun")
+			fileName = filepath.Join(directoryName, "bun-windows-x64-baseline", "bun.exe")
 		}
 
 		if files.IsFile(fileName) {
@@ -1245,6 +1245,16 @@ func (cli *Cli) Platform() Platform {
 	return PlatformLinuxAmd64 // Noop, cli.Fatalf will crash intentionally.
 }
 
+func (cli *Cli) Extension() string {
+	platform := cli.Platform()
+
+	if platform == PlatformWindowsArm64 || platform == PlatformWindowsAmd64 {
+		return ".exe"
+	}
+
+	return ""
+}
+
 // Confirm shows a confirmation prompt.
 //
 // Returns true if the user confirms, otherwise false.
@@ -1269,11 +1279,6 @@ func (cli *Cli) Confirm(text string) bool {
 
 func (cli *Cli) Go(basepath string) string {
 	var goBinary string
-	var extension string
-
-	if string(filepath.Separator) == "\\" {
-		extension = ".exe"
-	}
 
 	if *FlagGo != "" {
 		goBinary = *FlagGo
@@ -1287,11 +1292,11 @@ func (cli *Cli) Go(basepath string) string {
 			log.Fatal(err)
 		}
 		goBinary = strings.Replace(goBinary, "~", dirname, 1)
-		return goBinary + extension
+		return goBinary + cli.Extension()
 	}
 
 	if !strings.Contains(goBinary, string(filepath.Separator)) {
-		return goBinary + extension
+		return goBinary + cli.Extension()
 	}
 
 	var pathError error
@@ -1300,16 +1305,11 @@ func (cli *Cli) Go(basepath string) string {
 		cli.Fatal(pathError)
 	}
 
-	return goBinary + extension
+	return goBinary + cli.Extension()
 }
 
 func (cli *Cli) Air(basepath string) string {
 	var air string
-	var extension string
-
-	if string(filepath.Separator) == "\\" {
-		extension = ".exe"
-	}
 
 	if *FlagAir != "" {
 		air = *FlagAir
@@ -1323,11 +1323,11 @@ func (cli *Cli) Air(basepath string) string {
 			log.Fatal(err)
 		}
 		air = strings.Replace(air, "~", dirname, 1)
-		return air + extension
+		return air + cli.Extension()
 	}
 
 	if !strings.Contains(air, string(filepath.Separator)) {
-		return air + extension
+		return air + cli.Extension()
 	}
 
 	var pathError error
@@ -1337,16 +1337,11 @@ func (cli *Cli) Air(basepath string) string {
 		cli.Fatal(pathError)
 	}
 
-	return air + extension
+	return air + cli.Extension()
 }
 
 func (cli *Cli) Bun(basepath string) string {
 	var bun string
-	var extension string
-
-	if string(filepath.Separator) == "\\" {
-		extension = ".exe"
-	}
 
 	if *FlagBun != "" {
 		bun = *FlagBun
@@ -1360,11 +1355,11 @@ func (cli *Cli) Bun(basepath string) string {
 			log.Fatal(err)
 		}
 		bun = strings.Replace(bun, "~", dirname, 1)
-		return bun + extension
+		return bun + cli.Extension()
 	}
 
 	if !strings.Contains(bun, string(filepath.Separator)) {
-		return bun + extension
+		return bun + cli.Extension()
 	}
 
 	var pathError error
@@ -1373,16 +1368,11 @@ func (cli *Cli) Bun(basepath string) string {
 		cli.Fatal(pathError)
 	}
 
-	return bun + extension
+	return bun + cli.Extension()
 }
 
 func (cli *Cli) Sqlc(basepath string) string {
 	var sqlc string
-	var extension string
-
-	if string(filepath.Separator) == "\\" {
-		extension = ".exe"
-	}
 
 	if *FlagSqlc != "" {
 		sqlc = *FlagSqlc
@@ -1396,11 +1386,11 @@ func (cli *Cli) Sqlc(basepath string) string {
 			log.Fatal(err)
 		}
 		sqlc = strings.Replace(sqlc, "~", dirname, 1)
-		return sqlc + extension
+		return sqlc + cli.Extension()
 	}
 
 	if !strings.Contains(sqlc, string(filepath.Separator)) {
-		return sqlc + extension
+		return sqlc + cli.Extension()
 	}
 
 	var pathError error
@@ -1409,7 +1399,7 @@ func (cli *Cli) Sqlc(basepath string) string {
 		cli.Fatal(pathError)
 	}
 
-	return sqlc + extension
+	return sqlc + cli.Extension()
 }
 
 // Confirmf shows a confirmation prompt.
