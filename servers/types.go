@@ -17,8 +17,7 @@ type Server struct {
 	SessionArchive archives.Archive
 	Connections    map[string]*net.Conn
 	InfoLog        *log.Logger
-	Address        string
-	SecureAddress  string
+	SecureAddr     string
 	PublicRoot     string
 	AppRoot        string
 	ServerJs       string

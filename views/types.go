@@ -1,6 +1,6 @@
 package views
 
-import "rogchap.com/v8go"
+import "embed"
 
 type RenderMode int
 
@@ -16,10 +16,10 @@ type Configuration struct {
 
 type View struct {
 	Name       string
-	Data       map[string]any
-	RenderMode RenderMode
-	Functions  map[string]v8go.FunctionCallback
 	AppRoot    string
 	ServerJs   string
 	IndexHtml  string
+	RenderMode RenderMode
+	Data       map[string]any
+	Efs        embed.FS
 }

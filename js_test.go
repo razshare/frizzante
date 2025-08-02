@@ -1,27 +1,26 @@
 package main
 
 import (
+	"github.com/dop251/goja"
 	"github.com/evanw/esbuild/pkg/api"
-	"github.com/razshare/frizzante/js"
-	"rogchap.com/v8go"
+	"github.com/razshare/frizzante/javascript"
+	"slices"
 	"strings"
 	"testing"
 )
 
 func TestJavaScriptRun(test *testing.T) {
-	// Simple.
+	runtime := goja.New()
 	script := "1+1"
-	actual, destroy, javaScriptError := js.JavaScriptRun("test", []byte(script), map[string]v8go.FunctionCallback{})
-	defer destroy()
-	if javaScriptError != nil {
-		test.Fatal(javaScriptError)
+	actual, runError := runtime.RunString(script)
+	if runError != nil {
+		test.Fatal(runError)
 	}
 
-	if actual.Int32() != 2 {
-		test.Fatalf("script was expected to return 2, received '%d' instead", actual.Int32())
+	if actual.ToInteger() != 2 {
+		test.Fatalf("script was expected to return 2, received '%d' instead", actual.ToInteger())
 	}
 
-	// Complex and with JsDoc.
 	script = `
 	/**
 	 * @param {boolean} payload
@@ -45,30 +44,24 @@ func TestJavaScriptRun(test *testing.T) {
 	
 	result
 	`
-	actual, destroy, javaScriptError = js.JavaScriptRun("test", []byte(script), map[string]v8go.FunctionCallback{})
-	defer destroy()
-	if javaScriptError != nil {
-		test.Fatal(javaScriptError)
+	actual, runError = runtime.RunString(script)
+	if runError != nil {
+		test.Fatal(runError)
 	}
 
-	obj := actual.Object()
+	obj := actual.ToObject(runtime)
+	keys := obj.Keys()
 
-	if !obj.Has("long") {
+	if !slices.Contains(keys, "long") {
 		test.Fatal("actual value was expected to have a 'long' key")
 	}
 
-	if !obj.Has("short") {
+	if !slices.Contains(keys, "short") {
 		test.Fatal("actual value was expected to have a 'short' key")
 	}
 
-	long, longError := obj.Get("long")
-	if longError != nil {
-		test.Fatal(longError)
-	}
-	short, shortError := obj.Get("short")
-	if shortError != nil {
-		test.Fatal(shortError)
-	}
+	long := obj.Get("long")
+	short := obj.Get("short")
 
 	longPieces := strings.Split(long.String(), "-")
 	if len(longPieces) != 5 {
@@ -83,6 +76,22 @@ func TestJavaScriptRun(test *testing.T) {
 }
 
 func TestJavaScriptBundle(test *testing.T) {
+	actual := ""
+	expected := "hello"
+
+	runtime := javascript.New()
+
+	err := runtime.SetFunction("signal", func(call goja.FunctionCall) goja.Value {
+		args := call.Arguments
+		if len(args) > 0 {
+			actual = args[0].String()
+		}
+		return goja.Undefined()
+	})
+	if err != nil {
+		return
+	}
+
 	script := `
 	import { writable } from 'svelte/store'
 	const test = writable("hello")
@@ -91,22 +100,12 @@ func TestJavaScriptBundle(test *testing.T) {
 	})
 	`
 
-	cjs, bundleError := js.JavaScriptBundle("app", api.FormatCommonJS, []byte(script))
+	cjs, bundleError := javascript.Bundle("app", api.FormatCommonJS, script)
 	if bundleError != nil {
 		test.Fatal(bundleError)
 	}
-	actual := ""
-	expected := "hello"
-	_, destroy, javaScriptError := js.JavaScriptRun("test", cjs, map[string]v8go.FunctionCallback{
-		"signal": func(info *v8go.FunctionCallbackInfo) *v8go.Value {
-			args := info.Args()
-			if len(args) > 0 {
-				actual = args[0].String()
-			}
-			return nil
-		},
-	})
-	defer destroy()
+
+	_, javaScriptError := runtime.RunString(cjs)
 	if javaScriptError != nil {
 		test.Fatal(javaScriptError)
 	}

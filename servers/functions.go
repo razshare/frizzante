@@ -23,13 +23,13 @@ func New() *Server {
 		Connections:    map[string]*net.Conn{},
 		InfoLog:        log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
 		SessionArchive: archives.New(filepath.Join(".gen", "sessions")),
-		Address:        "0.0.0.0:8080",
-		SecureAddress:  "0.0.0.0:8383",
+		SecureAddr:     "0.0.0.0:8383",
 		PublicRoot:     "app/dist/client",
 		AppRoot:        "app",
 		ServerJs:       "app/dist/server.js",
 		IndexHtml:      "app/dist/client/index.html",
 		Server: http.Server{
+			Addr:           "0.0.0.0:8080",
 			Handler:        http.NewServeMux(),
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
@@ -85,8 +85,8 @@ func (server *Server) Start() {
 	group.Add(2)
 
 	go func() {
-		server.InfoLog.Printf("listening for requests at http://%s", server.Address)
-		serveError := http.ListenAndServe(server.Address, server.Handler)
+		server.InfoLog.Printf("listening for requests at http://%s", server.Addr)
+		serveError := http.ListenAndServe(server.Addr, server.Handler)
 		if serveError != nil {
 			if errors.Is(serveError, http.ErrServerClosed) {
 				server.InfoLog.Println("shutting down server")
@@ -98,8 +98,8 @@ func (server *Server) Start() {
 
 	go func() {
 		if "" != server.Certificate && "" != server.Key {
-			server.InfoLog.Printf("listening for requests at https://%s", server.SecureAddress)
-			serveError := http.ListenAndServeTLS(server.SecureAddress, server.Certificate, server.Key, server.Handler)
+			server.InfoLog.Printf("listening for requests at https://%s", server.SecureAddr)
+			serveError := http.ListenAndServeTLS(server.SecureAddr, server.Certificate, server.Key, server.Handler)
 			if serveError != nil {
 				if errors.Is(serveError, http.ErrServerClosed) {
 					server.InfoLog.Printf("shutting down server")
