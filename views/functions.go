@@ -14,6 +14,7 @@ import (
 	"github.com/razshare/frizzante/javascript"
 	"os"
 	"strings"
+	"sync"
 )
 
 // ReadIndexHtml reads the contents of the index html document and returns it.
@@ -41,7 +42,7 @@ func (view *View) ReadIndexHtml(efs embed.FS) (string, error) {
 }
 
 // ReadServerJs reads the contents of the server script and returns it.
-func (view *View) ReadServerJs(efs embed.FS) (string, error) {
+func (view *View) ReadServerJs(efs embed.FS) (*goja.Program, string, error) {
 	fix := func(sourceCode string) string {
 		return fmt.Sprintf(
 			`
@@ -64,19 +65,30 @@ func (view *View) ReadServerJs(efs embed.FS) (string, error) {
 	if files.IsFile(view.ServerJs) {
 		data, readError := os.ReadFile(view.ServerJs)
 		if readError != nil {
-			return "", readError
+			return nil, "", readError
 		}
 
 		if files.IsDirectory(view.AppRoot) {
 			sourceCode, bundleError := javascript.Bundle(view.AppRoot, api.FormatCommonJS, string(data))
 			if bundleError != nil {
-				return "", bundleError
+				return nil, "", bundleError
 			}
 
-			return fix(sourceCode), nil
+			return nil, fix(sourceCode), nil
 		}
 
-		return fix(string(data)), nil
+		if Program == nil {
+			Mutex.Lock()
+			var compileError error
+			Program, compileError = goja.Compile("goja", fix(string(data)), false)
+			if compileError != nil {
+				Mutex.Unlock()
+				return nil, "", compileError
+			}
+			Mutex.Unlock()
+		}
+
+		return Program, "", nil
 	}
 
 	fileName := strings.ReplaceAll(view.ServerJs, "\\", "/")
@@ -84,22 +96,33 @@ func (view *View) ReadServerJs(efs embed.FS) (string, error) {
 	if embeds.IsFile(efs, fileName) {
 		data, readError := efs.ReadFile(fileName)
 		if readError != nil {
-			return "", readError
+			return nil, "", readError
 		}
 
 		if files.IsDirectory(view.AppRoot) {
 			sourceCode, bundleError := javascript.Bundle(view.AppRoot, api.FormatCommonJS, string(data))
 			if bundleError != nil {
-				return "", bundleError
+				return nil, "", bundleError
 			}
 
-			return fix(sourceCode), nil
+			return nil, fix(sourceCode), nil
 		}
 
-		return fix(string(data)), nil
+		if Program == nil {
+			Mutex.Lock()
+			var compileError error
+			Program, compileError = goja.Compile("goja", fix(string(data)), false)
+			if compileError != nil {
+				Mutex.Unlock()
+				return nil, "", compileError
+			}
+			Mutex.Unlock()
+		}
+
+		return Program, "", nil
 	}
 
-	return "", errors.New("view server is missing from the host file system and the embedded file system")
+	return nil, "", errors.New("view server is missing from the host file system and the embedded file system")
 }
 
 func (view *View) StringifyProperties() (string, error) {
@@ -115,6 +138,9 @@ func (view *View) StringifyProperties() (string, error) {
 	return string(jsonData), nil
 }
 
+var Program *goja.Program
+var Mutex sync.Mutex
+
 // ExecuteServerJs executes the server script.
 func (view *View) ExecuteServerJs(efs embed.FS) (head string, body string, properties string, err error) {
 	var jsError string
@@ -125,7 +151,7 @@ func (view *View) ExecuteServerJs(efs embed.FS) (head string, body string, prope
 		return "", "", "", propertiesError
 	}
 
-	sourceCode, readError := view.ReadServerJs(efs)
+	program, sourceCode, readError := view.ReadServerJs(efs)
 	if readError != nil {
 		return "", "", "", readError
 	}
@@ -163,9 +189,16 @@ func (view *View) ExecuteServerJs(efs embed.FS) (head string, body string, prope
 		return "", "", "", setError
 	}
 
-	_, runError := runtime.RunString(sourceCode)
-	if runError != nil {
-		return "", "", "", runError
+	if program != nil {
+		_, runError := runtime.RunProgram(program)
+		if runError != nil {
+			return "", "", "", runError
+		}
+	} else {
+		_, runError := runtime.RunScript("goja", sourceCode)
+		if runError != nil {
+			return "", "", "", runError
+		}
 	}
 
 	if "" != jsError {
