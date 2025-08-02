@@ -34,7 +34,7 @@ var FlagDev = flag.BoolP("dev", "d", false, "starts dev mode")
 var FlagBuild = flag.BoolP("build", "b", false, "builds project")
 var FlagHooks = flag.BoolP("hooks", "", false, "adds git hooks")
 var FlagConfigure = flag.BoolP("configure", "", false, "configures project by installing necessary binaries under \"./.gen\"")
-var FlagPlatform = flag.StringP("platform", "", "", "sets the platform, accepts either \"linux/amd64\", \"linux/arm64\", \"darwin/arm64\" or \"darwin/amd64\"")
+var FlagPlatform = flag.StringP("platform", "", "", "sets the platform, accepts \"linux/amd64\", \"linux/arm64\", \"darwin/arm64\", \"darwin/amd64\", \"windows/arm64\", \"windows/amd64\"")
 var FlagYes = flag.BoolP("yes", "y", false, "confirms all binary prompts silently")
 var FlagGo = flag.StringP("go", "", "go", "sets the go binary")
 var FlagAir = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), "sets the air binary")
@@ -448,6 +448,10 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-aarch64.zip"
 		} else if platform == PlatformLinuxAmd64 {
 			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-x64.zip"
+		} else if platform == PlatformWindowsArm64 {
+			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-windows-x64-baseline.zip"
+		} else if platform == PlatformWindowsAmd64 {
+			url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-windows-x64-baseline.zip"
 		}
 
 		cli.Install("bun", url, directoryName)
@@ -497,6 +501,10 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_arm64"
 		} else if platform == PlatformLinuxAmd64 {
 			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_amd64"
+		} else if platform == PlatformWindowsArm64 {
+			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_arm64.exe"
+		} else if platform == PlatformWindowsAmd64 {
+			url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_amd64.exe"
 		}
 
 		cli.Install("air", url, directoryName)
@@ -519,6 +527,10 @@ func (cli *Cli) AddFeatureByName(feature string) {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_arm64.zip"
 		} else if platform == PlatformLinuxAmd64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.zip"
+		} else if platform == PlatformWindowsArm64 {
+			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
+		} else if platform == PlatformWindowsAmd64 {
+			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
 		}
 
 		cli.Install("sqlc", url, directoryName)
@@ -1172,6 +1184,8 @@ const PlatformLinuxAmd64 Platform = 0
 const PlatformLinuxArm64 Platform = 1
 const PlatformDarwinAmd64 Platform = 2
 const PlatformDarwinArm64 Platform = 3
+const PlatformWindowsAmd64 Platform = 4
+const PlatformWindowsArm64 Platform = 5
 
 func (cli *Cli) Platform() Platform {
 	var platform string
@@ -1187,6 +1201,8 @@ func (cli *Cli) Platform() Platform {
 				"Linux/arm64",
 				"Darwin/amd64",
 				"Darwin/arm64",
+				"Windows/amd64",
+				"Windows/arm64",
 			}).
 			WithFilter(false).
 			Show("Pick a platform")
@@ -1211,6 +1227,14 @@ func (cli *Cli) Platform() Platform {
 
 	if strings.ToLower(platform) == "darwin/amd64" {
 		return PlatformDarwinAmd64
+	}
+
+	if strings.ToLower(platform) == "windows/arm64" {
+		return PlatformWindowsArm64
+	}
+
+	if strings.ToLower(platform) == "windows/amd64" {
+		return PlatformWindowsAmd64
 	}
 
 	cli.Fatalf("unknown platform `%s`", platform)
@@ -1241,6 +1265,11 @@ func (cli *Cli) Confirm(text string) bool {
 
 func (cli *Cli) Go(basepath string) string {
 	var goBinary string
+	var extension string
+
+	if string(filepath.Separator) == "\\" {
+		extension = ".exe"
+	}
 
 	if *FlagGo != "" {
 		goBinary = *FlagGo
@@ -1254,23 +1283,29 @@ func (cli *Cli) Go(basepath string) string {
 			log.Fatal(err)
 		}
 		goBinary = strings.Replace(goBinary, "~", dirname, 1)
-		return goBinary
+		return goBinary + extension
 	}
 
 	if !strings.Contains(goBinary, string(filepath.Separator)) {
-		return goBinary
+		return goBinary + extension
 	}
 
-	path, pathError := filepath.Rel(basepath, goBinary)
+	var pathError error
+	goBinary, pathError = filepath.Rel(basepath, goBinary)
 	if pathError != nil {
 		cli.Fatal(pathError)
 	}
 
-	return path
+	return goBinary + extension
 }
 
 func (cli *Cli) Air(basepath string) string {
 	var air string
+	var extension string
+
+	if string(filepath.Separator) == "\\" {
+		extension = ".exe"
+	}
 
 	if *FlagAir != "" {
 		air = *FlagAir
@@ -1284,23 +1319,30 @@ func (cli *Cli) Air(basepath string) string {
 			log.Fatal(err)
 		}
 		air = strings.Replace(air, "~", dirname, 1)
-		return air
+		return air + extension
 	}
 
 	if !strings.Contains(air, string(filepath.Separator)) {
-		return air
+		return air + extension
 	}
 
-	path, pathError := filepath.Rel(basepath, air)
+	var pathError error
+
+	air, pathError = filepath.Rel(basepath, air)
 	if pathError != nil {
 		cli.Fatal(pathError)
 	}
 
-	return path
+	return air + extension
 }
 
 func (cli *Cli) Bun(basepath string) string {
 	var bun string
+	var extension string
+
+	if string(filepath.Separator) == "\\" {
+		extension = ".exe"
+	}
 
 	if *FlagBun != "" {
 		bun = *FlagBun
@@ -1314,23 +1356,29 @@ func (cli *Cli) Bun(basepath string) string {
 			log.Fatal(err)
 		}
 		bun = strings.Replace(bun, "~", dirname, 1)
-		return bun
+		return bun + extension
 	}
 
 	if !strings.Contains(bun, string(filepath.Separator)) {
-		return bun
+		return bun + extension
 	}
 
-	path, pathError := filepath.Rel(basepath, bun)
+	var pathError error
+	bun, pathError = filepath.Rel(basepath, bun)
 	if pathError != nil {
 		cli.Fatal(pathError)
 	}
 
-	return path
+	return bun + extension
 }
 
 func (cli *Cli) Sqlc(basepath string) string {
 	var sqlc string
+	var extension string
+
+	if string(filepath.Separator) == "\\" {
+		extension = ".exe"
+	}
 
 	if *FlagSqlc != "" {
 		sqlc = *FlagSqlc
@@ -1344,19 +1392,20 @@ func (cli *Cli) Sqlc(basepath string) string {
 			log.Fatal(err)
 		}
 		sqlc = strings.Replace(sqlc, "~", dirname, 1)
-		return sqlc
+		return sqlc + extension
 	}
 
 	if !strings.Contains(sqlc, string(filepath.Separator)) {
-		return sqlc
+		return sqlc + extension
 	}
 
-	path, pathError := filepath.Rel(basepath, sqlc)
+	var pathError error
+	sqlc, pathError = filepath.Rel(basepath, sqlc)
 	if pathError != nil {
 		cli.Fatal(pathError)
 	}
 
-	return path
+	return sqlc + extension
 }
 
 // Confirmf shows a confirmation prompt.
