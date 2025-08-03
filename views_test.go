@@ -33,7 +33,7 @@ func TestRenderServer(test *testing.T) {
 	}
 }
 
-func BenchmarkRenderServer(b *testing.B) {
+func TestBenchmarkRenderServer(b *testing.T) {
 	count := 10_000
 	var group sync.WaitGroup
 	group.Add(count)

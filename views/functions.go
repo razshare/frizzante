@@ -13,6 +13,7 @@ import (
 	"github.com/razshare/frizzante/javascript"
 	"os"
 	"strings"
+	"sync"
 )
 
 func (view *View) ReadServerJs(efs embed.FS) (string, error) {
@@ -88,38 +89,20 @@ func FixSourceCode(sourceCode string) string {
 	)
 }
 
-//var Program *goja.Program
-//var Runtime = goja.New()
-//var Mutex = &sync.Mutex{}
-
-type Container struct {
-	Program *goja.Program
-	Runtime *goja.Runtime
-}
-
-var Channel = make(chan *Container)
-
-func init() {
-	go func() { Channel <- &Container{} }()
-}
+var Program *goja.Program
+var Runtime = goja.New()
+var Mutex = &sync.Mutex{}
 
 // ExecuteServerJs executes the server script.
 func (view *View) ExecuteServerJs(efs embed.FS, properties map[string]any) (string, string, error) {
-	var channel chan *Container
+	Mutex.Lock()
+	defer Mutex.Unlock()
 
-	chanellx2 := make(chan chan *Container)
-	go func() { chanellx2 <- Channel }()
-
-	channel = <-chanellx2
-	container := <-channel
-
-	defer func() { go func() { channel <- container }() }()
-
-	if container.Runtime == nil {
-		container.Runtime = goja.New()
+	if Runtime == nil {
+		Runtime = goja.New()
 	}
 
-	if container.Program == nil {
+	if Program == nil {
 		sourceCode, readError := view.ReadServerJs(efs)
 		if readError != nil {
 			return "", "", readError
@@ -130,10 +113,10 @@ func (view *View) ExecuteServerJs(efs embed.FS, properties map[string]any) (stri
 			return "", "", compileError
 		}
 
-		container.Program = program
+		Program = program
 	}
 
-	runResult, runError := container.Runtime.RunProgram(container.Program)
+	runResult, runError := Runtime.RunProgram(Program)
 	if runError != nil {
 		return "", "", runError
 	}
@@ -144,13 +127,13 @@ func (view *View) ExecuteServerJs(efs embed.FS, properties map[string]any) (stri
 		return "", "", errors.New("render is not a function")
 	}
 
-	renderPromise, renderError := renderFn(goja.Undefined(), container.Runtime.ToValue(properties))
+	renderPromise, renderError := renderFn(goja.Undefined(), Runtime.ToValue(properties))
 
 	if renderError != nil {
 		return "", "", renderError
 	}
 
-	value := renderPromise.Export().(*goja.Promise).Result().ToObject(container.Runtime)
+	value := renderPromise.Export().(*goja.Promise).Result().ToObject(Runtime)
 
 	headValue := value.Get("head")
 	bodyValue := value.Get("body")
