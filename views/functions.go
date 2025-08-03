@@ -14,7 +14,113 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"time"
 )
+
+func RaceForContainer(
+	mutex *sync.Mutex,
+	containers []*Container,
+) (container *Container, unlock func()) {
+	for {
+		mutex.Lock()
+		for _, containerLocal := range containers {
+			if containerLocal.Available {
+				containerLocal.Available = false
+				container = containerLocal
+				break
+			}
+		}
+
+		if container != nil {
+			mutex.Unlock()
+			break
+		}
+
+		mutex.Unlock()
+
+		time.Sleep(time.Millisecond)
+	}
+
+	unlock = func() {
+		mutex.Lock()
+		if container != nil {
+			container.Available = true
+		}
+		mutex.Unlock()
+	}
+
+	return
+}
+
+// Contain creates a new Container.
+func Contain(count int, configuration ContainerConfiguration) []*Container {
+	containers := make([]*Container, count)
+
+	for i := 0; i < count; i++ {
+		container := &Container{
+			ContainerConfiguration: configuration,
+			Runtime:                goja.New(),
+			Available:              true,
+		}
+
+		program, readError := container.CompileServerJs()
+		if readError != nil {
+			log.Fatal(readError)
+		}
+
+		runResult, runError := container.Runtime.RunProgram(program)
+
+		if runError != nil {
+			log.Fatal(runError)
+		}
+
+		renderFn, renderIsFn := goja.AssertFunction(runResult)
+
+		if !renderIsFn {
+			log.Fatal(errors.New("render is not a function"))
+		}
+
+		container.Render = renderFn
+
+		containers[i] = container
+	}
+
+	return containers
+}
+
+// CompileServerJs reads the contents of the server script and returns it.
+func (container *Container) CompileServerJs() (*goja.Program, error) {
+	var data []byte
+	var readError error
+
+	if files.IsFile(container.ServerJs) {
+		data, readError = os.ReadFile(container.ServerJs)
+		if readError != nil {
+			return nil, readError
+		}
+	} else {
+		data, readError = container.Efs.ReadFile(strings.ReplaceAll(container.ServerJs, "\\", "/"))
+		if readError != nil {
+			return nil, readError
+		}
+	}
+
+	var sourceCode string
+
+	bundledSourceCode, bundleError := javascript.Bundle(container.AppRoot, api.FormatCommonJS, string(data))
+	if bundleError != nil {
+		return nil, bundleError
+	}
+
+	sourceCode = FixSourceCode(bundledSourceCode)
+
+	program, compileError := goja.Compile("goja", sourceCode, false)
+	if compileError != nil {
+		return nil, compileError
+	}
+
+	return program, nil
+}
 
 // ReadIndexHtml reads the contents of the index html document and returns it.
 func (view *View) ReadIndexHtml() (string, error) {
@@ -52,50 +158,35 @@ func (view *View) ReadIndexHtml() (string, error) {
 func FixSourceCode(sourceCode string) string {
 	return fmt.Sprintf(
 		`
-			const module={exports:{}}; const render = (function(){
+			if (!module) {
+				var module={exports:{}}; 
+			}
+
+			(function(){
 				%s
 				return render;
 			})()
-			render
-			`,
+		`,
 		sourceCode,
 	)
 }
 
-type ViewReadMode int
-
-const (
-	ViewReadModeEfs ViewReadMode = 0
-	ViewReadModeFs  ViewReadMode = 1
-)
-
-type ViewBundleMode int
-
-const (
-	ViewBundleModeEsbuild ViewBundleMode = 0
-	ViewBundleModeNone    ViewBundleMode = 1
-)
-
 // ExecuteServerJs executes the server script.
 func (view *View) ExecuteServerJs(properties map[string]any) (string, string, error) {
 	if view.Container == nil {
-		return "", "", errors.New("view contaienr is nil")
+		return "", "", errors.New("view container is nil")
 	}
 
-	if view.Container.Mutex == nil {
-		return "", "", errors.New("view mutex is nil")
-	}
+	runtime := view.Container.Runtime
+	render := view.Container.Render
 
-	view.Container.Mutex.Lock()
-	defer view.Container.Mutex.Unlock()
-
-	renderPromise, renderError := view.Container.Render(goja.Undefined(), view.Container.Runtime.ToValue(properties))
+	renderPromise, renderError := render(goja.Undefined(), runtime.ToValue(properties))
 
 	if renderError != nil {
 		return "", "", renderError
 	}
 
-	value := renderPromise.Export().(*goja.Promise).Result().ToObject(view.Container.Runtime)
+	value := renderPromise.Export().(*goja.Promise).Result().ToObject(runtime)
 
 	head := value.Get("head")
 	body := value.Get("body")
@@ -277,74 +368,4 @@ func (view *View) Render() (string, error) {
 	}
 
 	return view.RenderHeadless()
-}
-
-// Contain creates a new Container.
-func Contain(configuration *ContainerConfiguration) *Container {
-	container := &Container{
-		ContainerConfiguration: configuration,
-		Runtime:                goja.New(),
-		Mutex:                  &sync.Mutex{},
-	}
-
-	program, readError := container.CompileServerJs()
-	if readError != nil {
-		log.Fatal(readError)
-	}
-
-	runResult, runError := container.Runtime.RunProgram(program)
-
-	if runError != nil {
-		log.Fatal(runError)
-	}
-
-	renderFn, renderIsFn := goja.AssertFunction(runResult)
-
-	if !renderIsFn {
-		log.Fatal(errors.New("render is not a function"))
-	}
-
-	container.Render = renderFn
-
-	return container
-}
-
-// CompileServerJs reads the contents of the server script and returns it.
-func (container *Container) CompileServerJs() (*goja.Program, error) {
-	var data []byte
-	var readError error
-
-	if container.ReadMode == ViewReadModeFs {
-		data, readError = os.ReadFile(container.ServerJs)
-		if readError != nil {
-			return nil, readError
-		}
-	}
-
-	if container.ReadMode == ViewReadModeEfs {
-		data, readError = container.Efs.ReadFile(strings.ReplaceAll(container.ServerJs, "\\", "/"))
-		if readError != nil {
-			return nil, readError
-		}
-	}
-
-	var sourceCode string
-
-	if container.BundleMode == ViewBundleModeEsbuild {
-		bundledSourceCode, bundleError := javascript.Bundle(container.AppRoot, api.FormatCommonJS, string(data))
-		if bundleError != nil {
-			return nil, bundleError
-		}
-
-		sourceCode = FixSourceCode(bundledSourceCode)
-	} else {
-		sourceCode = FixSourceCode(string(data))
-	}
-
-	program, compileError := goja.Compile("goja", sourceCode, false)
-	if compileError != nil {
-		return nil, compileError
-	}
-
-	return program, nil
 }

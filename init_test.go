@@ -25,12 +25,7 @@ func init() {
 
 	// Server.
 	serverLocal := servers.New()
-	serverLocal.ViewContainer = views.Contain(&views.ContainerConfiguration{
-		Efs:       efs,
-		AppRoot:   "app",
-		ServerJs:  "app/dist/server.js",
-		IndexHtml: "app/dist/client/index.html",
-	})
+	serverLocal.Efs = efs
 	serverLocal.Routes = append(
 		serverLocal.Routes,
 		routes.Route{Pattern: "GET /TestSession", Handler: func(connection *connections.Connection) {

@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"sync"
 	"testing"
 )
 
@@ -33,11 +34,13 @@ func TestRenderServer(test *testing.T) {
 }
 
 func BenchmarkRenderServer(b *testing.B) {
-	//lock := <-server
-	//defer func() { server <- lock }()
+	count := 10_000
+	var group sync.WaitGroup
+	group.Add(count)
 
-	for i := 0; i < 10_000; i++ {
+	for j := 0; j < count; j++ {
 		go func() {
+			defer group.Done()
 			//expected := "<h1>Welcome to Frizzante.</h1>"
 			//response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderServer", port))
 			response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", 3000))
@@ -51,17 +54,10 @@ func BenchmarkRenderServer(b *testing.B) {
 				b.Error(readAllError)
 				return
 			}
-
-			//actual := string(readAllBytes)
-
-			//ok := strings.Contains(actual, expected)
-
-			//if !ok {
-			//	b.Errorf("server was expected to respond with a string that contains '%s', received '%s' instead", expected, actual)
-			//	return
-			//}
 		}()
 	}
+
+	group.Wait()
 }
 
 func TestRenderClient(test *testing.T) {

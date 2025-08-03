@@ -8,6 +8,7 @@ import (
 	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/guards"
 	"github.com/razshare/frizzante/routes"
+	"github.com/razshare/frizzante/views"
 	"log"
 	"net"
 	"net/http"
@@ -21,11 +22,12 @@ import (
 
 func New() *Server {
 	return &Server{
-		Connections:    map[string]*net.Conn{},
-		InfoLog:        log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
-		SessionArchive: archives.New(filepath.Join(".gen", "sessions")),
-		SecureAddr:     "0.0.0.0:8383",
-		PublicRoot:     "app/dist/client",
+		Connections:         map[string]*net.Conn{},
+		InfoLog:             log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
+		SessionArchive:      archives.New(filepath.Join(".gen", "sessions")),
+		SecureAddr:          "0.0.0.0:8383",
+		PublicRoot:          "app/dist/client",
+		ViewContainersMutex: &sync.Mutex{},
 		Server: http.Server{
 			Addr:           "0.0.0.0:8080",
 			Handler:        http.NewServeMux(),
@@ -41,20 +43,31 @@ func New() *Server {
 //
 // If the server fails to start, ServerStart crashes the program.
 func (server *Server) Start() {
+	if server.ViewContainers == nil {
+		server.ViewContainers = views.Contain(1, views.ContainerConfiguration{
+			Efs:       server.Efs,
+			AppRoot:   "app",
+			ServerJs:  "app/dist/server.js",
+			IndexHtml: "app/dist/client/index.html",
+		})
+	}
+
 	mux := server.Handler.(*http.ServeMux)
 
 	for _, route := range server.Routes {
 		mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 			con := &connections.Connection{
-				Request:        request,
-				Writer:         writer,
-				Status:         200,
-				EventId:        1,
-				PublicRoot:     server.PublicRoot,
-				ErrorLog:       server.ErrorLog,
-				InfoLog:        server.InfoLog,
-				SessionArchive: server.SessionArchive,
-				ViewContainer:  server.ViewContainer,
+				Request:             request,
+				Writer:              writer,
+				Status:              200,
+				EventId:             1,
+				Efs:                 server.Efs,
+				PublicRoot:          server.PublicRoot,
+				ErrorLog:            server.ErrorLog,
+				InfoLog:             server.InfoLog,
+				SessionArchive:      server.SessionArchive,
+				ViewContainers:      server.ViewContainers,
+				ViewContainersMutex: server.ViewContainersMutex,
 			}
 
 			for _, tag := range route.Tags {

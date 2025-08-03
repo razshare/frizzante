@@ -628,7 +628,9 @@ func (connection *Connection) SendView(view views.View) {
 	}
 
 	if view.Container == nil {
-		view.Container = connection.ViewContainer
+		container, unlock := views.RaceForContainer(connection.ViewContainersMutex, connection.ViewContainers)
+		defer unlock()
+		view.Container = container
 	}
 
 	html, renderError := view.Render()

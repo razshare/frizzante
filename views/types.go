@@ -3,7 +3,6 @@ package views
 import (
 	"embed"
 	"github.com/dop251/goja"
-	"sync"
 )
 
 type RenderMode int
@@ -23,19 +22,16 @@ type View struct {
 }
 
 type Container struct {
-	*ContainerConfiguration
+	ContainerConfiguration
 	IndexHtmlCache string
 	Runtime        *goja.Runtime
 	Render         goja.Callable
-	Mutex          *sync.Mutex
+	Available      bool
 }
 
 type ContainerConfiguration struct {
-	Efs        embed.FS
-	AppRoot    string
-	ServerJs   string
-	IndexHtml  string
-	ReadMode   ViewReadMode
-	BundleMode ViewBundleMode
-	Mutex      sync.Mutex
+	Efs       embed.FS
+	AppRoot   string
+	ServerJs  string
+	IndexHtml string
 }
