@@ -17,7 +17,7 @@ var efs embed.FS
 var port = 8080
 var server = make(chan *servers.Server, 1)
 
-func asd() {
+func init() {
 	// Cli.
 	*frizzanteCli.FlagPlatform = "linux/amd64"
 	*frizzanteCli.FlagYes = true
@@ -25,7 +25,12 @@ func asd() {
 
 	// Server.
 	serverLocal := servers.New()
-	//serverLocal.Efs = efs
+	serverLocal.ViewContainer = views.Contain(&views.ContainerConfiguration{
+		Efs:       efs,
+		AppRoot:   "app",
+		ServerJs:  "app/dist/server.js",
+		IndexHtml: "app/dist/client/index.html",
+	})
 	serverLocal.Routes = append(
 		serverLocal.Routes,
 		routes.Route{Pattern: "GET /TestSession", Handler: func(connection *connections.Connection) {
