@@ -11,10 +11,8 @@ import (
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/javascript"
-	"log"
 	"os"
 	"strings"
-	"sync"
 )
 
 func (view *View) ReadServerJs(efs embed.FS) (string, error) {
@@ -90,16 +88,38 @@ func FixSourceCode(sourceCode string) string {
 	)
 }
 
-var Program *goja.Program
-var Runtime = goja.New()
-var Mutex = &sync.Mutex{}
+//var Program *goja.Program
+//var Runtime = goja.New()
+//var Mutex = &sync.Mutex{}
+
+type Container struct {
+	Program *goja.Program
+	Runtime *goja.Runtime
+}
+
+var Channel = make(chan *Container)
+
+func init() {
+	go func() { Channel <- &Container{} }()
+}
 
 // ExecuteServerJs executes the server script.
 func (view *View) ExecuteServerJs(efs embed.FS, properties map[string]any) (string, string, error) {
-	Mutex.Lock()
-	defer Mutex.Unlock()
+	var channel chan *Container
 
-	if Program == nil || Runtime == nil {
+	chanellx2 := make(chan chan *Container)
+	go func() { chanellx2 <- Channel }()
+
+	channel = <-chanellx2
+	container := <-channel
+
+	defer func() { go func() { channel <- container }() }()
+
+	if container.Runtime == nil {
+		container.Runtime = goja.New()
+	}
+
+	if container.Program == nil {
 		sourceCode, readError := view.ReadServerJs(efs)
 		if readError != nil {
 			return "", "", readError
@@ -110,10 +130,10 @@ func (view *View) ExecuteServerJs(efs embed.FS, properties map[string]any) (stri
 			return "", "", compileError
 		}
 
-		Program = program
+		container.Program = program
 	}
 
-	runResult, runError := Runtime.RunProgram(Program)
+	runResult, runError := container.Runtime.RunProgram(container.Program)
 	if runError != nil {
 		return "", "", runError
 	}
@@ -121,33 +141,32 @@ func (view *View) ExecuteServerJs(efs embed.FS, properties map[string]any) (stri
 	renderFn, renderIsFn := goja.AssertFunction(runResult)
 
 	if !renderIsFn {
-		log.Fatal(errors.New("render is not a function"))
+		return "", "", errors.New("render is not a function")
 	}
 
-	renderPromise, renderError := renderFn(goja.Undefined(), Runtime.ToValue(properties))
+	renderPromise, renderError := renderFn(goja.Undefined(), container.Runtime.ToValue(properties))
 
 	if renderError != nil {
 		return "", "", renderError
 	}
 
-	value := renderPromise.Export().(*goja.Promise).Result().ToObject(Runtime)
+	value := renderPromise.Export().(*goja.Promise).Result().ToObject(container.Runtime)
 
-	head := value.Get("head")
-	body := value.Get("body")
+	headValue := value.Get("head")
+	bodyValue := value.Get("body")
 
 	var headString string
 	var bodyString string
 
-	if head != nil {
-		headString = head.String()
+	if headValue != nil {
+		headString = headValue.String()
 	}
 
-	if body != nil {
-		bodyString = body.String()
+	if bodyValue != nil {
+		bodyString = bodyValue.String()
 	}
 
 	return headString, bodyString, nil
-
 }
 
 // RenderClient renders on the client.
