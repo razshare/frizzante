@@ -24,9 +24,10 @@ type View struct {
 
 type Container struct {
 	*ContainerConfiguration
-	Runtime *goja.Runtime
-	Render goja.Callable
-	Mutex *sync.Mutex
+	IndexHtmlCache string
+	Runtime        *goja.Runtime
+	Render         goja.Callable
+	Mutex          *sync.Mutex
 }
 
 type ContainerConfiguration struct {

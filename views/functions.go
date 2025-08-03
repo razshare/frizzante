@@ -16,12 +16,10 @@ import (
 	"sync"
 )
 
-var IndexHtmlContents string
-
 // ReadIndexHtml reads the contents of the index html document and returns it.
 func (view *View) ReadIndexHtml() (string, error) {
-	if IndexHtmlContents != "" {
-		return IndexHtmlContents, nil
+	if view.Container.IndexHtmlCache != "" {
+		return view.Container.IndexHtmlCache, nil
 	}
 
 	if files.IsFile(view.Container.IndexHtml) {
@@ -30,9 +28,9 @@ func (view *View) ReadIndexHtml() (string, error) {
 			return "", readError
 		}
 
-		IndexHtmlContents = string(data)
+		view.Container.IndexHtmlCache = string(data)
 
-		return IndexHtmlContents, nil
+		return view.Container.IndexHtmlCache, nil
 	}
 
 	var data []byte
@@ -47,8 +45,8 @@ func (view *View) ReadIndexHtml() (string, error) {
 		return "", errors.New("view index is missing from the host file system and the embedded file system")
 	}
 
-	IndexHtmlContents = string(data)
-	return IndexHtmlContents, nil
+	view.Container.IndexHtmlCache = string(data)
+	return view.Container.IndexHtmlCache, nil
 }
 
 func FixSourceCode(sourceCode string) string {
