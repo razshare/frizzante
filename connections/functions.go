@@ -627,19 +627,11 @@ func (connection *Connection) SendView(view views.View) {
 		return
 	}
 
-	if view.ServerJs == "" {
-		view.ServerJs = connection.ServerJs
+	if view.Container == nil {
+		view.Container = connection.ViewContainer
 	}
 
-	if view.IndexHtml == "" {
-		view.IndexHtml = connection.IndexHtml
-	}
-
-	if view.AppRoot == "" {
-		view.AppRoot = connection.AppRoot
-	}
-
-	html, renderError := view.Render(connection.Efs)
+	html, renderError := view.Render()
 	if renderError != nil {
 		traces.Trace(connection.ErrorLog, renderError)
 	}

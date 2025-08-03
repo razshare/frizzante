@@ -1,6 +1,10 @@
 package views
 
-import "embed"
+import (
+	"embed"
+	"github.com/dop251/goja"
+	"sync"
+)
 
 type RenderMode int
 
@@ -11,15 +15,26 @@ const (
 	RenderModeHeadless RenderMode = 3 // Renders only on the server and omits the base template.
 )
 
-type Configuration struct {
-}
-
 type View struct {
 	Name       string
+	RenderMode RenderMode
+	Data       map[string]any
+	Container  *Container
+}
+
+type Container struct {
+	*ContainerConfiguration
+	Runtime *goja.Runtime
+	Render goja.Callable
+	Mutex *sync.Mutex
+}
+
+type ContainerConfiguration struct {
+	Efs        embed.FS
 	AppRoot    string
 	ServerJs   string
 	IndexHtml  string
-	RenderMode RenderMode
-	Data       map[string]any
-	Efs        embed.FS
+	ReadMode   ViewReadMode
+	BundleMode ViewBundleMode
+	Mutex      sync.Mutex
 }

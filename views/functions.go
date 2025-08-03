@@ -1,226 +1,136 @@
 package views
 
 import (
-	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/dop251/goja"
 	"github.com/evanw/esbuild/pkg/api"
-	uuid "github.com/nu7hatch/gouuid"
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/javascript"
+	"log"
 	"os"
 	"strings"
 	"sync"
 )
 
+var IndexHtmlContents string
+
 // ReadIndexHtml reads the contents of the index html document and returns it.
-func (view *View) ReadIndexHtml(efs embed.FS) (string, error) {
-	if files.IsFile(view.IndexHtml) {
-		data, readError := os.ReadFile(view.IndexHtml)
+func (view *View) ReadIndexHtml() (string, error) {
+	if IndexHtmlContents != "" {
+		return IndexHtmlContents, nil
+	}
+
+	if files.IsFile(view.Container.IndexHtml) {
+		data, readError := os.ReadFile(view.Container.IndexHtml)
 		if readError != nil {
 			return "", readError
 		}
-		return string(data), nil
+
+		IndexHtmlContents = string(data)
+
+		return IndexHtmlContents, nil
 	}
 
 	var data []byte
-	fileNameFixed := strings.ReplaceAll(view.IndexHtml, "\\", "/")
-	if embeds.IsFile(efs, fileNameFixed) {
+	fileNameFixed := strings.ReplaceAll(view.Container.IndexHtml, "\\", "/")
+	if embeds.IsFile(view.Container.Efs, fileNameFixed) {
 		var readError error
-		data, readError = efs.ReadFile(fileNameFixed)
+		data, readError = view.Container.Efs.ReadFile(fileNameFixed)
 		if readError != nil {
 			return "", readError
 		}
 	} else {
 		return "", errors.New("view index is missing from the host file system and the embedded file system")
 	}
-	return string(data), nil
+
+	IndexHtmlContents = string(data)
+	return IndexHtmlContents, nil
 }
 
-// ReadServerJs reads the contents of the server script and returns it.
-func (view *View) ReadServerJs(efs embed.FS) (*goja.Program, string, error) {
-	fix := func(sourceCode string) string {
-		return fmt.Sprintf(
-			`
+func FixSourceCode(sourceCode string) string {
+	return fmt.Sprintf(
+		`
 			const module={exports:{}}; const render = (function(){
 				%s
 				return render;
 			})()
-			render(JSON.parse(props())).then(function success(r){
-				head(r.head??'');
-				body(r.body??'');
-			}).catch(function failure(e){
-				error(e.stack)
-			});
+			render
 			`,
-			sourceCode,
-		)
-
-	}
-
-	if files.IsFile(view.ServerJs) {
-		data, readError := os.ReadFile(view.ServerJs)
-		if readError != nil {
-			return nil, "", readError
-		}
-
-		if files.IsDirectory(view.AppRoot) {
-			sourceCode, bundleError := javascript.Bundle(view.AppRoot, api.FormatCommonJS, string(data))
-			if bundleError != nil {
-				return nil, "", bundleError
-			}
-
-			return nil, fix(sourceCode), nil
-		}
-
-		if Program == nil {
-			Mutex.Lock()
-			var compileError error
-			Program, compileError = goja.Compile("goja", fix(string(data)), false)
-			if compileError != nil {
-				Mutex.Unlock()
-				return nil, "", compileError
-			}
-			Mutex.Unlock()
-		}
-
-		return Program, "", nil
-	}
-
-	fileName := strings.ReplaceAll(view.ServerJs, "\\", "/")
-
-	if embeds.IsFile(efs, fileName) {
-		data, readError := efs.ReadFile(fileName)
-		if readError != nil {
-			return nil, "", readError
-		}
-
-		if files.IsDirectory(view.AppRoot) {
-			sourceCode, bundleError := javascript.Bundle(view.AppRoot, api.FormatCommonJS, string(data))
-			if bundleError != nil {
-				return nil, "", bundleError
-			}
-
-			return nil, fix(sourceCode), nil
-		}
-
-		if Program == nil {
-			Mutex.Lock()
-			var compileError error
-			Program, compileError = goja.Compile("goja", fix(string(data)), false)
-			if compileError != nil {
-				Mutex.Unlock()
-				return nil, "", compileError
-			}
-			Mutex.Unlock()
-		}
-
-		return Program, "", nil
-	}
-
-	return nil, "", errors.New("view server is missing from the host file system and the embedded file system")
+		sourceCode,
+	)
 }
 
-func (view *View) StringifyProperties() (string, error) {
-	jsonData, jsonError := json.Marshal(map[string]any{
+type ViewReadMode int
+
+const (
+	ViewReadModeEfs ViewReadMode = 0
+	ViewReadModeFs  ViewReadMode = 1
+)
+
+type ViewBundleMode int
+
+const (
+	ViewBundleModeEsbuild ViewBundleMode = 0
+	ViewBundleModeNone    ViewBundleMode = 1
+)
+
+// ExecuteServerJs executes the server script.
+func (view *View) ExecuteServerJs(properties map[string]any) (string, string, error) {
+	if view.Container == nil {
+		return "", "", errors.New("view contaienr is nil")
+	}
+
+	if view.Container.Mutex == nil {
+		return "", "", errors.New("view mutex is nil")
+	}
+
+	view.Container.Mutex.Lock()
+	defer view.Container.Mutex.Unlock()
+
+	renderPromise, renderError := view.Container.Render(goja.Undefined(), view.Container.Runtime.ToValue(properties))
+
+	if renderError != nil {
+		return "", "", renderError
+	}
+
+	value := renderPromise.Export().(*goja.Promise).Result().ToObject(view.Container.Runtime)
+
+	head := value.Get("head")
+	body := value.Get("body")
+
+	var headString string
+	var bodyString string
+
+	if head != nil {
+		headString = head.String()
+	}
+
+	if body != nil {
+		bodyString = body.String()
+	}
+
+	return headString, bodyString, nil
+
+}
+
+// RenderClient renders on the client.
+func (view *View) RenderClient() (string, error) {
+	id := "svelte-app"
+
+	stringifiedProperties, jsoNError := json.Marshal(map[string]any{
 		"name":       view.Name,
 		"data":       view.Data,
 		"renderMode": view.RenderMode,
 	})
-	if jsonError != nil {
-		return "", jsonError
+	if jsoNError != nil {
+		return "", jsoNError
 	}
 
-	return string(jsonData), nil
-}
-
-var Program *goja.Program
-var Mutex sync.Mutex
-
-// ExecuteServerJs executes the server script.
-func (view *View) ExecuteServerJs(efs embed.FS) (head string, body string, properties string, err error) {
-	var jsError string
-
-	properties, propertiesError := view.StringifyProperties()
-
-	if propertiesError != nil {
-		return "", "", "", propertiesError
-	}
-
-	program, sourceCode, readError := view.ReadServerJs(efs)
-	if readError != nil {
-		return "", "", "", readError
-	}
-
-	runtime := javascript.New()
-
-	setError := runtime.SetFunctions(map[string]javascript.Function{
-		"error": func(call goja.FunctionCall) goja.Value {
-			arguments := call.Arguments
-			if len(arguments) > 0 {
-				jsError = jsError + arguments[0].String() + "\n"
-			}
-			return nil
-		},
-		"props": func(call goja.FunctionCall) goja.Value {
-			return runtime.ToValue(properties)
-		},
-		"head": func(call goja.FunctionCall) goja.Value {
-			arguments := call.Arguments
-			if len(arguments) > 0 {
-				head = arguments[0].String()
-			}
-			return nil
-		},
-		"body": func(call goja.FunctionCall) goja.Value {
-			arguments := call.Arguments
-			if len(arguments) > 0 {
-				body = arguments[0].String()
-			}
-			return nil
-		},
-	})
-
-	if setError != nil {
-		return "", "", "", setError
-	}
-
-	if program != nil {
-		_, runError := runtime.RunProgram(program)
-		if runError != nil {
-			return "", "", "", runError
-		}
-	} else {
-		_, runError := runtime.RunScript("goja", sourceCode)
-		if runError != nil {
-			return "", "", "", runError
-		}
-	}
-
-	if "" != jsError {
-		return "", "", "", errors.New(jsError)
-	}
-
-	return head, body, properties, nil
-}
-
-// RenderClient renders on the client.
-func (view *View) RenderClient(efs embed.FS) (string, error) {
-	id, idError := uuid.NewV4()
-	if idError != nil {
-		return "", idError
-	}
-
-	properties, propertiesError := view.StringifyProperties()
-	if propertiesError != nil {
-		return "", propertiesError
-	}
-
-	indexHtmlData, indexHtmlDataError := view.ReadIndexHtml(efs)
+	indexHtmlData, indexHtmlDataError := view.ReadIndexHtml()
 	if indexHtmlDataError != nil {
 		return "", indexHtmlDataError
 	}
@@ -245,20 +155,24 @@ func (view *View) RenderClient(efs embed.FS) (string, error) {
 		"<!--app-data-->",
 		fmt.Sprintf(
 			"<script type=\"application/javascript\">function props(){return %s}</script>",
-			properties,
+			stringifiedProperties,
 		),
 		1,
 	), nil
 }
 
 // RenderServer renders on the server.
-func (view *View) RenderServer(efs embed.FS) (string, error) {
-	head, body, _, err := view.ExecuteServerJs(efs)
+func (view *View) RenderServer() (string, error) {
+	head, body, err := view.ExecuteServerJs(map[string]any{
+		"name":       view.Name,
+		"data":       view.Data,
+		"renderMode": view.RenderMode,
+	})
 	if err != nil {
 		return "", err
 	}
 
-	index, readError := view.ReadIndexHtml(efs)
+	index, readError := view.ReadIndexHtml()
 	if readError != nil {
 		return "", readError
 	}
@@ -287,8 +201,12 @@ func (view *View) RenderServer(efs embed.FS) (string, error) {
 }
 
 // RenderHeadless renders only the body of the view on the server.
-func (view *View) RenderHeadless(efs embed.FS) (string, error) {
-	_, body, _, err := view.ExecuteServerJs(efs)
+func (view *View) RenderHeadless() (string, error) {
+	_, body, err := view.ExecuteServerJs(map[string]any{
+		"name":       view.Name,
+		"data":       view.Data,
+		"renderMode": view.RenderMode,
+	})
 	if err != nil {
 		return "", err
 	}
@@ -296,20 +214,28 @@ func (view *View) RenderHeadless(efs embed.FS) (string, error) {
 }
 
 // RenderFull renders on the server and on the client.
-func (view *View) RenderFull(efs embed.FS) (string, error) {
-	id, idError := uuid.NewV4()
-	if idError != nil {
-		return "", idError
+func (view *View) RenderFull() (string, error) {
+	id := "svelte-app"
+
+	properties := map[string]any{
+		"name":       view.Name,
+		"data":       view.Data,
+		"renderMode": view.RenderMode,
 	}
 
-	head, body, properties, err := view.ExecuteServerJs(efs)
+	head, body, err := view.ExecuteServerJs(properties)
 	if err != nil {
 		return "", err
 	}
 
-	index, readError := view.ReadIndexHtml(efs)
+	index, readError := view.ReadIndexHtml()
 	if readError != nil {
 		return "", readError
+	}
+
+	stringifiedProperties, jsonError := json.Marshal(properties)
+	if jsonError != nil {
+		return "", jsonError
 	}
 
 	return strings.Replace(
@@ -332,25 +258,95 @@ func (view *View) RenderFull(efs embed.FS) (string, error) {
 		"<!--app-data-->",
 		fmt.Sprintf(
 			"<script type=\"application/javascript\">function props(){return %s}</script>",
-			properties,
+			stringifiedProperties,
 		),
 		1,
 	), nil
 }
 
 // Render renders.
-func (view *View) Render(efs embed.FS) (string, error) {
-	if view.RenderMode == RenderModeServer {
-		return view.RenderServer(efs)
+func (view *View) Render() (string, error) {
+	if view.RenderMode == RenderModeFull {
+		return view.RenderFull()
 	}
 
-	if view.RenderMode == RenderModeFull {
-		return view.RenderFull(efs)
+	if view.RenderMode == RenderModeServer {
+		return view.RenderServer()
 	}
 
 	if view.RenderMode == RenderModeClient {
-		return view.RenderClient(efs)
+		return view.RenderClient()
 	}
 
-	return view.RenderHeadless(efs)
+	return view.RenderHeadless()
+}
+
+// Contain creates a new Container.
+func Contain(configuration *ContainerConfiguration) *Container {
+	container := &Container{
+		ContainerConfiguration: configuration,
+		Runtime:                goja.New(),
+		Mutex:                  &sync.Mutex{},
+	}
+
+	program, readError := container.CompileServerJs()
+	if readError != nil {
+		log.Fatal(readError)
+	}
+
+	runResult, runError := container.Runtime.RunProgram(program)
+
+	if runError != nil {
+		log.Fatal(runError)
+	}
+
+	renderFn, renderIsFn := goja.AssertFunction(runResult)
+
+	if !renderIsFn {
+		log.Fatal(errors.New("render is not a function"))
+	}
+
+	container.Render = renderFn
+
+	return container
+}
+
+// CompileServerJs reads the contents of the server script and returns it.
+func (container *Container) CompileServerJs() (*goja.Program, error) {
+	var data []byte
+	var readError error
+
+	if container.ReadMode == ViewReadModeFs {
+		data, readError = os.ReadFile(container.ServerJs)
+		if readError != nil {
+			return nil, readError
+		}
+	}
+
+	if container.ReadMode == ViewReadModeEfs {
+		data, readError = container.Efs.ReadFile(strings.ReplaceAll(container.ServerJs, "\\", "/"))
+		if readError != nil {
+			return nil, readError
+		}
+	}
+
+	var sourceCode string
+
+	if container.BundleMode == ViewBundleModeEsbuild {
+		bundledSourceCode, bundleError := javascript.Bundle(container.AppRoot, api.FormatCommonJS, string(data))
+		if bundleError != nil {
+			return nil, bundleError
+		}
+
+		sourceCode = FixSourceCode(bundledSourceCode)
+	} else {
+		sourceCode = FixSourceCode(string(data))
+	}
+
+	program, compileError := goja.Compile("goja", sourceCode, false)
+	if compileError != nil {
+		return nil, compileError
+	}
+
+	return program, nil
 }

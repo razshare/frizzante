@@ -26,9 +26,6 @@ func New() *Server {
 		SessionArchive: archives.New(filepath.Join(".gen", "sessions")),
 		SecureAddr:     "0.0.0.0:8383",
 		PublicRoot:     "app/dist/client",
-		AppRoot:        "app",
-		ServerJs:       "app/dist/server.js",
-		IndexHtml:      "app/dist/client/index.html",
 		Server: http.Server{
 			Addr:           "0.0.0.0:8080",
 			Handler:        http.NewServeMux(),
@@ -51,16 +48,13 @@ func (server *Server) Start() {
 			con := &connections.Connection{
 				Request:        request,
 				Writer:         writer,
-				Efs:            server.Efs,
 				Status:         200,
 				EventId:        1,
 				PublicRoot:     server.PublicRoot,
-				AppRoot:        server.AppRoot,
-				ServerJs:       server.ServerJs,
-				IndexHtml:      server.IndexHtml,
 				ErrorLog:       server.ErrorLog,
 				InfoLog:        server.InfoLog,
 				SessionArchive: server.SessionArchive,
+				ViewContainer:  server.ViewContainer,
 			}
 
 			for _, tag := range route.Tags {
