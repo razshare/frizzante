@@ -1,10 +1,5 @@
 package views
 
-import (
-	"embed"
-	"github.com/dop251/goja"
-)
-
 type RenderMode int
 
 const (
@@ -15,23 +10,11 @@ const (
 )
 
 type View struct {
-	Name       string
-	RenderMode RenderMode
-	Data       map[string]any
-	Container  *Container
-}
-
-type Container struct {
-	ContainerConfiguration
+	Name           string
+	RenderMode     RenderMode
+	Data           map[string]any
+	AppRoot        string
+	ServerJs       string
+	IndexHtml      string
 	IndexHtmlCache string
-	Runtime        *goja.Runtime
-	Render         goja.Callable
-	Available      bool
-}
-
-type ContainerConfiguration struct {
-	Efs       embed.FS
-	AppRoot   string
-	ServerJs  string
-	IndexHtml string
 }

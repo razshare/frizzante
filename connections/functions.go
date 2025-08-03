@@ -627,13 +627,19 @@ func (connection *Connection) SendView(view views.View) {
 		return
 	}
 
-	if view.Container == nil {
-		container, unlock := views.RaceForContainer(connection.ViewContainersMutex, connection.ViewContainers)
-		defer unlock()
-		view.Container = container
+	if view.AppRoot == "" {
+		view.AppRoot = connection.AppRoot
 	}
 
-	html, renderError := view.Render()
+	if view.ServerJs == "" {
+		view.ServerJs = connection.ServerJs
+	}
+
+	if view.IndexHtml == "" {
+		view.IndexHtml = connection.IndexHtml
+	}
+
+	html, renderError := view.Render(connection.Efs)
 	if renderError != nil {
 		traces.Trace(connection.ErrorLog, renderError)
 	}
