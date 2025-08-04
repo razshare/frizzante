@@ -39,13 +39,14 @@ func BenchmarkRenderServer(b *testing.B) {
 	lock := <-server
 	defer func() { server <- lock }()
 
+	count := 1000
+
 	fmt.Println("=================================")
-	fmt.Println("starting benchmark")
+	fmt.Printf("starting benchmark, attempting to send %d requests, all in parallel\n", count)
 	var m1, m2 runtime.MemStats
 	runtime.GC()
 	runtime.ReadMemStats(&m1)
 
-	count := 1000
 	var group sync.WaitGroup
 	group.Add(count)
 
