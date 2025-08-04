@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/razshare/frizzante/archives"
 	"github.com/razshare/frizzante/connections"
+	"github.com/razshare/frizzante/containers"
 	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/guards"
 	"github.com/razshare/frizzante/routes"
@@ -26,9 +27,6 @@ func New() *Server {
 		SessionArchive: archives.New(filepath.Join(".gen", "sessions")),
 		SecureAddr:     "0.0.0.0:8383",
 		PublicRoot:     "app/dist/client",
-		AppRoot:        "app",
-		ServerJs:       "app/dist/server.js",
-		IndexHtml:      "app/dist/client/index.html",
 		Server: http.Server{
 			Addr:           "0.0.0.0:8080",
 			Handler:        http.NewServeMux(),
@@ -44,6 +42,13 @@ func New() *Server {
 //
 // If the server fails to start, ServerStart crashes the program.
 func (server *Server) Start() {
+	if server.ViewContainer == nil {
+		server.ViewContainer = containers.NewViewContainer()
+		server.ViewContainer.Efs = server.Efs
+	}
+
+	go server.ViewContainer.Start()
+
 	mux := server.Handler.(*http.ServeMux)
 
 	for _, route := range server.Routes {
@@ -58,9 +63,7 @@ func (server *Server) Start() {
 				ErrorLog:       server.ErrorLog,
 				InfoLog:        server.InfoLog,
 				SessionArchive: server.SessionArchive,
-				AppRoot:        server.AppRoot,
-				ServerJs:       server.ServerJs,
-				IndexHtml:      server.IndexHtml,
+				ViewContainer:  server.ViewContainer,
 			}
 
 			for _, tag := range route.Tags {

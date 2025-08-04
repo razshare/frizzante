@@ -1,120 +1,22 @@
 package views
 
 import (
-	"embed"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/dop251/goja"
-	"github.com/evanw/esbuild/pkg/api"
-	"github.com/razshare/frizzante/embeds"
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/containers"
 	"github.com/razshare/frizzante/globals"
-	"github.com/razshare/frizzante/javascript"
-	"os"
 	"strings"
-	"sync"
 )
 
-func (view *View) ReadServerJs(efs embed.FS) (string, error) {
-	var data []byte
-	var readError error
-
-	if files.IsFile(view.ServerJs) {
-		data, readError = os.ReadFile(view.ServerJs)
-		if readError != nil {
-			return "", readError
-		}
-	} else {
-		data, readError = efs.ReadFile(strings.ReplaceAll(view.ServerJs, "\\", "/"))
-		if readError != nil {
-			return "", readError
-		}
-	}
-
-	bundledSourceCode, bundleError := javascript.Bundle(view.AppRoot, api.FormatCommonJS, string(data))
-	if bundleError != nil {
-		return "", bundleError
-	}
-
-	return FixSourceCode(bundledSourceCode), nil
-}
-
-// ReadIndexHtml reads the contents of the index html document and returns it.
-func (view *View) ReadIndexHtml(efs embed.FS) (string, error) {
-	if view.IndexHtmlCache != "" {
-		return view.IndexHtmlCache, nil
-	}
-
-	if files.IsFile(view.IndexHtml) {
-		data, readError := os.ReadFile(view.IndexHtml)
-		if readError != nil {
-			return "", readError
-		}
-
-		view.IndexHtmlCache = string(data)
-
-		return view.IndexHtmlCache, nil
-	}
-
-	var data []byte
-	fileNameFixed := strings.ReplaceAll(view.IndexHtml, "\\", "/")
-	if embeds.IsFile(efs, fileNameFixed) {
-		var readError error
-		data, readError = efs.ReadFile(fileNameFixed)
-		if readError != nil {
-			return "", readError
-		}
-	} else {
-		return "", errors.New("view index is missing from the host file system and the embedded file system")
-	}
-
-	view.IndexHtmlCache = string(data)
-	return view.IndexHtmlCache, nil
-}
-
-func FixSourceCode(sourceCode string) string {
-	return fmt.Sprintf(
-		`
-			if (!module) {
-				var module={exports:{}}; 
-			}
-
-			(function(){
-				%s
-				return render;
-			})()
-		`,
-		sourceCode,
-	)
-}
-
-var Program *goja.Program
-var Runtime = goja.New()
-var Mutex = &sync.Mutex{}
-
 // ExecuteServerJs executes the server script.
-func (view *View) ExecuteServerJs(efs embed.FS, properties map[string]any) (string, string, error) {
-	Mutex.Lock()
-	defer Mutex.Unlock()
+func (view *View) ExecuteServerJs(container *containers.ViewContainer, properties map[string]any) (string, string, error) {
+	Program := <-container.ProgramChannel
+	Runtime := <-container.RuntimeChannel
 
-	if Runtime == nil {
-		Runtime = goja.New()
-	}
-
-	if Program == nil {
-		sourceCode, readError := view.ReadServerJs(efs)
-		if readError != nil {
-			return "", "", readError
-		}
-
-		program, compileError := goja.Compile("goja", sourceCode, false)
-		if compileError != nil {
-			return "", "", compileError
-		}
-
-		Program = program
-	}
+	defer func() { go func() { container.ProgramChannel <- Program }() }()
+	defer func() { go func() { container.RuntimeChannel <- Runtime }() }()
 
 	runResult, runError := Runtime.RunProgram(Program)
 	if runError != nil {
@@ -153,7 +55,7 @@ func (view *View) ExecuteServerJs(efs embed.FS, properties map[string]any) (stri
 }
 
 // RenderClient renders on the client.
-func (view *View) RenderClient(efs embed.FS) (string, error) {
+func (view *View) RenderClient(container *containers.ViewContainer) (string, error) {
 	id := "svelte-app"
 
 	stringifiedProperties, jsoNError := json.Marshal(map[string]any{
@@ -165,7 +67,7 @@ func (view *View) RenderClient(efs embed.FS) (string, error) {
 		return "", jsoNError
 	}
 
-	indexHtmlData, indexHtmlDataError := view.ReadIndexHtml(efs)
+	indexHtmlData, indexHtmlDataError := container.ReadIndexHtml()
 	if indexHtmlDataError != nil {
 		return "", indexHtmlDataError
 	}
@@ -197,8 +99,8 @@ func (view *View) RenderClient(efs embed.FS) (string, error) {
 }
 
 // RenderServer renders on the server.
-func (view *View) RenderServer(efs embed.FS) (string, error) {
-	head, body, err := view.ExecuteServerJs(efs, map[string]any{
+func (view *View) RenderServer(container *containers.ViewContainer) (string, error) {
+	head, body, err := view.ExecuteServerJs(container, map[string]any{
 		"name":       view.Name,
 		"data":       view.Data,
 		"renderMode": view.RenderMode,
@@ -207,7 +109,7 @@ func (view *View) RenderServer(efs embed.FS) (string, error) {
 		return "", err
 	}
 
-	index, readError := view.ReadIndexHtml(efs)
+	index, readError := container.ReadIndexHtml()
 	if readError != nil {
 		return "", readError
 	}
@@ -236,8 +138,8 @@ func (view *View) RenderServer(efs embed.FS) (string, error) {
 }
 
 // RenderHeadless renders only the body of the view on the server.
-func (view *View) RenderHeadless(efs embed.FS) (string, error) {
-	_, body, err := view.ExecuteServerJs(efs, map[string]any{
+func (view *View) RenderHeadless(container *containers.ViewContainer) (string, error) {
+	_, body, err := view.ExecuteServerJs(container, map[string]any{
 		"name":       view.Name,
 		"data":       view.Data,
 		"renderMode": view.RenderMode,
@@ -249,7 +151,7 @@ func (view *View) RenderHeadless(efs embed.FS) (string, error) {
 }
 
 // RenderFull renders on the server and on the client.
-func (view *View) RenderFull(efs embed.FS) (string, error) {
+func (view *View) RenderFull(container *containers.ViewContainer) (string, error) {
 	id := "svelte-app"
 
 	properties := map[string]any{
@@ -258,12 +160,12 @@ func (view *View) RenderFull(efs embed.FS) (string, error) {
 		"renderMode": view.RenderMode,
 	}
 
-	head, body, err := view.ExecuteServerJs(efs, properties)
+	head, body, err := view.ExecuteServerJs(container, properties)
 	if err != nil {
 		return "", err
 	}
 
-	index, readError := view.ReadIndexHtml(efs)
+	index, readError := container.ReadIndexHtml()
 	if readError != nil {
 		return "", readError
 	}
@@ -300,18 +202,18 @@ func (view *View) RenderFull(efs embed.FS) (string, error) {
 }
 
 // Render renders.
-func (view *View) Render(efs embed.FS) (string, error) {
+func (view *View) Render(container *containers.ViewContainer) (string, error) {
 	if view.RenderMode == RenderModeFull {
-		return view.RenderFull(efs)
+		return view.RenderFull(container)
 	}
 
 	if view.RenderMode == RenderModeServer {
-		return view.RenderServer(efs)
+		return view.RenderServer(container)
 	}
 
 	if view.RenderMode == RenderModeClient {
-		return view.RenderClient(efs)
+		return view.RenderClient(container)
 	}
 
-	return view.RenderHeadless(efs)
+	return view.RenderHeadless(container)
 }
