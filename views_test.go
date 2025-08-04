@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"github.com/razshare/frizzante/globals"
 	"io"
 	"net/http"
+	"runtime"
 	"strings"
 	"sync"
 	"testing"
@@ -34,16 +36,20 @@ func TestRenderServer(test *testing.T) {
 }
 
 func BenchmarkRenderServer(b *testing.B) {
-	count := 10_000
+	fmt.Println("=================================")
+	fmt.Println("starting benchmark")
+	var m1, m2 runtime.MemStats
+	runtime.GC()
+	runtime.ReadMemStats(&m1)
+
+	count := 1000
 	var group sync.WaitGroup
 	group.Add(count)
 
 	for j := 0; j < count; j++ {
 		go func() {
 			defer group.Done()
-			//expected := "<h1>Welcome to Frizzante.</h1>"
-			//response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderServer", port))
-			response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/", 3000))
+			response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d", port))
 			if getError != nil {
 				b.Error(getError)
 				return
@@ -58,6 +64,10 @@ func BenchmarkRenderServer(b *testing.B) {
 	}
 
 	group.Wait()
+
+	runtime.ReadMemStats(&m2)
+	fmt.Printf("used %d MB of memory\n", (m2.TotalAlloc-m1.TotalAlloc)/globals.MB)
+	fmt.Printf("allocated memory %d times\n", m2.Mallocs-m1.Mallocs)
 }
 
 func TestRenderClient(test *testing.T) {

@@ -26,6 +26,7 @@ func init() {
 	// Server.
 	serverLocal := servers.New()
 	serverLocal.Efs = efs
+
 	serverLocal.Routes = append(
 		serverLocal.Routes,
 		routes.Route{Pattern: "GET /TestSession", Handler: func(connection *connections.Connection) {

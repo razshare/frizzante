@@ -10,11 +10,7 @@ const (
 )
 
 type View struct {
-	Name           string
-	RenderMode     RenderMode
-	Data           map[string]any
-	AppRoot        string
-	ServerJs       string
-	IndexHtml      string
-	IndexHtmlCache string
+	Name       string
+	RenderMode RenderMode
+	Data       map[string]any
 }
