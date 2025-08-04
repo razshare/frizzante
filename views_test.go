@@ -36,6 +36,9 @@ func TestRenderServer(test *testing.T) {
 }
 
 func BenchmarkRenderServer(b *testing.B) {
+	lock := <-server
+	defer func() { server <- lock }()
+
 	fmt.Println("=================================")
 	fmt.Println("starting benchmark")
 	var m1, m2 runtime.MemStats
