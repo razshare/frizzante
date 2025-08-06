@@ -5,7 +5,7 @@ import (
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/globals"
-	"github.com/razshare/frizzante/traces"
+	"github.com/razshare/frizzante/stack"
 )
 
 // New creates a new session with a given initial state.
@@ -59,7 +59,7 @@ func (session *Session[T]) Id() string {
 	idObject, idObjectError := uuid.NewV4()
 	if idObjectError != nil {
 		session.Connection.SessionId = ""
-		traces.Trace(session.Connection.ErrorLog, idObjectError)
+		session.Connection.ErrorLog.Println(idObjectError, stack.Trace())
 		return ""
 	}
 
@@ -78,7 +78,7 @@ func (session *Session[T]) Exists() bool {
 
 	exists, existsError := session.Connection.SessionArchive.Has(id, globals.SessionKey)
 	if existsError != nil {
-		traces.Trace(session.Connection.ErrorLog, existsError)
+		session.Connection.ErrorLog.Println(existsError, stack.Trace())
 		return false
 	}
 	return exists
@@ -90,13 +90,13 @@ func (session *Session[T]) Save() {
 
 	data, jsonError := json.Marshal(session.State)
 	if jsonError != nil {
-		traces.Trace(session.Connection.ErrorLog, jsonError)
+		session.Connection.ErrorLog.Println(jsonError, stack.Trace())
 		return
 	}
 
 	archiveError := session.Connection.SessionArchive.Set(id, globals.SessionKey, data)
 	if archiveError != nil {
-		traces.Trace(session.Connection.ErrorLog, archiveError)
+		session.Connection.ErrorLog.Println(archiveError, stack.Trace())
 	}
 }
 
@@ -108,20 +108,20 @@ func (session *Session[T]) Load() {
 
 	exists, existsError := session.Connection.SessionArchive.Has(id, globals.SessionKey)
 	if existsError != nil {
-		traces.Trace(session.Connection.ErrorLog, existsError)
+		session.Connection.ErrorLog.Println(existsError, stack.Trace())
 		return
 	}
 
 	if exists {
 		data, getError := session.Connection.SessionArchive.Get(id, globals.SessionKey)
 		if getError != nil {
-			traces.Trace(session.Connection.ErrorLog, getError)
+			session.Connection.ErrorLog.Println(getError, stack.Trace())
 			return
 		}
 
 		jsonError := json.Unmarshal(data, session.State)
 		if jsonError != nil {
-			traces.Trace(session.Connection.ErrorLog, jsonError)
+			session.Connection.ErrorLog.Println(jsonError, stack.Trace())
 			return
 		}
 	}
@@ -133,7 +133,7 @@ func (session *Session[T]) Destroy() {
 
 	archiveError := session.Connection.SessionArchive.RemoveDomain(id)
 	if archiveError != nil {
-		traces.Trace(session.Connection.ErrorLog, archiveError)
+		session.Connection.ErrorLog.Println(archiveError, stack.Trace())
 		return
 	}
 }

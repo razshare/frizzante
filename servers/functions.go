@@ -6,6 +6,7 @@ import (
 	"github.com/razshare/frizzante/archives"
 	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/containers"
+	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/guards"
 	"github.com/razshare/frizzante/routes"
@@ -43,6 +44,10 @@ func (server *Server) Start() {
 	if server.ViewContainer == nil {
 		server.ViewContainer = containers.NewViewContainer()
 		server.ViewContainer.Efs = server.Efs
+	} else {
+		if !embeds.IsDirectory(server.ViewContainer.Efs, server.ViewContainer.AppRoot) {
+			//trace.
+		}
 	}
 
 	go server.ViewContainer.Start()
