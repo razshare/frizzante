@@ -8,22 +8,22 @@ import (
 	"path/filepath"
 )
 
-// New creates a new archive backed by the file system.
-func New(name string) Archive {
-	return &DiskArchive{Name: name}
+// NewDiskArchive creates a new archive backed by the file system.
+func NewDiskArchive(directoryName string) *DiskArchive {
+	return &DiskArchive{DirectoryName: directoryName}
 }
 
 // Set sets a value to the archive based on the domain and key.
 func (archive *DiskArchive) Set(domain string, key string, value []byte) error {
-	if "" == archive.Name {
-		return errors.New("disk archive name is blank")
+	if "" == archive.DirectoryName {
+		return errors.New("disk archive directory name is blank")
 	}
 
 	lock := locks.Acquire(domain, key)
 	lock.Lock()
 	defer lock.Unlock()
 
-	directoryName := filepath.Join(archive.Name, domain)
+	directoryName := filepath.Join(archive.DirectoryName, domain)
 	if !files.IsDirectory(directoryName) {
 		mkdirError := os.MkdirAll(directoryName, os.ModePerm)
 		if mkdirError != nil {
@@ -40,15 +40,15 @@ func (archive *DiskArchive) Set(domain string, key string, value []byte) error {
 
 // Get gets a value from the archive based on domain and key.
 func (archive *DiskArchive) Get(domain string, key string) ([]byte, error) {
-	if "" == archive.Name {
-		return nil, errors.New("disk archive name is blank")
+	if "" == archive.DirectoryName {
+		return nil, errors.New("disk archive directory name is blank")
 	}
 
 	lock := locks.Acquire(domain, key)
 	lock.Lock()
 	defer lock.Unlock()
 
-	fileName := filepath.Join(archive.Name, domain, key)
+	fileName := filepath.Join(archive.DirectoryName, domain, key)
 	value, readError := os.ReadFile(fileName)
 	if readError != nil {
 		return nil, readError
@@ -58,29 +58,29 @@ func (archive *DiskArchive) Get(domain string, key string) ([]byte, error) {
 
 // Has checks if the archive has a value based on a domain and key.
 func (archive *DiskArchive) Has(domain string, key string) (bool, error) {
-	if "" == archive.Name {
-		return false, errors.New("disk archive name is blank")
+	if "" == archive.DirectoryName {
+		return false, errors.New("disk archive directory name is blank")
 	}
 
 	lock := locks.Acquire(domain, key)
 	lock.Lock()
 	defer lock.Unlock()
 
-	fileName := filepath.Join(archive.Name, domain, key)
+	fileName := filepath.Join(archive.DirectoryName, domain, key)
 	return files.IsFile(fileName), nil
 }
 
 // Remove removes a value from the archive based on a domain and key.
 func (archive *DiskArchive) Remove(domain string, key string) error {
-	if "" == archive.Name {
-		return errors.New("disk archive name is blank")
+	if "" == archive.DirectoryName {
+		return errors.New("disk archive directory name is blank")
 	}
 
 	lock := locks.Acquire(domain, key)
 	lock.Lock()
 	defer lock.Unlock()
 
-	fileName := filepath.Join(archive.Name, domain, key)
+	fileName := filepath.Join(archive.DirectoryName, domain, key)
 	removeError := os.Remove(fileName)
 	if removeError != nil {
 		return removeError
@@ -90,28 +90,28 @@ func (archive *DiskArchive) Remove(domain string, key string) error {
 
 // HasDomain checks if the archive has a domain.
 func (archive *DiskArchive) HasDomain(domain string) (bool, error) {
-	if "" == archive.Name {
-		return false, errors.New("disk archive name is blank")
+	if "" == archive.DirectoryName {
+		return false, errors.New("disk archive directory name is blank")
 	}
 
 	lock := locks.Acquire(domain)
 	lock.Lock()
 	defer lock.Unlock()
 
-	return files.IsDirectory(filepath.Join(archive.Name, domain)), nil
+	return files.IsDirectory(filepath.Join(archive.DirectoryName, domain)), nil
 }
 
 // RemoveDomain removes a domain from the archive.
 func (archive *DiskArchive) RemoveDomain(domain string) error {
-	if "" == archive.Name {
-		return errors.New("disk archive name is blank")
+	if "" == archive.DirectoryName {
+		return errors.New("disk archive directory name is blank")
 	}
 
 	lock := locks.Acquire(domain)
 	lock.Lock()
 	defer lock.Unlock()
 
-	directoryName := filepath.Join(archive.Name, domain)
+	directoryName := filepath.Join(archive.DirectoryName, domain)
 	removeError := os.RemoveAll(directoryName)
 	if removeError != nil {
 		return removeError

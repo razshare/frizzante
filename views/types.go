@@ -3,10 +3,14 @@ package views
 type RenderMode int
 
 const (
-	RenderModeFull     RenderMode = 0 // Renders on both the server and the client.
-	RenderModeServer   RenderMode = 1 // Renders only on the server.
-	RenderModeClient   RenderMode = 2 // Renders only on the client.
-	RenderModeHeadless RenderMode = 3 // Renders only on the server and omits the base template.
+	// RenderModeFull renders on both the server and the client.
+	RenderModeFull RenderMode = 0
+	// RenderModeServer renders only on the server.
+	RenderModeServer RenderMode = 1
+	// RenderModeClient renders only on the client.
+	RenderModeClient RenderMode = 2
+	// RenderModeHeadless renders only on the server and omits the base template.
+	RenderModeHeadless RenderMode = 3
 )
 
 type View struct {

@@ -1,7 +1,7 @@
 package archives
 
 type DiskArchive struct {
-	Name string
+	DirectoryName string
 }
 
 type Archive interface {

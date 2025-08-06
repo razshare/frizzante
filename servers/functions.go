@@ -10,7 +10,6 @@ import (
 	"github.com/razshare/frizzante/guards"
 	"github.com/razshare/frizzante/routes"
 	"log"
-	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -22,9 +21,8 @@ import (
 
 func New() *Server {
 	return &Server{
-		Connections:    map[string]*net.Conn{},
 		InfoLog:        log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
-		SessionArchive: archives.New(filepath.Join(".gen", "sessions")),
+		SessionArchive: archives.NewDiskArchive(filepath.Join(".gen", "sessions")),
 		SecureAddr:     "0.0.0.0:8383",
 		PublicRoot:     "app/dist/client",
 		Server: http.Server{
@@ -52,7 +50,7 @@ func (server *Server) Start() {
 
 	for _, route := range server.Routes {
 		mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
-			con := &connections.Connection{
+			connection := &connections.Connection{
 				Request:        request,
 				Writer:         writer,
 				Status:         200,
@@ -71,7 +69,7 @@ func (server *Server) Start() {
 						continue
 					}
 					allowed := false
-					guard.Handler(con, func() { allowed = true })
+					guard.Handler(connection, func() { allowed = true })
 					if !allowed {
 						server.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", route.Pattern, tag, guard.Name)
 						return
@@ -79,7 +77,7 @@ func (server *Server) Start() {
 				}
 			}
 
-			route.Handler(con)
+			route.Handler(connection)
 		})
 	}
 

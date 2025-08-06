@@ -7,7 +7,6 @@ import (
 	"github.com/razshare/frizzante/guards"
 	"github.com/razshare/frizzante/routes"
 	"log"
-	"net"
 	"net/http"
 )
 
@@ -23,6 +22,5 @@ type Server struct {
 	Guards         []guards.Guard
 	Routes         []routes.Route
 	SessionArchive archives.Archive
-	Connections    map[string]*net.Conn
 	ViewContainer  *containers.ViewContainer
 }

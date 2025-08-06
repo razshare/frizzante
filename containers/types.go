@@ -6,14 +6,14 @@ import (
 )
 
 type ViewContainer struct {
+	Stop                  bool
 	MaximumProgramCounter uint64
 	MaximumRuntimeCounter uint64
-	ProgramChannel        chan *goja.Program
-	RuntimeChannel        chan *goja.Runtime
-	Stop                  bool
 	AppRoot               string
 	ServerJs              string
 	IndexHtml             string
 	IndexHtmlCache        string
+	ProgramChannel        chan *goja.Program
+	RuntimeChannel        chan *goja.Runtime
 	Efs                   embed.FS
 }
