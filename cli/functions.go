@@ -1,10 +1,7 @@
 package cli
 
 import (
-	"atomicgo.dev/keyboard/keys"
 	"fmt"
-	"github.com/pterm/pterm"
-	"github.com/pterm/pterm/putils"
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	flag "github.com/spf13/pflag"
@@ -142,10 +139,7 @@ func (cli *Cli) OnStart() {
 }
 
 func (cli *Cli) OnMenu() {
-	err := pterm.DefaultBigText.WithLetters(putils.LettersFromStringWithStyle("Frizzante", pterm.FgCyan.ToStyle())).Render()
-	if err != nil {
-		cli.Fatal(err)
-	}
+	CharmBigText("Frizzante")
 
 	options := []string{
 		"Help",
@@ -168,7 +162,7 @@ func (cli *Cli) OnMenu() {
 		"Sqlc Generate",
 	}
 
-	result, showError := pterm.DefaultInteractiveSelect.WithOptions(options).Show("Pick an option")
+	result, showError := CharmChoose("Pick an option", options)
 	if showError != nil {
 		cli.Fatal(showError)
 	}
@@ -186,7 +180,7 @@ func (cli *Cli) OnMenu() {
 	}
 
 	if result == "Create Project" {
-		projectName, projectNameError := pterm.DefaultInteractiveTextInput.Show("Give the project name")
+		projectName, projectNameError := CharmInput("Give the project name")
 		if projectNameError != nil {
 			cli.Fatal(projectNameError)
 		}
@@ -287,7 +281,7 @@ func (cli *Cli) OnMenu() {
 }
 
 func (cli *Cli) OnHelp() {
-	flag.Usage()
+	CharmHelp()
 }
 
 func (cli *Cli) OnVersion() {
@@ -598,21 +592,14 @@ func (cli *Cli) OnAddFeature(features string) {
 	}
 
 	if features == ":pick" {
-		selectedFeatures, showError := pterm.
-			DefaultInteractiveMultiselect.
-			WithKeySelect(keys.Space).
-			WithKeyConfirm(keys.Enter).
-			WithFilter(true).
-			WithOptions([]string{
-				"Core",
-				"Forms",
-				"Links",
-				"Air",
-				"Bun",
-				"Sqlc",
-			}).
-			WithFilter(false).
-			Show("Pick a feature to add")
+		selectedFeatures, showError := CharmMultiSelect("Pick a feature to add", []string{
+			"Core",
+			"Forms",
+			"Links",
+			"Air",
+			"Bun",
+			"Sqlc",
+		})
 
 		if showError != nil {
 			cli.Fatal(showError)
@@ -975,10 +962,7 @@ func (cli *Cli) OnSqlcGenerate() {
 func (cli *Cli) OnWelcome() {
 	usingDocker := os.Getenv("FRIZZANTE_USING_DOCKER")
 	end := make(chan string)
-	err := pterm.DefaultBigText.WithLetters(putils.LettersFromStringWithStyle("Frizzante", pterm.FgCyan.ToStyle())).Render()
-	if err != nil {
-		cli.Fatal(err)
-	}
+	CharmBigText("Frizzante")
 
 	if usingDocker != "" {
 		println("")
@@ -1016,16 +1000,9 @@ func (cli *Cli) Install(name string, url string, destination string) {
 		}
 	}
 
-	spinner, spinnerError := pterm.DefaultSpinner.WithRemoveWhenDone(true).Start(fmt.Sprintf("installing `%s` from `%s`...", name, url))
-	if spinnerError != nil {
-		cli.Fatal(spinnerError)
-	}
-	defer func() {
-		stopError := spinner.Stop()
-		if stopError != nil {
-			cli.Fatal(stopError)
-		}
-	}()
+	spinner := CharmSpinner(fmt.Sprintf("installing `%s` from `%s`...", name, url))
+	spinner.Start()
+	defer spinner.Stop()
 
 	if !strings.HasSuffix(url, ".zip") {
 		nameFixed := name
@@ -1079,10 +1056,10 @@ func (cli *Cli) ShowFeaturesInfo() {
 		"You can also use -a:pick or --add :pick to pick feature interactively.",
 	}, "\n"))
 
-	pterm.Println()
+	fmt.Println()
 
-	data := pterm.TableData{
-		{"Feature Name", "Description"},
+	headers := []string{"Feature Name", "Description"}
+	rows := [][]string{
 		{
 			"Core",
 			strings.Join([]string{
@@ -1138,18 +1115,7 @@ func (cli *Cli) ShowFeaturesInfo() {
 		},
 	}
 
-	// Create a table with a header and the defined data, then render it
-	tableError := pterm.
-		DefaultTable.
-		WithHasHeader().
-		WithData(data).
-		WithBoxed(true).
-		WithRowSeparator("─").
-		WithHeaderRowSeparator("=").
-		Render()
-	if tableError != nil {
-		cli.Fatal(tableError)
-	}
+	CharmTable(headers, rows)
 }
 
 type Platform uint
@@ -1168,17 +1134,14 @@ func (cli *Cli) Platform() Platform {
 		platform = *FlagPlatform
 	} else {
 		var platformError error
-		platform, platformError = pterm.
-			DefaultInteractiveSelect.
-			WithOptions([]string{
-				"Linux/amd64",
-				"Linux/arm64",
-				"Darwin/amd64",
-				"Darwin/arm64",
-				"Windows/amd64",
-				"Windows/arm64",
-			}).
-			Show("Pick a platform")
+		platform, platformError = CharmChoose("Pick a platform", []string{
+			"Linux/amd64",
+			"Linux/arm64",
+			"Darwin/amd64",
+			"Darwin/arm64",
+			"Windows/amd64",
+			"Windows/arm64",
+		})
 
 		if platformError != nil {
 			cli.Fatal(platformError)
@@ -1230,12 +1193,7 @@ func (cli *Cli) Confirm(text string) bool {
 		return true
 	}
 
-	yes, showError := pterm.
-		DefaultInteractiveConfirm.
-		WithConfirmText("Y").
-		WithDefaultText("n").
-		WithDefaultValue(true).
-		Show(text)
+	yes, showError := CharmConfirm(text, true)
 
 	if showError != nil {
 		cli.Fatal(showError)
@@ -1378,45 +1336,47 @@ func (cli *Cli) Confirmf(template string, vars ...any) bool {
 
 // Fatalf shows a fatal message and terminates the application.
 func (cli *Cli) Fatalf(template string, vars ...any) {
-	pterm.Fatal.Printfln(template, vars...)
+	CharmError(fmt.Sprintf(template, vars...))
+	os.Exit(1)
 }
 
 // Warningf shows a warning message.
 func (cli *Cli) Warningf(template string, vars ...any) {
-	pterm.Warning.Printfln(template, vars...)
+	CharmWarning(fmt.Sprintf(template, vars...))
 }
 
 // Infof shows an info message.
 func (cli *Cli) Infof(template string, vars ...any) {
-	pterm.Info.Printfln(template, vars...)
+	CharmInfo(fmt.Sprintf(template, vars...))
 }
 
 // Successf shows a success message.
 func (cli *Cli) Successf(template string, vars ...any) {
-	pterm.Success.Printfln(template, vars...)
+	CharmSuccess(fmt.Sprintf(template, vars...))
 }
 
 // Fatal shows a fatal message and terminates the application.
 func (cli *Cli) Fatal(vars ...any) {
-	pterm.Fatal.Println(vars...)
+	CharmError(fmt.Sprint(vars...))
+	os.Exit(1)
 }
 
 // Warning shows a warning message.
 func (cli *Cli) Warning(vars ...any) {
-	pterm.Warning.Println(vars...)
+	CharmWarning(fmt.Sprint(vars...))
 }
 
 // Info shows an info message.
 func (cli *Cli) Info(vars ...any) {
-	pterm.Info.Println(vars...)
+	CharmInfo(fmt.Sprint(vars...))
 }
 
 // Success shows a success message.
 func (cli *Cli) Success(vars ...any) {
-	pterm.Success.Println(vars...)
+	CharmSuccess(fmt.Sprint(vars...))
 }
 
 // Section shows the name of a section using Markdown semantics.
 func (cli *Cli) Section(vars ...any) {
-	pterm.DefaultSection.Println(vars...)
+	CharmSection(fmt.Sprint(vars...))
 }
