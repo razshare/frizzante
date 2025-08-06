@@ -41,7 +41,8 @@ func New() *Server {
 // If the server fails to start, ServerStart crashes the program.
 func (server *Server) Start() {
 	if server.ViewContainer == nil {
-		server.ViewContainer = containers.NewViewContainer(server.Efs, 2, 2)
+		server.ViewContainer = containers.NewViewContainer()
+		server.ViewContainer.Efs = server.Efs
 	}
 
 	go server.ViewContainer.Start()
