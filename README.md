@@ -8,20 +8,7 @@
 
 Frizzante is an opinionated web server framework written in [Go](https://go.dev/) that uses [Svelte](https://svelte.dev/docs/svelte/overview) to render web pages.
 
-# Prerequisites
-
-### Install build tools
-
-On Linux
-```sh
-sudo apt-get install build-essential
-```
-
-On Darwin (MacOS)
-
-```sh
-xcode-select --install
-```
+# Get Started
 
 ### Install  `frizzante`
 
@@ -48,35 +35,22 @@ frizzante -c MyProject
 Configure project
 
 ```sh
-make configure
+frizzante --configure
 ```
 
 Start development with
 
 ```sh
-make dev
+frizzante --dev
 ```
 
 Build with
 
 ```sh
-make build
+frizzante --build
 ```
 
 This will create a `.gen/bin/app` standalone executable.
-
-
-> [!NOTE]
-> The final executable uses [V8](https://v8.dev/) bindings to run
-> JavaScript code on the server in order to render svelte components.
->
-> For that reason, the first run may take some time, just be patient.
->
-> Subsequent runs will take considerably less time.
-
-> [!NOTE]
-> Frizzante is aimed mainly at linux distributions.\
-> Feel free to contribute improvements for other platforms or use [Frizzante-Docker](https://github.com/cmjoseph07/frizzante-docker).
 
 # Thanks
 
