@@ -14,6 +14,7 @@ import (
 	"sync"
 )
 
+// NewViewContainer creates a new view container that points to the "app" directory.
 func NewViewContainer() *ViewContainer {
 	return &ViewContainer{
 		AppRoot:               "app",
@@ -26,6 +27,9 @@ func NewViewContainer() *ViewContainer {
 	}
 }
 
+// ReadServerJs reads the contents of the server script and returns it.
+//
+// The server script is usually located at "app/dist/server.js".
 func (container *ViewContainer) ReadServerJs() (string, error) {
 	var data []byte
 	var readError error
@@ -62,6 +66,44 @@ func (container *ViewContainer) ReadServerJs() (string, error) {
 	), nil
 }
 
+// ReadIndexHtml reads the contents of the index document and returns it.
+//
+// The index document is usually located at "app/dist/client/index.html".
+func (container *ViewContainer) ReadIndexHtml() (string, error) {
+	if container.IndexHtmlCache != "" {
+		return container.IndexHtmlCache, nil
+	}
+
+	if files.IsFile(container.IndexHtml) {
+		data, readError := os.ReadFile(container.IndexHtml)
+		if readError != nil {
+			return "", readError
+		}
+
+		container.IndexHtmlCache = string(data)
+
+		return container.IndexHtmlCache, nil
+	}
+
+	var data []byte
+	fileNameFixed := strings.ReplaceAll(container.IndexHtml, "\\", "/")
+	if embeds.IsFile(container.Efs, fileNameFixed) {
+		var readError error
+		data, readError = container.Efs.ReadFile(fileNameFixed)
+		if readError != nil {
+			return "", readError
+		}
+	} else {
+		return "", errors.New("view index is missing from the host file system and the embedded file system")
+	}
+
+	container.IndexHtmlCache = string(data)
+	return container.IndexHtmlCache, nil
+}
+
+// Start starts the view container.
+//
+// This will launch two goroutines that sends values to RuntimeChannel and ProgramChannel.
 func (container *ViewContainer) Start() {
 	var group sync.WaitGroup
 	group.Add(2)
@@ -103,37 +145,4 @@ func (container *ViewContainer) Start() {
 	}()
 
 	group.Wait()
-}
-
-// ReadIndexHtml reads the contents of the index html document and returns it.
-func (container *ViewContainer) ReadIndexHtml() (string, error) {
-	if container.IndexHtmlCache != "" {
-		return container.IndexHtmlCache, nil
-	}
-
-	if files.IsFile(container.IndexHtml) {
-		data, readError := os.ReadFile(container.IndexHtml)
-		if readError != nil {
-			return "", readError
-		}
-
-		container.IndexHtmlCache = string(data)
-
-		return container.IndexHtmlCache, nil
-	}
-
-	var data []byte
-	fileNameFixed := strings.ReplaceAll(container.IndexHtml, "\\", "/")
-	if embeds.IsFile(container.Efs, fileNameFixed) {
-		var readError error
-		data, readError = container.Efs.ReadFile(fileNameFixed)
-		if readError != nil {
-			return "", readError
-		}
-	} else {
-		return "", errors.New("view index is missing from the host file system and the embedded file system")
-	}
-
-	container.IndexHtmlCache = string(data)
-	return container.IndexHtmlCache, nil
 }
