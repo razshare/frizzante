@@ -8,9 +8,9 @@
 
 Frizzante is an opinionated web server framework written in [Go](https://go.dev/) that uses [Svelte](https://svelte.dev/docs/svelte/overview) to render web pages.
 
-# Get Started
+# Prerequisites
 
-### Install  `frizzante`
+Install  `frizzante`
 
 ```sh
 go install github.com/razshare/frizzante@latest
@@ -23,6 +23,8 @@ go install github.com/razshare/frizzante@latest
 > export GOPATH=$HOME/go
 > export PATH=$PATH:$GOPATH/bin
 > ```
+
+# Get Started
 
 Create a project with
 ```sh
