@@ -1,8 +1,6 @@
 package cli
 
-import (
-	"embed"
-)
+import "embed"
 
 type Platform uint
 
