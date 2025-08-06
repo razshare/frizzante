@@ -2,123 +2,123 @@ package cli
 
 import (
 	"fmt"
-	"strings"
-	"time"
-
 	"github.com/charmbracelet/bubbles/spinner"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
+	"strings"
+	"time"
 )
 
-// =============================================================================
-// Theme Configuration
-// =============================================================================
-
-var Colors = struct {
-	primary   string
-	secondary string
-	success   string
-	error     string
-	warning   string
-	info      string
-	muted     string
-}{
-	primary:   "99",
-	secondary: "212",
-	success:   "82",
-	error:     "196",
-	warning:   "214",
-	info:      "39",
-	muted:     "240",
+var Colors = ThemeColors{
+	Primary:   "99",
+	Secondary: "212",
+	Success:   "82",
+	Error:     "196",
+	Warning:   "214",
+	Info:      "39",
+	Muted:     "240",
 }
 
-var Styles = struct {
-	title        lipgloss.Style
-	item         lipgloss.Style
-	selected     lipgloss.Style
-	status       func(color string) lipgloss.Style
-	bigText      lipgloss.Style
-	section      lipgloss.Style
-	spinner      lipgloss.Style
-	flag         lipgloss.Style
-	category     lipgloss.Style
-	example      lipgloss.Style
-}{
-	title: lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.primary)).Bold(true),
-	item:  lipgloss.NewStyle().PaddingLeft(2),
-	selected: lipgloss.NewStyle().PaddingLeft(1).Foreground(lipgloss.Color(Colors.secondary)),
-	status: func(color string) lipgloss.Style {
-		return lipgloss.NewStyle().Foreground(lipgloss.Color(color)).Bold(true).PaddingLeft(2)
+var Styles = ThemeStyles{
+	Title: lipgloss.NewStyle().
+		Foreground(lipgloss.Color(Colors.Primary)).
+		Bold(true),
+
+	Item: lipgloss.NewStyle().
+		PaddingLeft(2),
+
+	Selected: lipgloss.NewStyle().
+		PaddingLeft(1).
+		Foreground(lipgloss.Color(Colors.Secondary)),
+
+	Status: func(color string) lipgloss.Style {
+		return lipgloss.
+			NewStyle().
+			Foreground(lipgloss.Color(color)).
+			Bold(true).
+			PaddingLeft(2)
 	},
-	bigText: lipgloss.NewStyle().
-		Foreground(lipgloss.Color(Colors.info)).Bold(true).Align(lipgloss.Center).
-		Border(lipgloss.DoubleBorder()).BorderForeground(lipgloss.Color(Colors.primary)).
-		Padding(1, 4).Margin(1, 2),
-	section: lipgloss.NewStyle().
-		Foreground(lipgloss.Color(Colors.secondary)).Bold(true).Underline(true).Padding(1, 0),
-	spinner:  lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.info)),
-	flag:     lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.secondary)).Bold(true),
-	category: lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.primary)).Bold(true).Underline(true),
-	example:  lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.muted)),
+
+	BigText: lipgloss.
+		NewStyle().
+		Foreground(lipgloss.Color(Colors.Info)).
+		Bold(true).
+		Align(lipgloss.Center).
+		Border(lipgloss.DoubleBorder()).
+		BorderForeground(lipgloss.Color(Colors.Primary)).
+		Padding(1, 4).
+		Margin(1, 2),
+
+	Section: lipgloss.NewStyle().
+		Foreground(lipgloss.Color(Colors.Secondary)).
+		Bold(true).
+		Underline(true).
+		Padding(1, 0),
+
+	Spinner: lipgloss.
+		NewStyle().
+		Foreground(lipgloss.Color(Colors.Info)),
+
+	Flag: lipgloss.
+		NewStyle().
+		Foreground(lipgloss.Color(Colors.Secondary)).Bold(true),
+
+	Category: lipgloss.
+		NewStyle().
+		Foreground(lipgloss.Color(Colors.Primary)).Bold(true).Underline(true),
+
+	Example: lipgloss.
+		NewStyle().
+		Foreground(lipgloss.Color(Colors.Muted)),
 }
 
-// =============================================================================
-// Core Program Execution
-// =============================================================================
-
-func RunProgram[T tea.Model](m T) (T, error) {
-	result, err := tea.NewProgram(m).Run()
+func RunProgram[T tea.Model](model T) (T, error) {
+	result, err := tea.NewProgram(model).Run()
 	if err != nil {
-		return m, err
+		return model, err
 	}
 	if typed, ok := result.(T); ok {
 		return typed, nil
 	}
-	return m, fmt.Errorf("unexpected model type")
+	return model, fmt.Errorf("unexpected model type")
 }
-
-// =============================================================================
-// Interactive Input Functions
-// =============================================================================
 
 func CharmChoose(prompt string, options []string) (string, error) {
 	// Initialize the search input
 	searchInput := textinput.New()
 	searchInput.Placeholder = "Type to filter..."
 	searchInput.Width = 80
-	
-	m := SimpleChooseModel{
-		choices:         options,
-		filteredChoices: options,
-		prompt:          prompt,
-		searchInput:     searchInput,
-		maxVisible:      6,
-		viewportStart:   0,
-		cursor:          0,
-		searching:       false,
-	}
-	
-	result, err := RunProgram(m)
+
+	result, err := RunProgram(&SimpleChooseModel{
+		Choices:         options,
+		FilteredChoices: options,
+		Prompt:          prompt,
+		SearchInput:     searchInput,
+		MaxVisible:      6,
+		ViewportStart:   0,
+		Cursor:          0,
+		Searching:       false,
+	})
 	if err != nil {
 		return "", err
 	}
-	if result.selected == "" {
+	if result.Selected == "" {
 		return "", fmt.Errorf("no selection made")
 	}
-	return result.selected, nil
+	return result.Selected, nil
 }
 
 func CharmMultiSelect(prompt string, options []string) ([]string, error) {
-	m := MultiSelectModel{choices: options, selected: make(map[int]bool), prompt: prompt}
+	m := MultiSelectModel{Choices: options, Selected: make(map[int]bool), Prompt: prompt}
 	result, err := RunProgram(m)
 	if err != nil {
 		return nil, err
 	}
 	var selections []string
-	for i, choice := range result.choices {
-		if result.selected[i] {
+	for i, choice := range result.Choices {
+		if result.Selected[i] {
 			selections = append(selections, choice)
 		}
 	}
@@ -130,89 +130,81 @@ func CharmInput(prompt string) (string, error) {
 	ti.Placeholder = "Type here..."
 	ti.Focus()
 	ti.Width = 50
-	m := InputModel{textInput: ti, prompt: prompt}
+	m := InputModel{TextInput: ti, Prompt: prompt}
 	result, err := RunProgram(m)
 	if err != nil {
 		return "", err
 	}
-	return result.textInput.Value(), nil
+	return result.TextInput.Value(), nil
 }
 
 func CharmConfirm(prompt string, defaultValue bool) (bool, error) {
-	m := ConfirmModel{prompt: prompt, defaultValue: defaultValue, confirmed: defaultValue}
-	result, err := RunProgram(m)
+	model := ConfirmModel{Prompt: prompt, DefaultValue: defaultValue, Confirmed: defaultValue}
+	result, err := RunProgram(model)
 	if err != nil {
 		return false, err
 	}
-	return result.confirmed, nil
+	return result.Confirmed, nil
 }
 
-// =============================================================================
-// Status & Messaging Functions
-// =============================================================================
-
 func CharmSuccess(text string) {
-	fmt.Println(Styles.status(Colors.success).Render("✓ " + text))
+	fmt.Println(Styles.Status(Colors.Success).Render("✓ " + text))
 }
 
 func CharmError(text string) {
-	fmt.Println(Styles.status(Colors.error).Render("✗ " + text))
+	fmt.Println(Styles.Status(Colors.Error).Render("✗ " + text))
 }
 
 func CharmWarning(text string) {
-	fmt.Println(Styles.status(Colors.warning).Render("⚠ " + text))
+	fmt.Println(Styles.Status(Colors.Warning).Render("⚠ " + text))
 }
 
 func CharmInfo(text string) {
-	fmt.Println(Styles.status(Colors.info).Render("ℹ " + text))
+	fmt.Println(Styles.Status(Colors.Info).Render("ℹ " + text))
 }
 
 func CharmSection(text string) {
-	fmt.Println(Styles.section.Render("## " + text))
+	fmt.Println(Styles.Section.Render("## " + text))
 }
 
 func CharmDockerHelp() {
 	fmt.Println()
-	fmt.Println(Styles.title.Render("🐙 You're running Frizzante in Docker!"))
+	fmt.Println(Styles.Title.Render("🐙 You're running Frizzante in Docker!"))
 	fmt.Println()
-	
-	fmt.Println(Styles.section.Render("⚡ Simple workflow:"))
-	
-	fmt.Println(Styles.status(Colors.info).Render("• Attach to the container: ") + 
-		Styles.example.Render("docker exec -it frizzante-start sh"))
-	
-	fmt.Println(Styles.status(Colors.info).Render("• Run environment in container:"))
-	fmt.Println(Styles.item.Render("    • Dev environment: ") + Styles.flag.Render("make dev"))
-	fmt.Println(Styles.item.Render("    • Prod environment: ") + Styles.flag.Render("make build"))
-	fmt.Println(Styles.item.Render("    • To run the app: ") + Styles.flag.Render("./.gen/bin/app"))
-	
-	fmt.Println(Styles.status(Colors.info).Render("• Run prod via docker:"))
-	fmt.Println(Styles.item.Render("    • Build image: ") + 
-		Styles.example.Render("docker build --target frizzante_prod -t my-app:prod ."))
-	fmt.Println(Styles.item.Render("    • Run image: ") + 
-		Styles.example.Render("docker run -p 8080:8080 my-app:prod"))
-	fmt.Println(Styles.item.Render("    • Via docker compose: ") + 
-		Styles.example.Render("docker compose -f compose.yaml -f compose.prod.yaml up -d --build"))
-	
-	fmt.Println(Styles.status(Colors.success).Render("🎉 Enjoy!!"))
+
+	fmt.Println(Styles.Section.Render("⚡ Simple workflow:"))
+
+	fmt.Println(Styles.Status(Colors.Info).Render("• Attach to the container: ") +
+		Styles.Example.Render("docker exec -it frizzante-start sh"))
+
+	fmt.Println(Styles.Status(Colors.Info).Render("• Run environment in container:"))
+	fmt.Println(Styles.Item.Render("    • Dev environment: ") + Styles.Flag.Render("make dev"))
+	fmt.Println(Styles.Item.Render("    • Prod environment: ") + Styles.Flag.Render("make build"))
+	fmt.Println(Styles.Item.Render("    • To run the app: ") + Styles.Flag.Render("./.gen/bin/app"))
+
+	fmt.Println(Styles.Status(Colors.Info).Render("• Run prod via docker:"))
+	fmt.Println(Styles.Item.Render("    • Build image: ") +
+		Styles.Example.Render("docker build --target frizzante_prod -t my-app:prod ."))
+	fmt.Println(Styles.Item.Render("    • Run image: ") +
+		Styles.Example.Render("docker run -p 8080:8080 my-app:prod"))
+	fmt.Println(Styles.Item.Render("    • Via docker compose: ") +
+		Styles.Example.Render("docker compose -f compose.yaml -f compose.prod.yaml up -d --build"))
+
+	fmt.Println(Styles.Status(Colors.Success).Render("🎉 Enjoy!!"))
 	fmt.Println()
 }
 
-// =============================================================================
-// Display & Formatting Functions
-// =============================================================================
-
-func wrapText(text string, width int) []string {
+func WrapText(text string, width int) []string {
 	if width <= 0 || len(text) <= width {
 		return []string{text}
 	}
-	
+
 	var lines []string
 	words := strings.Fields(text)
 	if len(words) == 0 {
 		return []string{text}
 	}
-	
+
 	currentLine := ""
 	for _, word := range words {
 		if currentLine == "" {
@@ -227,42 +219,42 @@ func wrapText(text string, width int) []string {
 	if currentLine != "" {
 		lines = append(lines, currentLine)
 	}
-	
+
 	return lines
 }
 
 func CharmTable(headers []string, rows [][]string) {
 	columns := make([]table.Column, len(headers))
 	maxColWidth := 60
-	
-	for i, header := range headers {
+
+	for index, header := range headers {
 		width := len(header)
 		for _, row := range rows {
-			if i < len(row) && len(row[i]) > width {
-				width = len(row[i])
+			if index < len(row) && len(row[index]) > width {
+				width = len(row[index])
 			}
 		}
 		if width > maxColWidth {
 			width = maxColWidth
 		}
-		columns[i] = table.Column{Title: header, Width: width + 2}
+		columns[index] = table.Column{Title: header, Width: width + 2}
 	}
 
-	wrappedRows := []table.Row{}
+	wrappedRows := make([]table.Row, 0)
 	for rowIdx, row := range rows {
 		maxLines := 1
 		wrappedCells := make([][]string, len(row))
-		
+
 		for i, cell := range row {
 			if i < len(columns) {
 				cellWidth := columns[i].Width - 2
-				wrappedCells[i] = wrapText(cell, cellWidth)
+				wrappedCells[i] = WrapText(cell, cellWidth)
 				if len(wrappedCells[i]) > maxLines {
 					maxLines = len(wrappedCells[i])
 				}
 			}
 		}
-		
+
 		for lineIdx := 0; lineIdx < maxLines; lineIdx++ {
 			newRow := make([]string, len(row))
 			for cellIdx, wrappedCell := range wrappedCells {
@@ -274,437 +266,384 @@ func CharmTable(headers []string, rows [][]string) {
 			}
 			wrappedRows = append(wrappedRows, newRow)
 		}
-		
+
 		// Add empty row after each logical row (except the last one)
 		if rowIdx < len(rows)-1 {
 			emptyRow := make([]string, len(row))
-			for i := range emptyRow {
-				emptyRow[i] = ""
+			for index := range emptyRow {
+				emptyRow[index] = ""
 			}
 			wrappedRows = append(wrappedRows, emptyRow)
 		}
 	}
 
-	t := table.New(
+	tableLocal := table.New(
 		table.WithColumns(columns),
 		table.WithRows(wrappedRows),
 		table.WithFocused(false),
 		table.WithHeight(len(wrappedRows)+2),
 	)
 
-	s := table.DefaultStyles()
-	s.Header = s.Header.
+	styles := table.DefaultStyles()
+	styles.Header = styles.Header.
 		BorderStyle(lipgloss.NormalBorder()).
 		BorderForeground(lipgloss.Color("240")).
 		BorderBottom(true).
 		Bold(true)
 	// Remove selection highlight
-	s.Selected = lipgloss.NewStyle()
-	t.SetStyles(s)
+	styles.Selected = lipgloss.NewStyle()
+	tableLocal.SetStyles(styles)
 
-	fmt.Println(t.View())
+	fmt.Println(tableLocal.View())
 }
 
 func CharmSpinner(message string) *SpinnerManager {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
-	s.Style = Styles.spinner
-	
+	s.Style = Styles.Spinner
+
 	m := SpinnerModel{
-		spinner: s,
-		message: message,
+		Spinner: s,
+		Message: message,
 	}
-	
+
 	return &SpinnerManager{
 		Model:   m,
-		program: tea.NewProgram(m),
+		Program: tea.NewProgram(m),
 	}
 }
 
-// =============================================================================
-// Spinner Management
-// =============================================================================
-
-type SpinnerManager struct {
-	Model   SpinnerModel
-	program *tea.Program
-	done    chan bool
-}
-
-func (sm *SpinnerManager) Start() {
-	sm.done = make(chan bool)
+func (manager *SpinnerManager) Start() (err error) {
+	manager.Done = make(chan bool)
 	go func() {
-		sm.program.Run()
-		close(sm.done)
+		_, err = manager.Program.Run()
+		close(manager.Done)
 	}()
 	time.Sleep(100 * time.Millisecond)
+	return
 }
 
-func (sm *SpinnerManager) Stop() {
-	sm.program.Quit()
-	<-sm.done
+func (manager *SpinnerManager) Stop() {
+	manager.Program.Quit()
+	<-manager.Done
 	fmt.Print("\r\033[K")
 }
 
-// Spinner Model - Loading spinner display
-type SpinnerModel struct {
-	spinner spinner.Model
-	message string
+func (model SpinnerModel) Init() tea.Cmd {
+	return model.Spinner.Tick
 }
 
-func (m SpinnerModel) Init() tea.Cmd {
-	return m.spinner.Tick
-}
-
-func (m SpinnerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (model SpinnerModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	m.spinner, cmd = m.spinner.Update(msg)
-	return m, cmd
+	model.Spinner, cmd = model.Spinner.Update(msg)
+	return model, cmd
 }
 
-func (m SpinnerModel) View() string {
-	return fmt.Sprintf("%s %s", m.spinner.View(), m.message)
+func (model SpinnerModel) View() string {
+	return fmt.Sprintf("%s %s", model.Spinner.View(), model.Message)
 }
 
-// =============================================================================
-// UI Models (Bubble Tea Components)
-// =============================================================================
-
-// Simple Choice Model - Single selection from a list with search and scrolling
-type SimpleChooseModel struct {
-	choices        []string          // All available choices
-	filteredChoices []string         // Choices after filtering
-	cursor         int               // Current cursor position in filtered list
-	prompt         string            // The prompt to display
-	selected       string            // The selected choice
-	searchInput    textinput.Model   // Search input field
-	searching      bool              // Whether we're in search mode
-	viewportStart  int               // Start index for viewport (for scrolling)
-	maxVisible     int               // Maximum visible items (5 by default)
-}
-
-func (m SimpleChooseModel) Init() tea.Cmd {
+func (model *SimpleChooseModel) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m SimpleChooseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (model *SimpleChooseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	
-	switch msg := msg.(type) {
+
+	switch messageLocal := msg.(type) {
 	case tea.KeyMsg:
 		// Handle search mode
-		if m.searching {
-			switch msg.String() {
+		if model.Searching {
+			switch messageLocal.String() {
 			case "esc":
-				m.searching = false
-				m.searchInput.SetValue("")
-				m.filteredChoices = m.choices
-				m.cursor = 0
-				m.viewportStart = 0
-				return m, nil
+				model.Searching = false
+				model.SearchInput.SetValue("")
+				model.FilteredChoices = model.Choices
+				model.Cursor = 0
+				model.ViewportStart = 0
+				return model, nil
 			case "enter":
-				if len(m.filteredChoices) > 0 {
-					m.selected = m.filteredChoices[m.cursor]
-					return m, tea.Quit
+				if len(model.FilteredChoices) > 0 {
+					model.Selected = model.FilteredChoices[model.Cursor]
+					return model, tea.Quit
 				}
 			case "up", "ctrl+p":
-				m.navigateUp()
-				return m, nil
+				model.NavigateUp()
+				return model, nil
 			case "down", "ctrl+n", "tab":
-				m.navigateDown()
-				return m, nil
+				model.NavigateDown()
+				return model, nil
 			default:
 				// Update search input
-				prevValue := m.searchInput.Value()
-				m.searchInput, cmd = m.searchInput.Update(msg)
-				if m.searchInput.Value() != prevValue {
-					m.filterChoices()
+				prevValue := model.SearchInput.Value()
+				model.SearchInput, cmd = model.SearchInput.Update(messageLocal)
+				if model.SearchInput.Value() != prevValue {
+					model.FilterChoices()
 				}
-				return m, cmd
+				return model, cmd
 			}
 		}
-		
+
 		// Normal navigation mode
-		switch msg.String() {
+		switch messageLocal.String() {
 		case "ctrl+c":
-			return m, tea.Quit
+			return model, tea.Quit
 		case "/", "ctrl+f":
-			m.searching = true
-			m.searchInput.Focus()
-			return m, textinput.Blink
+			model.Searching = true
+			model.SearchInput.Focus()
+			return model, textinput.Blink
 		case "up", "k":
-			m.navigateUp()
+			model.NavigateUp()
 		case "down", "j":
-			m.navigateDown()
+			model.NavigateDown()
 		case "g":
 			// Go to top
-			m.cursor = 0
-			m.viewportStart = 0
+			model.Cursor = 0
+			model.ViewportStart = 0
 		case "G":
 			// Go to bottom
-			if len(m.filteredChoices) > 0 {
-				m.cursor = len(m.filteredChoices) - 1
-				m.updateViewport()
+			if len(model.FilteredChoices) > 0 {
+				model.Cursor = len(model.FilteredChoices) - 1
+				model.UpdateViewport()
 			}
 		case "enter":
-			if len(m.filteredChoices) > 0 {
-				m.selected = m.filteredChoices[m.cursor]
-				return m, tea.Quit
+			if len(model.FilteredChoices) > 0 {
+				model.Selected = model.FilteredChoices[model.Cursor]
+				return model, tea.Quit
 			}
 		}
 	}
-	
-	return m, nil
+
+	return model, nil
 }
 
-func (m *SimpleChooseModel) navigateUp() {
-	if m.cursor > 0 {
-		m.cursor--
-		if m.cursor < m.viewportStart {
-			m.viewportStart = m.cursor
+func (model *SimpleChooseModel) NavigateUp() {
+	if model.Cursor > 0 {
+		model.Cursor--
+		if model.Cursor < model.ViewportStart {
+			model.ViewportStart = model.Cursor
 		}
 	}
 }
 
-func (m *SimpleChooseModel) navigateDown() {
-	if m.cursor < len(m.filteredChoices)-1 {
-		m.cursor++
-		if m.cursor >= m.viewportStart+m.maxVisible {
-			m.viewportStart = m.cursor - m.maxVisible + 1
+func (model *SimpleChooseModel) NavigateDown() {
+	if model.Cursor < len(model.FilteredChoices)-1 {
+		model.Cursor++
+		if model.Cursor >= model.ViewportStart+model.MaxVisible {
+			model.ViewportStart = model.Cursor - model.MaxVisible + 1
 		}
 	}
 }
 
-func (m *SimpleChooseModel) updateViewport() {
+func (model *SimpleChooseModel) UpdateViewport() {
 	// Ensure viewport shows the cursor
-	if m.cursor < m.viewportStart {
-		m.viewportStart = m.cursor
-	} else if m.cursor >= m.viewportStart+m.maxVisible {
-		m.viewportStart = m.cursor - m.maxVisible + 1
+	if model.Cursor < model.ViewportStart {
+		model.ViewportStart = model.Cursor
+	} else if model.Cursor >= model.ViewportStart+model.MaxVisible {
+		model.ViewportStart = model.Cursor - model.MaxVisible + 1
 	}
-	
+
 	// Ensure viewport doesn't go out of bounds
-	if m.viewportStart < 0 {
-		m.viewportStart = 0
+	if model.ViewportStart < 0 {
+		model.ViewportStart = 0
 	}
-	maxStart := len(m.filteredChoices) - m.maxVisible
+	maxStart := len(model.FilteredChoices) - model.MaxVisible
 	if maxStart < 0 {
 		maxStart = 0
 	}
-	if m.viewportStart > maxStart {
-		m.viewportStart = maxStart
+	if model.ViewportStart > maxStart {
+		model.ViewportStart = maxStart
 	}
 }
 
-func (m *SimpleChooseModel) filterChoices() {
-	searchTerm := strings.ToLower(m.searchInput.Value())
+func (model *SimpleChooseModel) FilterChoices() {
+	searchTerm := strings.ToLower(model.SearchInput.Value())
 	if searchTerm == "" {
-		m.filteredChoices = m.choices
+		model.FilteredChoices = model.Choices
 	} else {
-		m.filteredChoices = []string{}
-		for _, choice := range m.choices {
+		model.FilteredChoices = []string{}
+		for _, choice := range model.Choices {
 			if strings.Contains(strings.ToLower(choice), searchTerm) {
-				m.filteredChoices = append(m.filteredChoices, choice)
+				model.FilteredChoices = append(model.FilteredChoices, choice)
 			}
 		}
 	}
-	
+
 	// Reset cursor and viewport
-	m.cursor = 0
-	m.viewportStart = 0
+	model.Cursor = 0
+	model.ViewportStart = 0
 }
 
-func (m SimpleChooseModel) View() string {
+func (model *SimpleChooseModel) View() string {
 	var s strings.Builder
-	
-	s.WriteString(Styles.title.Render(m.prompt) + "\n")
-	
+
+	s.WriteString(Styles.Title.Render(model.Prompt) + "\n")
+
 	// Search bar
-	if m.searching {
-		s.WriteString(Styles.status(Colors.info).Render("🔍 Search: "))
-		s.WriteString(m.searchInput.View())
+	if model.Searching {
+		s.WriteString(Styles.Status(Colors.Info).Render("🔍 Search: "))
+		s.WriteString(model.SearchInput.View())
 		s.WriteString("\n")
 	}
-	
+
 	// Show filtered results count if searching
-	if m.searching && m.searchInput.Value() != "" {
-		s.WriteString(Styles.status(Colors.muted).Render(
-			fmt.Sprintf("Found %d results", len(m.filteredChoices))))
+	if model.Searching && model.SearchInput.Value() != "" {
+		s.WriteString(Styles.Status(Colors.Muted).Render(
+			fmt.Sprintf("Found %d results", len(model.FilteredChoices))))
 		s.WriteString("\n")
 	}
-	
+
 	// Display choices (only show maxVisible items)
-	viewportEnd := m.viewportStart + m.maxVisible
-	if viewportEnd > len(m.filteredChoices) {
-		viewportEnd = len(m.filteredChoices)
+	viewportEnd := model.ViewportStart + model.MaxVisible
+	if viewportEnd > len(model.FilteredChoices) {
+		viewportEnd = len(model.FilteredChoices)
 	}
-	
+
 	// Show scroll indicator at top
-	if m.viewportStart > 0 {
-		s.WriteString(Styles.status(Colors.muted).Render("    ↑ more above") + "\n")
+	if model.ViewportStart > 0 {
+		s.WriteString(Styles.Status(Colors.Muted).Render("    ↑ more above") + "\n")
 	}
-	
-	for i := m.viewportStart; i < viewportEnd; i++ {
-		choice := m.filteredChoices[i]
+
+	for i := model.ViewportStart; i < viewportEnd; i++ {
+		choice := model.FilteredChoices[i]
 		cursor := "  "
-		if i == m.cursor {
+		if i == model.Cursor {
 			cursor = "▶ "
 		}
-		
+
 		line := cursor + choice
-		if i == m.cursor {
-			s.WriteString(Styles.selected.Render(line) + "\n")
+		if i == model.Cursor {
+			s.WriteString(Styles.Selected.Render(line) + "\n")
 		} else {
-			s.WriteString(Styles.item.Render(line) + "\n")
+			s.WriteString(Styles.Item.Render(line) + "\n")
 		}
 	}
-	
+
 	// Show scroll indicator at bottom
-	if viewportEnd < len(m.filteredChoices) {
-		s.WriteString(Styles.status(Colors.muted).Render("    ↓ more below") + "\n")
+	if viewportEnd < len(model.FilteredChoices) {
+		s.WriteString(Styles.Status(Colors.Muted).Render("    ↓ more below") + "\n")
 	}
-	
+
 	// Help text
-	if m.searching {
-		s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.muted)).Render(
+	if model.Searching {
+		s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.Muted)).Render(
 			"(↑/↓ navigate, enter to select, esc to clear search)"))
 	} else {
-		s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.muted)).Render(
+		s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.Muted)).Render(
 			"(↑/↓ navigate, / to search, enter to select, ctrl+c to quit)"))
 	}
-	
+
 	return s.String()
 }
 
-// Multi Select Model - Multiple selections from a list
-type MultiSelectModel struct {
-	choices  []string
-	cursor   int
-	selected map[int]bool
-	prompt   string
-}
-
-func (m MultiSelectModel) Init() tea.Cmd {
+func (model MultiSelectModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m MultiSelectModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
+func (model MultiSelectModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch messageLocal := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
+		switch messageLocal.String() {
 		case "ctrl+c", "q":
-			return m, tea.Quit
+			return model, tea.Quit
 		case "up", "k":
-			if m.cursor > 0 {
-				m.cursor--
+			if model.Cursor > 0 {
+				model.Cursor--
 			}
 		case "down", "j":
-			if m.cursor < len(m.choices)-1 {
-				m.cursor++
+			if model.Cursor < len(model.Choices)-1 {
+				model.Cursor++
 			}
 		case " ":
-			if m.selected[m.cursor] {
-				delete(m.selected, m.cursor)
+			if model.Selected[model.Cursor] {
+				delete(model.Selected, model.Cursor)
 			} else {
-				m.selected[m.cursor] = true
+				model.Selected[model.Cursor] = true
 			}
 		case "enter":
-			return m, tea.Quit
+			return model, tea.Quit
 		}
 	}
-	return m, nil
+	return model, nil
 }
 
-func (m MultiSelectModel) View() string {
-	s := Styles.title.Render(m.prompt) + "\n"
-	s += Styles.status(Colors.info).Render("Use arrow keys to navigate, space to select, enter to confirm") + "\n"
-	for i, choice := range m.choices {
+func (model MultiSelectModel) View() string {
+	s := Styles.Title.Render(model.Prompt) + "\n"
+	s += Styles.Status(Colors.Info).Render("Use arrow keys to navigate, space to select, enter to confirm") + "\n"
+	for i, choice := range model.Choices {
 		cursor := " "
-		if m.cursor == i {
+		if model.Cursor == i {
 			cursor = ">"
 		}
 		checked := " "
-		if m.selected[i] {
+		if model.Selected[i] {
 			checked = "✓"
 		}
 		line := cursor + " [" + checked + "] " + choice
-		if m.cursor == i {
-			s += Styles.selected.Render(line) + "\n"
+		if model.Cursor == i {
+			s += Styles.Selected.Render(line) + "\n"
 		} else {
-			s += Styles.item.Render(line) + "\n"
+			s += Styles.Item.Render(line) + "\n"
 		}
 	}
 	return s
 }
 
-// Input Model - Text input field
-type InputModel struct {
-	textInput textinput.Model
-	prompt    string
-}
-
-func (m InputModel) Init() tea.Cmd {
+func (model InputModel) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m InputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (model InputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
-	switch msg := msg.(type) {
+	switch messageLocal := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.Type {
+		switch messageLocal.Type {
 		case tea.KeyEnter, tea.KeyCtrlC, tea.KeyEsc:
-			return m, tea.Quit
+			return model, tea.Quit
 		}
 	}
 
-	m.textInput, cmd = m.textInput.Update(msg)
-	return m, cmd
+	model.TextInput, cmd = model.TextInput.Update(msg)
+	return model, cmd
 }
 
-func (m InputModel) View() string {
+func (model InputModel) View() string {
 	return fmt.Sprintf("\n%s\n\n%s\n\n%s",
-		Styles.title.Render(m.prompt),
-		m.textInput.View(),
+		Styles.Title.Render(model.Prompt),
+		model.TextInput.View(),
 		"(esc to quit)")
 }
 
-// Confirm Model - Yes/No confirmation dialog
-type ConfirmModel struct {
-	prompt       string
-	confirmed    bool
-	defaultValue bool
-}
-
-func (m ConfirmModel) Init() tea.Cmd {
+func (model ConfirmModel) Init() tea.Cmd {
 	return nil
 }
 
-func (m ConfirmModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
+func (model ConfirmModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch messageLocal := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
+		switch messageLocal.String() {
 		case "y", "Y":
-			m.confirmed = true
-			return m, tea.Quit
+			model.Confirmed = true
+			return model, tea.Quit
 		case "n", "N":
-			m.confirmed = false
-			return m, tea.Quit
+			model.Confirmed = false
+			return model, tea.Quit
 		case "ctrl+c", "esc":
-			m.confirmed = false
-			return m, tea.Quit
+			model.Confirmed = false
+			return model, tea.Quit
 		case "enter":
-			m.confirmed = m.defaultValue
-			return m, tea.Quit
+			model.Confirmed = model.DefaultValue
+			return model, tea.Quit
 		}
 	}
-	return m, nil
+	return model, nil
 }
 
-func (m ConfirmModel) View() string {
+func (model ConfirmModel) View() string {
 	defaultHint := "n"
-	if m.defaultValue {
+	if model.DefaultValue {
 		defaultHint = "Y"
 	}
-	return "\n" + Styles.title.Render(m.prompt) + "\n(Y/n) [default: " + defaultHint + "]"
+	return "\n" + Styles.Title.Render(model.Prompt) + "\n(Y/n) [default: " + defaultHint + "]"
 }
