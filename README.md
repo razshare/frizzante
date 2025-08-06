@@ -24,9 +24,6 @@ go install github.com/razshare/frizzante@latest
 > export PATH=$PATH:$GOPATH/bin
 > ```
 
-# Get started
-
-
 Create a project with
 ```sh
 frizzante -c MyProject
