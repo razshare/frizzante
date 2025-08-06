@@ -1,6 +1,7 @@
 package containers
 
 import (
+	"embed"
 	"errors"
 	"fmt"
 	"github.com/dop251/goja"
@@ -15,15 +16,16 @@ import (
 )
 
 // NewViewContainer creates a new view container that points to the "app" directory.
-func NewViewContainer() *ViewContainer {
+func NewViewContainer(efs embed.FS, programs uint64, runtimes uint64) *ViewContainer {
 	return &ViewContainer{
 		AppRoot:               "app",
 		ServerJs:              "app/dist/server.js",
 		IndexHtml:             "app/dist/client/index.html",
-		MaximumProgramCounter: 2,
-		MaximumRuntimeCounter: 2,
+		MaximumProgramCounter: programs,
+		MaximumRuntimeCounter: runtimes,
 		ProgramChannel:        make(chan *goja.Program, 1),
 		RuntimeChannel:        make(chan *goja.Runtime, 1),
+		Efs:                   efs,
 	}
 }
 
