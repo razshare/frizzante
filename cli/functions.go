@@ -1,7 +1,10 @@
 package cli
 
 import (
+	"atomicgo.dev/keyboard/keys"
 	"fmt"
+	"github.com/pterm/pterm"
+	"github.com/pterm/pterm/putils"
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	flag "github.com/spf13/pflag"
@@ -139,6 +142,11 @@ func (cli *Cli) OnStart() {
 }
 
 func (cli *Cli) OnMenu() {
+	err := pterm.DefaultBigText.WithLetters(putils.LettersFromStringWithStyle("Frizzante", pterm.FgCyan.ToStyle())).Render()
+	if err != nil {
+		cli.Fatal(err)
+	}
+
 	options := []string{
 		"Help",
 		"Update",
@@ -160,7 +168,7 @@ func (cli *Cli) OnMenu() {
 		"Sqlc Generate",
 	}
 
-	result, showError := CharmChoose("Pick an option", options)
+	result, showError := pterm.DefaultInteractiveSelect.WithOptions(options).Show("Pick an option")
 	if showError != nil {
 		cli.Fatal(showError)
 	}
@@ -178,7 +186,7 @@ func (cli *Cli) OnMenu() {
 	}
 
 	if result == "Create Project" {
-		projectName, projectNameError := CharmInput("Give the project name")
+		projectName, projectNameError := pterm.DefaultInteractiveTextInput.Show("Give the project name")
 		if projectNameError != nil {
 			cli.Fatal(projectNameError)
 		}
@@ -590,14 +598,21 @@ func (cli *Cli) OnAddFeature(features string) {
 	}
 
 	if features == ":pick" {
-		selectedFeatures, showError := CharmMultiSelect("Pick a feature to add", []string{
-			"Core",
-			"Forms",
-			"Links",
-			"Air",
-			"Bun",
-			"Sqlc",
-		})
+		selectedFeatures, showError := pterm.
+			DefaultInteractiveMultiselect.
+			WithKeySelect(keys.Space).
+			WithKeyConfirm(keys.Enter).
+			WithFilter(true).
+			WithOptions([]string{
+				"Core",
+				"Forms",
+				"Links",
+				"Air",
+				"Bun",
+				"Sqlc",
+			}).
+			WithFilter(false).
+			Show("Pick a feature to add")
 
 		if showError != nil {
 			cli.Fatal(showError)
@@ -960,9 +975,27 @@ func (cli *Cli) OnSqlcGenerate() {
 func (cli *Cli) OnWelcome() {
 	usingDocker := os.Getenv("FRIZZANTE_USING_DOCKER")
 	end := make(chan string)
+	err := pterm.DefaultBigText.WithLetters(putils.LettersFromStringWithStyle("Frizzante", pterm.FgCyan.ToStyle())).Render()
+	if err != nil {
+		cli.Fatal(err)
+	}
 
 	if usingDocker != "" {
-		CharmDockerHelp()
+		println("")
+		println("🐙 You're running Frizzante in Docker!")
+		println("")
+		println("⚡️ Simple workflow:")
+		println("• Attach to the container: docker exec -it frizzante-start sh")
+		println("• Run environment in container:")
+		println("    • Dev environment: make dev")
+		println("    • Prod environment: make build")
+		println("    • To run the app: ./.gen/bin/app")
+		println("• Run prod via docker:")
+		println("    • Build image: docker build --target frizzante_prod -t my-app:prod .")
+		println("    • Run image: docker run -p 8080:8080 my-app:prod")
+		println("    • Via docker compose: docker compose -f compose.yaml -f compose.prod.yaml up -d --build")
+		println("🎉 Enjoy!!")
+		println("")
 		cli.Info("For more info: https://razshare.github.io/frizzante-docs/guides/get-started/")
 	}
 
@@ -983,9 +1016,16 @@ func (cli *Cli) Install(name string, url string, destination string) {
 		}
 	}
 
-	spinner := CharmSpinner(fmt.Sprintf("installing `%s` from `%s`...", name, url))
-	spinner.Start()
-	defer spinner.Stop()
+	spinner, spinnerError := pterm.DefaultSpinner.WithRemoveWhenDone(true).Start(fmt.Sprintf("installing `%s` from `%s`...", name, url))
+	if spinnerError != nil {
+		cli.Fatal(spinnerError)
+	}
+	defer func() {
+		stopError := spinner.Stop()
+		if stopError != nil {
+			cli.Fatal(stopError)
+		}
+	}()
 
 	if !strings.HasSuffix(url, ".zip") {
 		nameFixed := name
@@ -1039,10 +1079,10 @@ func (cli *Cli) ShowFeaturesInfo() {
 		"You can also use -a:pick or --add :pick to pick feature interactively.",
 	}, "\n"))
 
-	fmt.Println()
+	pterm.Println()
 
-	headers := []string{"Feature Name", "Description"}
-	rows := [][]string{
+	data := pterm.TableData{
+		{"Feature Name", "Description"},
 		{
 			"Core",
 			strings.Join([]string{
@@ -1098,7 +1138,18 @@ func (cli *Cli) ShowFeaturesInfo() {
 		},
 	}
 
-	CharmTable(headers, rows)
+	// Create a table with a header and the defined data, then render it
+	tableError := pterm.
+		DefaultTable.
+		WithHasHeader().
+		WithData(data).
+		WithBoxed(true).
+		WithRowSeparator("─").
+		WithHeaderRowSeparator("=").
+		Render()
+	if tableError != nil {
+		cli.Fatal(tableError)
+	}
 }
 
 func (cli *Cli) Platform() Platform {
@@ -1108,14 +1159,17 @@ func (cli *Cli) Platform() Platform {
 		platform = *FlagPlatform
 	} else {
 		var platformError error
-		platform, platformError = CharmChoose("Pick a platform", []string{
-			"Linux/amd64",
-			"Linux/arm64",
-			"Darwin/amd64",
-			"Darwin/arm64",
-			"Windows/amd64",
-			"Windows/arm64",
-		})
+		platform, platformError = pterm.
+			DefaultInteractiveSelect.
+			WithOptions([]string{
+				"Linux/amd64",
+				"Linux/arm64",
+				"Darwin/amd64",
+				"Darwin/arm64",
+				"Windows/amd64",
+				"Windows/arm64",
+			}).
+			Show("Pick a platform")
 
 		if platformError != nil {
 			cli.Fatal(platformError)
@@ -1167,7 +1221,12 @@ func (cli *Cli) Confirm(text string) bool {
 		return true
 	}
 
-	yes, showError := CharmConfirm(text, true)
+	yes, showError := pterm.
+		DefaultInteractiveConfirm.
+		WithConfirmText("Y").
+		WithDefaultText("n").
+		WithDefaultValue(true).
+		Show(text)
 
 	if showError != nil {
 		cli.Fatal(showError)
@@ -1310,47 +1369,45 @@ func (cli *Cli) Confirmf(template string, vars ...any) bool {
 
 // Fatalf shows a fatal message and terminates the application.
 func (cli *Cli) Fatalf(template string, vars ...any) {
-	CharmError(fmt.Sprintf(template, vars...))
-	os.Exit(1)
+	pterm.Fatal.Printfln(template, vars...)
 }
 
 // Warningf shows a warning message.
 func (cli *Cli) Warningf(template string, vars ...any) {
-	CharmWarning(fmt.Sprintf(template, vars...))
+	pterm.Warning.Printfln(template, vars...)
 }
 
 // Infof shows an info message.
 func (cli *Cli) Infof(template string, vars ...any) {
-	CharmInfo(fmt.Sprintf(template, vars...))
+	pterm.Info.Printfln(template, vars...)
 }
 
 // Successf shows a success message.
 func (cli *Cli) Successf(template string, vars ...any) {
-	CharmSuccess(fmt.Sprintf(template, vars...))
+	pterm.Success.Printfln(template, vars...)
 }
 
 // Fatal shows a fatal message and terminates the application.
 func (cli *Cli) Fatal(vars ...any) {
-	CharmError(fmt.Sprint(vars...))
-	os.Exit(1)
+	pterm.Fatal.Println(vars...)
 }
 
 // Warning shows a warning message.
 func (cli *Cli) Warning(vars ...any) {
-	CharmWarning(fmt.Sprint(vars...))
+	pterm.Warning.Println(vars...)
 }
 
 // Info shows an info message.
 func (cli *Cli) Info(vars ...any) {
-	CharmInfo(fmt.Sprint(vars...))
+	pterm.Info.Println(vars...)
 }
 
 // Success shows a success message.
 func (cli *Cli) Success(vars ...any) {
-	CharmSuccess(fmt.Sprint(vars...))
+	pterm.Success.Println(vars...)
 }
 
 // Section shows the name of a section using Markdown semantics.
 func (cli *Cli) Section(vars ...any) {
-	CharmSection(fmt.Sprint(vars...))
+	pterm.DefaultSection.Println(vars...)
 }
