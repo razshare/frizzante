@@ -8,11 +8,16 @@ import (
 var Map = map[string]*Lock{}
 var Mutex = &sync.Mutex{}
 
-// Acquire acquires a LockSynchronizer from ParallelMap
-// based on the given key and returns its Mutex.
+// Acquire retrieves or creates a Lock with a given key.
 //
-// If the LockSynchronizer doesn't exist, Lock creates it
-// and if the key is not empty it also saves it in Map.
+// Lock embeds Mutex.
+//
+// If the Lock is created anew, locks.Acquire locks the Lock immediately.
+//
+// Acquire itself guarantees thread-safety by locking to locks.Mutex.
+//
+// New locks are saved in locks.Map.
+// Read Lock.Destroy for more details on the usage of locks.Map.
 func Acquire(key ...string) *Lock {
 	if len(key) == 0 {
 		return &Lock{Mutex: sync.Mutex{}}
@@ -35,7 +40,13 @@ func Acquire(key ...string) *Lock {
 	return lock
 }
 
-// Destroy removes the LockSynchronizer from ParallelMap.
+// Destroy removes the Lock from locks.Map.
+//
+// In order to guarantee thread-safety, Lock.Destroy
+// locks both the Lock and locks.Mutex during this process.
+//
+// Both Lock and locks.Mutex are unlocked after
+// the Lock has been removed from locks.Map.
 func (lock *Lock) Destroy() {
 	Mutex.Lock()
 	lock.Mutex.Lock()
