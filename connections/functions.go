@@ -627,7 +627,7 @@ func (connection *Connection) SendView(view views.View) {
 		return
 	}
 
-	html, renderError := view.Render(connection.ViewContainer)
+	html, renderError := view.Render(connection.App, connection.AppConfiguration)
 	if renderError != nil {
 		connection.ErrorLog.Println(renderError, stack.Trace())
 	}

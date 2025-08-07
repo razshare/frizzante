@@ -2,8 +2,8 @@ package servers
 
 import (
 	"embed"
+	"github.com/razshare/frizzante/apps"
 	"github.com/razshare/frizzante/archives"
-	"github.com/razshare/frizzante/containers"
 	"github.com/razshare/frizzante/guards"
 	"github.com/razshare/frizzante/routes"
 	"log"
@@ -12,15 +12,16 @@ import (
 
 type Server struct {
 	http.Server
-	SecureAddr     string
-	PublicRoot     string
-	Dotenv         string
-	Certificate    string
-	Key            string
-	Efs            embed.FS
-	InfoLog        *log.Logger
-	Guards         []guards.Guard
-	Routes         []routes.Route
-	SessionArchive archives.Archive
-	ViewContainer  *containers.ViewContainer
+	AppConfiguration apps.Configuration
+	SessionArchive   archives.Archive
+	Guards           []guards.Guard
+	Routes           []routes.Route
+	InfoLog          *log.Logger
+	Efs              embed.FS
+	Stop             chan any
+	SecureAddr       string
+	Certificate      string
+	PublicRoot       string
+	Dotenv           string
+	Key              string
 }

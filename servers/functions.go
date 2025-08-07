@@ -3,10 +3,9 @@ package servers
 import (
 	"context"
 	"errors"
+	"github.com/razshare/frizzante/apps"
 	"github.com/razshare/frizzante/archives"
 	"github.com/razshare/frizzante/connections"
-	"github.com/razshare/frizzante/containers"
-	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/guards"
 	"github.com/razshare/frizzante/routes"
@@ -16,57 +15,62 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
-	"sync"
 	"time"
 )
 
 func New() *Server {
+	infoLog := log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
 	return &Server{
-		InfoLog:        log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
-		SessionArchive: archives.NewDiskArchive(filepath.Join(".gen", "sessions")),
-		SecureAddr:     "0.0.0.0:8383",
-		PublicRoot:     "app/dist/client",
+		InfoLog:    infoLog,
+		SecureAddr: "0.0.0.0:8383",
+		Stop:       make(chan any),
 		Server: http.Server{
 			Addr:           "0.0.0.0:8080",
 			Handler:        http.NewServeMux(),
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
 			MaxHeaderBytes: 3 * globals.MB,
-			ErrorLog:       log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime),
+			ErrorLog:       errorLog,
+		},
+		SessionArchive: archives.NewDiskArchive(filepath.Join(".gen", "sessions")),
+		PublicRoot:     "app/dist/client",
+		AppConfiguration: apps.Configuration{
+			Root:        "app",
+			Script:      "app/dist/server.js",
+			Document:    "app/dist/client/index.html",
+			Parallels:   2,
+			InfoLog:     infoLog,
+			ErrorLog:    errorLog,
+			Development: os.Getenv("DEV") == "1",
 		},
 	}
 }
 
 // Start starts the server.
-//
-// If the server fails to start, ServerStart crashes the program.
 func (server *Server) Start() {
-	if server.ViewContainer == nil {
-		server.ViewContainer = containers.NewViewContainer()
-		server.ViewContainer.Efs = server.Efs
-	} else {
-		if !embeds.IsDirectory(server.ViewContainer.Efs, server.ViewContainer.AppRoot) {
-			//trace.
-		}
-	}
+	var app *apps.App
 
-	go server.ViewContainer.Start()
+	app = apps.Start(server.AppConfiguration, server.Efs)
+
+	defer func() { go func() { app.Stop <- 0 }() }()
 
 	mux := server.Handler.(*http.ServeMux)
 
 	for _, route := range server.Routes {
 		mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 			connection := &connections.Connection{
-				Request:        request,
-				Writer:         writer,
-				Status:         200,
-				EventId:        1,
-				Efs:            server.Efs,
-				PublicRoot:     server.PublicRoot,
-				ErrorLog:       server.ErrorLog,
-				InfoLog:        server.InfoLog,
-				SessionArchive: server.SessionArchive,
-				ViewContainer:  server.ViewContainer,
+				EventId:          1,
+				Status:           200,
+				Writer:           writer,
+				Request:          request,
+				App:              app,
+				Efs:              server.Efs,
+				InfoLog:          server.InfoLog,
+				ErrorLog:         server.ErrorLog,
+				PublicRoot:       server.PublicRoot,
+				SessionArchive:   server.SessionArchive,
+				AppConfiguration: server.AppConfiguration,
 			}
 
 			for _, tag := range route.Tags {
@@ -87,47 +91,50 @@ func (server *Server) Start() {
 		})
 	}
 
-	var group sync.WaitGroup
-
-	group.Add(2)
+	var cancelled bool
 
 	go func() {
 		readableAddress := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-		server.InfoLog.Printf("listening for requests at http://%s", readableAddress)
+		server.InfoLog.Printf("server bound to address %s; visit your application at http://%s", server.Addr, readableAddress)
+		if cancelled {
+			server.InfoLog.Printf("cancelling server startup")
+			return
+		}
 		serveError := http.ListenAndServe(server.Addr, server.Handler)
 		if serveError != nil {
 			if errors.Is(serveError, http.ErrServerClosed) {
 				server.InfoLog.Println("shutting down server")
 				return
 			}
-			log.Fatal(serveError)
+			server.ErrorLog.Println(serveError)
 		}
 	}()
 
 	go func() {
 		if "" != server.Certificate && "" != server.Key {
 			readableAddress := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-			server.InfoLog.Printf("listening for requests at https://%s", readableAddress)
+			server.InfoLog.Printf("server bound to address %s; visit your application at https://%s", server.Addr, readableAddress)
+			if cancelled {
+				server.InfoLog.Printf("cancelling server startup")
+				return
+			}
 			serveError := http.ListenAndServeTLS(server.SecureAddr, server.Certificate, server.Key, server.Handler)
 			if serveError != nil {
 				if errors.Is(serveError, http.ErrServerClosed) {
 					server.InfoLog.Printf("shutting down server")
 					return
 				}
-				log.Fatal(serveError)
+				server.ErrorLog.Println(serveError)
 			}
 		}
 	}()
 
-	group.Wait()
-}
+	<-server.Stop
+	println("cancelled")
+	cancelled = true
 
-// Stop attempts to stop the server.
-//
-// If the shutdown attempt fails, ServerStop crashes the program.
-func (server *Server) Stop() {
 	if err := server.Shutdown(context.Background()); err != nil {
-		log.Fatal(err)
+		server.ErrorLog.Println(err)
 	}
 }
 

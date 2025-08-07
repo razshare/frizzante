@@ -14,8 +14,8 @@ import (
 )
 
 // IsFile check if file exists and is a file.
-func IsFile(n string) bool {
-	stat, err := os.Stat(n)
+func IsFile(fileName string) bool {
+	stat, err := os.Stat(fileName)
 	if err != nil {
 		return false
 	}

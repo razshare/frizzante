@@ -3,25 +3,26 @@ package connections
 import (
 	"embed"
 	"github.com/gorilla/websocket"
+	"github.com/razshare/frizzante/apps"
 	"github.com/razshare/frizzante/archives"
-	"github.com/razshare/frizzante/containers"
 	"log"
 	"net/http"
 )
 
 type Connection struct {
-	Status         int
-	Locked         bool
-	EventId        int64
-	EventName      string
-	SessionId      string
-	PublicRoot     string
-	Efs            embed.FS
-	ErrorLog       *log.Logger
-	InfoLog        *log.Logger
-	WebSocket      *websocket.Conn
-	SessionArchive archives.Archive
-	Request        *http.Request
-	Writer         http.ResponseWriter
-	ViewContainer  *containers.ViewContainer
+	Status           int
+	Locked           bool
+	EventId          int64
+	EventName        string
+	SessionId        string
+	PublicRoot       string
+	Efs              embed.FS
+	App              *apps.App
+	ErrorLog         *log.Logger
+	InfoLog          *log.Logger
+	Request          *http.Request
+	WebSocket        *websocket.Conn
+	SessionArchive   archives.Archive
+	AppConfiguration apps.Configuration
+	Writer           http.ResponseWriter
 }

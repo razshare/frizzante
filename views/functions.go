@@ -5,20 +5,43 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dop251/goja"
-	"github.com/razshare/frizzante/containers"
+	"github.com/evanw/esbuild/pkg/api"
+	"github.com/razshare/frizzante/apps"
 	"github.com/razshare/frizzante/globals"
+	"github.com/razshare/frizzante/javascript"
+	"os"
 	"strings"
 )
 
 // ExecuteServerJs executes the server script.
-func (view *View) ExecuteServerJs(container *containers.ViewContainer, properties map[string]any) (string, string, error) {
-	Program := <-container.ProgramChannel
-	Runtime := <-container.RuntimeChannel
+func (view *View) ExecuteServerJs(app *apps.App, appConfig apps.Configuration, properties map[string]any) (string, string, error) {
+	var runtime *goja.Runtime
+	var program *goja.Program
+	var compileError error
 
-	defer func() { go func() { container.ProgramChannel <- Program }() }()
-	defer func() { go func() { container.RuntimeChannel <- Runtime }() }()
+	if appConfig.Development {
+		runtime = goja.New()
+		var fileNameFixed = strings.ReplaceAll(appConfig.Script, "\\", "/")
+		data, readError := os.ReadFile(fileNameFixed)
+		if readError != nil {
+			return "", "", readError
+		}
+		bundledSourceCode, bundleError := javascript.Bundle(appConfig.Root, api.FormatCommonJS, string(data))
+		if bundleError != nil {
+			return "", "", bundleError
+		}
+		program, compileError = goja.Compile(appConfig.Script, fmt.Sprintf(globals.RenderScriptFormat, bundledSourceCode), false)
+		if compileError != nil {
+			return "", "", compileError
+		}
+	} else {
+		runtime = <-app.Runtime
+		program = <-app.Program
+		defer func() { go func() { app.Runtime <- runtime }() }()
+		defer func() { go func() { app.Program <- program }() }()
+	}
 
-	runResult, runError := Runtime.RunProgram(Program)
+	runResult, runError := runtime.RunProgram(program)
 	if runError != nil {
 		return "", "", runError
 	}
@@ -29,13 +52,13 @@ func (view *View) ExecuteServerJs(container *containers.ViewContainer, propertie
 		return "", "", errors.New("render is not a function")
 	}
 
-	renderPromise, renderError := renderFn(goja.Undefined(), Runtime.ToValue(properties))
+	renderPromise, renderError := renderFn(goja.Undefined(), runtime.ToValue(properties))
 
 	if renderError != nil {
 		return "", "", renderError
 	}
 
-	value := renderPromise.Export().(*goja.Promise).Result().ToObject(Runtime)
+	value := renderPromise.Export().(*goja.Promise).Result().ToObject(runtime)
 
 	headValue := value.Get("head")
 	bodyValue := value.Get("body")
@@ -55,7 +78,7 @@ func (view *View) ExecuteServerJs(container *containers.ViewContainer, propertie
 }
 
 // RenderClient renders on the client.
-func (view *View) RenderClient(container *containers.ViewContainer) (string, error) {
+func (view *View) RenderClient(app *apps.App, appConfig apps.Configuration) (string, error) {
 	id := "svelte-app"
 
 	stringifiedProperties, jsoNError := json.Marshal(map[string]any{
@@ -67,16 +90,24 @@ func (view *View) RenderClient(container *containers.ViewContainer) (string, err
 		return "", jsoNError
 	}
 
-	indexHtmlData, indexHtmlDataError := container.ReadIndexHtml()
-	if indexHtmlDataError != nil {
-		return "", indexHtmlDataError
+	var document string
+
+	if appConfig.Development {
+		var fileNameFixed = strings.ReplaceAll(appConfig.Document, "\\", "/")
+		data, readError := os.ReadFile(fileNameFixed)
+		if readError != nil {
+			return "", readError
+		}
+		document = string(data)
+	} else {
+		document = <-app.Document
 	}
 
 	return strings.Replace(
 		strings.Replace(
 			strings.Replace(
 				strings.Replace(
-					indexHtmlData,
+					document,
 					"<!--app-target-->",
 					fmt.Sprintf("<script type=\"application/javascript\">function target(){return document.getElementById(\"%s\")}</script>", id),
 					1,
@@ -99,8 +130,8 @@ func (view *View) RenderClient(container *containers.ViewContainer) (string, err
 }
 
 // RenderServer renders on the server.
-func (view *View) RenderServer(container *containers.ViewContainer) (string, error) {
-	head, body, err := view.ExecuteServerJs(container, map[string]any{
+func (view *View) RenderServer(app *apps.App, appConfig apps.Configuration) (string, error) {
+	head, body, err := view.ExecuteServerJs(app, appConfig, map[string]any{
 		"name":       view.Name,
 		"data":       view.Data,
 		"renderMode": view.RenderMode,
@@ -109,22 +140,30 @@ func (view *View) RenderServer(container *containers.ViewContainer) (string, err
 		return "", err
 	}
 
-	index, readError := container.ReadIndexHtml()
-	if readError != nil {
-		return "", readError
+	var document string
+
+	if appConfig.Development {
+		var fileNameFixed = strings.ReplaceAll(appConfig.Document, "\\", "/")
+		data, readError := os.ReadFile(fileNameFixed)
+		if readError != nil {
+			return "", readError
+		}
+		document = string(data)
+	} else {
+		document = <-app.Document
 	}
 
 	return strings.Replace(
 		strings.Replace(
 			strings.Replace(
 				strings.Replace(
-					globals.NoScript.ReplaceAllString(index, ""),
+					globals.NoScript.ReplaceAllString(document, ""),
 					"<!--app-target-->",
 					"",
 					1,
 				),
 				"<!--app-body-->",
-				fmt.Sprintf("<div id=\"%s\">%s</div>", index, body),
+				fmt.Sprintf("<div id=\"%s\">%s</div>", document, body),
 				1,
 			),
 			"<!--app-head-->",
@@ -138,8 +177,8 @@ func (view *View) RenderServer(container *containers.ViewContainer) (string, err
 }
 
 // RenderHeadless renders only the body of the view on the server.
-func (view *View) RenderHeadless(container *containers.ViewContainer) (string, error) {
-	_, body, err := view.ExecuteServerJs(container, map[string]any{
+func (view *View) RenderHeadless(app *apps.App, appConfig apps.Configuration) (string, error) {
+	_, body, err := view.ExecuteServerJs(app, appConfig, map[string]any{
 		"name":       view.Name,
 		"data":       view.Data,
 		"renderMode": view.RenderMode,
@@ -151,7 +190,7 @@ func (view *View) RenderHeadless(container *containers.ViewContainer) (string, e
 }
 
 // RenderFull renders on the server and on the client.
-func (view *View) RenderFull(container *containers.ViewContainer) (string, error) {
+func (view *View) RenderFull(app *apps.App, appConfig apps.Configuration) (string, error) {
 	id := "svelte-app"
 
 	properties := map[string]any{
@@ -160,14 +199,22 @@ func (view *View) RenderFull(container *containers.ViewContainer) (string, error
 		"renderMode": view.RenderMode,
 	}
 
-	head, body, err := view.ExecuteServerJs(container, properties)
+	head, body, err := view.ExecuteServerJs(app, appConfig, properties)
 	if err != nil {
 		return "", err
 	}
 
-	index, readError := container.ReadIndexHtml()
-	if readError != nil {
-		return "", readError
+	var document string
+
+	if appConfig.Development {
+		var fileNameFixed = strings.ReplaceAll(appConfig.Document, "\\", "/")
+		data, readError := os.ReadFile(fileNameFixed)
+		if readError != nil {
+			return "", readError
+		}
+		document = string(data)
+	} else {
+		document = <-app.Document
 	}
 
 	stringifiedProperties, jsonError := json.Marshal(properties)
@@ -179,7 +226,7 @@ func (view *View) RenderFull(container *containers.ViewContainer) (string, error
 		strings.Replace(
 			strings.Replace(
 				strings.Replace(
-					index,
+					document,
 					"<!--app-target-->",
 					fmt.Sprintf("<script type=\"application/javascript\">function target(){return document.getElementById(\"%s\")}</script>", id),
 					1,
@@ -202,18 +249,18 @@ func (view *View) RenderFull(container *containers.ViewContainer) (string, error
 }
 
 // Render renders.
-func (view *View) Render(container *containers.ViewContainer) (string, error) {
+func (view *View) Render(app *apps.App, appConfig apps.Configuration) (string, error) {
 	if view.RenderMode == RenderModeFull {
-		return view.RenderFull(container)
+		return view.RenderFull(app, appConfig)
 	}
 
 	if view.RenderMode == RenderModeServer {
-		return view.RenderServer(container)
+		return view.RenderServer(app, appConfig)
 	}
 
 	if view.RenderMode == RenderModeClient {
-		return view.RenderClient(container)
+		return view.RenderClient(app, appConfig)
 	}
 
-	return view.RenderHeadless(container)
+	return view.RenderHeadless(app, appConfig)
 }
