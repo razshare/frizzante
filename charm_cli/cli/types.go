@@ -30,16 +30,17 @@ type ThemeColors struct {
 }
 
 type ThemeStyles struct {
-	Title    lipgloss.Style
-	Item     lipgloss.Style
-	Selected lipgloss.Style
-	Status   func(color string) lipgloss.Style
-	BigText  lipgloss.Style
-	Section  lipgloss.Style
-	Spinner  lipgloss.Style
-	Flag     lipgloss.Style
-	Category lipgloss.Style
-	Example  lipgloss.Style
+	Title       lipgloss.Style
+	Item        lipgloss.Style
+	Selected    lipgloss.Style
+	Status      func(color string) lipgloss.Style
+	BigText     lipgloss.Style
+	Section     lipgloss.Style
+	Subheader   lipgloss.Style
+	Spinner     lipgloss.Style
+	Flag        lipgloss.Style
+	Category    lipgloss.Style
+	Example     lipgloss.Style
 }
 
 type ConfirmModel struct {
@@ -51,6 +52,7 @@ type ConfirmModel struct {
 type InputModel struct {
 	TextInput textinput.Model
 	Prompt    string
+	Cancelled bool
 }
 
 type MultiSelectModel struct {
