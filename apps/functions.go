@@ -1,4 +1,4 @@
-package container
+package apps
 
 import (
 	"embed"
@@ -16,7 +16,7 @@ import (
 )
 
 // Start starts a new app.
-func Start(config Configuration, efs embed.FS) *Container {
+func Start(config Config, efs embed.FS) *App {
 	script := ProduceScript(
 		efs,
 		config.Root,
@@ -59,7 +59,7 @@ func Start(config Configuration, efs embed.FS) *Container {
 		group.Wait()
 	}()
 
-	return &Container{
+	return &App{
 		Script:   script.Value,
 		Document: document.Value,
 		Program:  program.Value,
@@ -192,7 +192,7 @@ func ProduceProgram(
 }
 
 // ExecuteServerJs executes the server script.
-func ExecuteServerJs(application *Container, configuration Configuration, properties map[string]any) (string, string, error) {
+func ExecuteServerJs(application *App, configuration Config, properties map[string]any) (string, string, error) {
 	var runtime *goja.Runtime
 	var program *goja.Program
 	var compileError error

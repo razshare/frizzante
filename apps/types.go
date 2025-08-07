@@ -1,4 +1,4 @@
-package container
+package apps
 
 import (
 	"github.com/dop251/goja"
@@ -6,7 +6,7 @@ import (
 	"sync"
 )
 
-type Configuration struct {
+type Config struct {
 	Development bool
 	Parallels   uint32
 	Document    string
@@ -16,7 +16,7 @@ type Configuration struct {
 	InfoLog     *log.Logger
 }
 
-type Container struct {
+type App struct {
 	Document chan string
 	Script   chan string
 	Program  chan *goja.Program

@@ -4,8 +4,8 @@ import (
 	"embed"
 	"github.com/razshare/frizzante/act"
 	frizzanteCli "github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/server"
-	"github.com/razshare/frizzante/view"
+	"github.com/razshare/frizzante/servers"
+	"github.com/razshare/frizzante/views"
 )
 
 //go:embed .github
@@ -13,7 +13,7 @@ import (
 //go:embed app/dist
 var Efs embed.FS
 var Port = 8080
-var Server = make(chan *server.Server, 1)
+var Server = make(chan *servers.Server, 1)
 
 func init() {
 	// Cli.
@@ -22,39 +22,39 @@ func init() {
 	*frizzanteCli.FlagBun = "bun"
 
 	// Server.
-	local := server.Default()
+	local := servers.New()
 	local.Efs = Efs
 
 	local.Routes = append(
 		local.Routes,
-		server.Route{Pattern: "GET /TestServerAddRoute", Handler: func(c *server.Connection) {
+		servers.Route{Pattern: "GET /TestServerAddRoute", Handler: func(c *servers.Connection) {
 			act.SendMessage(c, "hello")
 		}},
-		server.Route{Pattern: "GET /TestConnectionSendStatus", Handler: func(c *server.Connection) {
+		servers.Route{Pattern: "GET /TestConnectionSendStatus", Handler: func(c *servers.Connection) {
 			act.SendStatus(c, 201)
 			act.SendMessage(c, "ok")
 		}},
-		server.Route{Pattern: "GET /TestConnectionSendHeader", Handler: func(c *server.Connection) {
+		servers.Route{Pattern: "GET /TestConnectionSendHeader", Handler: func(c *servers.Connection) {
 			act.SendHeader(c, "Content-Type", "application/json")
 			act.SendMessage(c, "{}")
 		}},
-		server.Route{Pattern: "GET /TestRenderServer", Handler: func(c *server.Connection) {
-			act.SendView(c, view.View{
+		servers.Route{Pattern: "GET /TestRenderServer", Handler: func(c *servers.Connection) {
+			act.SendView(c, views.View{
 				Name:       "Welcome",
-				RenderMode: view.RenderModeServer,
+				RenderMode: views.RenderModeServer,
 				Data:       map[string]any{"name": "world"},
 			})
 		}},
-		server.Route{Pattern: "GET /TestRenderClient", Handler: func(c *server.Connection) {
-			act.SendView(c, view.View{
+		servers.Route{Pattern: "GET /TestRenderClient", Handler: func(c *servers.Connection) {
+			act.SendView(c, views.View{
 				Name:       "Welcome",
-				RenderMode: view.RenderModeClient,
+				RenderMode: views.RenderModeClient,
 				Data:       map[string]any{"name": "world"},
 			})
 		}},
 	)
 
-	go server.Start(local)
+	go servers.Start(local)
 
 	Server <- local
 }

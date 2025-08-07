@@ -1,4 +1,4 @@
-package mime
+package mimes
 
 import "path/filepath"
 

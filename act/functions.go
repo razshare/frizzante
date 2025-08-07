@@ -11,10 +11,10 @@ import (
 	ef "github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/globals"
-	"github.com/razshare/frizzante/mime"
-	"github.com/razshare/frizzante/server"
+	"github.com/razshare/frizzante/mimes"
+	"github.com/razshare/frizzante/servers"
 	"github.com/razshare/frizzante/stack"
-	v "github.com/razshare/frizzante/view"
+	v "github.com/razshare/frizzante/views"
 	"io"
 	"net/http"
 	"net/url"
@@ -34,7 +34,7 @@ import (
 
 // ReceiveSessionId tries to find a session id among the user's cookies.
 // If no session id is found, it creates a new one and returns it.
-func ReceiveSessionId(connection *server.Connection) string {
+func ReceiveSessionId(connection *servers.Connection) string {
 	var id string
 	cookies := connection.Request.CookiesNamed("session-id")
 	cookiesCount := 0
@@ -63,14 +63,14 @@ func ReceiveSessionId(connection *server.Connection) string {
 }
 
 // ReceiveCancellation returns a channel that closes when the request gets cancelled.
-func ReceiveCancellation(connection *server.Connection) <-chan struct{} {
+func ReceiveCancellation(connection *servers.Connection) <-chan struct{} {
 	return connection.Request.Context().Done()
 }
 
 // IsAlive returns a reference to a bool which is initially set to `true`.
 //
 // This bool updates to `false` when the request gets cancelled.
-func IsAlive(connection *server.Connection) *bool {
+func IsAlive(connection *servers.Connection) *bool {
 	isAlive := true
 	go func() {
 		<-ReceiveCancellation(connection)
@@ -82,7 +82,7 @@ func IsAlive(connection *server.Connection) *bool {
 // ReceiveCookie reads the contents of a cookie from the message and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveCookie(connection *server.Connection, key string) string {
+func ReceiveCookie(connection *servers.Connection, key string) string {
 	cookie, cookieError := connection.Request.Cookie(key)
 	if cookieError != nil {
 		connection.Server.ErrorLog.Println(cookieError, stack.Trace())
@@ -101,7 +101,7 @@ func ReceiveCookie(connection *server.Connection, key string) string {
 // ReceiveMessage reads the contents of the message and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveMessage(connection *server.Connection) string {
+func ReceiveMessage(connection *servers.Connection) string {
 	if connection.WebSocket != nil {
 		_, data, readError := connection.WebSocket.ReadMessage()
 		if readError != nil {
@@ -123,7 +123,7 @@ func ReceiveMessage(connection *server.Connection) string {
 // connection and stores it in the value pointed to by val.
 //
 // Compatible with web sockets.
-func ReceiveJson(connection *server.Connection, value any) {
+func ReceiveJson(connection *servers.Connection, value any) {
 	if connection.WebSocket != nil {
 		jsonError := connection.WebSocket.ReadJSON(value)
 		if jsonError != nil {
@@ -150,7 +150,7 @@ func ReceiveJson(connection *server.Connection, value any) {
 //
 // The whole request body is parsed and up to a total of 2MB
 // of its file parts are stored in memory, with the remainder stored on disk in temporary files.
-func ReceiveForm(connection *server.Connection) url.Values {
+func ReceiveForm(connection *servers.Connection) url.Values {
 	return ReceiveFormWithMaxMemory(connection, 2*globals.MB)
 }
 
@@ -158,7 +158,7 @@ func ReceiveForm(connection *server.Connection) url.Values {
 //
 // The whole request body is parsed and up to a total of maxMemory bytes
 // of its file parts are stored in memory, with the remainder stored on disk in temporary files.
-func ReceiveFormWithMaxMemory(connection *server.Connection, maxMemory int64) url.Values {
+func ReceiveFormWithMaxMemory(connection *servers.Connection, maxMemory int64) url.Values {
 	if connection.WebSocket != nil {
 		connection.Server.ErrorLog.Println(errors.New("connection is not of type web socket"), stack.Trace())
 		return url.Values{}
@@ -183,33 +183,33 @@ func ReceiveFormWithMaxMemory(connection *server.Connection, maxMemory int64) ur
 // ReceiveQuery reads a query field and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveQuery(connection *server.Connection, key string) string {
+func ReceiveQuery(connection *servers.Connection, key string) string {
 	return connection.Request.URL.Query().Get(key)
 }
 
 // ReceivePath reads a parameters fields and returns the value.
 //
 // Compatible with web sockets.
-func ReceivePath(connection *server.Connection, key string) string {
+func ReceivePath(connection *servers.Connection, key string) string {
 	return connection.Request.PathValue(key)
 }
 
 // ReceiveHeader reads a header field and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveHeader(connection *server.Connection, key string) string {
+func ReceiveHeader(connection *servers.Connection, key string) string {
 	return connection.Request.Header.Get(key)
 }
 
 // ReceiveContentType reads the Content-Type header field and returns the value.
 //
 // Compatible with web sockets.
-func ReceiveContentType(connection *server.Connection) string {
+func ReceiveContentType(connection *servers.Connection) string {
 	return connection.Request.Header.Get("Content-Type")
 }
 
 // VerifyContentType checks if the incoming request has any of the given content-types.
-func VerifyContentType(connection *server.Connection, contentType ...string) bool {
+func VerifyContentType(connection *servers.Connection, contentType ...string) bool {
 	requestedMime := connection.Request.Header.Get("Content-Type")
 	for _, acceptedMime := range contentType {
 		if acceptedMime == "*" || strings.HasPrefix(requestedMime, acceptedMime) {
@@ -221,7 +221,7 @@ func VerifyContentType(connection *server.Connection, contentType ...string) boo
 }
 
 // VerifyAccept checks if the incoming request accepts any of the given content-types.
-func VerifyAccept(connection *server.Connection, accept ...string) bool {
+func VerifyAccept(connection *servers.Connection, accept ...string) bool {
 	requestedAcceptMime := connection.Request.Header.Get("Accept")
 	for _, acceptedMime := range accept {
 		if acceptedMime == "*" || strings.Contains(requestedAcceptMime, acceptedMime) {
@@ -249,7 +249,7 @@ func VerifyAccept(connection *server.Connection, accept ...string) bool {
 // That being said, other than the format, there is nothing else different between this function and ResponseSendContent.
 //
 // See https://html.spec.whatwg.org/multipage/server-sent-events.html for more details on the format.
-func SendEventContent(connection *server.Connection, content []byte) {
+func SendEventContent(connection *servers.Connection, content []byte) {
 	header := fmt.Sprintf("id: %d\r\nevent: %s\r\n", connection.EventId, connection.EventName)
 
 	_, writeError := connection.Writer.Write([]byte(header))
@@ -296,13 +296,13 @@ func SendEventContent(connection *server.Connection, content []byte) {
 }
 
 // SendNavigate redirects the request to a location with status 302.
-func SendNavigate(connection *server.Connection, location string) {
+func SendNavigate(connection *servers.Connection, location string) {
 	SendRedirect(connection, location, 302)
 	SendFlush(connection)
 }
 
 // SendRedirect redirects the request to a location with a status.
-func SendRedirect(connection *server.Connection, location string, status int) {
+func SendRedirect(connection *servers.Connection, location string, status int) {
 	SendStatus(connection, status)
 	SendHeader(connection, "Location", location)
 }
@@ -314,7 +314,7 @@ func SendRedirect(connection *server.Connection, location string, status int) {
 // function it will fail with an error.
 //
 // All errors are sent to the server notifier.
-func SendStatus(connection *server.Connection, status int) {
+func SendStatus(connection *servers.Connection, status int) {
 	if connection.Locked {
 		connection.Server.ErrorLog.Println("status is locked", stack.Trace())
 		return
@@ -330,7 +330,7 @@ func SendStatus(connection *server.Connection, status int) {
 // This means the status will become locked and further attempts to send the status will fail with an error.
 //
 // All errors are sent to the server notifier.
-func SendHeader(connection *server.Connection, key string, value string) {
+func SendHeader(connection *servers.Connection, key string, value string) {
 	if connection.Locked {
 		connection.Server.ErrorLog.Println("header is locked", stack.Trace())
 		return
@@ -339,7 +339,7 @@ func SendHeader(connection *server.Connection, key string, value string) {
 	connection.Writer.Header().Set(key, value)
 }
 
-func SendHeaders(connection *server.Connection, headers map[string]string) {
+func SendHeaders(connection *servers.Connection, headers map[string]string) {
 	if connection.Locked {
 		connection.Server.ErrorLog.Println("header is locked", stack.Trace())
 		return
@@ -351,16 +351,16 @@ func SendHeaders(connection *server.Connection, headers map[string]string) {
 }
 
 // SendContentType sets the Content-Type header field.
-func SendContentType(connection *server.Connection, contentType string) {
+func SendContentType(connection *servers.Connection, contentType string) {
 	SendHeader(connection, "Content-Type", contentType)
 }
 
 // SendCookie sends a cookies to the client.
-func SendCookie(connection *server.Connection, key string, value string) {
+func SendCookie(connection *servers.Connection, key string, value string) {
 	SendHeader(connection, "Set-Cookie", fmt.Sprintf("%s=%s; Path=/; HttpOnly", url.QueryEscape(key), url.QueryEscape(value)))
 }
 
-func SendFlush(connection *server.Connection) {
+func SendFlush(connection *servers.Connection) {
 	SendMessage(connection, "")
 }
 
@@ -373,7 +373,7 @@ func SendFlush(connection *server.Connection) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func SendContent(connection *server.Connection, content []byte) {
+func SendContent(connection *servers.Connection, content []byte) {
 	if !connection.Locked {
 		connection.Writer.WriteHeader(connection.Status)
 		connection.Locked = true
@@ -407,7 +407,7 @@ func SendContent(connection *server.Connection, content []byte) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func SendMessage(connection *server.Connection, message string) {
+func SendMessage(connection *servers.Connection, message string) {
 	SendContent(connection, []byte(message))
 }
 
@@ -420,43 +420,43 @@ func SendMessage(connection *server.Connection, message string) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func SendMessagef(connection *server.Connection, format string, values ...any) {
+func SendMessagef(connection *servers.Connection, format string, values ...any) {
 	SendContent(connection, []byte(fmt.Sprintf(format, values...)))
 }
 
 // SendNotFound sends a message with status 404 Not Found.
-func SendNotFound(connection *server.Connection, message string) {
+func SendNotFound(connection *servers.Connection, message string) {
 	SendStatus(connection, http.StatusNotFound)
 	SendMessage(connection, message)
 }
 
 // SendUnauthorized sends a message with status 401 Unauthorized.
-func SendUnauthorized(connection *server.Connection, message string) {
+func SendUnauthorized(connection *servers.Connection, message string) {
 	SendStatus(connection, http.StatusUnauthorized)
 	SendMessage(connection, message)
 }
 
 // SendBadRequest sends a message with status 400 Bad Request.
-func SendBadRequest(connection *server.Connection, message string) {
+func SendBadRequest(connection *servers.Connection, message string) {
 	SendStatus(connection, http.StatusBadRequest)
 	SendMessage(connection, message)
 }
 
 // SendError sends a message with status 500 Internal server Error
 // and also sends the error to the server notifier.
-func SendError(connection *server.Connection, err error) {
+func SendError(connection *servers.Connection, err error) {
 	SendStatus(connection, http.StatusBadRequest)
 	SendMessage(connection, err.Error())
 }
 
 // SendForbidden sends a message with status 403 Forbidden.
-func SendForbidden(connection *server.Connection, message string) {
+func SendForbidden(connection *servers.Connection, message string) {
 	SendStatus(connection, http.StatusForbidden)
 	SendMessage(connection, message)
 }
 
 // SendTooManyRequests sends a message with status 403 Forbidden.
-func SendTooManyRequests(connection *server.Connection, message string) {
+func SendTooManyRequests(connection *servers.Connection, message string) {
 	SendStatus(connection, http.StatusTooManyRequests)
 	SendMessage(connection, message)
 }
@@ -470,7 +470,7 @@ func SendTooManyRequests(connection *server.Connection, message string) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func SendJson(connection *server.Connection, value any) {
+func SendJson(connection *servers.Connection, value any) {
 	data, jsonError := json.Marshal(value)
 	if jsonError != nil {
 		connection.Server.ErrorLog.Println(jsonError, stack.Trace())
@@ -489,7 +489,7 @@ func SendJson(connection *server.Connection, value any) {
 
 // SendEmbeddedFileOrElse sends the embedded file requested by the client,
 // or the closest index.html embedded file, or else falls back.
-func SendEmbeddedFileOrElse(connection *server.Connection, efs embed.FS, orElse func()) {
+func SendEmbeddedFileOrElse(connection *servers.Connection, efs embed.FS, orElse func()) {
 	fileName := connection.Server.PublicRoot + connection.Request.RequestURI
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
@@ -532,7 +532,7 @@ func SendEmbeddedFileOrElse(connection *server.Connection, efs embed.FS, orElse 
 	}
 
 	if "" == connection.Writer.Header().Get("Content-Type") {
-		SendHeader(connection, "Content-Type", mime.Mime(fileName))
+		SendHeader(connection, "Content-Type", mimes.Mime(fileName))
 	}
 
 	if "" == connection.Writer.Header().Get("Content-Length") {
@@ -543,7 +543,7 @@ func SendEmbeddedFileOrElse(connection *server.Connection, efs embed.FS, orElse 
 }
 
 // SendFileOrElse sends the file requested by the client, or else falls back.
-func SendFileOrElse(connection *server.Connection, orElse func()) {
+func SendFileOrElse(connection *servers.Connection, orElse func()) {
 	fileName := filepath.Join(connection.Server.PublicRoot, connection.Request.RequestURI)
 
 	if !files.IsFile(fileName) || files.IsDirectory(fileName) {
@@ -583,7 +583,7 @@ func SendFileOrElse(connection *server.Connection, orElse func()) {
 	}
 
 	if "" == connection.Writer.Header().Get("Content-Type") {
-		SendHeader(connection, "Content-Type", mime.Mime(fileName))
+		SendHeader(connection, "Content-Type", mimes.Mime(fileName))
 	}
 
 	if "" == connection.Writer.Header().Get("Content-Length") {
@@ -597,7 +597,7 @@ func SendFileOrElse(connection *server.Connection, orElse func()) {
 // and returns a function that sets the name of the current event.
 //
 // The default event name is "message".
-func SendSseUpgrade(connection *server.Connection) func(eventName string) {
+func SendSseUpgrade(connection *servers.Connection) func(eventName string) {
 	SendHeaders(connection, map[string]string{
 		"Access-Control-Allow-Origin":   "*",
 		"Access-Control-Expose-Headers": "Content-Type",
@@ -612,7 +612,7 @@ func SendSseUpgrade(connection *server.Connection) func(eventName string) {
 }
 
 // SendWsUpgrade upgrades to web sockets.
-func SendWsUpgrade(connection *server.Connection) {
+func SendWsUpgrade(connection *servers.Connection) {
 	SendConfiguredWsUpgrade(connection, websocket.Upgrader{
 		ReadBufferSize:  10 * globals.KB,
 		WriteBufferSize: 10 * globals.KB,
@@ -620,7 +620,7 @@ func SendWsUpgrade(connection *server.Connection) {
 }
 
 // SendConfiguredWsUpgrade upgrades to web sockets.
-func SendConfiguredWsUpgrade(connection *server.Connection, upgrader websocket.Upgrader) {
+func SendConfiguredWsUpgrade(connection *servers.Connection, upgrader websocket.Upgrader) {
 	webSocketConnection, upgradeError := upgrader.Upgrade(connection.Writer, connection.Request, nil)
 	if upgradeError != nil {
 		connection.Server.ErrorLog.Println(upgradeError, stack.Trace())
@@ -641,7 +641,7 @@ func SendConfiguredWsUpgrade(connection *server.Connection, upgrader websocket.U
 }
 
 // SendView sends a view.
-func SendView(connection *server.Connection, view v.View) {
+func SendView(connection *servers.Connection, view v.View) {
 	if connection.Writer.Header().Get("Location") != "" {
 		return
 	}
@@ -659,7 +659,7 @@ func SendView(connection *server.Connection, view v.View) {
 		return
 	}
 
-	html, renderError := v.Render(&view, connection.Container, connection.Server.Container)
+	html, renderError := v.Render(&view, connection.App, connection.Server.AppConfig)
 	if renderError != nil {
 		connection.Server.ErrorLog.Println(renderError, stack.Trace())
 	}

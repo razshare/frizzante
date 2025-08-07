@@ -1,16 +1,16 @@
-package server
+package servers
 
 import (
 	"embed"
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/container"
+	"github.com/razshare/frizzante/apps"
 	"log"
 	"net/http"
 )
 
 type Server struct {
 	http.Server
-	Container   container.Configuration
+	AppConfig   apps.Config
 	Guards      []Guard
 	Routes      []Route
 	InfoLog     *log.Logger
@@ -31,7 +31,7 @@ type Connection struct {
 	Request   *http.Request
 	Writer    http.ResponseWriter
 	WebSocket *websocket.Conn
-	Container *container.Container
+	App       *apps.App
 	Server    *Server
 }
 

@@ -1,9 +1,9 @@
-package server
+package servers
 
 import (
 	"context"
 	"errors"
-	"github.com/razshare/frizzante/container"
+	"github.com/razshare/frizzante/apps"
 	"github.com/razshare/frizzante/globals"
 	"log"
 	"net/http"
@@ -13,8 +13,8 @@ import (
 	"time"
 )
 
-// Default creates a new server.
-func Default() *Server {
+// New creates a new server.
+func New() *Server {
 	infoLog := log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
 	return &Server{
@@ -30,7 +30,7 @@ func Default() *Server {
 			ErrorLog:       errorLog,
 		},
 		PublicRoot: "app/dist/client",
-		Container: container.Configuration{
+		AppConfig: apps.Config{
 			Root:        "app",
 			Script:      "app/dist/server.js",
 			Document:    "app/dist/client/index.html",
@@ -44,7 +44,7 @@ func Default() *Server {
 
 // Start starts the server.
 func Start(server *Server) {
-	application := container.Start(server.Container, server.Efs)
+	application := apps.Start(server.AppConfig, server.Efs)
 	defer func() { go func() { application.Stop <- 0 }() }()
 
 	mux := server.Handler.(*http.ServeMux)
@@ -52,12 +52,12 @@ func Start(server *Server) {
 	for _, r := range server.Routes {
 		mux.HandleFunc(r.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 			connection := &Connection{
-				EventId:   1,
-				Status:    200,
-				Writer:    writer,
-				Request:   request,
-				Container: application,
-				Server:    server,
+				EventId: 1,
+				Status:  200,
+				Writer:  writer,
+				Request: request,
+				App:     application,
+				Server:  server,
 			}
 
 			for _, tag := range r.Tags {

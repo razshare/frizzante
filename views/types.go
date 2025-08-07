@@ -1,4 +1,4 @@
-package view
+package views
 
 type RenderMode int
 
