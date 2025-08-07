@@ -12,8 +12,8 @@ import (
 )
 
 var Colors = ThemeColors{
-	Primary:   "99",
-	Secondary: "212",
+	Primary:   "87",
+	Secondary: "169",
 	Success:   "82",
 	Error:     "196",
 	Warning:   "214",
@@ -57,6 +57,11 @@ var Styles = ThemeStyles{
 		Underline(true).
 		Padding(1, 0),
 
+	Subheader: lipgloss.NewStyle().
+		Foreground(lipgloss.Color(Colors.Warning)).
+		Bold(true).
+		Padding(1, 0),
+
 	Spinner: lipgloss.
 		NewStyle().
 		Foreground(lipgloss.Color(Colors.Info)),
@@ -75,7 +80,7 @@ var Styles = ThemeStyles{
 }
 
 func RunProgram[T tea.Model](model T) (T, error) {
-	result, err := tea.NewProgram(model).Run()
+	result, err := tea.NewProgram(model, tea.WithFPS(120)).Run()
 	if err != nil {
 		return model, err
 	}
@@ -88,7 +93,6 @@ func RunProgram[T tea.Model](model T) (T, error) {
 func CharmChoose(prompt string, options []string) (string, error) {
 	// Initialize the search input
 	searchInput := textinput.New()
-	searchInput.Placeholder = "Type to filter..."
 	searchInput.Width = 80
 
 	result, err := RunProgram(&SimpleChooseModel{
@@ -135,6 +139,9 @@ func CharmInput(prompt string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if result.Cancelled {
+		return "", fmt.Errorf("input cancelled")
+	}
 	return result.TextInput.Value(), nil
 }
 
@@ -147,32 +154,62 @@ func CharmConfirm(prompt string, defaultValue bool) (bool, error) {
 	return result.Confirmed, nil
 }
 
+func PrintStatusMessage(label string, text string, bgColor string, fgColor string, textColor string) {
+	labelWidth := 9
+	
+	if label == "INFO" {
+		labelWidth = 8
+	}
+	
+	labelStyle := lipgloss.NewStyle().
+		Background(lipgloss.Color(bgColor)).
+		Foreground(lipgloss.Color(fgColor)).
+		Bold(true).
+		Width(labelWidth).
+		Align(lipgloss.Center)
+	
+	textStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color(textColor)).
+		Bold(true)
+	
+	lines := strings.Split(text, "\n")
+	for i, line := range lines {
+		if i == 0 {
+			fmt.Println(labelStyle.Render(label) + " " + textStyle.Render(line))
+		} else {
+			fmt.Println(labelStyle.Render("") + " " + textStyle.Render(line))
+		}
+	}
+}
+
 func CharmSuccess(text string) {
-	fmt.Println(Styles.Status(Colors.Success).Render("✓ " + text))
+	PrintStatusMessage("SUCCESS", text, Colors.Success, "0", Colors.Success)
 }
 
 func CharmError(text string) {
-	fmt.Println(Styles.Status(Colors.Error).Render("✗ " + text))
+	PrintStatusMessage("ERROR", text, Colors.Error, "15", Colors.Error)
 }
 
 func CharmWarning(text string) {
-	fmt.Println(Styles.Status(Colors.Warning).Render("⚠ " + text))
+	PrintStatusMessage("WARNING", text, Colors.Warning, "0", Colors.Warning)
 }
 
 func CharmInfo(text string) {
-	fmt.Println(Styles.Status(Colors.Info).Render("ℹ " + text))
+	PrintStatusMessage("INFO", text, Colors.Info, "15", Colors.Info)
 }
 
 func CharmSection(text string) {
 	fmt.Println(Styles.Section.Render("## " + text))
 }
 
-func CharmDockerHelp() {
-	fmt.Println()
-	fmt.Println(Styles.Title.Render("🐙 You're running Frizzante in Docker!"))
-	fmt.Println()
+func CharmSubheader(text string) {
+	fmt.Println(Styles.Subheader.Render(text))
+}
 
-	fmt.Println(Styles.Section.Render("⚡ Simple workflow:"))
+func CharmDockerHelp() {
+	fmt.Println(Styles.Title.Render("🐙 You're running Frizzante in Docker!"))
+
+	fmt.Println(Styles.Subheader.Render("⚡ Simple workflow:"))
 
 	fmt.Println(Styles.Status(Colors.Info).Render("• Attach to the container: ") +
 		Styles.Example.Render("docker exec -it frizzante-start sh"))
@@ -190,7 +227,7 @@ func CharmDockerHelp() {
 	fmt.Println(Styles.Item.Render("    • Via docker compose: ") +
 		Styles.Example.Render("docker compose -f compose.yaml -f compose.prod.yaml up -d --build"))
 
-	fmt.Println(Styles.Status(Colors.Success).Render("🎉 Enjoy!!"))
+	fmt.Println(Styles.Subheader.Render("🎉 Enjoy!!"))
 	fmt.Println()
 }
 
@@ -348,112 +385,81 @@ func (model *SimpleChooseModel) Init() tea.Cmd {
 }
 
 func (model *SimpleChooseModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	var cmd tea.Cmd
-
 	switch messageLocal := msg.(type) {
 	case tea.KeyMsg:
-		// Handle search mode
-		if model.Searching {
-			switch messageLocal.String() {
-			case "esc":
-				model.Searching = false
-				model.SearchInput.SetValue("")
-				model.FilteredChoices = model.Choices
-				model.Cursor = 0
-				model.ViewportStart = 0
-				return model, nil
-			case "enter":
-				if len(model.FilteredChoices) > 0 {
-					model.Selected = model.FilteredChoices[model.Cursor]
-					return model, tea.Quit
-				}
-			case "up", "ctrl+p":
-				model.NavigateUp()
-				return model, nil
-			case "down", "ctrl+n", "tab":
-				model.NavigateDown()
-				return model, nil
-			default:
-				// Update search input
-				prevValue := model.SearchInput.Value()
-				model.SearchInput, cmd = model.SearchInput.Update(messageLocal)
-				if model.SearchInput.Value() != prevValue {
-					model.FilterChoices()
-				}
-				return model, cmd
-			}
-		}
-
-		// Normal navigation mode
-		switch messageLocal.String() {
+		key := messageLocal.String()
+		switch key {
 		case "ctrl+c":
 			return model, tea.Quit
-		case "/", "ctrl+f":
-			model.Searching = true
-			model.SearchInput.Focus()
-			return model, textinput.Blink
-		case "up", "k":
-			model.NavigateUp()
-		case "down", "j":
-			model.NavigateDown()
-		case "g":
-			// Go to top
-			model.Cursor = 0
-			model.ViewportStart = 0
-		case "G":
-			// Go to bottom
-			if len(model.FilteredChoices) > 0 {
-				model.Cursor = len(model.FilteredChoices) - 1
-				model.UpdateViewport()
+		case "esc":
+			if model.Searching {
+				model.ResetSearch()
 			}
+			return model, nil
 		case "enter":
 			if len(model.FilteredChoices) > 0 {
 				model.Selected = model.FilteredChoices[model.Cursor]
 				return model, tea.Quit
 			}
+		case "up", "ctrl+p":
+			model.Navigate(-1)
+			return model, nil
+		case "down", "ctrl+n", "tab":
+			model.Navigate(1)
+			return model, nil
+		case "backspace", "ctrl+h":
+			if model.Searching {
+				return model.HandleSearchInput(messageLocal)
+			}
+		default:
+			if len(key) == 1 || key == "space" {
+				if !model.Searching {
+					model.Searching = true
+					model.SearchInput.Focus()
+				}
+				return model.HandleSearchInput(messageLocal)
+			}
 		}
 	}
-
 	return model, nil
 }
 
-func (model *SimpleChooseModel) NavigateUp() {
-	if model.Cursor > 0 {
-		model.Cursor--
-		if model.Cursor < model.ViewportStart {
-			model.ViewportStart = model.Cursor
-		}
+func (model *SimpleChooseModel) Navigate(direction int) {
+	count := len(model.FilteredChoices)
+	if count == 0 {
+		return
 	}
-}
-
-func (model *SimpleChooseModel) NavigateDown() {
-	if model.Cursor < len(model.FilteredChoices)-1 {
-		model.Cursor++
-		if model.Cursor >= model.ViewportStart+model.MaxVisible {
-			model.ViewportStart = model.Cursor - model.MaxVisible + 1
-		}
-	}
-}
-
-func (model *SimpleChooseModel) UpdateViewport() {
-	// Ensure viewport shows the cursor
+	
+	model.Cursor = (model.Cursor + direction + count) % count
+	
 	if model.Cursor < model.ViewportStart {
 		model.ViewportStart = model.Cursor
 	} else if model.Cursor >= model.ViewportStart+model.MaxVisible {
 		model.ViewportStart = model.Cursor - model.MaxVisible + 1
 	}
+}
 
-	// Ensure viewport doesn't go out of bounds
-	if model.ViewportStart < 0 {
-		model.ViewportStart = 0
+func (model *SimpleChooseModel) ResetSearch() {
+	model.SearchInput.SetValue("")
+	model.Searching = false
+	model.FilteredChoices = model.Choices
+	model.Cursor = 0
+	model.ViewportStart = 0
+}
+
+func (model *SimpleChooseModel) HandleSearchInput(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
+	prevValue := model.SearchInput.Value()
+	var cmd tea.Cmd
+	model.SearchInput, cmd = model.SearchInput.Update(msg)
+	
+	if newValue := model.SearchInput.Value(); newValue != prevValue {
+		if newValue == "" {
+			model.ResetSearch()
+		} else {
+			model.FilterChoices()
+		}
 	}
-	maxStart := len(model.FilteredChoices) - model.MaxVisible
-	if maxStart < 0 {
-		maxStart = 0
-	}
-	if model.ViewportStart > maxStart {
-		model.ViewportStart = maxStart
-	}
+	return model, cmd
 }
 
 func (model *SimpleChooseModel) FilterChoices() {
@@ -461,78 +467,62 @@ func (model *SimpleChooseModel) FilterChoices() {
 	if searchTerm == "" {
 		model.FilteredChoices = model.Choices
 	} else {
-		model.FilteredChoices = []string{}
+		filtered := make([]string, 0, len(model.Choices)/2)
 		for _, choice := range model.Choices {
 			if strings.Contains(strings.ToLower(choice), searchTerm) {
-				model.FilteredChoices = append(model.FilteredChoices, choice)
+				filtered = append(filtered, choice)
 			}
 		}
+		model.FilteredChoices = filtered
 	}
-
-	// Reset cursor and viewport
 	model.Cursor = 0
 	model.ViewportStart = 0
 }
 
+
 func (model *SimpleChooseModel) View() string {
 	var s strings.Builder
+	s.Grow(1024)
+	
+	s.WriteString(Styles.Title.Render(model.Prompt))
+	s.WriteString(" ")
+	s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.Secondary)).Render("[type to search]"))
+	s.WriteString(": ")
+	s.WriteString(model.SearchInput.Value())
+	s.WriteString("\n")
 
-	s.WriteString(Styles.Title.Render(model.Prompt) + "\n")
-
-	// Search bar
-	if model.Searching {
-		s.WriteString(Styles.Status(Colors.Info).Render("🔍 Search: "))
-		s.WriteString(model.SearchInput.View())
-		s.WriteString("\n")
+	choiceCount := len(model.FilteredChoices)
+	if choiceCount == 0 {
+		s.WriteString("  No matches found\n")
+		s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.Muted)).Render("(esc to clear search, ctrl + c to quit)"))
+		return s.String()
 	}
 
-	// Show filtered results count if searching
-	if model.Searching && model.SearchInput.Value() != "" {
-		s.WriteString(Styles.Status(Colors.Muted).Render(
-			fmt.Sprintf("Found %d results", len(model.FilteredChoices))))
-		s.WriteString("\n")
-	}
-
-	// Display choices (only show maxVisible items)
 	viewportEnd := model.ViewportStart + model.MaxVisible
-	if viewportEnd > len(model.FilteredChoices) {
-		viewportEnd = len(model.FilteredChoices)
+	if viewportEnd > choiceCount {
+		viewportEnd = choiceCount
 	}
 
-	// Show scroll indicator at top
 	if model.ViewportStart > 0 {
-		s.WriteString(Styles.Status(Colors.Muted).Render("    ↑ more above") + "\n")
+		s.WriteString(Styles.Status(Colors.Muted).Render("    ↑ more above"))
+		s.WriteString("\n")
 	}
 
 	for i := model.ViewportStart; i < viewportEnd; i++ {
-		choice := model.FilteredChoices[i]
-		cursor := "  "
 		if i == model.Cursor {
-			cursor = "▶ "
-		}
-
-		line := cursor + choice
-		if i == model.Cursor {
-			s.WriteString(Styles.Selected.Render(line) + "\n")
+			s.WriteString(Styles.Selected.Render("▶ " + model.FilteredChoices[i]))
 		} else {
-			s.WriteString(Styles.Item.Render(line) + "\n")
+			s.WriteString(Styles.Item.Render("  " + model.FilteredChoices[i]))
 		}
+		s.WriteString("\n")
 	}
 
-	// Show scroll indicator at bottom
-	if viewportEnd < len(model.FilteredChoices) {
-		s.WriteString(Styles.Status(Colors.Muted).Render("    ↓ more below") + "\n")
+	if viewportEnd < choiceCount {
+		s.WriteString(Styles.Status(Colors.Muted).Render("    ↓ more below"))
+		s.WriteString("\n")
 	}
 
-	// Help text
-	if model.Searching {
-		s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.Muted)).Render(
-			"(↑/↓ navigate, enter to select, esc to clear search)"))
-	} else {
-		s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.Muted)).Render(
-			"(↑/↓ navigate, / to search, enter to select, ctrl+c to quit)"))
-	}
-
+	s.WriteString(lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.Muted)).Render("(↑/↓ Navigate, enter to select, esc to clear search, ctrl + c to quit)"))
 	return s.String()
 }
 
@@ -569,7 +559,7 @@ func (model MultiSelectModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (model MultiSelectModel) View() string {
 	s := Styles.Title.Render(model.Prompt) + "\n"
-	s += Styles.Status(Colors.Info).Render("Use arrow keys to navigate, space to select, enter to confirm") + "\n"
+	s += Styles.Status(Colors.Info).Render("Use arrow keys to Navigate, space to select, enter to confirm") + "\n"
 	for i, choice := range model.Choices {
 		cursor := " "
 		if model.Cursor == i {
@@ -599,7 +589,10 @@ func (model InputModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch messageLocal := msg.(type) {
 	case tea.KeyMsg:
 		switch messageLocal.Type {
-		case tea.KeyEnter, tea.KeyCtrlC, tea.KeyEsc:
+		case tea.KeyEnter:
+			return model, tea.Quit
+		case tea.KeyCtrlC, tea.KeyEsc:
+			model.Cancelled = true
 			return model, tea.Quit
 		}
 	}
@@ -612,7 +605,7 @@ func (model InputModel) View() string {
 	return fmt.Sprintf("\n%s\n\n%s\n\n%s",
 		Styles.Title.Render(model.Prompt),
 		model.TextInput.View(),
-		"(esc to quit)")
+		lipgloss.NewStyle().Foreground(lipgloss.Color(Colors.Muted)).Render("(esc to quit)"))
 }
 
 func (model ConfirmModel) Init() tea.Cmd {
