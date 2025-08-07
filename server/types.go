@@ -10,7 +10,7 @@ import (
 
 type Server struct {
 	http.Server
-	Application container.Configuration
+	Container   container.Configuration
 	Guards      []Guard
 	Routes      []Route
 	InfoLog     *log.Logger
@@ -24,15 +24,15 @@ type Server struct {
 }
 
 type Connection struct {
-	Status      int
-	Locked      bool
-	EventId     int64
-	EventName   string
-	Request     *http.Request
-	Writer      http.ResponseWriter
-	WebSocket   *websocket.Conn
-	Application *container.Container
-	Server      *Server
+	Status    int
+	Locked    bool
+	EventId   int64
+	EventName string
+	Request   *http.Request
+	Writer    http.ResponseWriter
+	WebSocket *websocket.Conn
+	Container *container.Container
+	Server    *Server
 }
 
 type Route struct {
