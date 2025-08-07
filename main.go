@@ -10,7 +10,7 @@ import (
 //go:embed sqlc.yaml
 //go:embed queries.sql
 //go:embed schema.sql
-var cliEfs embed.FS
-var frizzante = &cli.Cli{Efs: cliEfs}
+var efs embed.FS
+var frizzante = &cli.Cli{Efs: efs}
 
-func main() { frizzante.OnStart() }
+func main() { cli.OnStart(frizzante) }

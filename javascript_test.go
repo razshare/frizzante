@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/dop251/goja"
 	"github.com/evanw/esbuild/pkg/api"
-	"github.com/razshare/frizzante/javascript"
+	"github.com/razshare/frizzante/js"
 	"slices"
 	"strings"
 	"testing"
@@ -79,9 +79,9 @@ func TestJavaScriptBundle(test *testing.T) {
 	actual := ""
 	expected := "hello"
 
-	runtime := javascript.New()
+	runtime := js.New()
 
-	err := runtime.SetFunction("signal", func(call goja.FunctionCall) goja.Value {
+	err := js.SetFunction(runtime, "signal", func(call goja.FunctionCall) goja.Value {
 		args := call.Arguments
 		if len(args) > 0 {
 			actual = args[0].String()
@@ -100,7 +100,7 @@ func TestJavaScriptBundle(test *testing.T) {
 	})
 	`
 
-	cjs, bundleError := javascript.Bundle("app", api.FormatCommonJS, script)
+	cjs, bundleError := js.Bundle("app", api.FormatCommonJS, script)
 	if bundleError != nil {
 		test.Fatal(bundleError)
 	}

@@ -1,4 +1,4 @@
-package channels
+package _chan
 
 import "sync"
 

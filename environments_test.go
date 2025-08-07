@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/razshare/frizzante/environments"
+	"github.com/razshare/frizzante/env"
 	"os"
 	"testing"
 )
 
 func TestLoadDotenv(test *testing.T) {
-	err := environments.LoadDotenv("test.env")
+	err := env.LoadDotenv("test.env")
 	if err != nil {
 		test.Fatal(err)
 	}

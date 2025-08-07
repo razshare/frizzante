@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/razshare/frizzante/mimes"
+	"github.com/razshare/frizzante/mime"
 	"testing"
 )
 
@@ -77,7 +77,7 @@ var expectedMimes = map[string]string{
 func TestMime(test *testing.T) {
 	// Positives.
 	for fileName, expected := range expectedMimes {
-		actual := mimes.Mime(fileName)
+		actual := mime.Mime(fileName)
 		if actual != expected {
 			test.Fatalf("file %s was expected to resolve into mime %s, received %s instead", fileName, expected, actual)
 		}
@@ -85,7 +85,7 @@ func TestMime(test *testing.T) {
 
 	// Negative.
 	fileName := "my.file.qwerty123"
-	actual := mimes.Mime(fileName)
+	actual := mime.Mime(fileName)
 	expected := "text/plain"
 	if actual != expected {
 		test.Fatalf("file %s was expected to resolve into mime %s, received %s instead", fileName, expected, actual)

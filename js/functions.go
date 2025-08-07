@@ -1,4 +1,4 @@
-package javascript
+package js
 
 import (
 	"fmt"
@@ -14,14 +14,14 @@ func New() *JavaScript {
 }
 
 // SetFunction sets a function.
-func (javascript *JavaScript) SetFunction(name string, callback Function) error {
-	return javascript.Set(name, callback)
+func SetFunction(js *JavaScript, n string, f Function) error {
+	return js.Set(n, f)
 }
 
 // SetFunctions sets a map of functions.
-func (javascript *JavaScript) SetFunctions(functions map[string]Function) error {
-	for name, callback := range functions {
-		err := javascript.Set(name, callback)
+func SetFunctions(js *JavaScript, fs map[string]Function) error {
+	for n, cb := range fs {
+		err := js.Set(n, cb)
 		if err != nil {
 			return err
 		}
@@ -31,13 +31,13 @@ func (javascript *JavaScript) SetFunctions(functions map[string]Function) error 
 }
 
 // Bundle bundles source code into a specific format.
-func Bundle(root string, format api.Format, sourceCode string) (bundle string, err error) {
+func Bundle(root string, format api.Format, source string) (bundle string, err error) {
 	result := api.Build(api.BuildOptions{
 		Bundle: true,
 		Format: format,
 		Write:  false,
 		Stdin: &api.StdinOptions{
-			Contents:   sourceCode,
+			Contents:   source,
 			ResolveDir: root,
 		},
 	})

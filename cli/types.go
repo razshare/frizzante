@@ -2,14 +2,14 @@ package cli
 
 import "embed"
 
-type Platform uint
+type PlatformType uint
 
-const PlatformLinuxAmd64 Platform = 0
-const PlatformLinuxArm64 Platform = 1
-const PlatformDarwinAmd64 Platform = 2
-const PlatformDarwinArm64 Platform = 3
-const PlatformWindowsAmd64 Platform = 4
-const PlatformWindowsArm64 Platform = 5
+const PlatformTypeLinuxAmd64 PlatformType = 0
+const PlatformTypeLinuxArm64 PlatformType = 1
+const PlatformTypeDarwinAmd64 PlatformType = 2
+const PlatformTypeDarwinArm64 PlatformType = 3
+const PlatformTypeWindowsAmd64 PlatformType = 4
+const PlatformTypeWindowsArm64 PlatformType = 5
 
 type FeatureCopyInstruction struct {
 	FeatureName          string

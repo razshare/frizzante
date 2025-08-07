@@ -12,11 +12,11 @@ import (
 )
 
 func TestRenderServer(test *testing.T) {
-	lock := <-server
-	defer func() { server <- lock }()
+	lock := <-Server
+	defer func() { Server <- lock }()
 
 	expected := "<h1>Welcome to Frizzante.</h1>"
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderServer", port))
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderServer", Port))
 	if getError != nil {
 		test.Fatal(getError)
 	}
@@ -36,8 +36,8 @@ func TestRenderServer(test *testing.T) {
 }
 
 func BenchmarkRenderServer(b *testing.B) {
-	lock := <-server
-	defer func() { server <- lock }()
+	lock := <-Server
+	defer func() { Server <- lock }()
 
 	count := 1000
 
@@ -53,7 +53,7 @@ func BenchmarkRenderServer(b *testing.B) {
 	for j := 0; j < count; j++ {
 		go func() {
 			defer group.Done()
-			response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d", port))
+			response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d", Port))
 			if getError != nil {
 				b.Error(getError)
 				return
@@ -75,11 +75,11 @@ func BenchmarkRenderServer(b *testing.B) {
 }
 
 func TestRenderClient(test *testing.T) {
-	lock := <-server
-	defer func() { server <- lock }()
+	lock := <-Server
+	defer func() { Server <- lock }()
 
 	expected := "<script type=\"application/javascript\">function target(){return document.getElementById("
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderClient", port))
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderClient", Port))
 	if getError != nil {
 		test.Fatal(getError)
 	}

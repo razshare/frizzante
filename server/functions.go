@@ -1,24 +1,20 @@
-package servers
+package server
 
 import (
 	"context"
 	"errors"
-	"github.com/razshare/frizzante/apps"
-	"github.com/razshare/frizzante/archives"
-	"github.com/razshare/frizzante/connections"
+	"github.com/razshare/frizzante/container"
 	"github.com/razshare/frizzante/globals"
-	"github.com/razshare/frizzante/guards"
-	"github.com/razshare/frizzante/routes"
 	"log"
 	"net/http"
 	"os"
-	"path/filepath"
 	"slices"
 	"strings"
 	"time"
 )
 
-func New() *Server {
+// Default creates a new server.
+func Default() *Server {
 	infoLog := log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
 	return &Server{
@@ -33,9 +29,8 @@ func New() *Server {
 			MaxHeaderBytes: 3 * globals.MB,
 			ErrorLog:       errorLog,
 		},
-		SessionArchive: archives.NewDiskArchive(filepath.Join(".gen", "sessions")),
-		PublicRoot:     "app/dist/client",
-		AppConfiguration: apps.Configuration{
+		PublicRoot: "app/dist/client",
+		Application: container.Configuration{
 			Root:        "app",
 			Script:      "app/dist/server.js",
 			Document:    "app/dist/client/index.html",
@@ -48,55 +43,47 @@ func New() *Server {
 }
 
 // Start starts the server.
-func (server *Server) Start() {
-	var app *apps.App
-
-	app = apps.Start(server.AppConfiguration, server.Efs)
-
-	defer func() { go func() { app.Stop <- 0 }() }()
+func Start(server *Server) {
+	application := container.Start(server.Application, server.Efs)
+	defer func() { go func() { application.Stop <- 0 }() }()
 
 	mux := server.Handler.(*http.ServeMux)
 
-	for _, route := range server.Routes {
-		mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
-			connection := &connections.Connection{
-				EventId:          1,
-				Status:           200,
-				Writer:           writer,
-				Request:          request,
-				App:              app,
-				Efs:              server.Efs,
-				InfoLog:          server.InfoLog,
-				ErrorLog:         server.ErrorLog,
-				PublicRoot:       server.PublicRoot,
-				SessionArchive:   server.SessionArchive,
-				AppConfiguration: server.AppConfiguration,
+	for _, r := range server.Routes {
+		mux.HandleFunc(r.Pattern, func(writer http.ResponseWriter, request *http.Request) {
+			connection := &Connection{
+				EventId:     1,
+				Status:      200,
+				Writer:      writer,
+				Request:     request,
+				Application: application,
+				Server:      server,
 			}
 
-			for _, tag := range route.Tags {
+			for _, tag := range r.Tags {
 				for _, guard := range server.Guards {
 					if !slices.Contains(guard.Tags, tag) {
 						continue
 					}
-					allowed := false
-					guard.Handler(connection, func() { allowed = true })
-					if !allowed {
-						server.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", route.Pattern, tag, guard.Name)
+					allow := false
+					guard.Handler(connection, func() { allow = true })
+					if !allow {
+						server.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", r.Pattern, tag, guard.Name)
 						return
 					}
 				}
 			}
 
-			route.Handler(connection)
+			r.Handler(connection)
 		})
 	}
 
-	var cancelled bool
+	var exit bool
 
 	go func() {
 		readableAddress := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
 		server.InfoLog.Printf("server bound to address %s; visit your application at http://%s", server.Addr, readableAddress)
-		if cancelled {
+		if exit {
 			server.InfoLog.Printf("cancelling server startup")
 			return
 		}
@@ -114,7 +101,7 @@ func (server *Server) Start() {
 		if "" != server.Certificate && "" != server.Key {
 			readableAddress := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
 			server.InfoLog.Printf("server bound to address %s; visit your application at https://%s", server.Addr, readableAddress)
-			if cancelled {
+			if exit {
 				server.InfoLog.Printf("cancelling server startup")
 				return
 			}
@@ -130,26 +117,9 @@ func (server *Server) Start() {
 	}()
 
 	<-server.Stop
-	println("cancelled")
-	cancelled = true
+	exit = true
 
 	if err := server.Shutdown(context.Background()); err != nil {
 		server.ErrorLog.Println(err)
 	}
-}
-
-// AddGuard adds a guard.
-//
-// Deprecated: append directly to Guards instead.
-func (server *Server) AddGuard(guard guards.Guard) *Server {
-	server.Guards = append(server.Guards, guard)
-	return server
-}
-
-// AddRoute adds a guard.
-//
-// Deprecated: append directly to Routes instead.
-func (server *Server) AddRoute(route routes.Route) *Server {
-	server.Routes = append(server.Routes, route)
-	return server
 }

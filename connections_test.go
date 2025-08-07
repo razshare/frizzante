@@ -9,11 +9,11 @@ import (
 )
 
 func TestConnectionSendStatus(test *testing.T) {
-	lock := <-server
-	defer func() { server <- lock }()
+	lock := <-Server
+	defer func() { Server <- lock }()
 
 	expected := 201
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestConnectionSendStatus", port))
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestConnectionSendStatus", Port))
 	if getError != nil {
 		test.Fatal(getError)
 	}
@@ -32,11 +32,11 @@ func TestConnectionSendStatus(test *testing.T) {
 }
 
 func TestConnectionSendHeader(test *testing.T) {
-	lock := <-server
-	defer func() { server <- lock }()
+	lock := <-Server
+	defer func() { Server <- lock }()
 
 	expected := "application/json"
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestConnectionSendHeader", port))
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestConnectionSendHeader", Port))
 	if getError != nil {
 		test.Fatal(getError)
 	}

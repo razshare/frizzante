@@ -1,4 +1,4 @@
-package apps
+package container
 
 import (
 	"github.com/dop251/goja"
@@ -16,7 +16,7 @@ type Configuration struct {
 	InfoLog     *log.Logger
 }
 
-type App struct {
+type Container struct {
 	Document chan string
 	Script   chan string
 	Program  chan *goja.Program
