@@ -8,10 +8,10 @@ import (
 )
 
 func TestServerAddRoute(test *testing.T) {
-	lock := <-Server
-	defer func() { Server <- lock }()
+	lock := <-server
+	defer func() { server <- lock }()
 
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestServerAddRoute", Port))
+	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestServerAddRoute", port))
 	if getError != nil {
 		test.Fatal(getError)
 	}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/razshare/frizzante/apps"
+	"github.com/razshare/frizzante/connections"
 	"github.com/razshare/frizzante/globals"
 	"log"
 	"net/http"
@@ -43,32 +44,35 @@ func New() *Server {
 }
 
 // Start starts the server.
-func Start(server *Server) {
-	application := apps.Start(server.AppConfig, server.Efs)
+func Start(s *Server) {
+	application := apps.Start(s.AppConfig, s.Efs)
 	defer func() { go func() { application.Stop <- 0 }() }()
 
-	mux := server.Handler.(*http.ServeMux)
+	mux := s.Handler.(*http.ServeMux)
 
-	for _, r := range server.Routes {
+	for _, r := range s.Routes {
 		mux.HandleFunc(r.Pattern, func(writer http.ResponseWriter, request *http.Request) {
-			connection := &Connection{
-				EventId: 1,
-				Status:  200,
-				Writer:  writer,
-				Request: request,
-				App:     application,
-				Server:  server,
+			connection := &connections.Connection{
+				EventId:    1,
+				Status:     200,
+				Writer:     writer,
+				Request:    request,
+				App:        application,
+				Efs:        s.Efs,
+				ErrorLog:   s.ErrorLog,
+				AppConfig:  &s.AppConfig,
+				PublicRoot: s.PublicRoot,
 			}
 
 			for _, tag := range r.Tags {
-				for _, guard := range server.Guards {
+				for _, guard := range s.Guards {
 					if !slices.Contains(guard.Tags, tag) {
 						continue
 					}
 					allow := false
 					guard.Handler(connection, func() { allow = true })
 					if !allow {
-						server.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", r.Pattern, tag, guard.Name)
+						s.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", r.Pattern, tag, guard.Name)
 						return
 					}
 				}
@@ -81,45 +85,45 @@ func Start(server *Server) {
 	var exit bool
 
 	go func() {
-		readableAddress := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-		server.InfoLog.Printf("server bound to address %s; visit your application at http://%s", server.Addr, readableAddress)
+		readableAddress := strings.Replace(s.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+		s.InfoLog.Printf("server bound to address %s; visit your application at http://%s", s.Addr, readableAddress)
 		if exit {
-			server.InfoLog.Printf("cancelling server startup")
+			s.InfoLog.Printf("cancelling server startup")
 			return
 		}
-		serveError := http.ListenAndServe(server.Addr, server.Handler)
+		serveError := http.ListenAndServe(s.Addr, s.Handler)
 		if serveError != nil {
 			if errors.Is(serveError, http.ErrServerClosed) {
-				server.InfoLog.Println("shutting down server")
+				s.InfoLog.Println("shutting down server")
 				return
 			}
-			server.ErrorLog.Println(serveError)
+			s.ErrorLog.Println(serveError)
 		}
 	}()
 
 	go func() {
-		if "" != server.Certificate && "" != server.Key {
-			readableAddress := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-			server.InfoLog.Printf("server bound to address %s; visit your application at https://%s", server.Addr, readableAddress)
+		if "" != s.Certificate && "" != s.Key {
+			readableAddress := strings.Replace(s.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+			s.InfoLog.Printf("server bound to address %s; visit your application at https://%s", s.Addr, readableAddress)
 			if exit {
-				server.InfoLog.Printf("cancelling server startup")
+				s.InfoLog.Printf("cancelling server startup")
 				return
 			}
-			serveError := http.ListenAndServeTLS(server.SecureAddr, server.Certificate, server.Key, server.Handler)
+			serveError := http.ListenAndServeTLS(s.SecureAddr, s.Certificate, s.Key, s.Handler)
 			if serveError != nil {
 				if errors.Is(serveError, http.ErrServerClosed) {
-					server.InfoLog.Printf("shutting down server")
+					s.InfoLog.Printf("shutting down server")
 					return
 				}
-				server.ErrorLog.Println(serveError)
+				s.ErrorLog.Println(serveError)
 			}
 		}
 	}()
 
-	<-server.Stop
+	<-s.Stop
 	exit = true
 
-	if err := server.Shutdown(context.Background()); err != nil {
-		server.ErrorLog.Println(err)
+	if err := s.Shutdown(context.Background()); err != nil {
+		s.ErrorLog.Println(err)
 	}
 }

@@ -309,28 +309,28 @@ func OnVersion(cli *Cli) {
 	println(lines[0])
 }
 
-func OnCreateProject(cli *Cli, project string) {
-	downloadError := files.DownloadFile("https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip", project+".zip")
+func OnCreateProject(cli *Cli, prj string) {
+	downloadError := files.DownloadFile("https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip", prj+".zip")
 	if downloadError != nil {
 		Fatal(cli, downloadError)
 	}
 
-	unzipError := files.UnzipFile(project+".zip", project+".tmp")
+	unzipError := files.UnzipFile(prj+".zip", prj+".tmp")
 	if unzipError != nil {
 		Fatal(cli, unzipError)
 	}
 
-	removeError := os.Remove(project + ".zip")
+	removeError := os.Remove(prj + ".zip")
 	if removeError != nil {
 		Fatal(cli, removeError)
 	}
 
-	renameError := os.Rename(filepath.Join(project+".tmp", "frizzante-starter-main"), project)
+	renameError := os.Rename(filepath.Join(prj+".tmp", "frizzante-starter-main"), prj)
 	if renameError != nil {
 		Fatal(cli, renameError)
 	}
 
-	removeAllError := os.RemoveAll(filepath.Join(project + ".tmp"))
+	removeAllError := os.RemoveAll(filepath.Join(prj + ".tmp"))
 	if removeAllError != nil {
 		Fatal(cli, removeAllError)
 	}

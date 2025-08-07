@@ -30,15 +30,16 @@ func SetFunctions(js *JavaScript, fs map[string]Function) error {
 	return nil
 }
 
-// Bundle bundles source code into a specific format.
-func Bundle(root string, format api.Format, source string) (bundle string, err error) {
+// Bundle given a directory containing a node_modules subdirectory,
+// bundles source code into a specific format.
+func Bundle(d string, f api.Format, s string) (bundle string, err error) {
 	result := api.Build(api.BuildOptions{
 		Bundle: true,
-		Format: format,
+		Format: f,
 		Write:  false,
 		Stdin: &api.StdinOptions{
-			Contents:   source,
-			ResolveDir: root,
+			Contents:   s,
+			ResolveDir: d,
 		},
 	})
 

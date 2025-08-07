@@ -16,33 +16,33 @@ import (
 )
 
 // Start starts a new app.
-func Start(config Config, efs embed.FS) *App {
+func Start(c Config, efs embed.FS) *App {
 	script := ProduceScript(
 		efs,
-		config.Root,
-		config.Script,
-		config.InfoLog,
-		config.ErrorLog,
+		c.Root,
+		c.Script,
+		c.InfoLog,
+		c.ErrorLog,
 	)
 
 	document := ProduceDocument(
 		efs,
-		config.Document,
-		config.InfoLog,
-		config.ErrorLog,
+		c.Document,
+		c.InfoLog,
+		c.ErrorLog,
 	)
 
 	runtime := ProduceRuntime(
-		config.Parallels,
-		config.InfoLog,
+		c.Parallels,
+		c.InfoLog,
 	)
 
 	program := ProduceProgram(
-		config.Script,
+		c.Script,
 		script.Value,
-		config.Parallels,
-		config.InfoLog,
-		config.ErrorLog,
+		c.Parallels,
+		c.InfoLog,
+		c.ErrorLog,
 	)
 
 	stop := make(chan any, 1)
@@ -191,32 +191,32 @@ func ProduceProgram(
 	}
 }
 
-// ExecuteServerJs executes the server script.
-func ExecuteServerJs(application *App, configuration Config, properties map[string]any) (string, string, error) {
+// Render renders the application with the given properties.
+func Render(a *App, c *Config, p map[string]any) (string, string, error) {
 	var runtime *goja.Runtime
 	var program *goja.Program
 	var compileError error
 
-	if configuration.Development {
+	if c.Development {
 		runtime = goja.New()
-		var fileNameFixed = strings.ReplaceAll(configuration.Script, "\\", "/")
+		var fileNameFixed = strings.ReplaceAll(c.Script, "\\", "/")
 		data, rer := os.ReadFile(fileNameFixed)
 		if rer != nil {
 			return "", "", rer
 		}
-		source, bundleError := js.Bundle(configuration.Root, api.FormatCommonJS, string(data))
+		source, bundleError := js.Bundle(c.Root, api.FormatCommonJS, string(data))
 		if bundleError != nil {
 			return "", "", bundleError
 		}
-		program, compileError = goja.Compile(configuration.Script, fmt.Sprintf(globals.RenderScriptFormat, source), false)
+		program, compileError = goja.Compile(c.Script, fmt.Sprintf(globals.RenderScriptFormat, source), false)
 		if compileError != nil {
 			return "", "", compileError
 		}
 	} else {
-		runtime = <-application.Runtime
-		program = <-application.Program
-		defer func() { go func() { application.Runtime <- runtime }() }()
-		defer func() { go func() { application.Program <- program }() }()
+		runtime = <-a.Runtime
+		program = <-a.Program
+		defer func() { go func() { a.Runtime <- runtime }() }()
+		defer func() { go func() { a.Program <- program }() }()
 	}
 
 	programResult, programError := runtime.RunProgram(program)
@@ -230,7 +230,7 @@ func ExecuteServerJs(application *App, configuration Config, properties map[stri
 		return "", "", errors.New("render is not a function")
 	}
 
-	promise, programError := render(goja.Undefined(), runtime.ToValue(properties))
+	promise, programError := render(goja.Undefined(), runtime.ToValue(p))
 
 	if programError != nil {
 		return "", "", programError

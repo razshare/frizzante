@@ -3,20 +3,20 @@ package views
 import (
 	"encoding/json"
 	"fmt"
-	containers "github.com/razshare/frizzante/apps"
+	"github.com/razshare/frizzante/apps"
 	"github.com/razshare/frizzante/globals"
 	"os"
 	"strings"
 )
 
 // RenderClient renders on the client.
-func RenderClient(view *View, app *containers.App, config containers.Config) (string, error) {
+func RenderClient(v *View, a *apps.App, c *apps.Config) (string, error) {
 	id := "svelte-app"
 
 	marshaledProps, marshalError := json.Marshal(map[string]any{
-		"name":       view.Name,
-		"data":       view.Data,
-		"renderMode": view.RenderMode,
+		"name":       v.Name,
+		"data":       v.Data,
+		"renderMode": v.RenderMode,
 	})
 	if marshalError != nil {
 		return "", marshalError
@@ -24,15 +24,15 @@ func RenderClient(view *View, app *containers.App, config containers.Config) (st
 
 	var document string
 
-	if config.Development {
-		var fileNameLocal = strings.ReplaceAll(config.Document, "\\", "/")
+	if c.Development {
+		var fileNameLocal = strings.ReplaceAll(c.Document, "\\", "/")
 		data, rerr := os.ReadFile(fileNameLocal)
 		if rerr != nil {
 			return "", rerr
 		}
 		document = string(data)
 	} else {
-		document = <-app.Document
+		document = <-a.Document
 	}
 
 	return strings.Replace(
@@ -62,11 +62,11 @@ func RenderClient(view *View, app *containers.App, config containers.Config) (st
 }
 
 // RenderServer renders on the server.
-func RenderServer(view *View, app *containers.App, config containers.Config) (string, error) {
-	head, body, jsError := containers.ExecuteServerJs(app, config, map[string]any{
-		"name":       view.Name,
-		"data":       view.Data,
-		"renderMode": view.RenderMode,
+func RenderServer(v *View, a *apps.App, c *apps.Config) (string, error) {
+	head, body, jsError := apps.Render(a, c, map[string]any{
+		"name":       v.Name,
+		"data":       v.Data,
+		"renderMode": v.RenderMode,
 	})
 	if jsError != nil {
 		return "", jsError
@@ -74,15 +74,15 @@ func RenderServer(view *View, app *containers.App, config containers.Config) (st
 
 	var document string
 
-	if config.Development {
-		var fnf = strings.ReplaceAll(config.Document, "\\", "/")
+	if c.Development {
+		var fnf = strings.ReplaceAll(c.Document, "\\", "/")
 		data, rerr := os.ReadFile(fnf)
 		if rerr != nil {
 			return "", rerr
 		}
 		document = string(data)
 	} else {
-		document = <-app.Document
+		document = <-a.Document
 	}
 
 	return strings.Replace(
@@ -109,11 +109,11 @@ func RenderServer(view *View, app *containers.App, config containers.Config) (st
 }
 
 // RenderHeadless renders only the body of the view on the server.
-func RenderHeadless(view *View, app *containers.App, config containers.Config) (string, error) {
-	_, body, jsError := containers.ExecuteServerJs(app, config, map[string]any{
-		"name":       view.Name,
-		"data":       view.Data,
-		"renderMode": view.RenderMode,
+func RenderHeadless(v *View, a *apps.App, c *apps.Config) (string, error) {
+	_, body, jsError := apps.Render(a, c, map[string]any{
+		"name":       v.Name,
+		"data":       v.Data,
+		"renderMode": v.RenderMode,
 	})
 	if jsError != nil {
 		return "", jsError
@@ -122,31 +122,31 @@ func RenderHeadless(view *View, app *containers.App, config containers.Config) (
 }
 
 // RenderFull renders on the server and on the client.
-func RenderFull(view *View, app *containers.App, config containers.Config) (string, error) {
+func RenderFull(v *View, a *apps.App, c *apps.Config) (string, error) {
 	id := "svelte-app"
 
 	props := map[string]any{
-		"name":       view.Name,
-		"data":       view.Data,
-		"renderMode": view.RenderMode,
+		"name":       v.Name,
+		"data":       v.Data,
+		"renderMode": v.RenderMode,
 	}
 
-	head, body, jsError := containers.ExecuteServerJs(app, config, props)
+	head, body, jsError := apps.Render(a, c, props)
 	if jsError != nil {
 		return "", jsError
 	}
 
 	var document string
 
-	if config.Development {
-		var fnf = strings.ReplaceAll(config.Document, "\\", "/")
+	if c.Development {
+		var fnf = strings.ReplaceAll(c.Document, "\\", "/")
 		data, rerr := os.ReadFile(fnf)
 		if rerr != nil {
 			return "", rerr
 		}
 		document = string(data)
 	} else {
-		document = <-app.Document
+		document = <-a.Document
 	}
 
 	marshaledProps, marshalError := json.Marshal(props)
@@ -181,18 +181,18 @@ func RenderFull(view *View, app *containers.App, config containers.Config) (stri
 }
 
 // Render renders.
-func Render(view *View, app *containers.App, config containers.Config) (string, error) {
-	if view.RenderMode == RenderModeFull {
-		return RenderFull(view, app, config)
+func Render(v *View, a *apps.App, c *apps.Config) (string, error) {
+	if v.RenderMode == RenderModeFull {
+		return RenderFull(v, a, c)
 	}
 
-	if view.RenderMode == RenderModeServer {
-		return RenderServer(view, app, config)
+	if v.RenderMode == RenderModeServer {
+		return RenderServer(v, a, c)
 	}
 
-	if view.RenderMode == RenderModeClient {
-		return RenderClient(view, app, config)
+	if v.RenderMode == RenderModeClient {
+		return RenderClient(v, a, c)
 	}
 
-	return RenderHeadless(view, app, config)
+	return RenderHeadless(v, a, c)
 }

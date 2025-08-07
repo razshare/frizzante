@@ -21,3 +21,5 @@ type Cli struct {
 	Efs    embed.FS
 	Parsed bool
 }
+
+type Project string
