@@ -1,14 +1,14 @@
 package send
 
 import (
-	"github.com/razshare/frizzante/conn"
+	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/stack"
 	"github.com/razshare/frizzante/view"
 	"strings"
 )
 
 // View sends a view.
-func View(c *conn.Conn, v view.View) {
+func View(c *client.Client, v view.View) {
 	if c.Writer.Header().Get("Location") != "" {
 		return
 	}
@@ -26,9 +26,9 @@ func View(c *conn.Conn, v view.View) {
 		return
 	}
 
-	html, err := view.Render(&v, c.Container)
+	html, err := view.Render(&v, c.Scope.Container)
 	if err != nil {
-		c.Container.Config.ErrorLog.Println(err, stack.Trace())
+		c.Scope.Container.Config.ErrorLog.Println(err, stack.Trace())
 	}
 
 	if "" == c.Writer.Header().Get("Content-Type") {

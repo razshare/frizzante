@@ -3,7 +3,7 @@ package main
 import (
 	"embed"
 	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/conn"
+	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/route"
 	"github.com/razshare/frizzante/send"
 	"github.com/razshare/frizzante/server"
@@ -28,25 +28,25 @@ func init() {
 	c.Container.Efs = iefs
 
 	c.Routes = []route.Route{
-		{Pattern: "GET /TestRoutes", Handler: func(c *conn.Conn) {
+		{Pattern: "GET /TestRoutes", Handler: func(c *client.Client) {
 			send.Message(c, "hello")
 		}},
-		{Pattern: "GET /TestSendStatus", Handler: func(c *conn.Conn) {
+		{Pattern: "GET /TestSendStatus", Handler: func(c *client.Client) {
 			send.Status(c, 201)
 			send.Message(c, "ok")
 		}},
-		{Pattern: "GET /TestSendHeader", Handler: func(c *conn.Conn) {
+		{Pattern: "GET /TestSendHeader", Handler: func(c *client.Client) {
 			send.Header(c, "Content-Type", "application/json")
 			send.Message(c, "{}")
 		}},
-		{Pattern: "GET /TestRenderServer", Handler: func(c *conn.Conn) {
+		{Pattern: "GET /TestRenderServer", Handler: func(c *client.Client) {
 			send.View(c, view.View{
 				Name:       "Welcome",
 				RenderMode: view.RenderModeServer,
 				Data:       map[string]any{"name": "world"},
 			})
 		}},
-		{Pattern: "GET /TestRenderClient", Handler: func(c *conn.Conn) {
+		{Pattern: "GET /TestRenderClient", Handler: func(c *client.Client) {
 			send.View(c, view.View{
 				Name:       "Welcome",
 				RenderMode: view.RenderModeClient,

@@ -1,4 +1,4 @@
-package conn
+package client
 
 import (
 	"github.com/gorilla/websocket"
@@ -6,13 +6,17 @@ import (
 	"net/http"
 )
 
-type Conn struct {
+type Scope struct {
 	Container *container.Container
-	Writer    http.ResponseWriter
 	WebSocket *websocket.Conn
-	Request   *http.Request
 	EventName string
 	EventId   int64
 	Locked    bool
 	Status    int
+}
+
+type Client struct {
+	Writer  http.ResponseWriter
+	Request *http.Request
+	Scope   Scope
 }

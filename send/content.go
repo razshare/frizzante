@@ -1,16 +1,15 @@
 package send
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/conn"
+	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/stack"
 	"net/http"
 )
 
 // Flush send an empty message.
-func Flush(c *conn.Conn) {
+func Flush(c *client.Client) {
 	Message(c, "")
 }
 
@@ -23,28 +22,28 @@ func Flush(c *conn.Conn) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func Content(c *conn.Conn, d []byte) {
-	if !c.Locked {
-		c.Writer.WriteHeader(c.Status)
-		c.Locked = true
+func Content(c *client.Client, d []byte) {
+	if !c.Scope.Locked {
+		c.Writer.WriteHeader(c.Scope.Status)
+		c.Scope.Locked = true
 	}
 
-	if c.WebSocket != nil {
-		writeError := c.WebSocket.WriteMessage(websocket.TextMessage, d)
+	if c.Scope.WebSocket != nil {
+		writeError := c.Scope.WebSocket.WriteMessage(websocket.TextMessage, d)
 		if writeError != nil {
-			c.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+			c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
 		}
 		return
 	}
 
-	if "" != c.EventName {
+	if "" != c.Scope.EventName {
 		EventContent(c, d)
 		return
 	}
 
 	_, writeError := c.Writer.Write(d)
 	if writeError != nil {
-		c.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+		c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
 	}
 }
 
@@ -57,7 +56,7 @@ func Content(c *conn.Conn, d []byte) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func Message(c *conn.Conn, m string) {
+func Message(c *client.Client, m string) {
 	Content(c, []byte(m))
 }
 
@@ -70,69 +69,43 @@ func Message(c *conn.Conn, m string) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func Messagef(c *conn.Conn, f string, v ...any) {
+func Messagef(c *client.Client, f string, v ...any) {
 	Content(c, []byte(fmt.Sprintf(f, v...)))
 }
 
-// Json sends json content.
-//
-// If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
-//
-// The status code and the header will become locked and further attempts to send either of them will fail with an error.
-//
-// All errors are sent to the server notifier.
-//
-// Compatible with web sockets.
-func Json(c *conn.Conn, v any) {
-	data, jsonError := json.Marshal(v)
-	if jsonError != nil {
-		c.Container.Config.ErrorLog.Println(jsonError, stack.Trace())
-		return
-	}
-
-	if nil == c.WebSocket {
-		contentType := c.Writer.Header().Get("Content-Type")
-		if "" == contentType {
-			c.Writer.Header().Set("Content-Type", "application/json")
-		}
-	}
-
-	Content(c, data)
-}
-
 // NotFound sends a message with status 404 Not Found.
-func NotFound(c *conn.Conn, m string) {
+func NotFound(c *client.Client, m string) {
 	Status(c, http.StatusNotFound)
 	Message(c, m)
 }
 
 // Unauthorized sends a message with status 401 Unauthorized.
-func Unauthorized(c *conn.Conn, m string) {
+func Unauthorized(c *client.Client, m string) {
 	Status(c, http.StatusUnauthorized)
 	Message(c, m)
 }
 
 // BadRequest sends a message with status 400 Bad Request.
-func BadRequest(c *conn.Conn, m string) {
+func BadRequest(c *client.Client, m string) {
 	Status(c, http.StatusBadRequest)
 	Message(c, m)
 }
 
 // Error sends a message with status 500 Internal server Error
 // and also sends the error to the server notifier.
-func Error(c *conn.Conn, e error) {
+func Error(c *client.Client, e error) {
 	Status(c, http.StatusBadRequest)
 	Message(c, e.Error())
 }
 
 // Forbidden sends a message with status 403 Forbidden.
-func Forbidden(c *conn.Conn, m string) {
+func Forbidden(c *client.Client, m string) {
 	Status(c, http.StatusForbidden)
 	Message(c, m)
 }
 
 // TooManyRequests sends a message with status 403 Forbidden.
-func TooManyRequests(c *conn.Conn, m string) {
+func TooManyRequests(c *client.Client, m string) {
 	Status(c, http.StatusTooManyRequests)
 	Message(c, m)
 }

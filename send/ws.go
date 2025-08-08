@@ -2,13 +2,13 @@ package send
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/conn"
+	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/stack"
 )
 
 // WsUpgrade upgrades to web sockets.
-func WsUpgrade(c *conn.Conn) {
+func WsUpgrade(c *client.Client) {
 	WsUpgradeWithUpgrader(c, websocket.Upgrader{
 		ReadBufferSize:  10 * globals.KB,
 		WriteBufferSize: 10 * globals.KB,
@@ -16,22 +16,22 @@ func WsUpgrade(c *conn.Conn) {
 }
 
 // WsUpgradeWithUpgrader upgrades to web sockets.
-func WsUpgradeWithUpgrader(c *conn.Conn, u websocket.Upgrader) {
+func WsUpgradeWithUpgrader(c *client.Client, u websocket.Upgrader) {
 	webSocketConnection, upgradeError := u.Upgrade(c.Writer, c.Request, nil)
 	if upgradeError != nil {
-		c.Container.Config.ErrorLog.Println(upgradeError, stack.Trace())
+		c.Scope.Container.Config.ErrorLog.Println(upgradeError, stack.Trace())
 		return
 	}
 
 	defer func(webSocketConnection *websocket.Conn) {
-		closeError := c.WebSocket.Close()
+		closeError := c.Scope.WebSocket.Close()
 		if closeError != nil {
-			c.Container.Config.ErrorLog.Println(closeError, stack.Trace())
+			c.Scope.Container.Config.ErrorLog.Println(closeError, stack.Trace())
 		}
 	}(webSocketConnection)
 
-	c.WebSocket = webSocketConnection
-	c.Locked = true
+	c.Scope.WebSocket = webSocketConnection
+	c.Scope.Locked = true
 
 	return
 }

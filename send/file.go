@@ -4,7 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/conn"
+	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/mime"
@@ -17,8 +17,8 @@ import (
 
 // EmbeddedFileOrElse sends the embedded file requested by the client,
 // or the closest index.html embedded file, or else falls back.
-func EmbeddedFileOrElse(c *conn.Conn, fs embed.FS, or func()) {
-	fileName := c.Container.Config.PublicRoot + c.Request.RequestURI
+func EmbeddedFileOrElse(c *client.Client, fs embed.FS, or func()) {
+	fileName := c.Scope.Container.Config.PublicRoot + c.Request.RequestURI
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
@@ -29,29 +29,29 @@ func EmbeddedFileOrElse(c *conn.Conn, fs embed.FS, or func()) {
 
 	reader, readerInfo, readerError := embeds.NewFileReader(fs, fileName)
 	if readerError != nil {
-		c.Container.Config.ErrorLog.Println(readerError, stack.Trace())
+		c.Scope.Container.Config.ErrorLog.Println(readerError, stack.Trace())
 		return
 	}
 
-	if c.WebSocket != nil {
+	if c.Scope.WebSocket != nil {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			c.Container.Config.ErrorLog.Println(readError, stack.Trace())
+			c.Scope.Container.Config.ErrorLog.Println(readError, stack.Trace())
 			return
 		}
 
-		writeError := c.WebSocket.WriteMessage(websocket.TextMessage, data)
+		writeError := c.Scope.WebSocket.WriteMessage(websocket.TextMessage, data)
 		if writeError != nil {
-			c.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+			c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
 			return
 		}
 		return
 	}
 
-	if "" != c.EventName {
+	if "" != c.Scope.EventName {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			c.Container.Config.ErrorLog.Println(readError, stack.Trace())
+			c.Scope.Container.Config.ErrorLog.Println(readError, stack.Trace())
 			return
 		}
 
@@ -71,38 +71,38 @@ func EmbeddedFileOrElse(c *conn.Conn, fs embed.FS, or func()) {
 }
 
 // FileOrElse sends the file requested by the client, or else falls back.
-func FileOrElse(c *conn.Conn, or func()) {
-	fileName := filepath.Join(c.Container.Config.PublicRoot, c.Request.RequestURI)
+func FileOrElse(c *client.Client, or func()) {
+	fileName := filepath.Join(c.Scope.Container.Config.PublicRoot, c.Request.RequestURI)
 
 	if !files.IsFile(fileName) || files.IsDirectory(fileName) {
-		EmbeddedFileOrElse(c, c.Container.Config.Efs, or)
+		EmbeddedFileOrElse(c, c.Scope.Container.Config.Efs, or)
 		return
 	}
 
 	reader, readerInfo, readerError := files.NewFileReader(fileName)
 	if readerError != nil {
-		c.Container.Config.ErrorLog.Println(readerError, stack.Trace())
+		c.Scope.Container.Config.ErrorLog.Println(readerError, stack.Trace())
 		return
 	}
 
-	if c.WebSocket != nil {
+	if c.Scope.WebSocket != nil {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			c.Container.Config.ErrorLog.Println(readError, stack.Trace())
+			c.Scope.Container.Config.ErrorLog.Println(readError, stack.Trace())
 			return
 		}
 
-		writeError := c.WebSocket.WriteMessage(websocket.TextMessage, data)
+		writeError := c.Scope.WebSocket.WriteMessage(websocket.TextMessage, data)
 		if writeError != nil {
-			c.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+			c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
 			return
 		}
 	}
 
-	if "" != c.EventName {
+	if "" != c.Scope.EventName {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			c.Container.Config.ErrorLog.Println(readError, stack.Trace())
+			c.Scope.Container.Config.ErrorLog.Println(readError, stack.Trace())
 			return
 		}
 

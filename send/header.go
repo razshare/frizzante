@@ -1,38 +1,20 @@
 package send
 
 import (
-	"fmt"
-	"github.com/razshare/frizzante/conn"
+	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/stack"
-	"net/url"
 )
 
 // Navigate redirects the request to a location with status 302.
-func Navigate(c *conn.Conn, l string) {
+func Navigate(c *client.Client, l string) {
 	Redirect(c, l, 302)
-	Flush(c)
+	Message(c, "")
 }
 
 // Redirect redirects the request to a location with a status.
-func Redirect(c *conn.Conn, l string, status int) {
+func Redirect(c *client.Client, l string, status int) {
 	Status(c, status)
 	Header(c, "Location", l)
-}
-
-// Status sets the status code.
-//
-// This will lock the status, which makes it
-// so that the increaseIndex time you invoke this
-// function it will fail with an error.
-//
-// All errors are sent to the server notifier.
-func Status(c *conn.Conn, s int) {
-	if c.Locked {
-		c.Container.Config.ErrorLog.Println("status is locked", stack.Trace())
-		return
-	}
-
-	c.Status = s
 }
 
 // Header sends a header field.
@@ -42,9 +24,9 @@ func Status(c *conn.Conn, s int) {
 // This means the status will become locked and further attempts to send the status will fail with an error.
 //
 // All errors are sent to the server notifier.
-func Header(c *conn.Conn, k string, v string) {
-	if c.Locked {
-		c.Container.Config.ErrorLog.Println("header is locked", stack.Trace())
+func Header(c *client.Client, k string, v string) {
+	if c.Scope.Locked {
+		c.Scope.Container.Config.ErrorLog.Println("header is locked", stack.Trace())
 		return
 	}
 
@@ -52,9 +34,9 @@ func Header(c *conn.Conn, k string, v string) {
 }
 
 // Headers sends header fields.
-func Headers(c *conn.Conn, h map[string]string) {
-	if c.Locked {
-		c.Container.Config.ErrorLog.Println("header is locked", stack.Trace())
+func Headers(c *client.Client, h map[string]string) {
+	if c.Scope.Locked {
+		c.Scope.Container.Config.ErrorLog.Println("header is locked", stack.Trace())
 		return
 	}
 
@@ -64,11 +46,6 @@ func Headers(c *conn.Conn, h map[string]string) {
 }
 
 // ContentType sets the Content-Type header field.
-func ContentType(c *conn.Conn, t string) {
+func ContentType(c *client.Client, t string) {
 	Header(c, "Content-Type", t)
-}
-
-// Cookie sends a cookies to the client.
-func Cookie(c *conn.Conn, key string, value string) {
-	Header(c, "Set-Cookie", fmt.Sprintf("%s=%s; Path=/; HttpOnly", url.QueryEscape(key), url.QueryEscape(value)))
 }

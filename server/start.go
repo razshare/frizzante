@@ -3,7 +3,7 @@ package server
 import (
 	"context"
 	"errors"
-	"github.com/razshare/frizzante/conn"
+	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/container"
 	"net/http"
 	"slices"
@@ -20,12 +20,14 @@ func Start(conf *Config) {
 
 	for _, r := range conf.Routes {
 		mux.HandleFunc(r.Pattern, func(wrt http.ResponseWriter, req *http.Request) {
-			con := &conn.Conn{
-				EventId:   1,
-				Status:    200,
-				Writer:    wrt,
-				Request:   req,
-				Container: cont,
+			con := &client.Client{
+				Writer:  wrt,
+				Request: req,
+				Scope: client.Scope{
+					Container: cont,
+					EventId:   1,
+					Status:    200,
+				},
 			}
 
 			for _, tag := range r.Tags {

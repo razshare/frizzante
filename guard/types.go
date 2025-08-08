@@ -1,9 +1,9 @@
 package guard
 
-import "github.com/razshare/frizzante/conn"
+import "github.com/razshare/frizzante/client"
 
 type Guard struct {
 	Name    string
-	Handler func(c *conn.Conn, allow func())
+	Handler func(c *client.Client, allow func())
 	Tags    []string
 }
