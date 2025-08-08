@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/files"
 	"os"
 	"path/filepath"
@@ -8,11 +9,11 @@ import (
 )
 
 func TestOnHelp(test *testing.T) {
-	frizzante.OnHelp()
+	cli.OnHelp()
 }
 
 func TestOnVersion(test *testing.T) {
-	frizzante.OnVersion()
+	cli.OnVersion(efs)
 }
 
 func TestOnCreateProject(test *testing.T) {
@@ -23,7 +24,7 @@ func TestOnCreateProject(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	frizzante.OnCreateProject(directoryName)
+	cli.OnCreateProject(directoryName)
 
 	if !files.IsDirectory(directoryName) {
 		test.Fatal("the cli failed to create a test project")
@@ -54,7 +55,7 @@ func TestOnAddFeature(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	frizzante.OnAddFeature("air")
+	cli.OnAddFeature(efs, "air")
 
 	if !files.IsDirectory(air) {
 		test.Fatal("the cli failed to add air feature")
@@ -68,7 +69,7 @@ func TestOnPackage(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	frizzante.OnPackage()
+	cli.OnPackage()
 
 	if !files.IsDirectory(dist) {
 		test.Fatal("the cli failed to package the application into dist")
@@ -82,7 +83,7 @@ func TestOnInstall(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	frizzante.OnInstall()
+	cli.OnInstall()
 
 	if !files.IsDirectory(nodeModules) {
 		test.Fatal("the cli failed to install node_modules")
@@ -90,7 +91,7 @@ func TestOnInstall(test *testing.T) {
 }
 
 func TestOnFormat(test *testing.T) {
-	frizzante.OnFormat()
+	cli.OnFormat()
 }
 
 func TestOnTouch(test *testing.T) {
@@ -100,7 +101,7 @@ func TestOnTouch(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	frizzante.OnTouch()
+	cli.OnTouch()
 
 	serverJs := filepath.Join("app", "dist", "server.js")
 	if !files.IsFile(serverJs) {
@@ -113,7 +114,7 @@ func TestOnTouch(test *testing.T) {
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	frizzante.OnPackage()
+	cli.OnPackage()
 }
 
 func TestOnClean(test *testing.T) {
@@ -151,7 +152,7 @@ func TestOnClean(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	frizzante.OnClean()
+	cli.OnClean()
 
 	if files.IsFile(filepath.Join(dist, "test.txt")) {
 		test.Fatalf("cli failed to clean %s", dist)
@@ -166,6 +167,6 @@ func TestOnClean(test *testing.T) {
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	frizzante.OnInstall()
-	frizzante.OnPackage()
+	cli.OnInstall()
+	cli.OnPackage()
 }

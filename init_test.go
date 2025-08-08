@@ -2,80 +2,60 @@ package main
 
 import (
 	"embed"
-	frizzanteCli "github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/connections"
-	"github.com/razshare/frizzante/routes"
-	"github.com/razshare/frizzante/servers"
-	"github.com/razshare/frizzante/sessions"
-	"github.com/razshare/frizzante/views"
+	"github.com/razshare/frizzante/cli"
+	"github.com/razshare/frizzante/client"
+	"github.com/razshare/frizzante/route"
+	"github.com/razshare/frizzante/send"
+	"github.com/razshare/frizzante/server"
+	"github.com/razshare/frizzante/view"
 )
 
 //go:embed .github
 //go:embed makefile
 //go:embed app/dist
-var efs embed.FS
+var iefs embed.FS
 var port = 8080
-var server = make(chan *servers.Server, 1)
+var ready = make(chan any, 1)
 
 func init() {
 	// Cli.
-	*frizzanteCli.FlagPlatform = "linux/amd64"
-	*frizzanteCli.FlagYes = true
-	*frizzanteCli.FlagBun = "bun"
+	*cli.FlagPlatform = "linux/amd64"
+	*cli.FlagYes = true
+	*cli.FlagBun = "bun"
 
 	// Server.
-	serverLocal := servers.New()
-	serverLocal.Efs = efs
+	c := server.Default()
+	c.Container.Efs = iefs
 
-	serverLocal.Routes = append(
-		serverLocal.Routes,
-		routes.Route{Pattern: "GET /TestSession", Handler: func(connection *connections.Connection) {
-			session := sessions.New(connection, State{Name: "test"}).Start()
-			connection.SendMessagef("hello %s", session.State.Name)
+	c.Routes = []route.Route{
+		{Pattern: "GET /TestRoutes", Handler: func(c *client.Client) {
+			send.Message(c, "hello")
 		}},
-		routes.Route{Pattern: "POST /TestSession", Handler: func(connection *connections.Connection) {
-			session := sessions.New(connection, State{}).Start()
-			defer session.Save()
-			session.State.Name = connection.ReceiveMessage()
+		{Pattern: "GET /TestSendStatus", Handler: func(c *client.Client) {
+			send.Status(c, 201)
+			send.Message(c, "ok")
 		}},
-		routes.Route{Pattern: "GET /TestSessionExpectFail", Handler: func(connection *connections.Connection) {
-			session := sessions.New(connection, State{Name: "test"}).Start()
-			connection.SendMessagef("hello %s", session.State.Name)
+		{Pattern: "GET /TestSendHeader", Handler: func(c *client.Client) {
+			send.Header(c, "Content-Type", "application/json")
+			send.Message(c, "{}")
 		}},
-		routes.Route{Pattern: "POST /TestSessionExpectFail", Handler: func(connection *connections.Connection) {
-			session := sessions.New(connection, State{}).Start().Start()
-			// Without this, session state should not be updated.
-			// defer operator.Save(state)
-			session.State.Name = connection.ReceiveMessage()
-		}},
-		routes.Route{Pattern: "GET /TestServerAddRoute", Handler: func(connection *connections.Connection) {
-			connection.SendMessage("hello")
-		}},
-		routes.Route{Pattern: "GET /TestConnectionSendStatus", Handler: func(connection *connections.Connection) {
-			connection.SendStatus(201)
-			connection.SendMessage("ok")
-		}},
-		routes.Route{Pattern: "GET /TestConnectionSendHeader", Handler: func(connection *connections.Connection) {
-			connection.SendHeader("Content-Type", "application/json")
-			connection.SendMessage("{}")
-		}},
-		routes.Route{Pattern: "GET /TestRenderServer", Handler: func(connection *connections.Connection) {
-			connection.SendView(views.View{
+		{Pattern: "GET /TestRenderServer", Handler: func(c *client.Client) {
+			send.View(c, view.View{
 				Name:       "Welcome",
-				RenderMode: views.RenderModeServer,
+				RenderMode: view.RenderModeServer,
 				Data:       map[string]any{"name": "world"},
 			})
 		}},
-		routes.Route{Pattern: "GET /TestRenderClient", Handler: func(connection *connections.Connection) {
-			connection.SendView(views.View{
+		{Pattern: "GET /TestRenderClient", Handler: func(c *client.Client) {
+			send.View(c, view.View{
 				Name:       "Welcome",
-				RenderMode: views.RenderModeClient,
+				RenderMode: view.RenderModeClient,
 				Data:       map[string]any{"name": "world"},
 			})
 		}},
-	)
+	}
 
-	go serverLocal.Start()
+	go server.Start(c)
 
-	server <- serverLocal
+	ready <- 0
 }
