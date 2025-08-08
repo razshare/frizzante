@@ -1,0 +1,138 @@
+package send
+
+import (
+	"encoding/json"
+	"fmt"
+	"github.com/gorilla/websocket"
+	"github.com/razshare/frizzante/conn"
+	"github.com/razshare/frizzante/stack"
+	"net/http"
+)
+
+// Flush send an empty message.
+func Flush(c *conn.Conn) {
+	Message(c, "")
+}
+
+// Content sends binary safe content.
+//
+// If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
+//
+// The status code and the header will become locked and further attempts to send either of them will fail with an error.
+//
+// All errors are sent to the server notifier.
+//
+// Compatible with web sockets.
+func Content(c *conn.Conn, d []byte) {
+	if !c.Locked {
+		c.Writer.WriteHeader(c.Status)
+		c.Locked = true
+	}
+
+	if c.WebSocket != nil {
+		writeError := c.WebSocket.WriteMessage(websocket.TextMessage, d)
+		if writeError != nil {
+			c.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+		}
+		return
+	}
+
+	if "" != c.EventName {
+		EventContent(c, d)
+		return
+	}
+
+	_, writeError := c.Writer.Write(d)
+	if writeError != nil {
+		c.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+	}
+}
+
+// Message sends utf-8 safe content.
+//
+// If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
+//
+// The status code and the header will become locked and further attempts to send either of them will fail with an error.
+//
+// All errors are sent to the server notifier.
+//
+// Compatible with web sockets.
+func Message(c *conn.Conn, m string) {
+	Content(c, []byte(m))
+}
+
+// Messagef sends utf-8 safe content using a format.
+//
+// If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
+//
+// The status code and the header will become locked and further attempts to send either of them will fail with an error.
+//
+// All errors are sent to the server notifier.
+//
+// Compatible with web sockets.
+func Messagef(c *conn.Conn, f string, v ...any) {
+	Content(c, []byte(fmt.Sprintf(f, v...)))
+}
+
+// Json sends json content.
+//
+// If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
+//
+// The status code and the header will become locked and further attempts to send either of them will fail with an error.
+//
+// All errors are sent to the server notifier.
+//
+// Compatible with web sockets.
+func Json(c *conn.Conn, v any) {
+	data, jsonError := json.Marshal(v)
+	if jsonError != nil {
+		c.Container.Config.ErrorLog.Println(jsonError, stack.Trace())
+		return
+	}
+
+	if nil == c.WebSocket {
+		contentType := c.Writer.Header().Get("Content-Type")
+		if "" == contentType {
+			c.Writer.Header().Set("Content-Type", "application/json")
+		}
+	}
+
+	Content(c, data)
+}
+
+// NotFound sends a message with status 404 Not Found.
+func NotFound(c *conn.Conn, m string) {
+	Status(c, http.StatusNotFound)
+	Message(c, m)
+}
+
+// Unauthorized sends a message with status 401 Unauthorized.
+func Unauthorized(c *conn.Conn, m string) {
+	Status(c, http.StatusUnauthorized)
+	Message(c, m)
+}
+
+// BadRequest sends a message with status 400 Bad Request.
+func BadRequest(c *conn.Conn, m string) {
+	Status(c, http.StatusBadRequest)
+	Message(c, m)
+}
+
+// Error sends a message with status 500 Internal server Error
+// and also sends the error to the server notifier.
+func Error(c *conn.Conn, e error) {
+	Status(c, http.StatusBadRequest)
+	Message(c, e.Error())
+}
+
+// Forbidden sends a message with status 403 Forbidden.
+func Forbidden(c *conn.Conn, m string) {
+	Status(c, http.StatusForbidden)
+	Message(c, m)
+}
+
+// TooManyRequests sends a message with status 403 Forbidden.
+func TooManyRequests(c *conn.Conn, m string) {
+	Status(c, http.StatusTooManyRequests)
+	Message(c, m)
+}
