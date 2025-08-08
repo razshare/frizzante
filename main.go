@@ -11,6 +11,5 @@ import (
 //go:embed queries.sql
 //go:embed schema.sql
 var efs embed.FS
-var frizzante = &cli.Cli{Efs: efs}
 
-func main() { cli.OnStart(frizzante) }
+func main() { cli.OnStart(efs) }

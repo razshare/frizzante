@@ -1,7 +1,5 @@
 package cli
 
-import "embed"
-
 type PlatformType uint
 
 const PlatformTypeLinuxAmd64 PlatformType = 0
@@ -16,10 +14,3 @@ type FeatureCopyInstruction struct {
 	OriginDirectory      string
 	DestinationDirectory string
 }
-
-type Cli struct {
-	Efs    embed.FS
-	Parsed bool
-}
-
-type Project string

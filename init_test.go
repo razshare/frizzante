@@ -2,12 +2,12 @@ package main
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/act"
-	frizzanteCli "github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/connections"
-	"github.com/razshare/frizzante/routes"
-	"github.com/razshare/frizzante/servers"
-	"github.com/razshare/frizzante/views"
+	"github.com/razshare/frizzante/cli"
+	"github.com/razshare/frizzante/conn"
+	"github.com/razshare/frizzante/route"
+	"github.com/razshare/frizzante/send"
+	"github.com/razshare/frizzante/server"
+	"github.com/razshare/frizzante/view"
 )
 
 //go:embed .github
@@ -15,48 +15,47 @@ import (
 //go:embed app/dist
 var iefs embed.FS
 var port = 8080
-var server = make(chan *servers.Server, 1)
+var ready = make(chan any, 1)
 
 func init() {
 	// Cli.
-	*frizzanteCli.FlagPlatform = "linux/amd64"
-	*frizzanteCli.FlagYes = true
-	*frizzanteCli.FlagBun = "bun"
+	*cli.FlagPlatform = "linux/amd64"
+	*cli.FlagYes = true
+	*cli.FlagBun = "bun"
 
 	// Server.
-	s := servers.New()
-	s.Efs = iefs
+	c := server.Default()
+	c.Container.Efs = iefs
 
-	s.Routes = append(
-		s.Routes,
-		routes.Route{Pattern: "GET /TestServerAddRoute", Handler: func(c *connections.Connection) {
-			act.SendMessage(c, "hello")
+	c.Routes = []route.Route{
+		{Pattern: "GET /TestRoutes", Handler: func(c *conn.Conn) {
+			send.Message(c, "hello")
 		}},
-		routes.Route{Pattern: "GET /TestConnectionSendStatus", Handler: func(c *connections.Connection) {
-			act.SendStatus(c, 201)
-			act.SendMessage(c, "ok")
+		{Pattern: "GET /TestSendStatus", Handler: func(c *conn.Conn) {
+			send.Status(c, 201)
+			send.Message(c, "ok")
 		}},
-		routes.Route{Pattern: "GET /TestConnectionSendHeader", Handler: func(c *connections.Connection) {
-			act.SendHeader(c, "Content-Type", "application/json")
-			act.SendMessage(c, "{}")
+		{Pattern: "GET /TestSendHeader", Handler: func(c *conn.Conn) {
+			send.Header(c, "Content-Type", "application/json")
+			send.Message(c, "{}")
 		}},
-		routes.Route{Pattern: "GET /TestRenderServer", Handler: func(c *connections.Connection) {
-			act.SendView(c, views.View{
+		{Pattern: "GET /TestRenderServer", Handler: func(c *conn.Conn) {
+			send.View(c, view.View{
 				Name:       "Welcome",
-				RenderMode: views.RenderModeServer,
+				RenderMode: view.RenderModeServer,
 				Data:       map[string]any{"name": "world"},
 			})
 		}},
-		routes.Route{Pattern: "GET /TestRenderClient", Handler: func(c *connections.Connection) {
-			act.SendView(c, views.View{
+		{Pattern: "GET /TestRenderClient", Handler: func(c *conn.Conn) {
+			send.View(c, view.View{
 				Name:       "Welcome",
-				RenderMode: views.RenderModeClient,
+				RenderMode: view.RenderModeClient,
 				Data:       map[string]any{"name": "world"},
 			})
 		}},
-	)
+	}
 
-	go servers.Start(s)
+	go server.Start(c)
 
-	server <- s
+	ready <- 0
 }
