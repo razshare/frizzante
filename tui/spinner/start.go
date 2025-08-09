@@ -1,13 +1,10 @@
 package spinner
 
-import "time"
-
-func Start(manager *Spinner) (err error) {
-	manager.Done = make(chan bool)
+func Start(s *Spinner) (err error) {
+	s.Done = make(chan bool, 1)
 	go func() {
-		_, err = manager.Program.Run()
-		close(manager.Done)
+		_, err = s.Program.Run()
+		close(s.Done)
 	}()
-	time.Sleep(100 * time.Millisecond)
 	return
 }

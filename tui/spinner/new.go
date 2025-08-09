@@ -6,14 +6,14 @@ import (
 	"github.com/razshare/frizzante/tui/config"
 )
 
-func New(message string) *Spinner {
+func New(msg string) *Spinner {
 	s := spinner.New()
 	s.Spinner = spinner.Dot
 	s.Style = config.Styles.Spinner
 
 	m := Model{
 		Spinner: s,
-		Message: message,
+		Message: msg,
 	}
 
 	return &Spinner{

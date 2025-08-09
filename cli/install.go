@@ -51,6 +51,10 @@ func Install(name string, url string, destination string) {
 	}
 
 	spin := spinner.New(fmt.Sprintf("installing `%s` from `%s`...", name, url))
+	spinnerError := spinner.Start(spin)
+	if spinnerError != nil {
+		Fatal(spinnerError)
+	}
 	defer func() { spinner.Stop(spin) }()
 
 	if !strings.HasSuffix(url, ".zip") {
