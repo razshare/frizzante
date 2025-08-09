@@ -1,6 +1,6 @@
 import type { View } from "$frizzante/core/types.ts"
 import { IS_BROWSER } from "$frizzante/core/constants.ts"
-import { swaps } from "$frizzante/core/scripts/swaps.ts"
+import { find, swap } from "$frizzante/core/scripts/swap.ts"
 
 let started = false
 
@@ -9,22 +9,22 @@ export function route(view: View<never>): void {
         return
     }
 
+    const base = location.pathname
+
     const listener = async function pop(e: PopStateEvent) {
         e.preventDefault()
 
-        const id = e.state ?? ""
-        const current = swaps.find(id)
+        const id = (e.state ?? -1) as number
 
-        if (!current) {
-            await swaps.swap(view).withPath("/").play()
-            return
-        }
-
-        if (current.position() + 1 != swaps.position()) {
-            swaps.teleport(current.position() + 1)
-            await current.play()
+        if(id >= 0){
+            const config = find(id)
+            if(!config) {
+                console.warn("swap configuration not found", {id})
+                return
+            }
+            await swap(config)
         } else {
-            await current.withUpdate(true).play()
+            await swap({ method: "GET", path: base, view, body: false })
         }
     }
     window.addEventListener("popstate", listener)

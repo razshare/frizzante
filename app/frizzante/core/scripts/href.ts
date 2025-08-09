@@ -1,7 +1,7 @@
 import { getContext } from "svelte"
 import type { View } from "$frizzante/core/types.ts"
 import { route } from "$frizzante/core/scripts/route.ts"
-import { swaps } from "$frizzante/core/scripts/swaps.ts"
+import { swap } from "$frizzante/core/scripts/swap.ts"
 
 export function href(path = ""): {
     href: string
@@ -13,7 +13,8 @@ export function href(path = ""): {
         href: path,
         async onclick(event: MouseEvent) {
             event.preventDefault()
-            await swaps.swap(view).withPath(path).withUpdate(true).play()
+            const record = await swap({ method: "GET", path, body: false, view })
+            record()
             return false
         },
     }

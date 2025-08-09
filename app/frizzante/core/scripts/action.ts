@@ -1,7 +1,7 @@
 import { getContext } from "svelte"
 import type { View } from "$frizzante/core/types.ts"
 import { route } from "$frizzante/core/scripts/route.ts"
-import { swaps } from "$frizzante/core/scripts/swaps.ts"
+import { swap } from "$frizzante/core/scripts/swap.ts"
 
 export function action(path = ""): {
     action: string
@@ -16,17 +16,10 @@ export function action(path = ""): {
             const form = event.target as HTMLFormElement
             const body = new FormData(form)
             const target = event.target as HTMLFormElement
-
-            await swaps
-                .swap(view)
-                .withMethod(target.method)
-                .withPath(path)
-                .withBody(body)
-                .withUpdate(true)
-                .play()
-                .then(function done() {
-                    form.reset()
-                })
+            await swap({ method: target.method, path, body, view }).then(function done(record) {
+                record()
+                form.reset()
+            })
         },
     }
 }
