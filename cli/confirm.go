@@ -2,7 +2,7 @@ package cli
 
 import (
 	"fmt"
-	"github.com/pterm/pterm"
+	"github.com/razshare/frizzante/tui/confirm"
 )
 
 // Confirm shows a confirmation prompt.
@@ -13,12 +13,7 @@ func Confirm(text string) bool {
 		return true
 	}
 
-	yes, showError := pterm.
-		DefaultInteractiveConfirm.
-		WithConfirmText("Y").
-		WithDefaultText("n").
-		WithDefaultValue(true).
-		Show(text)
+	yes, showError := confirm.Send(text, true)
 
 	if showError != nil {
 		Fatal(showError)

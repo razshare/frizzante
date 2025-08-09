@@ -1,48 +1,48 @@
 package cli
 
-import "github.com/pterm/pterm"
+import "github.com/razshare/frizzante/tui/messages"
 
 // Fatalf shows a fatal message and terminates the application.
-func Fatalf(template string, vars ...any) {
-	pterm.Fatal.Printfln(template, vars...)
+func Fatalf(format string, vars ...any) {
+	messages.Fatalf(format, vars...)
 }
 
 // Warningf shows a warning message.
-func Warningf(template string, vars ...any) {
-	pterm.Warning.Printfln(template, vars...)
+func Warningf(format string, vars ...any) {
+	messages.Warningf(format, vars...)
 }
 
 // Infof shows an info message.
-func Infof(template string, vars ...any) {
-	pterm.Info.Printfln(template, vars...)
+func Infof(format string, vars ...any) {
+	messages.Infof(format, vars...)
 }
 
 // Successf shows a success message.
-func Successf(template string, vars ...any) {
-	pterm.Success.Printfln(template, vars...)
+func Successf(format string, vars ...any) {
+	messages.Successf(format, vars...)
 }
 
 // Warning shows a warning message.
 func Warning(vars ...any) {
-	pterm.Warning.Println(vars...)
+	messages.Warning(vars...)
 }
 
 // Fatal shows a fatal message and terminates the application.
 func Fatal(vars ...any) {
-	pterm.Fatal.Println(vars...)
+	messages.Fatal(vars...)
 }
 
 // Info shows an info message.
 func Info(vars ...any) {
-	pterm.Info.Println(vars...)
+	messages.Info(vars...)
 }
 
 // Success shows a success message.
 func Success(vars ...any) {
-	pterm.Success.Println(vars...)
+	messages.Success(vars...)
 }
 
 // Section shows the name of a section using Markdown semantics.
 func Section(vars ...any) {
-	pterm.DefaultSection.Println(vars...)
+	messages.Section(vars...)
 }

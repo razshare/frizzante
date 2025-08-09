@@ -2,16 +2,11 @@ package cli
 
 import (
 	"embed"
-	"github.com/pterm/pterm"
-	"github.com/pterm/pterm/putils"
+	"github.com/razshare/frizzante/tui/input"
+	"github.com/razshare/frizzante/tui/singleselect"
 )
 
 func OnMenu(efs embed.FS) {
-	err := pterm.DefaultBigText.WithLetters(putils.LettersFromStringWithStyle("Frizzante", pterm.FgCyan.ToStyle())).Render()
-	if err != nil {
-		Fatal(err)
-	}
-
 	options := []string{
 		"Help",
 		"Update",
@@ -33,7 +28,7 @@ func OnMenu(efs embed.FS) {
 		"Sqlc Generate",
 	}
 
-	result, showError := pterm.DefaultInteractiveSelect.WithOptions(options).Show("Pick an option")
+	result, showError := singleselect.Send("Pick an option", options)
 	if showError != nil {
 		Fatal(showError)
 	}
@@ -51,7 +46,7 @@ func OnMenu(efs embed.FS) {
 	}
 
 	if result == "Create Project" {
-		projectName, projectNameError := pterm.DefaultInteractiveTextInput.Show("Give the project name")
+		projectName, projectNameError := input.Send("Give the project a name")
 		if projectNameError != nil {
 			Fatal(projectNameError)
 		}

@@ -1,11 +1,12 @@
 package cli
 
 import (
-	"atomicgo.dev/keyboard/keys"
 	"embed"
-	"github.com/pterm/pterm"
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/multiselect"
+	"github.com/razshare/frizzante/tui/table"
 	"io"
 	"os"
 	"path/filepath"
@@ -19,21 +20,14 @@ func OnAddFeature(efs embed.FS, features string) {
 	}
 
 	if features == ":pick" {
-		selectedFeatures, showError := pterm.
-			DefaultInteractiveMultiselect.
-			WithKeySelect(keys.Space).
-			WithKeyConfirm(keys.Enter).
-			WithFilter(true).
-			WithOptions([]string{
-				"Core",
-				"Forms",
-				"Links",
-				"Air",
-				"Bun",
-				"Sqlc",
-			}).
-			WithFilter(false).
-			Show("Pick a feature to add")
+		selectedFeatures, showError := multiselect.Send("Pick a feature to add", []string{
+			"Core",
+			"Forms",
+			"Links",
+			"Air",
+			"Bun",
+			"Sqlc",
+		})
 
 		if showError != nil {
 			Fatal(showError)
@@ -301,7 +295,7 @@ func AddFeatureByName(efs embed.FS, feature string) {
 }
 
 func ShowFeaturesInfo() {
-	Info(strings.Join([]string{
+	messages.Info(strings.Join([]string{
 		"You can use -a or --add",
 		"in order to add new features to the project.",
 		"",
@@ -317,75 +311,64 @@ func ShowFeaturesInfo() {
 		"You can also use -a:pick or --add :pick to pick feature interactively.",
 	}, "\n"))
 
-	pterm.Println()
+	println()
 
-	data := pterm.TableData{
-		{"Feature Name", "Description"},
-		{
-			"Core",
-			strings.Join([]string{
-				"Adds the core of frizzante.",
-				"A bundle of scripts and components that manage",
-				"view rendering, view transitions, automatic state management,",
-				"provides commonly used functions.",
-				"",
-				"Source code will be dropped in `app/frizzante/core`.",
-			}, "\n"),
+	table.Send(
+		[]string{"Feature Name", "Description"},
+		[][]string{
+			{
+				"Core",
+				strings.Join([]string{
+					"Adds the core of frizzante.",
+					"A bundle of scripts and components that manage",
+					"view rendering, view transitions, automatic state management,",
+					"provides commonly used functions.",
+					"",
+					"Source code will be dropped in `app/frizzante/core`.",
+				}, "\n"),
+			},
+			{
+				"Forms",
+				strings.Join([]string{
+					"Adds a <Form> component which behaves like a <form> element",
+					"with some additional features that facilitate",
+					"the usage of web standards.",
+					"",
+					"Source code will be dropped in `app/frizzante/forms`.",
+					"",
+					"Requires `Core`.",
+				}, "\n"),
+			},
+			{
+				"Links",
+				strings.Join([]string{
+					"Adds a <Link> component which behaves like an <a> element",
+					"with some additional features that facilitate",
+					"the usage of web standards.",
+					"",
+					"Source code will be dropped in `app/frizzante/links`.",
+					"",
+					"Requires `Core`.",
+				}, "\n"),
+			},
+			{
+				"Bun",
+				strings.Join([]string{
+					"Adds bun to the project.",
+					"",
+					"Binaries will be dropped in `.gen/bun`.",
+					"",
+					"Bun is required for development mode.",
+				}, "\n"),
+			},
+			{
+				"Sqlc",
+				strings.Join([]string{
+					"Adds sqlc to the project.",
+					"",
+					"Binaries will be dropped in `.gen/sqlc`.",
+				}, "\n"),
+			},
 		},
-		{
-			"Forms",
-			strings.Join([]string{
-				"Adds a <Form> component which behaves like a <form> element",
-				"with some additional features that facilitate",
-				"the usage of web standards.",
-				"",
-				"Source code will be dropped in `app/frizzante/forms`.",
-				"",
-				"Requires `Core`.",
-			}, "\n"),
-		},
-		{
-			"Links",
-			strings.Join([]string{
-				"Adds a <Link> component which behaves like an <a> element",
-				"with some additional features that facilitate",
-				"the usage of web standards.",
-				"",
-				"Source code will be dropped in `app/frizzante/links`.",
-				"",
-				"Requires `Core`.",
-			}, "\n"),
-		},
-		{
-			"Bun",
-			strings.Join([]string{
-				"Adds bun to the project.",
-				"",
-				"Binaries will be dropped in `.gen/bun`.",
-				"",
-				"Bun is required for development mode.",
-			}, "\n"),
-		},
-		{
-			"Sqlc",
-			strings.Join([]string{
-				"Adds sqlc to the project.",
-				"",
-				"Binaries will be dropped in `.gen/sqlc`.",
-			}, "\n"),
-		},
-	}
-
-	// Create a table with a header and the defined data, then render it
-	tableError := pterm.
-		DefaultTable.
-		WithHasHeader().
-		WithData(data).
-		WithBoxed(true).
-		WithRowSeparator("─").
-		WithHeaderRowSeparator("=").
-		Render()
-	if tableError != nil {
-		Fatal(tableError)
-	}
+	)
 }

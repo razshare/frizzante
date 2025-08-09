@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
-	"main/wrap"
+	"github.com/razshare/frizzante/tui/wrap"
 )
 
 const (
@@ -19,10 +19,10 @@ func Send(headers []string, rows [][]string) {
 	}
 
 	columns := make([]table.Column, len(headers))
-	
+
 	for index, header := range headers {
 		width := len(header)
-		
+
 		for _, row := range rows {
 			if index < len(row) {
 				cellLen := len(row[index])
@@ -31,11 +31,11 @@ func Send(headers []string, rows [][]string) {
 				}
 			}
 		}
-		
+
 		if width > MaxColumnWidth {
 			width = MaxColumnWidth
 		}
-		
+
 		columns[index] = table.Column{
 			Title: header,
 			Width: width + ColumnPadding,
@@ -44,31 +44,31 @@ func Send(headers []string, rows [][]string) {
 
 	estimatedCapacity := len(rows) * 3
 	wrappedRows := make([]table.Row, 0, estimatedCapacity)
-	
+
 	emptyRow := make([]string, len(headers))
-	
+
 	for rowIdx, row := range rows {
 		if len(row) > len(columns) {
 			row = row[:len(columns)]
 		}
-		
+
 		maxLines := 1
 		wrappedCells := make([][]string, len(columns))
-		
+
 		for i := 0; i < len(columns); i++ {
 			cellContent := ""
 			if i < len(row) {
 				cellContent = row[i]
 			}
-			
+
 			cellWidth := columns[i].Width - ColumnPadding
 			wrappedCells[i] = wrap.Send(cellContent, cellWidth)
-			
+
 			if len(wrappedCells[i]) > maxLines {
 				maxLines = len(wrappedCells[i])
 			}
 		}
-		
+
 		for lineIdx := 0; lineIdx < maxLines; lineIdx++ {
 			newRow := make([]string, len(columns))
 			for cellIdx := 0; cellIdx < len(columns); cellIdx++ {
@@ -78,7 +78,7 @@ func Send(headers []string, rows [][]string) {
 			}
 			wrappedRows = append(wrappedRows, newRow)
 		}
-		
+
 		if rowIdx < len(rows)-1 {
 			wrappedRows = append(wrappedRows, emptyRow)
 		}

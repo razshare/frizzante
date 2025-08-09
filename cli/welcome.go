@@ -1,18 +1,10 @@
 package cli
 
-import (
-	"github.com/pterm/pterm"
-	"github.com/pterm/pterm/putils"
-	"os"
-)
+import "os"
 
 func OnWelcome() {
 	usingDocker := os.Getenv("FRIZZANTE_USING_DOCKER")
 	end := make(chan string)
-	err := pterm.DefaultBigText.WithLetters(putils.LettersFromStringWithStyle("Frizzante", pterm.FgCyan.ToStyle())).Render()
-	if err != nil {
-		Fatal(err)
-	}
 
 	if usingDocker != "" {
 		println("")

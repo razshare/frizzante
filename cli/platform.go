@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/pterm/pterm"
+	"github.com/razshare/frizzante/tui/singleselect"
 	"strings"
 )
 
@@ -12,21 +12,20 @@ func Platform() PlatformType {
 		platform = *FlagPlatform
 	} else {
 		var platformError error
-		platform, platformError = pterm.
-			DefaultInteractiveSelect.
-			WithOptions([]string{
-				"Linux/amd64",
-				"Linux/arm64",
-				"Darwin/amd64",
-				"Darwin/arm64",
-				"Windows/amd64",
-				"Windows/arm64",
-			}).
-			Show("Pick a platform")
+
+		platform, platformError = singleselect.Send("Pick a platform", []string{
+			"Linux/amd64",
+			"Linux/arm64",
+			"Darwin/amd64",
+			"Darwin/arm64",
+			"Windows/amd64",
+			"Windows/arm64",
+		})
 
 		if platformError != nil {
 			Fatal(platformError)
 		}
+
 		*FlagPlatform = platform
 	}
 

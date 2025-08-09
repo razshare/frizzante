@@ -1,6 +1,6 @@
 package confirm
 
-import "main/program"
+import "github.com/razshare/frizzante/tui/program"
 
 func Send(prompt string, defaultValue bool) (bool, error) {
 	model := Model{Prompt: prompt, DefaultValue: defaultValue, Confirmed: defaultValue}

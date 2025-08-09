@@ -2,8 +2,8 @@ package cli
 
 import (
 	"fmt"
-	"github.com/pterm/pterm"
 	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/tui/spinner"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -50,16 +50,8 @@ func Install(name string, url string, destination string) {
 		}
 	}
 
-	spinner, spinnerError := pterm.DefaultSpinner.WithRemoveWhenDone(true).Start(fmt.Sprintf("installing `%s` from `%s`...", name, url))
-	if spinnerError != nil {
-		Fatal(spinnerError)
-	}
-	defer func() {
-		stopError := spinner.Stop()
-		if stopError != nil {
-			Fatal(stopError)
-		}
-	}()
+	spin := spinner.New(fmt.Sprintf("installing `%s` from `%s`...", name, url))
+	defer func() { spinner.Stop(spin) }()
 
 	if !strings.HasSuffix(url, ".zip") {
 		nameFixed := name

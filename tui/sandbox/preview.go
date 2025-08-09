@@ -1,23 +1,23 @@
-package main
+package sandbox
 
 import (
-	"main/confirm"
-	"main/input"
-	"main/messages"
-	"main/multiselect"
-	"main/singleselect"
-	"main/spinner"
-	"main/table"
+	"github.com/razshare/frizzante/tui/confirm"
+	"github.com/razshare/frizzante/tui/input"
+	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/multiselect"
+	"github.com/razshare/frizzante/tui/singleselect"
+	"github.com/razshare/frizzante/tui/spinner"
+	"github.com/razshare/frizzante/tui/table"
 	"time"
 )
 
-func main() {
+func Preview() {
 	// Test status messages (replacing pterm.Info, Success, Warning, Fatal)
 	messages.Section("Charm CLI - Replacing pterm Functions")
 	messages.Info("Testing charm_cli as replacement for pterm")
 	messages.Success("Success messages (replaces pterm.Success)")
 	messages.Warning("Warning messages (replaces pterm.Warning)")
-	messages.Error("Error messages (replaces pterm.Fatal)")
+	messages.Fatal("Error messages (replaces pterm.Fatal)")
 
 	// Test interactive select (replacing pterm.DefaultInteractiveSelect)
 	messages.Section("Interactive Menu (replaces pterm.DefaultInteractiveSelect)")
@@ -34,7 +34,7 @@ func main() {
 	}
 	menuChoice, err := singleselect.Send("Pick a Frizzante option", frizzanteOptions)
 	if err != nil {
-		messages.Error("Menu selection failed: " + err.Error())
+		messages.Fatal("Menu selection failed: " + err.Error())
 	} else {
 		messages.Success("You selected: " + menuChoice)
 	}
@@ -43,7 +43,7 @@ func main() {
 	messages.Section("Text Input (replaces pterm.DefaultInteractiveTextInput)")
 	projectName, err := input.Send("Enter project name:")
 	if err != nil {
-		messages.Error("Text input failed: " + err.Error())
+		messages.Fatal("Text input failed: " + err.Error())
 	} else {
 		messages.Success("Project name: " + projectName)
 	}
@@ -52,7 +52,7 @@ func main() {
 	messages.Section("Confirmation (replaces pterm.DefaultInteractiveConfirm)")
 	overwrite, err := confirm.Send("Feature already exists, overwrite?", false)
 	if err != nil {
-		messages.Error("Confirm failed: " + err.Error())
+		messages.Fatal("Confirm failed: " + err.Error())
 	} else if overwrite {
 		messages.Success("Will overwrite existing feature")
 	} else {
@@ -64,7 +64,7 @@ func main() {
 	features := []string{"Core", "Forms", "Links", "Air", "Bun", "Sqlc"}
 	selectedFeatures, err := multiselect.Send("Pick features to add:", features)
 	if err != nil {
-		messages.Error("Multi-select failed: " + err.Error())
+		messages.Fatal("Multi-select failed: " + err.Error())
 	} else {
 		if len(selectedFeatures) > 0 {
 			messages.Success("Selected features:")
@@ -88,7 +88,7 @@ func main() {
 	}
 	platform, err := singleselect.Send("Pick a platform:", platforms)
 	if err != nil {
-		messages.Error("Platform selection failed: " + err.Error())
+		messages.Fatal("Platform selection failed: " + err.Error())
 	} else {
 		messages.Success("Target platform: " + platform)
 	}

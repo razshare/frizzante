@@ -2,7 +2,7 @@ package messages
 
 import (
 	"fmt"
-	"main/config"
+	"github.com/razshare/frizzante/tui/config"
 )
 
 func DockerHelp() {

@@ -2,7 +2,7 @@ package multiselect
 
 import (
 	tea "github.com/charmbracelet/bubbletea"
-	"main/config"
+	"github.com/razshare/frizzante/tui/config"
 )
 
 func (model Model) Init() tea.Cmd {

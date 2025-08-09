@@ -1,7 +1,7 @@
 package multiselect
 
 import (
-	"main/program"
+	"github.com/razshare/frizzante/tui/program"
 )
 
 func Send(prompt string, options []string) ([]string, error) {
