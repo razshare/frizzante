@@ -1,20 +1,23 @@
 package container
 
-import "sync"
+import (
+	"strings"
+	"sync"
+)
 
 // Start starts the container.
 func Start(c *Container) {
 	script := ProduceScript(
 		c.Config.Efs,
-		c.Config.Root,
-		c.Config.Script,
+		strings.ReplaceAll(c.Config.Root, "\\", "/"),
+		strings.ReplaceAll(c.Config.Script, "\\", "/"),
 		c.Config.InfoLog,
 		c.Config.ErrorLog,
 	)
 
 	document := ProduceDocument(
 		c.Config.Efs,
-		c.Config.Document,
+		strings.ReplaceAll(c.Config.Document, "\\", "/"),
 		c.Config.InfoLog,
 		c.Config.ErrorLog,
 	)

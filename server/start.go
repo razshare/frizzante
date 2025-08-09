@@ -51,37 +51,37 @@ func Start(conf *Config) {
 	var exit bool
 
 	go func() {
-		readableAddress := strings.Replace(conf.Http.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-		conf.InfoLog.Printf("server bound to address %s; visit your application at http://%s", conf.Http.Addr, readableAddress)
+		haddr := strings.Replace(conf.Http.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+		conf.InfoLog.Printf("server bound to address %s; visit your application at http://%s", conf.Http.Addr, haddr)
 		if exit {
 			conf.InfoLog.Println("cancelling server startup")
 			return
 		}
-		serveError := http.ListenAndServe(conf.Http.Addr, conf.Http.Handler)
-		if serveError != nil {
-			if errors.Is(serveError, http.ErrServerClosed) {
+		err := http.ListenAndServe(conf.Http.Addr, conf.Http.Handler)
+		if err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
 				conf.InfoLog.Println("shutting down server")
 				return
 			}
-			conf.ErrorLog.Println(serveError)
+			conf.ErrorLog.Println(err)
 		}
 	}()
 
 	go func() {
 		if "" != conf.Certificate && "" != conf.Key {
-			readableAddress := strings.Replace(conf.Http.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-			conf.InfoLog.Printf("server bound to address %s; visit your application at https://%s", conf.Http.Addr, readableAddress)
+			haddr := strings.Replace(conf.Http.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+			conf.InfoLog.Printf("server bound to address %s; visit your application at https://%s", conf.Http.Addr, haddr)
 			if exit {
 				conf.InfoLog.Println("cancelling server startup")
 				return
 			}
-			serveError := http.ListenAndServeTLS(conf.SecureAddr, conf.Certificate, conf.Key, conf.Http.Handler)
-			if serveError != nil {
-				if errors.Is(serveError, http.ErrServerClosed) {
+			err := http.ListenAndServeTLS(conf.SecureAddr, conf.Certificate, conf.Key, conf.Http.Handler)
+			if err != nil {
+				if errors.Is(err, http.ErrServerClosed) {
 					conf.InfoLog.Println("shutting down server")
 					return
 				}
-				conf.ErrorLog.Println(serveError)
+				conf.ErrorLog.Println(err)
 			}
 		}
 	}()

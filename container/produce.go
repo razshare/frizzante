@@ -9,35 +9,30 @@ import (
 	"github.com/razshare/frizzante/js"
 	"github.com/razshare/frizzante/stack"
 	"log"
-	"strings"
+	"time"
 )
 
-func ProduceScript(
-	efs embed.FS,
-	appRoot string,
-	fileName string,
-	infoLog *log.Logger,
-	errorLog *log.Logger,
-) *Script {
+func ProduceScript(efs embed.FS, root string, name string, ilog *log.Logger, elog *log.Logger) *Script {
 	var exit bool
 	var stop = make(chan any, 1)
 	var script = make(chan string, 1)
-	var fileNameFixed = strings.ReplaceAll(fileName, "\\", "/")
 	go func() { <-stop; exit = true }()
 	go func() {
-		defer infoLog.Println("script producer stopped")
+		defer ilog.Println("script producer stopped")
 		for !exit {
-			data, readError := efs.ReadFile(fileNameFixed)
-			if readError != nil {
-				errorLog.Println(readError, stack.Trace())
+			d, err := efs.ReadFile(name)
+			if err != nil {
+				elog.Println(err, stack.Trace())
+				time.Sleep(time.Second)
 				continue
 			}
-			bundledSourceCode, bundleError := js.Bundle(appRoot, api.FormatCommonJS, string(data))
-			if bundleError != nil {
-				errorLog.Println(bundleError, stack.Trace())
+			src, err := js.Bundle(root, api.FormatCommonJS, string(d))
+			if err != nil {
+				elog.Println(err, stack.Trace())
+				time.Sleep(time.Second)
 				continue
 			}
-			script <- fmt.Sprintf(globals.RenderScriptFormat, bundledSourceCode)
+			script <- fmt.Sprintf(globals.RenderScriptFormat, src)
 		}
 	}()
 	return &Script{
@@ -46,91 +41,78 @@ func ProduceScript(
 	}
 }
 
-func ProduceDocument(
-	efs embed.FS,
-	fileName string,
-	infoLog *log.Logger,
-	errorLog *log.Logger,
-) *Document {
+func ProduceDocument(efs embed.FS, name string, ilog *log.Logger, elog *log.Logger) *Document {
 	var exit bool
 	var stop = make(chan any, 1)
-	var document = make(chan string, 1)
-	var fileNameFixed = strings.ReplaceAll(fileName, "\\", "/")
+	var doc = make(chan string, 1)
 	go func() { <-stop; exit = true }()
 	go func() {
-		defer infoLog.Println("document producer stopped")
+		defer ilog.Println("document producer stopped")
 		for !exit {
-			data, readError := efs.ReadFile(fileNameFixed)
-			if readError != nil {
-				errorLog.Println(readError, stack.Trace())
+			d, err := efs.ReadFile(name)
+			if err != nil {
+				elog.Println(err, stack.Trace())
+				time.Sleep(time.Second)
 				continue
 			}
-			document <- string(data)
+			doc <- string(d)
 		}
 	}()
 	return &Document{
-		Value: document,
+		Value: doc,
 		Stop:  stop,
 	}
 }
 
-func ProduceRuntime(
-	parallels uint32,
-	infoLog *log.Logger,
-) *Runtime {
+func ProduceRuntime(parallel uint32, ilog *log.Logger) *Runtime {
 	var exit bool
 	var stop = make(chan any, 1)
-	var runtime = make(chan *goja.Runtime, 1)
+	var run = make(chan *goja.Runtime, 1)
 	go func() { <-stop; exit = true }()
 	go func() {
-		defer infoLog.Println("runtime producer stopped")
+		defer ilog.Println("runtime producer stopped")
 		var count uint32
 		for !exit {
-			if count >= parallels {
-				infoLog.Printf("maximum number of parallel runtimes (%d) reached", parallels)
+			if count >= parallel {
+				ilog.Printf("maximum number of parallel runtimes (%d) reached", parallel)
 				return
 			}
-			runtime <- goja.New()
+			run <- goja.New()
 			count++
 		}
 	}()
 	return &Runtime{
-		Value: runtime,
+		Value: run,
 		Stop:  stop,
 	}
 }
 
-func ProduceProgram(
-	scriptName string,
-	script chan string,
-	parallels uint32,
-	infoLog *log.Logger,
-	errorLog *log.Logger,
-) *Program {
+func ProduceProgram(name string, script chan string, parallel uint32, ilog *log.Logger, elog *log.Logger) *Program {
 	var exit bool
 	var stop = make(chan any, 1)
-	var program = make(chan *goja.Program, 1)
+	var prog = make(chan *goja.Program, 1)
 	go func() { <-stop; exit = true }()
 	go func() {
-		defer infoLog.Println("program producer stopped")
+		defer ilog.Println("program producer stopped")
 		var count uint32
 		for !exit {
-			if count >= parallels {
-				infoLog.Printf("maximum number of parallel programs (%d) reached", parallels)
+			if count >= parallel {
+				ilog.Printf("maximum number of parallel programs (%d) reached", parallel)
 				return
 			}
 
-			value, compileError := goja.Compile(scriptName, <-script, false)
-			if compileError != nil {
-				errorLog.Println(compileError, stack.Trace())
+			value, err := goja.Compile(name, <-script, false)
+			if err != nil {
+				elog.Println(err, stack.Trace())
+				time.Sleep(time.Second)
 				continue
 			}
-			program <- value
+			prog <- value
 			count++
 		}
 	}()
 	return &Program{
-		Value: program,
+		Value: prog,
 		Stop:  stop,
 	}
 }
