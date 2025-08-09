@@ -18,36 +18,34 @@ func Start(conf *Config) {
 
 	mux := conf.Http.Handler.(*http.ServeMux)
 
-	if conf.Routes != nil {
-		for _, r := range conf.Routes {
-			mux.HandleFunc(r.Pattern, func(wrt http.ResponseWriter, req *http.Request) {
-				con := &client.Client{
-					Writer:  wrt,
-					Request: req,
-					Scope: client.Scope{
-						Container: cont,
-						EventId:   1,
-						Status:    200,
-					},
-				}
+	for _, r := range conf.Routes {
+		mux.HandleFunc(r.Pattern, func(wrt http.ResponseWriter, req *http.Request) {
+			con := &client.Client{
+				Writer:  wrt,
+				Request: req,
+				Scope: client.Scope{
+					Container: cont,
+					EventId:   1,
+					Status:    200,
+				},
+			}
 
-				for _, tag := range r.Tags {
-					for _, g := range conf.Guards {
-						if !slices.Contains(g.Tags, tag) {
-							continue
-						}
-						allow := false
-						g.Handler(con, func() { allow = true })
-						if !allow {
-							conf.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", r.Pattern, tag, g.Name)
-							return
-						}
+			for _, tag := range r.Tags {
+				for _, g := range conf.Guards {
+					if !slices.Contains(g.Tags, tag) {
+						continue
+					}
+					allow := false
+					g.Handler(con, func() { allow = true })
+					if !allow {
+						conf.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", r.Pattern, tag, g.Name)
+						return
 					}
 				}
+			}
 
-				r.Handler(con)
-			})
-		}
+			r.Handler(con)
+		})
 	}
 
 	var exit bool
