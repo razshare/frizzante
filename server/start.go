@@ -3,7 +3,6 @@ package server
 import (
 	"context"
 	"errors"
-	"fmt"
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/container"
 	"net/http"
@@ -40,12 +39,7 @@ func Start(conf *Config) {
 						allow := false
 						g.Handler(con, func() { allow = true })
 						if !allow {
-							message := fmt.Sprintf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", r.Pattern, tag, g.Name)
-							if conf.InfoLog != nil {
-								conf.InfoLog.Println(message)
-							} else {
-								fmt.Println(message)
-							}
+							conf.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", r.Pattern, tag, g.Name)
 							return
 						}
 					}
@@ -60,34 +54,15 @@ func Start(conf *Config) {
 
 	go func() {
 		readableAddress := strings.Replace(conf.Http.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-
-		message := fmt.Sprintf("server bound to address %s; visit your application at http://%s\n", conf.Http.Addr, readableAddress)
-
-		if conf.InfoLog != nil {
-			conf.InfoLog.Printf(message)
-		} else {
-			fmt.Printf(message)
-		}
-
+		conf.InfoLog.Printf("server bound to address %s; visit your application at http://%s", conf.Http.Addr, readableAddress)
 		if exit {
-			message = "cancelling server startup"
-			if conf.InfoLog != nil {
-				conf.InfoLog.Println(message)
-			} else {
-				fmt.Println(message)
-			}
+			conf.InfoLog.Println("cancelling server startup")
 			return
 		}
-
 		serveError := http.ListenAndServe(conf.Http.Addr, conf.Http.Handler)
 		if serveError != nil {
 			if errors.Is(serveError, http.ErrServerClosed) {
-				message = "shutting down server"
-				if conf.InfoLog != nil {
-					conf.InfoLog.Println(message)
-				} else {
-					fmt.Println(message)
-				}
+				conf.InfoLog.Println("shutting down server")
 				return
 			}
 			conf.ErrorLog.Println(serveError)
@@ -97,34 +72,15 @@ func Start(conf *Config) {
 	go func() {
 		if "" != conf.Certificate && "" != conf.Key {
 			readableAddress := strings.Replace(conf.Http.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-
-			message := fmt.Sprintf("server bound to address %s; visit your application at https://%s", conf.Http.Addr, readableAddress)
-
-			if conf.InfoLog != nil {
-				conf.InfoLog.Println(message)
-			} else {
-				fmt.Println(message)
-			}
-
+			conf.InfoLog.Printf("server bound to address %s; visit your application at https://%s", conf.Http.Addr, readableAddress)
 			if exit {
-				message = "cancelling server startup"
-				if conf.InfoLog != nil {
-					conf.InfoLog.Println(message)
-				} else {
-					fmt.Println(message)
-				}
+				conf.InfoLog.Println("cancelling server startup")
 				return
 			}
-
 			serveError := http.ListenAndServeTLS(conf.SecureAddr, conf.Certificate, conf.Key, conf.Http.Handler)
 			if serveError != nil {
 				if errors.Is(serveError, http.ErrServerClosed) {
-					message = "shutting down server"
-					if conf.InfoLog != nil {
-						conf.InfoLog.Println(message)
-					} else {
-						fmt.Println(message)
-					}
+					conf.InfoLog.Println("shutting down server")
 					return
 				}
 				conf.ErrorLog.Println(serveError)
