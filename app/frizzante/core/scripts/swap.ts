@@ -1,13 +1,13 @@
 import type { SwapConfig } from "$frizzante/core/types.ts"
 
 let id = 0
-const configs:Record<number, SwapConfig> = {}
+const configs: Record<number, SwapConfig> = {}
 
-export function find(id: number): false|SwapConfig {
-    return configs[id]??false
+export function find(id: number): false | SwapConfig {
+    return configs[id] ?? false
 }
 
-export async function swap(config: SwapConfig):Promise<()=>void>{
+export async function swap(config: SwapConfig): Promise<() => void> {
     const payload = {
         method: config.method.toUpperCase(),
         headers: { Accept: "application/json" },
@@ -31,21 +31,21 @@ export async function swap(config: SwapConfig):Promise<()=>void>{
                 query = "?" + query
             }
         }
-    } else if(config.body){
+    } else if (config.body) {
         payload.body = config.body as BodyInit
         pushState = false
     }
 
     const res = await fetch(`${config.path}${query}`, payload)
 
-    if(res.redirected){
+    if (res.redirected) {
         pushState = false
     }
 
     const txt = await res.text()
 
     if ("" === txt) {
-        return function push(){}
+        return function push() {}
     }
 
     const json = JSON.parse(txt)
@@ -53,12 +53,12 @@ export async function swap(config: SwapConfig):Promise<()=>void>{
     config.view.data = json.data
     config.view.name = json.name
     config.view.renderMode = json.renderMode
-    if(pushState) {
+    if (pushState) {
         configs[++id] = config
     }
 
     return function push() {
-        if(!pushState){
+        if (!pushState) {
             return
         }
         window.history.pushState(id, "", res.url)

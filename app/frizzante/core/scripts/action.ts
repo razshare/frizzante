@@ -16,10 +16,12 @@ export function action(path = ""): {
             const form = event.target as HTMLFormElement
             const body = new FormData(form)
             const target = event.target as HTMLFormElement
-            await swap({ method: target.method, path, body, view }).then(function done(record) {
-                record()
-                form.reset()
-            })
+            await swap({ method: target.method, path, body, view }).then(
+                function done(record) {
+                    record()
+                    form.reset()
+                },
+            )
         },
     }
 }

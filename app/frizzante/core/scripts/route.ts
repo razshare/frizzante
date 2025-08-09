@@ -16,10 +16,10 @@ export function route(view: View<never>): void {
 
         const id = (e.state ?? -1) as number
 
-        if(id >= 0){
+        if (id >= 0) {
             const config = find(id)
-            if(!config) {
-                console.warn("swap configuration not found", {id})
+            if (!config) {
+                console.warn("swap configuration not found", { id })
                 return
             }
             await swap(config)

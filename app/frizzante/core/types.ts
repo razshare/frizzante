@@ -7,6 +7,6 @@ export type View<T> = {
 export type SwapConfig = {
     method: string
     path: string
-    body: false|FormData
+    body: false | FormData
     view: View<unknown>
 }
