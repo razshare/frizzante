@@ -35,10 +35,12 @@ export async function swap(
 
         if (method === "GET") {
             query = `${params.toString()}`
-            if (form.action.includes("?")) {
-                query = "&" + query
-            } else {
-                query = "?" + query
+            if (query !== "") {
+                if (form.action.includes("?")) {
+                    query = "&" + query
+                } else {
+                    query = "?" + query
+                }
             }
             res = await fetch(`${form.action}${query}`, {
                 headers: {
@@ -72,6 +74,10 @@ export async function swap(
 
     if (lastUrl === false) {
         lastUrl = location.toString()
+    }
+
+    if (lastUrl !== res.url) {
+        console.log(lastUrl, "is different from", res.url)
     }
 
     const sameUrl = lastUrl === res.url
