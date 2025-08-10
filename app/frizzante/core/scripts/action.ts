@@ -2,11 +2,16 @@ import { getContext } from "svelte"
 import type { View } from "$frizzante/core/types.ts"
 import { route } from "$frizzante/core/scripts/route.ts"
 import { swap } from "$frizzante/core/scripts/swap.ts"
+import { IS_BROWSER } from "$frizzante/core/constants.ts"
 
 export function action(path = ""): {
     action: string
     onsubmit: (event: Event) => Promise<void>
 } {
+    if(!IS_BROWSER) {
+        return {action:path, async onsubmit(){  }}
+    }
+
     const view = getContext("view") as View<never>
     route(view)
     return {
@@ -14,14 +19,10 @@ export function action(path = ""): {
         async onsubmit(event: Event) {
             event.preventDefault()
             const form = event.target as HTMLFormElement
-            const body = new FormData(form)
-            const target = event.target as HTMLFormElement
-            await swap({ method: target.method, path, body, view }).then(
-                function done(record) {
-                    record()
-                    form.reset()
-                },
-            )
+            await swap(form, view).then(function done(record) {
+                record()
+                form.reset()
+            })
         },
     }
 }

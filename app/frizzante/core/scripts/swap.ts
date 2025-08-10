@@ -1,45 +1,59 @@
-import type { HistoryEntry, SwapConfig } from "$frizzante/core/types.ts"
+import type { View } from "$frizzante/core/types.ts"
 
-let id = 0
-const configs: Record<number, SwapConfig> = {}
+export async function swap(
+    target: HTMLAnchorElement | HTMLFormElement,
+    view: View<unknown>,
+): Promise<() => void> {
+    let res: Response
+    let method: "GET" | "POST" = "GET"
+    const body: Record<string, string> = {}
 
-export function find(id: number): false | SwapConfig {
-    return configs[id] ?? false
-}
+    if (target.nodeName === "A") {
+        const anchor = target as HTMLAnchorElement
+        res = await fetch(anchor.href, {
+            headers: {
+                Accept: "application/json",
+            },
+        })
+    } else if (target.nodeName === "FORM") {
+        const form = target as HTMLFormElement
+        const data = new FormData(form)
+        const params = new URLSearchParams()
+        let query = ""
 
-export async function swap(config: SwapConfig): Promise<() => void> {
-    const payload = {
-        method: config.method.toUpperCase(),
-        headers: { Accept: "application/json" },
-    } as RequestInit
+        data.forEach(function each(value, key) {
+            if (value instanceof File) {
+                return
+            }
+            body[key] = `${value}`
+            params.append(key, `${value}`)
+        })
 
-    let query = ""
-    let pushState = true
+        method = form.method.toUpperCase() as "GET" | "POST"
 
-    if ("GET" === config.method.toUpperCase()) {
-        if (config.body && typeof config.body === "object") {
-            const params = new URLSearchParams()
-            config.body.forEach(function each(value, key) {
-                params.append(key, `${value}`)
-            })
-
+        if (method === "GET") {
             query = `${params.toString()}`
-
-            if (config.path.includes("?")) {
+            if (form.action.includes("?")) {
                 query = "&" + query
             } else {
                 query = "?" + query
             }
+            res = await fetch(`${form.action}${query}`, {
+                headers: {
+                    Accept: "application/json",
+                },
+            })
+        } else {
+            res = await fetch(form.action, {
+                method,
+                body: data,
+                headers: {
+                    Accept: "application/json",
+                },
+            })
         }
-    } else if (config.body) {
-        payload.body = config.body as BodyInit
-        pushState = false
-    }
-
-    const res = await fetch(`${config.path}${query}`, payload)
-
-    if (res.redirected) {
-        pushState = false
+    } else {
+        return function push() {}
     }
 
     const txt = await res.text()
@@ -50,24 +64,15 @@ export async function swap(config: SwapConfig): Promise<() => void> {
 
     const json = JSON.parse(txt)
 
-    config.view.data = json.data
-    config.view.name = json.name
-    config.view.renderMode = json.renderMode
-    if (pushState) {
-        configs[++id] = config
-    }
+    view.data = json.data
+    view.name = json.name
+    view.renderMode = json.renderMode
 
     return function push() {
-        if (!pushState) {
+        if(method !== "GET"){
             return
         }
 
-        const friendly: HistoryEntry = {
-            id,
-            method: config.method,
-            path: config.path,
-        }
-
-        window.history.pushState(friendly, "", res.url)
+        window.history.pushState(res.url, "", res.url)
     }
 }
