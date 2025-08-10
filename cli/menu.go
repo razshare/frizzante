@@ -27,8 +27,8 @@ func OnMenu(efs embed.FS) {
 		"Dev",
 		"Build",
 		"Configure",
-		"Create Sqlite Database",
-		"Sqlc Generate",
+		//"Create Sqlite Database",
+		//"Sqlc Generate",
 	}
 
 	logo, readError := efs.ReadFile("clilogo.txt")

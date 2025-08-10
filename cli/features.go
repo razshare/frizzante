@@ -26,7 +26,7 @@ func OnAddFeature(efs embed.FS, features string) {
 			"Links",
 			"Air",
 			"Bun",
-			"Sqlc",
+			//"Sqlc",
 		})
 
 		if showError != nil {

@@ -6,8 +6,8 @@ export async function swap(
     target: HTMLAnchorElement | HTMLFormElement,
     view: View<unknown>,
 ): Promise<() => void> {
-    if(lastView === false){
-        lastView = view.name
+    if (lastView === false) {
+        lastView = location.toString()
     }
 
     let res: Response
@@ -76,8 +76,8 @@ export async function swap(
     view.name = json.name
     view.renderMode = json.renderMode
 
-    const sameView = lastView === json.name
-    lastView = json.name
+    const sameView = lastView === res.url
+    lastView = res.url
 
     return function push() {
         if (sameView) {
