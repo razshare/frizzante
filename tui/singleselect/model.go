@@ -6,6 +6,7 @@ import (
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/navigate"
 	"github.com/razshare/frizzante/tui/search"
+	"os"
 	"strings"
 )
 
@@ -16,15 +17,15 @@ func (model *Model) Init() tea.Cmd {
 func (model *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch k := msg.(type) {
 	case tea.KeyMsg:
+		if k.Type == tea.KeyCtrlC {
+			os.Exit(0)
+		}
+
 		if k.Type == tea.KeyEnter {
 			if len(model.Search.Filtered) > 0 {
 				model.Selected = model.Search.Filtered[model.Viewport.Cursor]
 				return model, tea.Quit
 			}
-		}
-
-		if k.Type == tea.KeyCtrlC {
-			return model, tea.Quit
 		}
 
 		if k.Type == tea.KeyEsc {
