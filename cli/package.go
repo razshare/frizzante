@@ -49,7 +49,7 @@ func OnPackageWatch() {
 
 	server := exec.Command(Bun("app"), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
 	server.Dir = "app"
-	server.Env = append(os.Environ())
+	server.Env = append(os.Environ(), "DEV=1")
 	server.Stderr = os.Stderr
 	server.Stdout = os.Stdout
 	server.Stdin = os.Stdin
