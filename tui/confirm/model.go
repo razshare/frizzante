@@ -17,6 +17,11 @@ func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return model, tea.Quit
 		}
 
+		if k.Type == tea.KeyEnter {
+			model.Confirmed = model.DefaultValue
+			return model, tea.Quit
+		}
+
 		if strings.ToLower(k.String()) == "y" {
 			model.Confirmed = true
 			return model, tea.Quit
@@ -31,9 +36,8 @@ func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (model Model) View() string {
-	defaultHint := "n"
 	if model.DefaultValue {
-		defaultHint = "Y"
+		return config.Styles.Title.Render(model.Prompt, "(Y/n)")
 	}
-	return "\n" + config.Styles.Title.Render(model.Prompt) + "\n(Y/n) [default: " + defaultHint + "]"
+	return config.Styles.Title.Render(model.Prompt, "(y/N)")
 }
