@@ -76,10 +76,6 @@ export async function swap(
         lastUrl = location.toString()
     }
 
-    if (lastUrl !== res.url) {
-        console.log(lastUrl, "is different from", res.url)
-    }
-
     const sameUrl = lastUrl === res.url
     lastUrl = res.url
 
