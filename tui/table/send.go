@@ -2,103 +2,104 @@ package table
 
 import (
 	"fmt"
-	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/charmbracelet/lipgloss/table"
 	"github.com/razshare/frizzante/tui/wrap"
 )
 
-const (
-	MaxColumnWidth = 60
-	ColumnPadding  = 2
-	HeaderHeight   = 2
-)
-
-func Send(headers []string, rows [][]string) {
+func Send(headers []string, rows [][]string, opts ...Options) {
 	if len(headers) == 0 || len(rows) == 0 {
 		return
 	}
+	
+	opt := DefaultOptions()
+	if len(opts) > 0 {
+		opt = opts[0]
+	}
 
-	columns := make([]table.Column, len(headers))
-
-	for index, header := range headers {
-		width := len(header)
-
-		for _, row := range rows {
-			if index < len(row) {
-				cellLen := len(row[index])
-				if cellLen > width {
-					width = cellLen
+	colWidths := make([]int, len(headers))
+	for i, header := range headers {
+		colWidths[i] = len(header)
+	}
+	
+	for _, row := range rows {
+		for i, cell := range row {
+			if i < len(colWidths) {
+				if len(cell) > colWidths[i] {
+					colWidths[i] = len(cell)
 				}
 			}
 		}
-
-		if width > MaxColumnWidth {
-			width = MaxColumnWidth
-		}
-
-		columns[index] = table.Column{
-			Title: header,
-			Width: width + ColumnPadding,
+	}
+	
+	for i := range colWidths {
+		if colWidths[i] > opt.MaxColumnWidth {
+			colWidths[i] = opt.MaxColumnWidth
 		}
 	}
 
-	estimatedCapacity := len(rows) * 3
-	wrappedRows := make([]table.Row, 0, estimatedCapacity)
-
-	emptyRow := make([]string, len(headers))
-
+	var processedRows [][]string
+	logicalRowIndices := []int{}
+	
 	for rowIdx, row := range rows {
-		if len(row) > len(columns) {
-			row = row[:len(columns)]
-		}
-
 		maxLines := 1
-		wrappedCells := make([][]string, len(columns))
-
-		for i := 0; i < len(columns); i++ {
+		wrappedCells := make([][]string, len(headers))
+		
+		for i := 0; i < len(headers); i++ {
 			cellContent := ""
 			if i < len(row) {
 				cellContent = row[i]
 			}
-
-			cellWidth := columns[i].Width - ColumnPadding
-			wrappedCells[i] = wrap.Send(cellContent, cellWidth)
-
+			
+			wrappedCells[i] = wrap.Send(cellContent, colWidths[i])
 			if len(wrappedCells[i]) > maxLines {
 				maxLines = len(wrappedCells[i])
 			}
 		}
-
+		
 		for lineIdx := 0; lineIdx < maxLines; lineIdx++ {
-			newRow := make([]string, len(columns))
-			for cellIdx := 0; cellIdx < len(columns); cellIdx++ {
+			newRow := make([]string, len(headers))
+			for cellIdx := 0; cellIdx < len(headers); cellIdx++ {
 				if cellIdx < len(wrappedCells) && lineIdx < len(wrappedCells[cellIdx]) {
 					newRow[cellIdx] = wrappedCells[cellIdx][lineIdx]
 				}
 			}
-			wrappedRows = append(wrappedRows, newRow)
+			processedRows = append(processedRows, newRow)
+			logicalRowIndices = append(logicalRowIndices, rowIdx)
 		}
-
+		
 		if rowIdx < len(rows)-1 {
-			wrappedRows = append(wrappedRows, emptyRow)
+			emptyRow := make([]string, len(headers))
+			processedRows = append(processedRows, emptyRow)
+			logicalRowIndices = append(logicalRowIndices, -1) // -1 indicates separator
 		}
 	}
 
-	tableLocal := table.New(
-		table.WithColumns(columns),
-		table.WithRows(wrappedRows),
-		table.WithFocused(false),
-		table.WithHeight(len(wrappedRows)+HeaderHeight),
-	)
+	t := table.New().
+		Headers(headers...).
+		Rows(processedRows...).
+		Border(lipgloss.NormalBorder()).
+		BorderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("240"))).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			if row == table.HeaderRow {
+				return opt.HeaderStyle
+			}
+			
+			if row < len(logicalRowIndices) {
+				logicalRow := logicalRowIndices[row]
+				if logicalRow == -1 {
+					return lipgloss.NewStyle()
+				}
+				
+				if logicalRow%2 == 0 {
+					return opt.RowStyle
+				} else {
+					return opt.AltRowStyle
+				}
+			}
+			
+			return lipgloss.NewStyle()
+		})
 
-	styles := table.DefaultStyles()
-	styles.Header = styles.Header.
-		BorderStyle(lipgloss.NormalBorder()).
-		BorderForeground(lipgloss.Color("240")).
-		BorderBottom(true).
-		Bold(true)
-	styles.Selected = lipgloss.NewStyle()
-	tableLocal.SetStyles(styles)
-
-	fmt.Println(tableLocal.View())
+	fmt.Println(t.Render())
 }
