@@ -34,6 +34,6 @@ func (model Model) View() string {
 		"\n%s\n\n%s\n\n%s",
 		config.Styles.Title.Render(model.Prompt),
 		model.TextInput.View(),
-		config.Styles.Suggestion.Render("(esc to quit)"),
+		config.Styles.UserGuide.Render("[Esc] = clear"),
 	)
 }
