@@ -3,6 +3,7 @@ package confirm
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/tui/config"
+	"os"
 	"strings"
 )
 
@@ -14,13 +15,7 @@ func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch k := msg.(type) {
 	case tea.KeyMsg:
 		if k.Type == tea.KeyCtrlC {
-			model.Confirmed = false
-			return model, tea.Quit
-		}
-
-		if k.Type == tea.KeyCtrlC {
-			model.Confirmed = model.DefaultValue
-			return model, tea.Quit
+			os.Exit(0)
 		}
 
 		if strings.ToLower(k.String()) == "y" {

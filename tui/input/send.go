@@ -1,7 +1,6 @@
 package input
 
 import (
-	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/razshare/frizzante/tui/program"
 )
@@ -16,8 +15,6 @@ func Send(prompt string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if result.Cancelled {
-		return "", fmt.Errorf("input cancelled")
-	}
+
 	return result.TextInput.Value(), nil
 }

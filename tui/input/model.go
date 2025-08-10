@@ -5,6 +5,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/tui/config"
+	"os"
 )
 
 func (model Model) Init() tea.Cmd {
@@ -15,12 +16,11 @@ func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch k := msg.(type) {
 	case tea.KeyMsg:
-		if k.Type == tea.KeyEnter {
-			return model, tea.Quit
+		if k.Type == tea.KeyCtrlC {
+			os.Exit(0)
 		}
 
-		if k.Type == tea.KeyCtrlC || k.Type == tea.KeyEsc {
-			model.Cancelled = true
+		if k.Type == tea.KeyEnter {
 			return model, tea.Quit
 		}
 	}
