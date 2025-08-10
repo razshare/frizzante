@@ -27,6 +27,7 @@ func OnMenu(efs embed.FS) {
 		"Dev",
 		"Build",
 		"Configure",
+		"Create Sqlite Database",
 		"Sqlc Generate",
 	}
 
@@ -149,6 +150,12 @@ func OnMenu(efs embed.FS) {
 
 	if result == "Sqlc Generate" {
 		*FlagSqlcGenerate = true
+		OnStart(efs)
+		return
+	}
+
+	if result == "Create Sqlite Database" {
+		*FlagCreateSqliteDatabase = true
 		OnStart(efs)
 		return
 	}

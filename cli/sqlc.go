@@ -15,4 +15,5 @@ func OnSqlcGenerate() {
 	if svelteCheckError != nil {
 		Fatal(svelteCheckError)
 	}
+	Success("files generated")
 }

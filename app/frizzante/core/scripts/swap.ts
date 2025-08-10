@@ -74,7 +74,7 @@ export async function swap(
     lastUrl = res.url
 
     return function push() {
-        if(sameUrl){
+        if (sameUrl) {
             return
         }
 
@@ -82,7 +82,7 @@ export async function swap(
             nodeName: target.nodeName,
             method,
             url: res.url,
-            body
+            body,
         }
 
         window.history.pushState(JSON.stringify(entry), "", res.url)

@@ -8,8 +8,8 @@ export function action(path = ""): {
     action: string
     onsubmit: (event: Event) => Promise<void>
 } {
-    if(!IS_BROWSER) {
-        return {action:path, async onsubmit(){  }}
+    if (!IS_BROWSER) {
+        return { action: path, async onsubmit() {} }
     }
 
     const view = getContext("view") as View<never>

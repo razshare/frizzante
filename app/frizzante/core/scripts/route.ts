@@ -16,10 +16,10 @@ export function route(view: View<never>): void {
         e.preventDefault()
         const serialized = (e.state ?? "") as string
 
-        if(serialized!==""){
+        if (serialized !== "") {
             const entry = JSON.parse(serialized) as HistoryEntry
 
-            if(entry.method === "GET") {
+            if (entry.method === "GET") {
                 anchor.href = entry.url
                 await swap(anchor, view)
             }

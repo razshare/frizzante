@@ -97,6 +97,11 @@ func OnStart(efs embed.FS) {
 		os.Exit(0)
 	}
 
+	if *FlagCreateSqliteDatabase {
+		OnSqliteDatabase(efs)
+		os.Exit(0)
+	}
+
 	if *FlagWelcome {
 		OnWelcome()
 		os.Exit(0)

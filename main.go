@@ -6,6 +6,7 @@ import (
 )
 
 //go:embed clilogo.txt
+//go:embed database.sqlite
 //go:embed version
 //go:embed app/frizzante
 //go:embed sqlc.yaml

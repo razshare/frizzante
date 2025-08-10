@@ -8,8 +8,13 @@ export function href(path = ""): {
     href: string
     onclick: (event: MouseEvent) => Promise<boolean>
 } {
-    if(!IS_BROWSER) {
-        return {href:path, async onclick(){ return true }}
+    if (!IS_BROWSER) {
+        return {
+            href: path,
+            async onclick() {
+                return true
+            },
+        }
     }
 
     const anchor = document.createElement("a")

@@ -28,4 +28,5 @@ var FlagAir = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), "sets
 var FlagBun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), "sets the bun binary")
 var FlagSqlc = flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"), "sets the sqlc binary")
 var FlagSqlcGenerate = flag.BoolP("sqlc-generate", "", false, "generates sqlc queries")
+var FlagCreateSqliteDatabase = flag.BoolP("create-sqlite-database", "", false, "creates an empty sqlite database")
 var FlagWelcome = flag.BoolP("welcome", "", false, "shows a welcome message")
