@@ -11,7 +11,7 @@ func Send(headers []string, rows [][]string, opts ...Options) {
 	if len(headers) == 0 || len(rows) == 0 {
 		return
 	}
-	
+
 	opt := DefaultOptions()
 	if len(opts) > 0 {
 		opt = opts[0]
@@ -21,7 +21,7 @@ func Send(headers []string, rows [][]string, opts ...Options) {
 	for i, header := range headers {
 		colWidths[i] = len(header)
 	}
-	
+
 	for _, row := range rows {
 		for i, cell := range row {
 			if i < len(colWidths) {
@@ -31,7 +31,7 @@ func Send(headers []string, rows [][]string, opts ...Options) {
 			}
 		}
 	}
-	
+
 	for i := range colWidths {
 		if colWidths[i] > opt.MaxColumnWidth {
 			colWidths[i] = opt.MaxColumnWidth
@@ -39,24 +39,24 @@ func Send(headers []string, rows [][]string, opts ...Options) {
 	}
 
 	var processedRows [][]string
-	logicalRowIndices := []int{}
-	
+	logicalRowIndices := make([]int, 0)
+
 	for rowIdx, row := range rows {
 		maxLines := 1
 		wrappedCells := make([][]string, len(headers))
-		
+
 		for i := 0; i < len(headers); i++ {
 			cellContent := ""
 			if i < len(row) {
 				cellContent = row[i]
 			}
-			
+
 			wrappedCells[i] = wrap.Send(cellContent, colWidths[i])
 			if len(wrappedCells[i]) > maxLines {
 				maxLines = len(wrappedCells[i])
 			}
 		}
-		
+
 		for lineIdx := 0; lineIdx < maxLines; lineIdx++ {
 			newRow := make([]string, len(headers))
 			for cellIdx := 0; cellIdx < len(headers); cellIdx++ {
@@ -67,7 +67,7 @@ func Send(headers []string, rows [][]string, opts ...Options) {
 			processedRows = append(processedRows, newRow)
 			logicalRowIndices = append(logicalRowIndices, rowIdx)
 		}
-		
+
 		if rowIdx < len(rows)-1 {
 			emptyRow := make([]string, len(headers))
 			processedRows = append(processedRows, emptyRow)
@@ -84,20 +84,20 @@ func Send(headers []string, rows [][]string, opts ...Options) {
 			if row == table.HeaderRow {
 				return opt.HeaderStyle
 			}
-			
+
 			if row < len(logicalRowIndices) {
 				logicalRow := logicalRowIndices[row]
 				if logicalRow == -1 {
 					return lipgloss.NewStyle()
 				}
-				
+
 				if logicalRow%2 == 0 {
 					return opt.RowStyle
 				} else {
 					return opt.AltRowStyle
 				}
 			}
-			
+
 			return lipgloss.NewStyle()
 		})
 

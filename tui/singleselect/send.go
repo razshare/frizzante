@@ -1,9 +1,10 @@
 package singleselect
 
 import (
-	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/razshare/frizzante/tui/program"
+	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/viewport"
 )
 
 func Send(prompt string, options []string) (string, error) {
@@ -11,20 +12,23 @@ func Send(prompt string, options []string) (string, error) {
 	searchInput := textinput.New()
 	searchInput.Width = 80
 	result, err := program.Run(&Model{
-		Choices:         options,
-		FilteredChoices: options,
-		Prompt:          prompt,
-		SearchInput:     searchInput,
-		MaxVisible:      6,
-		ViewportStart:   0,
-		Cursor:          0,
-		Searching:       false,
+		Search: &search.Search{
+			Active:   false,
+			Choices:  options,
+			Filtered: options,
+			Input:    searchInput,
+		},
+		Viewport: &viewport.Viewport{
+			Visible: 6,
+			Start:   0,
+			Cursor:  0,
+		},
+		Prompt: prompt,
 	})
+
 	if err != nil {
 		return "", err
 	}
-	if result.Selected == "" {
-		return "", fmt.Errorf("no selection made")
-	}
+
 	return result.Selected, nil
 }

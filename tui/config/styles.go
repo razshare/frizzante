@@ -3,9 +3,7 @@ package config
 import "github.com/charmbracelet/lipgloss"
 
 var Styles = ThemeStyles{
-	Title: lipgloss.NewStyle().
-		Foreground(lipgloss.Color(Colors.Primary)).
-		Bold(true),
+	Title: lipgloss.NewStyle().Bold(true),
 
 	Item: lipgloss.NewStyle().
 		PaddingLeft(2),
@@ -42,6 +40,16 @@ var Styles = ThemeStyles{
 		Foreground(lipgloss.Color(Colors.Warning)).
 		Bold(true).
 		Padding(1, 0),
+
+	Suggestion: lipgloss.NewStyle().
+		Foreground(lipgloss.Color(Colors.Secondary)).
+		Underline(true),
+
+	UserInput: lipgloss.NewStyle().
+		Foreground(lipgloss.Color(Colors.Muted)),
+
+	UserGuide: lipgloss.NewStyle().
+		Foreground(lipgloss.Color(Colors.Muted)),
 
 	Spinner: lipgloss.
 		NewStyle().

@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 	"github.com/razshare/frizzante/tui/config"
 )
 
@@ -14,13 +13,13 @@ func (model Model) Init() tea.Cmd {
 
 func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-
-	switch messageLocal := msg.(type) {
+	switch k := msg.(type) {
 	case tea.KeyMsg:
-		switch messageLocal.Type {
-		case tea.KeyEnter:
+		if k.Type == tea.KeyEnter {
 			return model, tea.Quit
-		case tea.KeyCtrlC, tea.KeyEsc:
+		}
+
+		if k.Type == tea.KeyCtrlC || k.Type == tea.KeyEsc {
 			model.Cancelled = true
 			return model, tea.Quit
 		}
@@ -31,8 +30,10 @@ func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (model Model) View() string {
-	return fmt.Sprintf("\n%s\n\n%s\n\n%s",
+	return fmt.Sprintf(
+		"\n%s\n\n%s\n\n%s",
 		config.Styles.Title.Render(model.Prompt),
 		model.TextInput.View(),
-		lipgloss.NewStyle().Foreground(lipgloss.Color(config.Colors.Muted)).Render("(esc to quit)"))
+		config.Styles.Suggestion.Render("(esc to quit)"),
+	)
 }
