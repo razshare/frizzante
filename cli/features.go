@@ -296,19 +296,25 @@ func AddFeatureByName(efs embed.FS, feature string) {
 
 func ShowFeaturesInfo() {
 	messages.Info(strings.Join([]string{
-		"You can use -a or --add",
-		"in order to add new features to the project.",
+		"You can use -a or --add in order ",
+		"to add new features to the project.",
 		"",
-		"The value passed in must follow",
+		"The value passed in must follow ",
 		"the syntax: `-a{feature},{feature}`",
-		"where {feature} is the name of the feature.",
+		"where {feature} is the name of the ",
+		"feature.",
 		"",
-		"For example, `-acore,forms` will generate the core and forms",
-		"features of frizzante respectively in `app/frizzante/core` and `app/frizzante/forms`.",
+		"For example, `-acore,forms` will ",
+		"generate the core and forms",
+		"features of frizzante respectively ",
+		"in `app/frizzante/core` and ",
+		"`app/frizzante/forms`.",
 		"",
-		"Feature names are not case-sensitive.",
+		"Feature are not case-sensitive.",
 		"",
-		"You can also use -a:pick or --add :pick to pick feature interactively.",
+		"You can also use -a:pick or ",
+		"--add :pick to pick feature ",
+		"interactively.",
 	}, "\n"))
 
 	println()
