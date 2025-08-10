@@ -6,22 +6,15 @@ import (
 	"github.com/evanw/esbuild/pkg/api"
 )
 
-// New creates a new JavaScript runtime.
-func New() *JavaScript {
-	return &JavaScript{
-		Runtime: goja.New(),
-	}
-}
-
 // SetFunction sets a function.
-func SetFunction(js *JavaScript, n string, f Function) error {
-	return js.Set(n, f)
+func SetFunction(rt *goja.Runtime, n string, f Function) error {
+	return rt.Set(n, f)
 }
 
 // SetFunctions sets a map of functions.
-func SetFunctions(js *JavaScript, fs map[string]Function) error {
+func SetFunctions(rt *goja.Runtime, fs map[string]Function) error {
 	for n, cb := range fs {
-		err := js.Set(n, cb)
+		err := rt.Set(n, cb)
 		if err != nil {
 			return err
 		}

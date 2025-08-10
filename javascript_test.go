@@ -79,7 +79,7 @@ func TestJavaScriptBundle(test *testing.T) {
 	actual := ""
 	expected := "hello"
 
-	runtime := js.New()
+	runtime := goja.New()
 
 	err := js.SetFunction(runtime, "signal", func(call goja.FunctionCall) goja.Value {
 		args := call.Arguments

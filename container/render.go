@@ -13,63 +13,67 @@ import (
 
 // Render renders the application with the given properties.
 func Render(a *Container, p map[string]any) (string, string, error) {
-	var runtime *goja.Runtime
-	var program *goja.Program
-	var compileError error
+	var rt *goja.Runtime
+	var prg *goja.Program
+	var cerr error
 
 	if a.Config.Development {
-		runtime = goja.New()
-		var fileNameFixed = strings.ReplaceAll(a.Config.Script, "\\", "/")
-		data, rer := os.ReadFile(fileNameFixed)
+		rt = goja.New()
+
+		nfix := strings.ReplaceAll(a.Config.Script, "\\", "/")
+
+		data, rer := os.ReadFile(nfix)
 		if rer != nil {
 			return "", "", rer
 		}
-		source, bundleError := js.Bundle(a.Config.Root, api.FormatCommonJS, string(data))
-		if bundleError != nil {
-			return "", "", bundleError
+
+		src, berr := js.Bundle(a.Config.Root, api.FormatCommonJS, string(data))
+		if berr != nil {
+			return "", "", berr
 		}
-		program, compileError = goja.Compile(a.Config.Script, fmt.Sprintf(globals.RenderScriptFormat, source), false)
-		if compileError != nil {
-			return "", "", compileError
+
+		prg, cerr = goja.Compile(a.Config.Script, fmt.Sprintf(globals.RenderScriptFormat, src), false)
+		if cerr != nil {
+			return "", "", cerr
 		}
 	} else {
-		runtime = <-a.Channels.Runtime
-		program = <-a.Channels.Program
-		defer func() { go func() { a.Channels.Runtime <- runtime }() }()
-		defer func() { go func() { a.Channels.Program <- program }() }()
+		rt = <-a.Channels.Runtime
+		prg = <-a.Channels.Program
+		defer func() { go func() { a.Channels.Runtime <- rt }() }()
+		defer func() { go func() { a.Channels.Program <- prg }() }()
 	}
 
-	programResult, programError := runtime.RunProgram(program)
-	if programError != nil {
-		return "", "", programError
+	pres, perr := rt.RunProgram(prg)
+	if perr != nil {
+		return "", "", perr
 	}
 
-	render, isFunction := goja.AssertFunction(programResult)
+	render, isf := goja.AssertFunction(pres)
 
-	if !isFunction {
+	if !isf {
 		return "", "", errors.New("render is not a function")
 	}
 
-	promise, programError := render(goja.Undefined(), runtime.ToValue(p))
+	promise, perr := render(goja.Undefined(), rt.ToValue(p))
 
-	if programError != nil {
-		return "", "", programError
+	if perr != nil {
+		return "", "", perr
 	}
 
-	value := promise.Export().(*goja.Promise).Result().ToObject(runtime)
+	value := promise.Export().(*goja.Promise).Result().ToObject(rt)
 
-	headValue := value.Get("head")
-	bodyValue := value.Get("body")
+	headv := value.Get("head")
+	bodyv := value.Get("body")
 
 	var head string
 	var body string
 
-	if headValue != nil {
-		head = headValue.String()
+	if headv != nil {
+		head = headv.String()
 	}
 
-	if bodyValue != nil {
-		body = bodyValue.String()
+	if bodyv != nil {
+		body = bodyv.String()
 	}
 
 	return head, body, nil
