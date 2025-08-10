@@ -1,4 +1,4 @@
-import type { SwapConfig } from "$frizzante/core/types.ts"
+import type { HistoryEntry, SwapConfig } from "$frizzante/core/types.ts"
 
 let id = 0
 const configs: Record<number, SwapConfig> = {}
@@ -61,6 +61,13 @@ export async function swap(config: SwapConfig): Promise<() => void> {
         if (!pushState) {
             return
         }
-        window.history.pushState(id, "", res.url)
+
+        const friendly: HistoryEntry = {
+            id,
+            method: config.method,
+            path: config.path,
+        }
+
+        window.history.pushState(friendly, "", res.url)
     }
 }

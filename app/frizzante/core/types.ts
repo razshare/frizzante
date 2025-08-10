@@ -10,3 +10,9 @@ export type SwapConfig = {
     body: false | FormData
     view: View<unknown>
 }
+
+export type HistoryEntry = {
+    id: number
+    method: string
+    path: string
+}
