@@ -288,6 +288,13 @@ func AddFeatureByName(efs embed.FS, feature string) {
 			Success("sqlc.yaml created")
 		}
 
+		if !files.IsFile("database.sqlite") {
+			Info("frizzante's sqlc configuration uses sqlite by default")
+			if Confirm("would you like to create an empty sqlite database?") {
+				OnSqliteDatabase(efs)
+			}
+		}
+
 		return
 	}
 
