@@ -5,6 +5,7 @@ import (
 	"github.com/razshare/frizzante/cli"
 )
 
+//go:embed clilogo.txt
 //go:embed version
 //go:embed app/frizzante
 //go:embed sqlc.yaml

@@ -1,8 +1,8 @@
 package config
 
 var Colors = ThemeColors{
-	Primary:   "25",
-	Secondary: "57",
+	Primary:   "109",
+	Secondary: "62",
 	Success:   "148",
 	Error:     "203",
 	Warning:   "166",

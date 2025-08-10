@@ -10,7 +10,7 @@ var Styles = ThemeStyles{
 
 	Selected: lipgloss.NewStyle().
 		PaddingLeft(1).
-		Foreground(lipgloss.Color(Colors.Secondary)),
+		Foreground(lipgloss.Color(Colors.Primary)),
 
 	Status: func(color string) lipgloss.Style {
 		return lipgloss.
@@ -22,13 +22,12 @@ var Styles = ThemeStyles{
 
 	BigText: lipgloss.
 		NewStyle().
-		Foreground(lipgloss.Color(Colors.Info)).
+		Foreground(lipgloss.Color(Colors.Primary)).
 		Bold(true).
 		Align(lipgloss.Center).
 		Border(lipgloss.DoubleBorder()).
 		BorderForeground(lipgloss.Color(Colors.Primary)).
-		Padding(1, 4).
-		Margin(1, 2),
+		Padding(1, 1),
 
 	Section: lipgloss.NewStyle().
 		Foreground(lipgloss.Color(Colors.Secondary)).

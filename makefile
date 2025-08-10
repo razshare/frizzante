@@ -1,3 +1,6 @@
+frizzante:
+	frizzante
+
 configure:
 	go run main.go --configure
 

@@ -2,6 +2,8 @@ package cli
 
 import (
 	"embed"
+	"fmt"
+	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/input"
 	"github.com/razshare/frizzante/tui/singleselect"
 )
@@ -27,6 +29,12 @@ func OnMenu(efs embed.FS) {
 		"Configure",
 		"Sqlc Generate",
 	}
+
+	logo, readError := efs.ReadFile("clilogo.txt")
+	if readError != nil {
+		Fatal(readError)
+	}
+	fmt.Println(config.Styles.BigText.Render(string(logo)))
 
 	result, showError := singleselect.Send("Pick an option", options)
 	if showError != nil {
