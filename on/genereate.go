@@ -18,7 +18,6 @@ func Generate(efs embed.FS, n string) {
 				"Air",
 				"Bun",
 				"Sqlc",
-				"Queries",
 				"Session",
 				"Database",
 				"Queries",
