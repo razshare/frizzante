@@ -1,10 +1,8 @@
-package copy
+package codegen
 
 import (
 	"embed"
 	"github.com/razshare/frizzante/cli/flags"
-	"github.com/razshare/frizzante/codegen"
-	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
@@ -24,7 +22,7 @@ func Forms(efs embed.FS) {
 		}
 	}
 
-	err := embeds.Generate(efs, []codegen.Generation{
+	err := Generate(efs, []Generation{
 		{
 			From: "app/frizzante/forms",
 			To:   to,

@@ -1,13 +1,20 @@
+//gen:mod "memory" "session"
 package memory
 
-//gen:mods "session" "Session"
-//gen:mods "start" "Start"
-var sessions = map[string]*session{}
+//gen:mod "state" "State"
+//gen:mod "sessions" "Sessions"
+var sessions = map[string]*state{}
 
-func start(id string) *session {
+//gen:mod "start" "Start"
+//gen:mod "state" "State"
+func start(id string) *state {
+	//gen:mod "sessions" "Sessions"
 	v, ok := sessions[id]
 	if !ok {
-		sessions[id] = &session{}
+		//gen:mod "newState" "New"
+		//gen:mod "sessions" "Sessions"
+		sessions[id] = newState()
+		//gen:mod "sessions" "Sessions"
 		return sessions[id]
 	}
 	return v

@@ -1,4 +1,5 @@
+//gen:mod "memory" "session"
 package memory
 
-//gen:mods "session" "Session"
-type session struct{}
+//gen:mod "state" "State"
+type state struct{}

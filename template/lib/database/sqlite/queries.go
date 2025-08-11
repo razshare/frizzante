@@ -1,15 +1,14 @@
-package database
+package sqlite
 
 import (
 	"database/sql"
 	"embed"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/template/lib/database/sqlite/sqlc"
 	"log"
 	"os"
-
 	//gen:mod "github.com/razshare/frizzante/template" "main"
-	"github.com/razshare/frizzante/template/lib/database/sqlc"
 )
 
 //gen:mod "queries" "Queries"

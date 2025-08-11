@@ -23,8 +23,8 @@ func start(c *client.Client) *state {
 		//gen:mod "newState" "New"
 		s := newState()
 		//gen:mod "save" "Save"
-		save(c, &s)
-		return &s
+		save(c, s)
+		return s
 	}
 
 	//gen:mod "load" "Load"
@@ -98,15 +98,15 @@ func load(c *client.Client) *state {
 	d, err := os.ReadFile(n)
 	if err != nil {
 		c.Scope.Container.Config.ErrorLog.Println(err, stack.Trace())
-		return &v
+		return v
 	}
 
-	err = json.Unmarshal(d, &v)
+	err = json.Unmarshal(d, v)
 	if err != nil {
 		c.Scope.Container.Config.ErrorLog.Println(err, stack.Trace())
-		return &v
+		return v
 	}
-	return &v
+	return v
 }
 
 //gen:mod "lock" "Lock"

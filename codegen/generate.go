@@ -1,26 +1,26 @@
-package embeds
+package codegen
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/codegen"
+	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	"os"
 	"path/filepath"
 	"regexp"
 )
 
-func Generate(efs embed.FS, gs []codegen.Generation) error {
+func Generate(efs embed.FS, gs []Generation) error {
 	for _, g := range gs {
-		if IsDirectory(efs, g.From) {
+		if embeds.IsDirectory(efs, g.From) {
 			ds, err := efs.ReadDir(g.From)
 			if err != nil {
 				return err
 			}
 
-			gsloc := make([]codegen.Generation, 0)
+			gsloc := make([]Generation, 0)
 
 			for _, d := range ds {
-				gsloc = append(gsloc, codegen.Generation{
+				gsloc = append(gsloc, Generation{
 					From:      filepath.Join(g.From, d.Name()),
 					To:        filepath.Join(g.To, d.Name()),
 					Overwrite: g.Overwrite,
@@ -47,7 +47,7 @@ func Generate(efs embed.FS, gs []codegen.Generation) error {
 			return err
 		}
 
-		cont, err := codegen.Parse(string(dat), func(s codegen.Section) error {
+		cont, err := Parse(string(dat), func(s Section) error {
 			for _, m := range s.Mods {
 				reg, cerr := regexp.Compile("(?i)" + m.Pattern)
 				if cerr != nil {
@@ -63,7 +63,7 @@ func Generate(efs embed.FS, gs []codegen.Generation) error {
 		}
 
 		dir := filepath.Dir(to)
-		if !IsDirectory(efs, dir) {
+		if !embeds.IsDirectory(efs, dir) {
 			err = os.MkdirAll(dir, os.ModePerm)
 			if err != nil {
 				return err

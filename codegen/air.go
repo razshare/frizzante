@@ -1,4 +1,4 @@
-package download
+package codegen
 
 import (
 	"embed"

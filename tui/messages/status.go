@@ -9,10 +9,6 @@ import (
 func Status(label string, text string, bgColor string, fgColor string, textColor string) {
 	labelWidth := 9
 
-	if label == "INFO" {
-		labelWidth = 8
-	}
-
 	labelStyle := lipgloss.NewStyle().
 		Background(lipgloss.Color(bgColor)).
 		Foreground(lipgloss.Color(fgColor)).

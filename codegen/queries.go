@@ -1,10 +1,9 @@
-package cmd
+package codegen
 
 import (
 	"embed"
 	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/cli/platform"
-	"github.com/razshare/frizzante/codegen/download"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
@@ -34,7 +33,7 @@ func Queries(efs embed.FS) {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
 		}
 
-		download.Install("sqlc", url, dn)
+		Install("sqlc", url, dn)
 	}
 
 	dn := filepath.Join("lib", "database")
@@ -62,4 +61,16 @@ func Queries(efs embed.FS) {
 		messages.Fatal(err)
 	}
 	spinner.Stop(s)
+
+	messages.Success(
+		"queries generated into database.Queries.*\n",
+		"./lib/database/queries.go",
+	)
+	messages.Tip(
+		"## Usage Example\n",
+		"func(c *client.Client){\n",
+		"    u, _ := database.Queries.FindUsers(c.Request.Context())\n",
+		"    send.Json(c, u)\n",
+		"}",
+	)
 }

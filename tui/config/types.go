@@ -9,6 +9,7 @@ type ThemeColors struct {
 	Error     string
 	Warning   string
 	Info      string
+	Tip       string
 	Muted     string
 }
 

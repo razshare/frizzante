@@ -7,5 +7,6 @@ var Colors = ThemeColors{
 	Error:     "203",
 	Warning:   "166",
 	Info:      "33",
+	Tip:       "129",
 	Muted:     "245",
 }
