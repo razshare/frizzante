@@ -18,7 +18,6 @@ func Menu(efs embed.FS) {
 		"Version",
 		"Create Project",
 		"Generate",
-		"Generate?",
 		"Test",
 		"Package",
 		"Package Watch",
@@ -59,12 +58,6 @@ func Menu(efs embed.FS) {
 
 	if result == "Generate" {
 		*flags.Generate = ":pick"
-		Start(efs)
-		return
-	}
-
-	if result == "Generate?" {
-		*flags.Generate = "?"
 		Start(efs)
 		return
 	}

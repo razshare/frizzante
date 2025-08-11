@@ -8,7 +8,7 @@ import (
 var Help = flag.BoolP("help", "h", false, "shows this help document")
 var Version = flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
 var CreateProject = flag.StringP("create-project", "c", "", "creates a frizzante project")
-var Generate = flag.StringP("generate", "g", "", "adds features, see  \"-a?\" or \"--add ?\" for more details")
+var Generate = flag.StringP("generate", "g", "", "generates code and binaries")
 var Test = flag.BoolP("test", "t", false, "runs tests")
 var Package = flag.BoolP("package", "p", false, "packages app, result will be dropped in app/dist")
 var PackageWatch = flag.BoolP("package-watch", "", false, "watches and packages app, result will be dropped in app/dist")
