@@ -11,7 +11,6 @@ import (
 var Functions = map[string]func(efs embed.FS){
 	"air":      download.Air,
 	"bun":      download.Bun,
-	"sqlc":     download.Sqlc,
 	"session":  copy_modded.Session,
 	"database": copy_modded.Database,
 	"queries":  cmd.Queries,
