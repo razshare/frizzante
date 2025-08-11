@@ -17,8 +17,8 @@ func Menu(efs embed.FS) {
 		"Install",
 		"Version",
 		"Create Project",
-		"Add",
-		"Add?",
+		"Generate",
+		"Generate?",
 		"Test",
 		"Package",
 		"Package Watch",
@@ -29,8 +29,6 @@ func Menu(efs embed.FS) {
 		"Dev",
 		"Build",
 		"Configure",
-		//"Create Sqlite Database",
-		//"Sqlc Generate",
 	}
 
 	logo, readError := efs.ReadFile("clilogo.txt")
@@ -59,14 +57,14 @@ func Menu(efs embed.FS) {
 		return
 	}
 
-	if result == "Add" {
-		*flags.Add = ":pick"
+	if result == "Generate" {
+		*flags.Generate = ":pick"
 		Start(efs)
 		return
 	}
 
-	if result == "Add?" {
-		*flags.Add = "?"
+	if result == "Generate?" {
+		*flags.Generate = "?"
 		Start(efs)
 		return
 	}
@@ -139,18 +137,6 @@ func Menu(efs embed.FS) {
 
 	if result == "Configure" {
 		*flags.Configure = true
-		Start(efs)
-		return
-	}
-
-	if result == "Sqlc Generate" {
-		*flags.SqlcGenerate = true
-		Start(efs)
-		return
-	}
-
-	if result == "Create Sqlite Database" {
-		*flags.CreateSqliteDatabase = true
 		Start(efs)
 		return
 	}

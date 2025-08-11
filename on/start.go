@@ -29,8 +29,8 @@ func Start(efs embed.FS) {
 		os.Exit(0)
 	}
 
-	if *flags.Add != "" {
-		Add(efs, *flags.Add)
+	if *flags.Generate != "" {
+		Generate(efs, *flags.Generate)
 		os.Exit(0)
 	}
 
@@ -91,16 +91,6 @@ func Start(efs embed.FS) {
 
 	if *flags.Configure {
 		Configure(efs)
-		os.Exit(0)
-	}
-
-	if *flags.SqlcGenerate {
-		SqlcGenerate()
-		os.Exit(0)
-	}
-
-	if *flags.CreateSqliteDatabase {
-		CreateSqliteDatabase(efs)
 		os.Exit(0)
 	}
 

@@ -25,7 +25,7 @@ func Parse(c string, b Build) (string, error) {
 			case ReadingOriginalString:
 				switch r {
 				case '\\':
-					s = Escaping
+					s = EscapingOriginal
 				case '"':
 					s = DoneReadingOriginalString
 				default:
@@ -45,7 +45,7 @@ func Parse(c string, b Build) (string, error) {
 			case ReadingReplacementString:
 				switch r {
 				case '\\':
-					s = Escaping
+					s = EscapingReplacement
 				case '"':
 					s = DoneReadingReplacementString
 					return Mod{
@@ -55,8 +55,13 @@ func Parse(c string, b Build) (string, error) {
 				default:
 					repl.WriteRune(r)
 				}
-			case Escaping:
-				// Noop.
+			case EscapingOriginal:
+				repl.WriteRune(r)
+				s = ReadingOriginalString
+				continue
+			case EscapingReplacement:
+				repl.WriteRune(r)
+				s = ReadingReplacementString
 				continue
 			default:
 				switch r {
@@ -75,12 +80,12 @@ func Parse(c string, b Build) (string, error) {
 	msl := 0
 	ml := make([]Mod, 0)
 	mll := 0
-	o := len(globals.CodegenModHint)
 	var sb strings.Builder
 
 	for _, l := range strings.Split(c, "\n") {
 		trmd := strings.TrimSpace(l)
 		if strings.HasPrefix(trmd, globals.CodegenModsHint) {
+			o := len(globals.CodegenModsHint)
 			mod, err := ex(l[o:])
 			if err != nil {
 				return "", err
@@ -89,6 +94,7 @@ func Parse(c string, b Build) (string, error) {
 			msl++
 			continue
 		} else if strings.HasPrefix(trmd, globals.CodegenModHint) {
+			o := len(globals.CodegenModHint)
 			mod, err := ex(l[o:])
 			if err != nil {
 				return "", err

@@ -3,7 +3,7 @@ package embeds
 import (
 	"embed"
 	"github.com/razshare/frizzante/codegen"
-	"log"
+	"github.com/razshare/frizzante/files"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -12,7 +12,7 @@ import (
 func Generate(efs embed.FS, gs []codegen.Generation) error {
 	for _, g := range gs {
 		if IsDirectory(efs, g.From) {
-			ds, err := os.ReadDir(g.From)
+			ds, err := efs.ReadDir(g.From)
 			if err != nil {
 				return err
 			}
@@ -21,8 +21,9 @@ func Generate(efs embed.FS, gs []codegen.Generation) error {
 
 			for _, d := range ds {
 				gsloc = append(gsloc, codegen.Generation{
-					From: filepath.Join(g.From, d.Name()),
-					To:   filepath.Join(g.To, d.Name()),
+					From:      filepath.Join(g.From, d.Name()),
+					To:        filepath.Join(g.To, d.Name()),
+					Overwrite: g.Overwrite,
 				})
 			}
 			err = Generate(efs, gsloc)
@@ -35,14 +36,20 @@ func Generate(efs embed.FS, gs []codegen.Generation) error {
 		from := g.From
 		to := g.To
 
-		dat, err := os.ReadFile(from)
+		if g.Overwrite != nil && files.IsFile(to) {
+			if !g.Overwrite(to) {
+				continue
+			}
+		}
+
+		dat, err := efs.ReadFile(from)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		cont, err := codegen.Parse(string(dat), func(s codegen.Section) error {
 			for _, m := range s.Mods {
-				reg, cerr := regexp.Compile(m.Pattern)
+				reg, cerr := regexp.Compile("(?i)" + m.Pattern)
 				if cerr != nil {
 					return cerr
 				}

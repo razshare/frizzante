@@ -1,0 +1,7 @@
+if(!module){
+    var module={exports:{}};
+}
+(function(){
+    %s
+    return render
+})()

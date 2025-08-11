@@ -5,6 +5,6 @@ import (
 )
 
 func Configure(efs embed.FS) {
-	Add(efs, "bun,air")
+	Generate(efs, "bun,air")
 	Install()
 }

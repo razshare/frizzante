@@ -9,6 +9,7 @@ import (
 type Scope struct {
 	Container *container.Container
 	WebSocket *websocket.Conn
+	SessionId string
 	EventName string
 	EventId   int64
 	Locked    bool

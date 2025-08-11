@@ -3,7 +3,7 @@ package download
 import (
 	"embed"
 	"github.com/razshare/frizzante/cli/path"
-	"github.com/razshare/frizzante/cli/platforms"
+	"github.com/razshare/frizzante/cli/platform"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
@@ -12,21 +12,21 @@ import (
 
 func Bun(efs embed.FS) {
 	dn := filepath.Join(".gen", "bun")
-	p := platforms.Find()
+	p := platform.Find()
 
 	var url string
 
-	if p == platforms.PlatformTypeDarwinArm64 {
+	if p == platform.DarwinArm64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-aarch64.zip"
-	} else if p == platforms.PlatformTypeDarwinAmd64 {
+	} else if p == platform.DarwinAmd64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-x64.zip"
-	} else if p == platforms.PlatformTypeLinuxArm64 {
+	} else if p == platform.LinuxArm64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-aarch64.zip"
-	} else if p == platforms.PlatformTypeLinuxAmd64 {
+	} else if p == platform.LinuxAmd64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-x64.zip"
-	} else if p == platforms.PlatformTypeWindowsArm64 {
+	} else if p == platform.WindowsArm64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-windows-x64-baseline.zip"
-	} else if p == platforms.PlatformTypeWindowsAmd64 {
+	} else if p == platform.WindowsAmd64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-windows-x64-baseline.zip"
 	}
 
@@ -34,17 +34,17 @@ func Bun(efs embed.FS) {
 
 	var n string
 
-	if p == platforms.PlatformTypeDarwinArm64 {
+	if p == platform.DarwinArm64 {
 		n = filepath.Join(dn, "bun-darwin-aarch64", "bun")
-	} else if p == platforms.PlatformTypeDarwinAmd64 {
+	} else if p == platform.DarwinAmd64 {
 		n = filepath.Join(dn, "bun-darwin-x64", "bun")
-	} else if p == platforms.PlatformTypeLinuxArm64 {
+	} else if p == platform.LinuxArm64 {
 		n = filepath.Join(dn, "bun-linux-aarch64", "bun")
-	} else if p == platforms.PlatformTypeLinuxAmd64 {
+	} else if p == platform.LinuxAmd64 {
 		n = filepath.Join(dn, "bun-linux-x64", "bun")
-	} else if p == platforms.PlatformTypeWindowsArm64 {
+	} else if p == platform.WindowsArm64 {
 		n = filepath.Join(dn, "bun-windows-x64-baseline", "bun.exe")
-	} else if p == platforms.PlatformTypeWindowsAmd64 {
+	} else if p == platform.WindowsAmd64 {
 		n = filepath.Join(dn, "bun-windows-x64-baseline", "bun.exe")
 	}
 

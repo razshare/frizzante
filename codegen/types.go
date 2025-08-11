@@ -3,7 +3,8 @@ package codegen
 type State uint64
 
 const Start State = 0
-const Escaping State = 99
+const EscapingOriginal State = 98
+const EscapingReplacement State = 99
 const ReadingOriginalString State = 100
 const DoneReadingOriginalString State = 101
 const ReadingReplacementString State = 200
@@ -24,6 +25,7 @@ type Section struct {
 }
 
 type Generation struct {
-	From string
-	To   string
+	From      string
+	To        string
+	Overwrite func(n string) bool
 }

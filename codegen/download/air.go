@@ -2,27 +2,27 @@ package download
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/cli/platforms"
+	"github.com/razshare/frizzante/cli/platform"
 	"path/filepath"
 )
 
 func Air(efs embed.FS) {
 	dn := filepath.Join(".gen", "air")
-	p := platforms.Find()
+	p := platform.Find()
 
 	var url string
 
-	if p == platforms.PlatformTypeDarwinArm64 {
+	if p == platform.DarwinArm64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_darwin_arm64"
-	} else if p == platforms.PlatformTypeDarwinAmd64 {
+	} else if p == platform.DarwinAmd64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_darwin_amd64"
-	} else if p == platforms.PlatformTypeLinuxArm64 {
+	} else if p == platform.LinuxArm64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_arm64"
-	} else if p == platforms.PlatformTypeLinuxAmd64 {
+	} else if p == platform.LinuxAmd64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_amd64"
-	} else if p == platforms.PlatformTypeWindowsArm64 {
+	} else if p == platform.WindowsArm64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_arm64.exe"
-	} else if p == platforms.PlatformTypeWindowsAmd64 {
+	} else if p == platform.WindowsAmd64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_amd64.exe"
 	}
 

@@ -2,7 +2,7 @@ package download
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/cli/platforms"
+	"github.com/razshare/frizzante/cli/platform"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
@@ -12,21 +12,21 @@ import (
 
 func Sqlc(efs embed.FS) {
 	dn := filepath.Join(".gen", "sqlc")
-	p := platforms.Find()
+	p := platform.Find()
 
 	var url string
 
-	if p == platforms.PlatformTypeDarwinArm64 {
+	if p == platform.DarwinArm64 {
 		url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_arm64.zip"
-	} else if p == platforms.PlatformTypeDarwinAmd64 {
+	} else if p == platform.DarwinAmd64 {
 		url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_amd64.zip"
-	} else if p == platforms.PlatformTypeLinuxArm64 {
+	} else if p == platform.LinuxArm64 {
 		url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_arm64.zip"
-	} else if p == platforms.PlatformTypeLinuxAmd64 {
+	} else if p == platform.LinuxAmd64 {
 		url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.zip"
-	} else if p == platforms.PlatformTypeWindowsArm64 {
+	} else if p == platform.WindowsArm64 {
 		url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
-	} else if p == platforms.PlatformTypeWindowsAmd64 {
+	} else if p == platform.WindowsAmd64 {
 		url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
 	}
 

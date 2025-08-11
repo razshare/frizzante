@@ -4,39 +4,38 @@ import (
 	"github.com/razshare/frizzante/cli/extension"
 	"github.com/razshare/frizzante/cli/flags"
 	"github.com/razshare/frizzante/tui/messages"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func Sqlc(basepath string) string {
-	var sqlc string
+func Sqlc(base string) string {
+	var bin string
 
 	if *flags.Sqlc != "" {
-		sqlc = *flags.Sqlc
+		bin = *flags.Sqlc
 	} else {
-		sqlc = filepath.Join(".gen", "sqlc", "sqlc")
+		bin = filepath.Join(".gen", "sqlc", "sqlc")
 	}
 
-	if strings.HasPrefix(sqlc, "~") {
+	if strings.HasPrefix(bin, "~") {
 		dirname, err := os.UserHomeDir()
 		if err != nil {
-			log.Fatal(err)
+			messages.Fatal(err)
 		}
-		sqlc = strings.Replace(sqlc, "~", dirname, 1)
-		return sqlc + extension.Find()
+		bin = strings.Replace(bin, "~", dirname, 1)
+		return bin + extension.Find()
 	}
 
-	if !strings.Contains(sqlc, string(filepath.Separator)) {
-		return sqlc + extension.Find()
+	if !strings.Contains(bin, string(filepath.Separator)) {
+		return bin + extension.Find()
 	}
 
 	var pathError error
-	sqlc, pathError = filepath.Rel(basepath, sqlc)
+	bin, pathError = filepath.Rel(base, bin)
 	if pathError != nil {
 		messages.Fatal(pathError)
 	}
 
-	return sqlc + extension.Find()
+	return bin + extension.Find()
 }

@@ -10,6 +10,10 @@ import (
 // SessionId tries to find a session id among the user's cookies.
 // If no session id is found, it creates a new one and returns it.
 func SessionId(c *client.Client) string {
+	if c.Scope.SessionId != "" {
+		return c.Scope.SessionId
+	}
+
 	var id string
 	cookies := c.Request.CookiesNamed("session-id")
 	cookiesCount := 0
@@ -20,6 +24,7 @@ func SessionId(c *client.Client) string {
 	}
 
 	if cookiesCount > 0 {
+		c.Scope.SessionId = id
 		return id
 	}
 
@@ -33,6 +38,8 @@ func SessionId(c *client.Client) string {
 	id = idObject.String()
 
 	send.Cookie(c, "session-id", id)
+
+	c.Scope.SessionId = id
 
 	return id
 }

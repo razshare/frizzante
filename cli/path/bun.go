@@ -4,39 +4,38 @@ import (
 	"github.com/razshare/frizzante/cli/extension"
 	"github.com/razshare/frizzante/cli/flags"
 	"github.com/razshare/frizzante/tui/messages"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func Bun(basepath string) string {
-	var bun string
+func Bun(base string) string {
+	var bin string
 
 	if *flags.Bun != "" {
-		bun = *flags.Bun
+		bin = *flags.Bun
 	} else {
-		bun = filepath.Join(".gen", "bun", "bun")
+		bin = filepath.Join(".gen", "bun", "bun")
 	}
 
-	if strings.HasPrefix(bun, "~") {
+	if strings.HasPrefix(bin, "~") {
 		dirname, err := os.UserHomeDir()
 		if err != nil {
-			log.Fatal(err)
+			messages.Fatal(err)
 		}
-		bun = strings.Replace(bun, "~", dirname, 1)
-		return bun + extension.Find()
+		bin = strings.Replace(bin, "~", dirname, 1)
+		return bin + extension.Find()
 	}
 
-	if !strings.Contains(bun, string(filepath.Separator)) {
-		return bun + extension.Find()
+	if !strings.Contains(bin, string(filepath.Separator)) {
+		return bin + extension.Find()
 	}
 
 	var pathError error
-	bun, pathError = filepath.Rel(basepath, bun)
+	bin, pathError = filepath.Rel(base, bin)
 	if pathError != nil {
 		messages.Fatal(pathError)
 	}
 
-	return bun + extension.Find()
+	return bin + extension.Find()
 }

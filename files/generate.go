@@ -2,7 +2,6 @@ package files
 
 import (
 	"github.com/razshare/frizzante/codegen"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -20,8 +19,9 @@ func Generate(gs []codegen.Generation) error {
 
 			for _, d := range ds {
 				gsloc = append(gsloc, codegen.Generation{
-					From: filepath.Join(g.From, d.Name()),
-					To:   filepath.Join(g.To, d.Name()),
+					From:      filepath.Join(g.From, d.Name()),
+					To:        filepath.Join(g.To, d.Name()),
+					Overwrite: g.Overwrite,
 				})
 			}
 			err = Generate(gsloc)
@@ -34,9 +34,15 @@ func Generate(gs []codegen.Generation) error {
 		from := g.From
 		to := g.To
 
+		if g.Overwrite != nil && IsFile(to) {
+			if !g.Overwrite(to) {
+				continue
+			}
+		}
+
 		dat, err := os.ReadFile(from)
 		if err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		cont, err := codegen.Parse(string(dat), func(s codegen.Section) error {

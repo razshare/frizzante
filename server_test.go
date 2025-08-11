@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/razshare/frizzante/tui/messages"
 	"io"
-	"log"
 	"net/http"
 	"testing"
 )
@@ -42,7 +42,7 @@ func TestSendStatus(test *testing.T) {
 	defer func(Body io.ReadCloser) {
 		closeError := Body.Close()
 		if closeError != nil {
-			log.Fatal(closeError)
+			messages.Fatal(closeError)
 		}
 	}(response.Body)
 
@@ -65,7 +65,7 @@ func TestSendHeader(test *testing.T) {
 	defer func(Body io.ReadCloser) {
 		closeError := Body.Close()
 		if closeError != nil {
-			log.Fatal(closeError)
+			messages.Fatal(closeError)
 		}
 	}(response.Body)
 

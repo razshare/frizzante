@@ -55,7 +55,7 @@ func TestOnAddFeature(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	on.Add(efs, "air")
+	on.Generate(efs, "air")
 
 	if !files.IsDirectory(air) {
 		test.Fatal("the cli failed to add air feature")
