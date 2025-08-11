@@ -120,7 +120,7 @@ func (model Model) View() string {
 
 		sbloc.WriteString("]")
 
-		sbloc.WriteString(model.Search.Choices[i])
+		sbloc.WriteString(model.Search.Filtered[i])
 
 		if model.Viewport.Cursor == i {
 			sb.WriteString(config.Styles.Selected.Render(sbloc.String()) + "\n")
