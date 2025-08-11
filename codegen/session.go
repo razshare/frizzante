@@ -44,7 +44,7 @@ func Session(efs embed.FS) {
 			"./lib/session/start.go\n",
 			"./lib/session/types.go\n",
 		)
-		messages.Info(
+		messages.Tip(
 			"## Usage Example\n",
 			"func(c *client.Client){\n",
 			"    s := session.Start(receive.SessionId(c))\n",
