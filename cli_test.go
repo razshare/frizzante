@@ -1,19 +1,19 @@
 package main
 
 import (
-	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/on"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
 func TestOnHelp(test *testing.T) {
-	cli.OnHelp()
+	on.Help()
 }
 
 func TestOnVersion(test *testing.T) {
-	cli.OnVersion(efs)
+	on.Version(efs)
 }
 
 func TestOnCreateProject(test *testing.T) {
@@ -24,7 +24,7 @@ func TestOnCreateProject(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	cli.OnCreateProject(directoryName)
+	on.CreateProject(directoryName)
 
 	if !files.IsDirectory(directoryName) {
 		test.Fatal("the cli failed to create a test project")
@@ -55,7 +55,7 @@ func TestOnAddFeature(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	cli.OnAddFeature(efs, "air")
+	on.Add(efs, "air")
 
 	if !files.IsDirectory(air) {
 		test.Fatal("the cli failed to add air feature")
@@ -63,13 +63,13 @@ func TestOnAddFeature(test *testing.T) {
 }
 
 func TestOnPackage(test *testing.T) {
-	dist := filepath.Join("app", "dist")
+	dist := filepath.Join("template", "app", "dist")
 	err := os.RemoveAll(dist)
 	if err != nil {
 		test.Fatal(err)
 	}
 
-	cli.OnPackage()
+	on.Package()
 
 	if !files.IsDirectory(dist) {
 		test.Fatal("the cli failed to package the application into dist")
@@ -77,13 +77,13 @@ func TestOnPackage(test *testing.T) {
 }
 
 func TestOnInstall(test *testing.T) {
-	nodeModules := filepath.Join("app", "node_modules")
+	nodeModules := filepath.Join("template", "app", "node_modules")
 	err := os.RemoveAll(nodeModules)
 	if err != nil {
 		test.Fatal(err)
 	}
 
-	cli.OnInstall()
+	on.Install()
 
 	if !files.IsDirectory(nodeModules) {
 		test.Fatal("the cli failed to install node_modules")
@@ -91,35 +91,35 @@ func TestOnInstall(test *testing.T) {
 }
 
 func TestOnFormat(test *testing.T) {
-	cli.OnFormat()
+	on.Format()
 }
 
 func TestOnTouch(test *testing.T) {
-	dist := filepath.Join("app", "dist")
+	dist := filepath.Join("template", "app", "dist")
 	err := os.RemoveAll(dist)
 	if err != nil {
 		test.Fatal(err)
 	}
 
-	cli.OnTouch()
+	on.Touch()
 
-	serverJs := filepath.Join("app", "dist", "server.js")
+	serverJs := filepath.Join("template", "app", "dist", "server.js")
 	if !files.IsFile(serverJs) {
 		test.Fatalf("the cli failed to touch %s", serverJs)
 	}
 
-	indexHtml := filepath.Join("app", "dist", "client", "index.html")
+	indexHtml := filepath.Join("template", "app", "dist", "client", "index.html")
 	if !files.IsFile(indexHtml) {
 		test.Fatalf("the cli failed to touch %s", indexHtml)
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	cli.OnPackage()
+	on.Package()
 }
 
 func TestOnClean(test *testing.T) {
-	dist := filepath.Join("app", "dist")
-	nodeModules := filepath.Join("app", "node_modules")
+	dist := filepath.Join("template", "app", "dist")
+	nodeModules := filepath.Join("template", "app", "node_modules")
 	tmp := filepath.Join(".gen", "tmp")
 
 	err := os.MkdirAll(dist, os.ModePerm)
@@ -152,7 +152,7 @@ func TestOnClean(test *testing.T) {
 		test.Fatal(err)
 	}
 
-	cli.OnClean()
+	on.Clean()
 
 	if files.IsFile(filepath.Join(dist, "test.txt")) {
 		test.Fatalf("cli failed to clean %s", dist)
@@ -167,6 +167,6 @@ func TestOnClean(test *testing.T) {
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	cli.OnInstall()
-	cli.OnPackage()
+	on.Install()
+	on.Package()
 }

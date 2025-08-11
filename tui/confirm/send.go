@@ -1,12 +1,20 @@
 package confirm
 
-import "github.com/razshare/frizzante/tui/program"
+import (
+	"fmt"
+	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/program"
+)
 
-func Send(prompt string, defaultValue bool) (bool, error) {
+func Send(defaultValue bool, prompt string) bool {
 	model := Model{Prompt: prompt, DefaultValue: defaultValue, Confirmed: defaultValue}
 	result, err := program.Run(model)
 	if err != nil {
-		return false, err
+		messages.Fatal(err)
 	}
-	return result.Confirmed, nil
+	return result.Confirmed
+}
+
+func Sendf(defaultValue bool, format string, vars ...any) bool {
+	return Send(defaultValue, fmt.Sprintf(format, vars...))
 }

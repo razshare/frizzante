@@ -2,7 +2,7 @@ package main
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/cli"
+	"github.com/razshare/frizzante/cli/flags"
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/route"
 	"github.com/razshare/frizzante/send"
@@ -12,19 +12,24 @@ import (
 
 //go:embed .github
 //go:embed makefile
-//go:embed app/dist
+//go:embed template/app/dist
 var iefs embed.FS
 var port = 8080
 var ready = make(chan any, 1)
 
 func init() {
 	// Cli.
-	*cli.FlagPlatform = "linux/amd64"
-	*cli.FlagYes = true
-	*cli.FlagBun = "bun"
+	*flags.Platform = "linux/amd64"
+	*flags.Yes = true
+	*flags.Bun = "bun"
+	*flags.App = "template/app"
 
 	// Server.
 	c := server.Default()
+	c.Container.Root = "template/app"
+	c.Container.Script = "template/app/dist/server.js"
+	c.Container.Document = "template/app/dist/client/index.html"
+	c.Container.PublicRoot = "template/app/dist/client"
 	c.Container.Efs = iefs
 
 	c.Routes = []route.Route{

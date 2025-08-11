@@ -1,13 +1,15 @@
 package multiselect
 
 import (
+	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/program"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/viewport"
 )
 
-func Send(prompt string, options []string) ([]string, error) {
+func Send(options []string, prompt string) []string {
 	// Initialize the search input
 	searchInput := textinput.New()
 	result, err := program.Run(&Model{
@@ -27,7 +29,7 @@ func Send(prompt string, options []string) ([]string, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		messages.Fatal(err)
 	}
 
 	var selections []string
@@ -37,5 +39,9 @@ func Send(prompt string, options []string) ([]string, error) {
 		}
 	}
 
-	return selections, nil
+	return selections
+}
+
+func Sendf(options []string, format string, vars ...any) []string {
+	return Sendf(options, fmt.Sprintf(format, vars...))
 }

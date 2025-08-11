@@ -1,6 +1,34 @@
 package files
 
-import "os"
+import (
+	"fmt"
+	"os"
+	"slices"
+)
+
+func ReadDirectory(dn string) ([]string, error) {
+	items := make([]string, 0)
+	entries, readDirError := os.ReadDir(dn)
+	if readDirError != nil {
+		return nil, readDirError
+	}
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			items2, readDirLocalError := ReadDirectory(fmt.Sprintf("%s/%s", dn, entry.Name()))
+			if readDirLocalError != nil {
+				return nil, readDirLocalError
+			}
+
+			items = slices.Concat(items, items2)
+			continue
+		}
+
+		items = append(items, fmt.Sprintf("%s/%s", dn, entry.Name()))
+	}
+
+	return items, nil
+}
 
 // ReadFileInChunks reads a file in chunks.
 func ReadFileInChunks(n string, c int, cb func([]byte) error) (err error) {

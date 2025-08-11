@@ -4,6 +4,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/razshare/frizzante/js"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -100,7 +101,7 @@ func TestJavaScriptBundle(test *testing.T) {
 	})
 	`
 
-	cjs, bundleError := js.Bundle("app", api.FormatCommonJS, script)
+	cjs, bundleError := js.Bundle(filepath.Join("template", "app"), api.FormatCommonJS, script)
 	if bundleError != nil {
 		test.Fatal(bundleError)
 	}
