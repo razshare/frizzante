@@ -20,5 +20,5 @@ func Fatal(args ...any) {
 }
 
 func Fatalf(format string, vars ...any) {
-	Fatal(fmt.Sprintf(format, vars...))
+	Fatal(fmt.Sprintf(format, vars...), "\n", stack.Trace())
 }

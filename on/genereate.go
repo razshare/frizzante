@@ -2,7 +2,7 @@ package on
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/codegen/generate"
+	"github.com/razshare/frizzante/codegen/generators"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/multiselect"
 	"strings"
@@ -18,12 +18,13 @@ func Generate(efs embed.FS, n string) {
 				"Air",
 				"Bun",
 				"Session",
+				"Database",
 			},
 			"Pick a feature to add",
 		)
 
 		for _, feat := range feats {
-			gen, exists := generate.Available[strings.ToLower(feat)]
+			gen, exists := generators.Functions[strings.ToLower(feat)]
 			if !exists {
 				messages.Fatalf("feature `%s` not found", feat)
 			}
@@ -33,7 +34,7 @@ func Generate(efs embed.FS, n string) {
 	}
 
 	for _, feat := range strings.Split(n, ",") {
-		gen, exists := generate.Available[strings.ToLower(feat)]
+		gen, exists := generators.Functions[strings.ToLower(feat)]
 		if !exists {
 			messages.Fatalf("feature `%s` not found", feat)
 		}

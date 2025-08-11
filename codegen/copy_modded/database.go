@@ -1,4 +1,4 @@
-package parse
+package copy_modded
 
 import (
 	"embed"
@@ -6,24 +6,14 @@ import (
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
-	"github.com/razshare/frizzante/tui/singleselect"
 	"path/filepath"
-	"strings"
 )
 
-func Session(efs embed.FS) {
-	t := singleselect.Send(
-		[]string{
-			"Memory",
-			"Disk",
-		},
-		"How should the session be managed?",
-	)
-
+func Database(efs embed.FS) {
 	err := embeds.Generate(efs, []codegen.Generation{
 		{
-			From: "template/lib/session/" + strings.ReplaceAll(strings.ToLower(t), " ", ""),
-			To:   filepath.Join("lib", "session"),
+			From: "template/lib/database",
+			To:   filepath.Join("lib", "database"),
 			Overwrite: func(n string) bool {
 				yes := confirm.Sendf(true, "file `%s` already exists. Overwrite?", n)
 				if yes {
