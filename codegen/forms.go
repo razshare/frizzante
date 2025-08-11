@@ -24,7 +24,7 @@ func Forms(efs embed.FS) {
 
 	err := Generate(efs, []Generation{
 		{
-			From: "app/frizzante/forms",
+			From: "template/app/frizzante/forms",
 			To:   to,
 		},
 	})

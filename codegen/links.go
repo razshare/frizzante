@@ -24,7 +24,7 @@ func Links(efs embed.FS) {
 
 	err := Generate(efs, []Generation{
 		{
-			From: "app/frizzante/links",
+			From: "template/app/frizzante/links",
 			To:   to,
 		},
 	})

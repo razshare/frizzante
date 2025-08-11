@@ -24,7 +24,7 @@ func Core(efs embed.FS) {
 
 	err := Generate(efs, []Generation{
 		{
-			From: "app/frizzante/core",
+			From: "template/app/frizzante/core",
 			To:   to,
 		},
 	})
