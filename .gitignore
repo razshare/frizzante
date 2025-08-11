@@ -52,5 +52,8 @@ go.work.sum
 *.crt
 *.key
 
+# Air
+tmp
+
 # Frizzante
 /.gen
