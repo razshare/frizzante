@@ -7,20 +7,20 @@ import (
 )
 
 func Version(efs embed.FS) {
-	var version string
+	var v string
 
-	versionData, versionError := efs.ReadFile("version")
-	if versionError != nil {
-		messages.Fatal(versionError)
+	d, err := efs.ReadFile("version")
+	if err != nil {
+		messages.Fatal(err)
 	}
 
-	version = string(versionData)
+	v = string(d)
 
-	lines := strings.Split(version, "\n")
+	ls := strings.Split(v, "\n")
 
-	if len(lines) == 0 {
+	if len(ls) == 0 {
 		return
 	}
 
-	println(lines[0])
+	println(ls[0])
 }

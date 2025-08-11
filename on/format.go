@@ -16,20 +16,20 @@ func Format() {
 	gofmt.Stderr = os.Stderr
 	gofmt.Stdout = os.Stdout
 	gofmt.Stdin = os.Stdin
-	gofmtError := gofmt.Run()
-	if gofmtError != nil {
-		messages.Fatal(gofmtError)
+	err := gofmt.Run()
+	if err != nil {
+		messages.Fatal(err)
 	}
 
-	prettier := exec.Command(path.Bun(*flags.App), "x", "prettier", "--write", ".")
-	prettier.Dir = *flags.App
-	prettier.Env = append(os.Environ())
-	prettier.Stderr = os.Stderr
-	prettier.Stdout = os.Stdout
-	prettier.Stdin = os.Stdin
-	prettierError := prettier.Run()
-	if prettierError != nil {
-		messages.Fatal(prettierError)
+	pretty := exec.Command(path.Bun(*flags.App), "x", "prettier", "--write", ".")
+	pretty.Dir = *flags.App
+	pretty.Env = append(os.Environ())
+	pretty.Stderr = os.Stderr
+	pretty.Stdout = os.Stdout
+	pretty.Stdin = os.Stdin
+	err = pretty.Run()
+	if err != nil {
+		messages.Fatal(err)
 	}
 
 	messages.Success("project formatted")

@@ -15,8 +15,8 @@ func Test() {
 	test.Stderr = os.Stderr
 	test.Stdout = os.Stdout
 	test.Stdin = os.Stdin
-	runError := test.Run()
-	if runError != nil {
-		messages.Fatal(runError)
+	err := test.Run()
+	if err != nil {
+		messages.Fatal(err)
 	}
 }

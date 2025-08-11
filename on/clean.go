@@ -15,29 +15,29 @@ func Clean() {
 	clean.Stderr = os.Stderr
 	clean.Stdout = os.Stdout
 	clean.Stdin = os.Stdin
-	runError := clean.Run()
-	if runError != nil {
-		messages.Fatal(runError)
+	err := clean.Run()
+	if err != nil {
+		messages.Fatal(err)
 	}
 
-	removeError := os.RemoveAll(filepath.Join(*flags.App, "dist"))
-	if removeError != nil {
-		messages.Fatal(removeError)
+	err = os.RemoveAll(filepath.Join(*flags.App, "dist"))
+	if err != nil {
+		messages.Fatal(err)
 	}
 
-	removeError = os.RemoveAll(filepath.Join(*flags.App, "node_modules"))
-	if removeError != nil {
-		messages.Fatal(removeError)
+	err = os.RemoveAll(filepath.Join(*flags.App, "node_modules"))
+	if err != nil {
+		messages.Fatal(err)
 	}
 
-	removeError = os.RemoveAll(filepath.Join(".gen", "tmp"))
-	if removeError != nil {
-		messages.Fatal(removeError)
+	err = os.RemoveAll(filepath.Join(".gen", "tmp"))
+	if err != nil {
+		messages.Fatal(err)
 	}
 
-	removeError = os.RemoveAll(".vite")
-	if removeError != nil {
-		messages.Fatal(removeError)
+	err = os.RemoveAll(".vite")
+	if err != nil {
+		messages.Fatal(err)
 	}
 
 	Touch()

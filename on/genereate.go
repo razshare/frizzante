@@ -17,8 +17,11 @@ func Generate(efs embed.FS, n string) {
 				"Links",
 				"Air",
 				"Bun",
+				"Sqlc",
+				"Queries",
 				"Session",
 				"Database",
+				"Queries",
 			},
 			"Pick a feature to add",
 		)

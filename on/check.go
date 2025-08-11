@@ -17,9 +17,9 @@ func Check() {
 	eslint.Stderr = os.Stderr
 	eslint.Stdout = os.Stdout
 	eslint.Stdin = os.Stdin
-	eslintError := eslint.Run()
-	if eslintError != nil {
-		messages.Fatal(eslintError)
+	err := eslint.Run()
+	if err != nil {
+		messages.Fatal(err)
 	}
 
 	svelteCheck := exec.Command(path.Bun(*flags.App), "x", "svelte-check", "--tsconfig=./tsconfig.json")
@@ -28,8 +28,8 @@ func Check() {
 	svelteCheck.Stderr = os.Stderr
 	svelteCheck.Stdout = os.Stdout
 	svelteCheck.Stdin = os.Stdin
-	svelteCheckError := svelteCheck.Run()
-	if svelteCheckError != nil {
-		messages.Fatal(svelteCheckError)
+	err = svelteCheck.Run()
+	if err != nil {
+		messages.Fatal(err)
 	}
 }

@@ -12,9 +12,9 @@ import (
 func Dev() {
 	Touch()
 
-	mkdirError := os.MkdirAll(filepath.Join(".gen", "tmp"), os.ModePerm)
-	if mkdirError != nil {
-		messages.Fatal(mkdirError)
+	err := os.MkdirAll(filepath.Join(".gen", "tmp"), os.ModePerm)
+	if err != nil {
+		messages.Fatal(err)
 	}
 
 	air := exec.Command(path.Air("."))
@@ -22,10 +22,11 @@ func Dev() {
 	air.Stderr = os.Stderr
 	air.Stdout = os.Stdout
 	air.Stdin = os.Stdin
-	airError := air.Start()
-	if airError != nil {
-		messages.Fatalf("air watcher failed to launch\n%s", airError)
+	err = air.Start()
+	if err != nil {
+		messages.Fatalf("air watcher failed to launch\n%s", err)
 	}
+
 	messages.Success("air watcher launched")
 
 	var group sync.WaitGroup
@@ -35,8 +36,9 @@ func Dev() {
 	go func() { PackageWatch() }()
 
 	group.Wait()
-	tidyWaitError := air.Wait()
-	if tidyWaitError != nil {
-		messages.Fatal(tidyWaitError)
+
+	err = air.Wait()
+	if err != nil {
+		messages.Fatal(err)
 	}
 }

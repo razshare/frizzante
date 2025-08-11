@@ -9,30 +9,30 @@ import (
 )
 
 func Touch() {
-	touch := func(fileName string) {
-		directoryName := filepath.Dir(fileName)
+	touch := func(n string) {
+		dn := filepath.Dir(n)
 
-		if !files.IsDirectory(directoryName) {
-			mkdirAllError := os.MkdirAll(directoryName, os.ModePerm)
-			if mkdirAllError != nil {
-				messages.Fatal(mkdirAllError)
+		if !files.IsDirectory(dn) {
+			err := os.MkdirAll(dn, os.ModePerm)
+			if err != nil {
+				messages.Fatal(err)
 			}
 		}
 
-		file, openError := os.OpenFile(fileName, os.O_RDONLY|os.O_CREATE, 0666)
-		if openError != nil {
-			messages.Fatal(openError)
+		file, err := os.OpenFile(n, os.O_RDONLY|os.O_CREATE, 0666)
+		if err != nil {
+			messages.Fatal(err)
 		}
 
-		closeError := file.Close()
-		if closeError != nil {
-			messages.Fatal(closeError)
+		err = file.Close()
+		if err != nil {
+			messages.Fatal(err)
 		}
 	}
 
-	mkdirError := os.MkdirAll(filepath.Join(*flags.App, "dist"), os.ModePerm)
-	if mkdirError != nil {
-		messages.Fatal(mkdirError)
+	err := os.MkdirAll(filepath.Join(*flags.App, "dist"), os.ModePerm)
+	if err != nil {
+		messages.Fatal(err)
 	}
 
 	touch(filepath.Join(*flags.App, "dist", "server.js"))

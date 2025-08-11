@@ -29,9 +29,9 @@ func Build() {
 	build.Stderr = os.Stderr
 	build.Stdout = os.Stdout
 	build.Stdin = os.Stdin
-	buildError := build.Run()
-	if buildError != nil {
-		messages.Fatal(buildError)
+	err := build.Run()
+	if err != nil {
+		messages.Fatal(err)
 	}
 	messages.Success("project built into ", filepath.Join(".gen", "bin", "app"))
 }

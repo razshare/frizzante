@@ -31,9 +31,9 @@ func Menu(efs embed.FS) {
 		"Configure",
 	}
 
-	logo, readError := efs.ReadFile("clilogo.txt")
-	if readError != nil {
-		messages.Fatal(readError)
+	logo, err := efs.ReadFile("clilogo.txt")
+	if err != nil {
+		messages.Fatal(err)
 	}
 	fmt.Println(config.Styles.BigText.Render(string(logo)))
 

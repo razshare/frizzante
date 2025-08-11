@@ -6,10 +6,10 @@ import (
 )
 
 func Welcome() {
-	usingDocker := os.Getenv("FRIZZANTE_USING_DOCKER")
+	dock := os.Getenv("FRIZZANTE_USING_DOCKER")
 	end := make(chan string)
 
-	if usingDocker != "" {
+	if dock != "" {
 		println("")
 		println("🐙 You're running Frizzante in Docker!")
 		println("")

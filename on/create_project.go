@@ -8,28 +8,28 @@ import (
 )
 
 func CreateProject(prj string) {
-	downloadError := files.DownloadFile("https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip", prj+".zip")
-	if downloadError != nil {
-		messages.Fatal(downloadError)
+	err := files.DownloadFile("https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip", prj+".zip")
+	if err != nil {
+		messages.Fatal(err)
 	}
 
-	unzipError := files.UnzipFile(prj+".zip", prj+".tmp")
-	if unzipError != nil {
-		messages.Fatal(unzipError)
+	err = files.UnzipFile(prj+".zip", prj+".tmp")
+	if err != nil {
+		messages.Fatal(err)
 	}
 
-	removeError := os.Remove(prj + ".zip")
-	if removeError != nil {
-		messages.Fatal(removeError)
+	err = os.Remove(prj + ".zip")
+	if err != nil {
+		messages.Fatal(err)
 	}
 
-	renameError := os.Rename(filepath.Join(prj+".tmp", "frizzante-starter-main"), prj)
-	if renameError != nil {
-		messages.Fatal(renameError)
+	err = os.Rename(filepath.Join(prj+".tmp", "frizzante-starter-main"), prj)
+	if err != nil {
+		messages.Fatal(err)
 	}
 
-	removeAllError := os.RemoveAll(filepath.Join(prj + ".tmp"))
-	if removeAllError != nil {
-		messages.Fatal(removeAllError)
+	err = os.RemoveAll(filepath.Join(prj + ".tmp"))
+	if err != nil {
+		messages.Fatal(err)
 	}
 }
