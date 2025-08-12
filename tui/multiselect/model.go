@@ -71,7 +71,7 @@ func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (model Model) View() string {
 	var sbguide strings.Builder
 	sbguide.WriteString("(")
-	sbguide.WriteString("↑/↓ = navigate, [Enter] = select")
+	sbguide.WriteString("↑/↓ = navigate, [Space] = select, [Enter] = continue")
 	if model.Search.Active {
 		sbguide.WriteString(", [Esc] = clear")
 	}
