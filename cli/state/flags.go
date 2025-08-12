@@ -1,10 +1,11 @@
-package flags
+package state
 
 import (
 	flag "github.com/spf13/pflag"
 	"path/filepath"
 )
 
+var App = flag.StringP("app", "a", "app", "sets the location of the app directory")
 var Help = flag.BoolP("help", "h", false, "shows this help document")
 var Version = flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
 var CreateProject = flag.StringP("create-project", "c", "", "creates a frizzante project")
@@ -28,4 +29,3 @@ var Air = flag.StringP("air", "", filepath.Join(".gen", "air", "air"), "sets the
 var Bun = flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"), "sets the bun binary")
 var Sqlc = flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"), "sets the sqlc binary")
 var Welcome = flag.BoolP("welcome", "", false, "shows a welcome message")
-var App = flag.StringP("app", "", "app", "sets the location of the app directory")

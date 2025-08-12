@@ -3,7 +3,7 @@ package on
 import (
 	"embed"
 	"fmt"
-	"github.com/razshare/frizzante/cli/flags"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/input"
 	"github.com/razshare/frizzante/tui/messages"
@@ -47,13 +47,13 @@ func Menu(efs embed.FS) {
 			Touches the app/dist directory with placeholder files. This can be useful to silence //go:embed errors.
 		`,
 		`Clean
-			Deletes removes Go temporary objects, deletes app/dist, app/modules, .gen/tmp and .vite.
+			Deletes Go temporary objects, app/dist, app/modules, .gen/tmp and .vite.
 		`,
 		`Dev
 			Runs Air and Vite development server in parallel.
 		`,
 		`Build
-			Build the whole project into one single binary located at .gen/bin/app.
+			Builds the whole project into one single binary located at .gen/bin/app.
 		`,
 		`Configure
 			Generates Air and Bun binaries then it installs Go and JavaScript dependencies.
@@ -69,97 +69,97 @@ func Menu(efs embed.FS) {
 	result := singleselect.Send(options, "Pick an option")
 
 	if result == "Help" {
-		*flags.Help = true
+		*state.Help = true
 		Start(efs)
 		return
 	}
 
 	if result == "Version" {
-		*flags.Version = true
+		*state.Version = true
 		Start(efs)
 		return
 	}
 
 	if result == "Create Project" {
-		*flags.CreateProject = input.Send("Give the project a name")
+		*state.CreateProject = input.Send("Give the project a name")
 		Start(efs)
 		return
 	}
 
 	if result == "Generate" {
-		*flags.Generate = ":pick"
+		*state.Generate = ":pick"
 		Start(efs)
 		return
 	}
 
 	if result == "Test" {
-		*flags.Test = true
+		*state.Test = true
 		Start(efs)
 		return
 	}
 
 	if result == "Package" {
-		*flags.Package = true
+		*state.Package = true
 		Start(efs)
 		return
 	}
 
 	if result == "Package Watch" {
-		*flags.PackageWatch = true
+		*state.PackageWatch = true
 		Start(efs)
 		return
 	}
 
 	if result == "Check" {
-		*flags.Check = true
+		*state.Check = true
 		Start(efs)
 		return
 	}
 
 	if result == "Update" {
-		*flags.Update = true
+		*state.Update = true
 		Start(efs)
 		return
 	}
 
 	if result == "Install" {
-		*flags.Install = true
+		*state.Install = true
 		Start(efs)
 		return
 	}
 
 	if result == "Format" {
-		*flags.Format = true
+		*state.Format = true
 		Start(efs)
 		return
 	}
 
 	if result == "Touch" {
-		*flags.Touch = true
+		*state.Touch = true
 		Start(efs)
 		return
 	}
 
 	if result == "Clean" {
-		*flags.Clean = true
+		*state.Clean = true
 		Start(efs)
 		return
 	}
 
 	if result == "Dev" {
-		*flags.Dev = true
+		*state.Dev = true
 		Start(efs)
 		return
 	}
 
 	if result == "Build" {
-		*flags.Build = true
+		*state.Build = true
 		Start(efs)
 		return
 	}
 
 	if result == "Configure" {
-		*flags.Configure = true
+		*state.Configure = true
 		Start(efs)
 		return
 	}

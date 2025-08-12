@@ -1,8 +1,8 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli/flags"
 	"github.com/razshare/frizzante/cli/path"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
@@ -21,8 +21,8 @@ func Format() {
 		messages.Fatal(err)
 	}
 
-	pretty := exec.Command(path.Bun(*flags.App), "x", "prettier", "--write", ".")
-	pretty.Dir = *flags.App
+	pretty := exec.Command(path.Bun(*state.App), "x", "prettier", "--write", ".")
+	pretty.Dir = *state.App
 	pretty.Env = append(os.Environ())
 	pretty.Stderr = os.Stderr
 	pretty.Stdout = os.Stdout

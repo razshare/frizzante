@@ -1,7 +1,7 @@
 package platform
 
 import (
-	"github.com/razshare/frizzante/cli/flags"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/singleselect"
 	"strings"
@@ -10,8 +10,8 @@ import (
 func Find() Type {
 	var p string
 
-	if *flags.Platform != "" {
-		p = *flags.Platform
+	if *state.Platform != "" {
+		p = *state.Platform
 	} else {
 		p = singleselect.Send(
 			[]string{
@@ -25,7 +25,7 @@ func Find() Type {
 			"Pick a platform",
 		)
 
-		*flags.Platform = p
+		*state.Platform = p
 	}
 
 	if strings.ToLower(p) == "linux/amd64" {

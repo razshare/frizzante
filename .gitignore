@@ -53,7 +53,9 @@ go.work.sum
 *.key
 
 # Air
-tmp
+/tmp
 
 # Frizzante
 /.gen
+/app
+/lib

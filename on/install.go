@@ -1,8 +1,8 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli/flags"
 	"github.com/razshare/frizzante/cli/path"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
 	"os"
@@ -15,6 +15,7 @@ func Install() {
 	s := spinner.New("installing go dependencies")
 	err := spinner.Start(s)
 	if err != nil {
+		spinner.Stop(s)
 		messages.Fatal(err)
 		return
 	}
@@ -30,13 +31,13 @@ func Install() {
 	}
 	spinner.Stop(s)
 
-	install := exec.Command(path.Bun(*flags.App), "install")
-	install.Dir = *flags.App
-	install.Env = append(os.Environ())
-	install.Stderr = os.Stderr
-	install.Stdout = os.Stdout
-	install.Stdin = os.Stdin
-	err = install.Run()
+	ins := exec.Command(path.Bun(*state.App), "install")
+	ins.Dir = *state.App
+	ins.Env = append(os.Environ())
+	ins.Stderr = os.Stderr
+	ins.Stdout = os.Stdout
+	ins.Stdin = os.Stdin
+	err = ins.Run()
 	if err != nil {
 		messages.Fatal(err)
 	}

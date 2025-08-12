@@ -2,7 +2,7 @@ package codegen
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/cli/flags"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
@@ -11,7 +11,7 @@ import (
 )
 
 func Core(efs embed.FS) {
-	to := filepath.Join(*flags.App, "frizzante", "core")
+	to := filepath.Join(*state.App, "frizzante", "core")
 
 	if files.IsDirectory(to) {
 		if confirm.Send(true, "feature `Core` already exists in this project. Overwrite?") {

@@ -1,8 +1,8 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli/flags"
 	"github.com/razshare/frizzante/cli/path"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
@@ -16,13 +16,13 @@ func Build() {
 	build := exec.Command(path.Go("."), "build", "-o="+filepath.Join(".gen", "bin", "app"), ".")
 	build.Env = os.Environ()
 
-	if strings.ToLower(*flags.Platform) == "linux/amd64" {
+	if strings.ToLower(*state.Platform) == "linux/amd64" {
 		build.Env = append(build.Env, "GOOS=linux", "GOARCH=amd64")
-	} else if strings.ToLower(*flags.Platform) == "linux/arm64" {
+	} else if strings.ToLower(*state.Platform) == "linux/arm64" {
 		build.Env = append(build.Env, "GOOS=linux", "GOARCH=arm64")
-	} else if strings.ToLower(*flags.Platform) == "linux/arm64" {
+	} else if strings.ToLower(*state.Platform) == "linux/arm64" {
 		build.Env = append(build.Env, "GOOS=darwin", "GOARCH=amd64")
-	} else if strings.ToLower(*flags.Platform) == "linux/arm64" {
+	} else if strings.ToLower(*state.Platform) == "linux/arm64" {
 		build.Env = append(build.Env, "GOOS=darwin", "GOARCH=arm64")
 	}
 

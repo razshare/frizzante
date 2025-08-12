@@ -1,3 +1,3 @@
-package cli
+package state
 
 var Parsed bool

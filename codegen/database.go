@@ -2,8 +2,8 @@ package codegen
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/cli/flags"
 	"github.com/razshare/frizzante/cli/path"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/singleselect"
@@ -82,7 +82,7 @@ func Database(efs embed.FS) {
 		spinner.Stop(s)
 		messages.Success("your sqlite database is ready")
 
-		if strings.Contains(strings.ToLower(*flags.Generate), "queries") &&
+		if strings.Contains(strings.ToLower(*state.Generate), "queries") &&
 			confirm.Send(true, "would you like to also generate your queries?") {
 			Queries(efs)
 		}

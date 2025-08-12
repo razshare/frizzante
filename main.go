@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/on"
 )
 
@@ -16,5 +17,6 @@ import (
 var efs embed.FS
 
 func main() {
+	*state.Install = true
 	on.Start(efs)
 }

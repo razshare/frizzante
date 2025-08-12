@@ -1,7 +1,7 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli/flags"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
@@ -30,11 +30,11 @@ func Touch() {
 		}
 	}
 
-	err := os.MkdirAll(filepath.Join(*flags.App, "dist"), os.ModePerm)
+	err := os.MkdirAll(filepath.Join(*state.App, "dist"), os.ModePerm)
 	if err != nil {
 		messages.Fatal(err)
 	}
 
-	touch(filepath.Join(*flags.App, "dist", "server.js"))
-	touch(filepath.Join(*flags.App, "dist", "client", "index.html"))
+	touch(filepath.Join(*state.App, "dist", "server.js"))
+	touch(filepath.Join(*state.App, "dist", "client", "index.html"))
 }

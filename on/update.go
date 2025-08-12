@@ -1,8 +1,8 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli/flags"
 	"github.com/razshare/frizzante/cli/path"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
 	"os"
@@ -29,8 +29,8 @@ func Update() {
 	}
 	spinner.Stop(s)
 
-	pretty := exec.Command(path.Bun(*flags.App), "update")
-	pretty.Dir = *flags.App
+	pretty := exec.Command(path.Bun(*state.App), "update")
+	pretty.Dir = *state.App
 	pretty.Env = append(os.Environ())
 	pretty.Stderr = os.Stderr
 	pretty.Stdout = os.Stdout

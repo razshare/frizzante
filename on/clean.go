@@ -1,8 +1,8 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli/flags"
 	"github.com/razshare/frizzante/cli/path"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
@@ -20,12 +20,12 @@ func Clean() {
 		messages.Fatal(err)
 	}
 
-	err = os.RemoveAll(filepath.Join(*flags.App, "dist"))
+	err = os.RemoveAll(filepath.Join(*state.App, "dist"))
 	if err != nil {
 		messages.Fatal(err)
 	}
 
-	err = os.RemoveAll(filepath.Join(*flags.App, "node_modules"))
+	err = os.RemoveAll(filepath.Join(*state.App, "node_modules"))
 	if err != nil {
 		messages.Fatal(err)
 	}

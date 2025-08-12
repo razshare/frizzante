@@ -2,7 +2,7 @@ package path
 
 import (
 	"github.com/razshare/frizzante/cli/extension"
-	"github.com/razshare/frizzante/cli/flags"
+	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"path/filepath"
@@ -12,8 +12,8 @@ import (
 func Sqlc(base string) string {
 	var bin string
 
-	if *flags.Sqlc != "" {
-		bin = *flags.Sqlc
+	if *state.Sqlc != "" {
+		bin = *state.Sqlc
 	} else {
 		bin = filepath.Join(".gen", "sqlc", "sqlc")
 	}
