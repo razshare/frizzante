@@ -25,7 +25,7 @@ func Send(opts []string, msg string) []string {
 				if trm == "" {
 					continue
 				}
-				sb.WriteString(trm)
+				sb.WriteString(trm + " ")
 			}
 			dsc[i] = sb.String()
 			sb.Reset()

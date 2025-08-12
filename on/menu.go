@@ -23,9 +23,7 @@ func Menu(efs embed.FS) {
 			Shows the version number of this binary.
 		`,
 		`Create Project
-			Creates a new Frizzante project.
-			Once done, change directory into the project and run
-			frizzante --configure or make configure.
+			Creates a new Frizzante project. Once done, change directory into the project and run frizzante --configure or make configure.
 		`,
 		`Generate
 			Generates code and resources. Select for more details.
@@ -46,8 +44,7 @@ func Menu(efs embed.FS) {
 			Formats Go, JavaScript and Svelte code.
 		`,
 		`Touch
-			Touches the app/dist directory with placeholder files.
-			This can be useful to silence //go:embed errors.
+			Touches the app/dist directory with placeholder files. This can be useful to silence //go:embed errors.
 		`,
 		`Clean
 			Deletes removes Go temporary objects, deletes app/dist, app/modules, .gen/tmp and .vite.
