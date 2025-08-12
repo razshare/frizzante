@@ -7,17 +7,44 @@ import (
 	"github.com/razshare/frizzante/tui/program"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/viewport"
+	"strings"
 )
 
-func Send(options []string, prompt string) []string {
+func Send(opts []string, msg string) []string {
+	var sb strings.Builder
+	c := len(opts)
+	chs := make([]string, c)
+	dsc := make([]string, c)
+
+	for i, option := range opts {
+		p := strings.SplitN(strings.TrimSpace(option), "\n", 2)
+
+		if len(p) > 1 {
+			for _, l := range strings.Split(p[1], "\n") {
+				trm := strings.TrimSpace(l)
+				if trm == "" {
+					continue
+				}
+				sb.WriteString(trm)
+			}
+			dsc[i] = sb.String()
+			sb.Reset()
+		} else {
+			dsc[i] = ""
+		}
+
+		chs[i] = p[0]
+	}
+
 	// Initialize the search input
 	searchInput := textinput.New()
 	result, err := program.Run(&Model{
 		Search: &search.Search{
-			Active:   false,
-			Choices:  options,
-			Filtered: options,
-			Input:    searchInput,
+			Active:       false,
+			Choices:      chs,
+			Filtered:     chs,
+			Descriptions: dsc,
+			Input:        searchInput,
 		},
 		Viewport: &viewport.Viewport{
 			Visible: 6,
@@ -25,7 +52,7 @@ func Send(options []string, prompt string) []string {
 			Cursor:  0,
 		},
 		Selected: make(map[int]bool),
-		Prompt:   prompt,
+		Prompt:   msg,
 	})
 
 	if err != nil {
@@ -42,6 +69,6 @@ func Send(options []string, prompt string) []string {
 	return selections
 }
 
-func Sendf(options []string, format string, vars ...any) []string {
-	return Sendf(options, fmt.Sprintf(format, vars...))
+func Sendf(opts []string, format string, vars ...any) []string {
+	return Sendf(opts, fmt.Sprintf(format, vars...))
 }

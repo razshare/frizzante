@@ -123,10 +123,15 @@ func (model Model) View() string {
 		sbloc.WriteString(model.Search.Filtered[i])
 
 		if model.Viewport.Cursor == i {
-			sb.WriteString(config.Styles.Selected.Render(sbloc.String()) + "\n")
+			sb.WriteString(config.Styles.Selected.Render(sbloc.String()))
+			if model.Search.Descriptions[i] != "" {
+				sb.WriteString("\n")
+				sb.WriteString(config.Styles.Selected.Width(50).PaddingLeft(5).Render(model.Search.Descriptions[i]))
+			}
 		} else {
-			sb.WriteString(config.Styles.Item.Render(sbloc.String()) + "\n")
+			sb.WriteString(config.Styles.Item.Render(sbloc.String()))
 		}
+		sb.WriteString("\n")
 	}
 
 	if height < choices {

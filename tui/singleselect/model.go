@@ -101,6 +101,10 @@ func (model *Model) View() string {
 	for i := model.Viewport.Start; i < height; i++ {
 		if i == model.Viewport.Cursor {
 			sb.WriteString(config.Styles.Selected.Render("▶ " + model.Search.Filtered[i]))
+			if model.Search.Descriptions[i] != "" {
+				sb.WriteString("\n")
+				sb.WriteString(config.Styles.Selected.Width(50).PaddingLeft(5).Render(model.Search.Descriptions[i]))
+			}
 		} else {
 			sb.WriteString(config.Styles.Item.Render("  " + model.Search.Filtered[i]))
 		}

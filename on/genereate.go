@@ -12,16 +12,32 @@ func Generate(efs embed.FS, n string) {
 	if n == ":pick" {
 		feats := multiselect.Send(
 			[]string{
-				"Core",
-				"Forms",
-				"Links",
-				"Air",
-				"Bun",
-				"Session",
-				"Database",
-				"Queries",
+				`Core
+					Generates router and view swapping tools.
+				`,
+				`Forms
+					Generates a <Form> component that allows management of pending requests and errors.
+				`,
+				`Links
+					Generates a <Link> component that allows management of pending requests and errors.
+				`,
+				`Air
+					Generates Air binaries, a ☁️ Live reload tool for Go apps.
+				`,
+				`Bun
+					Generates Bun binaries, a fast JavaScript all-in-one toolkit.
+				`,
+				`Session
+					Generates functions for managing user session state.
+				`,
+				`Database
+					Generates a full database setup and defaults for querying it using SQLC.
+				`,
+				`Queries
+					Generates Go code from your ./lib/database/queries.sql file using SQLC.
+				`,
 			},
-			"Pick a feature to add",
+			"What to generate",
 		)
 
 		for _, feat := range feats {
