@@ -1,4 +1,4 @@
-package globals
+package container
 
 import _ "embed"
 

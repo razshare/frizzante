@@ -1,11 +1,10 @@
-package app
+package container
 
 import (
 	"errors"
 	"fmt"
 	"github.com/dop251/goja"
 	"github.com/evanw/esbuild/pkg/api"
-	"github.com/razshare/frizzante/globals"
 	"github.com/razshare/frizzante/js"
 	"os"
 	"strings"
@@ -34,7 +33,7 @@ func RunEntry(c *Config, p map[string]any) (string, string, error) {
 			return "", "", berr
 		}
 
-		prg, cerr = goja.Compile(c.Script, fmt.Sprintf(globals.RenderScriptFormat, src), false)
+		prg, cerr = goja.Compile(c.Script, fmt.Sprintf(RenderScriptFormat, src), false)
 		if cerr != nil {
 			return "", "", cerr
 		}

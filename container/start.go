@@ -1,39 +1,34 @@
-package app
+package container
 
 import (
-	"github.com/razshare/frizzante/server"
 	"strings"
 	"sync"
 )
 
-// Start starts the app and its server.
+// Start starts ssr producers and the server.
 func Start(c *Config) {
 	script := ProduceScript(
-		c.Server.Efs,
+		c.Efs,
 		strings.ReplaceAll(c.Root, "\\", "/"),
 		strings.ReplaceAll(c.Script, "\\", "/"),
-		c.Server.InfoLog,
-		c.Server.ErrorLog,
+		c.ErrorLog,
 	)
 
 	document := ProduceDocument(
-		c.Server.Efs,
+		c.Efs,
 		strings.ReplaceAll(c.Document, "\\", "/"),
-		c.Server.InfoLog,
-		c.Server.ErrorLog,
+		c.ErrorLog,
 	)
 
 	runtime := ProduceRuntime(
 		c.Parallels,
-		c.Server.InfoLog,
 	)
 
 	program := ProduceProgram(
 		c.Script,
 		script.Value,
 		c.Parallels,
-		c.Server.InfoLog,
-		c.Server.ErrorLog,
+		c.ErrorLog,
 	)
 
 	stop := make(chan any, 1)
@@ -54,7 +49,4 @@ func Start(c *Config) {
 	c.Channels.Program = program.Value
 	c.Channels.Runtime = runtime.Value
 	c.Channels.Stop = stop
-
-	defer func() { stop <- 0 }()
-	server.Start(c.Server)
 }

@@ -1,8 +1,10 @@
-package app
+package container
 
 import (
+	"embed"
 	"github.com/dop251/goja"
 	"github.com/razshare/frizzante/server"
+	"log"
 	"sync"
 )
 
@@ -13,7 +15,10 @@ type Config struct {
 	Script      string
 	Root        string
 	Channels    Channels
-	Server      *server.Config
+	Efs         embed.FS
+	InfoLog     *log.Logger
+	ErrorLog    *log.Logger
+	Render      server.Render
 }
 
 type Channels struct {
@@ -22,10 +27,6 @@ type Channels struct {
 	Program  chan *goja.Program
 	Runtime  chan *goja.Runtime
 	Stop     chan any
-}
-
-type App struct {
-	Config Config
 }
 
 type Script struct {

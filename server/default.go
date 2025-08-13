@@ -1,7 +1,6 @@
 package server
 
 import (
-	"embed"
 	"github.com/razshare/frizzante/globals"
 	"log"
 	"net/http"
@@ -9,12 +8,11 @@ import (
 	"time"
 )
 
-// NewConfig creates a new server configuration.
-func NewConfig(efs embed.FS) *Config {
+// Default creates a default server configuration.
+func Default() *Config {
 	ilog := log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
 	elog := log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
 	return &Config{
-		Efs:        efs,
 		InfoLog:    ilog,
 		ErrorLog:   elog,
 		SecureAddr: "0.0.0.0:8383",

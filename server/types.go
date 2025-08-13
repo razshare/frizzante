@@ -29,3 +29,5 @@ type Config struct {
 	Certificate string
 	Key         string
 }
+
+type Render func(v view.View) (string, error)
