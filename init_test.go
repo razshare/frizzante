@@ -6,7 +6,7 @@ import (
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/route"
 	"github.com/razshare/frizzante/send"
-	app2 "github.com/razshare/frizzante/svelte/container/server"
+	"github.com/razshare/frizzante/svelte/container/server"
 	"github.com/razshare/frizzante/view"
 )
 
@@ -25,12 +25,12 @@ func init() {
 	*state.App = "template/app"
 
 	// Server.
-	a := app2.Default(tefs)
-	a.Container.Document = "template/app/dist/client/index.html"
-	a.Container.Script = "template/app/dist/server.js"
-	a.Container.Root = "template/app"
-	a.Server.PublicRoot = "template/app/dist/client"
-	a.Server.Routes = []route.Route{
+	s := server.Default(tefs)
+	s.Container.Document = "template/app/dist/client/index.html"
+	s.Container.Script = "template/app/dist/server.js"
+	s.Container.Root = "template/app"
+	s.PublicRoot = "template/app/dist/client"
+	s.Routes = []route.Route{
 		{Pattern: "GET /TestRoutes", Handler: func(c *client.Client) {
 			send.Message(c, "hello")
 		}},
@@ -58,7 +58,7 @@ func init() {
 		}},
 	}
 
-	go app2.Start(a)
+	go server.Start(s)
 
 	ready <- 0
 }
