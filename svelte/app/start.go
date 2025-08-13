@@ -1,38 +1,39 @@
-package container
+package app
 
 import (
+	"github.com/razshare/frizzante/server"
 	"strings"
 	"sync"
 )
 
-// Start starts the container.
-func Start(c *Container) {
+// Start starts the app and its server.
+func Start(c *Config) {
 	script := ProduceScript(
-		c.Config.Efs,
-		strings.ReplaceAll(c.Config.Root, "\\", "/"),
-		strings.ReplaceAll(c.Config.Script, "\\", "/"),
-		c.Config.InfoLog,
-		c.Config.ErrorLog,
+		c.Server.Efs,
+		strings.ReplaceAll(c.Root, "\\", "/"),
+		strings.ReplaceAll(c.Script, "\\", "/"),
+		c.Server.InfoLog,
+		c.Server.ErrorLog,
 	)
 
 	document := ProduceDocument(
-		c.Config.Efs,
-		strings.ReplaceAll(c.Config.Document, "\\", "/"),
-		c.Config.InfoLog,
-		c.Config.ErrorLog,
+		c.Server.Efs,
+		strings.ReplaceAll(c.Document, "\\", "/"),
+		c.Server.InfoLog,
+		c.Server.ErrorLog,
 	)
 
 	runtime := ProduceRuntime(
-		c.Config.Parallels,
-		c.Config.InfoLog,
+		c.Parallels,
+		c.Server.InfoLog,
 	)
 
 	program := ProduceProgram(
-		c.Config.Script,
+		c.Script,
 		script.Value,
-		c.Config.Parallels,
-		c.Config.InfoLog,
-		c.Config.ErrorLog,
+		c.Parallels,
+		c.Server.InfoLog,
+		c.Server.ErrorLog,
 	)
 
 	stop := make(chan any, 1)
@@ -53,4 +54,7 @@ func Start(c *Container) {
 	c.Channels.Program = program.Value
 	c.Channels.Runtime = runtime.Value
 	c.Channels.Stop = stop
+
+	defer func() { stop <- 0 }()
+	server.Start(c.Server)
 }

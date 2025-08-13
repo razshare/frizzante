@@ -1,4 +1,4 @@
-package container
+package app
 
 import (
 	"errors"
@@ -11,36 +11,38 @@ import (
 	"strings"
 )
 
-// Render renders the application with the given properties.
-func Render(a *Container, p map[string]any) (string, string, error) {
+// RunEntry runs the container entry point with the given properties.
+//
+// The container's entry point is usually Svelte's render function.
+func RunEntry(c *Config, p map[string]any) (string, string, error) {
 	var rt *goja.Runtime
 	var prg *goja.Program
 	var cerr error
 
-	if a.Config.Development {
+	if c.Development {
 		rt = goja.New()
 
-		nfix := strings.ReplaceAll(a.Config.Script, "\\", "/")
+		nfix := strings.ReplaceAll(c.Script, "\\", "/")
 
 		data, rer := os.ReadFile(nfix)
 		if rer != nil {
 			return "", "", rer
 		}
 
-		src, berr := js.Bundle(a.Config.Root, api.FormatCommonJS, string(data))
+		src, berr := js.Bundle(c.Root, api.FormatCommonJS, string(data))
 		if berr != nil {
 			return "", "", berr
 		}
 
-		prg, cerr = goja.Compile(a.Config.Script, fmt.Sprintf(globals.RenderScriptFormat, src), false)
+		prg, cerr = goja.Compile(c.Script, fmt.Sprintf(globals.RenderScriptFormat, src), false)
 		if cerr != nil {
 			return "", "", cerr
 		}
 	} else {
-		rt = <-a.Channels.Runtime
-		prg = <-a.Channels.Program
-		defer func() { go func() { a.Channels.Runtime <- rt }() }()
-		defer func() { go func() { a.Channels.Program <- prg }() }()
+		rt = <-c.Channels.Runtime
+		prg = <-c.Channels.Program
+		defer func() { go func() { c.Channels.Runtime <- rt }() }()
+		defer func() { go func() { c.Channels.Program <- prg }() }()
 	}
 
 	pres, perr := rt.RunProgram(prg)

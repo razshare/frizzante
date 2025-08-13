@@ -21,39 +21,39 @@ func EventContent(c *client.Client, d []byte) {
 
 	_, writeError := c.Writer.Write([]byte(header))
 	if writeError != nil {
-		c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+		c.Scope.ErrorLog.Println(writeError, stack.Trace())
 		return
 	}
 
 	for _, line := range bytes.Split(d, []byte("\r\n")) {
 		_, writeError = c.Writer.Write([]byte("data: "))
 		if writeError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+			c.Scope.ErrorLog.Println(writeError, stack.Trace())
 			return
 		}
 
 		_, writeError = c.Writer.Write(line)
 		if writeError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+			c.Scope.ErrorLog.Println(writeError, stack.Trace())
 			return
 		}
 
 		_, writeError = c.Writer.Write([]byte("\r\n"))
 		if writeError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+			c.Scope.ErrorLog.Println(writeError, stack.Trace())
 			return
 		}
 	}
 
 	_, writeError = c.Writer.Write([]byte("\r\n"))
 	if writeError != nil {
-		c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+		c.Scope.ErrorLog.Println(writeError, stack.Trace())
 		return
 	}
 
 	flusher, flushedOk := c.Writer.(http.Flusher)
 	if !flushedOk {
-		c.Scope.Container.Config.ErrorLog.Println(errors.New("could not retrieve flusher"), stack.Trace())
+		c.Scope.ErrorLog.Println(errors.New("could not retrieve flusher"), stack.Trace())
 		return
 	}
 

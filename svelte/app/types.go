@@ -1,22 +1,19 @@
-package container
+package app
 
 import (
-	"embed"
 	"github.com/dop251/goja"
-	"log"
+	"github.com/razshare/frizzante/server"
 	"sync"
 )
 
 type Config struct {
-	PublicRoot  string
 	Development bool
 	Parallels   uint32
 	Document    string
 	Script      string
 	Root        string
-	ErrorLog    *log.Logger
-	InfoLog     *log.Logger
-	Efs         embed.FS
+	Channels    Channels
+	Server      *server.Config
 }
 
 type Channels struct {
@@ -27,9 +24,8 @@ type Channels struct {
 	Stop     chan any
 }
 
-type Container struct {
-	Channels Channels
-	Config   Config
+type App struct {
+	Config Config
 }
 
 type Script struct {

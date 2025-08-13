@@ -17,7 +17,7 @@ func Json[T any](c *client.Client) T {
 	if c.Scope.WebSocket != nil {
 		jsonError := c.Scope.WebSocket.ReadJSON(&v)
 		if jsonError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(jsonError, stack.Trace())
+			c.Scope.ErrorLog.Println(jsonError, stack.Trace())
 			return v
 		}
 		return v
@@ -25,13 +25,13 @@ func Json[T any](c *client.Client) T {
 
 	data, readError := io.ReadAll(c.Request.Body)
 	if readError != nil {
-		c.Scope.Container.Config.ErrorLog.Println(readError, stack.Trace())
+		c.Scope.ErrorLog.Println(readError, stack.Trace())
 		return v
 	}
 
 	jsonError := json.Unmarshal(data, &v)
 	if jsonError != nil {
-		c.Scope.Container.Config.ErrorLog.Println(jsonError, stack.Trace())
+		c.Scope.ErrorLog.Println(jsonError, stack.Trace())
 		return v
 	}
 

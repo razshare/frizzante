@@ -18,7 +18,7 @@ import (
 func Json(c *client.Client, v any) {
 	data, jsonError := json.Marshal(v)
 	if jsonError != nil {
-		c.Scope.Container.Config.ErrorLog.Println(jsonError, stack.Trace())
+		c.Scope.ErrorLog.Println(jsonError, stack.Trace())
 		return
 	}
 

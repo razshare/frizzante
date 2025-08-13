@@ -6,14 +6,14 @@ import (
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/route"
 	"github.com/razshare/frizzante/send"
-	"github.com/razshare/frizzante/server"
+	"github.com/razshare/frizzante/svelte/app"
 	"github.com/razshare/frizzante/view"
 )
 
 //go:embed .github
 //go:embed makefile
 //go:embed template/app/dist
-var iefs embed.FS
+var tefs embed.FS
 var port = 8080
 var ready = make(chan any, 1)
 
@@ -24,15 +24,13 @@ func init() {
 	*state.Bun = "bun"
 	*state.App = "template/app"
 
-	// Server.
-	c := server.Default()
-	c.Container.Root = "template/app"
-	c.Container.Script = "template/app/dist/server.js"
-	c.Container.Document = "template/app/dist/client/index.html"
-	c.Container.PublicRoot = "template/app/dist/client"
-	c.Container.Efs = iefs
-
-	c.Routes = []route.Route{
+	// App.
+	a := app.NewConfig(tefs)
+	a.Document = "template/app/dist/client/index.html"
+	a.Script = "template/app/dist/server.js"
+	a.Root = "template/app"
+	a.Server.PublicRoot = "template/app/dist/client"
+	a.Server.Routes = []route.Route{
 		{Pattern: "GET /TestRoutes", Handler: func(c *client.Client) {
 			send.Message(c, "hello")
 		}},
@@ -60,7 +58,7 @@ func init() {
 		}},
 	}
 
-	go server.Start(c)
+	go app.Start(a)
 
 	ready <- 0
 }

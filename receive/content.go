@@ -13,7 +13,7 @@ func Message(c *client.Client) string {
 	if c.Scope.WebSocket != nil {
 		_, data, readError := c.Scope.WebSocket.ReadMessage()
 		if readError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(readError, stack.Trace())
+			c.Scope.ErrorLog.Println(readError, stack.Trace())
 			return ""
 		}
 		return string(data)
@@ -21,7 +21,7 @@ func Message(c *client.Client) string {
 
 	data, readError := io.ReadAll(c.Request.Body)
 	if readError != nil {
-		c.Scope.Container.Config.ErrorLog.Println(readError, stack.Trace())
+		c.Scope.ErrorLog.Println(readError, stack.Trace())
 		return ""
 	}
 	return string(data)

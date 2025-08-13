@@ -31,7 +31,7 @@ func Content(c *client.Client, d []byte) {
 	if c.Scope.WebSocket != nil {
 		writeError := c.Scope.WebSocket.WriteMessage(websocket.TextMessage, d)
 		if writeError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+			c.Scope.ErrorLog.Println(writeError, stack.Trace())
 		}
 		return
 	}
@@ -43,7 +43,7 @@ func Content(c *client.Client, d []byte) {
 
 	_, writeError := c.Writer.Write(d)
 	if writeError != nil {
-		c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+		c.Scope.ErrorLog.Println(writeError, stack.Trace())
 	}
 }
 

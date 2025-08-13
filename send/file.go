@@ -17,32 +17,32 @@ import (
 
 // EmbeddedFileOrElse sends the embedded file requested by the client,
 // or the closest index.html embedded file, or else falls back.
-func EmbeddedFileOrElse(c *client.Client, fs embed.FS, or func()) {
-	fileName := c.Scope.Container.Config.PublicRoot + c.Request.RequestURI
+func EmbeddedFileOrElse(c *client.Client, efs embed.FS, or func()) {
+	fileName := c.Scope.PublicRoot + c.Request.RequestURI
 	fileName = strings.Split(fileName, "?")[0]
 	fileName = strings.Split(fileName, "&")[0]
 
-	if !embeds.IsFile(fs, fileName) || embeds.IsDirectory(fs, fileName) {
+	if !embeds.IsFile(efs, fileName) || embeds.IsDirectory(efs, fileName) {
 		or()
 		return
 	}
 
-	reader, readerInfo, readerError := embeds.NewFileReader(fs, fileName)
+	reader, readerInfo, readerError := embeds.NewFileReader(efs, fileName)
 	if readerError != nil {
-		c.Scope.Container.Config.ErrorLog.Println(readerError, stack.Trace())
+		c.Scope.ErrorLog.Println(readerError, stack.Trace())
 		return
 	}
 
 	if c.Scope.WebSocket != nil {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(readError, stack.Trace())
+			c.Scope.ErrorLog.Println(readError, stack.Trace())
 			return
 		}
 
 		writeError := c.Scope.WebSocket.WriteMessage(websocket.TextMessage, data)
 		if writeError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+			c.Scope.ErrorLog.Println(writeError, stack.Trace())
 			return
 		}
 		return
@@ -51,7 +51,7 @@ func EmbeddedFileOrElse(c *client.Client, fs embed.FS, or func()) {
 	if "" != c.Scope.EventName {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(readError, stack.Trace())
+			c.Scope.ErrorLog.Println(readError, stack.Trace())
 			return
 		}
 
@@ -72,29 +72,29 @@ func EmbeddedFileOrElse(c *client.Client, fs embed.FS, or func()) {
 
 // FileOrElse sends the file requested by the client, or else falls back.
 func FileOrElse(c *client.Client, or func()) {
-	fileName := filepath.Join(c.Scope.Container.Config.PublicRoot, c.Request.RequestURI)
+	fileName := filepath.Join(c.Scope.PublicRoot, c.Request.RequestURI)
 
 	if !files.IsFile(fileName) || files.IsDirectory(fileName) {
-		EmbeddedFileOrElse(c, c.Scope.Container.Config.Efs, or)
+		EmbeddedFileOrElse(c, c.Scope.Efs, or)
 		return
 	}
 
 	reader, readerInfo, readerError := files.NewFileReader(fileName)
 	if readerError != nil {
-		c.Scope.Container.Config.ErrorLog.Println(readerError, stack.Trace())
+		c.Scope.ErrorLog.Println(readerError, stack.Trace())
 		return
 	}
 
 	if c.Scope.WebSocket != nil {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(readError, stack.Trace())
+			c.Scope.ErrorLog.Println(readError, stack.Trace())
 			return
 		}
 
 		writeError := c.Scope.WebSocket.WriteMessage(websocket.TextMessage, data)
 		if writeError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(writeError, stack.Trace())
+			c.Scope.ErrorLog.Println(writeError, stack.Trace())
 			return
 		}
 	}
@@ -102,7 +102,7 @@ func FileOrElse(c *client.Client, or func()) {
 	if "" != c.Scope.EventName {
 		data, readError := io.ReadAll(reader)
 		if readError != nil {
-			c.Scope.Container.Config.ErrorLog.Println(readError, stack.Trace())
+			c.Scope.ErrorLog.Println(readError, stack.Trace())
 			return
 		}
 

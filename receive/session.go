@@ -31,7 +31,7 @@ func SessionId(c *client.Client) string {
 	// Create new session.
 	idObject, idObjectError := uuid.NewV4()
 	if idObjectError != nil {
-		c.Scope.Container.Config.ErrorLog.Println(idObjectError, stack.Trace())
+		c.Scope.ErrorLog.Println(idObjectError, stack.Trace())
 		return ""
 	}
 
