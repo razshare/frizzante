@@ -9,7 +9,7 @@ import (
 )
 
 // Client renders on the client.
-func Client(conf *Config, v view.View) (string, error) {
+func Client(conf *Index, v view.View) (string, error) {
 	id := "svelte-app"
 
 	marshaledProps, marshalError := json.Marshal(map[string]any{

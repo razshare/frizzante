@@ -3,12 +3,12 @@ package container
 import (
 	"embed"
 	"github.com/dop251/goja"
-	"github.com/razshare/frizzante/server"
+	"github.com/razshare/frizzante/view"
 	"log"
 	"sync"
 )
 
-type Config struct {
+type Container struct {
 	Development bool
 	Parallels   uint32
 	Document    string
@@ -16,9 +16,8 @@ type Config struct {
 	Root        string
 	Channels    Channels
 	Efs         embed.FS
-	InfoLog     *log.Logger
 	ErrorLog    *log.Logger
-	Render      server.Render
+	Render      func(v view.View) (string, error)
 }
 
 type Channels struct {

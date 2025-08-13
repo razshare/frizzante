@@ -2,19 +2,18 @@ package index
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/server"
+	"github.com/razshare/frizzante/view"
 	"log"
 )
 
-type Config struct {
+type Index struct {
 	Development bool
 	Document    string
 	Root        string
 	Channels    Channels
 	Efs         embed.FS
-	InfoLog     *log.Logger
 	ErrorLog    *log.Logger
-	Render      server.Render
+	Render      func(v view.View) (string, error)
 }
 
 type Channels struct {

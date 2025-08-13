@@ -10,33 +10,33 @@ import (
 )
 
 // Start starts a server from a configuration.
-func Start(c *Config) {
-	mux := c.Http.Handler.(*http.ServeMux)
-	for _, r := range c.Routes {
+func Start(s *Server) {
+	mux := s.Http.Handler.(*http.ServeMux)
+	for _, r := range s.Routes {
 		mux.HandleFunc(r.Pattern, func(wrt http.ResponseWriter, req *http.Request) {
 			con := &client.Client{
 				Writer:  wrt,
 				Request: req,
 				Scope: client.Scope{
-					Render:     c.Render,
-					ErrorLog:   c.ErrorLog,
-					InfoLog:    c.InfoLog,
-					PublicRoot: c.PublicRoot,
-					Efs:        c.Efs,
+					Render:     s.Render,
+					ErrorLog:   s.ErrorLog,
+					InfoLog:    s.InfoLog,
+					PublicRoot: s.PublicRoot,
+					Efs:        s.Efs,
 					EventId:    1,
 					Status:     200,
 				},
 			}
 
 			for _, tag := range r.Tags {
-				for _, g := range c.Guards {
+				for _, g := range s.Guards {
 					if !slices.Contains(g.Tags, tag) {
 						continue
 					}
 					allow := false
 					g.Handler(con, func() { allow = true })
 					if !allow {
-						c.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", r.Pattern, tag, g.Name)
+						s.InfoLog.Printf("route `%s` tagged with `%s` denied the request because guard `%s` did not pass", r.Pattern, tag, g.Name)
 						return
 					}
 				}
@@ -49,45 +49,45 @@ func Start(c *Config) {
 	var exit bool
 
 	go func() {
-		haddr := strings.Replace(c.Http.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-		c.InfoLog.Printf("server bound to address %s; visit your application at http://%s", c.Http.Addr, haddr)
+		haddr := strings.Replace(s.Http.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+		s.InfoLog.Printf("server bound to address %s; visit your application at http://%s", s.Http.Addr, haddr)
 		if exit {
-			c.InfoLog.Println("cancelling server startup")
+			s.InfoLog.Println("cancelling server startup")
 			return
 		}
-		err := http.ListenAndServe(c.Http.Addr, c.Http.Handler)
+		err := http.ListenAndServe(s.Http.Addr, s.Http.Handler)
 		if err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
-				c.InfoLog.Println("shutting down server")
+				s.InfoLog.Println("shutting down server")
 				return
 			}
-			c.ErrorLog.Println(err)
+			s.ErrorLog.Println(err)
 		}
 	}()
 
 	go func() {
-		if "" != c.Certificate && "" != c.Key {
-			haddr := strings.Replace(c.Http.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-			c.InfoLog.Printf("server bound to address %s; visit your application at https://%s", c.Http.Addr, haddr)
+		if "" != s.Certificate && "" != s.Key {
+			haddr := strings.Replace(s.Http.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+			s.InfoLog.Printf("server bound to address %s; visit your application at https://%s", s.Http.Addr, haddr)
 			if exit {
-				c.InfoLog.Println("cancelling server startup")
+				s.InfoLog.Println("cancelling server startup")
 				return
 			}
-			err := http.ListenAndServeTLS(c.SecureAddr, c.Certificate, c.Key, c.Http.Handler)
+			err := http.ListenAndServeTLS(s.SecureAddr, s.Certificate, s.Key, s.Http.Handler)
 			if err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
-					c.InfoLog.Println("shutting down server")
+					s.InfoLog.Println("shutting down server")
 					return
 				}
-				c.ErrorLog.Println(err)
+				s.ErrorLog.Println(err)
 			}
 		}
 	}()
 
-	<-c.Channels.Stop
+	<-s.Channels.Stop
 	exit = true
 
-	if err := c.Http.Shutdown(context.Background()); err != nil {
-		c.ErrorLog.Println(err)
+	if err := s.Http.Shutdown(context.Background()); err != nil {
+		s.ErrorLog.Println(err)
 	}
 }

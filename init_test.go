@@ -4,10 +4,9 @@ import (
 	"embed"
 	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/client"
-	"github.com/razshare/frizzante/container"
 	"github.com/razshare/frizzante/route"
 	"github.com/razshare/frizzante/send"
-	"github.com/razshare/frizzante/server"
+	app2 "github.com/razshare/frizzante/svelte/container/server"
 	"github.com/razshare/frizzante/view"
 )
 
@@ -25,21 +24,13 @@ func init() {
 	*state.Bun = "bun"
 	*state.App = "template/app"
 
-	// Config.
-	conf := server.Default()
-
-	// Config.
-	cont := container.Default()
-	cont.Document = "template/app/dist/client/index.html"
-	cont.Script = "template/app/dist/server.js"
-	cont.Root = "template/app"
-	cont.Efs = tefs
-
-	// Config config.
-	conf.Efs = tefs
-	conf.Render = cont.Render
-	conf.PublicRoot = "template/app/dist/client"
-	conf.Routes = []route.Route{
+	// Server.
+	a := app2.Default(tefs)
+	a.Container.Document = "template/app/dist/client/index.html"
+	a.Container.Script = "template/app/dist/server.js"
+	a.Container.Root = "template/app"
+	a.Server.PublicRoot = "template/app/dist/client"
+	a.Server.Routes = []route.Route{
 		{Pattern: "GET /TestRoutes", Handler: func(c *client.Client) {
 			send.Message(c, "hello")
 		}},
@@ -67,8 +58,7 @@ func init() {
 		}},
 	}
 
-	go container.Start(cont)
-	go server.Start(conf)
+	go app2.Start(a)
 
 	ready <- 0
 }

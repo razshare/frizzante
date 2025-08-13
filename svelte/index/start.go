@@ -6,7 +6,7 @@ import (
 )
 
 // Start starts csr producers and the server.
-func Start(c *Config) {
+func Start(c *Index) {
 	document := ProduceDocument(
 		c.Efs,
 		strings.ReplaceAll(c.Document, "\\", "/"),

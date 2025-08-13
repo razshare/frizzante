@@ -13,7 +13,7 @@ import (
 // RunEntry runs the container entry point with the given properties.
 //
 // The container's entry point is usually Svelte's render function.
-func RunEntry(c *Config, p map[string]any) (string, string, error) {
+func RunEntry(c *Container, p map[string]any) (string, string, error) {
 	var rt *goja.Runtime
 	var prg *goja.Program
 	var cerr error

@@ -6,7 +6,7 @@ import (
 )
 
 // Start starts ssr producers and the server.
-func Start(c *Config) {
+func Start(c *Container) {
 	script := ProduceScript(
 		c.Efs,
 		strings.ReplaceAll(c.Root, "\\", "/"),

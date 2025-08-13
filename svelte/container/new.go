@@ -1,19 +1,20 @@
 package container
 
 import (
+	"embed"
 	"github.com/razshare/frizzante/view"
 	"log"
 	"os"
 )
 
-// Default creates a new container.
-func Default() (c *Config) {
-	return &Config{
+// New creates a new container.
+func New(efs embed.FS) (c *Container) {
+	return &Container{
+		Efs:         efs,
 		Parallels:   2,
 		Root:        "app",
 		Script:      "app/dist/server.js",
 		Document:    "app/dist/client/index.html",
-		InfoLog:     log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
 		ErrorLog:    log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime),
 		Development: os.Getenv("DEV") == "1",
 		Channels:    Channels{},

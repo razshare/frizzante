@@ -8,11 +8,11 @@ import (
 	"time"
 )
 
-// Default creates a default server configuration.
-func Default() *Config {
+// New creates a new server.
+func New() *Server {
 	ilog := log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
 	elog := log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
-	return &Config{
+	return &Server{
 		InfoLog:    ilog,
 		ErrorLog:   elog,
 		SecureAddr: "0.0.0.0:8383",

@@ -9,10 +9,10 @@ import (
 )
 
 type Scope struct {
+	Render     func(v view.View) (string, error)
 	ErrorLog   *log.Logger
 	InfoLog    *log.Logger
 	WebSocket  *websocket.Conn
-	Render     func(v view.View) (string, error)
 	Efs        embed.FS
 	PublicRoot string
 	SessionId  string

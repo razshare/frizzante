@@ -2,7 +2,6 @@ package server
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/guard"
 	"github.com/razshare/frizzante/route"
 	"github.com/razshare/frizzante/view"
@@ -10,13 +9,8 @@ import (
 	"net/http"
 )
 
-type Channels struct {
-	Stop chan any
-}
-
-type Config struct {
+type Server struct {
 	Render      func(v view.View) (string, error)
-	SendFile    func(c *client.Client) bool
 	Guards      []guard.Guard
 	Routes      []route.Route
 	Http        *http.Server
@@ -30,4 +24,6 @@ type Config struct {
 	Key         string
 }
 
-type Render func(v view.View) (string, error)
+type Channels struct {
+	Stop chan any
+}

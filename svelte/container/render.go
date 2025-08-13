@@ -10,7 +10,7 @@ import (
 )
 
 // Full renders on the server and on the client.
-func Full(c *Config, v view.View) (string, error) {
+func Full(c *Container, v view.View) (string, error) {
 	id := "svelte-app"
 
 	props := map[string]any{
@@ -69,7 +69,7 @@ func Full(c *Config, v view.View) (string, error) {
 }
 
 // Server renders on the server.
-func Server(conf *Config, v view.View) (string, error) {
+func Server(conf *Container, v view.View) (string, error) {
 	head, body, jsError := RunEntry(conf, map[string]any{
 		"name":       v.Name,
 		"data":       v.Data,
@@ -116,7 +116,7 @@ func Server(conf *Config, v view.View) (string, error) {
 }
 
 // Headless renders only the body of the view on the server.
-func Headless(conf *Config, v view.View) (string, error) {
+func Headless(conf *Container, v view.View) (string, error) {
 	_, body, jsError := RunEntry(conf, map[string]any{
 		"name":       v.Name,
 		"data":       v.Data,
@@ -129,7 +129,7 @@ func Headless(conf *Config, v view.View) (string, error) {
 }
 
 // Client renders on the client.
-func Client(conf *Config, v view.View) (string, error) {
+func Client(conf *Container, v view.View) (string, error) {
 	id := "svelte-app"
 
 	marshaledProps, marshalError := json.Marshal(map[string]any{

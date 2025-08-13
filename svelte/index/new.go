@@ -1,17 +1,18 @@
 package index
 
 import (
+	"embed"
 	"github.com/razshare/frizzante/view"
 	"log"
 	"os"
 )
 
-// Default creates a new index.
-func Default() (c *Config) {
-	return &Config{
+// New creates a new index.
+func New(efs embed.FS) (c *Index) {
+	return &Index{
+		Efs:         efs,
 		Root:        "app",
 		Document:    "app/dist/client/index.html",
-		InfoLog:     log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
 		ErrorLog:    log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime),
 		Development: os.Getenv("DEV") == "1",
 		Channels:    Channels{},
