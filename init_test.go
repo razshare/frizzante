@@ -6,8 +6,11 @@ import (
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/route"
 	"github.com/razshare/frizzante/send"
-	"github.com/razshare/frizzante/svelte/container/server"
+	"github.com/razshare/frizzante/server"
+	"github.com/razshare/frizzante/svelte/ssr"
 	"github.com/razshare/frizzante/view"
+	"os"
+	"path/filepath"
 )
 
 //go:embed .github
@@ -25,11 +28,9 @@ func init() {
 	*state.App = "template/app"
 
 	// Server.
-	s := server.Default(tefs)
-	s.Container.Document = "template/app/dist/client/index.html"
-	s.Container.Script = "template/app/dist/server.js"
-	s.Container.Root = "template/app"
-	s.PublicRoot = "template/app/dist/client"
+	s := server.New()
+	s.PublicRoot = filepath.Join("template", "app", "dist", "client")
+	s.Render = ssr.New(s, filepath.Join("template", "app"), os.Getenv("DEV") == "1", 2)
 	s.Routes = []route.Route{
 		{Pattern: "GET /TestRoutes", Handler: func(c *client.Client) {
 			send.Message(c, "hello")

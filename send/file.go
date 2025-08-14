@@ -1,7 +1,7 @@
 package send
 
 import (
-	"embed"
+	"bytes"
 	"fmt"
 	"github.com/gorilla/websocket"
 	"github.com/razshare/frizzante/client"
@@ -11,112 +11,64 @@ import (
 	"github.com/razshare/frizzante/stack"
 	"io"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strings"
 )
 
-// EmbeddedFileOrElse sends the embedded file requested by the client,
-// or the closest index.html embedded file, or else falls back.
-func EmbeddedFileOrElse(c *client.Client, efs embed.FS, or func()) {
-	fileName := c.Scope.PublicRoot + c.Request.RequestURI
-	fileName = strings.Split(fileName, "?")[0]
-	fileName = strings.Split(fileName, "&")[0]
+// FileOrElse sends the file requested by the client, or else falls back.
+func FileOrElse(c *client.Client, or func()) {
+	var n = filepath.Join(c.Scope.PublicRoot, c.Request.RequestURI)
+	var r *bytes.Reader
+	var i os.FileInfo
+	var err error
 
-	if !embeds.IsFile(efs, fileName) || embeds.IsDirectory(efs, fileName) {
+	if embeds.IsFile(c.Scope.Efs, n) && !embeds.IsDirectory(c.Scope.Efs, n) {
+		r, i, err = embeds.NewFileReader(c.Scope.Efs, strings.ReplaceAll(n, "\\", "//"))
+	} else if files.IsFile(n) && !files.IsDirectory(n) {
+		r, i, err = files.NewFileReader(n)
+	} else {
 		or()
 		return
 	}
 
-	reader, readerInfo, readerError := embeds.NewFileReader(efs, fileName)
-	if readerError != nil {
-		c.Scope.ErrorLog.Println(readerError, stack.Trace())
+	if err != nil {
+		c.Scope.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
 	if c.Scope.WebSocket != nil {
-		data, readError := io.ReadAll(reader)
-		if readError != nil {
-			c.Scope.ErrorLog.Println(readError, stack.Trace())
+		d, rerr := io.ReadAll(r)
+		if rerr != nil {
+			c.Scope.ErrorLog.Println(rerr, stack.Trace())
 			return
 		}
 
-		writeError := c.Scope.WebSocket.WriteMessage(websocket.TextMessage, data)
-		if writeError != nil {
-			c.Scope.ErrorLog.Println(writeError, stack.Trace())
-			return
-		}
-		return
-	}
-
-	if "" != c.Scope.EventName {
-		data, readError := io.ReadAll(reader)
-		if readError != nil {
-			c.Scope.ErrorLog.Println(readError, stack.Trace())
-			return
-		}
-
-		EventContent(c, data)
-		return
-	}
-
-	if "" == c.Writer.Header().Get("Content-Type") {
-		Header(c, "Content-Type", mime.Parse(fileName))
-	}
-
-	if "" == c.Writer.Header().Get("Content-Length") {
-		Header(c, "Content-Length", fmt.Sprintf("%d", readerInfo.Size()))
-	}
-
-	http.ServeContent(c.Writer, c.Request, fileName, readerInfo.ModTime(), reader)
-}
-
-// FileOrElse sends the file requested by the client, or else falls back.
-func FileOrElse(c *client.Client, or func()) {
-	fileName := filepath.Join(c.Scope.PublicRoot, c.Request.RequestURI)
-
-	if !files.IsFile(fileName) || files.IsDirectory(fileName) {
-		EmbeddedFileOrElse(c, c.Scope.Efs, or)
-		return
-	}
-
-	reader, readerInfo, readerError := files.NewFileReader(fileName)
-	if readerError != nil {
-		c.Scope.ErrorLog.Println(readerError, stack.Trace())
-		return
-	}
-
-	if c.Scope.WebSocket != nil {
-		data, readError := io.ReadAll(reader)
-		if readError != nil {
-			c.Scope.ErrorLog.Println(readError, stack.Trace())
-			return
-		}
-
-		writeError := c.Scope.WebSocket.WriteMessage(websocket.TextMessage, data)
-		if writeError != nil {
-			c.Scope.ErrorLog.Println(writeError, stack.Trace())
+		werr := c.Scope.WebSocket.WriteMessage(websocket.TextMessage, d)
+		if werr != nil {
+			c.Scope.ErrorLog.Println(werr, stack.Trace())
 			return
 		}
 	}
 
 	if "" != c.Scope.EventName {
-		data, readError := io.ReadAll(reader)
-		if readError != nil {
-			c.Scope.ErrorLog.Println(readError, stack.Trace())
+		d, rerr := io.ReadAll(r)
+		if rerr != nil {
+			c.Scope.ErrorLog.Println(rerr, stack.Trace())
 			return
 		}
 
-		EventContent(c, data)
+		EventContent(c, d)
 		return
 	}
 
 	if "" == c.Writer.Header().Get("Content-Type") {
-		Header(c, "Content-Type", mime.Parse(fileName))
+		Header(c, "Content-Type", mime.Parse(n))
 	}
 
 	if "" == c.Writer.Header().Get("Content-Length") {
-		Header(c, "Content-Length", fmt.Sprintf("%d", readerInfo.Size()))
+		Header(c, "Content-Length", fmt.Sprintf("%d", i.Size()))
 	}
 
-	http.ServeContent(c.Writer, c.Request, fileName, readerInfo.ModTime(), reader)
+	http.ServeContent(c.Writer, c.Request, n, i.ModTime(), r)
 }

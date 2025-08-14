@@ -1,0 +1,5 @@
+<script type="application/javascript">
+    function target(){
+        return document.getElementById("%s")
+    }
+</script>

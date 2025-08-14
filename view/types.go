@@ -11,6 +11,9 @@ const (
 
 type View struct {
 	Name       string
+	Title      string
 	RenderMode RenderMode
 	Data       map[string]any
 }
+
+type Render func(v View) (string, error)

@@ -78,7 +78,7 @@ func TestRenderClient(test *testing.T) {
 	<-ready
 	defer func() { ready <- 0 }()
 
-	expected := "<script type=\"application/javascript\">function target(){return document.getElementById("
+	expected := "return document.getElementById(\"svelte-app\")"
 	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderClient", port))
 	if getError != nil {
 		test.Fatal(getError)
