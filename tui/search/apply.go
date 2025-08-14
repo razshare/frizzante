@@ -6,6 +6,7 @@ import (
 )
 
 func Apply(search *Search, vport *viewport.Viewport, msg tea.KeyMsg) tea.Cmd {
+	vport.Cursor = 0
 	preval := search.Input.Value()
 	var cmd tea.Cmd
 	search.Input, cmd = search.Input.Update(msg)

@@ -6,7 +6,7 @@ import (
 )
 
 type Model struct {
-	Selected map[int]bool
+	Selected []string
 	Prompt   string
 	Search   *search.Search
 	Viewport *viewport.Viewport

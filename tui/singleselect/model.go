@@ -6,6 +6,7 @@ import (
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/navigate"
 	"github.com/razshare/frizzante/tui/search"
+	"slices"
 	"strings"
 )
 
@@ -81,16 +82,16 @@ func (model *Model) View() string {
 	sb.WriteString(config.Styles.UserInput.Render(model.Search.Input.Value()))
 	sb.WriteString("\n")
 
-	choices := len(model.Search.Filtered)
-	if choices == 0 {
+	filtered := len(model.Search.Filtered)
+	if filtered == 0 {
 		sb.WriteString("  No matches found\n")
 		sb.WriteString(config.Styles.UserGuide.Render(sbguide.String()))
 		return sb.String()
 	}
 
 	height := model.Viewport.Start + model.Viewport.Visible
-	if height > choices {
-		height = choices
+	if height > filtered {
+		height = filtered
 	}
 
 	if model.Viewport.Start > 0 {
@@ -101,9 +102,10 @@ func (model *Model) View() string {
 	for i := model.Viewport.Start; i < height; i++ {
 		if i == model.Viewport.Cursor {
 			sb.WriteString(config.Styles.Selected.Render("▶ " + model.Search.Filtered[i]))
-			if model.Search.Descriptions[i] != "" {
+			j := slices.Index(model.Search.Choices, model.Search.Filtered[i])
+			if j > 0 && model.Search.Descriptions[j] != "" {
 				sb.WriteString("\n")
-				sb.WriteString(config.Styles.Selected.Width(50).PaddingLeft(5).Render(model.Search.Descriptions[i]))
+				sb.WriteString(config.Styles.Selected.Width(50).PaddingLeft(5).Render(model.Search.Descriptions[j]))
 			}
 		} else {
 			sb.WriteString(config.Styles.Item.Render("  " + model.Search.Filtered[i]))
@@ -111,7 +113,7 @@ func (model *Model) View() string {
 		sb.WriteString("\n")
 	}
 
-	if height < choices {
+	if height < filtered {
 		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("    ↓ more below"))
 		sb.WriteString("\n")
 	}

@@ -12,7 +12,7 @@ func Send(prompt string) string {
 	ti.Placeholder = "Type here..."
 	ti.Focus()
 	ti.Width = 50
-	m := Model{TextInput: ti, Prompt: prompt}
+	m := &Model{TextInput: ti, Prompt: prompt}
 	result, err := program.Run(m)
 	if err != nil {
 		messages.Fatal(err)

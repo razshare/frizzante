@@ -10,7 +10,7 @@ import (
 
 func Generate(efs embed.FS, n string) {
 	if n == ":pick" {
-		feats := multiselect.Send(
+		items := multiselect.Send(
 			[]string{
 				`Core
 					Generates router and view swapping tools.
@@ -40,12 +40,12 @@ func Generate(efs embed.FS, n string) {
 			"What to generate",
 		)
 
-		for _, feat := range feats {
-			gen, exists := codegen.Functions[strings.ToLower(feat)]
+		for _, item := range items {
+			generate, exists := codegen.Functions[strings.ToLower(item)]
 			if !exists {
-				messages.Fatalf("feature `%s` not found", feat)
+				messages.Fatalf("feature `%s` not found", item)
 			}
-			gen(efs)
+			generate(efs)
 		}
 		return
 	}

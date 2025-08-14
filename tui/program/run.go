@@ -8,8 +8,8 @@ func Run[T tea.Model](model T) (T, error) {
 		return model, err
 	}
 
-	if typed, ok := result.(T); ok {
-		return typed, nil
+	if modelt, ok := result.(T); ok {
+		return modelt, nil
 	}
 
 	return model, nil

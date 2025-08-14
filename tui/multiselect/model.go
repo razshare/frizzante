@@ -5,14 +5,15 @@ import (
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/navigate"
 	"github.com/razshare/frizzante/tui/search"
+	"slices"
 	"strings"
 )
 
-func (model Model) Init() tea.Cmd {
+func (model *Model) Init() tea.Cmd {
 	return nil
 }
 
-func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (model *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch k := msg.(type) {
 	case tea.KeyMsg:
 		if k.Type == tea.KeyCtrlC {
@@ -25,10 +26,13 @@ func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if k.Type == tea.KeySpace {
 			if len(model.Search.Filtered) > 0 {
-				if model.Selected[model.Viewport.Cursor] {
-					delete(model.Selected, model.Viewport.Cursor)
+				val := model.Search.Filtered[model.Viewport.Cursor]
+				if slices.Contains(model.Selected, val) {
+					if i := slices.Index(model.Selected, val); i >= 0 {
+						model.Selected = append(model.Selected[0:i], model.Selected[i:]...)
+					}
 				} else {
-					model.Selected[model.Viewport.Cursor] = true
+					model.Selected = append(model.Selected, val)
 				}
 			}
 			return model, nil
@@ -68,7 +72,7 @@ func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return model, nil
 }
 
-func (model Model) View() string {
+func (model *Model) View() string {
 	var sbguide strings.Builder
 	sbguide.WriteString("(")
 	sbguide.WriteString("↑/↓ = navigate, [Space] = select, [Enter] = continue")
@@ -87,16 +91,16 @@ func (model Model) View() string {
 	sb.WriteString(config.Styles.UserInput.Render(model.Search.Input.Value()))
 	sb.WriteString("\n")
 
-	choices := len(model.Search.Filtered)
-	if choices == 0 {
+	filtered := len(model.Search.Filtered)
+	if filtered == 0 {
 		sb.WriteString("  No matches found\n")
 		sb.WriteString(config.Styles.UserGuide.Render(sbguide.String()))
 		return sb.String()
 	}
 
 	height := model.Viewport.Start + model.Viewport.Visible
-	if height > choices {
-		height = choices
+	if height > filtered {
+		height = filtered
 	}
 
 	if model.Viewport.Start > 0 {
@@ -114,7 +118,7 @@ func (model Model) View() string {
 
 		sbloc.WriteString("[")
 
-		if model.Selected[i] {
+		if slices.Contains(model.Selected, model.Search.Filtered[i]) {
 			sbloc.WriteString("✓")
 		}
 
@@ -124,9 +128,10 @@ func (model Model) View() string {
 
 		if model.Viewport.Cursor == i {
 			sb.WriteString(config.Styles.Selected.Render(sbloc.String()))
-			if model.Search.Descriptions[i] != "" {
+			j := slices.Index(model.Search.Choices, model.Search.Filtered[i])
+			if j > 0 && model.Search.Descriptions[j] != "" {
 				sb.WriteString("\n")
-				sb.WriteString(config.Styles.Selected.Width(50).PaddingLeft(5).Render(model.Search.Descriptions[i]))
+				sb.WriteString(config.Styles.Selected.Width(50).PaddingLeft(5).Render(model.Search.Descriptions[j]))
 			}
 		} else {
 			sb.WriteString(config.Styles.Item.Render(sbloc.String()))
@@ -134,7 +139,7 @@ func (model Model) View() string {
 		sb.WriteString("\n")
 	}
 
-	if height < choices {
+	if height < filtered {
 		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("    ↓ more below"))
 		sb.WriteString("\n")
 	}

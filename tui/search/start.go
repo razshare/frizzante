@@ -10,7 +10,7 @@ func Filter(search *Search, vport *viewport.Viewport) {
 	if input == "" {
 		search.Filtered = search.Choices
 	} else {
-		filtered := make([]string, 0, len(search.Choices)/2)
+		filtered := make([]string, 0)
 		for _, choice := range search.Choices {
 			if strings.Contains(strings.ToLower(choice), input) {
 				filtered = append(filtered, choice)
