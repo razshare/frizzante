@@ -14,6 +14,12 @@ func View(c *client.Client, v view.View) {
 	}
 
 	if strings.Contains(c.Request.Header.Get("Accept"), "application/json") {
+		if "" == c.Writer.Header().Get("Cache-Control") {
+			Header(c, "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+		}
+		if "" == c.Writer.Header().Get("Pragma") {
+			Header(c, "Pragma", "no-cache")
+		}
 		if v.Data == nil {
 			v.Data = map[string]any{}
 		}
