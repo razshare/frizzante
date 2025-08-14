@@ -48,7 +48,7 @@ func New(c Config) view.Render {
 	}
 
 	var id = "svelte-app"
-	var dist = filepath.Join(c.App, "dist")
+	var dist = filepath.Join(app, "dist")
 	var scriptn = filepath.Join(dist, "server.js")
 	var scriptnfix = strings.ReplaceAll(scriptn, "\\", "/")
 	var docn = filepath.Join(dist, "client", "index.html")
