@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/razshare/frizzante/embeds"
-	"github.com/razshare/frizzante/server"
 	"github.com/razshare/frizzante/view"
 	"os"
 	"path/filepath"
@@ -24,7 +23,15 @@ var BodyFormat string
 //go:embed props.format
 var PropsFormat string
 
-func New(s *server.Server, app string, disk bool) view.Render {
+func New(c Config) view.Render {
+	var efs = c.Efs
+	var app = c.App
+	var disk = c.Disk
+
+	if app == "" {
+		app = "app"
+	}
+
 	var id = "svelte-app"
 	var dist = filepath.Join(app, "dist")
 	var docn = filepath.Join(dist, "client", "index.html")
@@ -34,8 +41,8 @@ func New(s *server.Server, app string, disk bool) view.Render {
 		var d []byte
 		var err error
 
-		if !disk && embeds.IsFile(s.Efs, docnfix) {
-			d, err = s.Efs.ReadFile(docnfix)
+		if !disk && embeds.IsFile(efs, docnfix) {
+			d, err = efs.ReadFile(docnfix)
 		} else {
 			d, err = os.ReadFile(docn)
 		}

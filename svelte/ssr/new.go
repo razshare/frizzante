@@ -9,7 +9,6 @@ import (
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/js"
-	"github.com/razshare/frizzante/server"
 	"github.com/razshare/frizzante/view"
 	"os"
 	"path/filepath"
@@ -34,9 +33,22 @@ var PropsFormat string
 
 var NoScript = regexp.MustCompile(`<script.*>.*</script>`)
 
-func New(s *server.Server, app string, disk bool, limit int) view.Render {
+func New(c Config) view.Render {
+	var efs = c.Efs
+	var app = c.App
+	var disk = c.Disk
+	var limit = c.Limit
+
+	if limit == 0 {
+		limit = 1
+	}
+
+	if app == "" {
+		app = "app"
+	}
+
 	var id = "svelte-app"
-	var dist = filepath.Join(app, "dist")
+	var dist = filepath.Join(c.App, "dist")
 	var scriptn = filepath.Join(dist, "server.js")
 	var scriptnfix = strings.ReplaceAll(scriptn, "\\", "/")
 	var docn = filepath.Join(dist, "client", "index.html")
@@ -46,8 +58,8 @@ func New(s *server.Server, app string, disk bool, limit int) view.Render {
 	var compile = func() (render goja.Callable, r *goja.Runtime, err error) {
 		var d []byte
 
-		if !disk && embeds.IsFile(s.Efs, scriptnfix) {
-			d, err = s.Efs.ReadFile(scriptnfix)
+		if !disk && embeds.IsFile(efs, scriptnfix) {
+			d, err = efs.ReadFile(scriptnfix)
 		} else {
 			d, err = os.ReadFile(scriptn)
 		}
@@ -91,8 +103,8 @@ func New(s *server.Server, app string, disk bool, limit int) view.Render {
 		var d []byte
 		var err error
 
-		if !disk && embeds.IsFile(s.Efs, docnfix) {
-			d, err = s.Efs.ReadFile(docnfix)
+		if !disk && embeds.IsFile(efs, docnfix) {
+			d, err = efs.ReadFile(docnfix)
 		} else {
 			d, err = os.ReadFile(docn)
 		}

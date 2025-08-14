@@ -30,7 +30,12 @@ func init() {
 	// Server.
 	s := server.New()
 	s.PublicRoot = filepath.Join("template", "app", "dist", "client")
-	s.Render = ssr.New(s, filepath.Join("template", "app"), os.Getenv("DEV") == "1", 2)
+	s.Render = ssr.New(ssr.Config{
+		Efs:   s.Efs,
+		App:   filepath.Join("template", "app"),
+		Disk:  os.Getenv("DEV") == "1",
+		Limit: 2,
+	})
 	s.Routes = []route.Route{
 		{Pattern: "GET /TestRoutes", Handler: func(c *client.Client) {
 			send.Message(c, "hello")
