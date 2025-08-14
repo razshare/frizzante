@@ -14,6 +14,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 )
 
 //go:embed render.format
@@ -47,14 +48,15 @@ func New(c Config) view.Render {
 		app = "app"
 	}
 
+	var mut sync.Mutex
 	var id = "svelte-app"
 	var dist = filepath.Join(app, "dist")
 	var scriptn = filepath.Join(dist, "server.js")
 	var scriptnfix = strings.ReplaceAll(scriptn, "\\", "/")
 	var docn = filepath.Join(dist, "client", "index.html")
 	var docnfix = strings.ReplaceAll(docn, "\\", "/")
-	var renders = make(chan goja.Callable, limit)
-	var runtimes = make(chan *goja.Runtime, limit)
+	var renders = make(chan goja.Callable, 1)
+	var runtimes = make(chan *goja.Runtime, 1)
 	var compile = func() (render goja.Callable, r *goja.Runtime, err error) {
 		var d []byte
 
@@ -121,6 +123,11 @@ func New(c Config) view.Render {
 			if disk {
 				render, runtime, err = compile()
 			} else if limit >= 0 {
+				mut.Lock()
+				if limit >= 0 {
+					limit--
+				}
+				mut.Unlock()
 				render, runtime, err = compile()
 				defer func() { go func() { renders <- render }() }()
 				defer func() { go func() { runtimes <- runtime }() }()

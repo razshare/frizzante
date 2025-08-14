@@ -1,6 +1,5 @@
-if(!module){
-    var module={exports:{}};
-}
+const module={exports:{}};
+
 (function(){
     %s
     return render

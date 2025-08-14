@@ -9,8 +9,8 @@ import (
 )
 
 func TestRoutes(test *testing.T) {
-	<-ready
-	defer func() { ready <- 0 }()
+	<-serve
+	defer func() { serve <- 0 }()
 
 	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRoutes", port))
 	if getError != nil {
@@ -31,8 +31,8 @@ func TestRoutes(test *testing.T) {
 }
 
 func TestSendStatus(test *testing.T) {
-	<-ready
-	defer func() { ready <- 0 }()
+	<-serve
+	defer func() { serve <- 0 }()
 
 	expected := 201
 	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestSendStatus", port))
@@ -54,8 +54,8 @@ func TestSendStatus(test *testing.T) {
 }
 
 func TestSendHeader(test *testing.T) {
-	<-ready
-	defer func() { ready <- 0 }()
+	<-serve
+	defer func() { serve <- 0 }()
 
 	expected := "application/json"
 	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestSendHeader", port))

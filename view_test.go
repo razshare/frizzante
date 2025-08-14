@@ -12,8 +12,8 @@ import (
 )
 
 func TestRenderServer(test *testing.T) {
-	<-ready
-	defer func() { ready <- 0 }()
+	<-serve
+	defer func() { serve <- 0 }()
 
 	expected := "<h1>Welcome to Frizzante.</h1>"
 	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderServer", port))
@@ -36,8 +36,8 @@ func TestRenderServer(test *testing.T) {
 }
 
 func BenchmarkRenderServer(b *testing.B) {
-	<-ready
-	defer func() { ready <- 0 }()
+	<-serve
+	defer func() { serve <- 0 }()
 
 	count := 1000
 
@@ -75,8 +75,8 @@ func BenchmarkRenderServer(b *testing.B) {
 }
 
 func TestRenderClient(test *testing.T) {
-	<-ready
-	defer func() { ready <- 0 }()
+	<-serve
+	defer func() { serve <- 0 }()
 
 	expected := "return document.getElementById(\"svelte-app\")"
 	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderClient", port))

@@ -18,7 +18,7 @@ import (
 //go:embed template/app/dist
 var tefs embed.FS
 var port = 8080
-var ready = make(chan any, 1)
+var serve = make(chan any, 1)
 
 func init() {
 	// Cli.
@@ -66,5 +66,5 @@ func init() {
 
 	go server.Start(s)
 
-	ready <- 0
+	serve <- 0
 }
