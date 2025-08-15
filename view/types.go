@@ -12,8 +12,8 @@ const (
 type AlignMode int
 
 const (
-	AlignMerge AlignMode = 0 // AlignMerge merges given properties with existing props on the client view.
-	AlignClear AlignMode = 1 // AlignClear clears the client view properties before injecting given props.
+	AlignMerge AlignMode = 0 // AlignMerge merges given props with existing props on the client view.
+	AlignReset AlignMode = 1 // AlignReset resets the client view props before injecting given props.
 )
 
 type View struct {
