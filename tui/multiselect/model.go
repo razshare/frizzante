@@ -29,7 +29,7 @@ func (model *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				val := model.Search.Filtered[model.Viewport.Cursor]
 				if slices.Contains(model.Selected, val) {
 					if i := slices.Index(model.Selected, val); i >= 0 {
-						model.Selected = append(model.Selected[0:i], model.Selected[i:]...)
+						model.Selected = append(model.Selected[:i], model.Selected[i+1:]...)
 					}
 				} else {
 					model.Selected = append(model.Selected, val)
