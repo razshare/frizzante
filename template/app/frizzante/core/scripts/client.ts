@@ -5,4 +5,4 @@ import ClientView from "$frizzante/core/components/ClientView.svelte"
 target().innerHTML = ""
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
-mount(ClientView, { target: target(), props: props() })
+mount(ClientView, { target: target(), props: data() })

@@ -29,8 +29,8 @@ var HeadFormat string
 //go:embed body.format
 var BodyFormat string
 
-//go:embed props.format
-var PropsFormat string
+//go:embed data.format
+var DataFormat string
 
 var NoScript = regexp.MustCompile(`<script.*>.*</script>`)
 
@@ -172,12 +172,12 @@ func New(c Config) view.Render {
 				doc = strings.Replace(doc, "<!--app-target-->", "", 1)
 				doc = strings.Replace(doc, "<!--app-data-->", "", 1)
 			} else {
-				props, merr := json.Marshal(view.Data(v))
+				data, merr := json.Marshal(view.Data(v))
 				if merr != nil {
 					return "", merr
 				}
 				doc = strings.Replace(doc, "<!--app-target-->", fmt.Sprintf(TargetFormat, id), 1)
-				doc = strings.Replace(doc, "<!--app-data-->", fmt.Sprintf(PropsFormat, props), 1)
+				doc = strings.Replace(doc, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
 			}
 
 			doc = strings.Replace(doc, "<!--app-head-->", head, 1)
@@ -187,7 +187,7 @@ func New(c Config) view.Render {
 		}
 
 		if v.Render == view.RenderClient {
-			props, merr := json.Marshal(view.Data(v))
+			data, merr := json.Marshal(view.Data(v))
 
 			if merr != nil {
 				return "", merr
@@ -196,7 +196,7 @@ func New(c Config) view.Render {
 			doc = strings.Replace(doc, "<!--app-target-->", fmt.Sprintf(TargetFormat, id), 1)
 			doc = strings.Replace(doc, "<!--app-body-->", fmt.Sprintf(BodyFormat, id, ""), 1)
 			doc = strings.Replace(doc, "<!--app-head-->", fmt.Sprintf(HeadFormat, v.Title), 1)
-			doc = strings.Replace(doc, "<!--app-data-->", fmt.Sprintf(PropsFormat, props), 1)
+			doc = strings.Replace(doc, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
 
 			return doc, nil
 		}

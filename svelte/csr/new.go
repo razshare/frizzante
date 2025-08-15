@@ -20,8 +20,8 @@ var HeadFormat string
 //go:embed body.format
 var BodyFormat string
 
-//go:embed props.format
-var PropsFormat string
+//go:embed data.format
+var DataFormat string
 
 func New(c Config) view.Render {
 	var efs = c.Efs
@@ -62,7 +62,7 @@ func New(c Config) view.Render {
 		doc = strings.Replace(doc, "<!--app-target-->", fmt.Sprintf(TargetFormat, id), 1)
 		doc = strings.Replace(doc, "<!--app-head-->", fmt.Sprintf(HeadFormat, v.Title), 1)
 		doc = strings.Replace(doc, "<!--app-body-->", fmt.Sprintf(BodyFormat, id, ""), 1)
-		doc = strings.Replace(doc, "<!--app-props-->", fmt.Sprintf(PropsFormat, props), 1)
+		doc = strings.Replace(doc, "<!--app-props-->", fmt.Sprintf(DataFormat, props), 1)
 
 		return doc, nil
 
