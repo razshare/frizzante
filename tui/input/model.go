@@ -7,11 +7,11 @@ import (
 	"github.com/razshare/frizzante/tui/config"
 )
 
-func (model Model) Init() tea.Cmd {
+func (model *Model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (model *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch k := msg.(type) {
 	case tea.KeyMsg:
@@ -28,7 +28,7 @@ func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return model, cmd
 }
 
-func (model Model) View() string {
+func (model *Model) View() string {
 	return fmt.Sprintf(
 		"\n%s\n\n%s\n\n%s",
 		config.Styles.Title.Render(model.Prompt),
