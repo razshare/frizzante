@@ -3,17 +3,25 @@ package view
 type RenderMode int
 
 const (
-	RenderModeFull     RenderMode = 0 // RenderModeFull renders on both the server and the client.
-	RenderModeServer   RenderMode = 1 // RenderModeServer renders only on the server.
-	RenderModeClient   RenderMode = 2 // RenderModeClient renders only on the client.
-	RenderModeHeadless RenderMode = 3 // RenderModeHeadless renders only on the server and omits the base template.
+	RenderFull     RenderMode = 0 // RenderFull renders on both the server and the client.
+	RenderServer   RenderMode = 1 // RenderServer renders only on the server.
+	RenderClient   RenderMode = 2 // RenderClient renders only on the client.
+	RenderHeadless RenderMode = 3 // RenderHeadless renders only on the server and omits the base template.
+)
+
+type AlignMode int
+
+const (
+	AlignMerge AlignMode = 0 // AlignMerge merges given properties with existing props on the client view.
+	AlignClear AlignMode = 1 // AlignClear clears the client view properties before injecting given props.
 )
 
 type View struct {
-	Name       string
-	Title      string
-	RenderMode RenderMode
-	Data       map[string]any
+	Name   string
+	Title  string
+	Render RenderMode
+	Align  AlignMode
+	Props  map[string]any
 }
 
 type Render func(v View) (string, error)

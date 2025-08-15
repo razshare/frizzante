@@ -9,7 +9,7 @@ import (
 )
 
 type Scope struct {
-	Render     func(v view.View) (string, error)
+	Render     view.Render
 	ErrorLog   *log.Logger
 	InfoLog    *log.Logger
 	WebSocket  *websocket.Conn

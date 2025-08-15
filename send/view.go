@@ -20,15 +20,10 @@ func View(c *client.Client, v view.View) {
 		if "" == c.Writer.Header().Get("Pragma") {
 			Header(c, "Pragma", "no-cache")
 		}
-		if v.Data == nil {
-			v.Data = map[string]any{}
+		if v.Props == nil {
+			v.Props = map[string]any{}
 		}
-		props := map[string]any{
-			"name":       v.Name,
-			"data":       v.Data,
-			"renderMode": v.RenderMode,
-		}
-		Json(c, props)
+		Json(c, view.Data(v))
 		return
 	}
 

@@ -70,17 +70,37 @@ export async function swap(
         return function push() {}
     }
 
-    const json = JSON.parse(txt)
+    const remote = JSON.parse(txt)
 
-    view.data = json.data
-    view.name = json.name
-    view.renderMode = json.renderMode
+    view.align = remote.align
+    view.name = remote.name
+    view.render = remote.render
+    if (view.align === 0) {
+        if (typeof view.props != "object") {
+            console.warn(
+                "view alignment intends to merge props, but local view props is not an object",
+            )
+            // Noop.
+        } else if (typeof remote.props != "object") {
+            console.warn(
+                "view alignment intends to merge props, but remote props is not an object",
+            )
+            // Noop.
+        } else {
+            view.props = {
+                ...view.props,
+                ...remote.props,
+            }
+        }
+    } else {
+        view.props = remote.props
+    }
 
-    const sameView = lastUrl === res.url
+    const stationary = lastUrl === res.url
     lastUrl = res.url
 
     return function push() {
-        if (sameView) {
+        if (stationary) {
             return
         }
 

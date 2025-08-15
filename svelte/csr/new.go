@@ -53,11 +53,7 @@ func New(c Config) view.Render {
 
 		doc := string(d)
 
-		props, merr := json.Marshal(map[string]any{
-			"name":       v.Name,
-			"data":       v.Data,
-			"renderMode": v.RenderMode,
-		})
+		props, merr := json.Marshal(view.Data(v))
 
 		if merr != nil {
 			return "", merr

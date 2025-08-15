@@ -50,16 +50,16 @@ func init() {
 		}},
 		{Pattern: "GET /TestRenderServer", Handler: func(c *client.Client) {
 			send.View(c, view.View{
-				Name:       "Welcome",
-				RenderMode: view.RenderModeServer,
-				Data:       map[string]any{"name": "world"},
+				Name:   "Welcome",
+				Render: view.RenderServer,
+				Props:  map[string]any{"name": "world"},
 			})
 		}},
 		{Pattern: "GET /TestRenderClient", Handler: func(c *client.Client) {
 			send.View(c, view.View{
-				Name:       "Welcome",
-				RenderMode: view.RenderModeClient,
-				Data:       map[string]any{"name": "world"},
+				Name:   "Welcome",
+				Render: view.RenderClient,
+				Props:  map[string]any{"name": "world"},
 			})
 		}},
 	}

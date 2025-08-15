@@ -117,7 +117,7 @@ func New(c Config) view.Render {
 
 		doc := string(d)
 
-		if v.RenderMode == view.RenderModeServer || v.RenderMode == view.RenderModeFull {
+		if v.Render == view.RenderServer || v.Render == view.RenderFull {
 			var render goja.Callable
 			var runtime *goja.Runtime
 			if disk {
@@ -142,11 +142,7 @@ func New(c Config) view.Render {
 				return "", err
 			}
 
-			promise, perr := render(goja.Undefined(), runtime.ToValue(map[string]any{
-				"name":       v.Name,
-				"data":       v.Data,
-				"renderMode": v.RenderMode,
-			}))
+			promise, perr := render(goja.Undefined(), runtime.ToValue(view.Data(v)))
 
 			if perr != nil {
 				return "", perr
@@ -168,19 +164,15 @@ func New(c Config) view.Render {
 				body = bodyv.String()
 			}
 
-			if v.RenderMode == view.RenderModeServer {
+			if v.Render == view.RenderServer {
 				doc = NoScript.ReplaceAllString(doc, "")
 			}
 
-			if v.RenderMode == view.RenderModeServer {
+			if v.Render == view.RenderServer {
 				doc = strings.Replace(doc, "<!--app-target-->", "", 1)
 				doc = strings.Replace(doc, "<!--app-data-->", "", 1)
 			} else {
-				props, merr := json.Marshal(map[string]any{
-					"name":       v.Name,
-					"data":       v.Data,
-					"renderMode": v.RenderMode,
-				})
+				props, merr := json.Marshal(view.Data(v))
 				if merr != nil {
 					return "", merr
 				}
@@ -194,12 +186,8 @@ func New(c Config) view.Render {
 			return doc, nil
 		}
 
-		if v.RenderMode == view.RenderModeClient {
-			props, merr := json.Marshal(map[string]any{
-				"name":       v.Name,
-				"data":       v.Data,
-				"renderMode": v.RenderMode,
-			})
+		if v.Render == view.RenderClient {
+			props, merr := json.Marshal(view.Data(v))
 
 			if merr != nil {
 				return "", merr
