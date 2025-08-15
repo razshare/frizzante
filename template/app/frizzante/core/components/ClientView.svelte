@@ -6,9 +6,12 @@
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     const components = views as Record<string, Component>
-    let { name, props: remoteProps, render, align } = $props() as View<
-        Record<string, unknown>
-    >
+    let {
+        name,
+        props: remoteProps,
+        render,
+        align,
+    } = $props() as View<Record<string, unknown>>
     const view = $state({ name, props: remoteProps, render, align })
     setContext("view", view)
 </script>
