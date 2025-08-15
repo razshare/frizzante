@@ -38,23 +38,25 @@ func FileOrElse(c *client.Client, or func()) {
 	}
 
 	if c.Scope.WebSocket != nil {
-		d, rerr := io.ReadAll(r)
-		if rerr != nil {
-			c.Scope.ErrorLog.Println(rerr, stack.Trace())
+		var d []byte
+		d, err = io.ReadAll(r)
+		if err != nil {
+			c.Scope.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
-		werr := c.Scope.WebSocket.WriteMessage(websocket.TextMessage, d)
-		if werr != nil {
-			c.Scope.ErrorLog.Println(werr, stack.Trace())
+		err = c.Scope.WebSocket.WriteMessage(websocket.TextMessage, d)
+		if err != nil {
+			c.Scope.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 	}
 
 	if "" != c.Scope.EventName {
-		d, rerr := io.ReadAll(r)
-		if rerr != nil {
-			c.Scope.ErrorLog.Println(rerr, stack.Trace())
+		var d []byte
+		d, err = io.ReadAll(r)
+		if err != nil {
+			c.Scope.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
