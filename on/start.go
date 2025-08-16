@@ -2,9 +2,7 @@ package on
 
 import (
 	"embed"
-	"fmt"
 	"github.com/razshare/frizzante/cli/state"
-	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/text"
 	flag "github.com/spf13/pflag"
 )
@@ -15,11 +13,6 @@ func Start(efs embed.FS) error {
 	if !state.Parsed {
 		flag.Parse()
 		state.Parsed = true
-		logo, err := efs.ReadFile("clilogo.txt")
-		if err != nil {
-			return err
-		}
-		fmt.Println(config.Styles.BigText.Render(string(logo)))
 	}
 
 	if *state.Help {

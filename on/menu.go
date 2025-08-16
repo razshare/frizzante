@@ -2,7 +2,9 @@ package on
 
 import (
 	"embed"
+	"fmt"
 	"github.com/razshare/frizzante/cli/state"
+	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/input"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/singleselect"
@@ -113,6 +115,14 @@ var Functions = map[string]func() (func(), error){
 }
 
 func Menu(efs embed.FS, clear bool) error {
+	if !clear {
+		logo, err := efs.ReadFile("clilogo.txt")
+		if err != nil {
+			return err
+		}
+		fmt.Println(config.Styles.BigText.Render(string(logo)))
+	}
+
 	options := []string{
 		`configure
 			installs required binaries and dependencies
