@@ -2,21 +2,26 @@ package on
 
 import (
 	"github.com/razshare/frizzante/cli/path"
-	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
 )
 
-func Test() {
+func Test() error {
 	Package()
 
-	test := exec.Command(path.Go("."), "test")
+	gobin, err := path.Go(".")
+	if err != nil {
+		return err
+	}
+
+	test := exec.Command(gobin, "test")
 	test.Env = os.Environ()
 	test.Stderr = os.Stderr
 	test.Stdout = os.Stdout
 	test.Stdin = os.Stdin
-	err := test.Run()
+	err = test.Run()
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
+	return nil
 }

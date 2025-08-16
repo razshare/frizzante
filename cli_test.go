@@ -8,165 +8,201 @@ import (
 	"testing"
 )
 
-func TestOnHelp(test *testing.T) {
-	on.Help()
-}
-
-func TestOnVersion(test *testing.T) {
-	on.Version(efs)
-}
-
-func TestOnCreateProject(test *testing.T) {
-	directoryName := filepath.Join(".gen", "test_project")
-
-	err := os.RemoveAll(directoryName)
+func TestOnHelp(t *testing.T) {
+	err := on.Help()
 	if err != nil {
-		test.Fatal(err)
-	}
-
-	on.CreateProject(directoryName)
-
-	if !files.IsDirectory(directoryName) {
-		test.Fatal("the cli failed to create a test project")
-	}
-
-	if !files.IsDirectory(filepath.Join(directoryName, "app")) {
-		test.Fatal("the cli succeeded in creating a test project, but it's missing the app directory")
-	}
-
-	if !files.IsFile(filepath.Join(directoryName, "main.go")) {
-		test.Fatal("the cli succeeded in creating a test project, but it's missing the main.go file")
-	}
-
-	if !files.IsFile(filepath.Join(directoryName, "go.mod")) {
-		test.Fatal("the cli succeeded in creating a test project, but it's missing the go.mod file")
-	}
-
-	err = os.RemoveAll(directoryName)
-	if err != nil {
-		test.Fatal(err)
+		t.Fatal(err)
 	}
 }
 
-func TestOnAddFeature(test *testing.T) {
+func TestOnVersion(t *testing.T) {
+	err := on.Version(efs)
+	if err != nil {
+		t.Fatal()
+	}
+}
+
+func TestOnCreateProject(t *testing.T) {
+	dn := filepath.Join(".gen", "test_project")
+
+	err := os.RemoveAll(dn)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = on.CreateProject(efs, dn)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !files.IsDirectory(dn) {
+		t.Fatal("the cli failed to create a test project")
+	}
+
+	if !files.IsDirectory(filepath.Join(dn, "app")) {
+		t.Fatal("the cli succeeded in creating a test project, but it's missing the app directory")
+	}
+
+	if !files.IsFile(filepath.Join(dn, "main.go")) {
+		t.Fatal("the cli succeeded in creating a test project, but it's missing the main.go file")
+	}
+
+	if !files.IsFile(filepath.Join(dn, "go.mod")) {
+		t.Fatal("the cli succeeded in creating a test project, but it's missing the go.mod file")
+	}
+
+	err = os.RemoveAll(dn)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestOnAddFeature(t *testing.T) {
 	air := filepath.Join(".gen", "air")
 	err := os.RemoveAll(air)
 	if err != nil {
-		test.Fatal(err)
+		t.Fatal(err)
 	}
 
-	on.Generate(efs, "air")
+	err = on.Generate(efs, ".", "air")
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if !files.IsDirectory(air) {
-		test.Fatal("the cli failed to add air feature")
+		t.Fatal("the cli failed to add air feature")
 	}
 }
 
-func TestOnPackage(test *testing.T) {
+func TestOnPackage(t *testing.T) {
 	dist := filepath.Join("template", "app", "dist")
 	err := os.RemoveAll(dist)
 	if err != nil {
-		test.Fatal(err)
+		t.Fatal(err)
 	}
 
-	on.Package()
+	err = on.Package()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if !files.IsDirectory(dist) {
-		test.Fatal("the cli failed to package the application into dist")
+		t.Fatal("the cli failed to package the application into dist")
 	}
 }
 
-func TestOnInstall(test *testing.T) {
-	nodeModules := filepath.Join("template", "app", "node_modules")
-	err := os.RemoveAll(nodeModules)
+func TestOnInstall(t *testing.T) {
+	mods := filepath.Join("template", "app", "node_modules")
+	err := os.RemoveAll(mods)
 	if err != nil {
-		test.Fatal(err)
+		t.Fatal(err)
 	}
 
-	on.Install()
+	err = on.Install(".")
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	if !files.IsDirectory(nodeModules) {
-		test.Fatal("the cli failed to install node_modules")
+	if !files.IsDirectory(mods) {
+		t.Fatal("the cli failed to install node_modules")
 	}
 }
 
-func TestOnFormat(test *testing.T) {
-	on.Format()
+func TestOnFormat(t *testing.T) {
+	err := on.Format()
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
-func TestOnTouch(test *testing.T) {
+func TestOnTouch(t *testing.T) {
 	dist := filepath.Join("template", "app", "dist")
 	err := os.RemoveAll(dist)
 	if err != nil {
-		test.Fatal(err)
+		t.Fatal(err)
 	}
 
-	on.Touch()
-
-	serverJs := filepath.Join("template", "app", "dist", "server.js")
-	if !files.IsFile(serverJs) {
-		test.Fatalf("the cli failed to touch %s", serverJs)
+	err = on.Touch()
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	indexHtml := filepath.Join("template", "app", "dist", "client", "index.html")
-	if !files.IsFile(indexHtml) {
-		test.Fatalf("the cli failed to touch %s", indexHtml)
+	script := filepath.Join("template", "app", "dist", "server.js")
+	if !files.IsFile(script) {
+		t.Fatalf("the cli failed to touch %s", script)
+	}
+
+	doc := filepath.Join("template", "app", "dist", "client", "index.html")
+	if !files.IsFile(doc) {
+		t.Fatalf("the cli failed to touch %s", doc)
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	on.Package()
+	err = on.Package()
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
-func TestOnClean(test *testing.T) {
+func TestOnClean(t *testing.T) {
 	dist := filepath.Join("template", "app", "dist")
-	nodeModules := filepath.Join("template", "app", "node_modules")
+	mods := filepath.Join("template", "app", "node_modules")
 	tmp := filepath.Join(".gen", "tmp")
 
 	err := os.MkdirAll(dist, os.ModePerm)
 	if err != nil {
-		test.Fatal(err)
+		t.Fatal(err)
 	}
 
-	err = os.MkdirAll(nodeModules, os.ModePerm)
+	err = os.MkdirAll(mods, os.ModePerm)
 	if err != nil {
-		test.Fatal(err)
+		t.Fatal(err)
 	}
 
 	err = os.MkdirAll(tmp, os.ModePerm)
 	if err != nil {
-		test.Fatal(err)
+		t.Fatal(err)
 	}
 
 	err = os.WriteFile(filepath.Join(dist, "test.txt"), []byte("test"), os.ModePerm)
 	if err != nil {
-		test.Fatal(err)
+		t.Fatal(err)
 	}
 
-	err = os.WriteFile(filepath.Join(nodeModules, "test.txt"), []byte("test"), os.ModePerm)
+	err = os.WriteFile(filepath.Join(mods, "test.txt"), []byte("test"), os.ModePerm)
 	if err != nil {
-		test.Fatal(err)
+		t.Fatal(err)
 	}
 
 	err = os.WriteFile(filepath.Join(tmp, "test.txt"), []byte("test"), os.ModePerm)
 	if err != nil {
-		test.Fatal(err)
+		t.Fatal(err)
 	}
 
-	on.Clean()
+	err = on.Clean()
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	if files.IsFile(filepath.Join(dist, "test.txt")) {
-		test.Fatalf("cli failed to clean %s", dist)
+		t.Fatalf("cli failed to clean %s", dist)
 	}
 
-	if files.IsFile(filepath.Join(nodeModules, "test.txt")) {
-		test.Fatalf("cli failed to clean %s", nodeModules)
+	if files.IsFile(filepath.Join(mods, "test.txt")) {
+		t.Fatalf("cli failed to clean %s", mods)
 	}
 
 	if files.IsFile(filepath.Join(tmp, "test.txt")) {
-		test.Fatalf("cli failed to clean %s", tmp)
+		t.Fatalf("cli failed to clean %s", tmp)
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	on.Install()
-	on.Package()
+	err = on.Install(".")
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = on.Package()
+	if err != nil {
+		t.Fatal(err)
+	}
 }

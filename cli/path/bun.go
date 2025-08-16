@@ -3,13 +3,12 @@ package path
 import (
 	"github.com/razshare/frizzante/cli/extension"
 	"github.com/razshare/frizzante/cli/state"
-	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func Bun(base string) string {
+func Bun(base string) (string, error) {
 	var bin string
 
 	if *state.Bun != "" {
@@ -19,23 +18,22 @@ func Bun(base string) string {
 	}
 
 	if strings.HasPrefix(bin, "~") {
-		dirname, err := os.UserHomeDir()
+		home, err := os.UserHomeDir()
 		if err != nil {
-			messages.Fatal(err)
+			return "", err
 		}
-		bin = strings.Replace(bin, "~", dirname, 1)
-		return bin + extension.Find()
+		bin = strings.Replace(bin, "~", home, 1)
+		return bin + extension.Find(), nil
 	}
 
 	if !strings.Contains(bin, string(filepath.Separator)) {
-		return bin + extension.Find()
+		return bin + extension.Find(), nil
 	}
 
-	var pathError error
-	bin, pathError = filepath.Rel(base, bin)
-	if pathError != nil {
-		messages.Fatal(pathError)
+	bin, err := filepath.Rel(base, bin)
+	if err != nil {
+		return "", err
 	}
 
-	return bin + extension.Find()
+	return bin + extension.Find(), nil
 }

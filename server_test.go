@@ -2,76 +2,75 @@ package main
 
 import (
 	"fmt"
-	"github.com/razshare/frizzante/tui/messages"
 	"io"
 	"net/http"
 	"testing"
 )
 
-func TestRoutes(test *testing.T) {
+func TestRoutes(t *testing.T) {
 	<-serve
 	defer func() { serve <- 0 }()
 
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRoutes", port))
-	if getError != nil {
-		test.Fatal(getError)
+	r, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRoutes", port))
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	readAllBytes, readAllError := io.ReadAll(response.Body)
-	if readAllError != nil {
-		test.Fatal(readAllError)
+	d, err := io.ReadAll(r.Body)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	expected := "hello"
-	actual := string(readAllBytes)
+	ex := "hello"
+	ac := string(d)
 
-	if actual != expected {
-		test.Fatalf("server was expected to respond with '%s', received '%s' instead", expected, actual)
+	if ac != ex {
+		t.Fatalf("server was expected to respond with '%s', received '%s' instead", ex, ac)
 	}
 }
 
-func TestSendStatus(test *testing.T) {
+func TestSendStatus(t *testing.T) {
 	<-serve
 	defer func() { serve <- 0 }()
 
-	expected := 201
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestSendStatus", port))
-	if getError != nil {
-		test.Fatal(getError)
+	ex := 201
+	r, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestSendStatus", port))
+	if err != nil {
+		t.Fatal(err)
 	}
-	defer func(Body io.ReadCloser) {
-		closeError := Body.Close()
-		if closeError != nil {
-			messages.Fatal(closeError)
+	defer func(b io.ReadCloser) {
+		err = b.Close()
+		if err != nil {
+			t.Fatal(err)
 		}
-	}(response.Body)
+	}(r.Body)
 
-	actual := response.StatusCode
+	ac := r.StatusCode
 
-	if actual != expected {
-		test.Fatalf("server was expected to respond with status code '%d', received '%d' intead", expected, actual)
+	if ac != ex {
+		t.Fatalf("server was expected to respond with status code '%d', received '%d' intead", ex, ac)
 	}
 }
 
-func TestSendHeader(test *testing.T) {
+func TestSendHeader(t *testing.T) {
 	<-serve
 	defer func() { serve <- 0 }()
 
-	expected := "application/json"
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestSendHeader", port))
-	if getError != nil {
-		test.Fatal(getError)
+	ex := "application/json"
+	r, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestSendHeader", port))
+	if err != nil {
+		t.Fatal(err)
 	}
-	defer func(Body io.ReadCloser) {
-		closeError := Body.Close()
-		if closeError != nil {
-			messages.Fatal(closeError)
+	defer func(b io.ReadCloser) {
+		err = b.Close()
+		if err != nil {
+			t.Fatal(err)
 		}
-	}(response.Body)
+	}(r.Body)
 
-	actual := response.Header.Get("Content-Type")
+	ac := r.Header.Get("Content-Type")
 
-	if actual != expected {
-		test.Fatalf("server was expected to respond with header content type '%s', received '%s' intead", expected, actual)
+	if ac != ex {
+		t.Fatalf("server was expected to respond with header content type '%s', received '%s' intead", ex, ac)
 	}
 }

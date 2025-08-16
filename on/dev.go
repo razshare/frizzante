@@ -1,6 +1,7 @@
 package on
 
 import (
+	"fmt"
 	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
@@ -9,22 +10,30 @@ import (
 	"sync"
 )
 
-func Dev() {
-	Touch()
-
-	err := os.MkdirAll(filepath.Join(".gen", "tmp"), os.ModePerm)
+func Dev() (err error) {
+	err = Touch()
 	if err != nil {
-		messages.Fatal(err)
+		return
 	}
 
-	air := exec.Command(path.Air("."))
+	err = os.MkdirAll(filepath.Join(".gen", "tmp"), os.ModePerm)
+	if err != nil {
+		return
+	}
+
+	airbin, err := path.Air(".")
+	if err != nil {
+		return
+	}
+
+	air := exec.Command(airbin)
 	air.Env = append(os.Environ(), "DEV=1")
 	air.Stderr = os.Stderr
 	air.Stdout = os.Stdout
 	air.Stdin = os.Stdin
 	err = air.Start()
 	if err != nil {
-		messages.Fatalf("air watcher failed to launch\n%s", err)
+		return fmt.Errorf("air watcher failed to launch\n%s", err)
 	}
 
 	messages.Success("air watcher launched")
@@ -33,12 +42,14 @@ func Dev() {
 
 	group.Add(1)
 
-	go func() { PackageWatch() }()
+	go func() { err = PackageWatch() }()
 
 	group.Wait()
 
 	err = air.Wait()
 	if err != nil {
-		messages.Fatal(err)
+		return
 	}
+
+	return nil
 }

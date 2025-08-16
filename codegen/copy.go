@@ -9,7 +9,7 @@ import (
 	"regexp"
 )
 
-func Generate(efs embed.FS, gs []Generation) error {
+func Copy(efs embed.FS, gs []Generation) error {
 	for _, g := range gs {
 		if embeds.IsDirectory(efs, g.From) {
 			ds, err := efs.ReadDir(g.From)
@@ -26,7 +26,7 @@ func Generate(efs embed.FS, gs []Generation) error {
 					Overwrite: g.Overwrite,
 				})
 			}
-			err = Generate(efs, gsloc)
+			err = Copy(efs, gsloc)
 			if err != nil {
 				return err
 			}
@@ -37,7 +37,11 @@ func Generate(efs embed.FS, gs []Generation) error {
 		to := g.To
 
 		if g.Overwrite != nil && files.IsFile(to) {
-			if !g.Overwrite(to) {
+			overwrite, err := g.Overwrite(to)
+			if err != nil {
+				return err
+			}
+			if !overwrite {
 				continue
 			}
 		}

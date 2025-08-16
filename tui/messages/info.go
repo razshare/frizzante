@@ -12,7 +12,7 @@ func Info(args ...any) {
 	for i := 0; i < l; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	Status("INFO", strings.Join(entries, ""), config.Colors.Info, "15", config.Colors.Info)
+	Status("INFO", strings.Join(entries, ""), config.Colors.Info, "17", config.Colors.Info)
 }
 
 func Infof(format string, vars ...any) {

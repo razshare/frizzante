@@ -9,38 +9,48 @@ import (
 	"path/filepath"
 )
 
-func Clean() {
-	clean := exec.Command(path.Go("."), "clean")
+func Clean() error {
+	gobin, err := path.Go(".")
+	if err != nil {
+		return err
+	}
+
+	clean := exec.Command(gobin, "clean")
 	clean.Env = append(os.Environ())
 	clean.Stderr = os.Stderr
 	clean.Stdout = os.Stdout
 	clean.Stdin = os.Stdin
-	err := clean.Run()
+	err = clean.Run()
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
 	err = os.RemoveAll(filepath.Join(*state.App, "dist"))
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
 	err = os.RemoveAll(filepath.Join(*state.App, "node_modules"))
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
 	err = os.RemoveAll(filepath.Join(".gen", "tmp"))
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
 	err = os.RemoveAll(".vite")
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
-	Touch()
+	err = Touch()
+	if err != nil {
+		return err
+	}
 
 	messages.Success("project cleaned")
+
+	return nil
 }

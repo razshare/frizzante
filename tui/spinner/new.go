@@ -8,10 +8,10 @@ import (
 
 func New(msg string) *Spinner {
 	s := spinner.New()
-	s.Spinner = spinner.Dot
+	s.Spinner = spinner.Moon
 	s.Style = config.Styles.Spinner
 
-	m := Model{
+	m := &Model{
 		Spinner: s,
 		Message: msg,
 	}

@@ -10,19 +10,19 @@ import (
 	"testing"
 )
 
-func TestJavaScriptRun(test *testing.T) {
-	runtime := goja.New()
-	script := "1+1"
-	actual, runError := runtime.RunString(script)
-	if runError != nil {
-		test.Fatal(runError)
+func TestJavaScriptRun(t *testing.T) {
+	rt := goja.New()
+	src := "1+1"
+	ac, err := rt.RunString(src)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if actual.ToInteger() != 2 {
-		test.Fatalf("script was expected to return 2, received '%d' instead", actual.ToInteger())
+	if ac.ToInteger() != 2 {
+		t.Fatalf("script was expected to return 2, received '%d' instead", ac.ToInteger())
 	}
 
-	script = `
+	src = `
 	/**
 	 * @param {boolean} payload
 	 * @returns
@@ -45,55 +45,56 @@ func TestJavaScriptRun(test *testing.T) {
 	
 	result
 	`
-	actual, runError = runtime.RunString(script)
-	if runError != nil {
-		test.Fatal(runError)
+	ac, err = rt.RunString(src)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	obj := actual.ToObject(runtime)
+	obj := ac.ToObject(rt)
 	keys := obj.Keys()
 
 	if !slices.Contains(keys, "long") {
-		test.Fatal("actual value was expected to have a 'long' key")
+		t.Fatal("actual value was expected to have a 'long' key")
 	}
 
 	if !slices.Contains(keys, "short") {
-		test.Fatal("actual value was expected to have a 'short' key")
+		t.Fatal("actual value was expected to have a 'short' key")
 	}
 
 	long := obj.Get("long")
 	short := obj.Get("short")
 
-	longPieces := strings.Split(long.String(), "-")
-	if len(longPieces) != 5 {
-		test.Fatalf("long string was expected to be composed of 5 part separated by 4 -, received '%s' instead", long.String())
+	longs := strings.Split(long.String(), "-")
+	if len(longs) != 5 {
+		t.Fatalf("long string was expected to be composed of 5 part separated by 4 -, received '%s' instead", long.String())
 	}
 
-	shortPieces := strings.Split(short.String(), "-")
-	if len(shortPieces) != 1 {
-		test.Fatalf("string was expected to be composed of 1 part, received '%s' instead", short.String())
+	shorts := strings.Split(short.String(), "-")
+	if len(shorts) != 1 {
+		t.Fatalf("string was expected to be composed of 1 part, received '%s' instead", short.String())
 	}
 
 }
 
-func TestJavaScriptBundle(test *testing.T) {
-	actual := ""
-	expected := "hello"
+func TestJavaScriptBundle(t *testing.T) {
+	ac := ""
+	ex := "hello"
 
-	runtime := goja.New()
+	rt := goja.New()
 
-	err := js.SetFunction(runtime, "signal", func(call goja.FunctionCall) goja.Value {
+	err := js.SetFunction(rt, "signal", func(call goja.FunctionCall) goja.Value {
 		args := call.Arguments
 		if len(args) > 0 {
-			actual = args[0].String()
+			ac = args[0].String()
 		}
 		return goja.Undefined()
 	})
+
 	if err != nil {
 		return
 	}
 
-	script := `
+	src := `
 	import { writable } from 'svelte/store'
 	const test = writable("hello")
 	test.subscribe(function updated(value){
@@ -101,17 +102,17 @@ func TestJavaScriptBundle(test *testing.T) {
 	})
 	`
 
-	cjs, bundleError := js.Bundle(filepath.Join("template", "app"), api.FormatCommonJS, script)
-	if bundleError != nil {
-		test.Fatal(bundleError)
+	cjs, err := js.Bundle(filepath.Join("template", "app"), api.FormatCommonJS, src)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	_, javaScriptError := runtime.RunString(cjs)
-	if javaScriptError != nil {
-		test.Fatal(javaScriptError)
+	_, err = rt.RunString(cjs)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	if actual != expected {
-		test.Fatalf("script was expected to update the actual value to '%s', received '%s' instead.", expected, actual)
+	if ac != ex {
+		t.Fatalf("script was expected to update the actual value to '%s', received '%s' instead.", ex, ac)
 	}
 }

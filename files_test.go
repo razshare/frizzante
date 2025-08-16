@@ -6,102 +6,102 @@ import (
 	"testing"
 )
 
-func TestEmbeddedIsFile(test *testing.T) {
+func TestEmbeddedIsFile(t *testing.T) {
 	// Positive.
-	fileName := "makefile"
-	actual := embeds.IsFile(tefs, fileName)
-	expected := true
-	if actual != expected {
-		test.Fatalf("%s (embedded) was expected to be a file", fileName)
+	n := "makefile"
+	ac := embeds.IsFile(tefs, n)
+	ex := true
+	if ac != ex {
+		t.Fatalf("%s (embedded) was expected to be a file", n)
 	}
 
 	// Negatives.
-	fileName = "t"
-	actual = embeds.IsFile(tefs, fileName)
-	expected = false
-	if actual != expected {
-		test.Fatalf("%s (embedded) was expected to not be a file", fileName)
+	n = "t"
+	ac = embeds.IsFile(tefs, n)
+	ex = false
+	if ac != ex {
+		t.Fatalf("%s (embedded) was expected to not be a file", n)
 	}
 
-	fileName = "qwerty"
-	actual = embeds.IsFile(tefs, fileName)
-	expected = false
-	if actual != expected {
-		test.Fatalf("%s (embedded) was expected to not be a file", fileName)
+	n = "qwerty"
+	ac = embeds.IsFile(tefs, n)
+	ex = false
+	if ac != ex {
+		t.Fatalf("%s (embedded) was expected to not be a file", n)
 	}
 }
 
-func TestEmbeddedIsDirectory(test *testing.T) {
+func TestEmbeddedIsDirectory(t *testing.T) {
 	// Positive.
-	fileName := ".github"
-	actual := embeds.IsDirectory(tefs, fileName)
-	expected := true
-	if actual != expected {
-		test.Fatalf("%s (embedded) was expected to be a directory", fileName)
+	n := ".github"
+	ac := embeds.IsDirectory(tefs, n)
+	ex := true
+	if ac != ex {
+		t.Fatalf("%s (embedded) was expected to be a directory", n)
 	}
 
 	// Negatives.
-	fileName = "makefile"
-	actual = embeds.IsDirectory(tefs, fileName)
-	expected = false
-	if actual != expected {
-		test.Fatalf("%s (embedded) was expected to not be a directory", fileName)
+	n = "makefile"
+	ac = embeds.IsDirectory(tefs, n)
+	ex = false
+	if ac != ex {
+		t.Fatalf("%s (embedded) was expected to not be a directory", n)
 	}
 
-	fileName = "qwerty"
-	actual = embeds.IsDirectory(tefs, fileName)
-	expected = false
-	if actual != expected {
-		test.Fatalf("%s (embedded) was expected to not be a directory", fileName)
+	n = "qwerty"
+	ac = embeds.IsDirectory(tefs, n)
+	ex = false
+	if ac != ex {
+		t.Fatalf("%s (embedded) was expected to not be a directory", n)
 	}
 }
 
-func TestIsFile(test *testing.T) {
+func TestIsFile(t *testing.T) {
 	// Positive.
-	fileName := "makefile"
-	actual := files.IsFile(fileName)
-	expected := true
-	if actual != expected {
-		test.Fatalf("%s was expected to be a file", fileName)
+	n := "makefile"
+	ac := files.IsFile(n)
+	ex := true
+	if ac != ex {
+		t.Fatalf("%s was expected to be a file", n)
 	}
 
 	// Negatives.
-	fileName = ".github"
-	actual = files.IsFile(fileName)
-	expected = false
-	if actual != expected {
-		test.Fatalf("%s was expected to not be a file", fileName)
+	n = ".github"
+	ac = files.IsFile(n)
+	ex = false
+	if ac != ex {
+		t.Fatalf("%s was expected to not be a file", n)
 	}
 
-	fileName = "qwerty"
-	actual = files.IsFile(fileName)
-	expected = false
-	if actual != expected {
-		test.Fatalf("%s was expected to not be a file", fileName)
+	n = "qwerty"
+	ac = files.IsFile(n)
+	ex = false
+	if ac != ex {
+		t.Fatalf("%s was expected to not be a file", n)
 	}
 }
 
-func TestIsDirectory(test *testing.T) {
+func TestIsDirectory(t *testing.T) {
 	// Positive.
-	fileName := ".github"
-	actual := files.IsDirectory(fileName)
-	expected := true
-	if actual != expected {
-		test.Fatalf("%s was expected to be a directory", fileName)
+	n := ".github"
+	ac := files.IsDirectory(n)
+	ex := true
+	if ac != ex {
+		t.Fatalf("%s was expected to be a directory", n)
 	}
 
 	// Negatives.
-	fileName = "makefile"
-	actual = files.IsDirectory(fileName)
-	expected = false
-	if actual != expected {
-		test.Fatalf("%s was expected to not be a directory", fileName)
+	n = "makefile"
+	ac = files.IsDirectory(n)
+	ex = false
+	if ac != ex {
+		t.Fatalf("%s was expected to not be a directory", n)
 	}
 
-	fileName = "qwerty"
-	actual = files.IsDirectory(fileName)
-	expected = false
-	if actual != expected {
-		test.Fatalf("%s was expected to not be a directory", fileName)
+	n = "qwerty"
+	ac = files.IsDirectory(n)
+	ex = false
+	if ac != ex {
+		t.Fatalf("%s was expected to not be a directory", n)
 	}
 }

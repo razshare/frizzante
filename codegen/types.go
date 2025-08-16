@@ -27,5 +27,7 @@ type Section struct {
 type Generation struct {
 	From      string
 	To        string
-	Overwrite func(n string) bool
+	Overwrite func(n string) (bool, error)
 }
+
+type Install func(dst string) (bool, error)

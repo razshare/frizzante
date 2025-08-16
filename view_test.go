@@ -11,27 +11,27 @@ import (
 	"testing"
 )
 
-func TestRenderServer(test *testing.T) {
+func TestRenderServer(t *testing.T) {
 	<-serve
 	defer func() { serve <- 0 }()
 
-	expected := "<h1>Welcome to Frizzante.</h1>"
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderServer", port))
-	if getError != nil {
-		test.Fatal(getError)
+	ex := "<h1>Welcome to Frizzante.</h1>"
+	r, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderServer", port))
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	readAllBytes, readAllError := io.ReadAll(response.Body)
-	if readAllError != nil {
-		test.Fatal(readAllError)
+	d, err := io.ReadAll(r.Body)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	actual := string(readAllBytes)
+	ac := string(d)
 
-	ok := strings.Contains(actual, expected)
+	ok := strings.Contains(ac, ex)
 
 	if !ok {
-		test.Fatalf("server was expected to respond with a string that contains '%s', received '%s' instead", expected, actual)
+		t.Fatalf("server was expected to respond with a string that contains '%s', received '%s' instead", ex, ac)
 	}
 }
 
@@ -47,53 +47,53 @@ func BenchmarkRenderServer(b *testing.B) {
 	runtime.GC()
 	runtime.ReadMemStats(&m1)
 
-	var group sync.WaitGroup
-	group.Add(count)
+	var grp sync.WaitGroup
+	grp.Add(count)
 
 	for j := 0; j < count; j++ {
 		go func() {
-			defer group.Done()
-			response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d", port))
-			if getError != nil {
-				b.Error(getError)
+			defer grp.Done()
+			r, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d", port))
+			if err != nil {
+				b.Error(err)
 				return
 			}
 
-			_, readAllError := io.ReadAll(response.Body)
-			if readAllError != nil {
-				b.Error(readAllError)
+			_, err = io.ReadAll(r.Body)
+			if err != nil {
+				b.Error(err)
 				return
 			}
 		}()
 	}
 
-	group.Wait()
+	grp.Wait()
 
 	runtime.ReadMemStats(&m2)
 	fmt.Printf("used %d MB of memory\n", (m2.TotalAlloc-m1.TotalAlloc)/globals.MB)
 	fmt.Printf("allocated memory %d times\n", m2.Mallocs-m1.Mallocs)
 }
 
-func TestRenderClient(test *testing.T) {
+func TestRenderClient(t *testing.T) {
 	<-serve
 	defer func() { serve <- 0 }()
 
-	expected := "return document.getElementById(\"svelte-app\")"
-	response, getError := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderClient", port))
-	if getError != nil {
-		test.Fatal(getError)
+	ex := "return document.getElementById(\"svelte-app\")"
+	r, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/TestRenderClient", port))
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	readAllBytes, readAllError := io.ReadAll(response.Body)
-	if readAllError != nil {
-		test.Fatal(readAllError)
+	d, err := io.ReadAll(r.Body)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	actual := string(readAllBytes)
+	ac := string(d)
 
-	ok := strings.Contains(actual, expected)
+	ok := strings.Contains(ac, ex)
 
 	if !ok {
-		test.Fatalf("server was expected to respond with a string that contains '%s', received '%s' instead", expected, actual)
+		t.Fatalf("server was expected to respond with a string that contains '%s', received '%s' instead", ex, ac)
 	}
 }

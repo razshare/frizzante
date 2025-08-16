@@ -1,35 +1,40 @@
 package on
 
 import (
+	"embed"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"path/filepath"
 )
 
-func CreateProject(prj string) {
-	err := files.DownloadFile("https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip", prj+".zip")
+func CreateProject(efs embed.FS, n string) error {
+	err := files.DownloadFile("https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip", n+".zip")
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
-	err = files.UnzipFile(prj+".zip", prj+".tmp")
+	err = files.UnzipFile(n+".zip", n+".tmp")
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
-	err = os.Remove(prj + ".zip")
+	err = os.Remove(n + ".zip")
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
-	err = os.Rename(filepath.Join(prj+".tmp", "frizzante-starter-main"), prj)
+	err = os.Rename(filepath.Join(n+".tmp", "frizzante-starter-main"), n)
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
-	err = os.RemoveAll(filepath.Join(prj + ".tmp"))
+	err = os.RemoveAll(filepath.Join(n + ".tmp"))
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
+
+	messages.Successf("project created at %s", n)
+
+	return Configure(efs, n)
 }

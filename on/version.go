@@ -2,16 +2,15 @@ package on
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/tui/messages"
 	"strings"
 )
 
-func Version(efs embed.FS) {
+func Version(efs embed.FS) error {
 	var v string
 
 	d, err := efs.ReadFile("version")
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
 	v = string(d)
@@ -19,8 +18,10 @@ func Version(efs embed.FS) {
 	ls := strings.Split(v, "\n")
 
 	if len(ls) == 0 {
-		return
+		return nil
 	}
 
 	println(ls[0])
+
+	return nil
 }

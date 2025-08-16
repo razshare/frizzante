@@ -5,31 +5,31 @@ import (
 	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
-	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"path/filepath"
 )
 
-func Links(efs embed.FS) {
-	to := filepath.Join(*state.App, "frizzante", "links")
+func Links(efs embed.FS, base string) error {
+	dst := filepath.Join(base, *state.App, "frizzante", "links")
 
-	if files.IsDirectory(to) {
-		if confirm.Send(true, "feature `Links` already exists in this project. Overwrite?") {
-			err := os.RemoveAll(to)
+	if files.IsDirectory(dst) {
+		overwrite, err := confirm.Sendf(true, "%s already exists. Overwrite?", dst)
+		if err != nil {
+			return err
+		}
+
+		if overwrite {
+			err = os.RemoveAll(dst)
 			if err != nil {
-				messages.Fatal(err)
+				return err
 			}
 		}
 	}
 
-	err := Generate(efs, []Generation{
+	return Copy(efs, []Generation{
 		{
 			From: "template/app/frizzante/links",
-			To:   to,
+			To:   dst,
 		},
 	})
-
-	if err != nil {
-		messages.Fatal(err)
-	}
 }

@@ -9,21 +9,29 @@ import (
 	"path/filepath"
 )
 
-func Package() {
-	Touch()
+func Package() error {
+	err := Touch()
+	if err != nil {
+		return err
+	}
 
-	ssr := exec.Command(path.Bun(*state.App), "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
+	bunbin, err := path.Bun(*state.App)
+	if err != nil {
+		return err
+	}
+
+	ssr := exec.Command(bunbin, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
 	ssr.Dir = *state.App
 	ssr.Env = append(os.Environ())
 	ssr.Stderr = os.Stderr
 	ssr.Stdout = os.Stdout
 	ssr.Stdin = os.Stdin
-	err := ssr.Run()
+	err = ssr.Run()
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
-	csr := exec.Command(path.Bun(*state.App), "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
+	csr := exec.Command(bunbin, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
 	csr.Dir = *state.App
 	csr.Env = append(os.Environ())
 	csr.Stderr = os.Stderr
@@ -31,7 +39,7 @@ func Package() {
 	csr.Stdin = os.Stdin
 	err = csr.Run()
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
 	esb := exec.Command("node_modules/.bin/esbuild", "--bundle", "--outfile=dist/server.js", "--format=cjs", "--allow-overwrite", "dist/server.js")
@@ -42,8 +50,10 @@ func Package() {
 	esb.Stdin = os.Stdin
 	err = esb.Run()
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
 	messages.Success("project app package generated in ", filepath.Join(*state.App, "dist"))
+
+	return nil
 }

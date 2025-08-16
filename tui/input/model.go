@@ -7,32 +7,32 @@ import (
 	"github.com/razshare/frizzante/tui/config"
 )
 
-func (model *Model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (model *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch k := msg.(type) {
 	case tea.KeyMsg:
 		if k.Type == tea.KeyCtrlC {
-			return model, tea.Quit
+			return m, tea.Quit
 		}
 
 		if k.Type == tea.KeyEnter {
-			return model, tea.Quit
+			return m, tea.Quit
 		}
 	}
 
-	model.TextInput, cmd = model.TextInput.Update(msg)
-	return model, cmd
+	m.TextInput, cmd = m.TextInput.Update(msg)
+	return m, cmd
 }
 
-func (model *Model) View() string {
+func (m *Model) View() string {
 	return fmt.Sprintf(
 		"\n%s\n\n%s\n\n%s",
-		config.Styles.Title.Render(model.Prompt),
-		model.TextInput.View(),
+		config.Styles.Title.Render(m.Prompt),
+		m.TextInput.View(),
 		config.Styles.UserGuide.Render("[Esc] = clear"),
 	)
 }

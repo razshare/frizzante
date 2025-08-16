@@ -4,7 +4,7 @@ import (
 	"embed"
 )
 
-var Functions = map[string]func(efs embed.FS){
+var Functions = map[string]func(efs embed.FS, base string) error{
 	"air":      Air,
 	"bun":      Bun,
 	"session":  Session,

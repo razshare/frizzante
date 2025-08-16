@@ -1,10 +1,8 @@
 package spinner
 
-func Start(s *Spinner) (err error) {
+func Start(s *Spinner) {
 	s.Done = make(chan bool, 1)
-	go func() {
-		_, err = s.Program.Run()
-		close(s.Done)
-	}()
+	_, _ = s.Program.Run()
+	s.Done <- true
 	return
 }

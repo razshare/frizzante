@@ -8,20 +8,33 @@ import (
 	"os/exec"
 )
 
-func Format() {
-	Touch()
+func Format() error {
+	err := Touch()
+	if err != nil {
+		return err
+	}
 
-	gofmt := exec.Command(path.Go("."), "fmt")
+	gobin, err := path.Go(".")
+	if err != nil {
+		return err
+	}
+
+	gofmt := exec.Command(gobin, "fmt")
 	gofmt.Env = append(os.Environ())
 	gofmt.Stderr = os.Stderr
 	gofmt.Stdout = os.Stdout
 	gofmt.Stdin = os.Stdin
-	err := gofmt.Run()
+	err = gofmt.Run()
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
-	pretty := exec.Command(path.Bun(*state.App), "x", "prettier", "--write", ".")
+	bunbin, err := path.Bun(*state.App)
+	if err != nil {
+		return err
+	}
+
+	pretty := exec.Command(bunbin, "x", "prettier", "--write", ".")
 	pretty.Dir = *state.App
 	pretty.Env = append(os.Environ())
 	pretty.Stderr = os.Stderr
@@ -29,8 +42,10 @@ func Format() {
 	pretty.Stdin = os.Stdin
 	err = pretty.Run()
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
 	messages.Success("project formatted")
+
+	return nil
 }

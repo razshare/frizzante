@@ -10,10 +10,18 @@ import (
 	"strings"
 )
 
-func Build() {
-	Package()
+func Build() error {
+	err := Package()
+	if err != nil {
+		return err
+	}
 
-	build := exec.Command(path.Go("."), "build", "-o="+filepath.Join(".gen", "bin", "app"), ".")
+	gobin, err := path.Go(".")
+	if err != nil {
+		return err
+	}
+
+	build := exec.Command(gobin, "build", "-o="+filepath.Join(".gen", "bin", "app"), ".")
 	build.Env = os.Environ()
 
 	if strings.ToLower(*state.Platform) == "linux/amd64" {
@@ -29,9 +37,12 @@ func Build() {
 	build.Stderr = os.Stderr
 	build.Stdout = os.Stdout
 	build.Stdin = os.Stdin
-	err := build.Run()
+	err = build.Run()
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
+
 	messages.Success("project built into ", filepath.Join(".gen", "bin", "app"))
+
+	return nil
 }

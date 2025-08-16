@@ -7,25 +7,26 @@ import (
 	"slices"
 )
 
-func ReadDirectory(efs embed.FS, dn string) ([]string, error) {
+func ReadDirectory(efs embed.FS, n string) ([]string, error) {
 	items := make([]string, 0)
-	entries, readDirError := efs.ReadDir(dn)
-	if readDirError != nil {
-		return nil, readDirError
+	entries, err := efs.ReadDir(n)
+	if err != nil {
+		return nil, err
 	}
 
 	for _, entry := range entries {
 		if entry.IsDir() {
-			items2, readDirLocalError := ReadDirectory(efs, fmt.Sprintf("%s/%s", dn, entry.Name()))
-			if readDirLocalError != nil {
-				return nil, readDirLocalError
+			var subitems []string
+			subitems, err = ReadDirectory(efs, fmt.Sprintf("%s/%s", n, entry.Name()))
+			if err != nil {
+				return nil, err
 			}
 
-			items = slices.Concat(items, items2)
+			items = slices.Concat(items, subitems)
 			continue
 		}
 
-		items = append(items, fmt.Sprintf("%s/%s", dn, entry.Name()))
+		items = append(items, fmt.Sprintf("%s/%s", n, entry.Name()))
 	}
 
 	return items, nil

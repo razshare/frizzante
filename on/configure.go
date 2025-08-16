@@ -1,10 +1,11 @@
 package on
 
-import (
-	"embed"
-)
+import "embed"
 
-func Configure(efs embed.FS) {
-	Generate(efs, "bun,air")
-	Install()
+func Configure(efs embed.FS, base string) error {
+	err := Generate(efs, base, "bun,air")
+	if err != nil {
+		return err
+	}
+	return Install(base)
 }

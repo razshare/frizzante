@@ -5,31 +5,36 @@ import (
 	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
-	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"path/filepath"
 )
 
-func Forms(efs embed.FS) {
-	to := filepath.Join(*state.App, "frizzante", "forms")
+func Forms(efs embed.FS, base string) error {
+	dst := filepath.Join(base, *state.App, "frizzante", "forms")
 
-	if files.IsDirectory(to) {
-		if confirm.Send(true, "feature `Forms` already exists in this project. Overwrite?") {
-			err := os.RemoveAll(to)
+	if files.IsDirectory(dst) {
+		overwrite, err := confirm.Sendf(true, "%s already exists. Overwrite?", dst)
+		if err != nil {
+			return err
+		}
+		if overwrite {
+			err = os.RemoveAll(dst)
 			if err != nil {
-				messages.Fatal(err)
+				return err
 			}
 		}
 	}
 
-	err := Generate(efs, []Generation{
+	err := Copy(efs, []Generation{
 		{
 			From: "template/app/frizzante/forms",
-			To:   to,
+			To:   dst,
 		},
 	})
 
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
+
+	return nil
 }

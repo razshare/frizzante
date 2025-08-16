@@ -9,74 +9,78 @@ import (
 	"strings"
 )
 
-func (model *Model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return nil
 }
 
-func (model *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch k := msg.(type) {
 	case tea.KeyMsg:
 		if k.Type == tea.KeyCtrlC {
-			return model, tea.Quit
+			return m, tea.Quit
 		}
 
 		if k.Type == tea.KeyEnter {
-			return model, tea.Quit
+			if len(m.Selected) == 0 {
+				val := m.Search.Filtered[m.Viewport.Cursor]
+				m.Selected = append(m.Selected, val)
+			}
+			return m, tea.Quit
 		}
 
 		if k.Type == tea.KeySpace {
-			if len(model.Search.Filtered) > 0 {
-				val := model.Search.Filtered[model.Viewport.Cursor]
-				if slices.Contains(model.Selected, val) {
-					if i := slices.Index(model.Selected, val); i >= 0 {
-						model.Selected = append(model.Selected[:i], model.Selected[i+1:]...)
+			if len(m.Search.Filtered) > 0 {
+				val := m.Search.Filtered[m.Viewport.Cursor]
+				if slices.Contains(m.Selected, val) {
+					if i := slices.Index(m.Selected, val); i >= 0 {
+						m.Selected = append(m.Selected[:i], m.Selected[i+1:]...)
 					}
 				} else {
-					model.Selected = append(model.Selected, val)
+					m.Selected = append(m.Selected, val)
 				}
 			}
-			return model, nil
+			return m, nil
 		}
 
 		if k.Type == tea.KeyEsc {
-			if model.Search.Active {
-				search.Reset(model.Search, model.Viewport)
+			if m.Search.Active {
+				search.Reset(m.Search, m.Viewport)
 			}
-			return model, nil
+			return m, nil
 		}
 
 		if k.Type == tea.KeyUp || k.Type == tea.KeyCtrlP {
-			navigate.Apply(model.Search, model.Viewport, -1)
-			return model, nil
+			navigate.Apply(m.Search, m.Viewport, -1)
+			return m, nil
 		}
 
 		if k.Type == tea.KeyDown || k.Type == tea.KeyCtrlN || k.Type == tea.KeyTab {
-			navigate.Apply(model.Search, model.Viewport, 1)
-			return model, nil
+			navigate.Apply(m.Search, m.Viewport, 1)
+			return m, nil
 		}
 
 		if k.Type == tea.KeyBackspace || k.Type == tea.KeyCtrlH {
-			if model.Search.Active {
-				return model, search.Apply(model.Search, model.Viewport, k)
+			if m.Search.Active {
+				return m, search.Apply(m.Search, m.Viewport, k)
 			}
 		}
 
 		if len(k.String()) == 1 {
-			if !model.Search.Active {
-				model.Search.Active = true
-				model.Search.Input.Focus()
+			if !m.Search.Active {
+				m.Search.Active = true
+				m.Search.Input.Focus()
 			}
-			return model, search.Apply(model.Search, model.Viewport, k)
+			return m, search.Apply(m.Search, m.Viewport, k)
 		}
 	}
-	return model, nil
+	return m, nil
 }
 
-func (model *Model) View() string {
+func (m *Model) View() string {
 	var sbguide strings.Builder
 	sbguide.WriteString("(")
 	sbguide.WriteString("↑/↓ = navigate, [Space] = select, [Enter] = continue")
-	if model.Search.Active {
+	if m.Search.Active {
 		sbguide.WriteString(", [Esc] = clear")
 	}
 	sbguide.WriteString(")")
@@ -84,54 +88,49 @@ func (model *Model) View() string {
 	var sb strings.Builder
 	sb.Grow(1024)
 
-	sb.WriteString(config.Styles.Title.Render(model.Prompt))
+	sb.WriteString(config.Styles.Title.Render(m.Prompt))
 	sb.WriteString(" ")
 	sb.WriteString(config.Styles.Suggestion.Render("[type to search]"))
 	sb.WriteString(": ")
-	sb.WriteString(config.Styles.UserInput.Render(model.Search.Input.Value()))
+	sb.WriteString(config.Styles.UserInput.Render(m.Search.Input.Value()))
 	sb.WriteString("\n")
 
-	filtered := len(model.Search.Filtered)
+	filtered := len(m.Search.Filtered)
 	if filtered == 0 {
 		sb.WriteString("  No matches found\n")
 		sb.WriteString(config.Styles.UserGuide.Render(sbguide.String()))
 		return sb.String()
 	}
 
-	height := model.Viewport.Start + model.Viewport.Visible
+	height := m.Viewport.Start + m.Viewport.Visible
 	if height > filtered {
 		height = filtered
 	}
 
-	if model.Viewport.Start > 0 {
-		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("    ↑ more above"))
+	if m.Viewport.Start > 0 {
+		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
 		sb.WriteString("\n")
 	}
 
-	for i := model.Viewport.Start; i < height; i++ {
+	for i := m.Viewport.Start; i < height; i++ {
 		var sbloc strings.Builder
 
 		sbloc.WriteString(" ")
-		if model.Viewport.Cursor == i {
-			sbloc.WriteString(">")
+		if m.Viewport.Cursor == i {
+			sbloc.WriteString("● ")
+		} else if slices.Contains(m.Selected, m.Search.Filtered[i]) {
+			sbloc.WriteString("● ")
+		} else {
+			sbloc.WriteString("○ ")
 		}
 
-		sbloc.WriteString("[")
+		sbloc.WriteString(m.Search.Filtered[i])
 
-		if slices.Contains(model.Selected, model.Search.Filtered[i]) {
-			sbloc.WriteString("✓")
-		}
-
-		sbloc.WriteString("]")
-
-		sbloc.WriteString(model.Search.Filtered[i])
-
-		if model.Viewport.Cursor == i {
+		if m.Viewport.Cursor == i {
 			sb.WriteString(config.Styles.Selected.Render(sbloc.String()))
-			j := slices.Index(model.Search.Choices, model.Search.Filtered[i])
-			if j > 0 && model.Search.Descriptions[j] != "" {
-				sb.WriteString("\n")
-				sb.WriteString(config.Styles.Selected.Width(50).PaddingLeft(5).Render(model.Search.Descriptions[j]))
+			j := slices.Index(m.Search.Choices, m.Search.Filtered[i])
+			if j >= 0 && m.Search.Descriptions[j] != "" {
+				sb.WriteString(config.Styles.UserGuide.Render("  ⇢  " + m.Search.Descriptions[j]))
 			}
 		} else {
 			sb.WriteString(config.Styles.Item.Render(sbloc.String()))
@@ -140,7 +139,7 @@ func (model *Model) View() string {
 	}
 
 	if height < filtered {
-		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("    ↓ more below"))
+		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
 		sb.WriteString("\n")
 	}
 

@@ -3,14 +3,13 @@ package singleselect
 import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/program"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/text"
 	"github.com/razshare/frizzante/tui/viewport"
 )
 
-func Send(opts []string, msg string) string {
+func Send(opts []string, msg string) (string, error) {
 	c := len(opts)
 	chs := make([]string, c)
 	dsc := make([]string, c)
@@ -39,12 +38,12 @@ func Send(opts []string, msg string) string {
 	})
 
 	if err != nil {
-		messages.Fatal(err)
+		return "", err
 	}
 
-	return model.Selected
+	return model.Selected, nil
 }
 
-func Sendf(options []string, format string, vars ...any) string {
+func Sendf(options []string, format string, vars ...any) (string, error) {
 	return Send(options, fmt.Sprintf(format, vars...))
 }

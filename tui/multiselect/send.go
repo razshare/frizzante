@@ -3,14 +3,13 @@ package multiselect
 import (
 	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/program"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/text"
 	"github.com/razshare/frizzante/tui/viewport"
 )
 
-func Send(opts []string, msg string) []string {
+func Send(opts []string, msg string) ([]string, error) {
 	c := len(opts)
 	chs := make([]string, c)
 	dsc := make([]string, c)
@@ -40,10 +39,10 @@ func Send(opts []string, msg string) []string {
 	})
 
 	if err != nil {
-		messages.Fatal(err)
+		return nil, err
 	}
 
-	return model.Selected
+	return model.Selected, nil
 }
 
 func Sendf(opts []string, format string, vars ...any) []string {

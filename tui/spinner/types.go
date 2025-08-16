@@ -6,12 +6,13 @@ import (
 )
 
 type Model struct {
-	Spinner spinner.Model
-	Message string
+	Spinner     spinner.Model
+	Message     string
+	QuitMessage string
 }
 
 type Spinner struct {
-	Model   Model
+	Model   *Model
 	Program *tea.Program
 	Done    chan bool
 }

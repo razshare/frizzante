@@ -2,60 +2,68 @@ package on
 
 import (
 	"embed"
+	"fmt"
 	"github.com/razshare/frizzante/codegen"
-	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/multiselect"
 	"strings"
 )
 
-func Generate(efs embed.FS, n string) {
+func Generate(efs embed.FS, base string, n string) error {
 	if n == ":pick" {
-		items := multiselect.Send(
+		items, err := multiselect.Send(
 			[]string{
-				`Core
-					Generates router and view swapping tools.
+				`core
+					router and view swapping tools.
 				`,
-				`Forms
-					Generates a <Form> component that allows management of pending requests and errors.
+				`forms
+					form component that provides status details
 				`,
-				`Links
-					Generates a <Link> component that allows management of pending requests and errors.
+				`links
+					hyperlink component that provides status details
 				`,
-				`Air
-					Generates Air binaries, a ☁️ Live reload tool for Go apps.
+				`air
+					live reload tool for go programs
 				`,
-				`Bun
-					Generates Bun binaries, a fast JavaScript all-in-one toolkit.
+				`bun
+					fast js toolkit
 				`,
-				`Session
-					Generates functions for managing user session state.
+				`session
+					functions for managing user session state
 				`,
-				`Database
-					Generates a full database setup and defaults for querying it using SQLC.
+				`database
+					full database setup
 				`,
-				`Queries
-					Generates Go code from your ./lib/database/queries.sql file using SQLC.
+				`queries
+					sql code to go code using sqlc
 				`,
 			},
-			"What to generate",
+			"what to generate",
 		)
+
+		if err != nil {
+			return err
+		}
 
 		for _, item := range items {
 			generate, exists := codegen.Functions[strings.ToLower(item)]
 			if !exists {
-				messages.Fatalf("feature `%s` not found", item)
+				return fmt.Errorf("unknown option %s", item)
 			}
-			generate(efs)
+
+			err = generate(efs, base)
+			if err != nil {
+				return err
+			}
 		}
-		return
+		return nil
 	}
 
-	for _, feat := range strings.Split(n, ",") {
-		gen, exists := codegen.Functions[strings.ToLower(feat)]
+	for _, item := range strings.Split(n, ",") {
+		generate, exists := codegen.Functions[strings.ToLower(item)]
 		if !exists {
-			messages.Fatalf("feature `%s` not found", feat)
+			return fmt.Errorf("unknown option %s", item)
 		}
-		gen(efs)
+		generate(efs, base)
 	}
-	return
+	return nil
 }

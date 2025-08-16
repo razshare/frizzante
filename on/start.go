@@ -2,101 +2,93 @@ package on
 
 import (
 	"embed"
+	"fmt"
 	"github.com/razshare/frizzante/cli/state"
+	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/text"
 	flag "github.com/spf13/pflag"
-	"os"
 )
 
-func Start(efs embed.FS) {
+func Start(efs embed.FS) error {
+	text.Clrscr()
+
 	if !state.Parsed {
 		flag.Parse()
 		state.Parsed = true
+		logo, err := efs.ReadFile("clilogo.txt")
+		if err != nil {
+			return err
+		}
+		fmt.Println(config.Styles.BigText.Render(string(logo)))
 	}
 
 	if *state.Help {
-		Help()
-		os.Exit(0)
+		return Help()
 	}
 
 	if *state.Version {
-		Version(efs)
-		os.Exit(0)
+		return Version(efs)
 	}
 
 	if *state.CreateProject != "" {
-		CreateProject(*state.CreateProject)
-		os.Exit(0)
+		return CreateProject(efs, *state.CreateProject)
 	}
 
 	if *state.Generate != "" {
-		Generate(efs, *state.Generate)
-		os.Exit(0)
+		return Generate(efs, ".", *state.Generate)
 	}
 
 	if *state.Test {
-		Test()
-		os.Exit(0)
+		return Test()
 	}
 
 	if *state.Package {
-		Package()
-		os.Exit(0)
+		return Package()
 	}
 
 	if *state.PackageWatch {
-		PackageWatch()
-		os.Exit(0)
+		return PackageWatch()
 	}
 
 	if *state.Check {
-		Check()
-		os.Exit(0)
+		return Check()
 	}
 
 	if *state.Update {
-		Update()
-		os.Exit(0)
+		return Update()
 	}
 
 	if *state.Install {
-		Install()
-		os.Exit(0)
+		return Install(".")
 	}
 
 	if *state.Format {
-		Format()
-		os.Exit(0)
+		return Format()
 	}
 
 	if *state.Touch {
-		Touch()
-		os.Exit(0)
+		return Touch()
 	}
 
 	if *state.Clean {
-		Clean()
-		os.Exit(0)
+		return Clean()
 	}
 
 	if *state.Dev {
-		Dev()
-		os.Exit(0)
+		return Dev()
 	}
 
 	if *state.Build {
-		Build()
-		os.Exit(0)
+		return Build()
 	}
 
 	if *state.Configure {
-		Configure(efs)
-		os.Exit(0)
+		return Configure(efs, ".")
 	}
 
 	if *state.Welcome {
-		Welcome()
-		os.Exit(0)
+		return Welcome()
 	}
 
-	Menu(efs)
+	return Menu(efs, false)
 }

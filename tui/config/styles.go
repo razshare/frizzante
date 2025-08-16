@@ -6,7 +6,7 @@ var Styles = ThemeStyles{
 	Title: lipgloss.NewStyle().Bold(true),
 
 	Item: lipgloss.NewStyle().
-		PaddingLeft(2),
+		PaddingLeft(1),
 
 	Selected: lipgloss.NewStyle().
 		PaddingLeft(1).
@@ -17,7 +17,7 @@ var Styles = ThemeStyles{
 			NewStyle().
 			Foreground(lipgloss.Color(color)).
 			Bold(true).
-			PaddingLeft(2)
+			PaddingLeft(1)
 	},
 
 	BigText: lipgloss.
@@ -52,7 +52,7 @@ var Styles = ThemeStyles{
 
 	Spinner: lipgloss.
 		NewStyle().
-		Foreground(lipgloss.Color(Colors.Info)),
+		Foreground(lipgloss.Color(Colors.Primary)),
 
 	Flag: lipgloss.
 		NewStyle().

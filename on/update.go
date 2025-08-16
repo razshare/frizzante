@@ -9,27 +9,38 @@ import (
 	"os/exec"
 )
 
-func Update() {
-	Touch()
-	s := spinner.New("updating go dependencies")
-	err := spinner.Start(s)
+func Update() error {
+	err := Touch()
 	if err != nil {
-		messages.Fatal(err)
-		return
+		return err
 	}
-	get := exec.Command(path.Go("."), "get", "-u", "./...")
+
+	s := spinner.New("updating go dependencies")
+
+	gobin, err := path.Go(".")
+	if err != nil {
+		return err
+	}
+
+	go spinner.Start(s)
+	get := exec.Command(gobin, "get", "-u", "./...")
 	get.Env = append(os.Environ())
 	get.Stderr = os.Stderr
 	get.Stdout = os.Stdout
 	get.Stdin = os.Stdin
 	err = get.Run()
-	if err != nil {
-		spinner.Stop(s)
-		messages.Fatal(err)
-	}
 	spinner.Stop(s)
 
-	pretty := exec.Command(path.Bun(*state.App), "update")
+	if err != nil {
+		return err
+	}
+
+	bunbin, err := path.Bun(*state.App)
+	if err != nil {
+		return err
+	}
+
+	pretty := exec.Command(bunbin, "update")
 	pretty.Dir = *state.App
 	pretty.Env = append(os.Environ())
 	pretty.Stderr = os.Stderr
@@ -37,8 +48,10 @@ func Update() {
 	pretty.Stdin = os.Stdin
 	err = pretty.Run()
 	if err != nil {
-		messages.Fatal(err)
+		return err
 	}
 
 	messages.Success("project dependencies updated")
+
+	return nil
 }

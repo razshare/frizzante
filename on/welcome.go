@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func Welcome() {
+func Welcome() error {
 	dock := os.Getenv("FRIZZANTE_USING_DOCKER")
 	end := make(chan string)
 
@@ -30,4 +30,5 @@ func Welcome() {
 
 	<-end
 	messages.Success("Bye!")
+	return nil
 }

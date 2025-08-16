@@ -1,5 +1,5 @@
-//gen:mod "memory" "session"
-package memory
+//gen:mod "disk" "session"
+package disk
 
 import (
 	"encoding/json"

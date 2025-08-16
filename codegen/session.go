@@ -9,40 +9,53 @@ import (
 	"strings"
 )
 
-func Session(efs embed.FS) {
-	t := strings.ToLower(singleselect.Send(
+func Session(efs embed.FS, base string) error {
+	tchoice, err := singleselect.Send(
 		[]string{"Memory", "Disk"},
-		"How should the session be managed?",
-	))
+		"session type",
+	)
+	if err != nil {
+		return err
+	}
 
-	err := Generate(efs, []Generation{
+	t := strings.ToLower(tchoice)
+
+	to := filepath.Join(base, "lib", "session")
+
+	err = Copy(efs, []Generation{
 		{
 			From: "template/lib/session/" + t,
-			To:   filepath.Join("lib", "session"),
-			Overwrite: func(n string) bool {
-				yes := confirm.Sendf(true, "file `%s` already exists. Overwrite?", n)
-				if yes {
-					messages.Infof("overwriting file `%s`", n)
-				} else {
-					messages.Infof("skipping file `%s`", n)
+			To:   to,
+			Overwrite: func(n string) (bool, error) {
+				var overwrite bool
+
+				overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", n)
+				if err != nil {
+					return false, err
 				}
-				return yes
+
+				if overwrite {
+					messages.Infof("overwriting %s", n)
+				} else {
+					messages.Infof("skipping %s", n)
+				}
+
+				return overwrite, nil
 			},
 		},
 	})
 
 	if err != nil {
-		messages.Fatal(err)
-		return
+		return err
 	}
 
 	switch t {
 	case "memory":
 		messages.Success(
 			"memory session generated into session.*\n",
-			"./lib/session/new.go\n",
-			"./lib/session/start.go\n",
-			"./lib/session/types.go\n",
+			to+"/new.go\n",
+			to+"/start.go\n",
+			to+"/types.go\n",
 		)
 		messages.Tip(
 			"## Usage Example\n",
@@ -52,18 +65,18 @@ func Session(efs embed.FS) {
 			"\n",
 			"## State Shape\n",
 			"Your session state is defined by session.State,\n",
-			"which is located in ./lib/session/types.go.\n",
+			"which is located in "+to+"/types.go.\n",
 			"\n",
 			"## Initial State\n",
 			"Every new session is initialized with session.New(), \n",
-			"which is located in ./lib/session/new.go.\n",
+			"which is located in "+to+"/new.go.\n",
 		)
 	case "disk":
 		messages.Success(
 			"disk session generated into session.*\n",
-			"./lib/session/new.go\n",
-			"./lib/session/start.go\n",
-			"./lib/session/types.go\n",
+			to+"/new.go\n",
+			to+"/start.go\n",
+			to+"/types.go\n",
 		)
 		messages.Tip(
 			"## Usage Example\n",
@@ -74,11 +87,13 @@ func Session(efs embed.FS) {
 			"\n",
 			"## State Shape\n",
 			"Your session state is defined by session.State,\n",
-			"which is located in ./lib/session/types.go.\n",
+			"which is located in "+to+"/types.go.\n",
 			"\n",
 			"## Initial State\n",
 			"Every new session is initialized with session.New(), \n",
-			"which is located in ./lib/session/new.go.\n",
+			"which is located in "+to+"/new.go.\n",
 		)
 	}
+
+	return nil
 }

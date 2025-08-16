@@ -3,65 +3,76 @@ package codegen
 import (
 	"fmt"
 	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/text"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
 	"os"
 	"path/filepath"
-	"strings"
 )
 
-func Install(name string, url string, destination string) {
-	if files.IsDirectory(destination) {
-		if !confirm.Sendf(true, "It looks like `%s` is already installed in `%s`, would you like to overwrite it?", name, destination) {
-			messages.Infof("skipping `%s`", name)
-			return
-		}
+func Download(url string) (Install, error) {
+	hash, err := text.Sha1(url)
+	if err != nil {
+		return nil, err
+	}
 
-		removeError := os.RemoveAll(destination)
-		if removeError != nil {
-			messages.Fatal(removeError)
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return nil, err
+	}
+
+	ext := filepath.Ext(url)
+
+	if ext != ".exe" && ext != ".zip" {
+		ext = ""
+	}
+
+	global := filepath.Join(home, ".frizzante", hash+ext)
+
+	if !files.IsFile(global) {
+		s := spinner.New(fmt.Sprintf("downloading %s", url))
+		go spinner.Start(s)
+		defer spinner.Stop(s)
+
+		err = files.DownloadFile(url, global)
+		if err != nil {
+			return nil, err
 		}
 	}
 
-	spin := spinner.New(fmt.Sprintf("installing `%s` from `%s`...", name, url))
-	spinnerError := spinner.Start(spin)
-	if spinnerError != nil {
-		messages.Fatal(spinnerError)
-	}
-	defer func() { spinner.Stop(spin) }()
+	return func(dst string) (bool, error) {
+		if files.IsDirectory(dst) || files.IsFile(dst) {
+			var overwrite bool
+			overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", dst)
+			if err != nil {
+				return false, err
+			}
 
-	if !strings.HasSuffix(url, ".zip") {
-		nameFixed := name
-		if strings.HasSuffix(url, ".exe") {
-			nameFixed += ".exe"
+			if !overwrite {
+				messages.Infof("skipping %s", dst)
+				return false, nil
+			}
 		}
 
-		downloadError := files.DownloadFile(url, filepath.Join(destination, nameFixed))
-		if downloadError != nil {
-			messages.Fatal(downloadError)
+		s := spinner.New(fmt.Sprintf("installing %s", dst))
+		go spinner.Start(s)
+		defer spinner.Stop(s)
+
+		if ext == ".zip" {
+			err = files.UnzipFile(global, dst)
+			if err != nil {
+				return false, err
+			}
+		} else {
+			local := filepath.Join(dst, filepath.Base(dst)+ext)
+			err = files.CopyFile(global, local)
+			if err != nil {
+				return false, err
+			}
 		}
 
-		messages.Successf("%s installed in `%s`", name, destination)
-		return
-	}
-
-	zipFileName := destination + ".zip"
-	downloadError := files.DownloadFile(url, zipFileName)
-	if downloadError != nil {
-		messages.Fatal(downloadError)
-	}
-	defer func() {
-		removeError := os.Remove(zipFileName)
-		if removeError != nil {
-			messages.Fatal(removeError)
-		}
-	}()
-
-	unzipError := files.UnzipFile(zipFileName, destination)
-	if unzipError != nil {
-		messages.Fatal(unzipError)
-	}
-
-	messages.Successf("%s installed in `%s`", name, destination)
+		messages.Successf("%s installed", dst)
+		return true, nil
+	}, nil
 }
