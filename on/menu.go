@@ -14,49 +14,49 @@ func Menu(efs embed.FS) {
 	options := []string{
 		`Help`,
 		`Update
-			Updates Go and JavaScript dependencies. This might bump version numbers.
+			Updates dependencies.
 		`,
 		`Install
-			Installs Go and JavaScript dependencies.
+			Installs dependencies.
 		`,
 		`Version
 			Shows the version number of this binary.
 		`,
 		`Create Project
-			Creates a new Frizzante project. Once done, change directory into the project and run frizzante --configure or make configure.
+			Creates a new Frizzante project.
 		`,
 		`Generate
-			Generates code and resources. Select for more details.
+			Generates code and resources.
 		`,
 		`Test
 			Runs Go tests.
 		`,
 		`Package
-			Packages the JavaScript/Svelte application into app/dist.
+			Packages the app directory.
 		`,
 		`Package Watch
-			Watches for changes in the JavaScript application and packages it automatically into app/dist.
+			Watches for changes and packages the app directory.
 		`,
 		`Check
-			Checks for JavaScript and Svelte and errors.
+			Checks for JavaScript and Svelte code errors.
 		`,
 		`Format
 			Formats Go, JavaScript and Svelte code.
 		`,
 		`Touch
-			Touches the app/dist directory with placeholder files. This can be useful to silence //go:embed errors.
+			Adds placeholder files in app/dist. This can be useful to silence //go:embed errors.
 		`,
 		`Clean
 			Deletes Go temporary objects, app/dist, app/modules, .gen/tmp and .vite.
 		`,
 		`Dev
-			Runs Air and Vite development server in parallel.
+			Runs Air and Vite in parallel.
 		`,
 		`Build
-			Builds the whole project into one single binary located at .gen/bin/app.
+			Builds project into a binary located at .gen/bin/app.
 		`,
 		`Configure
-			Generates Air and Bun binaries then it installs Go and JavaScript dependencies.
+			Installs required binaries in .gen/bin and installs code dependencies.
 		`,
 	}
 
