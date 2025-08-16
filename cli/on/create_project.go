@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-func CreateProject(c *cli.Cli, clr bool, dst string) error {
+func CreateProject(_ *cli.Cli, _ bool, dst string) error {
 	err := files.DownloadFile("https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip", dst+".zip")
 	if err != nil {
 		return err
@@ -36,5 +36,5 @@ func CreateProject(c *cli.Cli, clr bool, dst string) error {
 
 	messages.Successf("project created at %s", dst)
 
-	return Configure(c, clr, dst)
+	return nil
 }
