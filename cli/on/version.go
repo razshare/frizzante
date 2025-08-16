@@ -1,14 +1,14 @@
 package on
 
 import (
-	"embed"
+	"github.com/razshare/frizzante/cli"
 	"strings"
 )
 
-func Version(efs embed.FS) error {
+func Version(c *cli.Cli) error {
 	var v string
 
-	d, err := efs.ReadFile("version")
+	d, err := c.Efs.ReadFile("version")
 	if err != nil {
 		return err
 	}

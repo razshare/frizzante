@@ -1,8 +1,8 @@
 package codegen
 
 import (
-	"embed"
 	"fmt"
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/cli/platform"
 	"github.com/razshare/frizzante/files"
@@ -13,8 +13,8 @@ import (
 	"path/filepath"
 )
 
-func Queries(_ embed.FS, base string) error {
-	sqlcbin, err := path.Sqlc(base)
+func Queries(c *cli.Cli, base string) error {
+	sqlcbin, err := path.Sqlc(c, base)
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func Queries(_ embed.FS, base string) error {
 		dst := filepath.Join(base, ".gen", "sqlc")
 
 		var plat platform.Type
-		plat, err = platform.Find()
+		plat, err = platform.Find(c)
 
 		if err != nil {
 			return err
@@ -66,7 +66,7 @@ func Queries(_ embed.FS, base string) error {
 
 	s := spinner.New("generating queries")
 
-	sqlcbin, err = path.Sqlc(database)
+	sqlcbin, err = path.Sqlc(c, database)
 	if err != nil {
 		return err
 	}
@@ -86,11 +86,11 @@ func Queries(_ embed.FS, base string) error {
 	}
 
 	messages.Success(
-		"queries generated into database.Queries.*\n",
+		"queries generated at database.Queries.*\n",
 		database+"/queries.go",
 	)
 	messages.Tip(
-		"## Usage Example\n",
+		"## usage example\n",
 		"func(c *client.Client){\n",
 		"    u, _ := database.Queries.FindUsers(c.Request.Context())\n",
 		"    send.Json(c, u)\n",

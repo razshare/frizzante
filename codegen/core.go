@@ -1,16 +1,16 @@
 package codegen
 
 import (
-	"embed"
-	"github.com/razshare/frizzante/cli/state"
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
+	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"path/filepath"
 )
 
-func Core(efs embed.FS, base string) error {
-	dst := filepath.Join(base, *state.App, "frizzante", "core")
+func Core(c *cli.Cli, base string) error {
+	dst := filepath.Join(base, *c.Flags.App, "frizzante", "core")
 
 	if files.IsDirectory(dst) {
 		overwrite, err := confirm.Sendf(true, "%s already exists. Overwrite?", dst)
@@ -18,15 +18,18 @@ func Core(efs embed.FS, base string) error {
 			return err
 		}
 
-		if overwrite {
-			err = os.RemoveAll(dst)
-			if err != nil {
-				return err
-			}
+		if !overwrite {
+			messages.Infof("skipping %s", dst)
+			return nil
+		}
+
+		err = os.RemoveAll(dst)
+		if err != nil {
+			return err
 		}
 	}
 
-	err := Copy(efs, []Generation{
+	err := Copy(c.Efs, []CopyInstruction{
 		{
 			From: "template/app/frizzante/core",
 			To:   dst,
@@ -36,6 +39,8 @@ func Core(efs embed.FS, base string) error {
 	if err != nil {
 		return err
 	}
+
+	messages.Successf("core files generated at %s", dst)
 
 	return nil
 }

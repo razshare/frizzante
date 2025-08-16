@@ -1,9 +1,8 @@
 package codegen
 
 import (
-	"embed"
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/path"
-	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/singleselect"
@@ -14,7 +13,7 @@ import (
 	"strings"
 )
 
-func Database(efs embed.FS, base string) error {
+func Database(c *cli.Cli, base string) error {
 	tchoice, err := singleselect.Send(
 		[]string{"Sqlite"},
 		"what type of database would you like to setup?",
@@ -26,22 +25,22 @@ func Database(efs embed.FS, base string) error {
 
 	t := strings.ToLower(tchoice)
 
-	to := filepath.Join(base, "lib", "database")
+	dst := filepath.Join(base, "lib", "database")
 
-	err = Copy(efs, []Generation{
+	err = Copy(c.Efs, []CopyInstruction{
 		{
 			From: "template/lib/database/" + t,
-			To:   to,
+			To:   dst,
 			Overwrite: func(n string) (bool, error) {
 				var overwrite bool
-				overwrite, err = confirm.Sendf(true, "file `%s` already exists. Overwrite?", n)
+				overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", n)
 				if err != nil {
 					return false, err
 				}
 				if overwrite {
-					messages.Infof("overwriting file `%s`", n)
+					messages.Infof("overwriting %s", n)
 				} else {
-					messages.Infof("skipping file `%s`", n)
+					messages.Infof("skipping %s", n)
 				}
 				return overwrite, nil
 			},
@@ -54,7 +53,7 @@ func Database(efs embed.FS, base string) error {
 
 	if t == "sqlite" {
 		var gobin string
-		gobin, err = path.Go(base)
+		gobin, err = path.Go(c, base)
 		if err != nil {
 			return err
 		}
@@ -91,16 +90,19 @@ func Database(efs embed.FS, base string) error {
 			return err
 		}
 
-		messages.Success("your sqlite database is ready")
+		messages.Success("sqlite database is ready")
 
-		if strings.Contains(strings.ToLower(*state.Generate), "queries") {
+		if strings.Contains(strings.ToLower(*c.Flags.Generate), "queries") {
 			var queries bool
 			queries, err = confirm.Send(true, "would you like to also generate your queries?")
 			if err != nil {
 				return err
 			}
 			if queries {
-				Queries(efs, base)
+				err = Queries(c, base)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}

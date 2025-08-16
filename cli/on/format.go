@@ -1,20 +1,20 @@
 package on
 
 import (
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/path"
-	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
 )
 
-func Format() error {
-	err := Touch()
+func Format(c *cli.Cli) error {
+	err := Touch(c)
 	if err != nil {
 		return err
 	}
 
-	gobin, err := path.Go(".")
+	gobin, err := path.Go(c, ".")
 	if err != nil {
 		return err
 	}
@@ -29,13 +29,13 @@ func Format() error {
 		return err
 	}
 
-	bunbin, err := path.Bun(*state.App)
+	bunbin, err := path.Bun(c, *c.Flags.App)
 	if err != nil {
 		return err
 	}
 
 	pretty := exec.Command(bunbin, "x", "prettier", "--write", ".")
-	pretty.Dir = *state.App
+	pretty.Dir = *c.Flags.App
 	pretty.Env = append(os.Environ())
 	pretty.Stderr = os.Stderr
 	pretty.Stdout = os.Stdout

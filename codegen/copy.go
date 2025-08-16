@@ -9,7 +9,7 @@ import (
 	"regexp"
 )
 
-func Copy(efs embed.FS, gs []Generation) error {
+func Copy(efs embed.FS, gs []CopyInstruction) error {
 	for _, g := range gs {
 		if embeds.IsDirectory(efs, g.From) {
 			ds, err := efs.ReadDir(g.From)
@@ -17,10 +17,10 @@ func Copy(efs embed.FS, gs []Generation) error {
 				return err
 			}
 
-			gsloc := make([]Generation, 0)
+			gsloc := make([]CopyInstruction, 0)
 
 			for _, d := range ds {
-				gsloc = append(gsloc, Generation{
+				gsloc = append(gsloc, CopyInstruction{
 					From:      filepath.Join(g.From, d.Name()),
 					To:        filepath.Join(g.To, d.Name()),
 					Overwrite: g.Overwrite,

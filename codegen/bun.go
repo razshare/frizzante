@@ -1,7 +1,7 @@
 package codegen
 
 import (
-	"embed"
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/platform"
 	"github.com/razshare/frizzante/files"
 	"golang.org/x/sys/unix"
@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 )
 
-func Bun(_ embed.FS, base string) error {
+func Bun(c *cli.Cli, base string) error {
 	dst := filepath.Join(base, ".gen", "bun")
-	plat, err := platform.Find()
+	plat, err := platform.Find(c)
 	if err != nil {
 		return err
 	}

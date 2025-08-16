@@ -2,6 +2,7 @@ package on
 
 import (
 	"fmt"
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
@@ -10,8 +11,8 @@ import (
 	"sync"
 )
 
-func Dev() (err error) {
-	err = Touch()
+func Dev(c *cli.Cli) (err error) {
+	err = Touch(c)
 	if err != nil {
 		return
 	}
@@ -21,7 +22,7 @@ func Dev() (err error) {
 		return
 	}
 
-	airbin, err := path.Air(".")
+	airbin, err := path.Air(c, ".")
 	if err != nil {
 		return
 	}
@@ -42,7 +43,7 @@ func Dev() (err error) {
 
 	group.Add(1)
 
-	go func() { err = PackageWatch() }()
+	go func() { err = PackageWatch(c) }()
 
 	group.Wait()
 

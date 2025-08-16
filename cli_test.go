@@ -1,57 +1,60 @@
 package main
 
 import (
+	on2 "github.com/razshare/frizzante/cli/on"
 	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/on"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
 func TestOnHelp(t *testing.T) {
-	err := on.Help()
+	err := on2.Help(c)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestOnVersion(t *testing.T) {
-	err := on.Version(efs)
+	err := on2.Version(c)
 	if err != nil {
 		t.Fatal()
 	}
 }
 
 func TestOnCreateProject(t *testing.T) {
-	dn := filepath.Join(".gen", "test_project")
+	dst := filepath.Join(".gen", "test_project")
 
-	err := os.RemoveAll(dn)
+	err := os.RemoveAll(dst)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = on.CreateProject(efs, dn)
+	app := *c.Flags.App
+	*c.Flags.App = "app"
+	defer func() { *c.Flags.App = app }()
+	err = on2.CreateProject(c, dst)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !files.IsDirectory(dn) {
+	if !files.IsDirectory(dst) {
 		t.Fatal("the cli failed to create a test project")
 	}
 
-	if !files.IsDirectory(filepath.Join(dn, "app")) {
+	if !files.IsDirectory(filepath.Join(dst, "app")) {
 		t.Fatal("the cli succeeded in creating a test project, but it's missing the app directory")
 	}
 
-	if !files.IsFile(filepath.Join(dn, "main.go")) {
+	if !files.IsFile(filepath.Join(dst, "main.go")) {
 		t.Fatal("the cli succeeded in creating a test project, but it's missing the main.go file")
 	}
 
-	if !files.IsFile(filepath.Join(dn, "go.mod")) {
+	if !files.IsFile(filepath.Join(dst, "go.mod")) {
 		t.Fatal("the cli succeeded in creating a test project, but it's missing the go.mod file")
 	}
 
-	err = os.RemoveAll(dn)
+	err = os.RemoveAll(dst)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +67,7 @@ func TestOnAddFeature(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on.Generate(efs, ".", "air")
+	err = on2.Generate(c, ".", "air")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,7 +84,7 @@ func TestOnPackage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on.Package()
+	err = on2.Package(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +101,7 @@ func TestOnInstall(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on.Install(".")
+	err = on2.Install(c, ".")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -109,7 +112,7 @@ func TestOnInstall(t *testing.T) {
 }
 
 func TestOnFormat(t *testing.T) {
-	err := on.Format()
+	err := on2.Format(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -122,7 +125,7 @@ func TestOnTouch(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on.Touch()
+	err = on2.Touch(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -138,7 +141,7 @@ func TestOnTouch(t *testing.T) {
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	err = on.Package()
+	err = on2.Package(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -179,7 +182,7 @@ func TestOnClean(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on.Clean()
+	err = on2.Clean(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,11 +200,11 @@ func TestOnClean(t *testing.T) {
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	err = on.Install(".")
+	err = on2.Install(c, ".")
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = on.Package()
+	err = on2.Package(c)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -2,17 +2,17 @@ package platform
 
 import (
 	"fmt"
-	"github.com/razshare/frizzante/cli/state"
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/tui/singleselect"
 	"strings"
 )
 
-func Find() (Type, error) {
+func Find(c *cli.Cli) (Type, error) {
 	var p string
 	var err error
 
-	if *state.Platform != "" {
-		p = *state.Platform
+	if *c.Flags.Platform != "" {
+		p = *c.Flags.Platform
 	} else {
 		p, err = singleselect.Send(
 			[]string{
@@ -26,7 +26,7 @@ func Find() (Type, error) {
 			"platform",
 		)
 
-		*state.Platform = p
+		*c.Flags.Platform = p
 	}
 
 	if err != nil {

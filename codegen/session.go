@@ -1,7 +1,7 @@
 package codegen
 
 import (
-	"embed"
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/singleselect"
@@ -9,9 +9,9 @@ import (
 	"strings"
 )
 
-func Session(efs embed.FS, base string) error {
+func Session(c *cli.Cli, base string) error {
 	tchoice, err := singleselect.Send(
-		[]string{"Memory", "Disk"},
+		[]string{"memory", "disk"},
 		"session type",
 	)
 	if err != nil {
@@ -20,12 +20,12 @@ func Session(efs embed.FS, base string) error {
 
 	t := strings.ToLower(tchoice)
 
-	to := filepath.Join(base, "lib", "session")
+	dst := filepath.Join(base, "lib", "session")
 
-	err = Copy(efs, []Generation{
+	err = Copy(c.Efs, []CopyInstruction{
 		{
 			From: "template/lib/session/" + t,
-			To:   to,
+			To:   dst,
 			Overwrite: func(n string) (bool, error) {
 				var overwrite bool
 
@@ -53,45 +53,45 @@ func Session(efs embed.FS, base string) error {
 	case "memory":
 		messages.Success(
 			"memory session generated into session.*\n",
-			to+"/new.go\n",
-			to+"/start.go\n",
-			to+"/types.go\n",
+			dst+"/new.go\n",
+			dst+"/start.go\n",
+			dst+"/types.go\n",
 		)
 		messages.Tip(
-			"## Usage Example\n",
+			"## usage example\n",
 			"func(c *client.Client){\n",
 			"    s := session.Start(receive.SessionId(c))\n",
 			"}\n",
 			"\n",
-			"## State Shape\n",
+			"## state shape\n",
 			"Your session state is defined by session.State,\n",
-			"which is located in "+to+"/types.go.\n",
+			"which is located in "+dst+"/types.go.\n",
 			"\n",
-			"## Initial State\n",
+			"## initial state\n",
 			"Every new session is initialized with session.New(), \n",
-			"which is located in "+to+"/new.go.\n",
+			"which is located in "+dst+"/new.go.\n",
 		)
 	case "disk":
 		messages.Success(
-			"disk session generated into session.*\n",
-			to+"/new.go\n",
-			to+"/start.go\n",
-			to+"/types.go\n",
+			"disk session generated at session.*\n",
+			dst+"/new.go\n",
+			dst+"/start.go\n",
+			dst+"/types.go\n",
 		)
 		messages.Tip(
-			"## Usage Example\n",
+			"## usage example\n",
 			"func(c *client.Client){\n",
 			"    s := session.Start(receive.SessionId(c))\n",
 			"    defer session.Save(c, s)\n",
 			"}\n",
 			"\n",
-			"## State Shape\n",
-			"Your session state is defined by session.State,\n",
-			"which is located in "+to+"/types.go.\n",
+			"## state shape\n",
+			"session state is defined by session.State,\n",
+			"which is located in "+dst+"/types.go.\n",
 			"\n",
-			"## Initial State\n",
-			"Every new session is initialized with session.New(), \n",
-			"which is located in "+to+"/new.go.\n",
+			"## initial state\n",
+			"ever new session is initialized with session.New(), \n",
+			"which is located in "+dst+"/new.go.\n",
 		)
 	}
 

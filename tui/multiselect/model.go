@@ -116,20 +116,13 @@ func (m *Model) View() string {
 		var sbloc strings.Builder
 		var selected = slices.Contains(m.Selected, m.Search.Filtered[i])
 
-		sbloc.WriteString(" ")
-		if m.Viewport.Cursor == i {
-			sbloc.WriteString("● ")
-		} else if selected {
+		if selected {
 			sbloc.WriteString("● ")
 		} else {
 			sbloc.WriteString("○ ")
 		}
 
 		sbloc.WriteString(m.Search.Filtered[i])
-
-		if selected {
-			sbloc.WriteString(" ✓ ")
-		}
 
 		if m.Viewport.Cursor == i {
 			sb.WriteString(config.Styles.Selected.Render(sbloc.String()))

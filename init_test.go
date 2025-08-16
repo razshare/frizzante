@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/route"
 	"github.com/razshare/frizzante/send"
@@ -22,10 +21,11 @@ var serve = make(chan any, 1)
 
 func init() {
 	// Cli.
-	*state.Platform = "linux/amd64"
-	*state.Yes = true
-	*state.Bun = "bun"
-	*state.App = "template/app"
+	c.Efs = efs
+	*c.Flags.Platform = "linux/amd64"
+	*c.Flags.Yes = true
+	*c.Flags.Bun = "bun"
+	*c.Flags.App = "template/app"
 
 	// Server.
 	s := server.New()

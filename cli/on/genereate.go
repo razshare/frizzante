@@ -1,15 +1,15 @@
 package on
 
 import (
-	"embed"
 	"fmt"
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/codegen"
 	"github.com/razshare/frizzante/tui/multiselect"
 	"strings"
 )
 
-func Generate(efs embed.FS, base string, n string) error {
-	if n == ":pick" {
+func Generate(c *cli.Cli, base string, gen string) error {
+	if gen == ":pick" {
 		items, err := multiselect.Send(
 			[]string{
 				`core
@@ -50,7 +50,7 @@ func Generate(efs embed.FS, base string, n string) error {
 				return fmt.Errorf("unknown option %s", item)
 			}
 
-			err = generate(efs, base)
+			err = generate(c, base)
 			if err != nil {
 				return err
 			}
@@ -58,12 +58,15 @@ func Generate(efs embed.FS, base string, n string) error {
 		return nil
 	}
 
-	for _, item := range strings.Split(n, ",") {
+	for _, item := range strings.Split(gen, ",") {
 		generate, exists := codegen.Functions[strings.ToLower(item)]
 		if !exists {
 			return fmt.Errorf("unknown option %s", item)
 		}
-		generate(efs, base)
+		err := generate(c, base)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -1,15 +1,19 @@
 package on
 
 import (
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/path"
 	"os"
 	"os/exec"
 )
 
-func Test() error {
-	Package()
+func Test(c *cli.Cli) error {
+	err := Package(c)
+	if err != nil {
+		return err
+	}
 
-	gobin, err := path.Go(".")
+	gobin, err := path.Go(c, ".")
 	if err != nil {
 		return err
 	}

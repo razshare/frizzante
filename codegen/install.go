@@ -53,6 +53,11 @@ func Download(url string) (Install, error) {
 				messages.Infof("skipping %s", dst)
 				return false, nil
 			}
+
+			err = os.RemoveAll(dst)
+			if err != nil {
+				return false, err
+			}
 		}
 
 		s := spinner.New(fmt.Sprintf("installing %s", dst))

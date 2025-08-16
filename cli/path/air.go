@@ -1,18 +1,18 @@
 package path
 
 import (
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/extension"
-	"github.com/razshare/frizzante/cli/state"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func Air(base string) (string, error) {
+func Air(c *cli.Cli, base string) (string, error) {
 	var bin string
 
-	if *state.Air != "" {
-		bin = *state.Air
+	if *c.Flags.Air != "" {
+		bin = *c.Flags.Air
 	} else {
 		bin = filepath.Join(".gen", "air", "air")
 	}

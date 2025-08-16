@@ -1,18 +1,18 @@
 package path
 
 import (
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/extension"
-	"github.com/razshare/frizzante/cli/state"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func Sqlc(base string) (string, error) {
+func Sqlc(c *cli.Cli, base string) (string, error) {
 	var bin string
 
-	if *state.Sqlc != "" {
-		bin = *state.Sqlc
+	if *c.Flags.Sqlc != "" {
+		bin = *c.Flags.Sqlc
 	} else {
 		bin = filepath.Join(".gen", "sqlc", "sqlc")
 	}

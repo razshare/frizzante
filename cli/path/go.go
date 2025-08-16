@@ -1,22 +1,22 @@
 package path
 
 import (
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/extension"
-	"github.com/razshare/frizzante/cli/state"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func Go(base string) (string, error) {
+func Go(c *cli.Cli, base string) (string, error) {
 	var err error
 	var bin string
 	var home string
 
-	if *state.Go != "" {
-		bin = *state.Go
+	if *c.Flags.Go != "" {
+		bin = *c.Flags.Go
 	} else {
-		bin, err = Go(".")
+		bin, err = Go(c, ".")
 		if err != nil {
 			return "", err
 		}

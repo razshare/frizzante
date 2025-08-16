@@ -1,13 +1,13 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli/state"
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/files"
 	"os"
 	"path/filepath"
 )
 
-func Touch() error {
+func Touch(c *cli.Cli) error {
 	touch := func(n string) error {
 		dn := filepath.Dir(n)
 
@@ -30,15 +30,15 @@ func Touch() error {
 		return nil
 	}
 
-	err := os.MkdirAll(filepath.Join(*state.App, "dist"), os.ModePerm)
+	err := os.MkdirAll(filepath.Join(*c.Flags.App, "dist"), os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = touch(filepath.Join(*state.App, "dist", "server.js"))
+	err = touch(filepath.Join(*c.Flags.App, "dist", "server.js"))
 	if err != nil {
 		return err
 	}
 
-	return touch(filepath.Join(*state.App, "dist", "client", "index.html"))
+	return touch(filepath.Join(*c.Flags.App, "dist", "client", "index.html"))
 }

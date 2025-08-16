@@ -24,7 +24,7 @@ type Section struct {
 	Line *string
 }
 
-type Generation struct {
+type CopyInstruction struct {
 	From      string
 	To        string
 	Overwrite func(n string) (bool, error)

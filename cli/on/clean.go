@@ -1,16 +1,16 @@
 package on
 
 import (
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/path"
-	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
 	"path/filepath"
 )
 
-func Clean() error {
-	gobin, err := path.Go(".")
+func Clean(c *cli.Cli) error {
+	gobin, err := path.Go(c, ".")
 	if err != nil {
 		return err
 	}
@@ -25,12 +25,12 @@ func Clean() error {
 		return err
 	}
 
-	err = os.RemoveAll(filepath.Join(*state.App, "dist"))
+	err = os.RemoveAll(filepath.Join(*c.Flags.App, "dist"))
 	if err != nil {
 		return err
 	}
 
-	err = os.RemoveAll(filepath.Join(*state.App, "node_modules"))
+	err = os.RemoveAll(filepath.Join(*c.Flags.App, "node_modules"))
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func Clean() error {
 		return err
 	}
 
-	err = Touch()
+	err = Touch(c)
 	if err != nil {
 		return err
 	}
