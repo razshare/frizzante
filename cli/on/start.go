@@ -1,13 +1,15 @@
 package on
 
 import (
+	"fmt"
 	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/state"
+	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/text"
 	flag "github.com/spf13/pflag"
 )
 
-func Start(c *cli.Cli) error {
+func Start(c *cli.Cli, clr bool, base string) error {
 	text.Clrscr()
 
 	if !state.Parsed {
@@ -24,11 +26,11 @@ func Start(c *cli.Cli) error {
 	}
 
 	if *c.Flags.CreateProject != "" {
-		return CreateProject(c, *c.Flags.CreateProject)
+		return CreateProject(c, clr, *c.Flags.CreateProject)
 	}
 
 	if *c.Flags.Generate != "" {
-		return Generate(c, ".", *c.Flags.Generate)
+		return Generate(c, clr, base, *c.Flags.Generate)
 	}
 
 	if *c.Flags.Test {
@@ -52,7 +54,7 @@ func Start(c *cli.Cli) error {
 	}
 
 	if *c.Flags.Install {
-		return Install(c, ".")
+		return Install(c, base)
 	}
 
 	if *c.Flags.Format {
@@ -76,12 +78,18 @@ func Start(c *cli.Cli) error {
 	}
 
 	if *c.Flags.Configure {
-		return Configure(c, ".")
+		return Configure(c, clr, base)
 	}
 
 	if *c.Flags.Welcome {
 		return Welcome()
 	}
 
-	return Menu(c, false)
+	logo, err := c.Efs.ReadFile("clilogo.txt")
+	if err != nil {
+		return err
+	}
+	fmt.Println(config.Styles.BigText.Render(string(logo)))
+
+	return Menu(c, false, base)
 }

@@ -23,7 +23,7 @@ var c = cli.New()
 
 func main() {
 	c.Efs = efs
-	err := on.Start(c)
+	err := on.Start(c, false, ".")
 	if err != nil {
 		if errors.Is(err, tea.ErrInterrupted) {
 			os.Exit(0)

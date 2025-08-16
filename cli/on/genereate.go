@@ -5,10 +5,11 @@ import (
 	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/codegen"
 	"github.com/razshare/frizzante/tui/multiselect"
+	"github.com/razshare/frizzante/tui/text"
 	"strings"
 )
 
-func Generate(c *cli.Cli, base string, gen string) error {
+func Generate(c *cli.Cli, clr bool, base string, gen string) error {
 	if gen == ":pick" {
 		items, err := multiselect.Send(
 			[]string{
@@ -44,13 +45,17 @@ func Generate(c *cli.Cli, base string, gen string) error {
 			return err
 		}
 
+		if clr {
+			text.Clrscr()
+		}
+
 		for _, item := range items {
 			generate, exists := codegen.Functions[strings.ToLower(item)]
 			if !exists {
 				return fmt.Errorf("unknown option %s", item)
 			}
 
-			err = generate(c, base)
+			err = generate(c, false, base)
 			if err != nil {
 				return err
 			}
@@ -63,7 +68,7 @@ func Generate(c *cli.Cli, base string, gen string) error {
 		if !exists {
 			return fmt.Errorf("unknown option %s", item)
 		}
-		err := generate(c, base)
+		err := generate(c, false, base)
 		if err != nil {
 			return err
 		}

@@ -7,13 +7,14 @@ import (
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/singleselect"
 	"github.com/razshare/frizzante/tui/spinner"
+	"github.com/razshare/frizzante/tui/text"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 )
 
-func Database(c *cli.Cli, base string) error {
+func Database(c *cli.Cli, clr bool, base string) error {
 	tchoice, err := singleselect.Send(
 		[]string{"Sqlite"},
 		"what type of database would you like to setup?",
@@ -21,6 +22,10 @@ func Database(c *cli.Cli, base string) error {
 
 	if err != nil {
 		return err
+	}
+
+	if clr {
+		text.Clrscr()
 	}
 
 	t := strings.ToLower(tchoice)
@@ -99,7 +104,7 @@ func Database(c *cli.Cli, base string) error {
 				return err
 			}
 			if queries {
-				err = Queries(c, base)
+				err = Queries(c, false, base)
 				if err != nil {
 					return err
 				}

@@ -4,17 +4,18 @@ import (
 	"fmt"
 	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/tui/singleselect"
+	"github.com/razshare/frizzante/tui/text"
 	"strings"
 )
 
-func Find(c *cli.Cli) (Type, error) {
-	var p string
+func Find(c *cli.Cli, clr bool) (Type, error) {
+	var plat string
 	var err error
 
 	if *c.Flags.Platform != "" {
-		p = *c.Flags.Platform
+		plat = *c.Flags.Platform
 	} else {
-		p, err = singleselect.Send(
+		plat, err = singleselect.Send(
 			[]string{
 				"Linux/amd64",
 				"Linux/arm64",
@@ -26,36 +27,40 @@ func Find(c *cli.Cli) (Type, error) {
 			"platform",
 		)
 
-		*c.Flags.Platform = p
+		*c.Flags.Platform = plat
 	}
 
 	if err != nil {
 		return 0, err
 	}
 
-	if strings.ToLower(p) == "linux/amd64" {
+	if clr {
+		text.Clrscr()
+	}
+
+	if strings.ToLower(plat) == "linux/amd64" {
 		return LinuxAmd64, nil
 	}
 
-	if strings.ToLower(p) == "linux/arm64" {
+	if strings.ToLower(plat) == "linux/arm64" {
 		return LinuxArm64, nil
 	}
 
-	if strings.ToLower(p) == "darwin/arm64" {
+	if strings.ToLower(plat) == "darwin/arm64" {
 		return DarwinArm64, nil
 	}
 
-	if strings.ToLower(p) == "darwin/amd64" {
+	if strings.ToLower(plat) == "darwin/amd64" {
 		return DarwinAmd64, nil
 	}
 
-	if strings.ToLower(p) == "windows/arm64" {
+	if strings.ToLower(plat) == "windows/arm64" {
 		return WindowsArm64, nil
 	}
 
-	if strings.ToLower(p) == "windows/amd64" {
+	if strings.ToLower(plat) == "windows/amd64" {
 		return WindowsAmd64, nil
 	}
 
-	return 0, fmt.Errorf("unknown platform %s", p)
+	return 0, fmt.Errorf("unknown platform %s", plat)
 }

@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 )
 
-func Bun(c *cli.Cli, base string) error {
+func Bun(c *cli.Cli, clr bool, base string) error {
 	dst := filepath.Join(base, ".gen", "bun")
-	plat, err := platform.Find(c)
+	plat, err := platform.Find(c, clr)
 	if err != nil {
 		return err
 	}

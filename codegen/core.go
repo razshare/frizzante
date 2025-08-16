@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func Core(c *cli.Cli, base string) error {
+func Core(c *cli.Cli, _ bool, base string) error {
 	dst := filepath.Join(base, *c.Flags.App, "frizzante", "core")
 
 	if files.IsDirectory(dst) {

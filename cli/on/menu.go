@@ -2,14 +2,11 @@ package on
 
 import (
 	"errors"
-	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/input"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/singleselect"
-	"github.com/razshare/frizzante/tui/text"
 	"os"
 )
 
@@ -116,15 +113,7 @@ var Functions = map[string]func(c *cli.Cli) (func(), error){
 	},
 }
 
-func Menu(c *cli.Cli, clear bool) error {
-	if !clear {
-		logo, err := c.Efs.ReadFile("clilogo.txt")
-		if err != nil {
-			return err
-		}
-		fmt.Println(config.Styles.BigText.Render(string(logo)))
-	}
-
+func Menu(c *cli.Cli, _ bool, base string) error {
 	options := []string{
 		`configure
 			installs required binaries and dependencies
@@ -174,6 +163,7 @@ func Menu(c *cli.Cli, clear bool) error {
 	}
 
 	choice, err := singleselect.Send(options, "menu")
+
 	if err != nil {
 		return err
 	}
@@ -186,11 +176,7 @@ func Menu(c *cli.Cli, clear bool) error {
 			messages.Error(err)
 		}
 
-		if clear {
-			text.Clrscr()
-		}
-
-		err = Start(c)
+		err = Start(c, true, base)
 		if err != nil {
 			if errors.Is(err, tea.ErrInterrupted) {
 				os.Exit(0)
@@ -201,7 +187,7 @@ func Menu(c *cli.Cli, clear bool) error {
 
 		revert()
 
-		err = Menu(c, true)
+		err = Menu(c, true, base)
 		if err != nil {
 			return err
 		}

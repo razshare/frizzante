@@ -2,7 +2,7 @@ package codegen
 
 import "github.com/razshare/frizzante/cli"
 
-var Functions = map[string]func(c *cli.Cli, base string) error{
+var Functions = map[string]func(c *cli.Cli, clr bool, base string) error{
 	"air":      Air,
 	"bun":      Bun,
 	"session":  Session,

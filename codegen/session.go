@@ -5,17 +5,23 @@ import (
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/singleselect"
+	"github.com/razshare/frizzante/tui/text"
 	"path/filepath"
 	"strings"
 )
 
-func Session(c *cli.Cli, base string) error {
+func Session(c *cli.Cli, clr bool, base string) error {
 	tchoice, err := singleselect.Send(
 		[]string{"memory", "disk"},
 		"session type",
 	)
+
 	if err != nil {
 		return err
+	}
+
+	if clr {
+		text.Clrscr()
 	}
 
 	t := strings.ToLower(tchoice)

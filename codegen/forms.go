@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 )
 
-func Forms(c *cli.Cli, base string) error {
+func Forms(c *cli.Cli, _ bool, base string) error {
 	dst := filepath.Join(base, *c.Flags.App, "frizzante", "forms")
 
 	if files.IsDirectory(dst) {

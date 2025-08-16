@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 )
 
-func Queries(c *cli.Cli, base string) error {
+func Queries(c *cli.Cli, clr bool, base string) error {
 	sqlcbin, err := path.Sqlc(c, base)
 	if err != nil {
 		return err
@@ -23,7 +23,7 @@ func Queries(c *cli.Cli, base string) error {
 		dst := filepath.Join(base, ".gen", "sqlc")
 
 		var plat platform.Type
-		plat, err = platform.Find(c)
+		plat, err = platform.Find(c, clr)
 
 		if err != nil {
 			return err

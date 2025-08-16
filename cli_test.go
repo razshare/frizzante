@@ -1,7 +1,7 @@
 package main
 
 import (
-	on2 "github.com/razshare/frizzante/cli/on"
+	"github.com/razshare/frizzante/cli/on"
 	"github.com/razshare/frizzante/files"
 	"os"
 	"path/filepath"
@@ -9,14 +9,14 @@ import (
 )
 
 func TestOnHelp(t *testing.T) {
-	err := on2.Help(c)
+	err := on.Help(c)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestOnVersion(t *testing.T) {
-	err := on2.Version(c)
+	err := on.Version(c)
 	if err != nil {
 		t.Fatal()
 	}
@@ -33,7 +33,7 @@ func TestOnCreateProject(t *testing.T) {
 	app := *c.Flags.App
 	*c.Flags.App = "app"
 	defer func() { *c.Flags.App = app }()
-	err = on2.CreateProject(c, dst)
+	err = on.CreateProject(c, false, dst)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -67,7 +67,7 @@ func TestOnAddFeature(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on2.Generate(c, ".", "air")
+	err = on.Generate(c, false, ".", "air")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +84,7 @@ func TestOnPackage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on2.Package(c)
+	err = on.Package(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +101,7 @@ func TestOnInstall(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on2.Install(c, ".")
+	err = on.Install(c, ".")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +112,7 @@ func TestOnInstall(t *testing.T) {
 }
 
 func TestOnFormat(t *testing.T) {
-	err := on2.Format(c)
+	err := on.Format(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +125,7 @@ func TestOnTouch(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on2.Touch(c)
+	err = on.Touch(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +141,7 @@ func TestOnTouch(t *testing.T) {
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	err = on2.Package(c)
+	err = on.Package(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +182,7 @@ func TestOnClean(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on2.Clean(c)
+	err = on.Clean(c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,11 +200,11 @@ func TestOnClean(t *testing.T) {
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	err = on2.Install(c, ".")
+	err = on.Install(c, ".")
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = on2.Package(c)
+	err = on.Package(c)
 	if err != nil {
 		t.Fatal(err)
 	}

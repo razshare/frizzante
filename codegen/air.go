@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 )
 
-func Air(c *cli.Cli, base string) error {
+func Air(c *cli.Cli, clr bool, base string) error {
 	dst := filepath.Join(base, ".gen", "air")
-	plat, err := platform.Find(c)
+	plat, err := platform.Find(c, clr)
 	if err != nil {
 		return err
 	}
