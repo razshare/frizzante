@@ -3,41 +3,42 @@ package confirm
 import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/tui/config"
+	"os"
 	"strings"
 )
 
-func (model Model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return nil
 }
 
-func (model Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch k := msg.(type) {
 	case tea.KeyMsg:
 		if k.Type == tea.KeyCtrlC {
-			return model, tea.Quit
+			os.Exit(0)
 		}
 
 		if k.Type == tea.KeyEnter {
-			model.Confirmed = model.DefaultValue
-			return model, tea.Quit
+			m.Confirmed = m.DefaultValue
+			return m, tea.Quit
 		}
 
 		if strings.ToLower(k.String()) == "y" {
-			model.Confirmed = true
-			return model, tea.Quit
+			m.Confirmed = true
+			return m, tea.Quit
 		}
 
 		if strings.ToLower(k.String()) == "n" {
-			model.Confirmed = false
-			return model, tea.Quit
+			m.Confirmed = false
+			return m, tea.Quit
 		}
 	}
-	return model, nil
+	return m, nil
 }
 
-func (model Model) View() string {
-	if model.DefaultValue {
-		return config.Styles.Title.Render(model.Prompt, "(Y/n)")
+func (m *Model) View() string {
+	if m.DefaultValue {
+		return config.Styles.Title.Render(m.Prompt, "(Y/n)")
 	}
-	return config.Styles.Title.Render(model.Prompt, "(y/N)")
+	return config.Styles.Title.Render(m.Prompt, "(y/N)")
 }

@@ -6,7 +6,7 @@ import (
 )
 
 func Send(defaultValue bool, prompt string) (bool, error) {
-	model := Model{Prompt: prompt, DefaultValue: defaultValue, Confirmed: defaultValue}
+	model := &Model{Prompt: prompt, DefaultValue: defaultValue, Confirmed: defaultValue}
 	result, err := program.Run(model)
 	if err != nil {
 		return false, err

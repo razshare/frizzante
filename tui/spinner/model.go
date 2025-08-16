@@ -3,6 +3,7 @@ package spinner
 import (
 	"fmt"
 	tea "github.com/charmbracelet/bubbletea"
+	"os"
 )
 
 func (m *Model) Init() tea.Cmd {
@@ -13,7 +14,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch k := msg.(type) {
 	case tea.KeyMsg:
 		if k.Type == tea.KeyCtrlC {
-			return m, tea.Quit
+			os.Exit(0)
 		}
 	}
 

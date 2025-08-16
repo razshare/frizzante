@@ -5,6 +5,7 @@ import (
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/navigate"
 	"github.com/razshare/frizzante/tui/search"
+	"os"
 	"slices"
 	"strings"
 )
@@ -17,7 +18,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch k := msg.(type) {
 	case tea.KeyMsg:
 		if k.Type == tea.KeyCtrlC {
-			return m, tea.Quit
+			os.Exit(0)
 		}
 
 		if k.Type == tea.KeyEnter {
@@ -114,17 +115,22 @@ func (m *Model) View() string {
 
 	for i := m.Viewport.Start; i < height; i++ {
 		var sbloc strings.Builder
+		var selected = slices.Contains(m.Selected, m.Search.Filtered[i])
 
 		sbloc.WriteString(" ")
 		if m.Viewport.Cursor == i {
 			sbloc.WriteString("● ")
-		} else if slices.Contains(m.Selected, m.Search.Filtered[i]) {
+		} else if selected {
 			sbloc.WriteString("● ")
 		} else {
 			sbloc.WriteString("○ ")
 		}
 
 		sbloc.WriteString(m.Search.Filtered[i])
+
+		if selected {
+			sbloc.WriteString(" ✓ ")
+		}
 
 		if m.Viewport.Cursor == i {
 			sb.WriteString(config.Styles.Selected.Render(sbloc.String()))
