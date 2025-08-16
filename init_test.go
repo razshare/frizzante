@@ -24,7 +24,6 @@ func init() {
 	c.Efs = efs
 	*c.Flags.Platform = "linux/amd64"
 	*c.Flags.Yes = true
-	*c.Flags.Bun = "bun"
 	*c.Flags.App = "template/app"
 
 	// Server.

@@ -7,8 +7,9 @@ import (
 
 // Model defines single selection options
 type Model struct {
-	Prompt   string // The Prompt to display
-	Selected string // The Selected choice
-	Search   *search.Search
-	Viewport *viewport.Viewport
+	Prompt        string // The Prompt to display
+	Selected      string // The Selected choice
+	Search        *search.Search
+	Viewport      *viewport.Viewport
+	SoftInterrupt bool
 }

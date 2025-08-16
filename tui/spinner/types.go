@@ -6,9 +6,10 @@ import (
 )
 
 type Model struct {
-	Spinner     spinner.Model
-	Message     string
-	QuitMessage string
+	Spinner       spinner.Model
+	Message       string
+	QuitMessage   string
+	SoftInterrupt bool
 }
 
 type Spinner struct {
