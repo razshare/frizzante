@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/platform"
 	"golang.org/x/sys/unix"
 	"path/filepath"
@@ -9,7 +8,6 @@ import (
 
 func Air(clr bool) error {
 	dst := filepath.Join(".gen", "air")
-	println("trying to find air, platform is", *cli.Platform)
 	plat, err := platform.Find(clr)
 	if err != nil {
 		return err
