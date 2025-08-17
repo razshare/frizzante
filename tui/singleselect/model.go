@@ -67,28 +67,31 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
-	var sbguide strings.Builder
-	sbguide.WriteString("(")
-	sbguide.WriteString("↑/↓ = navigate, [Enter] = select")
-	if m.Search.Active {
-		sbguide.WriteString(", [Esc] = clear")
-	}
-	sbguide.WriteString(")")
-
 	var sb strings.Builder
 	sb.Grow(1024)
 
-	sb.WriteString(config.Styles.Title.Render(m.Prompt))
-	sb.WriteString(" ")
-	sb.WriteString(config.Styles.Suggestion.Render("[type to search]"))
-	sb.WriteString(": ")
-	sb.WriteString(config.Styles.UserInput.Render(m.Search.Input.Value()))
+	sb.WriteString(config.Styles.Menu.Render(m.Prompt))
+
+	if m.Search.Input.Value() != "" {
+		sb.WriteString(config.Styles.UserInput.Render(" ⁋/" + m.Search.Input.Value()))
+	} else {
+		sb.WriteString(config.Styles.UserGuide.Render(" ⁋/type to search"))
+	}
+
 	sb.WriteString("\n")
 
 	filtered := len(m.Search.Filtered)
 	if filtered == 0 {
-		sb.WriteString("  No matches found\n")
-		sb.WriteString(config.Styles.UserGuide.Render(sbguide.String()))
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		sb.WriteString(config.Styles.UserGuide.PaddingLeft(1).Render("ⓘ  no matches found"))
+
+		sb.WriteString("\n")
+
+		sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • enter submit"))
+		if m.Search.Active {
+			sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+		}
+
 		return sb.String()
 	}
 
@@ -98,12 +101,14 @@ func (m *Model) View() string {
 	}
 
 	if m.Viewport.Start > 0 {
+		sb.WriteString(config.Styles.Menu.Render("│"))
 		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
 		sb.WriteString("\n")
 	}
 
 	for i := m.Viewport.Start; i < height; i++ {
-		if i == m.Viewport.Cursor {
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		if m.Viewport.Cursor == i {
 			sb.WriteString(config.Styles.Selected.Render("● " + m.Search.Filtered[i]))
 			j := slices.Index(m.Search.Choices, m.Search.Filtered[i])
 			if j >= 0 && m.Search.Descriptions[j] != "" {
@@ -116,11 +121,15 @@ func (m *Model) View() string {
 	}
 
 	if height < filtered {
+		sb.WriteString(config.Styles.Menu.Render("│"))
 		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
 		sb.WriteString("\n")
 	}
 
-	sb.WriteString(config.Styles.UserGuide.Render(sbguide.String()))
+	sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • enter submit"))
+	if m.Search.Active {
+		sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+	}
 
 	return sb.String()
 }

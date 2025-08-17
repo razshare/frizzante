@@ -8,6 +8,9 @@ var Styles = ThemeStyles{
 	Item: lipgloss.NewStyle().
 		PaddingLeft(1),
 
+	Popup: lipgloss.NewStyle().
+		Foreground(lipgloss.Color(Colors.Info)),
+
 	Selected: lipgloss.NewStyle().
 		PaddingLeft(1).
 		Foreground(lipgloss.Color(Colors.Primary)),
@@ -40,9 +43,8 @@ var Styles = ThemeStyles{
 		Bold(true).
 		Padding(1, 0),
 
-	Suggestion: lipgloss.NewStyle().
-		Foreground(lipgloss.Color(Colors.Secondary)).
-		Underline(true),
+	Menu: lipgloss.NewStyle().
+		Foreground(lipgloss.Color(Colors.Secondary)),
 
 	UserInput: lipgloss.NewStyle().
 		Foreground(lipgloss.Color(Colors.Muted)),

@@ -14,18 +14,19 @@ type ThemeColors struct {
 }
 
 type ThemeStyles struct {
-	Title      lipgloss.Style
-	Item       lipgloss.Style
-	Selected   lipgloss.Style
-	Status     func(color string) lipgloss.Style
-	BigText    lipgloss.Style
-	Section    lipgloss.Style
-	Subheader  lipgloss.Style
-	Suggestion lipgloss.Style
-	UserGuide  lipgloss.Style
-	UserInput  lipgloss.Style
-	Spinner    lipgloss.Style
-	Flag       lipgloss.Style
-	Category   lipgloss.Style
-	Example    lipgloss.Style
+	Title     lipgloss.Style
+	Popup     lipgloss.Style
+	Item      lipgloss.Style
+	Selected  lipgloss.Style
+	Status    func(color string) lipgloss.Style
+	BigText   lipgloss.Style
+	Section   lipgloss.Style
+	Subheader lipgloss.Style
+	Menu      lipgloss.Style
+	UserGuide lipgloss.Style
+	UserInput lipgloss.Style
+	Spinner   lipgloss.Style
+	Flag      lipgloss.Style
+	Category  lipgloss.Style
+	Example   lipgloss.Style
 }

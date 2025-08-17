@@ -94,7 +94,7 @@ func Generate(o GenerateOptions) error {
 					sql code to go code using sqlc
 				`,
 			},
-			"what to generate",
+			"generate",
 		)
 
 		if err != nil {

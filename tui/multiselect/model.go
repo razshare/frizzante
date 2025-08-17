@@ -25,7 +25,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if k.Type == tea.KeyEnter {
-			if len(m.Selected) == 0 {
+			if len(m.Selected) == 0 && len(m.Search.Filtered) > 0 {
 				val := m.Search.Filtered[m.Viewport.Cursor]
 				m.Selected = append(m.Selected, val)
 			}
@@ -81,28 +81,30 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
-	var sbguide strings.Builder
-	sbguide.WriteString("(")
-	sbguide.WriteString("↑/↓ = navigate, [Space] = select, [Enter] = continue")
-	if m.Search.Active {
-		sbguide.WriteString(", [Esc] = clear")
-	}
-	sbguide.WriteString(")")
-
 	var sb strings.Builder
 	sb.Grow(1024)
 
-	sb.WriteString(config.Styles.Title.Render(m.Prompt))
-	sb.WriteString(" ")
-	sb.WriteString(config.Styles.Suggestion.Render("[type to search]"))
-	sb.WriteString(": ")
-	sb.WriteString(config.Styles.UserInput.Render(m.Search.Input.Value()))
+	sb.WriteString(config.Styles.Menu.Render(m.Prompt))
+
+	if m.Search.Input.Value() != "" {
+		sb.WriteString(config.Styles.UserInput.Render(" ⁋/" + m.Search.Input.Value()))
+	} else {
+		sb.WriteString(config.Styles.UserGuide.Render(" ⁋/type to search"))
+	}
+
 	sb.WriteString("\n")
 
 	filtered := len(m.Search.Filtered)
 	if filtered == 0 {
-		sb.WriteString("  No matches found\n")
-		sb.WriteString(config.Styles.UserGuide.Render(sbguide.String()))
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		sb.WriteString(config.Styles.UserGuide.PaddingLeft(1).Render("ⓘ  no matches found"))
+
+		sb.WriteString("\n")
+
+		sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+		if m.Search.Active {
+			sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+		}
 		return sb.String()
 	}
 
@@ -112,40 +114,42 @@ func (m *Model) View() string {
 	}
 
 	if m.Viewport.Start > 0 {
+		sb.WriteString(config.Styles.Menu.Render("│"))
 		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
 		sb.WriteString("\n")
 	}
 
 	for i := m.Viewport.Start; i < height; i++ {
-		var sbloc strings.Builder
-		var selected = slices.Contains(m.Selected, m.Search.Filtered[i])
-
-		if selected {
-			sbloc.WriteString("● ")
-		} else {
-			sbloc.WriteString("○ ")
-		}
-
-		sbloc.WriteString(m.Search.Filtered[i])
-
+		sb.WriteString(config.Styles.Menu.Render("│"))
 		if m.Viewport.Cursor == i {
-			sb.WriteString(config.Styles.Selected.Render(sbloc.String()))
+			if slices.Contains(m.Selected, m.Search.Filtered[i]) {
+				sb.WriteString(config.Styles.Selected.Render("● " + m.Search.Filtered[i]))
+			} else {
+				sb.WriteString(config.Styles.Selected.Render("◉ " + m.Search.Filtered[i]))
+			}
+
 			j := slices.Index(m.Search.Choices, m.Search.Filtered[i])
 			if j >= 0 && m.Search.Descriptions[j] != "" {
 				sb.WriteString(config.Styles.UserGuide.Render("  ⇢  " + m.Search.Descriptions[j]))
 			}
+		} else if slices.Contains(m.Selected, m.Search.Filtered[i]) {
+			sb.WriteString(config.Styles.Item.Render("● " + m.Search.Filtered[i]))
 		} else {
-			sb.WriteString(config.Styles.Item.Render(sbloc.String()))
+			sb.WriteString(config.Styles.Item.Render("○ " + m.Search.Filtered[i]))
 		}
 		sb.WriteString("\n")
 	}
 
 	if height < filtered {
+		sb.WriteString(config.Styles.Menu.Render("│"))
 		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
 		sb.WriteString("\n")
 	}
 
-	sb.WriteString(config.Styles.UserGuide.Render(sbguide.String()))
+	sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+	if m.Search.Active {
+		sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+	}
 
 	return sb.String()
 }
