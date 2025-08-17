@@ -51,6 +51,15 @@ func Platform(c *Cli) (platform.Platform, error) {
 	}
 
 	save := func() {
+		dir := filepath.Dir(ntxt)
+		if !files.IsDirectory(dir) {
+			err = os.MkdirAll(dir, os.ModePerm)
+			if err != nil {
+				messages.Error(err)
+				return
+			}
+		}
+
 		err = os.WriteFile(ntxt, []byte(plat), os.ModePerm)
 		if err != nil {
 			messages.Error(err)
