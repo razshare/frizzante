@@ -1,10 +1,10 @@
 package input
 
 import (
-	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/tui/config"
+	"strings"
 )
 
 func (m *Model) Init() tea.Cmd {
@@ -22,6 +22,11 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Interrupt
 		}
 
+		if k.Type == tea.KeyEsc {
+			m.TextInput.Reset()
+			return m, nil
+		}
+
 		if k.Type == tea.KeyEnter {
 			return m, tea.Quit
 		}
@@ -32,10 +37,14 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (m *Model) View() string {
-	return fmt.Sprintf(
-		"\n%s\n\n%s\n\n%s",
-		config.Styles.Title.Render(m.Prompt),
-		m.TextInput.View(),
-		config.Styles.UserGuide.Render("[Esc] = clear"),
-	)
+	var sb strings.Builder
+	sb.WriteString(config.Styles.Menu.Render("│"))
+	sb.WriteString(config.Styles.Menu.Render(" ⏣ " + m.Prompt))
+	sb.WriteString("\n")
+	sb.WriteString(config.Styles.Menu.Render("│"))
+	sb.WriteString(config.Styles.Title.Render(" " + m.TextInput.View()))
+	sb.WriteString("\n")
+	sb.WriteString(config.Styles.UserGuide.Render("enter submit • esc clear"))
+	sb.WriteString("\n")
+	return sb.String()
 }
