@@ -2,7 +2,7 @@ frizzante:
 	frizzante --app="template/app"
 
 configure:
-	go run main.go --configure --app="template/app"
+	go run main.go --configure -y --platform="linux/amd64" --app="template/app"
 
 test:
 	go run main.go --test -y --platform="linux/amd64" --app="template/app"
