@@ -55,6 +55,9 @@ func Select(c *Cli, o SelectOptions) error {
 		`build
 			builds project at .gen/bin/app.
 		`,
+		`reset
+			deletes ~/.frizzante
+		`,
 	}
 
 	choice, err := singleselect.Send(options, "menu")

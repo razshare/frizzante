@@ -25,10 +25,13 @@ const (
 	TypeBuild    Type = 14
 	TypeConfig   Type = 15
 	TypeWelcome  Type = 16
-	TypeHelp     Type = 17
+	TypeReset    Type = 17
+	TypeHelp     Type = 99
 )
 
 type HelpOptions struct{}
+
+type ResetOptions struct{}
 
 type VersionOptions struct {
 	Efs embed.FS

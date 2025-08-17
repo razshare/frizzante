@@ -7,6 +7,8 @@ import (
 	"github.com/razshare/frizzante/tui/singleselect"
 	"os"
 	"path/filepath"
+	"runtime"
+	"slices"
 	"strings"
 )
 
@@ -33,17 +35,27 @@ func Platform(c *Cli) (platform.Platform, error) {
 	}
 
 	if plat == "" {
-		plat, err = singleselect.Send(
-			[]string{
+		detected := runtime.GOOS + "/" + runtime.GOARCH
+		if *c.Yes {
+			plat = detected
+		} else {
+			list := []string{
 				"linux/amd64",
 				"linux/arm64",
 				"darwin/amd64",
 				"darwin/arm64",
 				"windows/amd64",
 				"windows/arm64",
-			},
-			"platform",
-		)
+			}
+
+			if i := slices.Index(list, detected); i >= 0 {
+				if reduced := append(list[:i], list[i+1:]...); reduced != nil {
+					list = append([]string{detected}, reduced...)
+				}
+			}
+
+			plat, err = singleselect.Send(list, "platform (detected "+detected+")")
+		}
 	}
 
 	if err != nil {

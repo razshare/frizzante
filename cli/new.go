@@ -10,6 +10,7 @@ func New() *Cli {
 	app := flag.StringP("app", "", "app", "sets the app directory")
 	help := flag.BoolP("help", "h", false, "shows this help document")
 	ver := flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
+	res := flag.BoolP("reset", "", false, "deletes ~/.frizzante")
 	crt := flag.StringP("create-project", "c", "", "creates a frizzante project")
 	gen := flag.StringP("generate", "g", "", "generates code and binaries")
 	tst := flag.BoolP("test", "t", false, "runs tests")
@@ -101,12 +102,17 @@ func New() *Cli {
 			*ver = true
 			return func() { *ver = false }, nil
 		},
+		"reset": func() (func(), error) {
+			*ver = true
+			return func() { *ver = false }, nil
+		},
 	}
 
 	return &Cli{
 		App:          app,
 		Help:         help,
 		Version:      ver,
+		Reset:        res,
 		Project:      crt,
 		Generate:     gen,
 		Test:         tst,

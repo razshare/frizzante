@@ -10,6 +10,8 @@ func Next(c *Cli, o NextOptions) error {
 	switch o.Action() {
 	case action.TypeHelp:
 		return action.Help(action.HelpOptions{})
+	case action.TypeReset:
+		return action.Reset(action.ResetOptions{})
 	case action.TypeVersion:
 		return action.Version(action.VersionOptions{
 			Efs: c.Efs,

@@ -46,6 +46,10 @@ func Start(c *Cli) error {
 				return action.TypeVersion
 			}
 
+			if *c.Reset {
+				return action.TypeReset
+			}
+
 			if *c.Project != "" {
 				return action.TypeProject
 			}

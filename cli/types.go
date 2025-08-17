@@ -18,6 +18,7 @@ type Cli struct {
 	App          *string
 	Help         *bool
 	Version      *bool
+	Reset        *bool
 	Project      *string
 	Generate     *string
 	Test         *bool
