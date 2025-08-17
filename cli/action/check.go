@@ -1,18 +1,24 @@
-package on
+package action
 
 import (
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
-func Check(app string, bunbin string) error {
-	err := Touch(app)
+func Check(o CheckOptions) error {
+	err := Touch(TouchOptions{App: o.App})
 	if err != nil {
 		return err
 	}
 
-	eslint := exec.Command(bunbin, "x", "eslint")
-	eslint.Dir = app
+	bun, err := filepath.Rel(o.App, o.Bun)
+	if err != nil {
+		return err
+	}
+
+	eslint := exec.Command(bun, "x", "eslint")
+	eslint.Dir = o.App
 	eslint.Env = append(os.Environ())
 	eslint.Stderr = os.Stderr
 	eslint.Stdout = os.Stdout
@@ -22,8 +28,8 @@ func Check(app string, bunbin string) error {
 		return err
 	}
 
-	svelteCheck := exec.Command(bunbin, "x", "svelte-check", "--tsconfig=./tsconfig.json")
-	svelteCheck.Dir = app
+	svelteCheck := exec.Command(bun, "x", "svelte-check", "--tsconfig=./tsconfig.json")
+	svelteCheck.Dir = o.App
 	svelteCheck.Env = append(os.Environ())
 	svelteCheck.Stderr = os.Stderr
 	svelteCheck.Stdout = os.Stdout

@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Bun(bin string, base string) (string, error) {
+func Bun(bin string) (string, error) {
 	if strings.HasPrefix(bin, "~") {
 		home, err := os.UserHomeDir()
 		if err != nil {
@@ -19,11 +19,6 @@ func Bun(bin string, base string) (string, error) {
 
 	if !strings.Contains(bin, string(filepath.Separator)) {
 		return bin + extension.Find(), nil
-	}
-
-	bin, err := filepath.Rel(base, bin)
-	if err != nil {
-		return "", err
 	}
 
 	return bin + extension.Find(), nil

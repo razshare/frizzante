@@ -1,4 +1,4 @@
-package on
+package action
 
 import (
 	"github.com/razshare/frizzante/tui/messages"
@@ -7,14 +7,19 @@ import (
 	"path/filepath"
 )
 
-func Package(app string, bunbin string) error {
-	err := Touch(app)
+func Pkg(o PkgOptions) error {
+	err := Touch(TouchOptions{App: o.App})
 	if err != nil {
 		return err
 	}
 
-	ssr := exec.Command(bunbin, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
-	ssr.Dir = app
+	bun, err := filepath.Rel(o.App, o.Bun)
+	if err != nil {
+		return err
+	}
+
+	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
+	ssr.Dir = o.App
 	ssr.Env = append(os.Environ())
 	ssr.Stderr = os.Stderr
 	ssr.Stdout = os.Stdout
@@ -24,8 +29,8 @@ func Package(app string, bunbin string) error {
 		return err
 	}
 
-	csr := exec.Command(bunbin, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
-	csr.Dir = app
+	csr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
+	csr.Dir = o.App
 	csr.Env = append(os.Environ())
 	csr.Stderr = os.Stderr
 	csr.Stdout = os.Stdout
@@ -36,7 +41,7 @@ func Package(app string, bunbin string) error {
 	}
 
 	esb := exec.Command(filepath.Join("node_modules", ".bin", "esbuild"), "--bundle", "--outfile=dist/server.js", "--format=cjs", "--allow-overwrite", "dist/server.js")
-	esb.Dir = app
+	esb.Dir = o.App
 	esb.Env = append(os.Environ())
 	esb.Stderr = os.Stderr
 	esb.Stdout = os.Stdout
@@ -46,7 +51,7 @@ func Package(app string, bunbin string) error {
 		return err
 	}
 
-	messages.Success("project app package generated in ", filepath.Join(app, "dist"))
+	messages.Success("project app package generated in ", filepath.Join(o.App, "dist"))
 
 	return nil
 }

@@ -1,20 +1,26 @@
-package on
+package action
 
 import (
 	"fmt"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
-func PackageWatch(app string, bunbin string) error {
-	err := Touch(app)
+func PkgWatch(o PkgWatchOptions) error {
+	err := Touch(TouchOptions{App: o.App})
 	if err != nil {
 		return err
 	}
 
-	ssr := exec.Command(bunbin, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
-	ssr.Dir = app
+	bun, err := filepath.Rel(o.App, o.Bun)
+	if err != nil {
+		return err
+	}
+
+	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
+	ssr.Dir = o.App
 	ssr.Env = append(os.Environ(), "DEV=1")
 	ssr.Stderr = os.Stderr
 	ssr.Stdout = os.Stdout
@@ -25,8 +31,8 @@ func PackageWatch(app string, bunbin string) error {
 	}
 	messages.Success("vite server watcher launched")
 
-	csr := exec.Command(bunbin, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
-	csr.Dir = app
+	csr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
+	csr.Dir = o.App
 	csr.Env = append(os.Environ())
 	csr.Stderr = os.Stderr
 	csr.Stdout = os.Stdout

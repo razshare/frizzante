@@ -1,18 +1,19 @@
-package on
+package action
 
 import (
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
-func Format(app string, gobin string, bunbin string) error {
-	err := Touch(app)
+func Format(o FormatOptions) error {
+	err := Touch(TouchOptions{App: o.App})
 	if err != nil {
 		return err
 	}
 
-	gofmt := exec.Command(gobin, "fmt", "./...")
+	gofmt := exec.Command(o.Go, "fmt", "./...")
 	gofmt.Env = append(os.Environ())
 	gofmt.Stderr = os.Stderr
 	gofmt.Stdout = os.Stdout
@@ -22,8 +23,13 @@ func Format(app string, gobin string, bunbin string) error {
 		return err
 	}
 
-	pretty := exec.Command(bunbin, "x", "prettier", "--write", ".")
-	pretty.Dir = app
+	bun, err := filepath.Rel(o.App, o.Bun)
+	if err != nil {
+		return err
+	}
+
+	pretty := exec.Command(bun, "x", "prettier", "--write", ".")
+	pretty.Dir = o.App
 	pretty.Env = append(os.Environ())
 	pretty.Stderr = os.Stderr
 	pretty.Stdout = os.Stdout

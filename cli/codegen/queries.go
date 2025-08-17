@@ -2,9 +2,8 @@ package codegen
 
 import (
 	"fmt"
-	"github.com/razshare/frizzante/cli/path"
-	"github.com/razshare/frizzante/cli/platform"
 	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/platform"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
 	"os"
@@ -12,67 +11,55 @@ import (
 	"path/filepath"
 )
 
-func Queries(clr bool, sqlcbin string) error {
-	if !files.IsFile(sqlcbin) {
-		dst := filepath.Join(".gen", "sqlc")
-
-		var plat platform.Type
-		plat, err := platform.Find(clr)
-
-		if err != nil {
-			return err
-		}
-
+func Queries(o QueriesOptions) error {
+	if !files.IsFile(o.Sqlc) {
 		var url string
 
-		if plat == platform.DarwinArm64 {
+		if o.Platform == platform.PlatformDarwinArm64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_arm64.zip"
-		} else if plat == platform.DarwinAmd64 {
+		} else if o.Platform == platform.PlatformDarwinAmd64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_amd64.zip"
-		} else if plat == platform.LinuxArm64 {
+		} else if o.Platform == platform.PlatformLinuxArm64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_arm64.zip"
-		} else if plat == platform.LinuxAmd64 {
+		} else if o.Platform == platform.PlatformLinuxAmd64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.zip"
-		} else if plat == platform.WindowsArm64 {
+		} else if o.Platform == platform.PlatformWindowsArm64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
-		} else if plat == platform.WindowsAmd64 {
+		} else if o.Platform == platform.PlatformWindowsAmd64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
 		}
 
 		var install Install
-		install, err = Download(url)
+		install, err := Download(DownloadOptions{
+			Url:  url,
+			Auto: o.Auto,
+		})
 		if err != nil {
 			return err
 		}
 
-		_, err = install(dst)
+		_, err = install(o.Sqlc)
 		if err != nil {
 			return err
 		}
 	}
 
-	database := filepath.Join("lib", "database")
-	sqlcyaml := filepath.Join(database, "sqlc.yaml")
+	yaml := filepath.Join(o.Lib, "sqlc.yaml")
 
-	if !files.IsFile(sqlcyaml) {
-		return fmt.Errorf("%s not found", sqlcyaml)
+	if !files.IsFile(yaml) {
+		return fmt.Errorf("%s not found", yaml)
 	}
 
 	s := spinner.New("generating queries")
 
-	sqlcbin, err := path.Sqlc(sqlcbin, database)
-	if err != nil {
-		return err
-	}
-
 	go spinner.Start(s)
-	sqlc := exec.Command(sqlcbin, "generate")
-	sqlc.Dir = database
+	sqlc := exec.Command(o.Sqlc, "generate")
+	sqlc.Dir = o.Lib
 	sqlc.Env = append(os.Environ())
 	sqlc.Stderr = os.Stderr
 	sqlc.Stdout = os.Stdout
 	sqlc.Stdin = os.Stdin
-	err = sqlc.Run()
+	err := sqlc.Run()
 	spinner.Stop(s)
 
 	if err != nil {
@@ -81,7 +68,7 @@ func Queries(clr bool, sqlcbin string) error {
 
 	messages.Success(
 		"queries generated at database.Queries.*\n",
-		database+"/queries.go",
+		o.Lib+"/queries.go",
 	)
 	messages.Tip(
 		"## usage example\n",

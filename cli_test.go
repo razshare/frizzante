@@ -1,143 +1,166 @@
 package main
 
 import (
-	"github.com/razshare/frizzante/cli/on"
+	"github.com/razshare/frizzante/cli/action"
 	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/platform"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
 func TestOnHelp(t *testing.T) {
-	err := on.Help()
+	err := action.Help(action.HelpOptions{})
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestOnVersion(t *testing.T) {
-	err := on.Version()
+	err := action.Version(action.VersionOptions{Efs: efs})
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestOnCreateProject(t *testing.T) {
-	dst := filepath.Join(".gen", "test_project")
-	err := os.RemoveAll(dst)
+	proj := filepath.Join(".gen", "test_project")
+	err := os.RemoveAll(proj)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = on.CreateProject(dst)
+	err = action.Create(action.CreateOptions{Project: proj})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !files.IsDirectory(dst) {
+	if !files.IsDirectory(proj) {
 		t.Fatal("the cli failed to create a test project")
 	}
 
-	if !files.IsDirectory(filepath.Join(dst, "app")) {
+	if !files.IsDirectory(filepath.Join(proj, "app")) {
 		t.Fatal("the cli succeeded in creating a test project, but it's missing the app directory")
 	}
 
-	if !files.IsFile(filepath.Join(dst, "main.go")) {
+	if !files.IsFile(filepath.Join(proj, "main.go")) {
 		t.Fatal("the cli succeeded in creating a test project, but it's missing the main.go file")
 	}
 
-	if !files.IsFile(filepath.Join(dst, "go.mod")) {
+	if !files.IsFile(filepath.Join(proj, "go.mod")) {
 		t.Fatal("the cli succeeded in creating a test project, but it's missing the go.mod file")
 	}
 
-	err = os.RemoveAll(dst)
+	err = os.RemoveAll(proj)
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestOnGenerate(t *testing.T) {
-	air := filepath.Join(".gen", "air")
-	err := os.RemoveAll(air)
+	err := os.RemoveAll(filepath.Join(".gen", "air"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = on.Generate(filepath.Join("template", "app"), "air", false, true, "go", filepath.Join(".gen", "sqlc", "sqlc"))
+	err = action.Generate(action.GenerateOptions{
+		App:      filepath.Join("template", "app"),
+		Selected: "air",
+		Platform: platform.PlatformLinuxAmd64,
+		Auto:     true,
+		Go:       "go",
+		Air:      filepath.Join(".gen", "air", "air"),
+		Bun:      filepath.Join(".gen", "bun", "bun"),
+		Sqlc:     filepath.Join(".gen", "sqlc", "sqlc"),
+	})
+
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !files.IsDirectory(air) {
+	if !files.IsFile(filepath.Join(".gen", "air", "air")) {
 		t.Fatal("the cli failed to add air feature")
 	}
 }
 
 func TestOnPackage(t *testing.T) {
-	dist := filepath.Join("template", "app", "dist")
-	err := os.RemoveAll(dist)
+	err := os.RemoveAll(filepath.Join("template", "app", "dist"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = on.Package(filepath.Join("template", "app"), filepath.Join("..", "..", ".gen", "bun", "bun"))
+	err = action.Pkg(action.PkgOptions{
+		App: filepath.Join("template", "app"),
+		Bun: filepath.Join(".gen", "bun", "bun"),
+	})
+
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !files.IsDirectory(dist) {
+	if !files.IsDirectory(filepath.Join("template", "app", "dist")) {
 		t.Fatal("the cli failed to package the application into dist")
 	}
 }
 
 func TestOnInstall(t *testing.T) {
-	mods := filepath.Join("template", "app", "node_modules")
-	err := os.RemoveAll(mods)
+	err := os.RemoveAll(filepath.Join("template", "app", "node_modules"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = on.Install(filepath.Join("template", "app"), "go", filepath.Join("..", "..", ".gen", "bun", "bun"))
+	err = action.Install(action.InstallOptions{
+		App: filepath.Join("template", "app"),
+		Go:  "go",
+		Bun: filepath.Join(".gen", "bun", "bun"),
+	})
+
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !files.IsDirectory(mods) {
+	if !files.IsDirectory(filepath.Join("template", "app", "node_modules")) {
 		t.Fatal("the cli failed to install node_modules")
 	}
 }
 
 func TestOnFormat(t *testing.T) {
-	err := on.Format(filepath.Join("template", "app"), "go", filepath.Join("..", "..", ".gen", "bun", "bun"))
+	err := action.Format(action.FormatOptions{
+		App: filepath.Join("template", "app"),
+		Go:  "go",
+		Bun: filepath.Join(".gen", "bun", "bun"),
+	})
+
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestOnTouch(t *testing.T) {
-	dist := filepath.Join("template", "app", "dist")
-	err := os.RemoveAll(dist)
+	err := os.RemoveAll(filepath.Join("template", "app", "dist"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = on.Touch(filepath.Join("template", "app"))
+	err = action.Touch(action.TouchOptions{App: filepath.Join("template", "app")})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	script := filepath.Join("template", "app", "dist", "server.js")
-	if !files.IsFile(script) {
-		t.Fatalf("the cli failed to touch %s", script)
+	if !files.IsFile(filepath.Join("template", "app", "dist", "server.js")) {
+		t.Fatalf("the cli failed to touch %s", filepath.Join("template", "app", "dist", "server.js"))
 	}
 
-	doc := filepath.Join("template", "app", "dist", "client", "index.html")
-	if !files.IsFile(doc) {
-		t.Fatalf("the cli failed to touch %s", doc)
+	if !files.IsFile(filepath.Join("template", "app", "dist", "client", "index.html")) {
+		t.Fatalf("the cli failed to touch %s", filepath.Join("template", "app", "dist", "client", "index.html"))
 	}
 
-	// We need to restore dist, otherwise other tests will break.
-	err = on.Package(filepath.Join("template", "app"), filepath.Join("..", "..", ".gen", "bun", "bun"))
+	// We need to restore the package, otherwise other tests will break.
+	err = action.Pkg(action.PkgOptions{
+		App: filepath.Join("template", "app"),
+		Bun: filepath.Join(".gen", "bun", "bun"),
+	})
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -178,7 +201,11 @@ func TestOnClean(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on.Clean(filepath.Join("template", "app"), "go")
+	err = action.Clean(action.CleanOptions{
+		App: filepath.Join("template", "app"),
+		Go:  "go",
+	})
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -196,11 +223,21 @@ func TestOnClean(t *testing.T) {
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	err = on.Install(filepath.Join("template", "app"), "go", filepath.Join("..", "..", ".gen", "bun", "bun"))
+	err = action.Install(action.InstallOptions{
+		App: filepath.Join("template", "app"),
+		Go:  "go",
+		Bun: filepath.Join(".gen", "bun", "bun"),
+	})
+
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = on.Package(filepath.Join("template", "app"), filepath.Join("..", "..", ".gen", "bun", "bun"))
+
+	err = action.Pkg(action.PkgOptions{
+		App: filepath.Join("template", "app"),
+		Bun: filepath.Join(".gen", "bun", "bun"),
+	})
+
 	if err != nil {
 		t.Fatal(err)
 	}

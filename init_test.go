@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/route"
 	"github.com/razshare/frizzante/send"
@@ -21,13 +20,6 @@ var port = 8080
 var serve = make(chan any, 1)
 
 func init() {
-	// Cli.
-	cli.Efs = efs
-	*cli.Yes = true
-	*cli.Go = "go"
-	*cli.Platform = "linux/amd64"
-	*cli.App = "template/app"
-
 	// Server.
 	s := server.New()
 	s.PublicRoot = filepath.Join("template", "app", "dist", "client")

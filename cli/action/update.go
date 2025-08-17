@@ -1,14 +1,15 @@
-package on
+package action
 
 import (
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
 	"os"
 	"os/exec"
+	"path/filepath"
 )
 
-func Update(app string, gobin string, bunbin string) error {
-	err := Touch(app)
+func Update(o UpdateOptions) error {
+	err := Touch(TouchOptions{App: o.App})
 	if err != nil {
 		return err
 	}
@@ -16,7 +17,7 @@ func Update(app string, gobin string, bunbin string) error {
 	s := spinner.New("updating go dependencies")
 
 	go spinner.Start(s)
-	get := exec.Command(gobin, "get", "-u", "./...")
+	get := exec.Command(o.Go, "get", "-u", "./...")
 	get.Env = append(os.Environ())
 	get.Stderr = os.Stderr
 	get.Stdout = os.Stdout
@@ -28,8 +29,13 @@ func Update(app string, gobin string, bunbin string) error {
 		return err
 	}
 
-	pretty := exec.Command(bunbin, "update")
-	pretty.Dir = app
+	bun, err := filepath.Rel(o.App, o.Bun)
+	if err != nil {
+		return err
+	}
+
+	pretty := exec.Command(bun, "update")
+	pretty.Dir = o.App
 	pretty.Env = append(os.Environ())
 	pretty.Stderr = os.Stderr
 	pretty.Stdout = os.Stdout

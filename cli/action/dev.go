@@ -1,4 +1,4 @@
-package on
+package action
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 	"sync"
 )
 
-func Dev(app string, airbin string, bunbin string) (err error) {
-	err = Touch(app)
+func Dev(o DevOptions) (err error) {
+	err = Touch(TouchOptions{App: o.App})
 	if err != nil {
 		return
 	}
@@ -20,7 +20,7 @@ func Dev(app string, airbin string, bunbin string) (err error) {
 		return
 	}
 
-	air := exec.Command(airbin)
+	air := exec.Command(o.Air)
 	air.Env = append(os.Environ(), "DEV=1")
 	air.Stderr = os.Stderr
 	air.Stdout = os.Stdout
@@ -36,7 +36,7 @@ func Dev(app string, airbin string, bunbin string) (err error) {
 
 	group.Add(1)
 
-	go func() { err = PackageWatch(app, bunbin) }()
+	go func() { err = PkgWatch(PkgWatchOptions{App: o.App, Bun: o.Bun}) }()
 
 	group.Wait()
 

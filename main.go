@@ -5,8 +5,8 @@ import (
 	"errors"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/cli/on"
 	"github.com/razshare/frizzante/tui/messages"
+	flag "github.com/spf13/pflag"
 	"os"
 )
 
@@ -19,14 +19,15 @@ import (
 //go:embed queries.sql
 //go:embed schema.sql
 var efs embed.FS
+var c = cli.New()
 
 func main() {
-	cli.Efs = efs
-	err := on.Start()
-	if err != nil {
-		if errors.Is(err, tea.ErrInterrupted) {
-			os.Exit(0)
+	flag.Parse()
+	c.Efs = efs
+	if err := cli.Start(c); err != nil {
+		if !errors.Is(err, tea.ErrInterrupted) {
+			messages.Fatal(err)
 		}
-		messages.Fatal(err)
+		os.Exit(0)
 	}
 }

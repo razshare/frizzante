@@ -1,4 +1,4 @@
-package on
+package action
 
 import (
 	"github.com/razshare/frizzante/files"
@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func Touch(app string) error {
+func Touch(o TouchOptions) error {
 	touch := func(n string) error {
 		dn := filepath.Dir(n)
 
@@ -29,15 +29,15 @@ func Touch(app string) error {
 		return nil
 	}
 
-	err := os.MkdirAll(filepath.Join(app, "dist"), os.ModePerm)
+	err := os.MkdirAll(filepath.Join(o.App, "dist"), os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = touch(filepath.Join(app, "dist", "server.js"))
+	err = touch(filepath.Join(o.App, "dist", "server.js"))
 	if err != nil {
 		return err
 	}
 
-	return touch(filepath.Join(app, "dist", "client", "index.html"))
+	return touch(filepath.Join(o.App, "dist", "client", "index.html"))
 }

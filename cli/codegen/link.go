@@ -5,26 +5,23 @@ import (
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
-	"path/filepath"
 )
 
-func Links(app string, yes bool) error {
-	dst := filepath.Join(app, "frizzante", "links")
-
-	if files.IsDirectory(dst) {
-		if !yes {
-			overwrite, err := confirm.Sendf(true, "%s already exists. Overwrite?", dst)
+func Links(o LinksOptions) error {
+	if files.IsDirectory(o.Lib) {
+		if !o.Auto {
+			overwrite, err := confirm.Sendf(true, "%s already exists. Overwrite?", o.Lib)
 			if err != nil {
 				return err
 			}
 
 			if !overwrite {
-				messages.Infof("skipping %s", dst)
+				messages.Infof("skipping %s", o.Lib)
 				return nil
 			}
 		}
 
-		err := os.RemoveAll(dst)
+		err := os.RemoveAll(o.Lib)
 		if err != nil {
 			return err
 		}
@@ -33,7 +30,7 @@ func Links(app string, yes bool) error {
 	err := Copy([]CopyInstruction{
 		{
 			From: "template/app/frizzante/links",
-			To:   dst,
+			To:   o.Lib,
 		},
 	})
 
@@ -41,7 +38,7 @@ func Links(app string, yes bool) error {
 		return err
 	}
 
-	messages.Successf("link files generated at %s", dst)
+	messages.Successf("link files generated at %s", o.Lib)
 
 	return nil
 }

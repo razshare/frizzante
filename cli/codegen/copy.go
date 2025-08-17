@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	"os"
@@ -9,10 +8,10 @@ import (
 	"regexp"
 )
 
-func Copy(gs []CopyInstruction) error {
-	for _, g := range gs {
-		if embeds.IsDirectory(cli.Efs, g.From) {
-			ds, err := cli.Efs.ReadDir(g.From)
+func Copy(cops []CopyInstruction) error {
+	for _, cop := range cops {
+		if embeds.IsDirectory(cop.Efs, cop.From) {
+			ds, err := cop.Efs.ReadDir(cop.From)
 			if err != nil {
 				return err
 			}
@@ -21,9 +20,9 @@ func Copy(gs []CopyInstruction) error {
 
 			for _, d := range ds {
 				gsloc = append(gsloc, CopyInstruction{
-					From:      filepath.Join(g.From, d.Name()),
-					To:        filepath.Join(g.To, d.Name()),
-					Overwrite: g.Overwrite,
+					From:      filepath.Join(cop.From, d.Name()),
+					To:        filepath.Join(cop.To, d.Name()),
+					Overwrite: cop.Overwrite,
 				})
 			}
 			err = Copy(gsloc)
@@ -33,11 +32,11 @@ func Copy(gs []CopyInstruction) error {
 			continue
 		}
 
-		from := g.From
-		to := g.To
+		from := cop.From
+		to := cop.To
 
-		if g.Overwrite != nil && files.IsFile(to) {
-			overwrite, err := g.Overwrite(to)
+		if cop.Overwrite != nil && files.IsFile(to) {
+			overwrite, err := cop.Overwrite(to)
 			if err != nil {
 				return err
 			}
@@ -46,7 +45,7 @@ func Copy(gs []CopyInstruction) error {
 			}
 		}
 
-		dat, err := cli.Efs.ReadFile(from)
+		dat, err := cop.Efs.ReadFile(from)
 		if err != nil {
 			return err
 		}
@@ -67,7 +66,7 @@ func Copy(gs []CopyInstruction) error {
 		}
 
 		dir := filepath.Dir(to)
-		if !embeds.IsDirectory(cli.Efs, dir) {
+		if !embeds.IsDirectory(cop.Efs, dir) {
 			err = os.MkdirAll(dir, os.ModePerm)
 			if err != nil {
 				return err

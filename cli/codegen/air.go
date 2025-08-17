@@ -1,46 +1,44 @@
 package codegen
 
 import (
-	"github.com/razshare/frizzante/cli/platform"
+	"github.com/razshare/frizzante/platform"
 	"golang.org/x/sys/unix"
 	"path/filepath"
 )
 
-func Air(clr bool) error {
-	dst := filepath.Join(".gen", "air")
-	plat, err := platform.Find(clr)
-	if err != nil {
-		return err
-	}
-
+func Air(o AirOptions) error {
 	var url string
 
-	if plat == platform.DarwinArm64 {
+	if o.Platform == platform.PlatformDarwinArm64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_darwin_arm64"
-	} else if plat == platform.DarwinAmd64 {
+	} else if o.Platform == platform.PlatformDarwinAmd64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_darwin_amd64"
-	} else if plat == platform.LinuxArm64 {
+	} else if o.Platform == platform.PlatformLinuxArm64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_arm64"
-	} else if plat == platform.LinuxAmd64 {
+	} else if o.Platform == platform.PlatformLinuxAmd64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_amd64"
-	} else if plat == platform.WindowsArm64 {
+	} else if o.Platform == platform.PlatformWindowsArm64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_arm64.exe"
-	} else if plat == platform.WindowsAmd64 {
+	} else if o.Platform == platform.PlatformWindowsAmd64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_amd64.exe"
 	}
 
-	install, err := Download(url)
+	install, err := Download(DownloadOptions{
+		Url:  url,
+		Auto: o.Auto,
+	})
+
 	if err != nil {
 		return err
 	}
 
-	_, err = install(dst)
+	_, err = install(filepath.Dir(o.Air))
 	if err != nil {
 		return err
 	}
 
-	if plat != platform.WindowsArm64 && plat != platform.WindowsAmd64 {
-		err = unix.Chmod(filepath.Join(dst, "air"), 0755)
+	if o.Platform != platform.PlatformWindowsArm64 && o.Platform != platform.PlatformWindowsAmd64 {
+		err = unix.Chmod(o.Air, 0755)
 	}
 
 	if err != nil {

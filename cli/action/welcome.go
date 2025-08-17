@@ -1,11 +1,11 @@
-package on
+package action
 
 import (
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 )
 
-func Welcome() error {
+func Welcome(_ WelcomeOptions) error {
 	dock := os.Getenv("FRIZZANTE_USING_DOCKER")
 	end := make(chan string)
 

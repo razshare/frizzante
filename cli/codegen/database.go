@@ -5,16 +5,14 @@ import (
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/singleselect"
 	"github.com/razshare/frizzante/tui/spinner"
-	"github.com/razshare/frizzante/tui/text"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 )
 
-func Database(gen string, clr bool, yes bool, gobin string, sqlcbin string) error {
+func Database(o DatabaseOptions) error {
 	tchoice, err := singleselect.Send(
-		[]string{"Sqlite"},
+		[]string{"sqlite"},
 		"what type of database would you like to setup?",
 	)
 
@@ -22,20 +20,14 @@ func Database(gen string, clr bool, yes bool, gobin string, sqlcbin string) erro
 		return err
 	}
 
-	if clr {
-		text.Clrscr()
-	}
-
 	t := strings.ToLower(tchoice)
-
-	dst := filepath.Join("lib", "database")
 
 	err = Copy([]CopyInstruction{
 		{
 			From: "template/lib/database/" + t,
-			To:   dst,
+			To:   o.Lib,
 			Overwrite: func(n string) (bool, error) {
-				if yes {
+				if o.Auto {
 					return true, nil
 				}
 
@@ -64,7 +56,7 @@ func Database(gen string, clr bool, yes bool, gobin string, sqlcbin string) erro
 		s := spinner.New("adding github.com/mattn/go-sqlite3")
 
 		go spinner.Start(s)
-		install := exec.Command(gobin, "get", "github.com/mattn/go-sqlite3")
+		install := exec.Command(o.Go, "get", "github.com/mattn/go-sqlite3")
 		install.Env = append(os.Environ())
 		install.Stderr = os.Stderr
 		install.Stdout = os.Stdout
@@ -79,7 +71,7 @@ func Database(gen string, clr bool, yes bool, gobin string, sqlcbin string) erro
 		s = spinner.New("updating go dependencies")
 
 		go spinner.Start(s)
-		get := exec.Command(gobin, "get", "-u", "./...")
+		get := exec.Command(o.Go, "get", "-u", "./...")
 		get.Env = append(os.Environ())
 		get.Stderr = os.Stderr
 		get.Stdout = os.Stdout
@@ -93,14 +85,18 @@ func Database(gen string, clr bool, yes bool, gobin string, sqlcbin string) erro
 
 		messages.Success("sqlite database is ready")
 
-		if strings.Contains(strings.ToLower(gen), "queries") {
+		if strings.Contains(strings.ToLower(o.Generate), "queries") {
 			var queries bool
 			queries, err = confirm.Send(true, "would you like to also generate your queries?")
 			if err != nil {
 				return err
 			}
 			if queries {
-				err = Queries(clr, sqlcbin)
+				err = Queries(QueriesOptions{
+					Auto:     o.Auto,
+					Sqlc:     o.Sqlc,
+					Platform: o.Platform,
+				})
 				if err != nil {
 					return err
 				}

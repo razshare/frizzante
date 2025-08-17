@@ -1,4 +1,4 @@
-package on
+package action
 
 import (
 	"github.com/razshare/frizzante/tui/messages"
@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 )
 
-func Clean(app string, gobin string) error {
-	clean := exec.Command(gobin, "clean")
+func Clean(o CleanOptions) error {
+	clean := exec.Command(o.Go, "clean")
 	clean.Env = append(os.Environ())
 	clean.Stderr = os.Stderr
 	clean.Stdout = os.Stdout
@@ -18,12 +18,12 @@ func Clean(app string, gobin string) error {
 		return err
 	}
 
-	err = os.RemoveAll(filepath.Join(app, "dist"))
+	err = os.RemoveAll(filepath.Join(o.App, "dist"))
 	if err != nil {
 		return err
 	}
 
-	err = os.RemoveAll(filepath.Join(app, "node_modules"))
+	err = os.RemoveAll(filepath.Join(o.App, "node_modules"))
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func Clean(app string, gobin string) error {
 		return err
 	}
 
-	err = Touch(app)
+	err = Touch(TouchOptions{App: o.App})
 	if err != nil {
 		return err
 	}

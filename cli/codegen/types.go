@@ -1,5 +1,10 @@
 package codegen
 
+import (
+	"embed"
+	"github.com/razshare/frizzante/platform"
+)
+
 type State uint64
 
 const Start State = 0
@@ -25,9 +30,66 @@ type Section struct {
 }
 
 type CopyInstruction struct {
+	Efs       embed.FS
 	From      string
 	To        string
 	Overwrite func(n string) (bool, error)
 }
 
 type Install func(dst string) (bool, error)
+
+type AirOptions struct {
+	Air      string
+	Auto     bool
+	Platform platform.Platform
+}
+
+type BunOptions struct {
+	Bun      string
+	Auto     bool
+	Platform platform.Platform
+}
+
+type CoreOptions struct {
+	App  string
+	Auto bool
+	Lib  string
+}
+
+type DatabaseOptions struct {
+	Generate string
+	Auto     bool
+	Go       string
+	Sqlc     string
+	Lib      string
+	Platform platform.Platform
+}
+
+type QueriesOptions struct {
+	Auto     bool
+	Sqlc     string
+	Lib      string
+	Platform platform.Platform
+}
+
+type DownloadOptions struct {
+	Url  string
+	Auto bool
+}
+
+type FormsOptions struct {
+	App  string
+	Auto bool
+	Lib  string
+}
+
+type LinksOptions struct {
+	App  string
+	Auto bool
+	Lib  string
+}
+
+type SessionOptions struct {
+	Auto bool
+	Lib  string
+}

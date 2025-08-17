@@ -1,17 +1,17 @@
-package on
+package action
 
 import (
 	"os"
 	"os/exec"
 )
 
-func Test(app string, gobin string, bunbin string) error {
-	err := Package(app, bunbin)
+func Test(o TestOptions) error {
+	err := Pkg(PkgOptions{App: o.App, Bun: o.Bun})
 	if err != nil {
 		return err
 	}
 
-	test := exec.Command(gobin, "test")
+	test := exec.Command(o.Go, "test")
 	test.Env = os.Environ()
 	test.Stderr = os.Stderr
 	test.Stdout = os.Stdout

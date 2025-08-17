@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"fmt"
-	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/text"
 	"github.com/razshare/frizzante/tui/confirm"
@@ -12,8 +11,8 @@ import (
 	"path/filepath"
 )
 
-func Download(url string) (Install, error) {
-	hash, err := text.Sha1(url)
+func Download(o DownloadOptions) (Install, error) {
+	hash, err := text.Sha1(o.Url)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +22,7 @@ func Download(url string) (Install, error) {
 		return nil, err
 	}
 
-	ext := filepath.Ext(url)
+	ext := filepath.Ext(o.Url)
 
 	if ext != ".exe" && ext != ".zip" {
 		ext = ""
@@ -32,11 +31,11 @@ func Download(url string) (Install, error) {
 	global := filepath.Join(home, ".frizzante", hash+ext)
 
 	if !files.IsFile(global) {
-		s := spinner.New(fmt.Sprintf("downloading %s", url))
+		s := spinner.New(fmt.Sprintf("downloading %s", o.Url))
 		go spinner.Start(s)
 		defer spinner.Stop(s)
 
-		err = files.DownloadFile(url, global)
+		err = files.DownloadFile(o.Url, global)
 		if err != nil {
 			return nil, err
 		}
@@ -44,7 +43,7 @@ func Download(url string) (Install, error) {
 
 	return func(dst string) (bool, error) {
 		if files.IsDirectory(dst) || files.IsFile(dst) {
-			if !*cli.Yes {
+			if !o.Auto {
 				var overwrite bool
 				overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", dst)
 				if err != nil {
