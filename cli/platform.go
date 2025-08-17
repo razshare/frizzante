@@ -96,7 +96,7 @@ func Platform(c *Cli) (platform.Platform, error) {
 		return platform.PlatformWindowsAmd64, nil
 	}
 
-	messages.Errorf("unknown platform %s", plat)
+	messages.Infof("unknown platform %s, falling back to linux/amd64", plat)
 
-	return Platform(c)
+	return platform.PlatformLinuxAmd64, nil
 }
