@@ -10,110 +10,110 @@ import (
 	"os"
 )
 
-var Functions = map[string]func(c *cli.Cli) (func(), error){
-	"configure": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Configure = true
+var Functions = map[string]func() (func(), error){
+	"configure": func() (func(), error) {
+		*cli.Configure = true
 		return func() {
-			*c.Flags.Configure = false
+			*cli.Configure = false
 		}, nil
 	},
-	"create project": func(c *cli.Cli) (func(), error) {
+	"create project": func() (func(), error) {
 		var err error
-		*c.Flags.CreateProject, err = input.Send("give the project a name")
+		*cli.CreateProject, err = input.Send("give the project a name")
 		if err != nil {
 			return nil, err
 		}
 		return func() {
-			*c.Flags.CreateProject = ""
+			*cli.CreateProject = ""
 		}, nil
 	},
-	"dev": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Dev = true
+	"dev": func() (func(), error) {
+		*cli.Dev = true
 		return func() {
-			*c.Flags.Dev = false
+			*cli.Dev = false
 		}, nil
 	},
-	"build": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Build = true
+	"build": func() (func(), error) {
+		*cli.Build = true
 		return func() {
-			*c.Flags.Build = false
+			*cli.Build = false
 		}, nil
 	},
-	"install": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Install = true
+	"install": func() (func(), error) {
+		*cli.Install = true
 		return func() {
-			*c.Flags.Install = false
+			*cli.Install = false
 		}, nil
 	},
-	"update": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Update = true
+	"update": func() (func(), error) {
+		*cli.Update = true
 		return func() {
-			*c.Flags.Update = false
+			*cli.Update = false
 		}, nil
 	},
-	"generate": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Generate = ":pick"
+	"generate": func() (func(), error) {
+		*cli.Generate = ":pick"
 		return func() {
-			*c.Flags.Generate = ""
+			*cli.Generate = ""
 		}, nil
 	},
-	"package": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Package = true
+	"package": func() (func(), error) {
+		*cli.Package = true
 		return func() {
-			*c.Flags.Package = false
+			*cli.Package = false
 		}, nil
 	},
-	"package (watch)": func(c *cli.Cli) (func(), error) {
-		*c.Flags.PackageWatch = true
+	"package (watch)": func() (func(), error) {
+		*cli.PackageWatch = true
 		return func() {
-			*c.Flags.PackageWatch = false
+			*cli.PackageWatch = false
 		}, nil
 	},
-	"test": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Test = true
+	"test": func() (func(), error) {
+		*cli.Test = true
 		return func() {
-			*c.Flags.Test = false
+			*cli.Test = false
 		}, nil
 	},
-	"check": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Check = true
+	"check": func() (func(), error) {
+		*cli.Check = true
 		return func() {
-			*c.Flags.Check = false
+			*cli.Check = false
 		}, nil
 	},
-	"format": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Format = true
+	"format": func() (func(), error) {
+		*cli.Format = true
 		return func() {
-			*c.Flags.Format = false
+			*cli.Format = false
 		}, nil
 	},
-	"touch": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Touch = true
+	"touch": func() (func(), error) {
+		*cli.Touch = true
 		return func() {
-			*c.Flags.Touch = false
+			*cli.Touch = false
 		}, nil
 	},
-	"clean": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Clean = true
+	"clean": func() (func(), error) {
+		*cli.Clean = true
 		return func() {
-			*c.Flags.Clean = false
+			*cli.Clean = false
 		}, nil
 	},
-	"help": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Help = true
+	"help": func() (func(), error) {
+		*cli.Help = true
 		return func() {
-			*c.Flags.Help = false
+			*cli.Help = false
 		}, nil
 	},
-	"version": func(c *cli.Cli) (func(), error) {
-		*c.Flags.Version = true
+	"version": func() (func(), error) {
+		*cli.Version = true
 		return func() {
-			*c.Flags.Version = false
+			*cli.Version = false
 		}, nil
 	},
 }
 
-func Menu(c *cli.Cli, _ bool, base string) error {
+func Menu() error {
 	options := []string{
 		`configure
 			installs required binaries and dependencies
@@ -137,10 +137,10 @@ func Menu(c *cli.Cli, _ bool, base string) error {
 			runs tests
 		`,
 		`package
-			builds ` + *c.Flags.App + `
+			builds ` + "app" + `
 		`,
 		`package (watch)
-			builds ` + *c.Flags.App + ` on change
+			builds ` + "app" + ` on change
 		`,
 		`check
 			checks for code errors
@@ -149,7 +149,7 @@ func Menu(c *cli.Cli, _ bool, base string) error {
 			formats code
 		`,
 		`touch
-			adds placeholders in ` + *c.Flags.App + `/dist
+			adds placeholders in ` + "app" + `/dist
 		`,
 		`clean
 			deletes unnecessary files
@@ -171,12 +171,12 @@ func Menu(c *cli.Cli, _ bool, base string) error {
 	if choose := Functions[choice]; choose != nil {
 		var revert func()
 
-		revert, err = choose(c)
+		revert, err = choose()
 		if err != nil {
 			messages.Error(err)
 		}
 
-		err = Start(c, true, base)
+		err = Start()
 		if err != nil {
 			if errors.Is(err, tea.ErrInterrupted) {
 				os.Exit(0)
@@ -187,7 +187,7 @@ func Menu(c *cli.Cli, _ bool, base string) error {
 
 		revert()
 
-		err = Menu(c, true, base)
+		err = Menu()
 		if err != nil {
 			return err
 		}

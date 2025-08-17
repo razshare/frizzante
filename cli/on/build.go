@@ -1,8 +1,6 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
@@ -10,13 +8,8 @@ import (
 	"strings"
 )
 
-func Build(c *cli.Cli) error {
-	err := Package(c)
-	if err != nil {
-		return err
-	}
-
-	gobin, err := path.Go(c, ".")
+func Build(app string, plat string, gobin string, bunbin string) error {
+	err := Package(app, bunbin)
 	if err != nil {
 		return err
 	}
@@ -24,13 +17,13 @@ func Build(c *cli.Cli) error {
 	build := exec.Command(gobin, "build", "-o="+filepath.Join(".gen", "bin", "app"), ".")
 	build.Env = os.Environ()
 
-	if strings.ToLower(*c.Flags.Platform) == "linux/amd64" {
+	if strings.ToLower(plat) == "linux/amd64" {
 		build.Env = append(build.Env, "GOOS=linux", "GOARCH=amd64")
-	} else if strings.ToLower(*c.Flags.Platform) == "linux/arm64" {
+	} else if strings.ToLower(plat) == "linux/arm64" {
 		build.Env = append(build.Env, "GOOS=linux", "GOARCH=arm64")
-	} else if strings.ToLower(*c.Flags.Platform) == "linux/arm64" {
+	} else if strings.ToLower(plat) == "linux/arm64" {
 		build.Env = append(build.Env, "GOOS=darwin", "GOARCH=amd64")
-	} else if strings.ToLower(*c.Flags.Platform) == "linux/arm64" {
+	} else if strings.ToLower(plat) == "linux/arm64" {
 		build.Env = append(build.Env, "GOOS=darwin", "GOARCH=arm64")
 	}
 

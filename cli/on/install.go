@@ -1,31 +1,22 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
 	"os"
 	"os/exec"
-	"path/filepath"
 )
 
-func Install(c *cli.Cli, base string) error {
-	err := Touch(c)
+func Install(app string, gobin string, bunbin string) error {
+	err := Touch(app)
 	if err != nil {
 		return err
 	}
 
 	s := spinner.New("installing go dependencies")
 
-	gobin, err := path.Go(c, base)
-	if err != nil {
-		return err
-	}
-
 	go spinner.Start(s)
 	tidy := exec.Command(gobin, "mod", "tidy")
-	tidy.Dir = base
 	tidy.Env = append(os.Environ())
 	tidy.Stderr = os.Stderr
 	tidy.Stdout = os.Stdout
@@ -37,13 +28,8 @@ func Install(c *cli.Cli, base string) error {
 		return err
 	}
 
-	gobin, err = path.Bun(c, filepath.Join(base, *c.Flags.App))
-	if err != nil {
-		return err
-	}
-
-	ins := exec.Command(gobin, "install")
-	ins.Dir = filepath.Join(base, *c.Flags.App)
+	ins := exec.Command(bunbin, "install")
+	ins.Dir = app
 	ins.Env = append(os.Environ())
 	ins.Stderr = os.Stderr
 	ins.Stdout = os.Stdout

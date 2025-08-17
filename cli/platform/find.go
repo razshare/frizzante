@@ -8,26 +8,26 @@ import (
 	"strings"
 )
 
-func Find(c *cli.Cli, clr bool) (Type, error) {
+func Find(clr bool) (Type, error) {
 	var plat string
 	var err error
 
-	if *c.Flags.Platform != "" {
-		plat = *c.Flags.Platform
+	if *cli.Platform != "" {
+		plat = *cli.Platform
 	} else {
 		plat, err = singleselect.Send(
 			[]string{
-				"Linux/amd64",
-				"Linux/arm64",
-				"Darwin/amd64",
-				"Darwin/arm64",
-				"Windows/amd64",
-				"Windows/arm64",
+				"linux/amd64",
+				"linux/arm64",
+				"darwin/amd64",
+				"darwin/arm64",
+				"windows/amd64",
+				"windows/arm64",
 			},
 			"platform",
 		)
 
-		*c.Flags.Platform = plat
+		*cli.Platform = plat
 	}
 
 	if err != nil {

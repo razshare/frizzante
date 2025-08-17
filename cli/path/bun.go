@@ -1,22 +1,13 @@
 package path
 
 import (
-	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/extension"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func Bun(c *cli.Cli, base string) (string, error) {
-	var bin string
-
-	if *c.Flags.Bun != "" {
-		bin = *c.Flags.Bun
-	} else {
-		bin = filepath.Join(".gen", "bun", "bun")
-	}
-
+func Bun(bin string, base string) (string, error) {
 	if strings.HasPrefix(bin, "~") {
 		home, err := os.UserHomeDir()
 		if err != nil {

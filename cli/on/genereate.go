@@ -1,15 +1,36 @@
 package on
 
 import (
-	"fmt"
-	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/codegen"
+	"errors"
+	"github.com/razshare/frizzante/cli/codegen"
 	"github.com/razshare/frizzante/tui/multiselect"
 	"github.com/razshare/frizzante/tui/text"
 	"strings"
 )
 
-func Generate(c *cli.Cli, clr bool, base string, gen string) error {
+func Generate(app string, gen string, clr bool, yes bool, gobin string, sqlcbin string) error {
+	pick := func(gen string) error {
+		if gen == "air" {
+			return codegen.Air(clr)
+		} else if gen == "bun" {
+			return codegen.Bun(clr)
+		} else if gen == "session" {
+			return codegen.Session(clr, yes)
+		} else if gen == "database" {
+			return codegen.Database(gen, clr, yes, gobin, sqlcbin)
+		} else if gen == "queries" {
+			return codegen.Queries(clr, sqlcbin)
+		} else if gen == "core" {
+			return codegen.Core(app, yes)
+		} else if gen == "forms" {
+			return codegen.Forms(app, yes)
+		} else if gen == "links" {
+			return codegen.Links(app, yes)
+		}
+
+		return errors.New("unknown generation")
+	}
+
 	if gen == ":pick" {
 		items, err := multiselect.Send(
 			[]string{
@@ -50,12 +71,7 @@ func Generate(c *cli.Cli, clr bool, base string, gen string) error {
 		}
 
 		for _, item := range items {
-			generate, exists := codegen.Functions[strings.ToLower(item)]
-			if !exists {
-				return fmt.Errorf("unknown option %s", item)
-			}
-
-			err = generate(c, false, base)
+			err = pick(strings.ToLower(item))
 			if err != nil {
 				return err
 			}
@@ -64,11 +80,7 @@ func Generate(c *cli.Cli, clr bool, base string, gen string) error {
 	}
 
 	for _, item := range strings.Split(gen, ",") {
-		generate, exists := codegen.Functions[strings.ToLower(item)]
-		if !exists {
-			return fmt.Errorf("unknown option %s", item)
-		}
-		err := generate(c, false, base)
+		err := pick(strings.ToLower(item))
 		if err != nil {
 			return err
 		}

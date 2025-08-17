@@ -1,25 +1,18 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/cli/path"
 	"os"
 	"os/exec"
 )
 
-func Check(c *cli.Cli) error {
-	err := Touch(c)
-	if err != nil {
-		return err
-	}
-
-	bunbin, err := path.Bun(c, *c.Flags.App)
+func Check(app string, bunbin string) error {
+	err := Touch(app)
 	if err != nil {
 		return err
 	}
 
 	eslint := exec.Command(bunbin, "x", "eslint")
-	eslint.Dir = *c.Flags.App
+	eslint.Dir = app
 	eslint.Env = append(os.Environ())
 	eslint.Stderr = os.Stderr
 	eslint.Stdout = os.Stdout
@@ -30,7 +23,7 @@ func Check(c *cli.Cli) error {
 	}
 
 	svelteCheck := exec.Command(bunbin, "x", "svelte-check", "--tsconfig=./tsconfig.json")
-	svelteCheck.Dir = *c.Flags.App
+	svelteCheck.Dir = app
 	svelteCheck.Env = append(os.Environ())
 	svelteCheck.Stderr = os.Stderr
 	svelteCheck.Stdout = os.Stdout

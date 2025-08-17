@@ -1,26 +1,19 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
 	"os"
 	"os/exec"
 )
 
-func Update(c *cli.Cli) error {
-	err := Touch(c)
+func Update(app string, gobin string, bunbin string) error {
+	err := Touch(app)
 	if err != nil {
 		return err
 	}
 
 	s := spinner.New("updating go dependencies")
-
-	gobin, err := path.Go(c, ".")
-	if err != nil {
-		return err
-	}
 
 	go spinner.Start(s)
 	get := exec.Command(gobin, "get", "-u", "./...")
@@ -35,13 +28,8 @@ func Update(c *cli.Cli) error {
 		return err
 	}
 
-	bunbin, err := path.Bun(c, *c.Flags.App)
-	if err != nil {
-		return err
-	}
-
 	pretty := exec.Command(bunbin, "update")
-	pretty.Dir = *c.Flags.App
+	pretty.Dir = app
 	pretty.Env = append(os.Environ())
 	pretty.Stderr = os.Stderr
 	pretty.Stdout = os.Stdout

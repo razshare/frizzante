@@ -2,26 +2,19 @@ package on
 
 import (
 	"fmt"
-	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
 )
 
-func PackageWatch(c *cli.Cli) error {
-	err := Touch(c)
-	if err != nil {
-		return err
-	}
-
-	bunbin, err := path.Bun(c, *c.Flags.App)
+func PackageWatch(app string, bunbin string) error {
+	err := Touch(app)
 	if err != nil {
 		return err
 	}
 
 	ssr := exec.Command(bunbin, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
-	ssr.Dir = *c.Flags.App
+	ssr.Dir = app
 	ssr.Env = append(os.Environ(), "DEV=1")
 	ssr.Stderr = os.Stderr
 	ssr.Stdout = os.Stdout
@@ -33,7 +26,7 @@ func PackageWatch(c *cli.Cli) error {
 	messages.Success("vite server watcher launched")
 
 	csr := exec.Command(bunbin, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
-	csr.Dir = *c.Flags.App
+	csr.Dir = app
 	csr.Env = append(os.Environ())
 	csr.Stderr = os.Stderr
 	csr.Stdout = os.Stdout

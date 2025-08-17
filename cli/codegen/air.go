@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 )
 
-func Air(c *cli.Cli, clr bool, base string) error {
-	dst := filepath.Join(base, ".gen", "air")
-	plat, err := platform.Find(c, clr)
+func Air(clr bool) error {
+	dst := filepath.Join(".gen", "air")
+	println("trying to find air, platform is", *cli.Platform)
+	plat, err := platform.Find(clr)
 	if err != nil {
 		return err
 	}
@@ -41,7 +42,7 @@ func Air(c *cli.Cli, clr bool, base string) error {
 	}
 
 	if plat != platform.WindowsArm64 && plat != platform.WindowsAmd64 {
-		err = unix.Chmod(".gen/air/air", 0755)
+		err = unix.Chmod(filepath.Join(dst, "air"), 0755)
 	}
 
 	if err != nil {

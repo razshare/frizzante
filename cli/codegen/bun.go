@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/platform"
 	"github.com/razshare/frizzante/files"
 	"golang.org/x/sys/unix"
@@ -9,9 +8,9 @@ import (
 	"path/filepath"
 )
 
-func Bun(c *cli.Cli, clr bool, base string) error {
-	dst := filepath.Join(base, ".gen", "bun")
-	plat, err := platform.Find(c, clr)
+func Bun(clr bool) error {
+	dst := filepath.Join(".gen", "bun")
+	plat, err := platform.Find(clr)
 	if err != nil {
 		return err
 	}
@@ -83,7 +82,7 @@ func Bun(c *cli.Cli, clr bool, base string) error {
 	}
 
 	if plat != platform.WindowsArm64 && plat != platform.WindowsAmd64 {
-		return unix.Chmod(".gen/bun/bun", 0755)
+		err = unix.Chmod(filepath.Join(dst, "bun"), 0755)
 	}
 
 	return nil

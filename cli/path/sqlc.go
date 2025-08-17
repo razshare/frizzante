@@ -1,28 +1,19 @@
 package path
 
 import (
-	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/extension"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-func Sqlc(c *cli.Cli, base string) (string, error) {
-	var bin string
-
-	if *c.Flags.Sqlc != "" {
-		bin = *c.Flags.Sqlc
-	} else {
-		bin = filepath.Join(".gen", "sqlc", "sqlc")
-	}
-
+func Sqlc(bin string, base string) (string, error) {
 	if strings.HasPrefix(bin, "~") {
-		dirname, err := os.UserHomeDir()
+		home, err := os.UserHomeDir()
 		if err != nil {
 			return "", err
 		}
-		bin = strings.Replace(bin, "~", dirname, 1)
+		bin = strings.Replace(bin, "~", home, 1)
 		return bin + extension.Find(), nil
 	}
 

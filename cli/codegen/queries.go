@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"fmt"
-	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/cli/platform"
 	"github.com/razshare/frizzante/files"
@@ -13,17 +12,12 @@ import (
 	"path/filepath"
 )
 
-func Queries(c *cli.Cli, clr bool, base string) error {
-	sqlcbin, err := path.Sqlc(c, base)
-	if err != nil {
-		return err
-	}
-
+func Queries(clr bool, sqlcbin string) error {
 	if !files.IsFile(sqlcbin) {
-		dst := filepath.Join(base, ".gen", "sqlc")
+		dst := filepath.Join(".gen", "sqlc")
 
 		var plat platform.Type
-		plat, err = platform.Find(c, clr)
+		plat, err := platform.Find(clr)
 
 		if err != nil {
 			return err
@@ -57,7 +51,7 @@ func Queries(c *cli.Cli, clr bool, base string) error {
 		}
 	}
 
-	database := filepath.Join(base, "lib", "database")
+	database := filepath.Join("lib", "database")
 	sqlcyaml := filepath.Join(database, "sqlc.yaml")
 
 	if !files.IsFile(sqlcyaml) {
@@ -66,7 +60,7 @@ func Queries(c *cli.Cli, clr bool, base string) error {
 
 	s := spinner.New("generating queries")
 
-	sqlcbin, err = path.Sqlc(c, database)
+	sqlcbin, err := path.Sqlc(sqlcbin, database)
 	if err != nil {
 		return err
 	}

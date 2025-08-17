@@ -3,13 +3,14 @@ package on
 import (
 	"fmt"
 	"github.com/razshare/frizzante/cli"
+	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/cli/state"
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/text"
 	flag "github.com/spf13/pflag"
 )
 
-func Start(c *cli.Cli, clr bool, base string) error {
+func Start() error {
 	text.Clrscr()
 
 	if !state.Parsed {
@@ -17,79 +18,99 @@ func Start(c *cli.Cli, clr bool, base string) error {
 		state.Parsed = true
 	}
 
-	if *c.Flags.Help {
-		return Help(c)
+	gobin, err := path.Go(*cli.Go)
+	if err != nil {
+		return err
 	}
 
-	if *c.Flags.Version {
-		return Version(c)
+	bunbin, err := path.Bun(*cli.Bun, *cli.App)
+	if err != nil {
+		return err
 	}
 
-	if *c.Flags.CreateProject != "" {
-		return CreateProject(c, clr, *c.Flags.CreateProject)
+	airbin, err := path.Air(*cli.Air)
+	if err != nil {
+		return err
 	}
 
-	if *c.Flags.Generate != "" {
-		return Generate(c, clr, base, *c.Flags.Generate)
+	sqlcbin, err := path.Sqlc(*cli.Sqlc, ".")
+	if err != nil {
+		return err
 	}
 
-	if *c.Flags.Test {
-		return Test(c)
+	if *cli.Help {
+		return Help()
 	}
 
-	if *c.Flags.Package {
-		return Package(c)
+	if *cli.Version {
+		return Version()
 	}
 
-	if *c.Flags.PackageWatch {
-		return PackageWatch(c)
+	if *cli.CreateProject != "" {
+		return CreateProject(*cli.CreateProject)
 	}
 
-	if *c.Flags.Check {
-		return Check(c)
+	if *cli.Generate != "" {
+		return Generate(*cli.App, *cli.Generate, *cli.Clear, *cli.Yes, gobin, sqlcbin)
 	}
 
-	if *c.Flags.Update {
-		return Update(c)
+	if *cli.Test {
+		return Test(*cli.App, gobin, bunbin)
 	}
 
-	if *c.Flags.Install {
-		return Install(c, base)
+	if *cli.Package {
+		return Package(*cli.App, bunbin)
 	}
 
-	if *c.Flags.Format {
-		return Format(c)
+	if *cli.PackageWatch {
+		return PackageWatch(*cli.App, bunbin)
 	}
 
-	if *c.Flags.Touch {
-		return Touch(c)
+	if *cli.Check {
+		return Check(*cli.App, bunbin)
 	}
 
-	if *c.Flags.Clean {
-		return Clean(c)
+	if *cli.Update {
+		return Update(*cli.App, gobin, bunbin)
 	}
 
-	if *c.Flags.Dev {
-		return Dev(c)
+	if *cli.Install {
+		return Install(*cli.App, gobin, bunbin)
 	}
 
-	if *c.Flags.Build {
-		return Build(c)
+	if *cli.Format {
+		return Format(*cli.App, gobin, bunbin)
 	}
 
-	if *c.Flags.Configure {
-		return Configure(c, clr, base)
+	if *cli.Touch {
+		return Touch(*cli.App)
 	}
 
-	if *c.Flags.Welcome {
+	if *cli.Clean {
+		return Clean(*cli.App, gobin)
+	}
+
+	if *cli.Dev {
+		return Dev(*cli.App, airbin, bunbin)
+	}
+
+	if *cli.Build {
+		return Build(*cli.App, *cli.Platform, gobin, bunbin)
+	}
+
+	if *cli.Configure {
+		return Configure(*cli.App, *cli.Clear, *cli.Yes, gobin, bunbin, sqlcbin)
+	}
+
+	if *cli.Welcome {
 		return Welcome()
 	}
 
-	logo, err := c.Efs.ReadFile("clilogo.txt")
+	logo, err := cli.Efs.ReadFile("clilogo.txt")
 	if err != nil {
 		return err
 	}
 	fmt.Println(config.Styles.BigText.Render(string(logo)))
 
-	return Menu(c, false, base)
+	return Menu()
 }

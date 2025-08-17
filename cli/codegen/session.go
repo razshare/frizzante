@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/singleselect"
@@ -10,7 +9,7 @@ import (
 	"strings"
 )
 
-func Session(c *cli.Cli, clr bool, base string) error {
+func Session(clr bool, yes bool) error {
 	tchoice, err := singleselect.Send(
 		[]string{"memory", "disk"},
 		"session type",
@@ -26,13 +25,17 @@ func Session(c *cli.Cli, clr bool, base string) error {
 
 	t := strings.ToLower(tchoice)
 
-	dst := filepath.Join(base, "lib", "session")
+	dst := filepath.Join("lib", "session")
 
-	err = Copy(c.Efs, []CopyInstruction{
+	err = Copy([]CopyInstruction{
 		{
 			From: "template/lib/session/" + t,
 			To:   dst,
 			Overwrite: func(n string) (bool, error) {
+				if yes {
+					return true, nil
+				}
+
 				var overwrite bool
 
 				overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", n)

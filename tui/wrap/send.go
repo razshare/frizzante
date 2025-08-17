@@ -9,23 +9,23 @@ func Send(text string, width int) []string {
 
 	inputLines := strings.Split(text, "\n")
 	var result []string
-	
+
 	for _, line := range inputLines {
 		if line == "" {
 			continue
 		}
-		
+
 		if len(line) <= width {
 			result = append(result, line)
 			continue
 		}
-		
+
 		words := strings.Fields(line)
 		if len(words) == 0 {
 			result = append(result, line)
 			continue
 		}
-		
+
 		currentLine := ""
 		for _, word := range words {
 			if currentLine == "" {
@@ -41,6 +41,6 @@ func Send(text string, width int) []string {
 			result = append(result, currentLine)
 		}
 	}
-	
+
 	return result
 }

@@ -1,7 +1,7 @@
 package codegen
 
 import (
-	"embed"
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	"os"
@@ -9,10 +9,10 @@ import (
 	"regexp"
 )
 
-func Copy(efs embed.FS, gs []CopyInstruction) error {
+func Copy(gs []CopyInstruction) error {
 	for _, g := range gs {
-		if embeds.IsDirectory(efs, g.From) {
-			ds, err := efs.ReadDir(g.From)
+		if embeds.IsDirectory(cli.Efs, g.From) {
+			ds, err := cli.Efs.ReadDir(g.From)
 			if err != nil {
 				return err
 			}
@@ -26,7 +26,7 @@ func Copy(efs embed.FS, gs []CopyInstruction) error {
 					Overwrite: g.Overwrite,
 				})
 			}
-			err = Copy(efs, gsloc)
+			err = Copy(gsloc)
 			if err != nil {
 				return err
 			}
@@ -46,7 +46,7 @@ func Copy(efs embed.FS, gs []CopyInstruction) error {
 			}
 		}
 
-		dat, err := efs.ReadFile(from)
+		dat, err := cli.Efs.ReadFile(from)
 		if err != nil {
 			return err
 		}
@@ -67,7 +67,7 @@ func Copy(efs embed.FS, gs []CopyInstruction) error {
 		}
 
 		dir := filepath.Dir(to)
-		if !embeds.IsDirectory(efs, dir) {
+		if !embeds.IsDirectory(cli.Efs, dir) {
 			err = os.MkdirAll(dir, os.ModePerm)
 			if err != nil {
 				return err

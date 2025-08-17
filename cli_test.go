@@ -9,31 +9,27 @@ import (
 )
 
 func TestOnHelp(t *testing.T) {
-	err := on.Help(c)
+	err := on.Help()
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestOnVersion(t *testing.T) {
-	err := on.Version(c)
+	err := on.Version()
 	if err != nil {
-		t.Fatal()
+		t.Fatal(err)
 	}
 }
 
 func TestOnCreateProject(t *testing.T) {
 	dst := filepath.Join(".gen", "test_project")
-
 	err := os.RemoveAll(dst)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	app := *c.Flags.App
-	*c.Flags.App = "app"
-	defer func() { *c.Flags.App = app }()
-	err = on.CreateProject(c, false, dst)
+	err = on.CreateProject(dst)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -60,14 +56,14 @@ func TestOnCreateProject(t *testing.T) {
 	}
 }
 
-func TestOnAddFeature(t *testing.T) {
+func TestOnGenerate(t *testing.T) {
 	air := filepath.Join(".gen", "air")
 	err := os.RemoveAll(air)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = on.Generate(c, false, ".", "air")
+	err = on.Generate(filepath.Join("template", "app"), "air", false, true, "go", filepath.Join(".gen", "sqlc", "sqlc"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -84,7 +80,7 @@ func TestOnPackage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on.Package(c)
+	err = on.Package(filepath.Join("template", "app"), filepath.Join("..", "..", ".gen", "bun", "bun"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -101,7 +97,7 @@ func TestOnInstall(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on.Install(c, ".")
+	err = on.Install(filepath.Join("template", "app"), "go", filepath.Join("..", "..", ".gen", "bun", "bun"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,7 +108,7 @@ func TestOnInstall(t *testing.T) {
 }
 
 func TestOnFormat(t *testing.T) {
-	err := on.Format(c)
+	err := on.Format(filepath.Join("template", "app"), "go", filepath.Join("..", "..", ".gen", "bun", "bun"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -125,7 +121,7 @@ func TestOnTouch(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on.Touch(c)
+	err = on.Touch(filepath.Join("template", "app"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -141,7 +137,7 @@ func TestOnTouch(t *testing.T) {
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	err = on.Package(c)
+	err = on.Package(filepath.Join("template", "app"), filepath.Join("..", "..", ".gen", "bun", "bun"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -182,7 +178,7 @@ func TestOnClean(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = on.Clean(c)
+	err = on.Clean(filepath.Join("template", "app"), "go")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -200,11 +196,11 @@ func TestOnClean(t *testing.T) {
 	}
 
 	// We need to restore dist, otherwise other tests will break.
-	err = on.Install(c, ".")
+	err = on.Install(filepath.Join("template", "app"), "go", filepath.Join("..", "..", ".gen", "bun", "bun"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	err = on.Package(c)
+	err = on.Package(filepath.Join("template", "app"), filepath.Join("..", "..", ".gen", "bun", "bun"))
 	if err != nil {
 		t.Fatal(err)
 	}

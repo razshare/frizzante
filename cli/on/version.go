@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-func Version(c *cli.Cli) error {
+func Version() error {
 	var v string
 
-	d, err := c.Efs.ReadFile("version")
+	d, err := cli.Efs.ReadFile("version")
 	if err != nil {
 		return err
 	}

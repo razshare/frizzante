@@ -1,11 +1,9 @@
 package on
 
-import "github.com/razshare/frizzante/cli"
-
-func Configure(c *cli.Cli, clr bool, base string) error {
-	err := Generate(c, clr, base, "bun,air")
+func Configure(app string, clr bool, yes bool, gobin string, bunbin string, sqlcbin string) error {
+	err := Generate(app, "bun,air", clr, yes, gobin, sqlcbin)
 	if err != nil {
 		return err
 	}
-	return Install(c, base)
+	return Install(app, gobin, bunbin)
 }

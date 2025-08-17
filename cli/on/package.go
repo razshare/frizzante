@@ -1,27 +1,20 @@
 package on
 
 import (
-	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
 	"path/filepath"
 )
 
-func Package(c *cli.Cli) error {
-	err := Touch(c)
-	if err != nil {
-		return err
-	}
-
-	bunbin, err := path.Bun(c, *c.Flags.App)
+func Package(app string, bunbin string) error {
+	err := Touch(app)
 	if err != nil {
 		return err
 	}
 
 	ssr := exec.Command(bunbin, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
-	ssr.Dir = *c.Flags.App
+	ssr.Dir = app
 	ssr.Env = append(os.Environ())
 	ssr.Stderr = os.Stderr
 	ssr.Stdout = os.Stdout
@@ -32,7 +25,7 @@ func Package(c *cli.Cli) error {
 	}
 
 	csr := exec.Command(bunbin, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
-	csr.Dir = *c.Flags.App
+	csr.Dir = app
 	csr.Env = append(os.Environ())
 	csr.Stderr = os.Stderr
 	csr.Stdout = os.Stdout
@@ -42,8 +35,8 @@ func Package(c *cli.Cli) error {
 		return err
 	}
 
-	esb := exec.Command("node_modules/.bin/esbuild", "--bundle", "--outfile=dist/server.js", "--format=cjs", "--allow-overwrite", "dist/server.js")
-	esb.Dir = *c.Flags.App
+	esb := exec.Command(filepath.Join("node_modules", ".bin", "esbuild"), "--bundle", "--outfile=dist/server.js", "--format=cjs", "--allow-overwrite", "dist/server.js")
+	esb.Dir = app
 	esb.Env = append(os.Environ())
 	esb.Stderr = os.Stderr
 	esb.Stdout = os.Stdout
@@ -53,7 +46,7 @@ func Package(c *cli.Cli) error {
 		return err
 	}
 
-	messages.Success("project app package generated in ", filepath.Join(*c.Flags.App, "dist"))
+	messages.Success("project app package generated in ", filepath.Join(app, "dist"))
 
 	return nil
 }

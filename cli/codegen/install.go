@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"fmt"
+	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/text"
 	"github.com/razshare/frizzante/tui/confirm"
@@ -43,15 +44,17 @@ func Download(url string) (Install, error) {
 
 	return func(dst string) (bool, error) {
 		if files.IsDirectory(dst) || files.IsFile(dst) {
-			var overwrite bool
-			overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", dst)
-			if err != nil {
-				return false, err
-			}
+			if !*cli.Yes {
+				var overwrite bool
+				overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", dst)
+				if err != nil {
+					return false, err
+				}
 
-			if !overwrite {
-				messages.Infof("skipping %s", dst)
-				return false, nil
+				if !overwrite {
+					messages.Infof("skipping %s", dst)
+					return false, nil
+				}
 			}
 
 			err = os.RemoveAll(dst)

@@ -19,11 +19,10 @@ import (
 //go:embed queries.sql
 //go:embed schema.sql
 var efs embed.FS
-var c = cli.New()
 
 func main() {
-	c.Efs = efs
-	err := on.Start(c, false, ".")
+	cli.Efs = efs
+	err := on.Start()
 	if err != nil {
 		if errors.Is(err, tea.ErrInterrupted) {
 			os.Exit(0)
