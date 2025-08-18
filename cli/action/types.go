@@ -107,3 +107,7 @@ type ConfigOptions struct {
 }
 
 type WelcomeOptions struct{}
+
+type NpmOptions struct {
+	Query string
+}

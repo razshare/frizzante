@@ -20,6 +20,7 @@ func New() (c *App) {
 	upd := flag.BoolP("update", "u", false, "updates dependencies")
 	ins := flag.BoolP("install", "i", false, "installs dependencies")
 	fmt := flag.BoolP("format", "f", false, "formats source code")
+	npm := flag.BoolP("npm", "n", false, "interactive npm package search and install")
 	tch := flag.BoolP("touch", "", false, "creates placeholders in app/dist (useful for go:embed)")
 	cln := flag.BoolP("clean-project", "", false, "cleans project")
 	dev := flag.BoolP("dev", "d", false, "starts dev mode")
@@ -61,5 +62,6 @@ func New() (c *App) {
 		Sqlc:         sqc,
 		Welcome:      wel,
 		Clear:        clr,
+		Menu:         pkr,
 	}
 }
