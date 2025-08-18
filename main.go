@@ -5,7 +5,6 @@ import (
 	"errors"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/stack"
 	"github.com/razshare/frizzante/tui/messages"
 	flag "github.com/spf13/pflag"
 	"os"
@@ -21,10 +20,6 @@ import (
 //go:embed schema.sql
 var efs embed.FS
 var c = cli.New()
-
-func init() {
-	stack.TraceEnabled = true
-}
 
 func main() {
 	flag.Parse()
