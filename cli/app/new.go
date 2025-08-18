@@ -62,6 +62,5 @@ func New() (c *App) {
 		Sqlc:         sqc,
 		Welcome:      wel,
 		Clear:        clr,
-		Menu:         pkr,
 	}
 }
