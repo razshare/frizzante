@@ -79,7 +79,7 @@ func Bun(o BunOptions) error {
 		return err
 	}
 
-	if o.Platform != platform.PlatformWindowsArm64 && o.Platform != platform.PlatformWindowsAmd64 {
+	if o.Platform != platform.PlatformWindowsArm64 && o.Platform != platform.PlatformWindowsAmd64 && filepath.Separator != '\\' {
 		err = unix.Chmod(o.Bun, 0755)
 	}
 

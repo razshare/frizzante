@@ -37,7 +37,7 @@ func Air(o AirOptions) error {
 		return err
 	}
 
-	if o.Platform != platform.PlatformWindowsArm64 && o.Platform != platform.PlatformWindowsAmd64 {
+	if o.Platform != platform.PlatformWindowsArm64 && o.Platform != platform.PlatformWindowsAmd64 && filepath.Separator != '\\' {
 		err = unix.Chmod(o.Air, 0755)
 	}
 
