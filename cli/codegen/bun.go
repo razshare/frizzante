@@ -52,9 +52,9 @@ func Bun(o BunOptions) error {
 	} else if o.Platform == platform.PlatformLinuxAmd64 {
 		err = files.Move(filepath.Join(filepath.Dir(o.Bun), "bun-linux-x64", "bun"), o.Bun)
 	} else if o.Platform == platform.PlatformWindowsArm64 {
-		err = files.Move(filepath.Join(filepath.Dir(o.Bun), "bun-windows-x64-baseline", "bun"), o.Bun)
+		err = files.Move(filepath.Join(filepath.Dir(o.Bun), "bun-windows-x64-baseline", "bun.exe"), o.Bun)
 	} else if o.Platform == platform.PlatformWindowsAmd64 {
-		err = files.Move(filepath.Join(filepath.Dir(o.Bun), "bun-windows-x64-baseline", "bun"), o.Bun)
+		err = files.Move(filepath.Join(filepath.Dir(o.Bun), "bun-windows-x64-baseline", "bun.exe"), o.Bun)
 	}
 
 	if err != nil {
