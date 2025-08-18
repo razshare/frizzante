@@ -2,8 +2,8 @@ package codegen
 
 import (
 	"github.com/razshare/frizzante/platform"
-	"golang.org/x/sys/unix"
 	"path/filepath"
+	"syscall"
 )
 
 func Air(o AirOptions) error {
@@ -38,7 +38,7 @@ func Air(o AirOptions) error {
 	}
 
 	if o.Platform != platform.PlatformWindowsArm64 && o.Platform != platform.PlatformWindowsAmd64 && filepath.Separator != '\\' {
-		err = unix.Chmod(o.Air, 0755)
+		err = syscall.Chmod(o.Air, 0755)
 	}
 
 	if err != nil {

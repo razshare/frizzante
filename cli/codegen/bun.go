@@ -3,9 +3,9 @@ package codegen
 import (
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/platform"
-	"golang.org/x/sys/unix"
 	"os"
 	"path/filepath"
+	"syscall"
 )
 
 func Bun(o BunOptions) error {
@@ -80,7 +80,7 @@ func Bun(o BunOptions) error {
 	}
 
 	if o.Platform != platform.PlatformWindowsArm64 && o.Platform != platform.PlatformWindowsAmd64 && filepath.Separator != '\\' {
-		err = unix.Chmod(o.Bun, 0755)
+		err = syscall.Chmod(o.Bun, 0755)
 	}
 
 	return nil
