@@ -18,5 +18,5 @@ func Error(args ...any) {
 }
 
 func Errorf(format string, vars ...any) {
-	Fatal(fmt.Sprintf(format, vars...), "\n", stack.Trace())
+	Error(fmt.Sprintf(format, vars...))
 }

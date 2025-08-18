@@ -1,8 +1,10 @@
 package multiselect
 
 import (
+	"errors"
 	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/razshare/frizzante/stack"
 	"github.com/razshare/frizzante/tui/program"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/text"
@@ -39,7 +41,7 @@ func Send(opts []string, msg string) ([]string, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		return nil, errors.New(err.Error() + "\n" + stack.Trace())
 	}
 
 	return model.Selected, nil

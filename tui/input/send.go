@@ -1,8 +1,10 @@
 package input
 
 import (
+	"errors"
 	"fmt"
 	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/razshare/frizzante/stack"
 	"github.com/razshare/frizzante/tui/program"
 )
 
@@ -11,12 +13,12 @@ func Send(prompt string) (string, error) {
 	ti.Placeholder = "Type here..."
 	ti.Focus()
 	ti.Width = 50
-	result, err := program.Run(&Model{TextInput: ti, Prompt: prompt})
+	model, err := program.Run(&Model{TextInput: ti, Prompt: prompt})
 	if err != nil {
-		return "", err
+		return "", errors.New(err.Error() + "\n" + stack.Trace())
 	}
 
-	return result.TextInput.Value(), nil
+	return model.TextInput.Value(), nil
 }
 
 func Sendf(format string, vars ...any) (string, error) {
