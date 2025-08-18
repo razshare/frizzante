@@ -19,6 +19,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.SoftInterrupt {
 				return m, tea.Quit
 			}
+
 			return m, tea.Interrupt
 		}
 

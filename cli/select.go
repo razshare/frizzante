@@ -9,6 +9,11 @@ import (
 )
 
 func Select(c *Cli, o SelectOptions) error {
+	home, err := Home()
+	if err != nil {
+		return err
+	}
+
 	options := []string{
 		`configure
 			installs required binaries and dependencies
@@ -56,7 +61,7 @@ func Select(c *Cli, o SelectOptions) error {
 			builds project at .gen/bin/app.
 		`,
 		`reset
-			deletes ~/.frizzante
+			deletes ` + home + `
 		`,
 	}
 

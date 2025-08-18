@@ -17,7 +17,7 @@ func Download(o DownloadOptions) (Install, error) {
 		return nil, err
 	}
 
-	home, err := os.UserHomeDir()
+	user, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
 	}
@@ -28,7 +28,16 @@ func Download(o DownloadOptions) (Install, error) {
 		ext = ""
 	}
 
-	global := filepath.Join(home, ".frizzante", hash+ext)
+	home := os.Getenv("FRIZZANTE_HOME")
+	if home == "" {
+		user, err = os.UserHomeDir()
+		if err != nil {
+			return nil, err
+		}
+		home = filepath.Join(user, ".frizzante")
+	}
+
+	global := filepath.Join(home, hash+ext)
 
 	if !files.IsFile(global) {
 		s := spinner.New(fmt.Sprintf("downloading %s", o.Url))

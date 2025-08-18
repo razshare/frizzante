@@ -8,25 +8,27 @@ import (
 )
 
 func Reset(_ ResetOptions) error {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return err
+	home := os.Getenv("FRIZZANTE_HOME")
+	if home == "" {
+		user, err := os.UserHomeDir()
+		if err != nil {
+			return err
+		}
+		home = filepath.Join(user, ".frizzante")
 	}
 
-	dir := filepath.Join(home, ".frizzante")
-
-	if files.IsDirectory(dir) {
-		err = os.RemoveAll(dir)
+	if files.IsDirectory(home) {
+		err := os.RemoveAll(home)
 		if err != nil {
 			return err
 		}
 
-		messages.Successf("%s deleted", dir)
+		messages.Successf("%s deleted", home)
 
 		return nil
 	}
 
-	messages.Infof("%s not found", dir)
+	messages.Infof("%s not found", home)
 
 	return nil
 }
