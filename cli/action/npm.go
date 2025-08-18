@@ -80,7 +80,7 @@ func PerformNpmSearch(query string) tea.Cmd {
 		}
 
 		encodedQuery := url.QueryEscape(query)
-		apiUrl := fmt.Sprintf("https://registry.npmjs.org/-/v1/search?text=%s&size=15", encodedQuery)
+		apiUrl := fmt.Sprintf("https://registry.npmjs.org/-/v1/search?text=%s&size=6", encodedQuery)
 
 		client := &http.Client{
 			Timeout: 5 * time.Second,
@@ -294,48 +294,24 @@ func InstallNpmPackages(packages []string, bun string) error {
 		return nil
 	}
 
-	// Create .gen directory if it doesn't exist
-	err := os.MkdirAll(".gen", 0755)
-	if err != nil {
-		return fmt.Errorf("failed to create .gen directory: %w", err)
+	appDir := "app"
+	if _, err := os.Stat(appDir); os.IsNotExist(err) {
+		return fmt.Errorf("app directory does not exist")
 	}
 
-	// NOT SURE IF WE WANT TO DO ANY OF THE BELOW, I GUESS WE WOULD JUST INSTALL IN APP/node_modules
+	packageJsonPath := filepath.Join(appDir, "package.json")
+	if _, err := os.Stat(packageJsonPath); os.IsNotExist(err) {
+		return fmt.Errorf("package.json not found in app directory")
+	}
+
 	successCount := 0
 	for _, pkgName := range packages {
-		s := spinner.New(fmt.Sprintf("installing %s to .gen/%s", pkgName, pkgName))
+		s := spinner.New(fmt.Sprintf("installing %s to app/node_modules", pkgName))
 		go spinner.Start(s)
 
-		// Create directory for this package
-		pkgDir := filepath.Join(".gen", pkgName)
-		err := os.MkdirAll(pkgDir, 0755)
-		if err != nil {
-			spinner.Stop(s)
-			messages.Error(fmt.Sprintf("Failed to create directory for %s: %v", pkgName, err))
-			continue
-		}
-
-		// Create a minimal package.json for this package
-		packageJson := fmt.Sprintf(`{
-  "name": "%s-wrapper",
-  "version": "1.0.0",
-  "private": true,
-  "dependencies": {
-    "%s": "latest"
-  }
-}`, pkgName, pkgName)
-
-		packageJsonPath := filepath.Join(pkgDir, "package.json")
-		err = os.WriteFile(packageJsonPath, []byte(packageJson), 0644)
-		if err != nil {
-			spinner.Stop(s)
-			messages.Error(fmt.Sprintf("Failed to create package.json for %s: %v", pkgName, err))
-			continue
-		}
-
-		// Install the package using bun
-		cmd := exec.Command(bun, "install")
-		cmd.Dir = pkgDir
+		// Install the package using bun add
+		cmd := exec.Command(bun, "add", pkgName)
+		cmd.Dir = appDir
 		cmd.Env = append(os.Environ())
 		
 		output, err := cmd.CombinedOutput()
@@ -346,12 +322,12 @@ func InstallNpmPackages(packages []string, bun string) error {
 			continue
 		}
 
-		messages.Success(fmt.Sprintf("Installed %s to .gen/%s", pkgName, pkgName))
+		messages.Success(fmt.Sprintf("Installed %s to app/node_modules", pkgName))
 		successCount++
 	}
 
 	if successCount > 0 {
-		messages.Success(fmt.Sprintf("Successfully installed %d package(s) to .gen", successCount))
+		messages.Success(fmt.Sprintf("Successfully installed %d package(s) to app/node_modules", successCount))
 	}
 	
 	return nil
