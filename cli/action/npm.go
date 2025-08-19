@@ -19,40 +19,6 @@ import (
 	"github.com/razshare/frizzante/tui/spinner"
 )
 
-type NpmPackageInfo struct {
-	Name        string `json:"name"`
-	Version     string `json:"version"`
-	Description string `json:"description"`
-}
-
-type NpmSearchResponse struct {
-	Objects []struct {
-		Package NpmPackageInfo `json:"package"`
-	} `json:"objects"`
-}
-
-type NpmSearchModel struct {
-	Input         textinput.Model
-	Packages      []NpmPackageInfo
-	Selected      map[int]bool
-	Cursor        int
-	Loading       bool
-	Error         error
-	LastQuery     string
-	DebounceTimer *time.Timer
-	Quitting      bool
-	Confirmed     bool
-}
-
-type SearchResultMsg struct {
-	Packages []NpmPackageInfo
-	Error    error
-}
-
-type DebouncedSearchMsg struct {
-	Query string
-}
-
 func InitNpmSearch() NpmSearchModel {
 	ti := textinput.New()
 	ti.Placeholder = "Search npm packages..."
