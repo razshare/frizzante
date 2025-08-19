@@ -99,7 +99,7 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "add", Description: "adds packages"},
+				Choice:  search.Choice{Id: "add", Description: "adds packages (experimental)"},
 				Inlined: func() bool { return *a.Add != "" },
 				Handler: func() error {
 					//if strings.HasPrefix(*a.Add, "npm:") {
