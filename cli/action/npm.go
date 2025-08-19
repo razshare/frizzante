@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 	"time"
 
@@ -16,23 +17,58 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/navigate"
+	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/spinner"
+	"github.com/razshare/frizzante/tui/viewport"
 )
 
 func InitNpmSearch() NpmSearchModel {
-	ti := textinput.New()
-	ti.Placeholder = "Search npm packages..."
-	ti.Focus()
-	ti.CharLimit = 100
-	ti.Width = 50
-
+	input := textinput.New()
+	input.Width = 80
+	
 	return NpmSearchModel{
-		Input:    ti,
-		Packages: []NpmPackageInfo{},
-		Selected: make(map[int]bool),
-		Cursor:   0,
-		Loading:  false,
+		Search: &search.Search{
+			Active:   false,
+			Choices:  []search.Choice{},
+			Filtered: []search.Choice{},
+			Input:    input,
+		},
+		Viewport: &viewport.Viewport{
+			Visible: 6,
+			Start:   0,
+			Cursor:  0,
+		},
+		Packages:      []NpmPackageInfo{},
+		Selected:      []string{},
+		Loading:       false,
+		DebounceTimer: nil,
 	}
+}
+
+func ConvertPackagesToChoices(packages []NpmPackageInfo) []search.Choice {
+	choices := make([]search.Choice, len(packages))
+	for i, pkg := range packages {
+		id := pkg.Name
+		if pkg.Version != "" {
+			id = fmt.Sprintf("%s@%s", pkg.Name, pkg.Version)
+		}
+		choices[i] = search.Choice{
+			Id:          id,
+			Description: TruncateText(pkg.Description, 50),
+		}
+	}
+	return choices
+}
+
+func TruncateText(text string, maxLength int) string {
+	if len(text) <= maxLength {
+		return text
+	}
+	if maxLength <= 3 {
+		return "..."
+	}
+	return text[:maxLength-3] + "..."
 }
 
 func (m NpmSearchModel) Init() tea.Cmd {
@@ -46,7 +82,7 @@ func PerformNpmSearch(query string) tea.Cmd {
 		}
 
 		encodedQuery := url.QueryEscape(query)
-		apiUrl := fmt.Sprintf("https://registry.npmjs.org/-/v1/search?text=%s&size=6", encodedQuery)
+		apiUrl := fmt.Sprintf("https://registry.npmjs.org/-/v1/search?text=%s&size=20", encodedQuery)
 
 		client := &http.Client{
 			Timeout: 5 * time.Second,
@@ -97,85 +133,112 @@ func DebounceSearch(query string, delay time.Duration) tea.Cmd {
 }
 
 func (m NpmSearchModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
+	switch k := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "ctrl+c", "esc":
+		if k.Type == tea.KeyCtrlC {
+			return m, tea.Interrupt
+		}
+		
+		if k.Type == tea.KeyEsc {
 			m.Quitting = true
+			m.Selected = []string{}
 			return m, tea.Quit
-
-		case "enter":
-			if len(m.Selected) > 0 {
-				m.Confirmed = true
-				return m, tea.Quit
-			}
-			return m, nil
-
-		case "up", "ctrl+p":
-			if len(m.Packages) > 0 && m.Cursor > 0 {
-				m.Cursor--
-			}
-			return m, nil
-
-		case "down", "ctrl+n":
-			if len(m.Packages) > 0 && m.Cursor < len(m.Packages)-1 {
-				m.Cursor++
-			}
-			return m, nil
-
-		case " ":
-			if len(m.Packages) > 0 && m.Cursor < len(m.Packages) {
-				if m.Selected[m.Cursor] {
-					delete(m.Selected, m.Cursor)
-				} else {
-					m.Selected[m.Cursor] = true
-				}
-				return m, nil
-			}
-
-		case "ctrl+a":
-			if len(m.Packages) > 0 {
-				if len(m.Selected) == len(m.Packages) {
-					m.Selected = make(map[int]bool)
-				} else {
-					for i := range m.Packages {
-						m.Selected[i] = true
-					}
-				}
-				return m, nil
-			}
 		}
 
-		// For all other keys, update the input
-		var cmd tea.Cmd
-		prevValue := m.Input.Value()
-		m.Input, cmd = m.Input.Update(msg)
-
-		if m.Input.Value() != prevValue {
-			m.LastQuery = m.Input.Value()
-			if m.DebounceTimer != nil {
-				m.DebounceTimer.Stop()
+		if k.Type == tea.KeyEnter {
+			if len(m.Selected) == 0 && len(m.Search.Filtered) > 0 {
+				val := m.Search.Filtered[m.Viewport.Cursor].Id
+				m.Selected = append(m.Selected, val)
 			}
-			return m, tea.Batch(cmd, DebounceSearch(m.Input.Value(), 500*time.Millisecond))
+			m.Confirmed = true
+			return m, tea.Quit
 		}
-		return m, cmd
+
+		if k.Type == tea.KeySpace {
+			return m, HandleSpaceKey(&m)
+		}
+
+		if k.Type == tea.KeyUp || k.Type == tea.KeyCtrlP {
+			navigate.Apply(m.Search, m.Viewport, -1)
+			return m, nil
+		}
+
+		if k.Type == tea.KeyDown || k.Type == tea.KeyCtrlN || k.Type == tea.KeyTab {
+			navigate.Apply(m.Search, m.Viewport, 1)
+			return m, nil
+		}
+		
+		if k.String() == "ctrl+a" {
+			return m, ToggleAllItems(&m)
+		}
+
+		// Handle search input
+		if len(k.String()) == 1 || k.Type == tea.KeyBackspace || k.Type == tea.KeyCtrlH {
+			if !m.Search.Active {
+				m.Search.Active = true
+				m.Search.Input.Focus()
+			}
+			
+			var cmd tea.Cmd
+			prevValue := m.Search.Input.Value()
+			m.Search.Input, cmd = m.Search.Input.Update(k)
+			
+			if m.Search.Input.Value() != prevValue {
+				m.LastQuery = m.Search.Input.Value()
+				if m.DebounceTimer != nil {
+					m.DebounceTimer.Stop()
+				}
+				return m, tea.Batch(cmd, DebounceSearch(m.Search.Input.Value(), 500*time.Millisecond))
+			}
+			return m, cmd
+		}
 
 	case DebouncedSearchMsg:
-		if msg.Query != "" && msg.Query == m.Input.Value() {
+		if k.Query != "" && k.Query == m.Search.Input.Value() {
 			m.Loading = true
-			return m, PerformNpmSearch(msg.Query)
+			return m, PerformNpmSearch(k.Query)
 		}
 
 	case SearchResultMsg:
 		m.Loading = false
-		m.Error = msg.Error
-		m.Packages = msg.Packages
-		m.Cursor = 0
-		m.Selected = make(map[int]bool)
+		m.Error = k.Error
+		m.Packages = k.Packages
+		choices := ConvertPackagesToChoices(k.Packages)
+		m.Search.Choices = choices
+		m.Search.Filtered = choices
+		m.Viewport.Cursor = 0
 		return m, nil
 	}
 
 	return m, nil
+}
+
+func HandleSpaceKey(m *NpmSearchModel) tea.Cmd {
+	if len(m.Search.Filtered) > 0 {
+		val := m.Search.Filtered[m.Viewport.Cursor].Id
+		if slices.Contains(m.Selected, val) {
+			if i := slices.Index(m.Selected, val); i >= 0 {
+				m.Selected = append(m.Selected[:i], m.Selected[i+1:]...)
+			}
+		} else {
+			m.Selected = append(m.Selected, val)
+		}
+	}
+	return nil
+}
+
+func ToggleAllItems(m *NpmSearchModel) tea.Cmd {
+	if len(m.Search.Filtered) > 0 {
+		if len(m.Selected) == len(m.Search.Filtered) {
+			m.Selected = []string{}
+		} else {
+			m.Selected = []string{}
+			for _, choice := range m.Search.Filtered {
+				m.Selected = append(m.Selected, choice.Id)
+			}
+		}
+	}
+	return nil
 }
 
 func (m NpmSearchModel) View() string {
@@ -184,67 +247,29 @@ func (m NpmSearchModel) View() string {
 
 	sb.WriteString(config.Styles.Menu.Render("Search NPM packages"))
 
-	if m.Input.Value() != "" {
-		sb.WriteString(config.Styles.UserInput.Render(" ⁋/" + m.Input.Value()))
+	if m.Search.Input.Value() != "" {
+		sb.WriteString(config.Styles.UserInput.Render(" ⁋/" + m.Search.Input.Value()))
 	} else {
 		sb.WriteString(config.Styles.UserGuide.Render(" ⁋/type to search"))
 	}
 
 	sb.WriteString("\n")
 
+	footerText := "↑ up • ↓ down • space select • enter install • ctrl+a toggle all • esc cancel"
+
 	if m.Loading {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		sb.WriteString(config.Styles.UserGuide.PaddingLeft(1).Render("⌛ searching..."))
-		sb.WriteString("\n")
-		sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter install • ctrl+a toggle all • esc cancel"))
-		return sb.String()
+		return BuildStatusLine(&sb, config.Styles.UserGuide.PaddingLeft(1).Render("⌛ searching..."), footerText)
 	}
 
 	if m.Error != nil {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		sb.WriteString(config.Styles.Status(config.Colors.Error).PaddingLeft(1).Render(fmt.Sprintf("✗ Error: %v", m.Error)))
-		sb.WriteString("\n")
-		sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter install • ctrl+a toggle all • esc cancel"))
-		return sb.String()
+		return BuildStatusLine(&sb, config.Styles.Status(config.Colors.Error).PaddingLeft(1).Render(fmt.Sprintf("✗ Error: %v", m.Error)), footerText)
 	}
 
-	if len(m.Packages) == 0 && m.Input.Value() != "" {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		sb.WriteString(config.Styles.UserGuide.PaddingLeft(1).Render("ⓘ  no packages found"))
-		sb.WriteString("\n")
-		sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter install • ctrl+a toggle all • esc cancel"))
-		return sb.String()
+	if len(m.Search.Filtered) == 0 && m.Search.Input.Value() != "" {
+		return BuildStatusLine(&sb, config.Styles.UserGuide.PaddingLeft(1).Render("ⓘ  no packages found"), footerText)
 	}
 
-	for i, pkg := range m.Packages {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-
-		pkgName := pkg.Name
-		if pkg.Version != "" {
-			pkgName = fmt.Sprintf("%s@%s", pkg.Name, pkg.Version)
-		}
-
-		if i == m.Cursor {
-			if m.Selected[i] {
-				sb.WriteString(config.Styles.Selected.Render("● " + pkgName))
-			} else {
-				sb.WriteString(config.Styles.Selected.Render("◉ " + pkgName))
-			}
-
-			if pkg.Description != "" {
-				desc := pkg.Description
-				if len(desc) > 50 {
-					desc = desc[:47] + "..."
-				}
-				sb.WriteString(config.Styles.UserGuide.Render("  ⇢  " + desc))
-			}
-		} else if m.Selected[i] {
-			sb.WriteString(config.Styles.Item.Render("● " + pkgName))
-		} else {
-			sb.WriteString(config.Styles.Item.Render("○ " + pkgName))
-		}
-		sb.WriteString("\n")
-	}
+	RenderPackageItems(&sb, m)
 
 	sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter install"))
 	if len(m.Selected) > 0 {
@@ -253,6 +278,60 @@ func (m NpmSearchModel) View() string {
 	sb.WriteString(config.Styles.UserGuide.Render(" • ctrl+a toggle all • esc cancel"))
 
 	return sb.String()
+}
+
+func BuildStatusLine(sb *strings.Builder, content string, footer string) string {
+	sb.WriteString(config.Styles.Menu.Render("│"))
+	sb.WriteString(content)
+	sb.WriteString("\n")
+	sb.WriteString(config.Styles.UserGuide.Render(footer))
+	return sb.String()
+}
+
+func RenderPackageItems(sb *strings.Builder, m NpmSearchModel) {
+	filtered := len(m.Search.Filtered)
+	if filtered == 0 {
+		return
+	}
+	
+	height := m.Viewport.Start + m.Viewport.Visible
+	if height > filtered {
+		height = filtered
+	}
+	
+	if m.Viewport.Start > 0 {
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
+		sb.WriteString("\n")
+	}
+	
+	for i := m.Viewport.Start; i < height; i++ {
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		choice := m.Search.Filtered[i]
+		
+		if m.Viewport.Cursor == i {
+			if slices.Contains(m.Selected, choice.Id) {
+				sb.WriteString(config.Styles.Selected.Render("● " + choice.Id))
+			} else {
+				sb.WriteString(config.Styles.Selected.Render("◉ " + choice.Id))
+			}
+			
+			if choice.Description != "" {
+				sb.WriteString(config.Styles.UserGuide.Render("  ⇢  " + choice.Description))
+			}
+		} else if slices.Contains(m.Selected, choice.Id) {
+			sb.WriteString(config.Styles.Item.Render("● " + choice.Id))
+		} else {
+			sb.WriteString(config.Styles.Item.Render("○ " + choice.Id))
+		}
+		sb.WriteString("\n")
+	}
+	
+	if height < filtered {
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
+		sb.WriteString("\n")
+	}
 }
 
 func InstallNpmPackages(packages []string, bun string) error {
@@ -278,7 +357,7 @@ func InstallNpmPackages(packages []string, bun string) error {
 		// Install the package using bun add
 		cmd := exec.Command(bun, "add", pkgName)
 		cmd.Dir = appDir
-		cmd.Env = append(os.Environ())
+		cmd.Env = os.Environ()
 
 		output, err := cmd.CombinedOutput()
 		spinner.Stop(s)
@@ -320,13 +399,7 @@ func Npm(o NpmOptions) error {
 		return nil
 	}
 
-	selectedPackages := []string{}
-	for idx := range m.Selected {
-		if idx < len(m.Packages) {
-			pkg := m.Packages[idx]
-			selectedPackages = append(selectedPackages, pkg.Name)
-		}
-	}
+	selectedPackages := ExtractPackageNames(m.Selected)
 
 	bunPath := filepath.Join(".gen", "bun", "bun")
 	if _, err := os.Stat(bunPath); os.IsNotExist(err) {
@@ -334,4 +407,17 @@ func Npm(o NpmOptions) error {
 	}
 
 	return InstallNpmPackages(selectedPackages, bunPath)
+}
+
+func ExtractPackageNames(selected []string) []string {
+	names := make([]string, 0, len(selected))
+	for _, id := range selected {
+		// Remove version suffix if present (e.g., "package@1.0.0" -> "package")
+		if idx := strings.IndexByte(id, '@'); idx != -1 {
+			names = append(names, id[:idx])
+		} else {
+			names = append(names, id)
+		}
+	}
+	return names
 }

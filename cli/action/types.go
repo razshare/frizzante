@@ -5,7 +5,8 @@ import (
 	"time"
 
 	"github.com/razshare/frizzante/platform"
-	"github.com/charmbracelet/bubbles/textinput"
+	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/viewport"
 )
 
 type HelpOptions struct{}
@@ -128,10 +129,10 @@ type NpmSearchResponse struct {
 }
 
 type NpmSearchModel struct {
-	Input         textinput.Model
+	Search        *search.Search
+	Viewport      *viewport.Viewport
 	Packages      []NpmPackageInfo
-	Selected      map[int]bool
-	Cursor        int
+	Selected      []string
 	Loading       bool
 	Error         error
 	LastQuery     string
