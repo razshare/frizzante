@@ -166,7 +166,7 @@ func (m NpmSearchModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 				return m, nil
 			}
-		
+
 		case "ctrl+a":
 			if len(m.Packages) > 0 {
 				if len(m.Selected) == len(m.Packages) {
@@ -179,12 +179,12 @@ func (m NpmSearchModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				return m, nil
 			}
 		}
-		
+
 		// For all other keys, update the input
 		var cmd tea.Cmd
 		prevValue := m.Input.Value()
 		m.Input, cmd = m.Input.Update(msg)
-		
+
 		if m.Input.Value() != prevValue {
 			m.LastQuery = m.Input.Value()
 			if m.DebounceTimer != nil {
@@ -252,7 +252,7 @@ func (m NpmSearchModel) View() string {
 
 	for i, pkg := range m.Packages {
 		sb.WriteString(config.Styles.Menu.Render("│"))
-		
+
 		pkgName := pkg.Name
 		if pkg.Version != "" {
 			pkgName = fmt.Sprintf("%s@%s", pkg.Name, pkg.Version)
@@ -264,7 +264,7 @@ func (m NpmSearchModel) View() string {
 			} else {
 				sb.WriteString(config.Styles.Selected.Render("◉ " + pkgName))
 			}
-			
+
 			if pkg.Description != "" {
 				desc := pkg.Description
 				if len(desc) > 50 {
@@ -313,7 +313,7 @@ func InstallNpmPackages(packages []string, bun string) error {
 		cmd := exec.Command(bun, "add", pkgName)
 		cmd.Dir = appDir
 		cmd.Env = append(os.Environ())
-		
+
 		output, err := cmd.CombinedOutput()
 		spinner.Stop(s)
 
@@ -329,13 +329,13 @@ func InstallNpmPackages(packages []string, bun string) error {
 	if successCount > 0 {
 		messages.Success(fmt.Sprintf("Successfully installed %d package(s) to app/node_modules", successCount))
 	}
-	
+
 	return nil
 }
 
 func Npm(o NpmOptions) error {
 	model := InitNpmSearch()
-	
+
 	p := tea.NewProgram(model)
 	finalModel, err := p.Run()
 	if err != nil {
@@ -343,7 +343,7 @@ func Npm(o NpmOptions) error {
 	}
 
 	m := finalModel.(NpmSearchModel)
-	
+
 	if m.Quitting && !m.Confirmed {
 		messages.Info("npm search cancelled")
 		return nil
