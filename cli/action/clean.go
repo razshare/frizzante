@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func Clean(o CleanOptions) error {
+func CleanProject(o CleanProjectOptions) error {
 	clean := exec.Command(o.Go, "clean")
 	clean.Env = append(os.Environ())
 	clean.Stderr = os.Stderr

@@ -20,6 +20,7 @@ func Copy(cops []CopyInstruction) error {
 
 			for _, d := range ds {
 				gsloc = append(gsloc, CopyInstruction{
+					Efs:       cop.Efs,
 					From:      filepath.Join(cop.From, d.Name()),
 					To:        filepath.Join(cop.To, d.Name()),
 					Overwrite: cop.Overwrite,

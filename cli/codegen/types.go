@@ -30,9 +30,9 @@ type Section struct {
 }
 
 type CopyInstruction struct {
-	Efs       embed.FS
 	From      string
 	To        string
+	Efs       embed.FS
 	Overwrite func(n string) (bool, error)
 }
 
@@ -54,9 +54,11 @@ type CoreOptions struct {
 	App  string
 	Auto bool
 	Lib  string
+	Efs  embed.FS
 }
 
 type DatabaseOptions struct {
+	Efs      embed.FS
 	Generate string
 	Auto     bool
 	Go       string
@@ -81,15 +83,18 @@ type FormsOptions struct {
 	App  string
 	Auto bool
 	Lib  string
+	Efs  embed.FS
 }
 
 type LinksOptions struct {
 	App  string
 	Auto bool
 	Lib  string
+	Efs  embed.FS
 }
 
 type SessionOptions struct {
 	Auto bool
 	Lib  string
+	Efs  embed.FS
 }

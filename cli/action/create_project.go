@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 )
 
-func Create(o CreateOptions) error {
+func CreateProject(o CreateProjectOptions) error {
 	err := files.DownloadFile("https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip", o.Project+".zip")
 	if err != nil {
 		return err

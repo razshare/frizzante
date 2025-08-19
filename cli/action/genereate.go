@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/razshare/frizzante/cli/codegen"
 	"github.com/razshare/frizzante/tui/multiselect"
+	"github.com/razshare/frizzante/tui/search"
 	"path/filepath"
 	"strings"
 )
@@ -26,6 +27,7 @@ func Generate(o GenerateOptions) error {
 			return codegen.Session(codegen.SessionOptions{
 				Auto: o.Auto,
 				Lib:  filepath.Join("lib", "session"),
+				Efs:  o.Efs,
 			})
 		} else if gen == "database" {
 			return codegen.Database(codegen.DatabaseOptions{
@@ -34,6 +36,7 @@ func Generate(o GenerateOptions) error {
 				Go:       o.Go,
 				Sqlc:     o.Sqlc,
 				Platform: o.Platform,
+				Efs:      o.Efs,
 				Lib:      filepath.Join("lib", "database"),
 			})
 		} else if gen == "queries" {
@@ -47,18 +50,21 @@ func Generate(o GenerateOptions) error {
 			return codegen.Core(codegen.CoreOptions{
 				App:  o.App,
 				Auto: o.Auto,
+				Efs:  o.Efs,
 				Lib:  filepath.Join(o.App, "frizzante", "core"),
 			})
 		} else if gen == "forms" {
 			return codegen.Forms(codegen.FormsOptions{
 				App:  o.App,
 				Auto: o.Auto,
+				Efs:  o.Efs,
 				Lib:  filepath.Join(o.App, "frizzante", "forms"),
 			})
 		} else if gen == "links" {
 			return codegen.Links(codegen.LinksOptions{
 				App:  o.App,
 				Auto: o.Auto,
+				Efs:  o.Efs,
 				Lib:  filepath.Join(o.App, "frizzante", "forms"),
 			})
 		}
@@ -66,33 +72,17 @@ func Generate(o GenerateOptions) error {
 		return errors.New("unknown generation")
 	}
 
-	if o.Selected == ":pick" {
+	if o.Selected == "" {
 		items, err := multiselect.Send(
-			[]string{
-				`core
-					router and view swapping tools.
-				`,
-				`forms
-					form component that provides status details
-				`,
-				`links
-					hyperlink component that provides status details
-				`,
-				`air
-					live reload tool for go programs
-				`,
-				`bun
-					fast js toolkit
-				`,
-				`session
-					functions for managing user session state
-				`,
-				`database
-					full database setup
-				`,
-				`queries
-					sql code to go code using sqlc
-				`,
+			[]search.Choice{
+				{Id: "core", Description: "router and view swapping tools."},
+				{Id: "forms", Description: "form component that provides status details"},
+				{Id: "links", Description: "hyperlink component that provides status details"},
+				{Id: "air", Description: "live reload tool for go programs"},
+				{Id: "bun", Description: "fast js toolkit"},
+				{Id: "session", Description: "functions for managing user session state"},
+				{Id: "database", Description: "full database setup"},
+				{Id: "queries", Description: "sql code to go code using sqlc"},
 			},
 			"generate",
 		)

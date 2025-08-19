@@ -5,6 +5,7 @@ import (
 	"errors"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli"
+	"github.com/razshare/frizzante/cli/app"
 	"github.com/razshare/frizzante/tui/messages"
 	flag "github.com/spf13/pflag"
 	"os"
@@ -19,7 +20,7 @@ import (
 //go:embed queries.sql
 //go:embed schema.sql
 var efs embed.FS
-var c = cli.New()
+var c = app.New()
 
 func main() {
 	flag.Parse()

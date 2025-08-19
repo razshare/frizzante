@@ -13,15 +13,20 @@ type Server struct {
 	Render      func(v view.View) (string, error)
 	Guards      []guard.Guard
 	Routes      []route.Route
-	Http        *http.Server
+	Http        *Http
 	InfoLog     *log.Logger
 	ErrorLog    *log.Logger
 	Channels    Channels
 	Efs         embed.FS
-	PublicRoot  string
-	SecureAddr  string
 	Certificate string
 	Key         string
+}
+
+type Http struct {
+	*http.Server
+	PublicRoot string
+	Addr       string
+	SecureAddr string
 }
 
 type Channels struct {

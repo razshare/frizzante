@@ -13,7 +13,11 @@ func Error(args ...any) {
 	for i := 0; i < l; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	entries[l] = "\n" + stack.Trace()
+
+	if trace := stack.Trace(); trace != "" {
+		entries[l] = "\n" + stack.Trace()
+	}
+
 	Status("ERROR", strings.Join(entries, ""), config.Colors.Error, "233", config.Colors.Error)
 }
 

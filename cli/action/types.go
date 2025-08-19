@@ -5,31 +5,9 @@ import (
 	"github.com/razshare/frizzante/platform"
 )
 
-type Type int
-
-const (
-	TypeMenu     Type = 0
-	TypeVersion  Type = 1
-	TypeProject  Type = 2
-	TypeGenerate Type = 3
-	TypeTest     Type = 4
-	TypePkg      Type = 5
-	TypePkgWatch Type = 6
-	TypeCheck    Type = 7
-	TypeInstall  Type = 8
-	TypeUpdate   Type = 9
-	TypeFormat   Type = 10
-	TypeTouch    Type = 11
-	TypeClean    Type = 12
-	TypeDev      Type = 13
-	TypeBuild    Type = 14
-	TypeConfig   Type = 15
-	TypeWelcome  Type = 16
-	TypeReset    Type = 17
-	TypeHelp     Type = 99
-)
-
 type HelpOptions struct{}
+
+type ClearOptions struct{}
 
 type ResetOptions struct{}
 
@@ -37,7 +15,7 @@ type VersionOptions struct {
 	Efs embed.FS
 }
 
-type CreateOptions struct {
+type CreateProjectOptions struct {
 	Project string
 }
 
@@ -49,6 +27,7 @@ type GenerateOptions struct {
 	Air      string
 	Bun      string
 	Sqlc     string
+	Efs      embed.FS
 	Platform platform.Platform
 }
 
@@ -95,7 +74,7 @@ type TouchOptions struct {
 	App string
 }
 
-type CleanOptions struct {
+type CleanProjectOptions struct {
 	App string
 	Go  string
 }
@@ -123,6 +102,7 @@ type ConfigOptions struct {
 	Bun      string
 	Sqlc     string
 	Generate string
+	Efs      embed.FS
 	Platform platform.Platform
 }
 

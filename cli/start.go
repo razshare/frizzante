@@ -1,116 +1,67 @@
 package cli
 
 import (
-	"github.com/razshare/frizzante/cli/action"
-	"github.com/razshare/frizzante/cli/path"
+	"errors"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/razshare/frizzante/cli/app"
+	"github.com/razshare/frizzante/cli/menu"
+	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/singleselect"
 )
 
-func Start(c *Cli) error {
-	plat, err := Platform(c)
+func Start(a *app.App) error {
+	m, err := menu.New(a)
 	if err != nil {
 		return err
 	}
 
-	_go, err := path.Go(*c.Go)
-	if err != nil {
-		return err
+	chs := make([]search.Choice, len(m.Items))
+
+	for i, it := range m.Items {
+		chs[i] = it.Choice
 	}
 
-	air, err := path.Air(*c.Air)
-	if err != nil {
-		return err
+	// If this for loop returns,
+	// it means the choice has been inlined.
+	for _, it := range m.Items {
+		if !it.Inlined() {
+			continue
+		}
+
+		return it.Handler()
 	}
 
-	bun, err := path.Bun(*c.Bun)
-	if err != nil {
-		return err
+	var logo string
+	if logo, err = app.Logo(a); err == nil {
+		println(logo)
 	}
 
-	sqlc, err := path.Sqlc(*c.Sqlc)
-	if err != nil {
-		return err
+	// If we reach this point,
+	// it means we need to show the TUI menu.
+	for {
+		var id string
+		id, err = singleselect.Send(chs, "menu")
+		if err != nil {
+			if errors.Is(err, tea.ErrInterrupted) {
+				return err
+			}
+			messages.Error(err)
+			continue
+		}
+
+		for _, it := range m.Items {
+			if it.Choice.Id != id {
+				continue
+			}
+
+			if err = it.Handler(); err != nil {
+				if errors.Is(err, tea.ErrInterrupted) {
+					return err
+				}
+				messages.Error(err)
+			}
+			break
+		}
 	}
-
-	return Next(c, NextOptions{
-		Go:       _go,
-		Air:      air,
-		Bun:      bun,
-		Sqlc:     sqlc,
-		Platform: plat,
-		Action: func() action.Type {
-			if *c.Help {
-				return action.TypeHelp
-			}
-
-			if *c.Version {
-				return action.TypeVersion
-			}
-
-			if *c.Reset {
-				return action.TypeReset
-			}
-
-			if *c.Project != "" {
-				return action.TypeProject
-			}
-
-			if *c.Generate != "" {
-				return action.TypeGenerate
-			}
-
-			if *c.Test {
-				return action.TypeTest
-			}
-
-			if *c.Package {
-				return action.TypePkg
-			}
-
-			if *c.PackageWatch {
-				return action.TypePkgWatch
-			}
-
-			if *c.Check {
-				return action.TypeCheck
-			}
-
-			if *c.Install {
-				return action.TypeInstall
-			}
-
-			if *c.Update {
-				return action.TypeUpdate
-			}
-
-			if *c.Format {
-				return action.TypeFormat
-			}
-
-			if *c.Touch {
-				return action.TypeTouch
-			}
-
-			if *c.Clean {
-				return action.TypeClean
-			}
-
-			if *c.Dev {
-				return action.TypeDev
-			}
-
-			if *c.Build {
-				return action.TypeBuild
-			}
-
-			if *c.Configure {
-				return action.TypeConfig
-			}
-
-			if *c.Welcome {
-				return action.TypeWelcome
-			}
-
-			return action.TypeMenu
-		},
-	})
 }

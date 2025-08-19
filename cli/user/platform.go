@@ -1,6 +1,7 @@
-package cli
+package user
 
 import (
+	"github.com/razshare/frizzante/cli/app"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/platform"
 	"github.com/razshare/frizzante/tui/messages"
@@ -10,7 +11,7 @@ import (
 	"strings"
 )
 
-func Platform(c *Cli) (platform.Platform, error) {
+func Platform(a *app.App) (platform.Platform, error) {
 	var plat string
 
 	home, err := Home()
@@ -29,7 +30,7 @@ func Platform(c *Cli) (platform.Platform, error) {
 
 		plat = strings.TrimSpace(string(d))
 	} else {
-		plat = strings.TrimSpace(*c.Platform)
+		plat = strings.TrimSpace(*a.Platform)
 	}
 
 	if plat == "" {

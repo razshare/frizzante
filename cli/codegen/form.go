@@ -29,6 +29,7 @@ func Forms(o FormsOptions) error {
 
 	err := Copy([]CopyInstruction{
 		{
+			Efs:  o.Efs,
 			From: "template/app/frizzante/forms",
 			To:   o.Lib,
 		},

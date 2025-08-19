@@ -29,6 +29,7 @@ func Links(o LinksOptions) error {
 
 	err := Copy([]CopyInstruction{
 		{
+			Efs:  o.Efs,
 			From: "template/app/frizzante/links",
 			To:   o.Lib,
 		},

@@ -1,24 +1,24 @@
 package confirm
 
 import (
-	"errors"
 	"fmt"
-	"github.com/razshare/frizzante/stack"
 	"github.com/razshare/frizzante/tui/program"
 )
 
-func Send(defaultValue bool, prompt string) (bool, error) {
+func Send(def bool, msg string) (bool, error) {
 	model, err := program.Run(&Model{
-		Prompt:       prompt,
-		DefaultValue: defaultValue,
-		Confirmed:    defaultValue,
+		Prompt:       msg,
+		DefaultValue: def,
+		Confirmed:    def,
 	})
+
 	if err != nil {
-		return false, errors.New(err.Error() + "\n" + stack.Trace())
+		return false, err
 	}
+
 	return model.Confirmed, nil
 }
 
-func Sendf(defaultValue bool, format string, vars ...any) (bool, error) {
-	return Send(defaultValue, fmt.Sprintf(format, vars...))
+func Sendf(def bool, format string, vars ...any) (bool, error) {
+	return Send(def, fmt.Sprintf(format, vars...))
 }

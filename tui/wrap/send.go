@@ -2,15 +2,15 @@ package wrap
 
 import "strings"
 
-func Send(text string, width int) []string {
+func Send(txt string, width int) []string {
 	if width <= 0 {
-		return strings.Split(text, "\n")
+		return strings.Split(txt, "\n")
 	}
 
-	inputLines := strings.Split(text, "\n")
+	lines := strings.Split(txt, "\n")
 	var result []string
 
-	for _, line := range inputLines {
+	for _, line := range lines {
 		if line == "" {
 			continue
 		}
@@ -26,19 +26,19 @@ func Send(text string, width int) []string {
 			continue
 		}
 
-		currentLine := ""
+		cline := ""
 		for _, word := range words {
-			if currentLine == "" {
-				currentLine = word
-			} else if len(currentLine)+1+len(word) <= width {
-				currentLine += " " + word
+			if cline == "" {
+				cline = word
+			} else if len(cline)+1+len(word) <= width {
+				cline += " " + word
 			} else {
-				result = append(result, currentLine)
-				currentLine = word
+				result = append(result, cline)
+				cline = word
 			}
 		}
-		if currentLine != "" {
-			result = append(result, currentLine)
+		if cline != "" {
+			result = append(result, cline)
 		}
 	}
 

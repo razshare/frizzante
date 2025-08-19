@@ -16,16 +16,17 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch k := msg.(type) {
 	case tea.KeyMsg:
 		if k.Type == tea.KeyCtrlC {
-			if m.SoftInterrupt {
-				return m, tea.Quit
-			}
-
 			return m, tea.Interrupt
 		}
 
 		if k.Type == tea.KeyEsc {
 			m.TextInput.Reset()
-			return m, nil
+
+			if m.TextInput.Value() != "" {
+				return m, nil
+			}
+
+			return m, tea.Quit
 		}
 
 		if k.Type == tea.KeyEnter {
@@ -45,7 +46,12 @@ func (m *Model) View() string {
 	sb.WriteString(config.Styles.Menu.Render("│"))
 	sb.WriteString(config.Styles.Title.Render(" " + m.TextInput.View()))
 	sb.WriteString("\n")
-	sb.WriteString(config.Styles.UserGuide.Render("enter submit • esc clear"))
+	sb.WriteString(config.Styles.UserGuide.Render("enter submit"))
+	if m.TextInput.View() != "" {
+		sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+	} else {
+		sb.WriteString(config.Styles.UserGuide.Render(" • esc back"))
+	}
 	sb.WriteString("\n")
 	return sb.String()
 }

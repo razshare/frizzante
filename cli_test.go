@@ -30,7 +30,7 @@ func TestOnCreateProject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = action.Create(action.CreateOptions{Project: proj})
+	err = action.CreateProject(action.CreateProjectOptions{Project: proj})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,6 +72,7 @@ func TestOnGenerate(t *testing.T) {
 		Air:      filepath.Join(".gen", "air", "air"),
 		Bun:      filepath.Join(".gen", "bun", "bun"),
 		Sqlc:     filepath.Join(".gen", "sqlc", "sqlc"),
+		Efs:      tefs,
 	})
 
 	if err != nil {
@@ -201,7 +202,7 @@ func TestOnClean(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = action.Clean(action.CleanOptions{
+	err = action.CleanProject(action.CleanProjectOptions{
 		App: filepath.Join("template", "app"),
 		Go:  "go",
 	})

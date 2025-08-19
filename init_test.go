@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/route"
 	"github.com/razshare/frizzante/send"
@@ -16,13 +17,14 @@ import (
 //go:embed makefile
 //go:embed template/app/dist
 var tefs embed.FS
-var port = 8080
+var port = 7878
 var serve = make(chan any, 1)
 
 func init() {
 	// Server.
 	s := server.New()
-	s.PublicRoot = filepath.Join("template", "app", "dist", "client")
+	s.Http.Addr = fmt.Sprintf("0.0.0.0:%d", port)
+	s.Http.PublicRoot = filepath.Join("template", "app", "dist", "client")
 	s.Render = ssr.New(ssr.Config{
 		Efs:   s.Efs,
 		App:   filepath.Join("template", "app"),
@@ -56,8 +58,6 @@ func init() {
 			})
 		}},
 	}
-
 	go server.Start(s)
-
 	serve <- 0
 }

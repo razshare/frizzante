@@ -21,7 +21,7 @@ func Start(s *Server) {
 					Render:     s.Render,
 					ErrorLog:   s.ErrorLog,
 					InfoLog:    s.InfoLog,
-					PublicRoot: s.PublicRoot,
+					PublicRoot: s.Http.PublicRoot,
 					Efs:        s.Efs,
 					EventId:    1,
 					Status:     200,
@@ -73,7 +73,7 @@ func Start(s *Server) {
 				s.InfoLog.Println("cancelling server startup")
 				return
 			}
-			err := http.ListenAndServeTLS(s.SecureAddr, s.Certificate, s.Key, s.Http.Handler)
+			err := http.ListenAndServeTLS(s.Http.SecureAddr, s.Certificate, s.Key, s.Http.Handler)
 			if err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
 					s.InfoLog.Println("shutting down server")

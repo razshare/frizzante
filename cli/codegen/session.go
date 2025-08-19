@@ -3,13 +3,14 @@ package codegen
 import (
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
 	"strings"
 )
 
 func Session(o SessionOptions) error {
 	tchoice, err := singleselect.Send(
-		[]string{"memory", "disk"},
+		[]search.Choice{{Id: "memory"}, {Id: "disk"}},
 		"session type",
 	)
 
@@ -21,6 +22,7 @@ func Session(o SessionOptions) error {
 
 	err = Copy([]CopyInstruction{
 		{
+			Efs:  o.Efs,
 			From: "template/lib/session/" + t,
 			To:   o.Lib,
 			Overwrite: func(n string) (bool, error) {

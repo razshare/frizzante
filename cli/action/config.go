@@ -5,11 +5,12 @@ func Config(o ConfigOptions) error {
 		App:      o.App,
 		Selected: "bun,air",
 		Auto:     o.Auto,
-		Platform: o.Platform,
 		Go:       o.Go,
 		Air:      o.Air,
 		Bun:      o.Bun,
 		Sqlc:     o.Sqlc,
+		Efs:      o.Efs,
+		Platform: o.Platform,
 	})
 
 	if err != nil {

@@ -17,16 +17,12 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch k := msg.(type) {
 	case tea.KeyMsg:
 		if k.Type == tea.KeyCtrlC {
-			if m.SoftInterrupt {
-				return m, tea.Quit
-			}
-
 			return m, tea.Interrupt
 		}
 
 		if k.Type == tea.KeyEnter {
 			if len(m.Selected) == 0 && len(m.Search.Filtered) > 0 {
-				val := m.Search.Filtered[m.Viewport.Cursor]
+				val := m.Search.Filtered[m.Viewport.Cursor].Id
 				m.Selected = append(m.Selected, val)
 			}
 			return m, tea.Quit
@@ -34,7 +30,7 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if k.Type == tea.KeySpace {
 			if len(m.Search.Filtered) > 0 {
-				val := m.Search.Filtered[m.Viewport.Cursor]
+				val := m.Search.Filtered[m.Viewport.Cursor].Id
 				if slices.Contains(m.Selected, val) {
 					if i := slices.Index(m.Selected, val); i >= 0 {
 						m.Selected = append(m.Selected[:i], m.Selected[i+1:]...)
@@ -50,7 +46,9 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if m.Search.Active {
 				search.Reset(m.Search, m.Viewport)
 			}
-			return m, nil
+
+			m.Selected = make([]string, 0)
+			return m, tea.Quit
 		}
 
 		if k.Type == tea.KeyUp || k.Type == tea.KeyCtrlP {
@@ -102,9 +100,13 @@ func (m *Model) View() string {
 		sb.WriteString("\n")
 
 		sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+
 		if m.Search.Active {
 			sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+		} else {
+			sb.WriteString(config.Styles.UserGuide.Render(" • esc back"))
 		}
+
 		return sb.String()
 	}
 
@@ -122,20 +124,20 @@ func (m *Model) View() string {
 	for i := m.Viewport.Start; i < height; i++ {
 		sb.WriteString(config.Styles.Menu.Render("│"))
 		if m.Viewport.Cursor == i {
-			if slices.Contains(m.Selected, m.Search.Filtered[i]) {
-				sb.WriteString(config.Styles.Selected.Render("● " + m.Search.Filtered[i]))
+			if slices.Contains(m.Selected, m.Search.Filtered[i].Id) {
+				sb.WriteString(config.Styles.Selected.Render("● " + m.Search.Filtered[i].Id))
 			} else {
-				sb.WriteString(config.Styles.Selected.Render("◉ " + m.Search.Filtered[i]))
+				sb.WriteString(config.Styles.Selected.Render("◉ " + m.Search.Filtered[i].Id))
 			}
 
 			j := slices.Index(m.Search.Choices, m.Search.Filtered[i])
-			if j >= 0 && m.Search.Descriptions[j] != "" {
-				sb.WriteString(config.Styles.UserGuide.Render("  ⇢  " + m.Search.Descriptions[j]))
+			if j >= 0 && m.Search.Choices[j].Description != "" {
+				sb.WriteString(config.Styles.UserGuide.Render("  ⇢  " + m.Search.Choices[j].Description))
 			}
-		} else if slices.Contains(m.Selected, m.Search.Filtered[i]) {
-			sb.WriteString(config.Styles.Item.Render("● " + m.Search.Filtered[i]))
+		} else if slices.Contains(m.Selected, m.Search.Filtered[i].Id) {
+			sb.WriteString(config.Styles.Item.Render("● " + m.Search.Filtered[i].Id))
 		} else {
-			sb.WriteString(config.Styles.Item.Render("○ " + m.Search.Filtered[i]))
+			sb.WriteString(config.Styles.Item.Render("○ " + m.Search.Filtered[i].Id))
 		}
 		sb.WriteString("\n")
 	}
@@ -147,8 +149,11 @@ func (m *Model) View() string {
 	}
 
 	sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+
 	if m.Search.Active {
 		sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+	} else {
+		sb.WriteString(config.Styles.UserGuide.Render(" • esc back"))
 	}
 
 	return sb.String()

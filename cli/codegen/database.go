@@ -3,6 +3,7 @@ package codegen
 import (
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
 	"github.com/razshare/frizzante/tui/spinner"
 	"os"
@@ -12,7 +13,7 @@ import (
 
 func Database(o DatabaseOptions) error {
 	tchoice, err := singleselect.Send(
-		[]string{"sqlite"},
+		[]search.Choice{{Id: "sqlite"}},
 		"what type of database would you like to setup?",
 	)
 
@@ -24,6 +25,7 @@ func Database(o DatabaseOptions) error {
 
 	err = Copy([]CopyInstruction{
 		{
+			Efs:  o.Efs,
 			From: "template/lib/database/" + t,
 			To:   o.Lib,
 			Overwrite: func(n string) (bool, error) {

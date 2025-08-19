@@ -1,4 +1,4 @@
-package cli
+package user
 
 import (
 	"os"

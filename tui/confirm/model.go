@@ -13,10 +13,12 @@ func (m *Model) Init() tea.Cmd {
 func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch k := msg.(type) {
 	case tea.KeyMsg:
+		if k.Type == tea.KeyEsc {
+			m.Confirmed = false
+			return m, tea.Quit
+		}
+
 		if k.Type == tea.KeyCtrlC {
-			if m.SoftInterrupt {
-				return m, tea.Quit
-			}
 			return m, tea.Interrupt
 		}
 
