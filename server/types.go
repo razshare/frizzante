@@ -25,7 +25,6 @@ type Server struct {
 type Http struct {
 	*http.Server
 	PublicRoot string
-	Addr       string
 	SecureAddr string
 }
 
