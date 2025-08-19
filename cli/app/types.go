@@ -3,6 +3,7 @@ package app
 import "embed"
 
 type App struct {
+	Add          *string
 	App          *string
 	Help         *bool
 	Version      *bool

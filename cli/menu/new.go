@@ -99,6 +99,25 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
+				Choice:  search.Choice{Id: "add", Description: "adds packages"},
+				Inlined: func() bool { return *a.Add != "" },
+				Handler: func() error {
+					//if strings.HasPrefix(*a.Add, "npm:") {
+					//	// search for/add js packages
+					//} else {
+					//	// search for/add go packages
+					//}
+
+					// ^ We should aim for the above solution.
+					//
+					//   Reserve the possibility to also search for go packages in the future.
+					//
+					//   However, currently for testing purposes the following is also fine.
+
+					return action.Npm(action.NpmOptions{})
+				},
+			},
+			{
 				Choice:  search.Choice{Id: "dev", Description: "runs air and vite in parallel"},
 				Inlined: func() bool { return *a.Dev },
 				Handler: func() error {

@@ -7,6 +7,7 @@ import (
 )
 
 func New() (c *App) {
+	add := flag.StringP("add", "a", "", "adds packages")
 	app := flag.StringP("app", "", "app", "sets the app directory")
 	help := flag.BoolP("help", "h", false, "shows this help document")
 	ver := flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
@@ -20,7 +21,6 @@ func New() (c *App) {
 	upd := flag.BoolP("update", "u", false, "updates dependencies")
 	ins := flag.BoolP("install", "i", false, "installs dependencies")
 	fmt := flag.BoolP("format", "f", false, "formats source code")
-	npm := flag.BoolP("npm", "n", false, "interactive npm package search and install")
 	tch := flag.BoolP("touch", "", false, "creates placeholders in app/dist (useful for go:embed)")
 	cln := flag.BoolP("clean-project", "", false, "cleans project")
 	dev := flag.BoolP("dev", "d", false, "starts dev mode")
@@ -36,6 +36,7 @@ func New() (c *App) {
 	clr := flag.BoolP("clear", "", false, "clears screen")
 
 	return &App{
+		Add:          add,
 		App:          app,
 		Help:         help,
 		Version:      ver,
