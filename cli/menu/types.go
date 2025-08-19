@@ -8,6 +8,6 @@ type Menu struct {
 
 type Item struct {
 	Choice  search.Choice
-	Inlined func() bool // Inlined returns true if the user has typed the choice directly in the terminal.
+	Active  func() bool // Active returns true if the user has typed the choice directly in the terminal.
 	Handler func() error
 }

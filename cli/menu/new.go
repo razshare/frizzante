@@ -43,8 +43,8 @@ func New(a *app.App) (*Menu, error) {
 	return &Menu{
 		Items: []Item{
 			{
-				Choice:  search.Choice{Id: "configure", Description: "installs required binaries and dependencies"},
-				Inlined: func() bool { return *a.Configure },
+				Choice: search.Choice{Id: "configure", Description: "installs required binaries and dependencies"},
+				Active: func() bool { return *a.Configure },
 				Handler: func() error {
 					return action.Config(action.ConfigOptions{
 						App:      *a.App,
@@ -61,8 +61,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "create project", Description: "creates a new project"},
-				Inlined: func() bool { return *a.Project != "" },
+				Choice: search.Choice{Id: "create project", Description: "creates a new project"},
+				Active: func() bool { return *a.Project != "" },
 				Handler: func() error {
 					if *a.Project == "" {
 						*a.Project, err = input.Send("give the project a name")
@@ -77,8 +77,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "install", Description: "installs dependencies"},
-				Inlined: func() bool { return *a.Install },
+				Choice: search.Choice{Id: "install", Description: "installs dependencies"},
+				Active: func() bool { return *a.Install },
 				Handler: func() error {
 					return action.Install(action.InstallOptions{
 						App: *a.App,
@@ -88,8 +88,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "update", Description: "updates dependencies"},
-				Inlined: func() bool { return *a.Update },
+				Choice: search.Choice{Id: "update", Description: "updates dependencies"},
+				Active: func() bool { return *a.Update },
 				Handler: func() error {
 					return action.Update(action.UpdateOptions{
 						App: *a.App,
@@ -99,8 +99,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "add", Description: "adds packages (experimental)"},
-				Inlined: func() bool { return *a.Add != "" },
+				Choice: search.Choice{Id: "add", Description: "adds packages (experimental)"},
+				Active: func() bool { return *a.Add != "" },
 				Handler: func() error {
 					//if strings.HasPrefix(*a.Add, "npm:") {
 					//	// search for/add js packages
@@ -118,8 +118,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "dev", Description: "runs air and vite in parallel"},
-				Inlined: func() bool { return *a.Dev },
+				Choice: search.Choice{Id: "dev", Description: "runs air and vite in parallel"},
+				Active: func() bool { return *a.Dev },
 				Handler: func() error {
 					return action.Dev(action.DevOptions{
 						App: *a.App,
@@ -130,8 +130,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "build", Description: "builds project"},
-				Inlined: func() bool { return *a.Build },
+				Choice: search.Choice{Id: "build", Description: "builds project"},
+				Active: func() bool { return *a.Build },
 				Handler: func() error {
 					return action.Build(action.BuildOptions{
 						App:      *a.App,
@@ -142,8 +142,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "generate", Description: "generates code and resources"},
-				Inlined: func() bool { return *a.Generate != "" },
+				Choice: search.Choice{Id: "generate", Description: "generates code and resources"},
+				Active: func() bool { return *a.Generate != "" },
 				Handler: func() error {
 					return action.Generate(action.GenerateOptions{
 						App:      *a.App,
@@ -159,8 +159,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "package", Description: "builds app"},
-				Inlined: func() bool { return *a.Package },
+				Choice: search.Choice{Id: "package", Description: "builds app"},
+				Active: func() bool { return *a.Package },
 				Handler: func() error {
 					return action.Pkg(action.PkgOptions{
 						App: *a.App,
@@ -169,8 +169,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "package (watch)", Description: "builds app on change"},
-				Inlined: func() bool { return *a.PackageWatch },
+				Choice: search.Choice{Id: "package (watch)", Description: "builds app on change"},
+				Active: func() bool { return *a.PackageWatch },
 				Handler: func() error {
 					return action.PkgWatch(action.PkgWatchOptions{
 						App: *a.App,
@@ -179,8 +179,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "check", Description: "checks for code errors"},
-				Inlined: func() bool { return *a.Check },
+				Choice: search.Choice{Id: "check", Description: "checks for code errors"},
+				Active: func() bool { return *a.Check },
 				Handler: func() error {
 					return action.Check(action.CheckOptions{
 						App: *a.App,
@@ -189,8 +189,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "format", Description: "format code"},
-				Inlined: func() bool { return *a.Format },
+				Choice: search.Choice{Id: "format", Description: "format code"},
+				Active: func() bool { return *a.Format },
 				Handler: func() error {
 					return action.Format(action.FormatOptions{
 						App: *a.App,
@@ -200,8 +200,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "touch", Description: "adds placeholders in app/dist"},
-				Inlined: func() bool { return *a.Touch },
+				Choice: search.Choice{Id: "touch", Description: "adds placeholders in app/dist"},
+				Active: func() bool { return *a.Touch },
 				Handler: func() error {
 					return action.Touch(action.TouchOptions{
 						App: *a.App,
@@ -209,8 +209,8 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "clean project", Description: "deletes unnecessary project files"},
-				Inlined: func() bool { return *a.CleanProject },
+				Choice: search.Choice{Id: "clean project", Description: "deletes unnecessary project files"},
+				Active: func() bool { return *a.CleanProject },
 				Handler: func() error {
 					return action.CleanProject(action.CleanProjectOptions{
 						App: *a.App,
@@ -219,22 +219,22 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "reset", Description: "deletes " + home},
-				Inlined: func() bool { return *a.Reset },
+				Choice: search.Choice{Id: "reset", Description: "deletes " + home},
+				Active: func() bool { return *a.Reset },
 				Handler: func() error {
 					return action.Reset(action.ResetOptions{})
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "clear", Description: "clears screen"},
-				Inlined: func() bool { return *a.Clear },
+				Choice: search.Choice{Id: "clear", Description: "clears screen"},
+				Active: func() bool { return *a.Clear },
 				Handler: func() error {
 					return action.Clear(action.ClearOptions{})
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "test", Description: "runs tests"},
-				Inlined: func() bool { return *a.Test },
+				Choice: search.Choice{Id: "test", Description: "runs tests"},
+				Active: func() bool { return *a.Test },
 				Handler: func() error {
 					return action.Test(action.TestOptions{
 						App: *a.App,
@@ -244,15 +244,15 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "help", Description: "shows the help menu"},
-				Inlined: func() bool { return *a.Help },
+				Choice: search.Choice{Id: "help", Description: "shows the help menu"},
+				Active: func() bool { return *a.Help },
 				Handler: func() error {
 					return action.Help(action.HelpOptions{})
 				},
 			},
 			{
-				Choice:  search.Choice{Id: "version", Description: "shows binary version"},
-				Inlined: func() bool { return *a.Version },
+				Choice: search.Choice{Id: "version", Description: "shows binary version"},
+				Active: func() bool { return *a.Version },
 				Handler: func() error {
 					return action.Version(action.VersionOptions{
 						Efs: a.Efs,

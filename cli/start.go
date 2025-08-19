@@ -25,7 +25,7 @@ func Start(a *app.App) error {
 	// If this for loop returns,
 	// it means the choice has been inlined.
 	for _, it := range m.Items {
-		if !it.Inlined() {
+		if !it.Active() {
 			continue
 		}
 
