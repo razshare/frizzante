@@ -2,11 +2,8 @@ package action
 
 import (
 	"embed"
-	"time"
 
 	"github.com/razshare/frizzante/platform"
-	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/viewport"
 )
 
 type HelpOptions struct{}
@@ -116,36 +113,3 @@ type NpmOptions struct {
 	Query string
 }
 
-type NpmPackageInfo struct {
-	Name        string `json:"name"`
-	Version     string `json:"version"`
-	Description string `json:"description"`
-}
-
-type NpmSearchResponse struct {
-	Objects []struct {
-		Package NpmPackageInfo `json:"package"`
-	} `json:"objects"`
-}
-
-type NpmSearchModel struct {
-	Search        *search.Search
-	Viewport      *viewport.Viewport
-	Packages      []NpmPackageInfo
-	Selected      []string
-	Loading       bool
-	Error         error
-	LastQuery     string
-	DebounceTimer *time.Timer
-	Quitting      bool
-	Confirmed     bool
-}
-
-type SearchResultMsg struct {
-	Packages []NpmPackageInfo
-	Error    error
-}
-
-type DebouncedSearchMsg struct {
-	Query string
-}
