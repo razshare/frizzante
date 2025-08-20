@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
@@ -12,6 +13,25 @@ import (
 )
 
 func Database(o DatabaseOptions) error {
+	if files.IsDirectory(o.Lib) {
+		if !o.Auto {
+			overwrite, err := confirm.Sendf(true, "%s already exists. Overwrite?", o.Lib)
+			if err != nil {
+				return err
+			}
+
+			if !overwrite {
+				messages.Infof("skipping %s", o.Lib)
+				return nil
+			}
+		}
+
+		err := os.RemoveAll(o.Lib)
+		if err != nil {
+			return err
+		}
+	}
+
 	tchoice, err := singleselect.Send(
 		[]search.Choice{{Id: "sqlite"}},
 		"what type of database would you like to setup?",

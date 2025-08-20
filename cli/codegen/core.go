@@ -1,14 +1,14 @@
 package codegen
 
 import (
-	"github.com/razshare/frizzante/embeds"
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 )
 
 func Core(o CoreOptions) error {
-	if embeds.IsDirectory(o.Efs, o.Lib) {
+	if files.IsDirectory(o.Lib) {
 		if !o.Auto {
 			overwrite, err := confirm.Sendf(true, "%s already exists. Overwrite?", o.Lib)
 			if err != nil {
