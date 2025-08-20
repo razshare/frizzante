@@ -1,39 +1,29 @@
 package npmselect
 
 import (
-	"time"
-
+	"github.com/razshare/frizzante/cli/npm"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/viewport"
+	"time"
 )
 
-type PackageInfo struct {
-	Name        string `json:"name"`
-	Version     string `json:"version"`
-	Description string `json:"description"`
-}
-
-type SearchResponse struct {
-	Objects []struct {
-		Package PackageInfo `json:"package"`
-	} `json:"objects"`
-}
-
 type Model struct {
-	Search        *search.Search
-	Viewport      *viewport.Viewport
-	Packages      []PackageInfo
-	Selected      []string
-	Loading       bool
-	Error         error
-	LastQuery     string
-	DebounceTimer *time.Timer
-	Quitting      bool
-	Confirmed     bool
+	Selected  []string
+	Prompt    string
+	LastQuery string
+	Search    *search.Search
+	Viewport  *viewport.Viewport
+	Packages  []npm.PackageInfo
+	Debounce  time.Duration
+	Debouncer *time.Timer
+	Error     error
+	Loading   bool
+	Quitting  bool
+	Confirmed bool
 }
 
 type SearchResultMsg struct {
-	Packages []PackageInfo
+	Packages []npm.PackageInfo
 	Error    error
 }
 

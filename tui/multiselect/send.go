@@ -13,19 +13,14 @@ func Send(chs []search.Choice, msg string) ([]string, error) {
 	input := textinput.New()
 	input.Width = 80
 	model, err := program.Run(&Model{
+		Prompt:   msg,
+		Viewport: &viewport.Viewport{Visible: 6},
+		Selected: make([]string, 0),
 		Search: &search.Search{
-			Active:   false,
 			Choices:  chs,
 			Filtered: chs,
 			Input:    input,
 		},
-		Viewport: &viewport.Viewport{
-			Visible: 6,
-			Start:   0,
-			Cursor:  0,
-		},
-		Selected: make([]string, 0),
-		Prompt:   msg,
 	})
 
 	if err != nil {

@@ -11,31 +11,16 @@ import (
 )
 
 func Send(chs []search.Choice, msg string) (string, error) {
-
-	//c := len(opts)
-	//chs := make([]string, c)
-	//dsc := make([]string, c)
-
-	//for i, option := range opts {
-	//	chs[i], dsc[i] = text.TitleAndContent(option)
-	//}
-
-	// Initialize the search input
 	input := textinput.New()
 	input.Width = 80
 	model, err := program.Run(&Model{
+		Prompt:   msg,
+		Viewport: &viewport.Viewport{Visible: 6},
 		Search: &search.Search{
-			Active:   false,
 			Choices:  chs,
 			Filtered: chs,
 			Input:    input,
 		},
-		Viewport: &viewport.Viewport{
-			Visible: 6,
-			Start:   0,
-			Cursor:  0,
-		},
-		Prompt: msg,
 	})
 
 	if err != nil {

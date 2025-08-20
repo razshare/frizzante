@@ -1,57 +1,30 @@
 package npmselect
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"slices"
-	"strings"
-	"time"
-
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/navigate"
 	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/viewport"
+	"slices"
+	"strings"
 )
 
-func InitSearch() *search.Search {
-	input := textinput.New()
-	input.Width = 80
-	
-	return &search.Search{
-		Active:   false,
-		Choices:  []search.Choice{},
-		Filtered: []search.Choice{},
-		Input:    input,
-	}
-}
-
-func InitViewport() *viewport.Viewport {
-	return &viewport.Viewport{
-		Visible: 6,
-		Start:   0,
-		Cursor:  0,
-	}
-}
-
-func (m Model) Init() tea.Cmd {
+func (m *Model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch k := msg.(type) {
 	case tea.KeyMsg:
 		if k.Type == tea.KeyCtrlC {
 			return m, tea.Interrupt
 		}
-		
+
 		if k.Type == tea.KeyEsc {
 			m.Quitting = true
-			m.Selected = []string{}
+			m.Selected = make([]string, 0)
 			return m, tea.Quit
 		}
 
@@ -87,20 +60,6 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			navigate.Apply(m.Search, m.Viewport, 1)
 			return m, nil
 		}
-		
-		if k.String() == "ctrl+a" {
-			if len(m.Search.Filtered) > 0 {
-				if len(m.Selected) == len(m.Search.Filtered) {
-					m.Selected = []string{}
-				} else {
-					m.Selected = []string{}
-					for _, choice := range m.Search.Filtered {
-						m.Selected = append(m.Selected, choice.Id)
-					}
-				}
-			}
-			return m, nil
-		}
 
 		// Handle search input
 		if len(k.String()) == 1 || k.Type == tea.KeyBackspace || k.Type == tea.KeyCtrlH {
@@ -108,29 +67,22 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.Search.Active = true
 				m.Search.Input.Focus()
 			}
-			
+
 			var cmd tea.Cmd
-			prevValue := m.Search.Input.Value()
+			m.Debouncer.Reset(m.Debounce)
 			m.Search.Input, cmd = m.Search.Input.Update(k)
-			
-			if m.Search.Input.Value() != prevValue {
-				m.LastQuery = m.Search.Input.Value()
-				if m.DebounceTimer != nil {
-					m.DebounceTimer.Stop()
-				}
-				// tea.Cmd returns a debounced search message after the specified delay
-				return m, tea.Batch(cmd, func() tea.Msg {
-					time.Sleep(500 * time.Millisecond)
-					return DebouncedSearchMsg{Query: m.Search.Input.Value()}
-				})
-			}
-			return m, cmd
+			m.LastQuery = m.Search.Input.Value()
+
+			return m, tea.Batch(cmd, func() tea.Msg {
+				<-m.Debouncer.C
+				return DebouncedSearchMsg{Query: m.Search.Input.Value()}
+			})
 		}
 
 	case DebouncedSearchMsg:
 		if k.Query != "" && k.Query == m.Search.Input.Value() {
 			m.Loading = true
-			return m, PerformSearch(k.Query)
+			return m, Search(k.Query)
 		}
 
 	case SearchResultMsg:
@@ -145,11 +97,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			description := pkg.Description
 			if len(description) > 50 {
-				if 50 <= 3 {
-					description = "..."
-				} else {
-					description = description[:50-3] + "..."
-				}
+				description = description[:50-3] + "..."
 			}
 			choices[i] = search.Choice{
 				Id:          id,
@@ -165,11 +113,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
-func (m Model) View() string {
+func (m *Model) View() string {
+
 	var sb strings.Builder
 	sb.Grow(1024)
 
-	sb.WriteString(config.Styles.Menu.Render("Search NPM packages"))
+	sb.WriteString(config.Styles.Menu.Render(m.Prompt))
 
 	if m.Search.Input.Value() != "" {
 		sb.WriteString(config.Styles.UserInput.Render(" ⁋/" + m.Search.Input.Value()))
@@ -179,149 +128,87 @@ func (m Model) View() string {
 
 	sb.WriteString("\n")
 
-	footerText := "↑ up • ↓ down • space select • enter install • ctrl+a toggle all • esc cancel"
-
-	// Handle status cases with early returns
-	var statusContent string
-	var isLoading, isError, isNoResults bool
-
 	if m.Loading {
-		statusContent = "⌛ searching..."
-		isLoading = true
-	} else if m.Error != nil {
-		statusContent = fmt.Sprintf("✗ Error: %v", m.Error)
-		isError = true
-	} else if len(m.Search.Filtered) == 0 && m.Search.Input.Value() != "" {
-		statusContent = "ⓘ  no packages found"
-		isNoResults = true
-	}
-
-	if statusContent != "" {
-		var statusSb strings.Builder
-		statusSb.WriteString(config.Styles.Menu.Render("│"))
-		
-		if isLoading || isNoResults {
-			statusSb.WriteString(config.Styles.UserGuide.PaddingLeft(1).Render(statusContent))
-		} else if isError {
-			statusSb.WriteString(config.Styles.Status(config.Colors.Error).PaddingLeft(1).Render(statusContent))
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		sb.WriteString(config.Styles.UserGuide.PaddingLeft(1).Render("ⓘ  loading..."))
+		sb.WriteString("\n")
+		if m.Search.Active {
+			sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
 		}
-		
-		statusSb.WriteString("\n")
-		statusSb.WriteString(config.Styles.UserGuide.Render(footerText))
-		sb.WriteString(statusSb.String())
+		return sb.String()
+	} else if m.Error != nil {
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		sb.WriteString(config.Styles.Status(config.Colors.Error).PaddingLeft(1).Render("✗  " + m.Error.Error()))
+		sb.WriteString("\n")
+		if m.Search.Active {
+			sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+		}
 		return sb.String()
 	}
 
 	filtered := len(m.Search.Filtered)
-	if filtered > 0 {
-		height := m.Viewport.Start + m.Viewport.Visible
-		if height > filtered {
-			height = filtered
+	if filtered == 0 {
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		sb.WriteString(config.Styles.UserGuide.PaddingLeft(1).Render("ⓘ  no matches found"))
+
+		sb.WriteString("\n")
+
+		sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+
+		if m.Search.Active {
+			sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+		} else {
+			sb.WriteString(config.Styles.UserGuide.Render(" • esc back"))
 		}
-		
-		if m.Viewport.Start > 0 {
-			sb.WriteString(config.Styles.Menu.Render("│"))
-			sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
-			sb.WriteString("\n")
-		}
-		
-		for i := m.Viewport.Start; i < height; i++ {
-			sb.WriteString(config.Styles.Menu.Render("│"))
-			choice := m.Search.Filtered[i]
-			
-			if m.Viewport.Cursor == i {
-				if slices.Contains(m.Selected, choice.Id) {
-					sb.WriteString(config.Styles.Selected.Render("● " + choice.Id))
-				} else {
-					sb.WriteString(config.Styles.Selected.Render("◉ " + choice.Id))
-				}
-				
-				if choice.Description != "" {
-					sb.WriteString(config.Styles.UserGuide.Render("  ⇢  " + choice.Description))
-				}
-			} else if slices.Contains(m.Selected, choice.Id) {
-				sb.WriteString(config.Styles.Item.Render("● " + choice.Id))
-			} else {
-				sb.WriteString(config.Styles.Item.Render("○ " + choice.Id))
-			}
-			sb.WriteString("\n")
-		}
-		
-		if height < filtered {
-			sb.WriteString(config.Styles.Menu.Render("│"))
-			sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
-			sb.WriteString("\n")
-		}
+
+		return sb.String()
 	}
 
-	sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter install"))
-	if len(m.Selected) > 0 {
-		sb.WriteString(config.Styles.UserGuide.Render(fmt.Sprintf(" (%d selected)", len(m.Selected))))
+	height := m.Viewport.Start + m.Viewport.Visible
+	if height > filtered {
+		height = filtered
 	}
-	sb.WriteString(config.Styles.UserGuide.Render(" • ctrl+a toggle all • esc cancel"))
+
+	if m.Viewport.Start > 0 {
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
+		sb.WriteString("\n")
+	}
+
+	for i := m.Viewport.Start; i < height; i++ {
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		if m.Viewport.Cursor == i {
+			if slices.Contains(m.Selected, m.Search.Filtered[i].Id) {
+				sb.WriteString(config.Styles.Selected.Render("● " + m.Search.Filtered[i].Id))
+			} else {
+				sb.WriteString(config.Styles.Selected.Render("◉ " + m.Search.Filtered[i].Id))
+			}
+
+			j := slices.Index(m.Search.Choices, m.Search.Filtered[i])
+			if j >= 0 && m.Search.Choices[j].Description != "" {
+				sb.WriteString(config.Styles.UserGuide.Render("  ⇢  " + m.Search.Choices[j].Description))
+			}
+		} else if slices.Contains(m.Selected, m.Search.Filtered[i].Id) {
+			sb.WriteString(config.Styles.Item.Render("● " + m.Search.Filtered[i].Id))
+		} else {
+			sb.WriteString(config.Styles.Item.Render("○ " + m.Search.Filtered[i].Id))
+		}
+		sb.WriteString("\n")
+	}
+
+	if height < filtered {
+		sb.WriteString(config.Styles.Menu.Render("│"))
+		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
+		sb.WriteString("\n")
+	}
+
+	sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+
+	if m.Search.Active {
+		sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+	} else {
+		sb.WriteString(config.Styles.UserGuide.Render(" • esc back"))
+	}
 
 	return sb.String()
-}
-
-func PerformSearch(query string) tea.Cmd {
-	return func() tea.Msg {
-		if query == "" {
-			return SearchResultMsg{Packages: []PackageInfo{}}
-		}
-
-		encodedQuery := url.QueryEscape(query)
-		apiUrl := fmt.Sprintf("https://registry.npmjs.org/-/v1/search?text=%s&size=20", encodedQuery)
-
-		client := &http.Client{
-			Timeout: 5 * time.Second,
-		}
-
-		req, err := http.NewRequest("GET", apiUrl, nil)
-		if err != nil {
-			return SearchResultMsg{Error: err}
-		}
-
-		req.Header.Set("Accept", "application/json")
-
-		resp, err := client.Do(req)
-		if err != nil {
-			return SearchResultMsg{Error: err}
-		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			return SearchResultMsg{Error: fmt.Errorf("npm registry returned status %d", resp.StatusCode)}
-		}
-
-		body, err := io.ReadAll(resp.Body)
-		if err != nil {
-			return SearchResultMsg{Error: err}
-		}
-
-		var searchResult SearchResponse
-		err = json.Unmarshal(body, &searchResult)
-		if err != nil {
-			return SearchResultMsg{Error: err}
-		}
-
-		packages := make([]PackageInfo, 0, len(searchResult.Objects))
-		for _, obj := range searchResult.Objects {
-			packages = append(packages, obj.Package)
-		}
-
-		return SearchResultMsg{Packages: packages}
-	}
-}
-
-func ExtractPackageNames(selected []string) []string {
-	names := make([]string, 0, len(selected))
-	for _, id := range selected {
-		// Remove version suffix if present (e.g., "package@1.0.0" -> "package")
-		if idx := strings.IndexByte(id, '@'); idx != -1 {
-			names = append(names, id[:idx])
-		} else {
-			names = append(names, id)
-		}
-	}
-	return names
 }

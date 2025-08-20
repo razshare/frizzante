@@ -2,15 +2,15 @@ package program
 
 import tea "github.com/charmbracelet/bubbletea"
 
-func Run[T tea.Model](model T) (T, error) {
-	result, err := tea.NewProgram(model, tea.WithFPS(120)).Run()
+func Run[T tea.Model](m T) (T, error) {
+	r, err := tea.NewProgram(m, tea.WithFPS(120)).Run()
 	if err != nil {
-		return model, err
+		return m, err
 	}
 
-	if modelt, ok := result.(T); ok {
-		return modelt, nil
+	if t, ok := r.(T); ok {
+		return t, nil
 	}
 
-	return model, nil
+	return m, nil
 }

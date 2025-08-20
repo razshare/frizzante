@@ -112,5 +112,5 @@ type WelcomeOptions struct{}
 type NpmOptions struct {
 	App   string
 	Query string
+	Bun   string
 }
-

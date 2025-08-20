@@ -1,32 +1,43 @@
 package npmselect
 
 import (
-	"errors"
-
-	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/razshare/frizzante/tui/program"
+	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/viewport"
+	"strings"
+	"time"
 )
 
 func Send() ([]string, error) {
-	model, err := program.Run(&Model{
-		Search:        InitSearch(),
-		Viewport:      InitViewport(),
-		Packages:      []PackageInfo{},
-		Selected:      []string{},
-		Loading:       false,
-		DebounceTimer: nil,
+	in := textinput.New()
+	in.Width = 80
+	m, err := program.Run(&Model{
+		Prompt:    "search npm packages",
+		Viewport:  &viewport.Viewport{Visible: 6},
+		Selected:  make([]string, 0),
+		Debounce:  time.Second,
+		Debouncer: time.NewTimer(time.Second),
+		Search: &search.Search{
+			Choices:  []search.Choice{},
+			Filtered: []search.Choice{},
+			Input:    in,
+		},
 	})
 
 	if err != nil {
-		if errors.Is(err, tea.ErrInterrupted) {
-			return nil, err
-		}
 		return nil, err
 	}
 
-	if model.Quitting && !model.Confirmed {
-		return nil, errors.New("cancelled")
+	ns := make([]string, 0, len(m.Selected))
+	for _, id := range m.Selected {
+		// Remove version suffix if present (e.g., "package@1.0.0" -> "package")
+		if idx := strings.IndexByte(id, '@'); idx != -1 {
+			ns = append(ns, id[:idx])
+		} else {
+			ns = append(ns, id)
+		}
 	}
 
-	return ExtractPackageNames(model.Selected), nil
+	return ns, nil
 }

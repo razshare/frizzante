@@ -1,34 +1,26 @@
 package action
 
 import (
-	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/razshare/frizzante/cli/npm"
-	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/npmselect"
 )
 
 func Npm(o NpmOptions) error {
-	selectedPackages, err := npmselect.Send()
+	pkgs, err := npmselect.Send()
 	if err != nil {
-		if err.Error() == "cancelled" {
-			messages.Info("npm search cancelled")
-			return nil
-		}
-		return fmt.Errorf("failed to run npm search: %w", err)
+		return err
 	}
 
-	if len(selectedPackages) == 0 {
-		messages.Info("No packages selected")
+	if len(pkgs) == 0 {
 		return nil
 	}
 
-	bunPath := filepath.Join(".gen", "bun", "bun")
-	if _, err := os.Stat(bunPath); os.IsNotExist(err) {
-		bunPath = "bun"
+	bun, err := filepath.Rel(o.App, o.Bun)
+	if err != nil {
+		return err
 	}
 
-	return npm.InstallNpmPackages(selectedPackages, bunPath, o.App)
+	return npm.Install(bun, o.App, pkgs...)
 }

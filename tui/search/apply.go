@@ -18,5 +18,6 @@ func Apply(search *Search, vport *viewport.Viewport, msg tea.KeyMsg) tea.Cmd {
 			Filter(search, vport)
 		}
 	}
+
 	return cmd
 }

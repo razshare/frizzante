@@ -1,12 +1,14 @@
 package menu
 
 import (
+	"fmt"
 	"github.com/razshare/frizzante/cli/action"
 	"github.com/razshare/frizzante/cli/app"
 	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/cli/user"
 	"github.com/razshare/frizzante/tui/input"
 	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/singleselect"
 )
 
 func New(a *app.App) (*Menu, error) {
@@ -99,24 +101,30 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice: search.Choice{Id: "add", Description: "adds packages (experimental)"},
+				Choice: search.Choice{Id: "add", Description: "adds packages"},
 				Active: func() bool { return *a.Add != "" },
 				Handler: func() error {
-					//if strings.HasPrefix(*a.Add, "npm:") {
-					//	// search for/add js packages
-					//} else {
-					//	// search for/add go packages
-					//}
+					var t string
+					t, err = singleselect.Send(
+						[]search.Choice{
+							{Id: "js", Description: fmt.Sprintf("installs js packages in %s/node_modules", *a.App)},
+							//{Id: "go", Description: "installs go packages"},
+						},
+						"type of packages",
+					)
 
-					// ^ We should aim for the above solution.
-					//
-					//   Reserve the possibility to also search for go packages in the future.
-					//
-					//   However, currently for testing purposes the following is also fine.
+					if err != nil {
+						return err
+					}
 
-					return action.Npm(action.NpmOptions{
-						App: *a.App,
-					})
+					if t == "js" {
+						return action.Npm(action.NpmOptions{
+							App: *a.App,
+							Bun: bun,
+						})
+					}
+
+					return fmt.Errorf("%s packages are not supported", t)
 				},
 			},
 			{
