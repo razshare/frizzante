@@ -9,8 +9,8 @@ import (
 
 func Send() ([]string, error) {
 	model, err := program.Run(&Model{
-		Search:        initSearch(),
-		Viewport:      initViewport(),
+		Search:        InitSearch(),
+		Viewport:      InitViewport(),
 		Packages:      []PackageInfo{},
 		Selected:      []string{},
 		Loading:       false,

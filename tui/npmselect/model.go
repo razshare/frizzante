@@ -18,7 +18,7 @@ import (
 	"github.com/razshare/frizzante/tui/viewport"
 )
 
-func initSearch() *search.Search {
+func InitSearch() *search.Search {
 	input := textinput.New()
 	input.Width = 80
 	
@@ -30,7 +30,7 @@ func initSearch() *search.Search {
 	}
 }
 
-func initViewport() *viewport.Viewport {
+func InitViewport() *viewport.Viewport {
 	return &viewport.Viewport{
 		Visible: 6,
 		Start:   0,
