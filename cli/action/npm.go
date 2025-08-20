@@ -1,10 +1,9 @@
 package action
 
 import (
-	"path/filepath"
-
 	"github.com/razshare/frizzante/cli/npm"
 	"github.com/razshare/frizzante/tui/npmselect"
+	"path/filepath"
 )
 
 func Npm(o NpmOptions) error {
