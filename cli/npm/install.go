@@ -33,12 +33,14 @@ func InstallNpmPackages(packages []string, bun string, appDir string) error {
 		cmd := exec.Command(bun, "add", pkgName)
 		cmd.Dir = appDir
 		cmd.Env = os.Environ()
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
 
-		output, err := cmd.CombinedOutput()
+		err := cmd.Run()
 		spinner.Stop(s)
 
 		if err != nil {
-			messages.Error(fmt.Sprintf("Failed to install %s: %v\nOutput: %s", pkgName, err, string(output)))
+			messages.Error(fmt.Sprintf("Failed to install %s: %v", pkgName, err))
 			continue
 		}
 
