@@ -114,7 +114,9 @@ func New(a *app.App) (*Menu, error) {
 					//
 					//   However, currently for testing purposes the following is also fine.
 
-					return action.Npm(action.NpmOptions{})
+					return action.Npm(action.NpmOptions{
+						App: *a.App,
+					})
 				},
 			},
 			{

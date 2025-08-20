@@ -30,5 +30,5 @@ func Npm(o NpmOptions) error {
 		bunPath = "bun"
 	}
 
-	return npm.InstallNpmPackages(selectedPackages, bunPath)
+	return npm.InstallNpmPackages(selectedPackages, bunPath, o.App)
 }

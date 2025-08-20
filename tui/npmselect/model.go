@@ -118,7 +118,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if m.DebounceTimer != nil {
 					m.DebounceTimer.Stop()
 				}
-				return m, tea.Batch(cmd, DebounceSearch(m.Search.Input.Value(), 500*time.Millisecond))
+				// tea.Cmd returns a debounced search message after the specified delay
+				return m, tea.Batch(cmd, func() tea.Msg {
+					time.Sleep(500 * time.Millisecond)
+					return DebouncedSearchMsg{Query: m.Search.Input.Value()}
+				})
 			}
 			return m, cmd
 		}
@@ -208,7 +212,47 @@ func (m Model) View() string {
 		return sb.String()
 	}
 
-	RenderPackageItems(&sb, m)
+	filtered := len(m.Search.Filtered)
+	if filtered > 0 {
+		height := m.Viewport.Start + m.Viewport.Visible
+		if height > filtered {
+			height = filtered
+		}
+		
+		if m.Viewport.Start > 0 {
+			sb.WriteString(config.Styles.Menu.Render("│"))
+			sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
+			sb.WriteString("\n")
+		}
+		
+		for i := m.Viewport.Start; i < height; i++ {
+			sb.WriteString(config.Styles.Menu.Render("│"))
+			choice := m.Search.Filtered[i]
+			
+			if m.Viewport.Cursor == i {
+				if slices.Contains(m.Selected, choice.Id) {
+					sb.WriteString(config.Styles.Selected.Render("● " + choice.Id))
+				} else {
+					sb.WriteString(config.Styles.Selected.Render("◉ " + choice.Id))
+				}
+				
+				if choice.Description != "" {
+					sb.WriteString(config.Styles.UserGuide.Render("  ⇢  " + choice.Description))
+				}
+			} else if slices.Contains(m.Selected, choice.Id) {
+				sb.WriteString(config.Styles.Item.Render("● " + choice.Id))
+			} else {
+				sb.WriteString(config.Styles.Item.Render("○ " + choice.Id))
+			}
+			sb.WriteString("\n")
+		}
+		
+		if height < filtered {
+			sb.WriteString(config.Styles.Menu.Render("│"))
+			sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
+			sb.WriteString("\n")
+		}
+	}
 
 	sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter install"))
 	if len(m.Selected) > 0 {
@@ -269,13 +313,6 @@ func PerformSearch(query string) tea.Cmd {
 	}
 }
 
-func DebounceSearch(query string, delay time.Duration) tea.Cmd {
-	return func() tea.Msg {
-		time.Sleep(delay)
-		return DebouncedSearchMsg{Query: query}
-	}
-}
-
 func ExtractPackageNames(selected []string) []string {
 	names := make([]string, 0, len(selected))
 	for _, id := range selected {
@@ -288,50 +325,3 @@ func ExtractPackageNames(selected []string) []string {
 	}
 	return names
 }
-
-func RenderPackageItems(sb *strings.Builder, m Model) {
-	filtered := len(m.Search.Filtered)
-	if filtered == 0 {
-		return
-	}
-	
-	height := m.Viewport.Start + m.Viewport.Visible
-	if height > filtered {
-		height = filtered
-	}
-	
-	if m.Viewport.Start > 0 {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
-		sb.WriteString("\n")
-	}
-	
-	for i := m.Viewport.Start; i < height; i++ {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		choice := m.Search.Filtered[i]
-		
-		if m.Viewport.Cursor == i {
-			if slices.Contains(m.Selected, choice.Id) {
-				sb.WriteString(config.Styles.Selected.Render("● " + choice.Id))
-			} else {
-				sb.WriteString(config.Styles.Selected.Render("◉ " + choice.Id))
-			}
-			
-			if choice.Description != "" {
-				sb.WriteString(config.Styles.UserGuide.Render("  ⇢  " + choice.Description))
-			}
-		} else if slices.Contains(m.Selected, choice.Id) {
-			sb.WriteString(config.Styles.Item.Render("● " + choice.Id))
-		} else {
-			sb.WriteString(config.Styles.Item.Render("○ " + choice.Id))
-		}
-		sb.WriteString("\n")
-	}
-	
-	if height < filtered {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
-		sb.WriteString("\n")
-	}
-}
-

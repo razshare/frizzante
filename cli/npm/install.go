@@ -10,24 +10,23 @@ import (
 	"github.com/razshare/frizzante/tui/spinner"
 )
 
-func InstallNpmPackages(packages []string, bun string) error {
+func InstallNpmPackages(packages []string, bun string, appDir string) error {
 	if len(packages) == 0 {
 		return nil
 	}
 
-	appDir := "app"
 	if _, err := os.Stat(appDir); os.IsNotExist(err) {
-		return fmt.Errorf("app directory does not exist")
+		return fmt.Errorf("%s directory does not exist", appDir)
 	}
 
 	packageJsonPath := filepath.Join(appDir, "package.json")
 	if _, err := os.Stat(packageJsonPath); os.IsNotExist(err) {
-		return fmt.Errorf("package.json not found in app directory")
+		return fmt.Errorf("package.json not found in %s directory", appDir)
 	}
 
 	successCount := 0
 	for _, pkgName := range packages {
-		s := spinner.New(fmt.Sprintf("installing %s to app/node_modules", pkgName))
+		s := spinner.New(fmt.Sprintf("installing %s to %s/node_modules", pkgName, appDir))
 		go spinner.Start(s)
 
 		// Install the package using bun add
@@ -43,12 +42,12 @@ func InstallNpmPackages(packages []string, bun string) error {
 			continue
 		}
 
-		messages.Success(fmt.Sprintf("Installed %s to app/node_modules", pkgName))
+		messages.Success(fmt.Sprintf("Installed %s to %s/node_modules", pkgName, appDir))
 		successCount++
 	}
 
 	if successCount > 0 {
-		messages.Success(fmt.Sprintf("Successfully installed %d package(s) to app/node_modules", successCount))
+		messages.Success(fmt.Sprintf("Successfully installed %d package(s) to %s/node_modules", successCount, appDir))
 	}
 
 	return nil
