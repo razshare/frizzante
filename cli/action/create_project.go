@@ -2,6 +2,7 @@ package action
 
 import (
 	"github.com/razshare/frizzante/cli/codegen"
+	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"path/filepath"
 )
@@ -33,5 +34,13 @@ func CreateProject(o CreateProjectOptions) error {
 		return err
 	}
 
-	return evict()
+	err = evict()
+	if err != nil {
+		return err
+	}
+
+	messages.Successf("project has been created at %s", o.Project)
+	messages.Tipf("change directory into %s and run frizzante --configure", o.Project)
+
+	return nil
 }
