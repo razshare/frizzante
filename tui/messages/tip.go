@@ -12,9 +12,9 @@ func Tip(args ...any) {
 	for i := 0; i < l; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	Status("TIP", strings.Join(entries, ""), config.Colors.Tip, "15", config.Colors.Tip)
+	Status("TIP", strings.Join(entries, ""), config.Colors.Tip, "17", config.Colors.Tip)
 }
 
 func Tipf(format string, vars ...any) {
-	Info(fmt.Sprintf(format, vars...))
+	Tip(fmt.Sprintf(format, vars...))
 }

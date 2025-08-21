@@ -12,7 +12,7 @@ func Success(args ...any) {
 	for i := 0; i < l; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	Status("SUCCESS", strings.Join(entries, ""), config.Colors.Success, "0", config.Colors.Success)
+	Status("SUCCESS", strings.Join(entries, ""), config.Colors.Success, "17", config.Colors.Success)
 }
 
 func Successf(format string, vars ...any) {
