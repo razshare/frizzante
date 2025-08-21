@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 )
 
-func Home() (string, error) {
+func FrizzanteHome() (string, error) {
 	home := os.Getenv("FRIZZANTE_HOME")
 	if home == "" {
 		var user string

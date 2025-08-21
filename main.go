@@ -15,7 +15,7 @@ import (
 //go:embed database.sqlite
 //go:embed version
 //go:embed template/lib
-//go:embed template/app/frizzante
+//go:embed template/project.zip
 //go:embed sqlc.yaml
 //go:embed queries.sql
 //go:embed schema.sql

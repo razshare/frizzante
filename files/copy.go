@@ -4,6 +4,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func CopyFile(from string, to string) error {
@@ -58,13 +59,14 @@ func CopyFile(from string, to string) error {
 }
 
 func CopyDirectory(from string, to string) error {
-	froms, err := ReadDirectory(from)
+	ets, err := ReadDirectory(from)
 	if err != nil {
 		return err
 	}
 
-	for _, f := range froms {
-		err = CopyFile(f, filepath.Join(to, f))
+	for _, ent := range ets {
+		n := filepath.Join(to, strings.TrimPrefix(ent, from))
+		err = CopyFile(ent, n)
 		if err != nil {
 			return err
 		}

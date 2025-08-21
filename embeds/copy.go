@@ -7,6 +7,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func CopyFile(efs embed.FS, from string, to string) error {
@@ -61,13 +62,14 @@ func CopyFile(efs embed.FS, from string, to string) error {
 }
 
 func CopyDirectory(efs embed.FS, from string, to string) error {
-	froms, err := ReadDirectory(efs, from)
+	ents, err := ReadDirectory(efs, from)
 	if err != nil {
 		return err
 	}
 
-	for _, f := range froms {
-		err = CopyFile(efs, f, filepath.Join(to, f))
+	for _, ent := range ents {
+		n := filepath.Join(to, strings.TrimPrefix(ent, from))
+		err = CopyFile(efs, ent, n)
 		if err != nil {
 			return err
 		}

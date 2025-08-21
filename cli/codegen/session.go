@@ -41,32 +41,10 @@ func Session(o SessionOptions) error {
 
 	t := strings.ToLower(tchoice)
 
-	err = Copy([]CopyInstruction{
-		{
-			Efs:  o.Efs,
-			From: "template/lib/session/" + t,
-			To:   o.Lib,
-			Overwrite: func(n string) (bool, error) {
-				if o.Auto {
-					return true, nil
-				}
-
-				var overwrite bool
-
-				overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", n)
-				if err != nil {
-					return false, err
-				}
-
-				if overwrite {
-					messages.Infof("overwriting %s", n)
-				} else {
-					messages.Infof("skipping %s", n)
-				}
-
-				return overwrite, nil
-			},
-		},
+	err = Copy(CopyOptions{
+		From: "template/lib/session/" + t,
+		To:   o.Lib,
+		Auto: o.Auto,
 	})
 
 	if err != nil {

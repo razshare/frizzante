@@ -29,13 +29,6 @@ type Section struct {
 	Line *string
 }
 
-type CopyInstruction struct {
-	From      string
-	To        string
-	Efs       embed.FS
-	Overwrite func(n string) (bool, error)
-}
-
 type Install func(dst string) (bool, error)
 type Evict func() error
 
@@ -78,6 +71,24 @@ type QueriesOptions struct {
 type DownloadOptions struct {
 	Url  string
 	Auto bool
+}
+
+type CopyOptions struct {
+	From string
+	To   string
+	Auto bool
+}
+
+type ProjectOptions struct {
+	Auto bool
+	Name string
+	Efs  embed.FS
+}
+
+type EmbeddedZipOptions struct {
+	Auto     bool
+	FileName string
+	Efs      embed.FS
 }
 
 type FormsOptions struct {

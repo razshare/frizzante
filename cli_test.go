@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/razshare/frizzante/cli/action"
+	"github.com/razshare/frizzante/cli/codegen"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/platform"
 	"os"
@@ -30,7 +31,12 @@ func TestOnCreateProject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = action.CreateProject(action.CreateProjectOptions{Project: proj, Auto: true})
+	err = codegen.Project(codegen.ProjectOptions{
+		Name: proj,
+		Efs:  tefs,
+		Auto: true,
+	})
+
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +70,7 @@ func TestOnGenerate(t *testing.T) {
 	}
 
 	err = action.Generate(action.GenerateOptions{
-		App:      filepath.Join("template", "app"),
+		App:      filepath.Join("app"),
 		Selected: "air",
 		Platform: platform.PlatformLinuxAmd64,
 		Auto:     true,
@@ -85,13 +91,13 @@ func TestOnGenerate(t *testing.T) {
 }
 
 func TestOnPackage(t *testing.T) {
-	err := os.RemoveAll(filepath.Join("template", "app", "dist"))
+	err := os.RemoveAll(filepath.Join("app", "dist"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	err = action.Pkg(action.PkgOptions{
-		App: filepath.Join("template", "app"),
+		App: filepath.Join("app"),
 		Bun: filepath.Join(".gen", "bun", "bun"),
 	})
 
@@ -99,19 +105,19 @@ func TestOnPackage(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !files.IsDirectory(filepath.Join("template", "app", "dist")) {
+	if !files.IsDirectory(filepath.Join("app", "dist")) {
 		t.Fatal("the cli failed to package the application into dist")
 	}
 }
 
 func TestOnInstall(t *testing.T) {
-	err := os.RemoveAll(filepath.Join("template", "app", "node_modules"))
+	err := os.RemoveAll(filepath.Join("app", "node_modules"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	err = action.Install(action.InstallOptions{
-		App: filepath.Join("template", "app"),
+		App: filepath.Join("app"),
 		Go:  "go",
 		Bun: filepath.Join(".gen", "bun", "bun"),
 	})
@@ -120,14 +126,14 @@ func TestOnInstall(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !files.IsDirectory(filepath.Join("template", "app", "node_modules")) {
+	if !files.IsDirectory(filepath.Join("app", "node_modules")) {
 		t.Fatal("the cli failed to install node_modules")
 	}
 }
 
 func TestOnFormat(t *testing.T) {
 	err := action.Format(action.FormatOptions{
-		App: filepath.Join("template", "app"),
+		App: filepath.Join("app"),
 		Go:  "go",
 		Bun: filepath.Join(".gen", "bun", "bun"),
 	})
@@ -138,27 +144,27 @@ func TestOnFormat(t *testing.T) {
 }
 
 func TestOnTouch(t *testing.T) {
-	err := os.RemoveAll(filepath.Join("template", "app", "dist"))
+	err := os.RemoveAll(filepath.Join("app", "dist"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = action.Touch(action.TouchOptions{App: filepath.Join("template", "app")})
+	err = action.Touch(action.TouchOptions{App: filepath.Join("app")})
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !files.IsFile(filepath.Join("template", "app", "dist", "server.js")) {
-		t.Fatalf("the cli failed to touch %s", filepath.Join("template", "app", "dist", "server.js"))
+	if !files.IsFile(filepath.Join("app", "dist", "server.js")) {
+		t.Fatalf("the cli failed to touch %s", filepath.Join("app", "dist", "server.js"))
 	}
 
-	if !files.IsFile(filepath.Join("template", "app", "dist", "client", "index.html")) {
-		t.Fatalf("the cli failed to touch %s", filepath.Join("template", "app", "dist", "client", "index.html"))
+	if !files.IsFile(filepath.Join("app", "dist", "client", "index.html")) {
+		t.Fatalf("the cli failed to touch %s", filepath.Join("app", "dist", "client", "index.html"))
 	}
 
 	// We need to restore the package, otherwise other tests will break.
 	err = action.Pkg(action.PkgOptions{
-		App: filepath.Join("template", "app"),
+		App: filepath.Join("app"),
 		Bun: filepath.Join(".gen", "bun", "bun"),
 	})
 
@@ -168,8 +174,8 @@ func TestOnTouch(t *testing.T) {
 }
 
 func TestOnClean(t *testing.T) {
-	dist := filepath.Join("template", "app", "dist")
-	mods := filepath.Join("template", "app", "node_modules")
+	dist := filepath.Join("app", "dist")
+	mods := filepath.Join("app", "node_modules")
 	tmp := filepath.Join(".gen", "tmp")
 
 	err := os.MkdirAll(dist, os.ModePerm)
@@ -203,7 +209,7 @@ func TestOnClean(t *testing.T) {
 	}
 
 	err = action.CleanProject(action.CleanProjectOptions{
-		App: filepath.Join("template", "app"),
+		App: filepath.Join("app"),
 		Go:  "go",
 	})
 
@@ -225,7 +231,7 @@ func TestOnClean(t *testing.T) {
 
 	// We need to restore dist, otherwise other tests will break.
 	err = action.Install(action.InstallOptions{
-		App: filepath.Join("template", "app"),
+		App: filepath.Join("app"),
 		Go:  "go",
 		Bun: filepath.Join(".gen", "bun", "bun"),
 	})
@@ -235,7 +241,7 @@ func TestOnClean(t *testing.T) {
 	}
 
 	err = action.Pkg(action.PkgOptions{
-		App: filepath.Join("template", "app"),
+		App: filepath.Join("app"),
 		Bun: filepath.Join(".gen", "bun", "bun"),
 	})
 

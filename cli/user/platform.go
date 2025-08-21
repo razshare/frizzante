@@ -14,7 +14,7 @@ import (
 func Platform(a *app.App) (platform.Platform, error) {
 	var plat string
 
-	home, err := Home()
+	home, err := FrizzanteHome()
 	if err != nil {
 		return 0, err
 	}

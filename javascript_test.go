@@ -102,7 +102,7 @@ func TestJavaScriptBundle(t *testing.T) {
 	})
 	`
 
-	cjs, err := js.Bundle(filepath.Join("template", "app"), api.FormatCommonJS, src)
+	cjs, err := js.Bundle(filepath.Join("app"), api.FormatCommonJS, src)
 	if err != nil {
 		t.Fatal(err)
 	}

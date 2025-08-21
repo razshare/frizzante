@@ -1,82 +1,55 @@
 package codegen
 
 import (
-	"github.com/razshare/frizzante/embeds"
+	"fmt"
+	"github.com/razshare/frizzante/cli/user"
 	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/tui/confirm"
+	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"path/filepath"
-	"regexp"
 )
 
-func Copy(cops []CopyInstruction) error {
-	for _, cop := range cops {
-		if embeds.IsDirectory(cop.Efs, cop.From) {
-			ds, err := cop.Efs.ReadDir(cop.From)
+func Copy(o CopyOptions) error {
+	if files.IsFile(o.To) || files.IsDirectory(o.To) {
+		if !o.Auto {
+			yes, err := confirm.Sendf(true, "%s already exists. Overwrite?", o.To)
 			if err != nil {
 				return err
 			}
 
-			gsloc := make([]CopyInstruction, 0)
-
-			for _, d := range ds {
-				gsloc = append(gsloc, CopyInstruction{
-					Efs:       cop.Efs,
-					From:      filepath.Join(cop.From, d.Name()),
-					To:        filepath.Join(cop.To, d.Name()),
-					Overwrite: cop.Overwrite,
-				})
-			}
-			err = Copy(gsloc)
-			if err != nil {
-				return err
-			}
-			continue
-		}
-
-		from := cop.From
-		to := cop.To
-
-		if cop.Overwrite != nil && files.IsFile(to) {
-			overwrite, err := cop.Overwrite(to)
-			if err != nil {
-				return err
-			}
-			if !overwrite {
-				continue
+			if !yes {
+				messages.Infof("skipping %s", o.To)
+				return nil
 			}
 		}
 
-		dat, err := cop.Efs.ReadFile(from)
-		if err != nil {
-			return err
-		}
-
-		cont, err := Parse(string(dat), func(s Section) error {
-			for _, m := range s.Mods {
-				reg, cerr := regexp.Compile("(?i)" + m.Pattern)
-				if cerr != nil {
-					return cerr
-				}
-				*s.Line = reg.ReplaceAllLiteralString(*s.Line, m.Replacement)
-			}
-			return nil
-		})
-
-		if err != nil {
-			return err
-		}
-
-		dir := filepath.Dir(to)
-		if !embeds.IsDirectory(cop.Efs, dir) {
-			err = os.MkdirAll(dir, os.ModePerm)
-			if err != nil {
-				return err
-			}
-		}
-		err = os.WriteFile(to, []byte(cont), os.ModePerm)
+		err := os.RemoveAll(o.To)
 		if err != nil {
 			return err
 		}
 	}
+
+	home, err := user.FrizzanteHome()
+	if err != nil {
+		return err
+	}
+
+	if files.IsDirectory(filepath.Join(home, o.From)) {
+		err = files.CopyDirectory(filepath.Join(home, o.From), o.To)
+		if err != nil {
+			return err
+		}
+	} else if files.IsFile(filepath.Join(home, o.From)) {
+		err = files.CopyFile(filepath.Join(home, o.From), o.To)
+		if err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("%s not found", o.From)
+	}
+
+	messages.Successf("%s created", o.To)
+
 	return nil
 }

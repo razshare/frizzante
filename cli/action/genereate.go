@@ -10,6 +10,11 @@ import (
 )
 
 func Generate(o GenerateOptions) error {
+	err := codegen.Init(o.Efs)
+	if err != nil {
+		return err
+	}
+
 	pick := func(gen string) error {
 		if gen == "air" {
 			return codegen.Air(codegen.AirOptions{
@@ -73,7 +78,8 @@ func Generate(o GenerateOptions) error {
 	}
 
 	if o.Selected == "" {
-		items, err := multiselect.Send(
+		var items []string
+		items, err = multiselect.Send(
 			[]search.Choice{
 				{Id: "core", Description: "router and view swapping tools."},
 				{Id: "forms", Description: "form component that provides status details"},
@@ -97,14 +103,16 @@ func Generate(o GenerateOptions) error {
 				return err
 			}
 		}
+
 		return nil
 	}
 
 	for _, item := range strings.Split(o.Selected, ",") {
-		err := pick(strings.ToLower(item))
+		err = pick(strings.ToLower(item))
 		if err != nil {
 			return err
 		}
 	}
+
 	return nil
 }

@@ -10,12 +10,12 @@ import (
 	"github.com/razshare/frizzante/svelte/ssr"
 	"github.com/razshare/frizzante/view"
 	"os"
-	"path/filepath"
 )
 
 //go:embed .github
 //go:embed makefile
-//go:embed template/app/dist
+//go:embed app/dist
+//go:embed template/project.zip
 var tefs embed.FS
 var port = 7878
 var serve = make(chan any, 1)
@@ -24,10 +24,8 @@ func init() {
 	// Server.
 	s := server.New()
 	s.Addr = fmt.Sprintf("0.0.0.0:%d", port)
-	s.PublicRoot = filepath.Join("template", "app", "dist", "client")
 	s.Render = ssr.New(ssr.Config{
 		Efs:   s.Efs,
-		App:   filepath.Join("template", "app"),
 		Disk:  os.Getenv("DEV") == "1",
 		Limit: 2,
 	})

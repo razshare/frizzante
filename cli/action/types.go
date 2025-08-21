@@ -16,11 +16,6 @@ type VersionOptions struct {
 	Efs embed.FS
 }
 
-type CreateProjectOptions struct {
-	Project string
-	Auto    bool
-}
-
 type GenerateOptions struct {
 	App      string
 	Selected string

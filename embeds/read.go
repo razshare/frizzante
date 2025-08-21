@@ -8,28 +8,28 @@ import (
 )
 
 func ReadDirectory(efs embed.FS, n string) ([]string, error) {
-	items := make([]string, 0)
-	entries, err := efs.ReadDir(n)
+	its := make([]string, 0)
+	ents, err := efs.ReadDir(n)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, entry := range entries {
-		if entry.IsDir() {
-			var subitems []string
-			subitems, err = ReadDirectory(efs, fmt.Sprintf("%s/%s", n, entry.Name()))
+	for _, ent := range ents {
+		if ent.IsDir() {
+			var sits []string
+			sits, err = ReadDirectory(efs, fmt.Sprintf("%s/%s", n, ent.Name()))
 			if err != nil {
 				return nil, err
 			}
 
-			items = slices.Concat(items, subitems)
+			its = slices.Concat(its, sits)
 			continue
 		}
 
-		items = append(items, fmt.Sprintf("%s/%s", n, entry.Name()))
+		its = append(its, fmt.Sprintf("%s/%s", n, ent.Name()))
 	}
 
-	return items, nil
+	return its, nil
 }
 
 // ReadFileInChunks reads a file in chunks.
