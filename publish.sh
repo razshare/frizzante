@@ -11,6 +11,7 @@ go install "github.com/razshare/frizzante@$frizzante_version" && \
 pushd ../frizzante-starter && \
 sed -i "/frizzante v/c\require github.com/razshare/frizzante $frizzante_version" go.mod && \
 make update && \
+git add . && \
 git commit -m"chore(app): tagging version $frizzante_version" && \
 git push && \
 git tag "$frizzante_version" && \
