@@ -12,13 +12,13 @@ import (
 func Cookie(c *client.Client, key string) string {
 	cookie, cookieError := c.Request.Cookie(key)
 	if cookieError != nil {
-		c.Scope.ErrorLog.Println(cookieError, stack.Trace())
+		c.Config.ErrorLog.Println(cookieError, stack.Trace())
 		return ""
 	}
 
 	data, queryError := url.QueryUnescape(cookie.Value)
 	if queryError != nil {
-		c.Scope.ErrorLog.Println(queryError, stack.Trace())
+		c.Config.ErrorLog.Println(queryError, stack.Trace())
 		return ""
 	}
 

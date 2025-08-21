@@ -27,14 +27,9 @@ func View(c *client.Client, v view.View) {
 		return
 	}
 
-	if c.Scope.Render == nil {
-		c.Scope.ErrorLog.Println("render is missing", stack.Trace())
-		return
-	}
-
-	html, err := c.Scope.Render(v)
+	html, err := c.Config.Render(v)
 	if err != nil {
-		c.Scope.ErrorLog.Println(err, stack.Trace())
+		c.Config.ErrorLog.Println(err, stack.Trace())
 	}
 
 	if "" == c.Writer.Header().Get("Content-Type") {

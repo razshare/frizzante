@@ -17,49 +17,49 @@ import (
 //
 // See https://html.spec.whatwg.org/multipage/server-sent-events.html for more details on the format.
 func EventContent(c *client.Client, d []byte) {
-	header := fmt.Sprintf("id: %d\r\nevent: %s\r\n", c.Scope.EventId, c.Scope.EventName)
+	header := fmt.Sprintf("id: %d\r\nevent: %s\r\n", c.EventId, c.EventName)
 
 	_, writeError := c.Writer.Write([]byte(header))
 	if writeError != nil {
-		c.Scope.ErrorLog.Println(writeError, stack.Trace())
+		c.Config.ErrorLog.Println(writeError, stack.Trace())
 		return
 	}
 
 	for _, line := range bytes.Split(d, []byte("\r\n")) {
 		_, writeError = c.Writer.Write([]byte("data: "))
 		if writeError != nil {
-			c.Scope.ErrorLog.Println(writeError, stack.Trace())
+			c.Config.ErrorLog.Println(writeError, stack.Trace())
 			return
 		}
 
 		_, writeError = c.Writer.Write(line)
 		if writeError != nil {
-			c.Scope.ErrorLog.Println(writeError, stack.Trace())
+			c.Config.ErrorLog.Println(writeError, stack.Trace())
 			return
 		}
 
 		_, writeError = c.Writer.Write([]byte("\r\n"))
 		if writeError != nil {
-			c.Scope.ErrorLog.Println(writeError, stack.Trace())
+			c.Config.ErrorLog.Println(writeError, stack.Trace())
 			return
 		}
 	}
 
 	_, writeError = c.Writer.Write([]byte("\r\n"))
 	if writeError != nil {
-		c.Scope.ErrorLog.Println(writeError, stack.Trace())
+		c.Config.ErrorLog.Println(writeError, stack.Trace())
 		return
 	}
 
 	flusher, flushedOk := c.Writer.(http.Flusher)
 	if !flushedOk {
-		c.Scope.ErrorLog.Println(errors.New("could not retrieve flusher"), stack.Trace())
+		c.Config.ErrorLog.Println(errors.New("could not retrieve flusher"), stack.Trace())
 		return
 	}
 
 	flusher.Flush()
 
-	c.Scope.EventId++
+	c.EventId++
 }
 
 // SseUpgrade upgrades to server sent events
@@ -75,7 +75,7 @@ func SseUpgrade(c *client.Client) func(string) {
 		"Client":                        "keep-alive",
 	})
 
-	c.Scope.EventName = "message"
+	c.EventName = "message"
 
-	return func(eventName string) { c.Scope.EventName = eventName }
+	return func(eventName string) { c.EventName = eventName }
 }

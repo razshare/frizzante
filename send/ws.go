@@ -19,19 +19,19 @@ func WsUpgrade(c *client.Client) {
 func WsUpgradeWithUpgrader(c *client.Client, u websocket.Upgrader) {
 	webSocketConnection, upgradeError := u.Upgrade(c.Writer, c.Request, nil)
 	if upgradeError != nil {
-		c.Scope.ErrorLog.Println(upgradeError, stack.Trace())
+		c.Config.ErrorLog.Println(upgradeError, stack.Trace())
 		return
 	}
 
 	defer func(webSocketConnection *websocket.Conn) {
-		closeError := c.Scope.WebSocket.Close()
+		closeError := c.WebSocket.Close()
 		if closeError != nil {
-			c.Scope.ErrorLog.Println(closeError, stack.Trace())
+			c.Config.ErrorLog.Println(closeError, stack.Trace())
 		}
 	}(webSocketConnection)
 
-	c.Scope.WebSocket = webSocketConnection
-	c.Scope.Locked = true
+	c.WebSocket = webSocketConnection
+	c.Locked = true
 
 	return
 }

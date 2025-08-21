@@ -25,8 +25,8 @@ func Redirect(c *client.Client, l string, status int) {
 //
 // All errors are sent to the server notifier.
 func Header(c *client.Client, k string, v string) {
-	if c.Scope.Locked {
-		c.Scope.ErrorLog.Println("header is locked", stack.Trace())
+	if c.Locked {
+		c.Config.ErrorLog.Println("header is locked", stack.Trace())
 		return
 	}
 
@@ -35,8 +35,8 @@ func Header(c *client.Client, k string, v string) {
 
 // Headers sends header fields.
 func Headers(c *client.Client, h map[string]string) {
-	if c.Scope.Locked {
-		c.Scope.ErrorLog.Println("header is locked", stack.Trace())
+	if c.Locked {
+		c.Config.ErrorLog.Println("header is locked", stack.Trace())
 		return
 	}
 

@@ -23,8 +23,8 @@ var serve = make(chan any, 1)
 func init() {
 	// Server.
 	s := server.New()
-	s.Http.Addr = fmt.Sprintf("0.0.0.0:%d", port)
-	s.Http.PublicRoot = filepath.Join("template", "app", "dist", "client")
+	s.Addr = fmt.Sprintf("0.0.0.0:%d", port)
+	s.PublicRoot = filepath.Join("template", "app", "dist", "client")
 	s.Render = ssr.New(ssr.Config{
 		Efs:   s.Efs,
 		App:   filepath.Join("template", "app"),

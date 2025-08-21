@@ -23,27 +23,27 @@ func Flush(c *client.Client) {
 //
 // Compatible with web sockets.
 func Content(c *client.Client, d []byte) {
-	if !c.Scope.Locked {
-		c.Writer.WriteHeader(c.Scope.Status)
-		c.Scope.Locked = true
+	if !c.Locked {
+		c.Writer.WriteHeader(c.Status)
+		c.Locked = true
 	}
 
-	if c.Scope.WebSocket != nil {
-		writeError := c.Scope.WebSocket.WriteMessage(websocket.TextMessage, d)
+	if c.WebSocket != nil {
+		writeError := c.WebSocket.WriteMessage(websocket.TextMessage, d)
 		if writeError != nil {
-			c.Scope.ErrorLog.Println(writeError, stack.Trace())
+			c.Config.ErrorLog.Println(writeError, stack.Trace())
 		}
 		return
 	}
 
-	if "" != c.Scope.EventName {
+	if "" != c.EventName {
 		EventContent(c, d)
 		return
 	}
 
 	_, writeError := c.Writer.Write(d)
 	if writeError != nil {
-		c.Scope.ErrorLog.Println(writeError, stack.Trace())
+		c.Config.ErrorLog.Println(writeError, stack.Trace())
 	}
 }
 

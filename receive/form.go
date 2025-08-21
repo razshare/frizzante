@@ -22,8 +22,8 @@ func Form(c *client.Client) url.Values {
 // The whole request body is parsed and up to a total of maxMemory bytes
 // of its file parts are stored in memory, with the remainder stored on disk in temporary files.
 func FormWithMaxMemory(c *client.Client, m int64) url.Values {
-	if c.Scope.WebSocket != nil {
-		c.Scope.ErrorLog.Println(errors.New("web socket connections cannot parse forms"), stack.Trace())
+	if c.WebSocket != nil {
+		c.Config.ErrorLog.Println(errors.New("web socket connections cannot parse forms"), stack.Trace())
 		return url.Values{}
 	}
 
@@ -35,7 +35,7 @@ func FormWithMaxMemory(c *client.Client, m int64) url.Values {
 
 		formError = c.Request.ParseForm()
 		if formError != nil {
-			c.Scope.ErrorLog.Println(formError, stack.Trace())
+			c.Config.ErrorLog.Println(formError, stack.Trace())
 			return url.Values{}
 		}
 	}

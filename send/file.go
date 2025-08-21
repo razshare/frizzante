@@ -18,13 +18,13 @@ import (
 
 // FileOrElse sends the file requested by the client, or else falls back.
 func FileOrElse(c *client.Client, or func()) {
-	var n = filepath.Join(c.Scope.PublicRoot, c.Request.RequestURI)
+	var n = filepath.Join(c.Config.PublicRoot, c.Request.RequestURI)
 	var r *bytes.Reader
 	var i os.FileInfo
 	var err error
 
-	if embeds.IsFile(c.Scope.Efs, n) && !embeds.IsDirectory(c.Scope.Efs, n) {
-		r, i, err = embeds.NewFileReader(c.Scope.Efs, strings.ReplaceAll(n, "\\", "//"))
+	if embeds.IsFile(c.Config.Efs, n) && !embeds.IsDirectory(c.Config.Efs, n) {
+		r, i, err = embeds.NewFileReader(c.Config.Efs, strings.ReplaceAll(n, "\\", "//"))
 	} else if files.IsFile(n) && !files.IsDirectory(n) {
 		r, i, err = files.NewFileReader(n)
 	} else {
@@ -33,30 +33,30 @@ func FileOrElse(c *client.Client, or func()) {
 	}
 
 	if err != nil {
-		c.Scope.ErrorLog.Println(err, stack.Trace())
+		c.Config.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
-	if c.Scope.WebSocket != nil {
+	if c.WebSocket != nil {
 		var d []byte
 		d, err = io.ReadAll(r)
 		if err != nil {
-			c.Scope.ErrorLog.Println(err, stack.Trace())
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
-		err = c.Scope.WebSocket.WriteMessage(websocket.TextMessage, d)
+		err = c.WebSocket.WriteMessage(websocket.TextMessage, d)
 		if err != nil {
-			c.Scope.ErrorLog.Println(err, stack.Trace())
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 	}
 
-	if "" != c.Scope.EventName {
+	if "" != c.EventName {
 		var d []byte
 		d, err = io.ReadAll(r)
 		if err != nil {
-			c.Scope.ErrorLog.Println(err, stack.Trace())
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 

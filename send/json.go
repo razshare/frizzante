@@ -18,11 +18,11 @@ import (
 func Json(c *client.Client, v any) {
 	data, jsonError := json.Marshal(v)
 	if jsonError != nil {
-		c.Scope.ErrorLog.Println(jsonError, stack.Trace())
+		c.Config.ErrorLog.Println(jsonError, stack.Trace())
 		return
 	}
 
-	if nil == c.Scope.WebSocket {
+	if nil == c.WebSocket {
 		contentType := c.Writer.Header().Get("Content-Type")
 		if "" == contentType {
 			c.Writer.Header().Set("Content-Type", "application/json")

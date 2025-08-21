@@ -13,10 +13,10 @@ import (
 //
 // All errors are sent to the server notifier.
 func Status(c *client.Client, s int) {
-	if c.Scope.Locked {
-		c.Scope.ErrorLog.Println("status is locked", stack.Trace())
+	if c.Locked {
+		c.Config.ErrorLog.Println("status is locked", stack.Trace())
 		return
 	}
 
-	c.Scope.Status = s
+	c.Status = s
 }

@@ -51,7 +51,7 @@ func save(c *client.Client, s *state) {
 	if !files.IsDirectory(dn) {
 		err := os.MkdirAll(dn, os.ModePerm)
 		if err != nil {
-			c.Scope.ErrorLog.Println(err, stack.Trace())
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 	}
@@ -62,13 +62,13 @@ func save(c *client.Client, s *state) {
 
 	d, err := json.Marshal(s)
 	if err != nil {
-		c.Scope.ErrorLog.Println(err, stack.Trace())
+		c.Config.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
 	err = os.WriteFile(n, d, os.ModePerm)
 	if err != nil {
-		c.Scope.ErrorLog.Println(err, stack.Trace())
+		c.Config.ErrorLog.Println(err, stack.Trace())
 	}
 }
 
@@ -83,7 +83,7 @@ func load(c *client.Client) *state {
 	if !files.IsDirectory(dn) {
 		err := os.MkdirAll(dn, os.ModePerm)
 		if err != nil {
-			c.Scope.ErrorLog.Println(err, stack.Trace())
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return nil
 		}
 	}
@@ -97,13 +97,13 @@ func load(c *client.Client) *state {
 	var d []byte
 	d, err := os.ReadFile(n)
 	if err != nil {
-		c.Scope.ErrorLog.Println(err, stack.Trace())
+		c.Config.ErrorLog.Println(err, stack.Trace())
 		return v
 	}
 
 	err = json.Unmarshal(d, v)
 	if err != nil {
-		c.Scope.ErrorLog.Println(err, stack.Trace())
+		c.Config.ErrorLog.Println(err, stack.Trace())
 		return v
 	}
 	return v
