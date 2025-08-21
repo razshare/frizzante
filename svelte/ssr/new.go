@@ -40,7 +40,7 @@ func New(c Config) view.Render {
 	var disk = c.Disk
 	var limit = c.Limit
 
-	if limit == 0 {
+	if limit <= 0 {
 		limit = 1
 	}
 
