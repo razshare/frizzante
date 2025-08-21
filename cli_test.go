@@ -30,7 +30,7 @@ func TestOnCreateProject(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = action.CreateProject(action.CreateProjectOptions{Project: proj})
+	err = action.CreateProject(action.CreateProjectOptions{Project: proj, Auto: true})
 	if err != nil {
 		t.Fatal(err)
 	}

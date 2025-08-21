@@ -18,6 +18,7 @@ type VersionOptions struct {
 
 type CreateProjectOptions struct {
 	Project string
+	Auto    bool
 }
 
 type GenerateOptions struct {

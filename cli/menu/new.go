@@ -75,6 +75,7 @@ func New(a *app.App) (*Menu, error) {
 
 					return action.CreateProject(action.CreateProjectOptions{
 						Project: *a.Project,
+						Auto:    *a.Yes,
 					})
 				},
 			},

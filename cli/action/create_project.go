@@ -1,24 +1,24 @@
 package action
 
 import (
-	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/cli/codegen"
 	"os"
 	"path/filepath"
 )
 
 func CreateProject(o CreateProjectOptions) error {
-	err := files.DownloadFile("https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip", o.Project+".zip")
+	url := "https://github.com/razshare/frizzante-starter/archive/refs/heads/main.zip"
+
+	install, evict, err := codegen.Download(codegen.DownloadOptions{
+		Url:  url,
+		Auto: o.Auto,
+	})
+
 	if err != nil {
 		return err
 	}
 
-	err = files.UnzipFile(o.Project+".zip", o.Project+".tmp")
-	if err != nil {
-		return err
-	}
-
-	err = os.Remove(o.Project + ".zip")
+	_, err = install(o.Project + ".tmp")
 	if err != nil {
 		return err
 	}
@@ -33,7 +33,5 @@ func CreateProject(o CreateProjectOptions) error {
 		return err
 	}
 
-	messages.Successf("project created at %s", o.Project)
-
-	return nil
+	return evict()
 }

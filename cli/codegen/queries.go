@@ -30,7 +30,7 @@ func Queries(o QueriesOptions) error {
 		}
 
 		var install Install
-		install, err := Download(DownloadOptions{
+		install, _, err := Download(DownloadOptions{
 			Url:  url,
 			Auto: o.Auto,
 		})

@@ -23,7 +23,7 @@ func Air(o AirOptions) error {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_amd64.exe"
 	}
 
-	install, err := Download(DownloadOptions{
+	install, _, err := Download(DownloadOptions{
 		Url:  url,
 		Auto: o.Auto,
 	})

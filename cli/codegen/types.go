@@ -37,6 +37,7 @@ type CopyInstruction struct {
 }
 
 type Install func(dst string) (bool, error)
+type Evict func() error
 
 type AirOptions struct {
 	Air      string

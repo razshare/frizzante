@@ -11,15 +11,15 @@ import (
 	"path/filepath"
 )
 
-func Download(o DownloadOptions) (Install, error) {
+func Download(o DownloadOptions) (Install, Evict, error) {
 	hash, err := text.Sha1(o.Url)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	user, err := os.UserHomeDir()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	ext := filepath.Ext(o.Url)
@@ -32,7 +32,7 @@ func Download(o DownloadOptions) (Install, error) {
 	if home == "" {
 		user, err = os.UserHomeDir()
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 		home = filepath.Join(user, ".frizzante")
 	}
@@ -46,49 +46,53 @@ func Download(o DownloadOptions) (Install, error) {
 
 		err = files.DownloadFile(o.Url, global)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 	}
 
 	return func(dst string) (bool, error) {
-		if files.IsDirectory(dst) || files.IsFile(dst) {
-			if !o.Auto {
-				var overwrite bool
-				overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", dst)
+			if files.IsDirectory(dst) || files.IsFile(dst) {
+				if !o.Auto {
+					var overwrite bool
+					overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", dst)
+					if err != nil {
+						return false, err
+					}
+
+					if !overwrite {
+						messages.Infof("skipping %s", dst)
+						return false, nil
+					}
+				}
+
+				err = os.RemoveAll(dst)
 				if err != nil {
 					return false, err
 				}
+			}
 
-				if !overwrite {
-					messages.Infof("skipping %s", dst)
-					return false, nil
+			s := spinner.New(fmt.Sprintf("installing %s", dst))
+			go spinner.Start(s)
+			defer spinner.Stop(s)
+
+			if ext == ".zip" {
+				err = files.UnzipFile(global, dst)
+				if err != nil {
+					return false, err
+				}
+			} else {
+				local := filepath.Join(dst, filepath.Base(dst)+ext)
+				err = files.CopyFile(global, local)
+				if err != nil {
+					return false, err
 				}
 			}
 
-			err = os.RemoveAll(dst)
-			if err != nil {
-				return false, err
-			}
-		}
-
-		s := spinner.New(fmt.Sprintf("installing %s", dst))
-		go spinner.Start(s)
-		defer spinner.Stop(s)
-
-		if ext == ".zip" {
-			err = files.UnzipFile(global, dst)
-			if err != nil {
-				return false, err
-			}
-		} else {
-			local := filepath.Join(dst, filepath.Base(dst)+ext)
-			err = files.CopyFile(global, local)
-			if err != nil {
-				return false, err
-			}
-		}
-
-		messages.Successf("%s installed", dst)
-		return true, nil
-	}, nil
+			messages.Successf("%s installed", dst)
+			return true, nil
+		},
+		func() error {
+			return os.RemoveAll(global)
+		},
+		nil
 }
