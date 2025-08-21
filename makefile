@@ -11,8 +11,6 @@ test:
 	mkdir -p app && \
 	cp -r template/project/app .
 	go run main.go -y --test
-	rm -fr app
-
 
 dev:
 	go run main.go --dev
