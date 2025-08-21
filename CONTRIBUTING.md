@@ -40,12 +40,6 @@ export GOPATH=$HOME/go
 export PATH=$PATH:$GOPATH/bin
 ```
 
-If you're using a precompiled binary, make sure that's on your path
-
-```sh
-export PATH=$PATH:/path/to/frizzante
-```
-
 ## Configure Projects
 
 Navigate to your `frizzante` local repository and configure the project with make.
@@ -190,9 +184,9 @@ This helps keeping the test suite runtime low.
 
 ### Encapsulation
 
-Structures and packages **must not** declare private members.
+Structures and packages **must** export all members.
 
-All package functions, variables and structure properties **must always be public**.
+All package functions, variables and structure fields **must always be exported**.
 
 ```go
 //package1/types.go
