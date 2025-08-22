@@ -5,8 +5,8 @@ import (
 	"os/exec"
 )
 
-func Test(o TestOptions) error {
-	test := exec.Command(o.Go, "test")
+func Test(opts TestOptions) error {
+	test := exec.Command(opts.Go, "test")
 	test.Env = os.Environ()
 	test.Stderr = os.Stderr
 	test.Stdout = os.Stdout

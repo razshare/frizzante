@@ -10,51 +10,43 @@ import (
 	"strings"
 )
 
-func CopyFile(efs embed.FS, from string, to string) error {
-	var err error
+func CopyFile(efs embed.FS, from string, to string) (err error) {
 	var src fs.File
-	src, err = efs.Open(from)
-	if err != nil {
-		return err
+	if src, err = efs.Open(from); err != nil {
+		return
 	}
 
-	todir := filepath.Dir(to)
+	dir := filepath.Dir(to)
 
-	if !files.IsDirectory(todir) {
-		err = os.MkdirAll(todir, os.ModePerm)
-		if err != nil {
-			return err
+	if !files.IsDirectory(dir) {
+		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
+			return
 		}
 	}
 
 	if files.IsFile(to) {
-		err = os.Remove(to)
-		if err != nil {
-			return err
+		if err = os.Remove(to); err != nil {
+			return
 		}
 	}
 
 	var dst *os.File
-	dst, err = os.Create(to)
-	if err != nil {
+	if dst, err = os.Create(to); err != nil {
 		_ = src.Close()
 		return err
 	}
 
-	_, err = io.Copy(dst, src)
-	if err != nil {
+	if _, err = io.Copy(dst, src); err != nil {
 		_ = src.Close()
 		_ = dst.Close()
 		return err
 	}
 
-	err = src.Close()
-	if err != nil {
+	if err = src.Close(); err != nil {
 		return err
 	}
 
-	err = dst.Close()
-	if err != nil {
+	if err = dst.Close(); err != nil {
 		return err
 	}
 

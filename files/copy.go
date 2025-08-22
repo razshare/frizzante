@@ -7,70 +7,66 @@ import (
 	"strings"
 )
 
-func CopyFile(from string, to string) error {
-	var err error
-	var src *os.File
-	src, err = os.Open(from)
-	if err != nil {
-		return err
-	}
+func CopyFile(from string, to string) (err error) {
+	dir := filepath.Dir(to)
 
-	todir := filepath.Dir(to)
-
-	if !IsDirectory(todir) {
-		err = os.MkdirAll(todir, os.ModePerm)
+	if !IsDirectory(dir) {
+		err = os.MkdirAll(dir, os.ModePerm)
 		if err != nil {
-			return err
+			return
 		}
 	}
 
 	if IsFile(to) {
 		err = os.Remove(to)
 		if err != nil {
-			return err
+			return
 		}
 	}
 
-	var dst *os.File
-	dst, err = os.Create(to)
+	var fromFile *os.File
+	fromFile, err = os.Open(from)
 	if err != nil {
-		_ = src.Close()
-		return err
+		return
 	}
+	defer func() {
+		if cerr := fromFile.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
 
-	_, err = io.Copy(dst, src)
+	var toFile *os.File
+	toFile, err = os.Create(to)
 	if err != nil {
-		_ = src.Close()
-		_ = dst.Close()
-		return err
+		return
 	}
+	defer func() {
+		if cerr := toFile.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
 
-	err = src.Close()
+	_, err = io.Copy(toFile, fromFile)
 	if err != nil {
-		return err
-	}
-
-	err = dst.Close()
-	if err != nil {
-		return err
+		return
 	}
 
 	return nil
 }
 
-func CopyDirectory(from string, to string) error {
-	ets, err := ReadDirectory(from)
-	if err != nil {
-		return err
+func CopyDirectory(from string, to string) (err error) {
+	var ents []string
+	if ents, err = ReadDirectory(from); err != nil {
+		return
 	}
 
-	for _, ent := range ets {
+	for _, ent := range ents {
 		n := filepath.Join(to, strings.TrimPrefix(ent, from))
 		err = CopyFile(ent, n)
 		if err != nil {
-			return err
+			return
 		}
 	}
 
-	return nil
+	return
 }

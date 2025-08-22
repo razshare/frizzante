@@ -8,80 +8,76 @@ import (
 	"syscall"
 )
 
-func Bun(o BunOptions) error {
+func Bun(opts BunOptions) (err error) {
 	var url string
 
-	if o.Platform == platform.PlatformDarwinArm64 {
+	if opts.Platform == platform.DarwinArm64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-aarch64.zip"
-	} else if o.Platform == platform.PlatformDarwinAmd64 {
+	} else if opts.Platform == platform.DarwinAmd64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-x64.zip"
-	} else if o.Platform == platform.PlatformLinuxArm64 {
+	} else if opts.Platform == platform.LinuxArm64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-aarch64.zip"
-	} else if o.Platform == platform.PlatformLinuxAmd64 {
+	} else if opts.Platform == platform.LinuxAmd64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-x64.zip"
-	} else if o.Platform == platform.PlatformWindowsArm64 {
+	} else if opts.Platform == platform.WindowsArm64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-windows-x64-baseline.zip"
-	} else if o.Platform == platform.PlatformWindowsAmd64 {
+	} else if opts.Platform == platform.WindowsAmd64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-windows-x64-baseline.zip"
 	}
 
-	install, _, err := Download(DownloadOptions{
-		Url:  url,
-		Auto: o.Auto,
-	})
-
-	if err != nil {
-		return err
+	var install Install
+	if install, _, err = Download(DownloadOptions{Url: url, Auto: opts.Auto}); err != nil {
+		return
 	}
 
-	installed, err := install(filepath.Dir(o.Bun))
-	if err != nil {
-		return err
+	var installed bool
+	if installed, err = install(filepath.Dir(opts.Bun)); err != nil {
+		return
 	}
 
 	if !installed {
-		return nil
+		return
 	}
 
-	if o.Platform == platform.PlatformDarwinArm64 {
-		err = files.Move(filepath.Join(filepath.Dir(o.Bun), "bun-darwin-aarch64", "bun"), o.Bun)
-	} else if o.Platform == platform.PlatformDarwinAmd64 {
-		err = files.Move(filepath.Join(filepath.Dir(o.Bun), "bun-darwin-x64", "bun"), o.Bun)
-	} else if o.Platform == platform.PlatformLinuxArm64 {
-		err = files.Move(filepath.Join(filepath.Dir(o.Bun), "bun-linux-aarch64", "bun"), o.Bun)
-	} else if o.Platform == platform.PlatformLinuxAmd64 {
-		err = files.Move(filepath.Join(filepath.Dir(o.Bun), "bun-linux-x64", "bun"), o.Bun)
-	} else if o.Platform == platform.PlatformWindowsArm64 {
-		err = files.Move(filepath.Join(filepath.Dir(o.Bun), "bun-windows-x64-baseline", "bun.exe"), o.Bun)
-	} else if o.Platform == platform.PlatformWindowsAmd64 {
-		err = files.Move(filepath.Join(filepath.Dir(o.Bun), "bun-windows-x64-baseline", "bun.exe"), o.Bun)
-	}
-
-	if err != nil {
-		return err
-	}
-
-	if o.Platform == platform.PlatformDarwinArm64 {
-		err = os.Remove(filepath.Join(filepath.Dir(o.Bun), "bun-darwin-aarch64"))
-	} else if o.Platform == platform.PlatformDarwinAmd64 {
-		err = os.Remove(filepath.Join(filepath.Dir(o.Bun), "bun-darwin-x64"))
-	} else if o.Platform == platform.PlatformLinuxArm64 {
-		err = os.Remove(filepath.Join(filepath.Dir(o.Bun), "bun-linux-aarch64"))
-	} else if o.Platform == platform.PlatformLinuxAmd64 {
-		err = os.Remove(filepath.Join(filepath.Dir(o.Bun), "bun-linux-x64"))
-	} else if o.Platform == platform.PlatformWindowsArm64 {
-		err = os.Remove(filepath.Join(filepath.Dir(o.Bun), "bun-windows-x64-baseline"))
-	} else if o.Platform == platform.PlatformWindowsAmd64 {
-		err = os.Remove(filepath.Join(filepath.Dir(o.Bun), "bun-windows-x64-baseline"))
+	if opts.Platform == platform.DarwinArm64 {
+		err = files.Move(filepath.Join(filepath.Dir(opts.Bun), "bun-darwin-aarch64", "bun"), opts.Bun)
+	} else if opts.Platform == platform.DarwinAmd64 {
+		err = files.Move(filepath.Join(filepath.Dir(opts.Bun), "bun-darwin-x64", "bun"), opts.Bun)
+	} else if opts.Platform == platform.LinuxArm64 {
+		err = files.Move(filepath.Join(filepath.Dir(opts.Bun), "bun-linux-aarch64", "bun"), opts.Bun)
+	} else if opts.Platform == platform.LinuxAmd64 {
+		err = files.Move(filepath.Join(filepath.Dir(opts.Bun), "bun-linux-x64", "bun"), opts.Bun)
+	} else if opts.Platform == platform.WindowsArm64 {
+		err = files.Move(filepath.Join(filepath.Dir(opts.Bun), "bun-windows-x64-baseline", "bun.exe"), opts.Bun)
+	} else if opts.Platform == platform.WindowsAmd64 {
+		err = files.Move(filepath.Join(filepath.Dir(opts.Bun), "bun-windows-x64-baseline", "bun.exe"), opts.Bun)
 	}
 
 	if err != nil {
-		return err
+		return
 	}
 
-	if o.Platform != platform.PlatformWindowsArm64 && o.Platform != platform.PlatformWindowsAmd64 && filepath.Separator != '\\' {
-		err = syscall.Chmod(o.Bun, 0755)
+	if opts.Platform == platform.DarwinArm64 {
+		err = os.Remove(filepath.Join(filepath.Dir(opts.Bun), "bun-darwin-aarch64"))
+	} else if opts.Platform == platform.DarwinAmd64 {
+		err = os.Remove(filepath.Join(filepath.Dir(opts.Bun), "bun-darwin-x64"))
+	} else if opts.Platform == platform.LinuxArm64 {
+		err = os.Remove(filepath.Join(filepath.Dir(opts.Bun), "bun-linux-aarch64"))
+	} else if opts.Platform == platform.LinuxAmd64 {
+		err = os.Remove(filepath.Join(filepath.Dir(opts.Bun), "bun-linux-x64"))
+	} else if opts.Platform == platform.WindowsArm64 {
+		err = os.Remove(filepath.Join(filepath.Dir(opts.Bun), "bun-windows-x64-baseline"))
+	} else if opts.Platform == platform.WindowsAmd64 {
+		err = os.Remove(filepath.Join(filepath.Dir(opts.Bun), "bun-windows-x64-baseline"))
 	}
 
-	return nil
+	if err != nil {
+		return
+	}
+
+	if opts.Platform != platform.WindowsArm64 && opts.Platform != platform.WindowsAmd64 && filepath.Separator != '\\' {
+		err = syscall.Chmod(opts.Bun, 0755)
+	}
+
+	return
 }

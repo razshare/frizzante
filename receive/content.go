@@ -9,19 +9,19 @@ import (
 // Message reads the contents of the message and returns the value.
 //
 // Compatible with web sockets.
-func Message(c *client.Client) string {
-	if c.WebSocket != nil {
-		_, data, readError := c.WebSocket.ReadMessage()
-		if readError != nil {
-			c.Config.ErrorLog.Println(readError, stack.Trace())
+func Message(client *client.Client) string {
+	if client.WebSocket != nil {
+		_, data, err := client.WebSocket.ReadMessage()
+		if err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return ""
 		}
 		return string(data)
 	}
 
-	data, readError := io.ReadAll(c.Request.Body)
-	if readError != nil {
-		c.Config.ErrorLog.Println(readError, stack.Trace())
+	data, err := io.ReadAll(client.Request.Body)
+	if err != nil {
+		client.Config.ErrorLog.Println(err, stack.Trace())
 		return ""
 	}
 	return string(data)

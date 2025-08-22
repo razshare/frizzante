@@ -16,22 +16,21 @@ func WsUpgrade(c *client.Client) {
 }
 
 // WsUpgradeWithUpgrader upgrades to web sockets.
-func WsUpgradeWithUpgrader(c *client.Client, u websocket.Upgrader) {
-	webSocketConnection, upgradeError := u.Upgrade(c.Writer, c.Request, nil)
-	if upgradeError != nil {
-		c.Config.ErrorLog.Println(upgradeError, stack.Trace())
+func WsUpgradeWithUpgrader(client *client.Client, upgrader websocket.Upgrader) {
+	conn, err := upgrader.Upgrade(client.Writer, client.Request, nil)
+	if err != nil {
+		client.Config.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
-	defer func(webSocketConnection *websocket.Conn) {
-		closeError := c.WebSocket.Close()
-		if closeError != nil {
-			c.Config.ErrorLog.Println(closeError, stack.Trace())
+	defer func() {
+		if cerr := client.WebSocket.Close(); cerr != nil {
+			client.Config.ErrorLog.Println(cerr, stack.Trace())
 		}
-	}(webSocketConnection)
+	}()
 
-	c.WebSocket = webSocketConnection
-	c.Locked = true
+	client.WebSocket = conn
+	client.Locked = true
 
 	return
 }

@@ -4,19 +4,16 @@ import "os"
 
 func Move(from string, to string) error {
 	if IsDirectory(from) {
-		err := CopyDirectory(from, to)
-		if err != nil {
+		if err := CopyDirectory(from, to); err != nil {
 			return err
 		}
 	} else {
-		err := CopyFile(from, to)
-		if err != nil {
+		if err := CopyFile(from, to); err != nil {
 			return err
 		}
 	}
 
-	err := os.RemoveAll(from)
-	if err != nil {
+	if err := os.RemoveAll(from); err != nil {
 		return err
 	}
 

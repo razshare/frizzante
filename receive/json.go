@@ -11,29 +11,27 @@ import (
 // c and stores it in the value pointed to by va.
 //
 // Compatible with web sockets.
-func Json[T any](c *client.Client) T {
-	var v T
+func Json[T any](client *client.Client) T {
+	var val T
 
-	if c.WebSocket != nil {
-		jsonError := c.WebSocket.ReadJSON(&v)
-		if jsonError != nil {
-			c.Config.ErrorLog.Println(jsonError, stack.Trace())
-			return v
+	if client.WebSocket != nil {
+		if err := client.WebSocket.ReadJSON(&val); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
+			return val
 		}
-		return v
+		return val
 	}
 
-	data, readError := io.ReadAll(c.Request.Body)
-	if readError != nil {
-		c.Config.ErrorLog.Println(readError, stack.Trace())
-		return v
+	data, err := io.ReadAll(client.Request.Body)
+	if err != nil {
+		client.Config.ErrorLog.Println(err, stack.Trace())
+		return val
 	}
 
-	jsonError := json.Unmarshal(data, &v)
-	if jsonError != nil {
-		c.Config.ErrorLog.Println(jsonError, stack.Trace())
-		return v
+	if err = json.Unmarshal(data, &val); err != nil {
+		client.Config.ErrorLog.Println(err, stack.Trace())
+		return val
 	}
 
-	return v
+	return val
 }

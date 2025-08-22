@@ -8,19 +8,19 @@ import (
 	"path/filepath"
 )
 
-func PkgWatch(o PkgWatchOptions) error {
-	err := Touch(TouchOptions{App: o.App})
+func PkgWatch(opts PkgWatchOptions) error {
+	err := Touch(TouchOptions{App: opts.App})
 	if err != nil {
 		return err
 	}
 
-	bun, err := filepath.Rel(o.App, o.Bun)
+	bun, err := filepath.Rel(opts.App, opts.Bun)
 	if err != nil {
 		return err
 	}
 
 	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
-	ssr.Dir = o.App
+	ssr.Dir = opts.App
 	ssr.Env = append(os.Environ(), "DEV=1")
 	ssr.Stderr = os.Stderr
 	ssr.Stdout = os.Stdout
@@ -32,7 +32,7 @@ func PkgWatch(o PkgWatchOptions) error {
 	messages.Success("vite server watcher launched")
 
 	csr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
-	csr.Dir = o.App
+	csr.Dir = opts.App
 	csr.Env = append(os.Environ())
 	csr.Stderr = os.Stderr
 	csr.Stdout = os.Stdout

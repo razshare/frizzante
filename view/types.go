@@ -24,4 +24,4 @@ type View struct {
 	Props  map[string]any
 }
 
-type Render func(v View) (string, error)
+type Render func(view View) (html string, err error)

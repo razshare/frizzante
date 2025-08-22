@@ -7,52 +7,63 @@ import (
 	"slices"
 )
 
-func ReadDirectory(efs embed.FS, n string) ([]string, error) {
-	its := make([]string, 0)
-	ents, err := efs.ReadDir(n)
+func ReadDirectory(efs embed.FS, from string) (entries []string, err error) {
+	entries = make([]string, 0)
+	names, err := efs.ReadDir(from)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, ent := range ents {
-		if ent.IsDir() {
-			var sits []string
-			sits, err = ReadDirectory(efs, fmt.Sprintf("%s/%s", n, ent.Name()))
+	for _, name := range names {
+		if name.IsDir() {
+			var subNames []string
+			subNames, err = ReadDirectory(efs, fmt.Sprintf("%s/%s", from, name.Name()))
 			if err != nil {
-				return nil, err
+				return
 			}
 
-			its = slices.Concat(its, sits)
+			entries = slices.Concat(entries, subNames)
 			continue
 		}
 
-		its = append(its, fmt.Sprintf("%s/%s", n, ent.Name()))
+		entries = append(entries, fmt.Sprintf("%s/%s", from, name.Name()))
 	}
 
-	return its, nil
+	return
 }
 
-// ReadFileInChunks reads a file in chunks.
-func ReadFileInChunks(efs embed.FS, n string, c int, cb func([]byte)) (err error) {
-	file, openError := efs.Open(n)
-	if openError != nil {
-		return openError
+// ReadFileInChunks reads a file in chunks of a set maximum size.
+func ReadFileInChunks(efs embed.FS, from string, max int, call func([]byte) error) (err error) {
+	var file fs.File
+	if file, err = efs.Open(from); err != nil {
+		return
 	}
-	defer func(file fs.File) { err = file.Close() }(file)
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
 
-	buffer := make([]byte, c)
+	buf := make([]byte, max)
 
+	var size int
 	for {
-		count, readError := file.Read(buffer)
-		if readError != nil {
-			return readError
+		if size, err = file.Read(buf); err != nil {
+			return err
 		}
-		if count == 0 {
-			return nil
+
+		if size == 0 {
+			return
 		}
-		if count < c {
-			cb(buffer[:count-1])
+
+		if size < max {
+			if err = call(buf[:size-1]); err != nil {
+				return
+			}
 		}
-		cb(buffer)
+
+		if err = call(buf); err != nil {
+			return
+		}
 	}
 }

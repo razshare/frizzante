@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 )
 
-func Format(o FormatOptions) error {
-	err := Touch(TouchOptions{App: o.App})
+func Format(opts FormatOptions) error {
+	err := Touch(TouchOptions{App: opts.App})
 	if err != nil {
 		return err
 	}
 
-	gofmt := exec.Command(o.Go, "fmt", "./...")
+	gofmt := exec.Command(opts.Go, "fmt", "./...")
 	gofmt.Env = append(os.Environ())
 	gofmt.Stderr = os.Stderr
 	gofmt.Stdout = os.Stdout
@@ -23,13 +23,13 @@ func Format(o FormatOptions) error {
 		return err
 	}
 
-	bun, err := filepath.Rel(o.App, o.Bun)
+	bun, err := filepath.Rel(opts.App, opts.Bun)
 	if err != nil {
 		return err
 	}
 
 	pretty := exec.Command(bun, "x", "prettier", "--write", ".")
-	pretty.Dir = o.App
+	pretty.Dir = opts.App
 	pretty.Env = append(os.Environ())
 	pretty.Stderr = os.Stderr
 	pretty.Stdout = os.Stdout

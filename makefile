@@ -1,8 +1,8 @@
 frizzante:
-	frizzante
+	cd template/project && make frizzante
 
 configure:
-	go run main.go --configure
+	cd template/project && make configure
 
 test:
 	go run main.go -y --configure --app="template/project/app"
@@ -13,28 +13,30 @@ test:
 	go run main.go -y --test
 
 dev:
-	go run main.go --dev
+	cd template/project && make dev
 
 package-watch:
-	go run main.go --package-watch
+	cd template/project && make package-watch
 
 package:
-	go run main.go --package
+	cd template/project && make package
 
 check:
 	go run main.go --check
 
 clean:
-	go run main.go --clean
+	cd template/project && make clean
 
 format:
 	go run main.go --format
 
 install:
 	go run main.go --install
+	cd template/project && make install
 
 update:
 	go run main.go --update
+	cd template/project && make update
 
 hooks:
 	go run main.go --hooks

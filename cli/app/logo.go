@@ -4,12 +4,11 @@ import (
 	"github.com/razshare/frizzante/tui/config"
 )
 
-func Logo(o *App) (string, error) {
-	var d []byte
-	d, err := o.Efs.ReadFile("clilogo.txt")
-	if err != nil {
-		return "", err
+func Logo(opts *App) (logo string, err error) {
+	var data []byte
+	if data, err = opts.Efs.ReadFile("clilogo.txt"); err != nil {
+		return
 	}
-
-	return config.Styles.BigText.Render(string(d)), nil
+	logo = config.Styles.BigText.Render(string(data))
+	return
 }

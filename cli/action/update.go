@@ -8,34 +8,34 @@ import (
 	"path/filepath"
 )
 
-func Update(o UpdateOptions) error {
-	err := Touch(TouchOptions{App: o.App})
+func Update(opts UpdateOptions) error {
+	err := Touch(TouchOptions{App: opts.App})
 	if err != nil {
 		return err
 	}
 
-	s := spinner.New("updating go dependencies")
+	spin := spinner.New("updating go dependencies")
 
-	go spinner.Start(s)
-	get := exec.Command(o.Go, "get", "-u", "./...")
+	go spinner.Start(spin)
+	get := exec.Command(opts.Go, "get", "-u", "./...")
 	get.Env = append(os.Environ())
 	get.Stderr = os.Stderr
 	get.Stdout = os.Stdout
 	get.Stdin = os.Stdin
 	err = get.Run()
-	spinner.Stop(s)
+	spinner.Stop(spin)
 
 	if err != nil {
 		return err
 	}
 
-	bun, err := filepath.Rel(o.App, o.Bun)
+	bun, err := filepath.Rel(opts.App, opts.Bun)
 	if err != nil {
 		return err
 	}
 
 	pretty := exec.Command(bun, "update")
-	pretty.Dir = o.App
+	pretty.Dir = opts.App
 	pretty.Env = append(os.Environ())
 	pretty.Stderr = os.Stderr
 	pretty.Stdout = os.Stdout

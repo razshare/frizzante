@@ -8,34 +8,34 @@ import (
 	"path/filepath"
 )
 
-func Install(o InstallOptions) error {
-	err := Touch(TouchOptions{App: o.App})
+func Install(opts InstallOptions) error {
+	err := Touch(TouchOptions{App: opts.App})
 	if err != nil {
 		return err
 	}
 
-	s := spinner.New("installing go dependencies")
+	spin := spinner.New("installing go dependencies")
 
-	go spinner.Start(s)
-	tidy := exec.Command(o.Go, "mod", "tidy")
+	go spinner.Start(spin)
+	tidy := exec.Command(opts.Go, "mod", "tidy")
 	tidy.Env = append(os.Environ())
 	tidy.Stderr = os.Stderr
 	tidy.Stdout = os.Stdout
 	tidy.Stdin = os.Stdin
 	err = tidy.Run()
-	spinner.Stop(s)
+	spinner.Stop(spin)
 
 	if err != nil {
 		return err
 	}
 
-	bun, err := filepath.Rel(o.App, o.Bun)
+	bun, err := filepath.Rel(opts.App, opts.Bun)
 	if err != nil {
 		return err
 	}
 
 	ins := exec.Command(bun, "install")
-	ins.Dir = o.App
+	ins.Dir = opts.App
 	ins.Env = append(os.Environ())
 	ins.Stderr = os.Stderr
 	ins.Stdout = os.Stdout

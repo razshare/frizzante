@@ -7,19 +7,19 @@ import (
 	"path/filepath"
 )
 
-func Pkg(o PkgOptions) error {
-	err := Touch(TouchOptions{App: o.App})
+func Pkg(opts PkgOptions) error {
+	err := Touch(TouchOptions{App: opts.App})
 	if err != nil {
 		return err
 	}
 
-	bun, err := filepath.Rel(o.App, o.Bun)
+	bun, err := filepath.Rel(opts.App, opts.Bun)
 	if err != nil {
 		return err
 	}
 
 	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
-	ssr.Dir = o.App
+	ssr.Dir = opts.App
 	ssr.Env = append(os.Environ())
 	ssr.Stderr = os.Stderr
 	ssr.Stdout = os.Stdout
@@ -30,7 +30,7 @@ func Pkg(o PkgOptions) error {
 	}
 
 	csr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
-	csr.Dir = o.App
+	csr.Dir = opts.App
 	csr.Env = append(os.Environ())
 	csr.Stderr = os.Stderr
 	csr.Stdout = os.Stdout
@@ -41,7 +41,7 @@ func Pkg(o PkgOptions) error {
 	}
 
 	esb := exec.Command(filepath.Join("node_modules", ".bin", "esbuild"), "--bundle", "--outfile=dist/server.js", "--format=cjs", "--allow-overwrite", "dist/server.js")
-	esb.Dir = o.App
+	esb.Dir = opts.App
 	esb.Env = append(os.Environ())
 	esb.Stderr = os.Stderr
 	esb.Stdout = os.Stdout
@@ -51,7 +51,7 @@ func Pkg(o PkgOptions) error {
 		return err
 	}
 
-	messages.Success("project app package generated in ", filepath.Join(o.App, "dist"))
+	messages.Success("project app package generated in ", filepath.Join(opts.App, "dist"))
 
 	return nil
 }

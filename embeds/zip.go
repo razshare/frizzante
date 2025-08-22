@@ -11,41 +11,40 @@ import (
 )
 
 // ZipFile zips a file to the disk.
-func ZipFile(efs embed.FS, n string, zn string) (err error) {
-	err = os.MkdirAll(filepath.Dir(zn), os.ModePerm)
-	if err != nil {
+func ZipFile(efs embed.FS, from string, to string) (err error) {
+	if err = os.MkdirAll(filepath.Dir(to), os.ModePerm); err != nil {
 		return
 	}
 
-	var z *os.File
-
-	z, err = os.Create(zn)
-	if err != nil {
+	var zipFile *os.File
+	if zipFile, err = os.Create(to); err != nil {
 		return
 	}
 
-	defer func(z *os.File) { err = z.Close() }(z)
+	defer func() {
+		if cerr := zipFile.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
 
-	zw := zip.NewWriter(z)
+	zipWriter := zip.NewWriter(zipFile)
+	defer func() {
+		if cerr := zipWriter.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
 
-	defer func(zw *zip.Writer) { err = zw.Close() }(zw)
-
-	var zww io.Writer
-
-	zww, err = zw.Create(filepath.Base(n))
-	if err != nil {
+	var ioWriter io.Writer
+	if ioWriter, err = zipWriter.Create(filepath.Base(from)); err != nil {
 		return
 	}
 
-	var f fs.File
-
-	f, err = efs.Open(n)
-	if err != nil {
+	var file fs.File
+	if file, err = efs.Open(from); err != nil {
 		return
 	}
 
-	_, err = io.Copy(zww, f)
-	if err != nil {
+	if _, err = io.Copy(ioWriter, file); err != nil {
 		return
 	}
 
@@ -53,46 +52,48 @@ func ZipFile(efs embed.FS, n string, zn string) (err error) {
 }
 
 // ZipDirectory zips a directory to the disk.
-func ZipDirectory(efs embed.FS, dn string, zn string) (err error) {
-	err = os.MkdirAll(filepath.Dir(zn), os.ModePerm)
-	if err != nil {
+func ZipDirectory(efs embed.FS, from string, to string) (err error) {
+	if err = os.MkdirAll(filepath.Dir(to), os.ModePerm); err != nil {
 		return
 	}
 
-	var z *os.File
-
-	z, err = os.Create(zn)
-	if err != nil {
+	var zipFile *os.File
+	if zipFile, err = os.Create(to); err != nil {
 		return
 	}
+	defer func() {
+		if cerr := zipFile.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
 
-	defer func(z *os.File) { err = z.Close() }(z)
+	zipWriter := zip.NewWriter(zipFile)
+	defer func() {
+		if cerr := zipWriter.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
 
-	zw := zip.NewWriter(z)
-
-	defer func(zw *zip.Writer) { err = zw.Close() }(zw)
-
-	err = filepath.Walk(dn, func(p string, i fs.FileInfo, err error) error {
+	err = filepath.Walk(from, func(name string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if i.IsDir() {
+		if info.IsDir() {
 			return nil
 		}
 
-		f, err := efs.Open(p)
+		file, err := efs.Open(name)
 		if err != nil {
 			return err
 		}
 
-		zww, err := zw.Create(strings.TrimPrefix(p, dn+"/"))
+		ioWriter, err := zipWriter.Create(strings.TrimPrefix(name, from+"/"))
 		if err != nil {
 			return err
 		}
 
-		_, err = io.Copy(zww, f)
-		if err != nil {
+		if _, err = io.Copy(ioWriter, file); err != nil {
 			return err
 		}
 

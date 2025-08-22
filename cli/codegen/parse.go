@@ -7,126 +7,127 @@ import (
 	"strings"
 )
 
-func Parse(c string, b Build) (string, error) {
+func Parse(source string, build Build) (string, error) {
 	var find strings.Builder
 	var repl strings.Builder
 
-	ex := func(l string) (Mod, error) {
+	ex := func(line string) (Mod, error) {
 		find.Reset()
 		repl.Reset()
-		s := Start
-		for _, r := range l {
-			switch s {
+		state := Start
+		for _, char := range line {
+			switch state {
 			case Start:
-				switch r {
+				switch char {
 				case '"':
-					s = ReadingOriginalString
+					state = ReadingOriginalString
 				}
 			case ReadingOriginalString:
-				switch r {
+				switch char {
 				case '\\':
-					s = EscapingOriginal
+					state = EscapingOriginal
 				case '"':
-					s = DoneReadingOriginalString
+					state = DoneReadingOriginalString
 				default:
-					find.WriteRune(r)
+					find.WriteRune(char)
 				}
 			case DoneReadingOriginalString:
-				switch r {
+				switch char {
 				case ' ':
-					s = ExpectingReplacementString
+					state = ExpectingReplacementString
 				}
 			case ExpectingReplacementString:
-				switch r {
+				switch char {
 				case '"':
-					s = ReadingReplacementString
+					state = ReadingReplacementString
 				default:
 				}
 			case ReadingReplacementString:
-				switch r {
+				switch char {
 				case '\\':
-					s = EscapingReplacement
+					state = EscapingReplacement
 				case '"':
-					s = DoneReadingReplacementString
+					state = DoneReadingReplacementString
 					return Mod{
 						Pattern:     find.String(),
 						Replacement: repl.String(),
 					}, nil
 				default:
-					repl.WriteRune(r)
+					repl.WriteRune(char)
 				}
 			case EscapingOriginal:
-				repl.WriteRune(r)
-				s = ReadingOriginalString
+				repl.WriteRune(char)
+				state = ReadingOriginalString
 				continue
 			case EscapingReplacement:
-				repl.WriteRune(r)
-				s = ReadingReplacementString
+				repl.WriteRune(char)
+				state = ReadingReplacementString
 				continue
 			default:
-				switch r {
+				switch char {
 				case ' ':
 					// Noop.
 					continue
 				}
-				s = Invalid
-				return Mod{}, fmt.Errorf("invalid state, expecting \",\", received \"%c\" instead", r)
+				state = Invalid
+				return Mod{}, fmt.Errorf("invalid state, expecting \",\", received \"%c\" instead", char)
 			}
 		}
 		return Mod{}, errors.New("invalid mod")
 	}
 
-	ms := make([]Mod, 0)
-	msl := 0
-	ml := make([]Mod, 0)
-	mll := 0
 	var sb strings.Builder
 
-	for _, l := range strings.Split(c, "\n") {
-		trmd := strings.TrimSpace(l)
-		if strings.HasPrefix(trmd, globals.CodegenModsHint) {
-			o := len(globals.CodegenModsHint)
-			mod, err := ex(l[o:])
+	modsGlobal := make([]Mod, 0)
+	modsGlobalLen := 0
+	modsLocal := make([]Mod, 0)
+	modsLocalLen := 0
+
+	for _, line := range strings.Split(source, "\n") {
+		trimmed := strings.TrimSpace(line)
+		if strings.HasPrefix(trimmed, globals.CodegenGlobalModHint) {
+			offset := len(globals.CodegenGlobalModHint)
+			mod, err := ex(line[offset:])
 			if err != nil {
 				return "", err
 			}
-			ms = append(ms, mod)
-			msl++
+			modsGlobal = append(modsGlobal, mod)
+			modsGlobalLen++
 			continue
-		} else if strings.HasPrefix(trmd, globals.CodegenModHint) {
-			o := len(globals.CodegenModHint)
-			mod, err := ex(l[o:])
+		} else if strings.HasPrefix(trimmed, globals.CodegenLineModHint) {
+			o := len(globals.CodegenLineModHint)
+			mod, err := ex(line[o:])
 			if err != nil {
 				return "", err
 			}
-			ml = append(ml, mod)
-			mll++
+			modsLocal = append(modsLocal, mod)
+			modsLocalLen++
 			continue
 		}
 
-		if msl > 0 {
-			err := b(Section{
-				Mods: ms,
-				Line: &l,
+		if modsGlobalLen > 0 {
+			err := build(Block{
+				Mods: modsGlobal,
+				Line: &line,
 			})
 			if err != nil {
 				return "", err
 			}
 		}
 
-		if mll > 0 {
-			err := b(Section{
-				Mods: append(ms, ml...),
-				Line: &l,
+		if modsLocalLen > 0 {
+			err := build(Block{
+				Mods: append(modsGlobal, modsLocal...),
+				Line: &line,
 			})
 			if err != nil {
 				return "", err
 			}
-			ml = make([]Mod, 0)
-			mll = 0
+			modsLocal = make([]Mod, 0)
+			modsLocalLen = 0
 		}
 
-		sb.WriteString(l + "\n")
+		sb.WriteString(line + "\n")
 
 	}
 

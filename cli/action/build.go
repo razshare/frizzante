@@ -7,13 +7,13 @@ import (
 	"path/filepath"
 )
 
-func Build(o BuildOptions) error {
-	err := Pkg(PkgOptions{App: o.App, Bun: o.Bun})
+func Build(opts BuildOptions) error {
+	err := Pkg(PkgOptions{App: opts.App, Bun: opts.Bun})
 	if err != nil {
 		return err
 	}
 
-	build := exec.Command(o.Go, "build", "-o="+filepath.Join(".gen", "bin", "app"), ".")
+	build := exec.Command(opts.Go, "build", "-o="+filepath.Join(".gen", "bin", "app"), ".")
 	build.Env = os.Environ()
 
 	build.Stderr = os.Stderr

@@ -6,7 +6,7 @@ import (
 )
 
 // DeleteFile deletes a file from the disk.
-func DeleteFile(n string) bool {
-	e := os.Remove(n)
-	return nil == e || !errors.Is(e, os.ErrNotExist)
+func DeleteFile(name string) bool {
+	err := os.Remove(name)
+	return nil == err || !errors.Is(err, os.ErrNotExist)
 }

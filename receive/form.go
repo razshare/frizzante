@@ -13,32 +13,31 @@ import (
 //
 // The whole request body is parsed and up to a total of 2MB
 // of its file parts are stored in memory, with the remainder stored on disk in temporary files.
-func Form(c *client.Client) url.Values {
-	return FormWithMaxMemory(c, 2*globals.MB)
+func Form(client *client.Client) url.Values {
+	return FormWithMaxMemory(client, 2*globals.MB)
 }
 
 // FormWithMaxMemory reads the message as a form and returns the value.
 //
 // The whole request body is parsed and up to a total of maxMemory bytes
 // of its file parts are stored in memory, with the remainder stored on disk in temporary files.
-func FormWithMaxMemory(c *client.Client, m int64) url.Values {
-	if c.WebSocket != nil {
-		c.Config.ErrorLog.Println(errors.New("web socket connections cannot parse forms"), stack.Trace())
+func FormWithMaxMemory(client *client.Client, m int64) url.Values {
+	if client.WebSocket != nil {
+		client.Config.ErrorLog.Println(errors.New("web socket connections cannot parse forms"), stack.Trace())
 		return url.Values{}
 	}
 
-	formError := c.Request.ParseMultipartForm(m)
-	if formError != nil {
-		if !errors.Is(formError, http.ErrNotMultipart) {
+	if err := client.Request.ParseMultipartForm(m); err != nil {
+		if !errors.Is(err, http.ErrNotMultipart) {
 			return url.Values{}
 		}
 
-		formError = c.Request.ParseForm()
-		if formError != nil {
-			c.Config.ErrorLog.Println(formError, stack.Trace())
+		err = client.Request.ParseForm()
+		if err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return url.Values{}
 		}
 	}
 
-	return c.Request.Form
+	return client.Request.Form
 }

@@ -1,16 +1,16 @@
 package action
 
-func Config(o ConfigOptions) error {
+func Config(opts ConfigOptions) error {
 	err := Generate(GenerateOptions{
-		App:      o.App,
+		App:      opts.App,
 		Selected: "bun,air",
-		Auto:     o.Auto,
-		Go:       o.Go,
-		Air:      o.Air,
-		Bun:      o.Bun,
-		Sqlc:     o.Sqlc,
-		Efs:      o.Efs,
-		Platform: o.Platform,
+		Auto:     opts.Auto,
+		Go:       opts.Go,
+		Air:      opts.Air,
+		Bun:      opts.Bun,
+		Sqlc:     opts.Sqlc,
+		Efs:      opts.Efs,
+		Platform: opts.Platform,
 	})
 
 	if err != nil {
@@ -18,8 +18,8 @@ func Config(o ConfigOptions) error {
 	}
 
 	return Install(InstallOptions{
-		App: o.App,
-		Go:  o.Go,
-		Bun: o.Bun,
+		App: opts.App,
+		Go:  opts.Go,
+		Bun: opts.Bun,
 	})
 }

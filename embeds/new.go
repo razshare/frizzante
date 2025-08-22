@@ -3,30 +3,35 @@ package embeds
 import (
 	"bytes"
 	"embed"
+	"io/fs"
 	"os"
 )
 
-func NewFileReader(efs embed.FS, n string) (*bytes.Reader, os.FileInfo, error) {
-	file, openError := efs.Open(n)
-	if openError != nil {
-		return nil, nil, openError
+func NewFileReader(efs embed.FS, n string) (reader *bytes.Reader, info os.FileInfo, err error) {
+	var file fs.File
+	if file, err = efs.Open(n); err != nil {
+		return
 	}
-
-	fileInfo, _ := file.Stat()
-
-	buffer := make([]byte, fileInfo.Size())
-	_, readError := file.Read(buffer)
-	if readError != nil {
-		closeError := file.Close()
-		if closeError != nil {
-			return nil, nil, closeError
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = cerr
 		}
-		return nil, nil, readError
+	}()
+
+	info, _ = file.Stat()
+
+	buf := make([]byte, info.Size())
+
+	if _, err = file.Read(buf); err != nil {
+		return
 	}
 
-	closeError := file.Close()
-	if closeError != nil {
-		return nil, nil, closeError
+	if err = file.Close(); err != nil {
+		return
 	}
-	return bytes.NewReader(buffer), fileInfo, nil
+
+	reader = bytes.NewReader(buf)
+
+	return
+
 }

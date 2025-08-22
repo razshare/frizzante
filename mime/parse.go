@@ -72,8 +72,8 @@ var mimes = map[string]string{
 }
 
 // Parse gets the mime type fo a file name.
-func Parse(n string) string {
-	extension := filepath.Ext(n)
+func Parse(name string) string {
+	extension := filepath.Ext(name)
 	mime, ok := mimes[extension]
 
 	if ok {

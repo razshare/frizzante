@@ -32,33 +32,38 @@ func ReadDirectory(dn string) ([]string, error) {
 	return its, nil
 }
 
-// ReadFileInChunks reads a file in chunks.
-func ReadFileInChunks(n string, c int, cb func([]byte) error) (err error) {
-	file, openError := os.Open(n)
-	if openError != nil {
-		return openError
+// ReadFileInChunks reads a file in chunks of a set maximum size.
+func ReadFileInChunks(name string, max int, call func([]byte) error) (err error) {
+	var file *os.File
+	if file, err = os.Open(name); err != nil {
+		return
 	}
-	defer func(file *os.File) { err = file.Close() }(file)
+	defer func() {
+		if cerr := file.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
 
-	buffer := make([]byte, c)
+	buf := make([]byte, max)
 
+	var size int
 	for {
-		count, readError := file.Read(buffer)
-		if readError != nil {
-			return readError
+		if size, err = file.Read(buf); err != nil {
+			return
 		}
-		if count == 0 {
-			return nil
+
+		if size == 0 {
+			return
 		}
-		if count < c {
-			callError := cb(buffer[:count-1])
-			if callError != nil {
-				return callError
+
+		if size < max {
+			if err = call(buf[:size-1]); err != nil {
+				return
 			}
 		}
-		callError := cb(buffer)
-		if callError != nil {
-			return callError
+
+		if err = call(buf); err != nil {
+			return
 		}
 	}
 }

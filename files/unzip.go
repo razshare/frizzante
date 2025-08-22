@@ -8,58 +8,61 @@ import (
 )
 
 // UnzipFile unzips a file to a directory on the disk.
-func UnzipFile(zn string, dn string) (err error) {
-	var r *zip.ReadCloser
-	r, err = zip.OpenReader(zn)
-	if err != nil {
+func UnzipFile(from string, to string) (err error) {
+	var reader *zip.ReadCloser
+	if reader, err = zip.OpenReader(from); err != nil {
 		return
 	}
+	defer func() {
+		if cerr := reader.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
 
-	defer func(r *zip.ReadCloser) { err = r.Close() }(r)
+	flags := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
 
-	for _, zf := range r.File {
-		zfn := filepath.Join(dn, zf.Name)
-		if zf.FileInfo().IsDir() && !IsDirectory(zfn) {
-			err = os.MkdirAll(zfn, os.ModePerm)
-			if err != nil {
+	for _, file := range reader.File {
+		name := filepath.Join(to, file.Name)
+		if file.FileInfo().IsDir() && !IsDirectory(name) {
+			if err = os.MkdirAll(name, os.ModePerm); err != nil {
 				return
 			}
 			continue
 		}
 
-		d := filepath.Dir(zfn)
+		dir := filepath.Dir(name)
 
-		if d == "." {
+		if dir == "." {
 			continue
 		}
 
-		if !IsDirectory(d) {
-			err = os.MkdirAll(d, os.ModePerm)
-			if err != nil {
+		if !IsDirectory(dir) {
+			if err = os.MkdirAll(dir, os.ModePerm); err != nil {
 				return
 			}
 		}
 
-		var f *os.File
-
-		f, err = os.OpenFile(zfn, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, zf.Mode())
-		if err != nil {
+		var zipFile *os.File
+		if zipFile, err = os.OpenFile(name, flags, file.Mode()); err != nil {
 			return
 		}
 
-		var zfr io.ReadCloser
-
-		zfr, err = zf.Open()
-		if err != nil {
+		var zipReader io.ReadCloser
+		if zipReader, err = file.Open(); err != nil {
 			return
 		}
 
-		if _, err = io.Copy(f, zfr); err != nil {
+		if _, err = io.Copy(zipFile, zipReader); err != nil {
 			return
 		}
 
-		_ = f.Close()
-		_ = zfr.Close()
+		if err = zipFile.Close(); err != nil {
+			return
+		}
+
+		if err = zipReader.Close(); err != nil {
+			return
+		}
 	}
 
 	return nil

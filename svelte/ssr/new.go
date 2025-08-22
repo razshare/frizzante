@@ -34,11 +34,11 @@ var DataFormat string
 
 var NoScript = regexp.MustCompile(`<script.*>.*</script>`)
 
-func New(c Config) view.Render {
-	var efs = c.Efs
-	var app = c.App
-	var disk = c.Disk
-	var limit = c.Limit
+func New(conf Config) view.Render {
+	var efs = conf.Efs
+	var app = conf.App
+	var disk = conf.Disk
+	var limit = conf.Limit
 
 	if limit <= 0 {
 		limit = 1
@@ -50,72 +50,65 @@ func New(c Config) view.Render {
 
 	var mut sync.Mutex
 	var id = "svelte-app"
-	var dist = filepath.Join(app, "dist")
-	var scriptn = filepath.Join(dist, "server.js")
-	var scriptnfix = strings.ReplaceAll(scriptn, "\\", "/")
-	var docn = filepath.Join(dist, "client", "index.html")
-	var docnfix = strings.ReplaceAll(docn, "\\", "/")
+	var nameDist = filepath.Join(app, "dist")
+	var nameScript = filepath.Join(nameDist, "server.js")
+	var nameScriptFixed = strings.ReplaceAll(nameScript, "\\", "/")
+	var nameDoc = filepath.Join(nameDist, "client", "index.html")
+	var nameDocFixed = strings.ReplaceAll(nameDoc, "\\", "/")
 	var renders = make(chan goja.Callable, 1)
 	var runtimes = make(chan *goja.Runtime, 1)
-	var compile = func() (render goja.Callable, r *goja.Runtime, err error) {
-		var d []byte
+	var compile = func() (render goja.Callable, runtime *goja.Runtime, err error) {
+		var data []byte
 
-		if !disk && embeds.IsFile(efs, scriptnfix) {
-			d, err = efs.ReadFile(scriptnfix)
+		if !disk && embeds.IsFile(efs, nameScriptFixed) {
+			data, err = efs.ReadFile(nameScriptFixed)
 		} else {
-			d, err = os.ReadFile(scriptn)
+			data, err = os.ReadFile(nameScript)
 		}
 
 		if err != nil {
 			return
 		}
 
-		r = goja.New()
+		runtime = goja.New()
 
-		var src string
-		src, err = js.Bundle(app, api.FormatCommonJS, string(d))
-		if err != nil {
+		var source string
+		if source, err = js.Bundle(app, api.FormatCommonJS, string(data)); err != nil {
 			return
 		}
 
 		var prog *goja.Program
-		prog, err = goja.Compile(scriptn, fmt.Sprintf(RenderFormat, src), false)
-		if err != nil {
+		if prog, err = goja.Compile(nameScript, fmt.Sprintf(RenderFormat, source), false); err != nil {
 			return
 		}
 
 		var v goja.Value
-
-		v, err = r.RunProgram(prog)
-		if err != nil {
+		if v, err = runtime.RunProgram(prog); err != nil {
 			return
 		}
 
 		var isf bool
-		render, isf = goja.AssertFunction(v)
-
-		if !isf {
+		if render, isf = goja.AssertFunction(v); !isf {
 			err = errors.New("render is not a function")
-			return
 		}
+
 		return
 	}
 
-	return func(v view.View) (string, error) {
-		var d []byte
-		var err error
+	return func(v view.View) (html string, err error) {
+		var data []byte
 
-		if !disk && embeds.IsFile(efs, docnfix) {
-			d, err = efs.ReadFile(docnfix)
+		if !disk && embeds.IsFile(efs, nameDocFixed) {
+			data, err = efs.ReadFile(nameDocFixed)
 		} else {
-			d, err = os.ReadFile(docn)
+			data, err = os.ReadFile(nameDoc)
 		}
 
 		if err != nil {
 			return "", err
 		}
 
-		doc := string(d)
+		html = string(data)
 
 		if v.Render == view.RenderServer || v.Render == view.RenderFull {
 			var render goja.Callable
@@ -165,42 +158,42 @@ func New(c Config) view.Render {
 			}
 
 			if v.Render == view.RenderServer {
-				doc = NoScript.ReplaceAllString(doc, "")
+				html = NoScript.ReplaceAllString(html, "")
 			}
 
 			if v.Render == view.RenderServer {
-				doc = strings.Replace(doc, "<!--app-target-->", "", 1)
-				doc = strings.Replace(doc, "<!--app-data-->", "", 1)
+				html = strings.Replace(html, "<!--app-target-->", "", 1)
+				html = strings.Replace(html, "<!--app-data-->", "", 1)
 			} else {
-				data, merr := json.Marshal(view.Data(v))
-				if merr != nil {
-					return "", merr
+				if data, err = json.Marshal(view.Data(v)); err != nil {
+					return
 				}
-				doc = strings.Replace(doc, "<!--app-target-->", fmt.Sprintf(TargetFormat, id), 1)
-				doc = strings.Replace(doc, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
+
+				html = strings.Replace(html, "<!--app-target-->", fmt.Sprintf(TargetFormat, id), 1)
+				html = strings.Replace(html, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
 			}
 
-			doc = strings.Replace(doc, "<!--app-head-->", head, 1)
-			doc = strings.Replace(doc, "<!--app-body-->", fmt.Sprintf(BodyFormat, id, body), 1)
+			html = strings.Replace(html, "<!--app-head-->", head, 1)
+			html = strings.Replace(html, "<!--app-body-->", fmt.Sprintf(BodyFormat, id, body), 1)
 
-			return doc, nil
+			return html, nil
 		}
 
 		if v.Render == view.RenderClient {
-			data, merr := json.Marshal(view.Data(v))
-
-			if merr != nil {
-				return "", merr
+			if data, err = json.Marshal(view.Data(v)); err != nil {
+				return
 			}
 
-			doc = strings.Replace(doc, "<!--app-target-->", fmt.Sprintf(TargetFormat, id), 1)
-			doc = strings.Replace(doc, "<!--app-body-->", fmt.Sprintf(BodyFormat, id, ""), 1)
-			doc = strings.Replace(doc, "<!--app-head-->", fmt.Sprintf(HeadFormat, v.Title), 1)
-			doc = strings.Replace(doc, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
+			html = strings.Replace(html, "<!--app-target-->", fmt.Sprintf(TargetFormat, id), 1)
+			html = strings.Replace(html, "<!--app-body-->", fmt.Sprintf(BodyFormat, id, ""), 1)
+			html = strings.Replace(html, "<!--app-head-->", fmt.Sprintf(HeadFormat, v.Title), 1)
+			html = strings.Replace(html, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
 
-			return doc, nil
+			return
 		}
 
-		return "", errors.New("unknown render mode")
+		err = errors.New("unknown render mode")
+
+		return
 	}
 }

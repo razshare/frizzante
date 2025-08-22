@@ -3,18 +3,18 @@ package files
 import "os"
 
 // IsFile check if file exists and is a file.
-func IsFile(n string) bool {
-	stat, statError := os.Stat(n)
-	if statError != nil {
+func IsFile(name string) bool {
+	stat, err := os.Stat(name)
+	if err != nil {
 		return false
 	}
 	return !stat.IsDir()
 }
 
 // IsDirectory checks if file exists and is a directory.
-func IsDirectory(n string) bool {
-	stat, statError := os.Stat(n)
-	if statError != nil {
+func IsDirectory(name string) bool {
+	stat, err := os.Stat(name)
+	if err != nil {
 		return false
 	}
 	return stat.IsDir()

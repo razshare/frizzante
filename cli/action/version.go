@@ -2,21 +2,21 @@ package action
 
 import "strings"
 
-func Version(o VersionOptions) error {
-	d, err := o.Efs.ReadFile("version")
+func Version(opts VersionOptions) error {
+	data, err := opts.Efs.ReadFile("version")
 	if err != nil {
 		return err
 	}
 
-	v := string(d)
+	version := string(data)
 
-	ls := strings.Split(v, "\n")
+	lines := strings.Split(version, "\n")
 
-	if len(ls) == 0 {
+	if len(lines) == 0 {
 		return nil
 	}
 
-	println(ls[0])
+	println(lines[0])
 
 	return nil
 }

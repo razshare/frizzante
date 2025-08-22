@@ -15,7 +15,7 @@ import (
 var efs embed.FS
 var srv = server.New()
 var dev = os.Getenv("DEV") == "1"
-var render = ssr.New(ssr.Config{Efs: efs, Disk: dev, Limit: 3})
+var render = ssr.New(ssr.Config{Efs: efs, Disk: dev})
 
 func main() {
 	defer server.Start(srv)

@@ -6,18 +6,18 @@ import (
 	"path/filepath"
 )
 
-func Touch(o TouchOptions) error {
-	touch := func(n string) error {
-		dn := filepath.Dir(n)
+func Touch(opts TouchOptions) error {
+	touch := func(name string) error {
+		dir := filepath.Dir(name)
 
-		if !files.IsDirectory(dn) {
-			err := os.MkdirAll(dn, os.ModePerm)
+		if !files.IsDirectory(dir) {
+			err := os.MkdirAll(dir, os.ModePerm)
 			if err != nil {
 				return err
 			}
 		}
 
-		file, err := os.OpenFile(n, os.O_RDONLY|os.O_CREATE, 0666)
+		file, err := os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0666)
 		if err != nil {
 			return err
 		}
@@ -29,15 +29,15 @@ func Touch(o TouchOptions) error {
 		return nil
 	}
 
-	err := os.MkdirAll(filepath.Join(o.App, "dist"), os.ModePerm)
+	err := os.MkdirAll(filepath.Join(opts.App, "dist"), os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	err = touch(filepath.Join(o.App, "dist", "server.js"))
+	err = touch(filepath.Join(opts.App, "dist", "server.js"))
 	if err != nil {
 		return err
 	}
 
-	return touch(filepath.Join(o.App, "dist", "client", "index.html"))
+	return touch(filepath.Join(opts.App, "dist", "client", "index.html"))
 }

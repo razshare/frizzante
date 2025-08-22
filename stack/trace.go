@@ -19,12 +19,12 @@ func Trace() string {
 	var sb strings.Builder
 	ptr := make([]uintptr, TraceSize)
 	runtime.Callers(2, ptr)
-	frm := runtime.CallersFrames(ptr)
+	frames := runtime.CallersFrames(ptr)
 
 	for {
-		f, n := frm.Next()
-		sb.WriteString(fmt.Sprintf("%s:%d\n", f.File, f.Line))
-		if !n {
+		frame, more := frames.Next()
+		sb.WriteString(fmt.Sprintf("%s:%d\n", frame.File, frame.Line))
+		if !more {
 			break
 		}
 	}

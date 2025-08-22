@@ -9,8 +9,8 @@ import (
 	"sync"
 )
 
-func Dev(o DevOptions) (err error) {
-	err = Touch(TouchOptions{App: o.App})
+func Dev(opts DevOptions) (err error) {
+	err = Touch(TouchOptions{App: opts.App})
 	if err != nil {
 		return
 	}
@@ -20,7 +20,7 @@ func Dev(o DevOptions) (err error) {
 		return
 	}
 
-	air := exec.Command(o.Air)
+	air := exec.Command(opts.Air)
 	air.Env = append(os.Environ(), "DEV=1")
 	air.Stderr = os.Stderr
 	air.Stdout = os.Stdout
@@ -36,7 +36,7 @@ func Dev(o DevOptions) (err error) {
 
 	group.Add(1)
 
-	go func() { err = PkgWatch(PkgWatchOptions{App: o.App, Bun: o.Bun}) }()
+	go func() { err = PkgWatch(PkgWatchOptions{App: opts.App, Bun: opts.Bun}) }()
 
 	group.Wait()
 

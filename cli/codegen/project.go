@@ -2,10 +2,10 @@ package codegen
 
 import "path/filepath"
 
-func Project(o ProjectOptions) error {
+func Project(opts ProjectOptions) error {
 	return Copy(CopyOptions{
 		From: filepath.Join("template", "project"),
-		To:   o.Name,
-		Auto: o.Auto,
+		To:   opts.Name,
+		Auto: opts.Auto,
 	})
 }

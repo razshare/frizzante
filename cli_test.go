@@ -72,7 +72,7 @@ func TestOnGenerate(t *testing.T) {
 	err = action.Generate(action.GenerateOptions{
 		App:      filepath.Join("app"),
 		Selected: "air",
-		Platform: platform.PlatformLinuxAmd64,
+		Platform: platform.LinuxAmd64,
 		Auto:     true,
 		Go:       "go",
 		Air:      filepath.Join(".gen", "air", "air"),

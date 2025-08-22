@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 )
 
-func CleanProject(o CleanProjectOptions) error {
-	clean := exec.Command(o.Go, "clean")
+func CleanProject(opts CleanProjectOptions) error {
+	clean := exec.Command(opts.Go, "clean")
 	clean.Env = append(os.Environ())
 	clean.Stderr = os.Stderr
 	clean.Stdout = os.Stdout
@@ -18,12 +18,12 @@ func CleanProject(o CleanProjectOptions) error {
 		return err
 	}
 
-	err = os.RemoveAll(filepath.Join(o.App, "dist"))
+	err = os.RemoveAll(filepath.Join(opts.App, "dist"))
 	if err != nil {
 		return err
 	}
 
-	err = os.RemoveAll(filepath.Join(o.App, "node_modules"))
+	err = os.RemoveAll(filepath.Join(opts.App, "node_modules"))
 	if err != nil {
 		return err
 	}
@@ -38,7 +38,7 @@ func CleanProject(o CleanProjectOptions) error {
 		return err
 	}
 
-	err = Touch(TouchOptions{App: o.App})
+	err = Touch(TouchOptions{App: opts.App})
 	if err != nil {
 		return err
 	}

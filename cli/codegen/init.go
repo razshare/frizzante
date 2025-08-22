@@ -9,51 +9,45 @@ import (
 	"path/filepath"
 )
 
-func Init(efs embed.FS) error {
-	home, err := user.FrizzanteHome()
-	if err != nil {
-		return err
+func Init(efs embed.FS) (err error) {
+	var home string
+	if home, err = user.FrizzanteHome(); err != nil {
+		return
 	}
 
 	if !files.IsDirectory(filepath.Join(home, "template", "lib")) {
-		err = embeds.CopyDirectory(efs, "template/lib", filepath.Join(home, "template", "lib"))
-		if err != nil {
-			return err
+		if err = embeds.CopyDirectory(efs, "template/lib", filepath.Join(home, "template", "lib")); err != nil {
+			return
 		}
 	}
 
 	if !files.IsDirectory(filepath.Join(home, "template", "project")) {
 		if files.IsFile(filepath.Join(home, "template", "project.zip")) {
-			err = os.RemoveAll(filepath.Join(home, "template", "project.zip"))
-			if err != nil {
-				return err
+			if err = os.RemoveAll(filepath.Join(home, "template", "project.zip")); err != nil {
+				return
 			}
 		}
-		err = embeds.CopyFile(efs, "template/project.zip", filepath.Join(home, "template", "project.zip"))
-		if err != nil {
-			return err
+
+		if err = embeds.CopyFile(efs, "template/project.zip", filepath.Join(home, "template", "project.zip")); err != nil {
+			return
 		}
 
-		err = files.UnzipFile(filepath.Join(home, "template", "project.zip"), filepath.Join(home, "template", "project.base"))
-		if err != nil {
-			return err
+		if err = files.UnzipFile(filepath.Join(home, "template", "project.zip"), filepath.Join(home, "template", "project.base")); err != nil {
+			return
 		}
 
-		err = os.Rename(filepath.Join(home, "template", "project.base", "project.tmp"), filepath.Join(home, "template", "project"))
-		if err != nil {
-			return err
+		if err = os.Rename(filepath.Join(home, "template", "project.base", "project.tmp"), filepath.Join(home, "template", "project")); err != nil {
+			return
 		}
 
-		err = os.RemoveAll(filepath.Join(home, "template", "project.base"))
-		if err != nil {
-			return err
+		if err = os.RemoveAll(filepath.Join(home, "template", "project.base")); err != nil {
+			return
 		}
 
-		err = os.RemoveAll(filepath.Join(home, "template", "project.zip"))
-		if err != nil {
-			return err
+		if err = os.RemoveAll(filepath.Join(home, "template", "project.zip")); err != nil {
+			return
 		}
 	}
 
-	return nil
+	return
 }

@@ -10,41 +10,41 @@ import (
 )
 
 // ZipFile zips a file to the disk.
-func ZipFile(n string, zn string) (err error) {
-	err = os.MkdirAll(filepath.Dir(zn), os.ModePerm)
+func ZipFile(from string, to string) (err error) {
+	if err = os.MkdirAll(filepath.Dir(to), os.ModePerm); err != nil {
+		return
+	}
+
+	var zipFile *os.File
+	if zipFile, err = os.Create(to); err != nil {
+		return
+	}
+
+	defer func() {
+		if cerr := zipFile.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
+
+	zipWriter := zip.NewWriter(zipFile)
+	defer func() {
+		if cerr := zipWriter.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
+
+	var writer io.Writer
+	if writer, err = zipWriter.Create(filepath.Base(from)); err != nil {
+		return
+	}
+
+	var file *os.File
+	file, err = os.Open(from)
 	if err != nil {
 		return
 	}
 
-	var z *os.File
-
-	z, err = os.Create(zn)
-	if err != nil {
-		return
-	}
-
-	defer func(z *os.File) { err = z.Close() }(z)
-
-	zw := zip.NewWriter(z)
-
-	defer func(zw *zip.Writer) { err = zw.Close() }(zw)
-
-	var zww io.Writer
-
-	zww, err = zw.Create(filepath.Base(n))
-	if err != nil {
-		return
-	}
-
-	var f *os.File
-
-	f, err = os.Open(n)
-	if err != nil {
-		return
-	}
-
-	_, err = io.Copy(zww, f)
-	if err != nil {
+	if _, err = io.Copy(writer, file); err != nil {
 		return
 	}
 

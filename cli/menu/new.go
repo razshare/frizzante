@@ -262,6 +262,14 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
+				Hidden: true,
+				Choice: search.Choice{Id: "welcome", Description: "shows a welcome message"},
+				Active: func() bool { return *a.Help },
+				Handler: func() error {
+					return action.Welcome(action.WelcomeOptions{})
+				},
+			},
+			{
 				Choice: search.Choice{Id: "help", Description: "shows the help menu"},
 				Active: func() bool { return *a.Help },
 				Handler: func() error {

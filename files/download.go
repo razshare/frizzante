@@ -8,28 +8,26 @@ import (
 )
 
 // DownloadFile downloads a file to the disk.
-func DownloadFile(url string, n string) error {
-	response, getError := http.Get(url)
-	if getError != nil {
-		return getError
+func DownloadFile(url string, name string) (err error) {
+	var res *http.Response
+	if res, err = http.Get(url); err != nil {
+		return
 	}
 
-	data, readError := io.ReadAll(response.Body)
-	if readError != nil {
-		return readError
+	var data []byte
+	if data, err = io.ReadAll(res.Body); err != nil {
+		return
 	}
 
-	parentName := filepath.Dir(n)
-	if !IsDirectory(parentName) {
-		mkdirError := os.MkdirAll(parentName, os.ModePerm)
-		if mkdirError != nil {
-			return mkdirError
+	dir := filepath.Dir(name)
+	if !IsDirectory(dir) {
+		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
+			return
 		}
 	}
 
-	writeErr := os.WriteFile(n, data, os.ModePerm)
-	if writeErr != nil {
-		return writeErr
+	if err = os.WriteFile(name, data, os.ModePerm); err != nil {
+		return
 	}
 
 	return nil

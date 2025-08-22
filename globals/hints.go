@@ -1,4 +1,4 @@
 package globals
 
-var CodegenModHint = "//gen:mod"
-var CodegenModsHint = "//gen:mods"
+var CodegenLineModHint = "//gen:mod"
+var CodegenGlobalModHint = "//gen:mods"

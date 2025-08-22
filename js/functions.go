@@ -7,15 +7,14 @@ import (
 )
 
 // SetFunction sets a function.
-func SetFunction(rt *goja.Runtime, n string, f Function) error {
-	return rt.Set(n, f)
+func SetFunction(runtime *goja.Runtime, name string, call Function) error {
+	return runtime.Set(name, call)
 }
 
 // SetFunctions sets a map of functions.
-func SetFunctions(rt *goja.Runtime, fs map[string]Function) error {
-	for n, cb := range fs {
-		err := rt.Set(n, cb)
-		if err != nil {
+func SetFunctions(runtime *goja.Runtime, calls map[string]Function) error {
+	for name, call := range calls {
+		if err := runtime.Set(name, call); err != nil {
 			return err
 		}
 	}
@@ -23,21 +22,20 @@ func SetFunctions(rt *goja.Runtime, fs map[string]Function) error {
 	return nil
 }
 
-// Bundle given a directory containing a node_modules subdirectory,
-// bundles source code into a specific format.
-func Bundle(d string, f api.Format, s string) (bundle string, err error) {
+// Bundle bundles JavaScript source code into a specific format given a root directory containing node_modules.
+func Bundle(root string, format api.Format, source string) (string, error) {
 	result := api.Build(api.BuildOptions{
 		Bundle: true,
-		Format: f,
+		Format: format,
 		Write:  false,
 		Stdin: &api.StdinOptions{
-			Contents:   s,
-			ResolveDir: d,
+			Contents:   source,
+			ResolveDir: root,
 		},
 	})
 
-	for _, buildError := range result.Errors {
-		return "", fmt.Errorf("%s in %s:%d:%d", buildError.Text, buildError.Location.File, buildError.Location.Line, buildError.Location.Column)
+	for _, err := range result.Errors {
+		return "", fmt.Errorf("%s in %s:%d:%d", err.Text, err.Location.File, err.Location.Line, err.Location.Column)
 	}
 
 	return string(result.OutputFiles[0].Contents), nil

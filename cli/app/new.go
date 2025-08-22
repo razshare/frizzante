@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func New() (c *App) {
+func New() *App {
 	add := flag.StringP("add", "a", "", "adds packages")
 	app := flag.StringP("app", "", "app", "sets the app directory")
 	help := flag.BoolP("help", "h", false, "shows this help document")

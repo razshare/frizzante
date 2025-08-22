@@ -9,7 +9,7 @@ import (
 )
 
 // New creates a new server.
-func New() (s *Server) {
+func New() (server *Server) {
 	return &Server{
 		InfoLog:    log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
 		SecureAddr: "0.0.0.0:8383",

@@ -23,40 +23,39 @@ var BodyFormat string
 //go:embed data.format
 var DataFormat string
 
-func New(c Config) view.Render {
-	var efs = c.Efs
-	var app = c.App
-	var disk = c.Disk
+func New(conf Config) view.Render {
+	var efs = conf.Efs
+	var app = conf.App
+	var disk = conf.Disk
 
 	if app == "" {
 		app = "app"
 	}
 
 	var id = "svelte-app"
-	var dist = filepath.Join(app, "dist")
-	var docn = filepath.Join(dist, "client", "index.html")
-	var docnfix = strings.ReplaceAll(docn, "\\", "/")
+	var nameDist = filepath.Join(app, "dist")
+	var nameDoc = filepath.Join(nameDist, "client", "index.html")
+	var nameDoxFixed = strings.ReplaceAll(nameDoc, "\\", "/")
 
 	return func(v view.View) (string, error) {
-		var d []byte
+		var data []byte
 		var err error
 
-		if !disk && embeds.IsFile(efs, docnfix) {
-			d, err = efs.ReadFile(docnfix)
+		if !disk && embeds.IsFile(efs, nameDoxFixed) {
+			data, err = efs.ReadFile(nameDoxFixed)
 		} else {
-			d, err = os.ReadFile(docn)
+			data, err = os.ReadFile(nameDoc)
 		}
 
 		if err != nil {
 			return "", err
 		}
 
-		doc := string(d)
+		doc := string(data)
 
-		props, merr := json.Marshal(view.Data(v))
-
-		if merr != nil {
-			return "", merr
+		var props []byte
+		if props, err = json.Marshal(view.Data(v)); err != nil {
+			return "", err
 		}
 
 		doc = strings.Replace(doc, "<!--app-target-->", fmt.Sprintf(TargetFormat, id), 1)
@@ -65,6 +64,5 @@ func New(c Config) view.Render {
 		doc = strings.Replace(doc, "<!--app-props-->", fmt.Sprintf(DataFormat, props), 1)
 
 		return doc, nil
-
 	}
 }

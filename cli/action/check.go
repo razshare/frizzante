@@ -6,19 +6,19 @@ import (
 	"path/filepath"
 )
 
-func Check(o CheckOptions) error {
-	err := Touch(TouchOptions{App: o.App})
+func Check(opts CheckOptions) error {
+	err := Touch(TouchOptions{App: opts.App})
 	if err != nil {
 		return err
 	}
 
-	bun, err := filepath.Rel(o.App, o.Bun)
+	bun, err := filepath.Rel(opts.App, opts.Bun)
 	if err != nil {
 		return err
 	}
 
 	eslint := exec.Command(bun, "x", "eslint")
-	eslint.Dir = o.App
+	eslint.Dir = opts.App
 	eslint.Env = append(os.Environ())
 	eslint.Stderr = os.Stderr
 	eslint.Stdout = os.Stdout
@@ -29,7 +29,7 @@ func Check(o CheckOptions) error {
 	}
 
 	svelteCheck := exec.Command(bun, "x", "svelte-check", "--tsconfig=./tsconfig.json")
-	svelteCheck.Dir = o.App
+	svelteCheck.Dir = opts.App
 	svelteCheck.Env = append(os.Environ())
 	svelteCheck.Stderr = os.Stderr
 	svelteCheck.Stdout = os.Stdout

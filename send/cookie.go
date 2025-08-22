@@ -7,6 +7,6 @@ import (
 )
 
 // Cookie sends a cookies to the client.
-func Cookie(c *client.Client, key string, value string) {
-	Header(c, "Set-Cookie", fmt.Sprintf("%s=%s; Path=/; HttpOnly", url.QueryEscape(key), url.QueryEscape(value)))
+func Cookie(client *client.Client, key string, value string) {
+	Header(client, "Set-Cookie", fmt.Sprintf("%s=%s; Path=/; HttpOnly", url.QueryEscape(key), url.QueryEscape(value)))
 }

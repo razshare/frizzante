@@ -11,64 +11,59 @@ import (
 	"path/filepath"
 )
 
-func Queries(o QueriesOptions) error {
-	if !files.IsFile(o.Sqlc) {
+func Queries(opts QueriesOptions) (err error) {
+	if !files.IsFile(opts.Sqlc) {
 		var url string
 
-		if o.Platform == platform.PlatformDarwinArm64 {
+		if opts.Platform == platform.DarwinArm64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_arm64.zip"
-		} else if o.Platform == platform.PlatformDarwinAmd64 {
+		} else if opts.Platform == platform.DarwinAmd64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_amd64.zip"
-		} else if o.Platform == platform.PlatformLinuxArm64 {
+		} else if opts.Platform == platform.LinuxArm64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_arm64.zip"
-		} else if o.Platform == platform.PlatformLinuxAmd64 {
+		} else if opts.Platform == platform.LinuxAmd64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.zip"
-		} else if o.Platform == platform.PlatformWindowsArm64 {
+		} else if opts.Platform == platform.WindowsArm64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
-		} else if o.Platform == platform.PlatformWindowsAmd64 {
+		} else if opts.Platform == platform.WindowsAmd64 {
 			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
 		}
 
 		var install Install
-		install, _, err := Download(DownloadOptions{
-			Url:  url,
-			Auto: o.Auto,
-		})
-		if err != nil {
-			return err
+		if install, _, err = Download(DownloadOptions{Url: url, Auto: opts.Auto}); err != nil {
+			return
 		}
 
-		_, err = install(o.Sqlc)
-		if err != nil {
-			return err
+		if _, err = install(opts.Sqlc); err != nil {
+			return
 		}
 	}
 
-	yaml := filepath.Join(o.Lib, "sqlc.yaml")
+	yaml := filepath.Join(opts.Lib, "sqlc.yaml")
 
 	if !files.IsFile(yaml) {
 		return fmt.Errorf("%s not found", yaml)
 	}
 
-	s := spinner.New("generating queries")
+	spin := spinner.New("generating queries")
 
-	go spinner.Start(s)
-	sqlc := exec.Command(o.Sqlc, "generate")
-	sqlc.Dir = o.Lib
+	go spinner.Start(spin)
+	sqlc := exec.Command(opts.Sqlc, "generate")
+	sqlc.Dir = opts.Lib
 	sqlc.Env = append(os.Environ())
 	sqlc.Stderr = os.Stderr
 	sqlc.Stdout = os.Stdout
 	sqlc.Stdin = os.Stdin
-	err := sqlc.Run()
-	spinner.Stop(s)
+	err = sqlc.Run()
+	spinner.Stop(spin)
 
 	if err != nil {
-		return err
+		return
 	}
 
 	messages.Success(
 		"queries generated at database.Queries.*\n",
-		o.Lib+"/queries.go",
+		opts.Lib+"/queries.go",
 	)
 	messages.Tip(
 		"## usage example\n",
@@ -78,5 +73,5 @@ func Queries(o QueriesOptions) error {
 		"}",
 	)
 
-	return nil
+	return
 }

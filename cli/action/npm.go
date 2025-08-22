@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 )
 
-func Npm(o NpmOptions) error {
+func Npm(opts NpmOptions) error {
 	pkgs, err := npmselect.Send()
 	if err != nil {
 		return err
@@ -16,10 +16,10 @@ func Npm(o NpmOptions) error {
 		return nil
 	}
 
-	bun, err := filepath.Rel(o.App, o.Bun)
+	bun, err := filepath.Rel(opts.App, opts.Bun)
 	if err != nil {
 		return err
 	}
 
-	return npm.Install(bun, o.App, pkgs...)
+	return npm.Install(bun, opts.App, pkgs...)
 }

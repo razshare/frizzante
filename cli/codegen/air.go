@@ -6,44 +6,35 @@ import (
 	"syscall"
 )
 
-func Air(o AirOptions) error {
+func Air(opts AirOptions) (err error) {
 	var url string
 
-	if o.Platform == platform.PlatformDarwinArm64 {
+	if opts.Platform == platform.DarwinArm64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_darwin_arm64"
-	} else if o.Platform == platform.PlatformDarwinAmd64 {
+	} else if opts.Platform == platform.DarwinAmd64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_darwin_amd64"
-	} else if o.Platform == platform.PlatformLinuxArm64 {
+	} else if opts.Platform == platform.LinuxArm64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_arm64"
-	} else if o.Platform == platform.PlatformLinuxAmd64 {
+	} else if opts.Platform == platform.LinuxAmd64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_linux_amd64"
-	} else if o.Platform == platform.PlatformWindowsArm64 {
+	} else if opts.Platform == platform.WindowsArm64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_arm64.exe"
-	} else if o.Platform == platform.PlatformWindowsAmd64 {
+	} else if opts.Platform == platform.WindowsAmd64 {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_amd64.exe"
 	}
 
-	install, _, err := Download(DownloadOptions{
-		Url:  url,
-		Auto: o.Auto,
-	})
-
-	if err != nil {
-		return err
+	var install Install
+	if install, _, err = Download(DownloadOptions{Url: url, Auto: opts.Auto}); err != nil {
+		return
 	}
 
-	_, err = install(filepath.Dir(o.Air))
-	if err != nil {
-		return err
+	if _, err = install(filepath.Dir(opts.Air)); err != nil {
+		return
 	}
 
-	if o.Platform != platform.PlatformWindowsArm64 && o.Platform != platform.PlatformWindowsAmd64 && filepath.Separator != '\\' {
-		err = syscall.Chmod(o.Air, 0755)
+	if opts.Platform != platform.WindowsArm64 && opts.Platform != platform.WindowsAmd64 && filepath.Separator != '\\' {
+		err = syscall.Chmod(opts.Air, 0755)
 	}
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return
 }

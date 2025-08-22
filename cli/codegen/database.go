@@ -12,97 +12,82 @@ import (
 	"strings"
 )
 
-func Database(o DatabaseOptions) error {
-	if files.IsDirectory(o.Lib) {
-		if !o.Auto {
-			overwrite, err := confirm.Sendf(true, "%s already exists. Overwrite?", o.Lib)
-			if err != nil {
-				return err
+func Database(opts DatabaseOptions) (err error) {
+	if files.IsDirectory(opts.Lib) {
+		if !opts.Auto {
+			var overwrite bool
+			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", opts.Lib); err != nil {
+				return
 			}
 
 			if !overwrite {
-				messages.Infof("skipping %s", o.Lib)
+				messages.Infof("skipping %s", opts.Lib)
 				return nil
 			}
 		}
 
-		err := os.RemoveAll(o.Lib)
-		if err != nil {
-			return err
+		if err = os.RemoveAll(opts.Lib); err != nil {
+			return
 		}
 	}
 
-	tchoice, err := singleselect.Send(
-		[]search.Choice{{Id: "sqlite"}},
-		"what type of database would you like to setup?",
-	)
-
-	if err != nil {
-		return err
+	var choice string
+	if choice, err = singleselect.Send([]search.Choice{{Id: "sqlite"}}, "what type of database would you like to setup?"); err != nil {
+		return
 	}
 
-	t := strings.ToLower(tchoice)
+	choice = strings.ToLower(choice)
 
-	err = Copy(CopyOptions{
-		From: "template/lib/database/" + t,
-		To:   o.Lib,
-		Auto: o.Auto,
-	})
-
-	if err != nil {
-		return err
+	if err = Copy(CopyOptions{From: "template/lib/database/" + choice, To: opts.Lib, Auto: opts.Auto}); err != nil {
+		return
 	}
 
-	if t == "sqlite" {
-		s := spinner.New("adding github.com/mattn/go-sqlite3")
+	if choice == "sqlite" {
+		spin := spinner.New("adding github.com/mattn/go-sqlite3")
 
-		go spinner.Start(s)
-		install := exec.Command(o.Go, "get", "github.com/mattn/go-sqlite3")
+		go spinner.Start(spin)
+		install := exec.Command(opts.Go, "get", "github.com/mattn/go-sqlite3")
 		install.Env = append(os.Environ())
 		install.Stderr = os.Stderr
 		install.Stdout = os.Stdout
 		install.Stdin = os.Stdin
 		err = install.Run()
-		spinner.Stop(s)
+		spinner.Stop(spin)
 
 		if err != nil {
-			return err
+			return
 		}
 
-		s = spinner.New("updating go dependencies")
+		spin = spinner.New("updating go dependencies")
 
-		go spinner.Start(s)
-		get := exec.Command(o.Go, "get", "-u", "./...")
+		go spinner.Start(spin)
+		get := exec.Command(opts.Go, "get", "-u", "./...")
 		get.Env = append(os.Environ())
 		get.Stderr = os.Stderr
 		get.Stdout = os.Stdout
 		get.Stdin = os.Stdin
 		err = get.Run()
-		spinner.Stop(s)
+		spinner.Stop(spin)
 
 		if err != nil {
-			return err
+			return
 		}
 
 		messages.Success("sqlite database is ready")
 
-		if strings.Contains(strings.ToLower(o.Generate), "queries") {
+		if strings.Contains(strings.ToLower(opts.Generate), "queries") {
 			var queries bool
-			queries, err = confirm.Send(true, "would you like to also generate your queries?")
-			if err != nil {
-				return err
+			if queries, err = confirm.Send(true, "would you like to also generate your queries?"); err != nil {
+				return
 			}
+
 			if queries {
-				err = Queries(QueriesOptions{
-					Auto:     o.Auto,
-					Sqlc:     o.Sqlc,
-					Platform: o.Platform,
-				})
-				if err != nil {
-					return err
+				if err = Queries(QueriesOptions{Auto: opts.Auto, Sqlc: opts.Sqlc, Platform: opts.Platform}); err != nil {
+					return
 				}
 			}
 		}
 	}
-	return nil
+
+	return
 }

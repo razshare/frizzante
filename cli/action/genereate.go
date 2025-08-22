@@ -9,8 +9,8 @@ import (
 	"strings"
 )
 
-func Generate(o GenerateOptions) error {
-	err := codegen.Init(o.Efs)
+func Generate(opts GenerateOptions) error {
+	err := codegen.Init(opts.Efs)
 	if err != nil {
 		return err
 	}
@@ -18,66 +18,66 @@ func Generate(o GenerateOptions) error {
 	pick := func(gen string) error {
 		if gen == "air" {
 			return codegen.Air(codegen.AirOptions{
-				Air:      o.Air,
-				Auto:     o.Auto,
-				Platform: o.Platform,
+				Air:      opts.Air,
+				Auto:     opts.Auto,
+				Platform: opts.Platform,
 			})
 		} else if gen == "bun" {
 			return codegen.Bun(codegen.BunOptions{
-				Bun:      o.Bun,
-				Auto:     o.Auto,
-				Platform: o.Platform,
+				Bun:      opts.Bun,
+				Auto:     opts.Auto,
+				Platform: opts.Platform,
 			})
 		} else if gen == "session" {
 			return codegen.Session(codegen.SessionOptions{
-				Auto: o.Auto,
+				Auto: opts.Auto,
 				Lib:  filepath.Join("lib", "session"),
-				Efs:  o.Efs,
+				Efs:  opts.Efs,
 			})
 		} else if gen == "database" {
 			return codegen.Database(codegen.DatabaseOptions{
 				Generate: gen,
-				Auto:     o.Auto,
-				Go:       o.Go,
-				Sqlc:     o.Sqlc,
-				Platform: o.Platform,
-				Efs:      o.Efs,
+				Auto:     opts.Auto,
+				Go:       opts.Go,
+				Sqlc:     opts.Sqlc,
+				Platform: opts.Platform,
+				Efs:      opts.Efs,
 				Lib:      filepath.Join("lib", "database"),
 			})
 		} else if gen == "queries" {
 			return codegen.Queries(codegen.QueriesOptions{
-				Auto:     o.Auto,
-				Sqlc:     o.Sqlc,
-				Platform: o.Platform,
+				Auto:     opts.Auto,
+				Sqlc:     opts.Sqlc,
+				Platform: opts.Platform,
 				Lib:      filepath.Join("lib", "database"),
 			})
 		} else if gen == "core" {
 			return codegen.Core(codegen.CoreOptions{
-				App:  o.App,
-				Auto: o.Auto,
-				Efs:  o.Efs,
-				Lib:  filepath.Join(o.App, "frizzante", "core"),
+				App:  opts.App,
+				Auto: opts.Auto,
+				Efs:  opts.Efs,
+				Lib:  filepath.Join(opts.App, "frizzante", "core"),
 			})
 		} else if gen == "forms" {
 			return codegen.Forms(codegen.FormsOptions{
-				App:  o.App,
-				Auto: o.Auto,
-				Efs:  o.Efs,
-				Lib:  filepath.Join(o.App, "frizzante", "forms"),
+				App:  opts.App,
+				Auto: opts.Auto,
+				Efs:  opts.Efs,
+				Lib:  filepath.Join(opts.App, "frizzante", "forms"),
 			})
 		} else if gen == "links" {
 			return codegen.Links(codegen.LinksOptions{
-				App:  o.App,
-				Auto: o.Auto,
-				Efs:  o.Efs,
-				Lib:  filepath.Join(o.App, "frizzante", "forms"),
+				App:  opts.App,
+				Auto: opts.Auto,
+				Efs:  opts.Efs,
+				Lib:  filepath.Join(opts.App, "frizzante", "forms"),
 			})
 		}
 
 		return errors.New("unknown generation")
 	}
 
-	if o.Selected == "" {
+	if opts.Selected == "" {
 		var items []string
 		items, err = multiselect.Send(
 			[]search.Choice{
@@ -107,7 +107,7 @@ func Generate(o GenerateOptions) error {
 		return nil
 	}
 
-	for _, item := range strings.Split(o.Selected, ",") {
+	for _, item := range strings.Split(opts.Selected, ",") {
 		err = pick(strings.ToLower(item))
 		if err != nil {
 			return err

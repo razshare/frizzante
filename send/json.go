@@ -15,19 +15,19 @@ import (
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func Json(c *client.Client, v any) {
-	data, jsonError := json.Marshal(v)
-	if jsonError != nil {
-		c.Config.ErrorLog.Println(jsonError, stack.Trace())
+func Json(client *client.Client, val any) {
+	data, err := json.Marshal(val)
+	if err != nil {
+		client.Config.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
-	if nil == c.WebSocket {
-		contentType := c.Writer.Header().Get("Content-Type")
-		if "" == contentType {
-			c.Writer.Header().Set("Content-Type", "application/json")
+	if nil == client.WebSocket {
+		ctype := client.Writer.Header().Get("Content-Type")
+		if "" == ctype {
+			client.Writer.Header().Set("Content-Type", "application/json")
 		}
 	}
 
-	Content(c, data)
+	Content(client, data)
 }

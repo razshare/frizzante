@@ -22,14 +22,14 @@ type Mod struct {
 	Replacement string
 }
 
-type Submit func(c string)
-type Build func(s Section) error
-type Section struct {
+type Submit func(char string)
+type Build func(block Block) error
+type Block struct {
 	Mods []Mod
 	Line *string
 }
 
-type Install func(dst string) (bool, error)
+type Install func(to string) (bool, error)
 type Evict func() error
 
 type AirOptions struct {
