@@ -39,6 +39,9 @@ func ReadFileInChunks(name string, max int, call func([]byte) error) (err error)
 		return
 	}
 	defer func() {
+		if file == nil {
+			return
+		}
 		if cerr := file.Close(); cerr != nil {
 			err = cerr
 		}

@@ -11,6 +11,9 @@ func NewFileReader(name string) (reader *bytes.Reader, info os.FileInfo, err err
 		return
 	}
 	defer func() {
+		if file == nil {
+			return
+		}
 		if cerr := file.Close(); cerr != nil {
 			err = cerr
 		}
@@ -22,10 +25,6 @@ func NewFileReader(name string) (reader *bytes.Reader, info os.FileInfo, err err
 
 	buf := make([]byte, info.Size())
 	if _, err = file.Read(buf); err != nil {
-		return
-	}
-
-	if err = file.Close(); err != nil {
 		return
 	}
 

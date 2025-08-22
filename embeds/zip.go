@@ -22,6 +22,9 @@ func ZipFile(efs embed.FS, from string, to string) (err error) {
 	}
 
 	defer func() {
+		if zipFile == nil {
+			return
+		}
 		if cerr := zipFile.Close(); cerr != nil {
 			err = cerr
 		}
@@ -29,6 +32,9 @@ func ZipFile(efs embed.FS, from string, to string) (err error) {
 
 	zipWriter := zip.NewWriter(zipFile)
 	defer func() {
+		if zipWriter == nil {
+			return
+		}
 		if cerr := zipWriter.Close(); cerr != nil {
 			err = cerr
 		}
@@ -62,6 +68,9 @@ func ZipDirectory(efs embed.FS, from string, to string) (err error) {
 		return
 	}
 	defer func() {
+		if zipFile == nil {
+			return
+		}
 		if cerr := zipFile.Close(); cerr != nil {
 			err = cerr
 		}
@@ -69,6 +78,9 @@ func ZipDirectory(efs embed.FS, from string, to string) (err error) {
 
 	zipWriter := zip.NewWriter(zipFile)
 	defer func() {
+		if zipWriter == nil {
+			return
+		}
 		if cerr := zipWriter.Close(); cerr != nil {
 			err = cerr
 		}

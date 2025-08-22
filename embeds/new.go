@@ -13,6 +13,9 @@ func NewFileReader(efs embed.FS, n string) (reader *bytes.Reader, info os.FileIn
 		return
 	}
 	defer func() {
+		if file == nil {
+			return
+		}
 		if cerr := file.Close(); cerr != nil {
 			err = cerr
 		}
@@ -23,10 +26,6 @@ func NewFileReader(efs embed.FS, n string) (reader *bytes.Reader, info os.FileIn
 	buf := make([]byte, info.Size())
 
 	if _, err = file.Read(buf); err != nil {
-		return
-	}
-
-	if err = file.Close(); err != nil {
 		return
 	}
 

@@ -21,6 +21,9 @@ func ZipFile(from string, to string) (err error) {
 	}
 
 	defer func() {
+		if zipFile == nil {
+			return
+		}
 		if cerr := zipFile.Close(); cerr != nil {
 			err = cerr
 		}

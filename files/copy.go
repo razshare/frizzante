@@ -30,6 +30,9 @@ func CopyFile(from string, to string) (err error) {
 		return
 	}
 	defer func() {
+		if fromFile == nil {
+			return
+		}
 		if cerr := fromFile.Close(); cerr != nil {
 			err = cerr
 		}
@@ -41,6 +44,9 @@ func CopyFile(from string, to string) (err error) {
 		return
 	}
 	defer func() {
+		if toFile == nil {
+			return
+		}
 		if cerr := toFile.Close(); cerr != nil {
 			err = cerr
 		}
