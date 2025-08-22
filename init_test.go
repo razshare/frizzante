@@ -16,6 +16,7 @@ import (
 //go:embed makefile
 //go:embed app/dist
 //go:embed template/project.zip
+//go:embed template/lib
 var tefs embed.FS
 var port = 7878
 var serve = make(chan any, 1)
