@@ -22,25 +22,25 @@ func Flush(client *client.Client) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func Content(client *client.Client, d []byte) {
+func Content(client *client.Client, data []byte) {
 	if !client.Locked {
 		client.Writer.WriteHeader(client.Status)
 		client.Locked = true
 	}
 
 	if client.WebSocket != nil {
-		if err := client.WebSocket.WriteMessage(websocket.TextMessage, d); err != nil {
+		if err := client.WebSocket.WriteMessage(websocket.TextMessage, data); err != nil {
 			client.Config.ErrorLog.Println(err, stack.Trace())
 		}
 		return
 	}
 
 	if "" != client.EventName {
-		EventContent(client, d)
+		EventContent(client, data)
 		return
 	}
 
-	if _, err := client.Writer.Write(d); err != nil {
+	if _, err := client.Writer.Write(data); err != nil {
 		client.Config.ErrorLog.Println(err, stack.Trace())
 	}
 }
@@ -54,8 +54,8 @@ func Content(client *client.Client, d []byte) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func Message(client *client.Client, m string) {
-	Content(client, []byte(m))
+func Message(client *client.Client, message string) {
+	Content(client, []byte(message))
 }
 
 // Messagef sends utf-8 safe content using a format.
@@ -67,8 +67,8 @@ func Message(client *client.Client, m string) {
 // All errors are sent to the server notifier.
 //
 // Compatible with web sockets.
-func Messagef(client *client.Client, f string, v ...any) {
-	Content(client, []byte(fmt.Sprintf(f, v...)))
+func Messagef(client *client.Client, format string, vars ...any) {
+	Content(client, []byte(fmt.Sprintf(format, vars...)))
 }
 
 // NotFound sends a message with status 404 Not Found.
@@ -78,32 +78,32 @@ func NotFound(client *client.Client, m string) {
 }
 
 // Unauthorized sends a message with status 401 Unauthorized.
-func Unauthorized(client *client.Client, m string) {
+func Unauthorized(client *client.Client, message string) {
 	Status(client, http.StatusUnauthorized)
-	Message(client, m)
+	Message(client, message)
 }
 
 // BadRequest sends a message with status 400 Bad Request.
-func BadRequest(client *client.Client, m string) {
+func BadRequest(client *client.Client, message string) {
 	Status(client, http.StatusBadRequest)
-	Message(client, m)
+	Message(client, message)
 }
 
 // Error sends a message with status 500 Internal server Error
 // and also sends the error to the server notifier.
-func Error(client *client.Client, e error) {
-	Status(client, http.StatusBadRequest)
-	Message(client, e.Error())
+func Error(client *client.Client, err error) {
+	Status(client, http.StatusInternalServerError)
+	Message(client, err.Error())
 }
 
 // Forbidden sends a message with status 403 Forbidden.
-func Forbidden(client *client.Client, m string) {
+func Forbidden(client *client.Client, message string) {
 	Status(client, http.StatusForbidden)
-	Message(client, m)
+	Message(client, message)
 }
 
 // TooManyRequests sends a message with status 403 Forbidden.
-func TooManyRequests(client *client.Client, m string) {
+func TooManyRequests(client *client.Client, message string) {
 	Status(client, http.StatusTooManyRequests)
-	Message(client, m)
+	Message(client, message)
 }

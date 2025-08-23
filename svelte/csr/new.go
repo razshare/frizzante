@@ -35,14 +35,14 @@ func New(conf Config) view.Render {
 	var id = "svelte-app"
 	var nameDist = filepath.Join(app, "dist")
 	var nameDoc = filepath.Join(nameDist, "client", "index.html")
-	var nameDoxFixed = strings.ReplaceAll(nameDoc, "\\", "/")
+	var nameDocFixed = strings.ReplaceAll(nameDoc, "\\", "/")
 
 	return func(v view.View) (string, error) {
 		var data []byte
 		var err error
 
-		if !disk && embeds.IsFile(efs, nameDoxFixed) {
-			data, err = efs.ReadFile(nameDoxFixed)
+		if !disk && embeds.IsFile(efs, nameDocFixed) {
+			data, err = efs.ReadFile(nameDocFixed)
 		} else {
 			data, err = os.ReadFile(nameDoc)
 		}

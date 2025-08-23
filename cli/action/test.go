@@ -6,7 +6,7 @@ import (
 )
 
 func Test(opts TestOptions) error {
-	test := exec.Command(opts.Go, "test")
+	test := exec.Command(opts.Go, "test", "./...")
 	test.Env = os.Environ()
 	test.Stderr = os.Stderr
 	test.Stdout = os.Stdout

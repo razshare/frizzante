@@ -9,6 +9,24 @@ import (
 	"net/http"
 )
 
+// SseUpgrade upgrades to server sent events
+// and returns a function that sets the name of the current event.
+//
+// The default event name is "message".
+func SseUpgrade(client *client.Client) func(string) {
+	Headers(client, map[string]string{
+		"Access-Control-Allow-Origin":   "*",
+		"Access-Control-Expose-Headers": "Content-Type",
+		"Content-Type":                  "text/event-stream",
+		"Cache-Control":                 "no-cache",
+		"Client":                        "keep-alive",
+	})
+
+	client.EventName = "message"
+
+	return func(eventName string) { client.EventName = eventName }
+}
+
 // EventContent sends content using the `server sent events` format.
 //
 // Usually this should be used internally in order to send content to a Server sent event.
@@ -25,7 +43,6 @@ func EventContent(client *client.Client, data []byte) {
 	}
 
 	for _, line := range bytes.Split(data, []byte("\r\n")) {
-
 		if _, err := client.Writer.Write([]byte("data: ")); err != nil {
 			client.Config.ErrorLog.Println(err, stack.Trace())
 			return
@@ -56,22 +73,4 @@ func EventContent(client *client.Client, data []byte) {
 	flusher.Flush()
 
 	client.EventId++
-}
-
-// SseUpgrade upgrades to server sent events
-// and returns a function that sets the name of the current event.
-//
-// The default event name is "message".
-func SseUpgrade(client *client.Client) func(string) {
-	Headers(client, map[string]string{
-		"Access-Control-Allow-Origin":   "*",
-		"Access-Control-Expose-Headers": "Content-Type",
-		"Content-Type":                  "text/event-stream",
-		"Cache-Control":                 "no-cache",
-		"Client":                        "keep-alive",
-	})
-
-	client.EventName = "message"
-
-	return func(eventName string) { client.EventName = eventName }
 }

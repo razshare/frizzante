@@ -30,6 +30,6 @@ func Send(chs []search.Choice, msg string) ([]string, error) {
 	return model.Selected, nil
 }
 
-func Sendf(opts []string, format string, vars ...any) []string {
-	return Sendf(opts, fmt.Sprintf(format, vars...))
+func Sendf(chs []search.Choice, format string, vars ...any) ([]string, error) {
+	return Send(chs, fmt.Sprintf(format, vars...))
 }

@@ -9,7 +9,7 @@ import (
 func TestEmbeddedIsFile(t *testing.T) {
 	// Positive.
 	n := "makefile"
-	ac := embeds.IsFile(tefs, n)
+	ac := embeds.IsFile(Tefs, n)
 	ex := true
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to be a file", n)
@@ -17,14 +17,14 @@ func TestEmbeddedIsFile(t *testing.T) {
 
 	// Negatives.
 	n = "t"
-	ac = embeds.IsFile(tefs, n)
+	ac = embeds.IsFile(Tefs, n)
 	ex = false
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to not be a file", n)
 	}
 
 	n = "qwerty"
-	ac = embeds.IsFile(tefs, n)
+	ac = embeds.IsFile(Tefs, n)
 	ex = false
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to not be a file", n)
@@ -34,7 +34,7 @@ func TestEmbeddedIsFile(t *testing.T) {
 func TestEmbeddedIsDirectory(t *testing.T) {
 	// Positive.
 	n := ".github"
-	ac := embeds.IsDirectory(tefs, n)
+	ac := embeds.IsDirectory(Tefs, n)
 	ex := true
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to be a directory", n)
@@ -42,14 +42,14 @@ func TestEmbeddedIsDirectory(t *testing.T) {
 
 	// Negatives.
 	n = "makefile"
-	ac = embeds.IsDirectory(tefs, n)
+	ac = embeds.IsDirectory(Tefs, n)
 	ex = false
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to not be a directory", n)
 	}
 
 	n = "qwerty"
-	ac = embeds.IsDirectory(tefs, n)
+	ac = embeds.IsDirectory(Tefs, n)
 	ex = false
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to not be a directory", n)

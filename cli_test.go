@@ -33,7 +33,7 @@ func TestOnCreateProject(t *testing.T) {
 
 	err = codegen.Project(codegen.ProjectOptions{
 		Name: proj,
-		Efs:  tefs,
+		Efs:  Tefs,
 		Auto: true,
 	})
 
@@ -78,7 +78,7 @@ func TestOnGenerate(t *testing.T) {
 		Air:      filepath.Join(".gen", "air", "air"),
 		Bun:      filepath.Join(".gen", "bun", "bun"),
 		Sqlc:     filepath.Join(".gen", "sqlc", "sqlc"),
-		Efs:      tefs,
+		Efs:      Tefs,
 	})
 
 	if err != nil {

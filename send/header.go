@@ -5,18 +5,6 @@ import (
 	"github.com/razshare/frizzante/stack"
 )
 
-// Navigate redirects the request to a location with status 302.
-func Navigate(client *client.Client, location string) {
-	Redirect(client, location, 302)
-	Message(client, "")
-}
-
-// Redirect redirects the request to a location with a status.
-func Redirect(client *client.Client, location string, status int) {
-	Status(client, status)
-	Header(client, "Location", location)
-}
-
 // Header sends a header field.
 //
 // If the status has not been sent already, a default "200 OK" status will be sent immediately.
@@ -43,6 +31,18 @@ func Headers(client *client.Client, fields map[string]string) {
 	for key, value := range fields {
 		client.Writer.Header().Set(key, value)
 	}
+}
+
+// Redirect redirects the request to a location with a status.
+func Redirect(client *client.Client, location string, status int) {
+	Status(client, status)
+	Header(client, "Location", location)
+}
+
+// Navigate redirects the request to a location with status 302.
+func Navigate(client *client.Client, location string) {
+	Redirect(client, location, 302)
+	Message(client, "")
 }
 
 // ContentType sets the Content-Type header field.

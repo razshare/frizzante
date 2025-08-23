@@ -12,7 +12,7 @@ import (
 // Start starts a server from a configuration.
 func Start(server *Server) {
 	mux := server.Handler.(*http.ServeMux)
-	ctx := &client.Config{
+	config := &client.Config{
 		Render:     server.Render,
 		ErrorLog:   server.ErrorLog,
 		InfoLog:    server.InfoLog,
@@ -24,7 +24,7 @@ func Start(server *Server) {
 			con := &client.Client{
 				Writer:  writer,
 				Request: request,
-				Config:  ctx,
+				Config:  config,
 				EventId: 1,
 				Status:  200,
 			}
