@@ -31,11 +31,9 @@ format:
 	go run main.go --format
 
 install:
-	go run main.go --install
 	cd template/project && make install
 
 update:
-	go run main.go --update
 	cd template/project && make update
 
 hooks:
