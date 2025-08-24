@@ -18,17 +18,17 @@ func CleanProject(opts CleanProjectOptions) error {
 		return err
 	}
 
+	err = os.RemoveAll(".gen")
+	if err != nil {
+		return err
+	}
+
 	err = os.RemoveAll(filepath.Join(opts.App, "dist"))
 	if err != nil {
 		return err
 	}
 
 	err = os.RemoveAll(filepath.Join(opts.App, "node_modules"))
-	if err != nil {
-		return err
-	}
-
-	err = os.RemoveAll(filepath.Join(".gen", "tmp"))
 	if err != nil {
 		return err
 	}

@@ -51,15 +51,11 @@ func New(a *app.App) (*Menu, error) {
 				Handler: func() error {
 					return action.Config(action.ConfigOptions{
 						App:      *a.App,
-						Generate: *a.Generate,
-						Clear:    *a.Clear,
 						Auto:     *a.Yes,
-						Efs:      a.Efs,
 						Platform: plat,
 						Go:       _go,
 						Air:      air,
 						Bun:      bun,
-						Sqlc:     sqlc,
 					})
 				},
 			},
@@ -227,7 +223,7 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice: search.Choice{Id: "clean project", Description: "deletes unnecessary project files"},
+				Choice: search.Choice{Id: "clean project", Description: "deletes .gen, .vite, app/{dist,node_modules}"},
 				Active: func() bool { return *a.CleanProject },
 				Handler: func() error {
 					return action.CleanProject(action.CleanProjectOptions{

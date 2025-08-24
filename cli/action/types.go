@@ -92,14 +92,10 @@ type BuildOptions struct {
 
 type ConfigOptions struct {
 	App      string
-	Clear    bool
-	Auto     bool
 	Go       string
 	Air      string
 	Bun      string
-	Sqlc     string
-	Generate string
-	Efs      embed.FS
+	Auto     bool
 	Platform platform.Platform
 }
 

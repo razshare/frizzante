@@ -1,15 +1,21 @@
 package action
 
+import "github.com/razshare/frizzante/cli/codegen"
+
 func Config(opts ConfigOptions) error {
-	err := Generate(GenerateOptions{
-		App:      opts.App,
-		Selected: "bun,air",
-		Auto:     opts.Auto,
-		Go:       opts.Go,
+	err := codegen.Air(codegen.AirOptions{
 		Air:      opts.Air,
+		Auto:     opts.Auto,
+		Platform: opts.Platform,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	err = codegen.Bun(codegen.BunOptions{
 		Bun:      opts.Bun,
-		Sqlc:     opts.Sqlc,
-		Efs:      opts.Efs,
+		Auto:     opts.Auto,
 		Platform: opts.Platform,
 	})
 

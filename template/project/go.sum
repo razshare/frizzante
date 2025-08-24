@@ -14,14 +14,6 @@ github.com/gorilla/websocket v1.5.3 h1:saDtZ6Pbx/0u+bgYQ3q96pZgCzfhKXGPqt7kZ72aN
 github.com/gorilla/websocket v1.5.3/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=
 github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d h1:VhgPp6v9qf9Agr/56bj7Y/xa04UccTW04VP0Qed4vnQ=
 github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d/go.mod h1:YUTz3bUH2ZwIWBy3CJBeOBEugqcmXREj14T+iG/4k4U=
-github.com/razshare/frizzante v1.23.6/go.mod h1:Lz/o8spyPzdGQFJm2Q30riPI9onneNSG+1Ctpmx0ydQ=
-github.com/razshare/frizzante v1.23.8/go.mod h1:Lz/o8spyPzdGQFJm2Q30riPI9onneNSG+1Ctpmx0ydQ=
-github.com/razshare/frizzante v1.23.9/go.mod h1:Lz/o8spyPzdGQFJm2Q30riPI9onneNSG+1Ctpmx0ydQ=
-github.com/razshare/frizzante v1.23.11 h1:FWa9U5bMx/QmUycfGPpOwItR4hH3hS9kXl/hYgoV3Iw=
-github.com/razshare/frizzante v1.23.11/go.mod h1:Lz/o8spyPzdGQFJm2Q30riPI9onneNSG+1Ctpmx0ydQ=
-github.com/razshare/frizzante v1.23.12/go.mod h1:BCYvmpamPsio8QP+d+TcpIhahkxZZmHrDI+YSSR0kco=
-github.com/razshare/frizzante v1.23.15 h1:pdDZ52jcJpukEvQlUFPNodt6X7b8sjxTbWfk93yiCbU=
-github.com/razshare/frizzante v1.23.15/go.mod h1:BCYvmpamPsio8QP+d+TcpIhahkxZZmHrDI+YSSR0kco=
 github.com/razshare/frizzante v1.23.17 h1:9j9eMwJY7vVSDGj1rF4QbvAB6hzA4HzJFVwuAmz/Au4=
 github.com/razshare/frizzante v1.23.17/go.mod h1:BCYvmpamPsio8QP+d+TcpIhahkxZZmHrDI+YSSR0kco=
 golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
