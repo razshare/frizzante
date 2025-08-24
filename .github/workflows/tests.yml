@@ -22,4 +22,4 @@ jobs:
           go-version: '1.24'
 
       - name: Run tests
-        run: make clean
+        run: make clean configure install package test

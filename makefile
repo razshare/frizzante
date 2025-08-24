@@ -1,40 +1,38 @@
 test:
-	go run main.go --test
-
-configure:
-	TRACE=1 cd template/project && make configure
-
-dev:
-	TRACE=1 cd template/project && make dev
-
-package-watch:
-	TRACE=1 cd template/project && make package-watch
-
-package:
-	TRACE=1 cd template/project && make package
-
-copies:
-	rm -fr .gen && \
-	rm -fr app && \
-	rm -fr svelte/ssr/app && \
-	cp -r template/project/.gen .
+	rm -fr app
+	rm -fr svelte/ssr/app
 	cp -r template/project/app .
 	cp -r template/project/app svelte/ssr
+	go run main.go --app="template/project/app" --test
+
+configure:
+	go run main.go --app="template/project/app" --configure
+	rm -fr template/project/.gen
+	cp -r .gen template/project
+
+dev:
+	go run main.go --app="template/project/app" --dev
+
+package-watch:
+	go run main.go --app="template/project/app" --package-watch
+
+package:
+	go run main.go --app="template/project/app" --package
 
 check:
-	TRACE=1 cd template/project && make check
+	go run main.go --app="template/project/app" --check
 
 clean:
-	TRACE=1 cd template/project && make clean
+	go run main.go --app="template/project/app" --clean-project
 
 format:
-	TRACE=1 cd template/project && make format
+	go run main.go --app="template/project/app" --format
 
 install:
-	TRACE=1 cd template/project && make install
+	go run main.go --app="template/project/app" --install
 
 update:
-	TRACE=1 cd template/project && make update
+	go run main.go --app="template/project/app" --update
 
 zip:
 	./zip.sh

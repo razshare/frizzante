@@ -13,19 +13,9 @@ func Config(opts ConfigOptions) error {
 		return err
 	}
 
-	err = codegen.Bun(codegen.BunOptions{
+	return codegen.Bun(codegen.BunOptions{
 		Bun:      opts.Bun,
 		Auto:     opts.Auto,
 		Platform: opts.Platform,
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return Install(InstallOptions{
-		App: opts.App,
-		Go:  opts.Go,
-		Bun: opts.Bun,
 	})
 }
