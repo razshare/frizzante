@@ -13,8 +13,8 @@ import (
 // and returns a function that sets the name of the current event.
 //
 // The default event name is "message".
-func SseUpgrade(client *client.Client) func(string) {
-	Headers(client, map[string]string{
+func SseUpgrade(c *client.Client) func(string) {
+	Headers(c, map[string]string{
 		"Access-Control-Allow-Origin":   "*",
 		"Access-Control-Expose-Headers": "Content-Type",
 		"Content-Type":                  "text/event-stream",
@@ -22,9 +22,9 @@ func SseUpgrade(client *client.Client) func(string) {
 		"Client":                        "keep-alive",
 	})
 
-	client.EventName = "message"
+	c.EventName = "message"
 
-	return func(eventName string) { client.EventName = eventName }
+	return func(n string) { c.EventName = n }
 }
 
 // EventContent sends content using the `server sent events` format.
@@ -34,43 +34,43 @@ func SseUpgrade(client *client.Client) func(string) {
 // That being said, other than the format, there is nothing else different between this function and ResponseSendContent.
 //
 // See https://html.spec.whatwg.org/multipage/server-sent-events.html for more details on the format.
-func EventContent(client *client.Client, data []byte) {
-	header := fmt.Sprintf("id: %d\r\nevent: %s\r\n", client.EventId, client.EventName)
+func EventContent(c *client.Client, d []byte) {
+	h := fmt.Sprintf("id: %d\r\nevent: %s\r\n", c.EventId, c.EventName)
 
-	if _, err := client.Writer.Write([]byte(header)); err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+	if _, err := c.Writer.Write([]byte(h)); err != nil {
+		c.Config.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
-	for _, line := range bytes.Split(data, []byte("\r\n")) {
-		if _, err := client.Writer.Write([]byte("data: ")); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+	for _, l := range bytes.Split(d, []byte("\r\n")) {
+		if _, err := c.Writer.Write([]byte("data: ")); err != nil {
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
-		if _, err := client.Writer.Write(line); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+		if _, err := c.Writer.Write(l); err != nil {
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
-		if _, err := client.Writer.Write([]byte("\r\n")); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+		if _, err := c.Writer.Write([]byte("\r\n")); err != nil {
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 	}
 
-	if _, err := client.Writer.Write([]byte("\r\n")); err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+	if _, err := c.Writer.Write([]byte("\r\n")); err != nil {
+		c.Config.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
-	flusher, ok := client.Writer.(http.Flusher)
+	w, ok := c.Writer.(http.Flusher)
 	if !ok {
-		client.Config.ErrorLog.Println(errors.New("could not retrieve flusher"), stack.Trace())
+		c.Config.ErrorLog.Println(errors.New("could not retrieve flusher"), stack.Trace())
 		return
 	}
 
-	flusher.Flush()
+	w.Flush()
 
-	client.EventId++
+	c.EventId++
 }

@@ -9,18 +9,18 @@ import (
 // Cookie reads the contents of a cookie from the message and returns the value.
 //
 // Compatible with web sockets.
-func Cookie(client *client.Client, key string) string {
-	cookie, err := client.Request.Cookie(key)
+func Cookie(c *client.Client, k string) string {
+	ck, err := c.Request.Cookie(k)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		c.Config.ErrorLog.Println(err, stack.Trace())
 		return ""
 	}
 
-	data, err := url.QueryUnescape(cookie.Value)
+	d, err := url.QueryUnescape(ck.Value)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		c.Config.ErrorLog.Println(err, stack.Trace())
 		return ""
 	}
 
-	return data
+	return d
 }

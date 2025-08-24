@@ -19,25 +19,25 @@ func Form(client *client.Client) url.Values {
 
 // FormWithMaxMemory reads the message as a form and returns the value.
 //
-// The whole request body is parsed and up to a total of maxMemory bytes
+// The whole request body is parsed and up to a total of m bytes
 // of its file parts are stored in memory, with the remainder stored on disk in temporary files.
-func FormWithMaxMemory(client *client.Client, m int64) url.Values {
-	if client.WebSocket != nil {
-		client.Config.ErrorLog.Println(errors.New("web socket connections cannot parse forms"), stack.Trace())
+func FormWithMaxMemory(c *client.Client, m int64) url.Values {
+	if c.WebSocket != nil {
+		c.Config.ErrorLog.Println(errors.New("web socket connections cannot parse forms"), stack.Trace())
 		return url.Values{}
 	}
 
-	if err := client.Request.ParseMultipartForm(m); err != nil {
+	if err := c.Request.ParseMultipartForm(m); err != nil {
 		if !errors.Is(err, http.ErrNotMultipart) {
 			return url.Values{}
 		}
 
-		err = client.Request.ParseForm()
+		err = c.Request.ParseForm()
 		if err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return url.Values{}
 		}
 	}
 
-	return client.Request.Form
+	return c.Request.Form
 }

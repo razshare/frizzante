@@ -10,6 +10,7 @@
 
     type Props = {
         method?: "GET" | "POST"
+        enctype?: "multipart/form-data" | "application/x-www-form-urlencoded" | "text/plain"
         action: string
         children: Snippet<[{ pending: boolean; error: false | Error }]>
         class?: string
@@ -17,6 +18,7 @@
     }
     let {
         method = "GET",
+        enctype,
         action: actionPath,
         children,
         class: cls,
@@ -43,6 +45,6 @@
     })
 </script>
 
-<form {method} {...options} class={cls} {style}>
+<form {enctype} {method} {...options} class={cls} {style}>
     {@render children({ pending, error })}
 </form>

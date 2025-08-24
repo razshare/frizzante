@@ -1,4 +1,4 @@
-package send
+package receive
 
 import (
 	"github.com/razshare/frizzante/mock"
@@ -7,9 +7,9 @@ import (
 
 func TestCookie(t *testing.T) {
 	c := mock.NewClient()
-	Cookie(c, "cookie", "monster")
-	w := c.Writer.(*mock.ResponseWriter)
-	if w.MockHeader.Get("Set-Cookie") != "cookie=monster; Path=/; HttpOnly" {
+	c.Request.Header.Set("Cookie", "cookie=monster;")
+	ck := Cookie(c, "cookie")
+	if ck != "monster" {
 		t.Fatal("cookie should be monster")
 	}
 }

@@ -12,40 +12,40 @@ import (
 // This means the status will become locked and further attempts to send the status will fail with an error.
 //
 // All errors are sent to the server notifier.
-func Header(client *client.Client, key string, value string) {
-	if client.Locked {
-		client.Config.ErrorLog.Println("header is locked", stack.Trace())
+func Header(c *client.Client, k string, v string) {
+	if c.Locked {
+		c.Config.ErrorLog.Println("header is locked", stack.Trace())
 		return
 	}
 
-	client.Writer.Header().Set(key, value)
+	c.Writer.Header().Set(k, v)
 }
 
 // Headers sends header fields.
-func Headers(client *client.Client, fields map[string]string) {
-	if client.Locked {
-		client.Config.ErrorLog.Println("header is locked", stack.Trace())
+func Headers(c *client.Client, f map[string]string) {
+	if c.Locked {
+		c.Config.ErrorLog.Println("header is locked", stack.Trace())
 		return
 	}
 
-	for key, value := range fields {
-		client.Writer.Header().Set(key, value)
+	for k, v := range f {
+		c.Writer.Header().Set(k, v)
 	}
 }
 
 // Redirect redirects the request to a location with a status.
-func Redirect(client *client.Client, location string, status int) {
-	Status(client, status)
-	Header(client, "Location", location)
+func Redirect(c *client.Client, l string, s int) {
+	Status(c, s)
+	Header(c, "Location", l)
 }
 
 // Navigate redirects the request to a location with status 302.
-func Navigate(client *client.Client, location string) {
-	Redirect(client, location, 302)
-	Message(client, "")
+func Navigate(c *client.Client, l string) {
+	Redirect(c, l, 302)
+	Message(c, "")
 }
 
 // ContentType sets the Content-Type header field.
-func ContentType(client *client.Client, ctype string) {
-	Header(client, "Content-Type", ctype)
+func ContentType(c *client.Client, t string) {
+	Header(c, "Content-Type", t)
 }

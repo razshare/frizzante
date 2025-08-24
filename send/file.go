@@ -17,57 +17,57 @@ import (
 )
 
 // FileOrElse sends the file requested by the client, or else falls back.
-func FileOrElse(client *client.Client, or func()) {
-	var name = filepath.Join(client.Config.PublicRoot, client.Request.RequestURI)
-	var reader *bytes.Reader
-	var info os.FileInfo
+func FileOrElse(c *client.Client, or func()) {
+	var n = filepath.Join(c.Config.PublicRoot, c.Request.RequestURI)
+	var r *bytes.Reader
+	var i os.FileInfo
 	var err error
 
-	if embeds.IsFile(client.Config.Efs, name) && !embeds.IsDirectory(client.Config.Efs, name) {
-		reader, info, err = embeds.NewFileReader(client.Config.Efs, strings.ReplaceAll(name, "\\", "//"))
-	} else if files.IsFile(name) && !files.IsDirectory(name) {
-		reader, info, err = files.NewFileReader(name)
+	if embeds.IsFile(c.Config.Efs, n) && !embeds.IsDirectory(c.Config.Efs, n) {
+		r, i, err = embeds.NewFileReader(c.Config.Efs, strings.ReplaceAll(n, "\\", "//"))
+	} else if files.IsFile(n) && !files.IsDirectory(n) {
+		r, i, err = files.NewFileReader(n)
 	} else {
 		or()
 		return
 	}
 
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		c.Config.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
-	if client.WebSocket != nil {
-		var data []byte
-		if data, err = io.ReadAll(reader); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+	if c.WebSocket != nil {
+		var d []byte
+		if d, err = io.ReadAll(r); err != nil {
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
-		if err = client.WebSocket.WriteMessage(websocket.TextMessage, data); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+		if err = c.WebSocket.WriteMessage(websocket.TextMessage, d); err != nil {
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 	}
 
-	if "" != client.EventName {
-		var data []byte
-		if data, err = io.ReadAll(reader); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+	if "" != c.EventName {
+		var d []byte
+		if d, err = io.ReadAll(r); err != nil {
+			c.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
-		EventContent(client, data)
+		EventContent(c, d)
 		return
 	}
 
-	if "" == client.Writer.Header().Get("Content-Type") {
-		Header(client, "Content-Type", mime.Parse(name))
+	if "" == c.Writer.Header().Get("Content-Type") {
+		Header(c, "Content-Type", mime.Parse(n))
 	}
 
-	if "" == client.Writer.Header().Get("Content-Length") {
-		Header(client, "Content-Length", fmt.Sprintf("%d", info.Size()))
+	if "" == c.Writer.Header().Get("Content-Length") {
+		Header(c, "Content-Length", fmt.Sprintf("%d", i.Size()))
 	}
 
-	http.ServeContent(client.Writer, client.Request, name, info.ModTime(), reader)
+	http.ServeContent(c.Writer, c.Request, n, i.ModTime(), r)
 }

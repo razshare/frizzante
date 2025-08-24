@@ -6,10 +6,14 @@ configure:
 
 test:
 	go run main.go -y --configure --app="template/project/app"
+	make package
 	test -d template/project/app && \
 	rm -fr app && \
+	rm -fr svelte/ssr/app && \
 	mkdir -p app && \
+	mkdir -p svelte/ssr/app && \
 	cp -r template/project/app .
+	cp -r template/project/app svelte/ssr
 	go run main.go -y --test
 
 dev:

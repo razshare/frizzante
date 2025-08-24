@@ -3,38 +3,38 @@ package send
 import (
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/stack"
-	v "github.com/razshare/frizzante/view"
+	"github.com/razshare/frizzante/view"
 	"strings"
 )
 
 // View sends a view.
-func View(client *client.Client, view v.View) {
-	if client.Writer.Header().Get("Location") != "" {
+func View(c *client.Client, v view.View) {
+	if c.Writer.Header().Get("Location") != "" {
 		return
 	}
 
-	if strings.Contains(client.Request.Header.Get("Accept"), "application/json") {
-		if "" == client.Writer.Header().Get("Cache-Control") {
-			Header(client, "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+	if strings.Contains(c.Request.Header.Get("Accept"), "application/json") {
+		if "" == c.Writer.Header().Get("Cache-Control") {
+			Header(c, "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
 		}
-		if "" == client.Writer.Header().Get("Pragma") {
-			Header(client, "Pragma", "no-cache")
+		if "" == c.Writer.Header().Get("Pragma") {
+			Header(c, "Pragma", "no-cache")
 		}
-		if view.Props == nil {
-			view.Props = map[string]any{}
+		if v.Props == nil {
+			v.Props = map[string]any{}
 		}
-		Json(client, v.Data(view))
+		Json(c, view.Data(v))
 		return
 	}
 
-	html, err := client.Config.Render(view)
+	html, err := c.Config.Render(v)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		c.Config.ErrorLog.Println(err, stack.Trace())
 	}
 
-	if "" == client.Writer.Header().Get("Content-Type") {
-		Header(client, "Content-Type", "text/html")
+	if "" == c.Writer.Header().Get("Content-Type") {
+		Header(c, "Content-Type", "text/html")
 	}
 
-	Message(client, html)
+	Message(c, html)
 }

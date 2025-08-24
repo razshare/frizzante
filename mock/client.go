@@ -1,35 +1,56 @@
-package send
+package mock
 
 import (
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/server"
+	"io"
 	"net/http"
 )
 
-type MockWriter struct {
+type ResponseWriter struct {
 	MockHeader     http.Header
 	MockStatusCode int
 	MockBytes      []byte
 }
 
-func (m *MockWriter) Header() http.Header {
+func (m *ResponseWriter) Header() http.Header {
 	return m.MockHeader
 }
 
-func (m *MockWriter) Write(bytes []byte) (int, error) {
+func (m *ResponseWriter) Write(bytes []byte) (int, error) {
 	m.MockBytes = append(m.MockBytes, bytes...)
 	return len(bytes), nil
 }
 
-func (m *MockWriter) WriteHeader(status int) {
+func (m *ResponseWriter) WriteHeader(status int) {
 	m.MockStatusCode = status
 }
 
-func (m *MockWriter) Flush() {
+func (m *ResponseWriter) Flush() {
 	// Noop.
 }
 
-func MockClient() *client.Client {
+type RequestBody struct {
+	MockBuffer []byte
+}
+
+func (b *RequestBody) Read(p []byte) (int, error) {
+	if len(b.MockBuffer) == 0 {
+		return 0, io.EOF
+	}
+
+	n := copy(p, b.MockBuffer)
+	b.MockBuffer = make([]byte, 0)
+
+	return n, nil
+}
+
+func (b *RequestBody) Close() error {
+	// Noop.
+	return nil
+}
+
+func NewClient() *client.Client {
 	srv := server.New()
 
 	conf := &client.Config{
@@ -40,13 +61,16 @@ func MockClient() *client.Client {
 		Efs:        srv.Efs,
 	}
 
-	writer := &MockWriter{
+	writer := &ResponseWriter{
 		MockHeader: map[string][]string{},
 		MockBytes:  make([]byte, 0),
 	}
 
 	request := &http.Request{
 		Header: map[string][]string{},
+		Body: &RequestBody{
+			MockBuffer: make([]byte, 1024),
+		},
 	}
 
 	return &client.Client{
