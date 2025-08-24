@@ -1,15 +1,19 @@
-package main
+package embeds
 
 import (
-	"github.com/razshare/frizzante/embeds"
+	"embed"
 	"github.com/razshare/frizzante/files"
 	"testing"
 )
 
+//go:embed dir
+//go:embed embeds_test.go
+var Efs embed.FS
+
 func TestEmbeddedIsFile(t *testing.T) {
 	// Positive.
-	n := "makefile"
-	ac := embeds.IsFile(Tefs, n)
+	n := "embeds_test.go"
+	ac := IsFile(Efs, n)
 	ex := true
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to be a file", n)
@@ -17,14 +21,14 @@ func TestEmbeddedIsFile(t *testing.T) {
 
 	// Negatives.
 	n = "t"
-	ac = embeds.IsFile(Tefs, n)
+	ac = IsFile(Efs, n)
 	ex = false
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to not be a file", n)
 	}
 
 	n = "qwerty"
-	ac = embeds.IsFile(Tefs, n)
+	ac = IsFile(Efs, n)
 	ex = false
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to not be a file", n)
@@ -33,23 +37,23 @@ func TestEmbeddedIsFile(t *testing.T) {
 
 func TestEmbeddedIsDirectory(t *testing.T) {
 	// Positive.
-	n := ".github"
-	ac := embeds.IsDirectory(Tefs, n)
+	n := "dir"
+	ac := IsDirectory(Efs, n)
 	ex := true
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to be a directory", n)
 	}
 
 	// Negatives.
-	n = "makefile"
-	ac = embeds.IsDirectory(Tefs, n)
+	n = "embeds_test.go"
+	ac = IsDirectory(Efs, n)
 	ex = false
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to not be a directory", n)
 	}
 
 	n = "qwerty"
-	ac = embeds.IsDirectory(Tefs, n)
+	ac = IsDirectory(Efs, n)
 	ex = false
 	if ac != ex {
 		t.Fatalf("%s (embedded) was expected to not be a directory", n)
@@ -58,7 +62,7 @@ func TestEmbeddedIsDirectory(t *testing.T) {
 
 func TestIsFile(t *testing.T) {
 	// Positive.
-	n := "makefile"
+	n := "embeds_test.go"
 	ac := files.IsFile(n)
 	ex := true
 	if ac != ex {
@@ -66,7 +70,7 @@ func TestIsFile(t *testing.T) {
 	}
 
 	// Negatives.
-	n = ".github"
+	n = "dir"
 	ac = files.IsFile(n)
 	ex = false
 	if ac != ex {
@@ -83,7 +87,7 @@ func TestIsFile(t *testing.T) {
 
 func TestIsDirectory(t *testing.T) {
 	// Positive.
-	n := ".github"
+	n := "dir"
 	ac := files.IsDirectory(n)
 	ex := true
 	if ac != ex {
@@ -91,7 +95,7 @@ func TestIsDirectory(t *testing.T) {
 	}
 
 	// Negatives.
-	n = "makefile"
+	n = "embeds_test.go"
 	ac = files.IsDirectory(n)
 	ex = false
 	if ac != ex {

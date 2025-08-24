@@ -1,9 +1,8 @@
-package main
+package js
 
 import (
 	"github.com/dop251/goja"
 	"github.com/evanw/esbuild/pkg/api"
-	"github.com/razshare/frizzante/js"
 	"path/filepath"
 	"slices"
 	"strings"
@@ -82,7 +81,7 @@ func TestJavaScriptBundle(t *testing.T) {
 
 	rt := goja.New()
 
-	err := js.SetFunction(rt, "signal", func(call goja.FunctionCall) goja.Value {
+	err := SetFunction(rt, "signal", func(call goja.FunctionCall) goja.Value {
 		args := call.Arguments
 		if len(args) > 0 {
 			ac = args[0].String()
@@ -102,7 +101,7 @@ func TestJavaScriptBundle(t *testing.T) {
 	})
 	`
 
-	cjs, err := js.Bundle(filepath.Join("app"), api.FormatCommonJS, src)
+	cjs, err := Bundle(filepath.Join("app"), api.FormatCommonJS, src)
 	if err != nil {
 		t.Fatal(err)
 	}
