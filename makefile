@@ -3,7 +3,10 @@ test:
 	rm -fr svelte/ssr/app
 	cp -r template/project/app .
 	cp -r template/project/app svelte/ssr
-	go run main.go --app="template/project/app" --test
+	go test . && \
+	go test ./send && \
+	go test ./receive && \
+	go test ./svelte/ssr
 
 configure:
 	go run main.go --app="template/project/app" --configure
