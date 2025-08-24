@@ -2,16 +2,16 @@ test:
 	go run main.go --test
 
 configure:
-	cd template/project && make configure
+	TRACE=1 cd template/project && make configure
 
 dev:
-	cd template/project && make dev
+	TRACE=1 cd template/project && make dev
 
 package-watch:
-	cd template/project && make package-watch
+	TRACE=1 cd template/project && make package-watch
 
 package:
-	cd template/project && make package
+	TRACE=1 cd template/project && make package
 
 copies:
 	rm -fr .gen && \
@@ -22,19 +22,19 @@ copies:
 	cp -r template/project/app svelte/ssr
 
 check:
-	cd template/project && make check
+	TRACE=1 cd template/project && make check
 
 clean:
-	cd template/project && make clean
+	TRACE=1 cd template/project && make clean
 
 format:
-	cd template/project && make format
+	TRACE=1 cd template/project && make format
 
 install:
-	cd template/project && make install
+	TRACE=1 cd template/project && make install
 
 update:
-	cd template/project && make update
+	TRACE=1 cd template/project && make update
 
 zip:
 	./zip.sh
