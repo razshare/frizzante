@@ -14,12 +14,7 @@ var EfsTestFileOrElse embed.FS
 func TestFileOrElse(t *testing.T) {
 	c := mock.NewClient()
 	c.Config.Efs = EfsTestFileOrElse
-	// we don't have an app directory in this package,
-	// so we need to ignore the public root.
 	c.Config.PublicRoot = ""
-	// we're intentionally omitting the leading "/",
-	// otherwise the embedded file system will not
-	// find the "requested" file.
 	c.Request.RequestURI = "file_or_else_test.go"
 	var or bool
 	FileOrElse(c, func() { or = true })
@@ -36,12 +31,7 @@ func TestFileOrElse(t *testing.T) {
 
 func TestFileOrElseFromFs(t *testing.T) {
 	c := mock.NewClient()
-	// we don't have an app directory in this package,
-	// so we need to ignore the public root.
 	c.Config.PublicRoot = ""
-	// we're intentionally omitting the leading "/",
-	// otherwise the embedded file system will not
-	// find the "requested" file.
 	c.Request.RequestURI = "file_or_else_test.go"
 	c.Request.URL = &url.URL{Path: "file_or_else_test.go"}
 	var or bool
