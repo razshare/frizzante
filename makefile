@@ -34,6 +34,10 @@ install:
 update:
 	go run main.go --app="template/project/app" --update
 
+coverage:
+	go test ./... -coverprofile cover.out && \
+	go tool cover -html=cover.out -o cover.html
+
 zip:
 	./zip.sh
 
