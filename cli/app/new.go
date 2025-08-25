@@ -25,7 +25,7 @@ func New() *App {
 	cln := flag.BoolP("clean-project", "", false, "cleans project")
 	dev := flag.BoolP("dev", "d", false, "starts dev mode")
 	bld := flag.BoolP("build", "b", false, "builds project")
-	cnf := flag.BoolP("configure", "", false, "configures project by installing necessary binaries under \"./.gen\"")
+	cnf := flag.BoolP("configure", "", false, "configures project by installing required binaries and packages")
 	plt := flag.StringP("platform", "", "", "sets the platform, accepts \"linux/amd64\", \"linux/arm64\", \"darwin/arm64\", \"darwin/amd64\", \"windows/arm64\", \"windows/amd64\"")
 	yes := flag.BoolP("yes", "y", false, "confirms all binary prompts silently")
 	_go := flag.StringP("go", "", "go"+extension.Find(), "sets the go binary")

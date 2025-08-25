@@ -46,7 +46,7 @@ func New(a *app.App) (*Menu, error) {
 	return &Menu{
 		Items: []Item{
 			{
-				Choice: search.Choice{Id: "configure", Description: "installs required binaries"},
+				Choice: search.Choice{Id: "configure", Description: "installs required binaries and packages"},
 				Active: func() bool { return *a.Configure },
 				Handler: func() error {
 					return action.Config(action.ConfigOptions{
