@@ -1,7 +1,5 @@
 package platform
 
-type Platform uint
-
 const LinuxAmd64 Platform = 0
 const LinuxArm64 Platform = 1
 const DarwinAmd64 Platform = 2
