@@ -22,7 +22,7 @@ func New() *App {
 	ins := flag.BoolP("install", "i", false, "installs dependencies")
 	fmt := flag.BoolP("format", "f", false, "formats source code")
 	tch := flag.BoolP("touch", "", false, "creates placeholders in app/dist (useful for go:embed)")
-	cln := flag.BoolP("clean-project", "", false, "cleans project")
+	cln := flag.BoolP("clean-project", "", false, "deletes .gen, .vite, app/{dist,node_modules}")
 	dev := flag.BoolP("dev", "d", false, "starts dev mode")
 	bld := flag.BoolP("build", "b", false, "builds project")
 	cnf := flag.BoolP("configure", "", false, "configures project by installing required binaries and packages")
