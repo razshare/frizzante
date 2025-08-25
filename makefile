@@ -10,16 +10,19 @@ configure:
 	cp -r .gen template/project
 
 dev:
-	go run main.go --app="template/project/app" --dev
+	cd template/project && make dev
 
 package-watch:
-	go run main.go --app="template/project/app" --package-watch
+	cd template/project && make package-watch
 
 package:
-	go run main.go --app="template/project/app" --package
+	cd template/project && make package
 
 check:
-	go run main.go --app="template/project/app" --check
+	cd template/project && make check
+
+build:
+	cd template/project && make build
 
 clean:
 	go run main.go --app="template/project/app" --clean-project

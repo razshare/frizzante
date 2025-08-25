@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-//go:embed file_test.go
+//go:embed file_or_else_test.go
 var EfsTestFileOrElse embed.FS
 
 func TestFileOrElse(t *testing.T) {
@@ -19,7 +19,7 @@ func TestFileOrElse(t *testing.T) {
 	// we're intentionally omitting the leading "/",
 	// otherwise the embedded file system will not
 	// find the "requested" file.
-	c.Request.RequestURI = "file_test.go"
+	c.Request.RequestURI = "file_or_else_test.go"
 	var or bool
 	FileOrElse(c, func() { or = true })
 	w := c.Writer.(*mock.ResponseWriter)
