@@ -1,11 +1,8 @@
-package main
+package mime
 
-import (
-	"github.com/razshare/frizzante/mime"
-	"testing"
-)
+import "testing"
 
-func TestMime(t *testing.T) {
+func TestParse(t *testing.T) {
 	var exms = map[string]string{
 		"my.file.html":  "text/html",
 		"my.file.css":   "text/css",
@@ -77,7 +74,7 @@ func TestMime(t *testing.T) {
 
 	// Positives.
 	for n, ex := range exms {
-		ac := mime.Parse(n)
+		ac := Parse(n)
 		if ac != ex {
 			t.Fatalf("file %s was expected to resolve into mime %s, received %s instead", n, ex, ac)
 		}
@@ -85,7 +82,7 @@ func TestMime(t *testing.T) {
 
 	// Negative.
 	n := "my.file.qwerty123"
-	ac := mime.Parse(n)
+	ac := Parse(n)
 	ex := "text/plain"
 	if ac != ex {
 		t.Fatalf("file %s was expected to resolve into mime %s, received %s instead", n, exms, ac)
