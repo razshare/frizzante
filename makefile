@@ -11,7 +11,7 @@ configure:
 	cp -r .gen template/project
 
 dev:
-	go run main.go --app="template/project/app" --dev
+	cd template/project && make dev
 
 package-watch:
 	go run main.go --app="template/project/app" --package-watch
@@ -30,9 +30,11 @@ format:
 
 install:
 	go run main.go --app="template/project/app" --install
+	cd template/project && make install
 
 update:
 	go run main.go --app="template/project/app" --update
+	cd template/project && make update
 
 coverage:
 	go test ./... -coverprofile cover.out && \
