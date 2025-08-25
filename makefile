@@ -1,4 +1,5 @@
 test:
+	rm -fr js/app
 	rm -fr svelte/ssr/app
 	cp -r template/project/app svelte/ssr
 	cp -r template/project/app js
@@ -10,19 +11,16 @@ configure:
 	cp -r .gen template/project
 
 dev:
-	cd template/project && make dev
+	go run main.go --app="template/project/app" --dev
 
 package-watch:
-	cd template/project && make package-watch
+	go run main.go --app="template/project/app" --package-watch
 
 package:
-	cd template/project && make package
+	go run main.go --app="template/project/app" --package
 
 check:
-	cd template/project && make check
-
-build:
-	cd template/project && make build
+	go run main.go --app="template/project/app" --check
 
 clean:
 	go run main.go --app="template/project/app" --clean-project
