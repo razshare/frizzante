@@ -17,7 +17,6 @@ type Server struct {
 	Guards      []guard.Guard
 	Routes      []route.Route
 	InfoLog     *log.Logger
-	ErrorLog    *log.Logger
 	Channels    Channels
 	Efs         embed.FS
 	Certificate string
