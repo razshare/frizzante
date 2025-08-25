@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // FileOrElse sends the file requested by the client, or else falls back.
@@ -26,7 +27,13 @@ func FileOrElse(c *client.Client, or func()) {
 		return
 	}
 
-	var n = filepath.Join(c.Config.PublicRoot, c.Request.RequestURI)
+	var n string
+
+	if strings.HasPrefix(c.Request.RequestURI, "/") {
+		n = filepath.Join(c.Config.PublicRoot, c.Request.RequestURI[1:])
+	} else {
+		n = filepath.Join(c.Config.PublicRoot, c.Request.RequestURI)
+	}
 
 	if embeds.IsFile(c.Config.Efs, n) {
 		var f fs.File
