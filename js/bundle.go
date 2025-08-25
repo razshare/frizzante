@@ -2,25 +2,8 @@ package js
 
 import (
 	"fmt"
-	"github.com/dop251/goja"
 	"github.com/evanw/esbuild/pkg/api"
 )
-
-// SetFunction sets a function.
-func SetFunction(runtime *goja.Runtime, name string, call Function) error {
-	return runtime.Set(name, call)
-}
-
-// SetFunctions sets a map of functions.
-func SetFunctions(runtime *goja.Runtime, calls map[string]Function) error {
-	for name, call := range calls {
-		if err := runtime.Set(name, call); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
 
 // Bundle bundles JavaScript source code into a specific format given a root directory containing node_modules.
 func Bundle(root string, format api.Format, source string) (string, error) {
