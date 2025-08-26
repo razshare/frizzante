@@ -4,32 +4,27 @@ on:
 permissions:
   contents: write
 jobs:
-  tests:
-      name: Run Tests
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout Code
-          uses: actions/checkout@v2
-        - name: Run tests
-          id: run_tests
-          run: .github/scripts/200.run_tests.sh
-  release:
-    needs: tests
+  build:
     name: Release
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
       - name: Create identity
         id: create_identity
         run: .github/scripts/000.create_identity.sh
-      - name: Fix Version
+      - name: Fix version
         id: fix_version
         run: .github/scripts/100.fix_version.sh
-      - name: Create Zip
+      - name: Run tests
+        id: run_tests
+        run: .github/scripts/200.run_tests.sh
+      - name: Create zip
         id: create_zip
         run: .github/scripts/300.create_zip.sh
-      - name: Create Tag
+      - name: Create tag
         id: create_tag
         run: .github/scripts/400.create_tag.sh
-      - name: Save Changes
+      - name: Save changes
         id: save_changes
         run: .github/scripts/500.save_changes.sh
