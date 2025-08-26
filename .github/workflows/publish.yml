@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Fix Version
         id: fix_version
-        run: .github/scripts/200.fix_version.sh
+        run: .github/scripts/100.fix_version.sh
   tests:
     needs: fix_version
     name: Run Tests
@@ -20,7 +20,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run tests
         id: run_tests
-        run: .github/scripts/300.run_tests.sh
+        run: .github/scripts/200.run_tests.sh
   publish:
     needs:
       - fix_version
@@ -39,7 +39,7 @@ jobs:
             ${{ runner.os }}-go-
       - name: Create identity
         id: create_identity
-        run: .github/scripts/100.create_identity.sh
+        run: .github/scripts/300.create_identity.sh
       - name: Create zip
         id: create_zip
         run: .github/scripts/400.create_zip.sh
