@@ -8,8 +8,15 @@ jobs:
     name: Release
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
       - name: Create identity
         id: create_identity
         run: .github/scripts/000.create_identity.sh
