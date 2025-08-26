@@ -9,6 +9,21 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Publish
-        id: publish
-        run: .github/scripts/publish.sh
+      - name: Create identity
+        id: create_identity
+        run: .github/scripts/100.create_identity.sh
+      - name: Fix version
+        id: fix_version
+        run: .github/scripts/200.fix_version.sh
+      - name: Run tests
+        id: run_tests
+        run: .github/scripts/300.run_tests.sh
+      - name: Create zip
+        id: create_zip
+        run: .github/scripts/400.create_zip.sh
+      - name: Create tag
+        id: create_tag
+        run: .github/scripts/500.create_tag.sh
+      - name: Save changes
+        id: save_changes
+        run: .github/scripts/600.save_changes.sh
