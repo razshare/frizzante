@@ -1,21 +1,21 @@
-name: Publish
+name: build
 on:
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
   tests:
-    name: Run Tests
+    name: run tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Run tests
+      - name: run tests
         id: run_tests
         run: .github/scripts/100.run_tests.sh
   publish:
     needs:
       - tests
-    name: Publish
+    name: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -27,18 +27,18 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: Fix Version
+      - name: fix Version
         id: fix_version
         run: .github/scripts/200.fix_version.sh
-      - name: Create identity
+      - name: create identity
         id: create_identity
         run: .github/scripts/300.create_identity.sh
-      - name: Create zip
+      - name: create zip
         id: create_zip
         run: .github/scripts/400.create_zip.sh
-      - name: Create tag
+      - name: create tag
         id: create_tag
         run: .github/scripts/500.create_tag.sh
-      - name: Save changes
+      - name: save changes
         id: save_changes
         run: .github/scripts/600.save_changes.sh
