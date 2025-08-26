@@ -2,6 +2,7 @@ package action
 
 import (
 	"fmt"
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
@@ -21,10 +22,12 @@ func Dev(opts DevOptions) (err error) {
 	}
 
 	var air string
-	if air, err = exec.LookPath(opts.Air); err != nil {
+	if files.IsFile(opts.Air) {
 		if air, err = filepath.Rel(opts.App, opts.Air); err != nil {
 			return err
 		}
+	} else if air, err = exec.LookPath(opts.Air); err != nil {
+		air = opts.Air
 	}
 
 	airwatch := exec.Command(air)

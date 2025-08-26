@@ -44,6 +44,12 @@ type BunOptions struct {
 	Platform platform.Platform
 }
 
+type SqlcOptions struct {
+	Sqlc     string
+	Auto     bool
+	Platform platform.Platform
+}
+
 type CoreOptions struct {
 	App  string
 	Auto bool

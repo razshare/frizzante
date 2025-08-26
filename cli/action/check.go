@@ -1,22 +1,25 @@
 package action
 
 import (
+	"github.com/razshare/frizzante/files"
 	"os"
 	"os/exec"
 	"path/filepath"
 )
 
 func Check(opts CheckOptions) error {
-	err := Touch(TouchOptions{App: opts.App})
-	if err != nil {
+	if err := Touch(TouchOptions{App: opts.App}); err != nil {
 		return err
 	}
 
 	var bun string
-	if bun, err = exec.LookPath(opts.Bun); err != nil {
+	var err error
+	if files.IsFile(opts.Bun) {
 		if bun, err = filepath.Rel(opts.App, opts.Bun); err != nil {
 			return err
 		}
+	} else if bun, err = exec.LookPath(opts.Bun); err != nil {
+		bun = opts.Bun
 	}
 
 	eslint := exec.Command(bun, "x", "eslint")
@@ -25,8 +28,7 @@ func Check(opts CheckOptions) error {
 	eslint.Stderr = os.Stderr
 	eslint.Stdout = os.Stdout
 	eslint.Stdin = os.Stdin
-	err = eslint.Run()
-	if err != nil {
+	if err := eslint.Run(); err != nil {
 		return err
 	}
 
@@ -36,8 +38,7 @@ func Check(opts CheckOptions) error {
 	svelteCheck.Stderr = os.Stderr
 	svelteCheck.Stdout = os.Stdout
 	svelteCheck.Stdin = os.Stdin
-	err = svelteCheck.Run()
-	if err != nil {
+	if err := svelteCheck.Run(); err != nil {
 		return err
 	}
 	return nil

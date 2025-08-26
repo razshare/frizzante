@@ -1,6 +1,7 @@
 package action
 
 import (
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
@@ -14,10 +15,12 @@ func Pkg(opts PkgOptions) error {
 	}
 
 	var bun string
-	if bun, err = exec.LookPath(opts.Bun); err != nil {
+	if files.IsFile(opts.Bun) {
 		if bun, err = filepath.Rel(opts.App, opts.Bun); err != nil {
 			return err
 		}
+	} else if bun, err = exec.LookPath(opts.Bun); err != nil {
+		bun = opts.Bun
 	}
 
 	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")

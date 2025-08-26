@@ -3,7 +3,6 @@ package codegen
 import (
 	"fmt"
 	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/platform"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
 	"os"
@@ -12,29 +11,8 @@ import (
 )
 
 func Queries(opts QueriesOptions) (err error) {
-	if !files.IsFile(opts.Sqlc) {
-		var url string
-
-		if opts.Platform == platform.DarwinArm64 {
-			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_arm64.zip"
-		} else if opts.Platform == platform.DarwinAmd64 {
-			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_darwin_amd64.zip"
-		} else if opts.Platform == platform.LinuxArm64 {
-			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_arm64.zip"
-		} else if opts.Platform == platform.LinuxAmd64 {
-			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_linux_amd64.zip"
-		} else if opts.Platform == platform.WindowsArm64 {
-			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
-		} else if opts.Platform == platform.WindowsAmd64 {
-			url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
-		}
-
-		var install Install
-		if install, _, err = Download(DownloadOptions{Url: url, Auto: opts.Auto}); err != nil {
-			return
-		}
-
-		if _, err = install(opts.Sqlc); err != nil {
+	if _, perr := exec.LookPath(opts.Sqlc); perr != nil && !files.IsFile(opts.Sqlc) {
+		if err = Sqlc(SqlcOptions{Sqlc: opts.Sqlc, Platform: opts.Platform, Auto: opts.Auto}); err != nil {
 			return
 		}
 	}

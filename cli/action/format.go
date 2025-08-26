@@ -1,6 +1,7 @@
 package action
 
 import (
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
@@ -8,8 +9,8 @@ import (
 )
 
 func Format(opts FormatOptions) error {
-	err := Touch(TouchOptions{App: opts.App})
-	if err != nil {
+
+	if err := Touch(TouchOptions{App: opts.App}); err != nil {
 		return err
 	}
 
@@ -18,16 +19,18 @@ func Format(opts FormatOptions) error {
 	gofmt.Stderr = os.Stderr
 	gofmt.Stdout = os.Stdout
 	gofmt.Stdin = os.Stdin
-	err = gofmt.Run()
-	if err != nil {
+	if err := gofmt.Run(); err != nil {
 		return err
 	}
 
 	var bun string
-	if bun, err = exec.LookPath(opts.Bun); err != nil {
+	var err error
+	if files.IsFile(opts.Bun) {
 		if bun, err = filepath.Rel(opts.App, opts.Bun); err != nil {
 			return err
 		}
+	} else if bun, err = exec.LookPath(opts.Bun); err != nil {
+		bun = opts.Bun
 	}
 
 	pretty := exec.Command(bun, "x", "prettier", "--write", ".")
@@ -36,8 +39,7 @@ func Format(opts FormatOptions) error {
 	pretty.Stderr = os.Stderr
 	pretty.Stdout = os.Stdout
 	pretty.Stdin = os.Stdin
-	err = pretty.Run()
-	if err != nil {
+	if err := pretty.Run(); err != nil {
 		return err
 	}
 
