@@ -18,12 +18,14 @@ jobs:
         run: .github/scripts/100.fix_version.sh
   tests:
       name: Run Tests
+      needs: initialize
       runs-on: ubuntu-latest
       steps:
         - name: Run tests
           id: run_tests
           run: .github/scripts/200.run_tests.sh
   release:
+    needs: tests
     name: Release
     runs-on: ubuntu-latest
     steps:
