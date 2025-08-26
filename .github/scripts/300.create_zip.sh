@@ -1,13 +1,6 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2155
 export frizzante_version=$(< version)
-export frizzante_version_tagged=$(git describe --tags --abbrev=0)
-
-if [[ "$frizzante_version" == "$frizzante_version_tagged" ]]
-then
-  exit 0
-fi
-
 pushd template && \
 rm -fr project.tmp && cp -r project project.tmp && \
 rm -f project.tmp/go.sum && \
