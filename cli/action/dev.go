@@ -20,12 +20,19 @@ func Dev(opts DevOptions) (err error) {
 		return
 	}
 
-	air := exec.Command(opts.Air)
-	air.Env = append(os.Environ(), "DEV=1")
-	air.Stderr = os.Stderr
-	air.Stdout = os.Stdout
-	air.Stdin = os.Stdin
-	err = air.Start()
+	var air string
+	if air, err = exec.LookPath(opts.Air); err != nil {
+		if air, err = filepath.Rel(opts.App, opts.Air); err != nil {
+			return err
+		}
+	}
+
+	airwatch := exec.Command(air)
+	airwatch.Env = append(os.Environ(), "DEV=1")
+	airwatch.Stderr = os.Stderr
+	airwatch.Stdout = os.Stdout
+	airwatch.Stdin = os.Stdin
+	err = airwatch.Start()
 	if err != nil {
 		return fmt.Errorf("air watcher failed to launch\n%s", err)
 	}
@@ -40,7 +47,7 @@ func Dev(opts DevOptions) (err error) {
 
 	group.Wait()
 
-	err = air.Wait()
+	err = airwatch.Wait()
 	if err != nil {
 		return
 	}

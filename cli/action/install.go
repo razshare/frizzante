@@ -29,9 +29,11 @@ func Install(opts InstallOptions) error {
 		return err
 	}
 
-	bun, err := filepath.Rel(opts.App, opts.Bun)
-	if err != nil {
-		return err
+	var bun string
+	if bun, err = exec.LookPath(opts.Bun); err != nil {
+		if bun, err = filepath.Rel(opts.App, opts.Bun); err != nil {
+			return err
+		}
 	}
 
 	ins := exec.Command(bun, "install")

@@ -3,6 +3,7 @@ package action
 import (
 	"github.com/razshare/frizzante/cli/npm"
 	"github.com/razshare/frizzante/tui/npmselect"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -16,9 +17,11 @@ func Npm(opts NpmOptions) error {
 		return nil
 	}
 
-	bun, err := filepath.Rel(opts.App, opts.Bun)
-	if err != nil {
-		return err
+	var bun string
+	if bun, err = exec.LookPath(opts.Bun); err != nil {
+		if bun, err = filepath.Rel(opts.App, opts.Bun); err != nil {
+			return err
+		}
 	}
 
 	return npm.Install(bun, opts.App, pkgs...)
