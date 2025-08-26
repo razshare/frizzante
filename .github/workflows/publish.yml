@@ -4,26 +4,16 @@ on:
 permissions:
   contents: write
 jobs:
-  fix_version:
-    name: Fix Version
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Fix Version
-        id: fix_version
-        run: .github/scripts/100.fix_version.sh
   tests:
-    needs: fix_version
     name: Run Tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Run tests
         id: run_tests
-        run: .github/scripts/200.run_tests.sh
+        run: .github/scripts/100.run_tests.sh
   publish:
     needs:
-      - fix_version
       - tests
     name: Publish
     runs-on: ubuntu-latest
@@ -37,6 +27,9 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
+      - name: Fix Version
+        id: fix_version
+        run: .github/scripts/200.fix_version.sh
       - name: Create identity
         id: create_identity
         run: .github/scripts/300.create_identity.sh
