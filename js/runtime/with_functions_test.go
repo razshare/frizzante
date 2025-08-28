@@ -37,5 +37,20 @@ func TestWithFunctions(t *testing.T) {
 	if !invoked2 {
 		t.Fatal("custom_function_2 should be invoked")
 	}
+}
 
+func TestWithFunctionsShouldFail(t *testing.T) {
+	run := goja.New()
+	err := WithFunctions(run, map[string]js.Function{
+		"?''^_@_-custom_function_1": func(call goja.FunctionCall) goja.Value {
+			return goja.Undefined()
+		},
+		"custom_function_2": func(call goja.FunctionCall) goja.Value {
+			return goja.Undefined()
+		},
+	})
+	if err != nil {
+		t.Fatal("functions should fail assignment")
+		return
+	}
 }

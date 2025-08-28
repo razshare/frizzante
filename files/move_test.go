@@ -28,3 +28,9 @@ func TestMove(t *testing.T) {
 		t.Fatal("dir/move should be a directory")
 	}
 }
+
+func TestMoveShouldFail(t *testing.T) {
+	if err := Move("-- ;,", filepath.Join("dir", "move", "move.txt")); err == nil {
+		t.Fatal("move should fail")
+	}
+}

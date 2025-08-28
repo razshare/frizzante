@@ -12,11 +12,11 @@ import (
 	"sync"
 )
 
-var Mutex sync.Mutex
+var PlatformMutex sync.Mutex
 
 func Platform(a *app.App) (plat platform.Platform, err error) {
-	Mutex.Lock()
-	defer Mutex.Unlock()
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
 
 	var home string
 	if home, err = FrizzanteHome(); err != nil {
@@ -42,8 +42,7 @@ func Platform(a *app.App) (plat platform.Platform, err error) {
 	}
 
 	save := func() {
-		dir := filepath.Dir(name)
-		if !files.IsDirectory(dir) {
+		if dir := filepath.Dir(name); !files.IsDirectory(dir) {
 			if err = os.MkdirAll(dir, os.ModePerm); err != nil {
 				messages.Error(err)
 				return
