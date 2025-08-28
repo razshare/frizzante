@@ -31,15 +31,15 @@ func Init(efs embed.FS) (err error) {
 		}
 	}
 
-	if err = embeds.CopyFile(efs, "internal/template/project.zip", filepath.Join(home, "template", "project.zip")); err != nil {
+	if err = embeds.CopyFile(efs, "internal/template/project.zip", filepath.Join(home, "internal", "template", "project.zip")); err != nil {
 		return
 	}
 
-	if err = files.UnzipFile(filepath.Join(home, "internal", "template", "project.zip"), filepath.Join(home, "template", "project.base")); err != nil {
+	if err = files.UnzipFile(filepath.Join(home, "internal", "template", "project.zip"), filepath.Join(home, "internal", "template", "project.base")); err != nil {
 		return
 	}
 
-	if err = os.Rename(filepath.Join(home, "internal", "template", "project.base", "project.tmp"), filepath.Join(home, "template", "project")); err != nil {
+	if err = os.Rename(filepath.Join(home, "internal", "template", "project.base", "project.tmp"), filepath.Join(home, "internal", "template", "project")); err != nil {
 		return
 	}
 
