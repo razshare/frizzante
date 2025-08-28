@@ -12,39 +12,27 @@ import (
 	"sync"
 )
 
-//gen:mod "mutexes" "Mutexes"
-var mutexes = map[string]*sync.Mutex{}
+var Mutexes = map[string]*sync.Mutex{}
 
-//gen:mod "start" "Start"
-//gen:mod "state" "State"
-func start(c *client.Client) *state {
-	//gen:mod "exists" "Exists"
-	if !exists(c) {
-		//gen:mod "newState" "New"
-		s := newState()
-		//gen:mod "save" "Save"
-		save(c, s)
+func Start(c *client.Client) *State {
+	if !Exists(c) {
+		s := New()
+		Save(c, s)
 		return s
 	}
 
-	//gen:mod "load" "Load"
-	return load(c)
+	return Load(c)
 }
 
-//gen:mod "exists" "Exists"
-func exists(c *client.Client) bool {
+func Exists(c *client.Client) bool {
 	id := receive.SessionId(c)
-	//gen:mod "lock" "Lock"
-	mtx := lock(c)
+	mtx := Lock(c)
 	defer mtx.Unlock()
 	return files.IsFile(filepath.Join(".gen", "sessions", id+".json"))
 }
 
-//gen:mod "save" "Save"
-//gen:mod "state" "State"
-func save(c *client.Client, s *state) {
-	//gen:mod "lock" "Lock"
-	mtx := lock(c)
+func Save(c *client.Client, s *State) {
+	mtx := Lock(c)
 	defer mtx.Unlock()
 
 	dn := filepath.Join(".gen", "sessions")
@@ -72,11 +60,8 @@ func save(c *client.Client, s *state) {
 	}
 }
 
-//gen:mod "load" "Load"
-//gen:mod "state" "State"
-func load(c *client.Client) *state {
-	//gen:mod "lock" "Lock"
-	mtx := lock(c)
+func Load(c *client.Client) *State {
+	mtx := Lock(c)
 	defer mtx.Unlock()
 
 	dn := filepath.Join(".gen", "sessions")
@@ -91,8 +76,7 @@ func load(c *client.Client) *state {
 	id := receive.SessionId(c)
 	n := filepath.Join(dn, id+".json")
 
-	//gen:mod "newState" "New"
-	v := newState()
+	v := New()
 
 	var d []byte
 	d, err := os.ReadFile(n)
@@ -109,17 +93,14 @@ func load(c *client.Client) *state {
 	return v
 }
 
-//gen:mod "lock" "Lock"
-func lock(c *client.Client) *sync.Mutex {
+func Lock(c *client.Client) *sync.Mutex {
 	id := receive.SessionId(c)
-	//gen:mod "mutexes" "Mutexes"
-	mtx, ok := mutexes[id]
+	mtx, ok := Mutexes[id]
 
 	if !ok {
 		mtx = &sync.Mutex{}
 		mtx.Lock()
-		//gen:mod "mutexes" "Mutexes"
-		mutexes[id] = mtx
+		Mutexes[id] = mtx
 	} else {
 		mtx.Lock()
 	}

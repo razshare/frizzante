@@ -4,7 +4,7 @@ import "path/filepath"
 
 func Project(opts ProjectOptions) error {
 	return Copy(CopyOptions{
-		From: filepath.Join("template", "project"),
+		From: filepath.Join("internal", "template", "project"),
 		To:   opts.Name,
 		Auto: opts.Auto,
 	})

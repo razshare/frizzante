@@ -14,18 +14,18 @@ import (
 //go:embed clilogo.txt
 //go:embed database.sqlite
 //go:embed version
-//go:embed template/lib
-//go:embed template/project.zip
+//go:embed internal/template/lib
+//go:embed internal/template/project.zip
 //go:embed sqlc.yaml
 //go:embed queries.sql
 //go:embed schema.sql
 var efs embed.FS
-var c = app.New()
+var frz = app.New()
 
 func main() {
 	flag.Parse()
-	c.Efs = efs
-	if err := cli.Start(c); err != nil {
+	frz.Efs = efs
+	if err := cli.Start(frz); err != nil {
 		if !errors.Is(err, tea.ErrInterrupted) {
 			messages.Fatal(err)
 		}

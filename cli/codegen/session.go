@@ -36,7 +36,7 @@ func Session(opts SessionOptions) (err error) {
 
 	choice = strings.ToLower(choice)
 
-	if err = Copy(CopyOptions{From: "template/lib/session/" + choice, To: opts.Lib, Auto: opts.Auto}); err != nil {
+	if err = Copy(CopyOptions{From: "internal/template/lib/session/" + choice, To: opts.Lib, Auto: opts.Auto}); err != nil {
 		return
 	}
 

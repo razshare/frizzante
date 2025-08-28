@@ -12,8 +12,8 @@ const (
 type AlignMode int
 
 const (
-	AlignMerge AlignMode = 0 // AlignMerge merges given props with existing props on the client view.
-	AlignReset AlignMode = 1 // AlignReset resets the client view props before injecting given props.
+	AlignReset AlignMode = 0 // AlignReset resets the client view props before injecting given props.
+	AlignMerge AlignMode = 1 // AlignMerge merges given props with existing props on the client view.
 )
 
 type View struct {
@@ -24,4 +24,4 @@ type View struct {
 	Props  map[string]any
 }
 
-type Render func(view View) (html string, err error)
+type Render func(v View) (html string, err error)

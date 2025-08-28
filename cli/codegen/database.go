@@ -38,7 +38,7 @@ func Database(opts DatabaseOptions) (err error) {
 
 	choice = strings.ToLower(choice)
 
-	if err = Copy(CopyOptions{From: "template/lib/database/" + choice, To: opts.Lib, Auto: opts.Auto}); err != nil {
+	if err = Copy(CopyOptions{From: "internal/template/lib/database/" + choice, To: opts.Lib, Auto: opts.Auto}); err != nil {
 		return
 	}
 

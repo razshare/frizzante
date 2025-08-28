@@ -5,23 +5,19 @@ import (
 	"embed"
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/template/lib/database/sqlite/sqlc"
+	"github.com/razshare/frizzante/internal/template/lib/database/sqlite/sqlc"
 	"log"
 	"os"
-	//gen:mod "github.com/razshare/frizzante/template" "main"
 )
 
-//gen:mod "queries" "Queries"
-var queries *sqlc.Queries
+var Queries *sqlc.Queries
 
 //go:embed source.sqlite
-//gen:mod "efs" "Efs"
-var dbf embed.FS
+var Efs embed.FS
 
 func init() {
 	if !files.IsFile("source.sqlite") {
-		//gen:mod "efs" "Efs"
-		data, readError := dbf.ReadFile("source.sqlite")
+		data, readError := Efs.ReadFile("source.sqlite")
 		if readError != nil {
 			log.Fatal(readError)
 		}
@@ -36,6 +32,5 @@ func init() {
 		log.Fatal(err)
 	}
 
-	//gen:mod "queries" "Queries"
-	queries = sqlc.New(db)
+	Queries = sqlc.New(db)
 }

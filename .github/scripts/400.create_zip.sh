@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # shellcheck disable=SC2155
 export frizzante_version=$(< version)
-pushd template && \
+pushd internal/template && \
 rm -fr project.tmp && cp -r project project.tmp && \
 rm -f project.tmp/go.sum && \
 rm -fr project.tmp/.gen && \
