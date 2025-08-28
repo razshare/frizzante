@@ -25,14 +25,23 @@ func Queries(opts QueriesOptions) (err error) {
 
 	spin := spinner.New("generating queries")
 
+	var sqlc string
+	if files.IsFile(opts.Sqlc) {
+		if sqlc, err = filepath.Rel(opts.Lib, opts.Sqlc); err != nil {
+			return err
+		}
+	} else if sqlc, err = exec.LookPath(opts.Sqlc); err != nil {
+		sqlc = opts.Sqlc
+	}
+
 	go spinner.Start(spin)
-	sqlc := exec.Command(opts.Sqlc, "generate")
-	sqlc.Dir = opts.Lib
-	sqlc.Env = append(os.Environ())
-	sqlc.Stderr = os.Stderr
-	sqlc.Stdout = os.Stdout
-	sqlc.Stdin = os.Stdin
-	err = sqlc.Run()
+	gen := exec.Command(sqlc, "generate")
+	gen.Dir = opts.Lib
+	gen.Env = append(os.Environ())
+	gen.Stderr = os.Stderr
+	gen.Stdout = os.Stdout
+	gen.Stdin = os.Stdin
+	err = gen.Run()
 	spinner.Stop(spin)
 
 	if err != nil {
