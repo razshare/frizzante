@@ -61,10 +61,10 @@ func New(a *app.App) (*Menu, error) {
 			},
 			{
 				Choice: search.Choice{Id: "create project", Description: "creates a new project"},
-				Active: func() bool { return *a.Project != "" },
+				Active: func() bool { return *a.CreateProject != "" },
 				Handler: func() error {
-					if *a.Project == "" {
-						*a.Project, err = input.Send("give the project a name")
+					if *a.CreateProject == "" {
+						*a.CreateProject, err = input.Send("give the project a name")
 						if err != nil {
 							return err
 						}
@@ -76,7 +76,7 @@ func New(a *app.App) (*Menu, error) {
 					}
 
 					return codegen.Project(codegen.ProjectOptions{
-						Name: *a.Project,
+						Name: *a.CreateProject,
 						Auto: *a.Yes,
 						Efs:  a.Efs,
 					})

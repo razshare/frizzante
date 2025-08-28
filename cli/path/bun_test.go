@@ -7,7 +7,7 @@ import (
 )
 
 func TestBun(t *testing.T) {
-	bun, err := Air("./bun/bun")
+	bun, err := Bun("./bun/bun")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -18,7 +18,7 @@ func TestBun(t *testing.T) {
 }
 
 func TestBunAtHome(t *testing.T) {
-	bun, err := Air("~/.bun/bun")
+	bun, err := Bun("~/.bun/bun")
 	if err != nil {
 		t.Fatal(err)
 	}

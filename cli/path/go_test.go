@@ -7,7 +7,7 @@ import (
 )
 
 func TestGo(t *testing.T) {
-	_go, err := Air("./go/go")
+	_go, err := Go("./go/go")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -18,7 +18,7 @@ func TestGo(t *testing.T) {
 }
 
 func TestGoAtHome(t *testing.T) {
-	_go, err := Air("~/.go/go")
+	_go, err := Go("~/.go/go")
 	if err != nil {
 		t.Fatal(err)
 	}

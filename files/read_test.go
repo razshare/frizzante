@@ -1,16 +1,13 @@
-package embeds
+package files
 
 import (
-	"embed"
+	"path/filepath"
 	"slices"
 	"testing"
 )
 
-//go:embed dir
-var TestReadDirectoryEfs embed.FS
-
 func TestReadDirectory(t *testing.T) {
-	ents, err := ReadDirectory(TestReadDirectoryEfs, "dir")
+	ents, err := ReadDirectory("dir")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -19,22 +16,19 @@ func TestReadDirectory(t *testing.T) {
 		t.Fatal("ents should contain 2 items")
 	}
 
-	if !slices.Contains(ents, "dir/subdir/test.txt") {
+	if !slices.Contains(ents, filepath.Join("dir", "subdir", "test.txt")) {
 		t.Fatal("ents should contain dir/subdir/test.txt")
 	}
 
-	if !slices.Contains(ents, "dir/test.txt") {
+	if !slices.Contains(ents, filepath.Join("dir", "test.txt")) {
 		t.Fatal("ents should contain dir/test.txt")
 	}
 }
 
-//go:embed dir/test.txt
-var TestReadFileInChunksEfs embed.FS
-
 func TestReadFileInChunks(t *testing.T) {
 	var i int
 	var v string
-	err := ReadFileInChunks(TestReadFileInChunksEfs, "dir/test.txt", 5, func(b []byte) error {
+	err := ReadFileInChunks(filepath.Join("dir", "test.txt"), 5, func(b []byte) error {
 		i++
 		v += string(b)
 		return nil

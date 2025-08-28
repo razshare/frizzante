@@ -7,29 +7,43 @@ import (
 )
 
 func TestCopyFile(t *testing.T) {
-	_ = os.RemoveAll("test_copy_file")
-	defer func() { _ = os.RemoveAll("test_copy_file") }()
+	_ = os.RemoveAll("test_copy_file_dir")
+	defer func() { _ = os.RemoveAll("test_copy_file_dir") }()
 
-	err := CopyFile("copy_test.go", filepath.Join("test_copy_file", "copy_test.go"))
+	err := CopyFile("copy_test.go", filepath.Join("test_copy_file_dir", "copy_test.go"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !IsFile(filepath.Join("test_copy_file", "copy_test.go")) {
-		t.Fatalf("test_copy_file/copy_test.go should be a file")
+	if !IsFile(filepath.Join("test_copy_file_dir", "copy_test.go")) {
+		t.Fatalf("test_copy_file_dir/copy_test.go should be a file")
+	}
+
+	err = CopyFile(filepath.Join("dir", "test.txt"), filepath.Join("test_copy_file_dir", "copy_test.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	d, err := os.ReadFile(filepath.Join("test_copy_file_dir", "copy_test.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if string(d) != "hello world" {
+		t.Fatal("test_copy_file_dir/copy_test.go should contain hello world")
 	}
 }
 
 func TestCopyDirectory(t *testing.T) {
-	_ = os.RemoveAll("test_copy_directory")
-	defer func() { _ = os.RemoveAll("test_copy_directory") }()
+	_ = os.RemoveAll("test_copy_file_dir")
+	defer func() { _ = os.RemoveAll("test_copy_file_dir") }()
 
-	err := CopyDirectory("dir", "test_copy_directory")
+	err := CopyDirectory("dir", "test_copy_file_dir")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !IsDirectory("test_copy_directory") {
-		t.Fatalf("test_copy_directory should be a directory")
+	if !IsDirectory("test_copy_file_dir") {
+		t.Fatalf("test_copy_file_dir should be a directory")
 	}
 }

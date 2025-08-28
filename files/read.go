@@ -1,6 +1,8 @@
 package files
 
 import (
+	"errors"
+	"io"
 	"os"
 	"path/filepath"
 	"slices"
@@ -51,21 +53,16 @@ func ReadFileInChunks(name string, max int, call func([]byte) error) (err error)
 
 	var size int
 	for {
-		if size, err = file.Read(buf); err != nil {
-			return
-		}
+		size, err = file.Read(buf)
 
-		if size == 0 {
-			return
-		}
-
-		if size < max {
-			if err = call(buf[:size-1]); err != nil {
+		if size > 0 {
+			if err = call(buf[:size]); err != nil {
 				return
 			}
 		}
 
-		if err = call(buf); err != nil {
+		if errors.Is(err, io.EOF) {
+			err = nil
 			return
 		}
 	}

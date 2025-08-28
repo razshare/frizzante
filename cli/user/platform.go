@@ -9,10 +9,14 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 )
 
+var Mutex sync.Mutex
+
 func Platform(a *app.App) (platform.Platform, error) {
-	var plat string
+	Mutex.Lock()
+	defer Mutex.Unlock()
 
 	home, err := FrizzanteHome()
 	if err != nil {
@@ -21,6 +25,7 @@ func Platform(a *app.App) (platform.Platform, error) {
 
 	txt := filepath.Join(home, "platform.txt")
 
+	var plat string
 	if files.IsFile(txt) {
 		var d []byte
 		d, err = os.ReadFile(txt)

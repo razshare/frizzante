@@ -38,3 +38,23 @@ func TestBundle(t *testing.T) {
 		t.Fatalf("value should be hello")
 	}
 }
+
+func TestBundleShouldFail(t *testing.T) {
+	src := `
+	import { writable } from 'svelte/store___' //invalid import, this should fail
+	const test = writable("hello")
+	let result
+	function done(){
+		return result
+	}
+	test.subscribe(function updated(value){
+		result = value
+	})
+	done()
+	`
+
+	_, err := Bundle(filepath.Join("app"), api.FormatCommonJS, src)
+	if err == nil {
+		t.Fatal("bundle should fail")
+	}
+}

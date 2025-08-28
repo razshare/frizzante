@@ -2,7 +2,9 @@ package embeds
 
 import (
 	"embed"
+	"errors"
 	"fmt"
+	"io"
 	"io/fs"
 	"slices"
 )
@@ -48,21 +50,16 @@ func ReadFileInChunks(efs embed.FS, from string, max int, call func([]byte) erro
 
 	var size int
 	for {
-		if size, err = file.Read(buf); err != nil {
-			return err
-		}
+		size, err = file.Read(buf)
 
-		if size == 0 {
-			return
-		}
-
-		if size < max {
-			if err = call(buf[:size-1]); err != nil {
+		if size > 0 {
+			if err = call(buf[:size]); err != nil {
 				return
 			}
 		}
 
-		if err = call(buf); err != nil {
+		if errors.Is(err, io.EOF) {
+			err = nil
 			return
 		}
 	}

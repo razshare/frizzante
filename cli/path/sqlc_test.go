@@ -7,7 +7,7 @@ import (
 )
 
 func TestSqlc(t *testing.T) {
-	sqlc, err := Air("./sqlc/sqlc")
+	sqlc, err := Sqlc("./sqlc/sqlc")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -18,7 +18,7 @@ func TestSqlc(t *testing.T) {
 }
 
 func TestSqlcAtHome(t *testing.T) {
-	sqlc, err := Air("~/.sqlc/sqlc")
+	sqlc, err := Sqlc("~/.sqlc/sqlc")
 	if err != nil {
 		t.Fatal(err)
 	}

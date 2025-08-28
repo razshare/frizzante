@@ -2,10 +2,10 @@ package action
 
 import "strings"
 
-func Version(opts VersionOptions) error {
-	data, err := opts.Efs.ReadFile("version")
-	if err != nil {
-		return err
+func Version(opts VersionOptions) (err error) {
+	var data []byte
+	if data, err = opts.Efs.ReadFile("version"); err != nil {
+		return
 	}
 
 	version := string(data)
@@ -13,10 +13,10 @@ func Version(opts VersionOptions) error {
 	lines := strings.Split(version, "\n")
 
 	if len(lines) == 0 {
-		return nil
+		return
 	}
 
 	println(lines[0])
 
-	return nil
+	return
 }
