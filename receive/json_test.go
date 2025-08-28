@@ -12,8 +12,9 @@ func TestJson(t *testing.T) {
 	c := mock.NewClient()
 	b := c.Request.Body.(*mock.RequestBody)
 	b.MockBuffer = []byte(`{"key":"value"}`)
-	p := Json[Payload](c)
-	if p.Key != "value" {
+	var v Payload
+	Json(c, &v)
+	if v.Key != "value" {
 		t.Fatal("key should be value")
 	}
 }

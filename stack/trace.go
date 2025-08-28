@@ -7,8 +7,8 @@ import (
 	"strings"
 )
 
-var TraceEnabled = os.Getenv("DEV") == "1" || os.Getenv("TRACE") == "1"
 var TraceSize = 10
+var TraceEnabled = os.Getenv("DEV") == "1" || os.Getenv("TRACE") == "1"
 
 // Trace returns the stack trace including the file name and line number.
 func Trace() string {
