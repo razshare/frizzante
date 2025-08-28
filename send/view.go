@@ -27,6 +27,11 @@ func View(client *client.Client, view v.View) {
 		return
 	}
 
+	if client.Config.Render == nil {
+		client.Config.ErrorLog.Println("render function is missing", stack.Trace())
+		return
+	}
+
 	html, err := client.Config.Render(view)
 	if err != nil {
 		client.Config.ErrorLog.Println(err, stack.Trace())

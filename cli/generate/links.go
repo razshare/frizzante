@@ -1,4 +1,4 @@
-package codegen
+package generate
 
 import "path/filepath"
 

@@ -1,4 +1,4 @@
-package codegen
+package generate
 
 import (
 	"github.com/razshare/frizzante/files"

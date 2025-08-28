@@ -2,7 +2,7 @@ package action
 
 import (
 	"errors"
-	"github.com/razshare/frizzante/cli/codegen"
+	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/tui/multiselect"
 	"github.com/razshare/frizzante/tui/search"
 	"path/filepath"
@@ -10,31 +10,31 @@ import (
 )
 
 func Generate(options GenerateOptions) (err error) {
-	if err = codegen.Init(options.Efs); err != nil {
+	if err = generate.Init(options.Efs); err != nil {
 		return
 	}
 
 	pick := func(gen string) error {
 		if gen == "air" {
-			return codegen.Air(codegen.AirOptions{
+			return generate.Air(generate.AirOptions{
 				Air:      options.Air,
 				Auto:     options.Auto,
 				Platform: options.Platform,
 			})
 		} else if gen == "bun" {
-			return codegen.Bun(codegen.BunOptions{
+			return generate.Bun(generate.BunOptions{
 				Bun:      options.Bun,
 				Auto:     options.Auto,
 				Platform: options.Platform,
 			})
 		} else if gen == "session" {
-			return codegen.Session(codegen.SessionOptions{
+			return generate.Session(generate.SessionOptions{
 				Auto: options.Auto,
 				Lib:  filepath.Join("lib", "session"),
 				Efs:  options.Efs,
 			})
 		} else if gen == "database" {
-			return codegen.Database(codegen.DatabaseOptions{
+			return generate.Database(generate.DatabaseOptions{
 				Generate: gen,
 				Auto:     options.Auto,
 				Go:       options.Go,
@@ -44,28 +44,28 @@ func Generate(options GenerateOptions) (err error) {
 				Lib:      filepath.Join("lib", "database"),
 			})
 		} else if gen == "queries" {
-			return codegen.Queries(codegen.QueriesOptions{
+			return generate.Queries(generate.QueriesOptions{
 				Auto:     options.Auto,
 				Sqlc:     options.Sqlc,
 				Platform: options.Platform,
 				Lib:      filepath.Join("lib", "database"),
 			})
 		} else if gen == "core" {
-			return codegen.Core(codegen.CoreOptions{
+			return generate.Core(generate.CoreOptions{
 				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,
 				Lib:  filepath.Join(options.App, "frizzante", "core"),
 			})
 		} else if gen == "forms" {
-			return codegen.Forms(codegen.FormsOptions{
+			return generate.Forms(generate.FormsOptions{
 				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,
 				Lib:  filepath.Join(options.App, "frizzante", "forms"),
 			})
 		} else if gen == "links" {
-			return codegen.Links(codegen.LinksOptions{
+			return generate.Links(generate.LinksOptions{
 				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,

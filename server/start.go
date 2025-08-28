@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/razshare/frizzante/client"
+	"github.com/razshare/frizzante/stack"
 	"net/http"
 	"slices"
 	"strings"
@@ -62,7 +63,7 @@ func Start(server *Server) {
 				server.InfoLog.Println("shutting down server")
 				return
 			}
-			server.ErrorLog.Println(err)
+			server.ErrorLog.Println(err, stack.Trace())
 		}
 	}()
 
@@ -80,7 +81,7 @@ func Start(server *Server) {
 					server.InfoLog.Println("shutting down server")
 					return
 				}
-				server.ErrorLog.Println(err)
+				server.ErrorLog.Println(err, stack.Trace())
 			}
 		}
 	}()

@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-make clean configure package sync test
+make reset clean configure package sync test

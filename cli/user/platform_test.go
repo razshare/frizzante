@@ -10,6 +10,9 @@ import (
 )
 
 func TestPlatformLinuxAmd64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	home, err := FrizzanteHome()
 	if err != nil {
 		t.Fatal(err)
@@ -40,11 +43,14 @@ func TestPlatformLinuxAmd64(t *testing.T) {
 	}
 
 	if string(d) != "linux/amd64" {
-		t.Fatal("~/platform.txt should container linux/amd64")
+		t.Fatal("~/platform.txt should contain linux/amd64")
 	}
 }
 
 func TestPlatformLinuxArm64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	home, err := FrizzanteHome()
 	if err != nil {
 		t.Fatal(err)
@@ -75,11 +81,14 @@ func TestPlatformLinuxArm64(t *testing.T) {
 	}
 
 	if string(d) != "linux/arm64" {
-		t.Fatal("~/platform.txt should container linux/arm64")
+		t.Fatal("~/platform.txt should contain linux/arm64")
 	}
 }
 
 func TestPlatformDarwinAmd64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	home, err := FrizzanteHome()
 	if err != nil {
 		t.Fatal(err)
@@ -110,11 +119,14 @@ func TestPlatformDarwinAmd64(t *testing.T) {
 	}
 
 	if string(d) != "darwin/amd64" {
-		t.Fatal("~/platform.txt should container darwin/amd64")
+		t.Fatal("~/platform.txt should contain darwin/amd64")
 	}
 }
 
 func TestPlatformDarwinArm64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	home, err := FrizzanteHome()
 	if err != nil {
 		t.Fatal(err)
@@ -145,11 +157,14 @@ func TestPlatformDarwinArm64(t *testing.T) {
 	}
 
 	if string(d) != "darwin/arm64" {
-		t.Fatal("~/platform.txt should container darwin/arm64")
+		t.Fatal("~/platform.txt should contain darwin/arm64")
 	}
 }
 
 func TestPlatformWindowsAmd64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	home, err := FrizzanteHome()
 	if err != nil {
 		t.Fatal(err)
@@ -180,11 +195,14 @@ func TestPlatformWindowsAmd64(t *testing.T) {
 	}
 
 	if string(d) != "windows/amd64" {
-		t.Fatal("~/platform.txt should container windows/amd64")
+		t.Fatal("~/platform.txt should contain windows/amd64")
 	}
 }
 
 func TestPlatformWindowsArm64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	home, err := FrizzanteHome()
 	if err != nil {
 		t.Fatal(err)
@@ -215,11 +233,14 @@ func TestPlatformWindowsArm64(t *testing.T) {
 	}
 
 	if string(data) != "windows/arm64" {
-		t.Fatal("~/platform.txt should container windows/arm64")
+		t.Fatal("~/platform.txt should contain windows/arm64")
 	}
 }
 
 func TestTestPlatformFresh(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	home, err := FrizzanteHome()
 	if err != nil {
 		t.Fatal(err)
@@ -239,17 +260,17 @@ func TestTestPlatformFresh(t *testing.T) {
 }
 
 func TestPlatformCached(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	home, err := FrizzanteHome()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	PlatformMutex.Lock()
 	if err = os.WriteFile(filepath.Join(home, "platform.txt"), []byte("windows/arm64"), os.ModePerm); err != nil {
-		PlatformMutex.Unlock()
 		t.Fatal(err)
 	}
-	PlatformMutex.Unlock()
 
 	plat, err := Platform(&app.App{})
 	if err != nil {

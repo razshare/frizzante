@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/razshare/frizzante/cli/action"
 	"github.com/razshare/frizzante/cli/app"
-	"github.com/razshare/frizzante/cli/codegen"
+	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/cli/path"
 	"github.com/razshare/frizzante/cli/user"
 	"github.com/razshare/frizzante/tui/input"
@@ -70,12 +70,12 @@ func New(a *app.App) (*Menu, error) {
 						}
 					}
 
-					err = codegen.Init(a.Efs)
+					err = generate.Init(a.Efs)
 					if err != nil {
 						return err
 					}
 
-					return codegen.Project(codegen.ProjectOptions{
+					return generate.Project(generate.ProjectOptions{
 						Name: *a.CreateProject,
 						Auto: *a.Yes,
 						Efs:  a.Efs,

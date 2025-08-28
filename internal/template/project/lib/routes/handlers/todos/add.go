@@ -10,6 +10,7 @@ import (
 
 func Add(c *client.Client) {
 	s := session.Start(receive.SessionId(c))
+
 	d := receive.Query(c, "description")
 	if d == "" {
 		send.View(c, view.View{

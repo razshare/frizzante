@@ -17,6 +17,6 @@ func TestNew(t *testing.T) {
 		t.Fatal(err)
 	}
 	if !strings.Contains(html, "<h1>Welcome to Frizzante.</h1>") {
-		t.Fatal("view should container <h1>Welcome to Frizzante.</h1>")
+		t.Fatal("view should contain <h1>Welcome to Frizzante.</h1>")
 	}
 }

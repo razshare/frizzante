@@ -2,6 +2,8 @@ module main
 
 go 1.24.0
 
+replace github.com/razshare/frizzante => /home/raz/Github/razshare/frizzante
+
 require github.com/razshare/frizzante v1.24.1
 
 require (

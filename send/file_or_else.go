@@ -18,12 +18,12 @@ import (
 // FileOrElse sends the file requested by the client, or else falls back.
 func FileOrElse(client *client.Client, or func()) {
 	if client.WebSocket != nil {
-		client.Config.ErrorLog.Println("FileOrElse does not support web sockets")
+		client.Config.ErrorLog.Println("file_or_else does not support web sockets", stack.Trace())
 		return
 	}
 
 	if client.EventName != "" {
-		client.Config.ErrorLog.Println("FileOrElse does not support server sent events")
+		client.Config.ErrorLog.Println("file_or_else does not support server sent events", stack.Trace())
 		return
 	}
 

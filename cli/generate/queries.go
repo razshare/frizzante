@@ -1,4 +1,4 @@
-package codegen
+package generate
 
 import (
 	"fmt"
@@ -35,13 +35,13 @@ func Queries(options QueriesOptions) (err error) {
 	}
 
 	go spinner.Start(spin)
-	gen := exec.Command(sqlc, "generate")
-	gen.Dir = options.Lib
-	gen.Env = append(os.Environ())
-	gen.Stderr = os.Stderr
-	gen.Stdout = os.Stdout
-	gen.Stdin = os.Stdin
-	err = gen.Run()
+	generate := exec.Command(sqlc, "generate")
+	generate.Dir = options.Lib
+	generate.Env = append(os.Environ())
+	generate.Stderr = os.Stderr
+	generate.Stdout = os.Stdout
+	generate.Stdin = os.Stdin
+	err = generate.Run()
 	spinner.Stop(spin)
 
 	if err != nil {

@@ -38,6 +38,9 @@ update:
 	go run main.go --app="internal/template/project/app" --update
 	cd internal/template/project && make update
 
+reset:
+	go run main.go --reset
+
 coverage:
 	go test ./... -coverprofile cover.out && \
 	go tool cover -html=cover.out -o cover.html
