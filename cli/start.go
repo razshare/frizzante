@@ -16,10 +16,13 @@ func Start(a *app.App) error {
 		return err
 	}
 
-	chs := make([]search.Choice, len(m.Items))
+	chs := make([]search.Choice, 0)
 
-	for i, it := range m.Items {
-		chs[i] = it.Choice
+	for _, it := range m.Items {
+		if it.Hidden {
+			continue
+		}
+		chs = append(chs, it.Choice)
 	}
 
 	// If this for loop returns,
