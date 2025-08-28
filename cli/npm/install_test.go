@@ -31,7 +31,6 @@ func TestInstall(t *testing.T) {
 			t.Fatal(err)
 		}
 		defer func() {
-			// Ensure complete cleanup including any node_modules
 			os.RemoveAll(tmpDir)
 		}()
 
@@ -41,13 +40,11 @@ func TestInstall(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		// Use a mock command that won't actually install packages
 		err = Install("echo", tmpDir, "test-package")
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		// Verify any created node_modules will be cleaned up
 		nodeModulesPath := filepath.Join(tmpDir, "node_modules")
 		if _, err := os.Stat(nodeModulesPath); err == nil {
 			t.Logf("node_modules created at %s - will be cleaned up", nodeModulesPath)
@@ -60,7 +57,6 @@ func TestInstall(t *testing.T) {
 			t.Fatal(err)
 		}
 		defer func() {
-			// Ensure complete cleanup including any node_modules
 			os.RemoveAll(tmpDir)
 		}()
 
@@ -70,13 +66,11 @@ func TestInstall(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		// Use a mock command that won't actually install packages
 		err = Install("echo", tmpDir, "package1", "package2", "package3")
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
 		}
 
-		// Verify any created node_modules will be cleaned up
 		nodeModulesPath := filepath.Join(tmpDir, "node_modules")
 		if _, err := os.Stat(nodeModulesPath); err == nil {
 			t.Logf("node_modules created at %s - will be cleaned up", nodeModulesPath)
@@ -89,7 +83,6 @@ func TestInstall(t *testing.T) {
 			t.Fatal(err)
 		}
 		defer func() {
-			// Ensure complete cleanup including any node_modules
 			os.RemoveAll(tmpDir)
 		}()
 
@@ -98,7 +91,6 @@ func TestInstall(t *testing.T) {
 			t.Fatalf("Install should not return error even if command fails: %v", err)
 		}
 
-		// Verify cleanup will happen even on failure
 		nodeModulesPath := filepath.Join(tmpDir, "node_modules")
 		if _, err := os.Stat(nodeModulesPath); err == nil {
 			t.Logf("node_modules created at %s - will be cleaned up", nodeModulesPath)
