@@ -30,7 +30,10 @@ func TestInstall(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer os.RemoveAll(tmpDir)
+		defer func() {
+			// Ensure complete cleanup including any node_modules
+			os.RemoveAll(tmpDir)
+		}()
 
 		packageJsonPath := filepath.Join(tmpDir, "package.json")
 		err = os.WriteFile(packageJsonPath, []byte(`{"name":"test","version":"1.0.0"}`), 0644)
@@ -38,9 +41,16 @@ func TestInstall(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		// Use a mock command that won't actually install packages
 		err = Install("echo", tmpDir, "test-package")
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
+		}
+
+		// Verify any created node_modules will be cleaned up
+		nodeModulesPath := filepath.Join(tmpDir, "node_modules")
+		if _, err := os.Stat(nodeModulesPath); err == nil {
+			t.Logf("node_modules created at %s - will be cleaned up", nodeModulesPath)
 		}
 	})
 
@@ -49,7 +59,10 @@ func TestInstall(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer os.RemoveAll(tmpDir)
+		defer func() {
+			// Ensure complete cleanup including any node_modules
+			os.RemoveAll(tmpDir)
+		}()
 
 		packageJsonPath := filepath.Join(tmpDir, "package.json")
 		err = os.WriteFile(packageJsonPath, []byte(`{"name":"test","version":"1.0.0"}`), 0644)
@@ -57,9 +70,16 @@ func TestInstall(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		// Use a mock command that won't actually install packages
 		err = Install("echo", tmpDir, "package1", "package2", "package3")
 		if err != nil {
 			t.Fatalf("unexpected error: %v", err)
+		}
+
+		// Verify any created node_modules will be cleaned up
+		nodeModulesPath := filepath.Join(tmpDir, "node_modules")
+		if _, err := os.Stat(nodeModulesPath); err == nil {
+			t.Logf("node_modules created at %s - will be cleaned up", nodeModulesPath)
 		}
 	})
 
@@ -68,11 +88,20 @@ func TestInstall(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		defer os.RemoveAll(tmpDir)
+		defer func() {
+			// Ensure complete cleanup including any node_modules
+			os.RemoveAll(tmpDir)
+		}()
 
 		err = Install("/non/existent/command", tmpDir, "package1")
 		if err != nil {
 			t.Fatalf("Install should not return error even if command fails: %v", err)
+		}
+
+		// Verify cleanup will happen even on failure
+		nodeModulesPath := filepath.Join(tmpDir, "node_modules")
+		if _, err := os.Stat(nodeModulesPath); err == nil {
+			t.Logf("node_modules created at %s - will be cleaned up", nodeModulesPath)
 		}
 	})
 }
