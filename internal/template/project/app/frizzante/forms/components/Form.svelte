@@ -10,7 +10,10 @@
 
     type Props = {
         method?: "GET" | "POST"
-        enctype?: "multipart/form-data" | "application/x-www-form-urlencoded" | "text/plain"
+        enctype?:
+            | "multipart/form-data"
+            | "application/x-www-form-urlencoded"
+            | "text/plain"
         action: string
         children: Snippet<[{ pending: boolean; error: false | Error }]>
         class?: string

@@ -11,4 +11,3 @@ export type HistoryEntry = {
     url: string
     body: Record<string, string>
 }
-

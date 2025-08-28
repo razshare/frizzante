@@ -114,4 +114,3 @@ export async function swap(
         window.history.pushState(JSON.stringify(entry), "", res.url)
     }
 }
-

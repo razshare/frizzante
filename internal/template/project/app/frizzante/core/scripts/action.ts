@@ -26,4 +26,3 @@ export function action(path = ""): {
         },
     }
 }
-

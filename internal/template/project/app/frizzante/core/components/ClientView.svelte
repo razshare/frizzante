@@ -21,4 +21,3 @@
         <ClientViewLoader from={components[key]} properties={view.props} />
     {/if}
 {/each}
-

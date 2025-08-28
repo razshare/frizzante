@@ -19,4 +19,3 @@
 {:then Component}
     <Component.default {...properties} />
 {/await}
-

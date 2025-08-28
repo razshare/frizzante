@@ -21,4 +21,3 @@
         <Component {...view.props} />
     {/if}
 {/each}
-
