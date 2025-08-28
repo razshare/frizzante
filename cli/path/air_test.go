@@ -23,12 +23,12 @@ func TestAirAtHome(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	usr, err := os.UserHomeDir()
+	user, err := os.UserHomeDir()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !strings.HasPrefix(air, usr) {
+	if !strings.HasPrefix(air, user) {
 		t.Fatal("binary should be prefixed with user home dir")
 	}
 }

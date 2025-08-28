@@ -8,55 +8,51 @@ import (
 	"path/filepath"
 )
 
-func Pkg(opts PkgOptions) error {
-	err := Touch(TouchOptions{App: opts.App})
-	if err != nil {
-		return err
+func Pkg(options PkgOptions) (err error) {
+	if err = Touch(TouchOptions{App: options.App}); err != nil {
+		return
 	}
 
 	var bun string
-	if files.IsFile(opts.Bun) {
-		if bun, err = filepath.Rel(opts.App, opts.Bun); err != nil {
-			return err
+	if files.IsFile(options.Bun) {
+		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
+			return
 		}
-	} else if bun, err = exec.LookPath(opts.Bun); err != nil {
-		bun = opts.Bun
+	} else if bun, err = exec.LookPath(options.Bun); err != nil {
+		bun = options.Bun
 	}
 
 	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
-	ssr.Dir = opts.App
+	ssr.Dir = options.App
 	ssr.Env = append(os.Environ())
 	ssr.Stderr = os.Stderr
 	ssr.Stdout = os.Stdout
 	ssr.Stdin = os.Stdin
-	err = ssr.Run()
-	if err != nil {
-		return err
+	if err = ssr.Run(); err != nil {
+		return
 	}
 
 	csr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
-	csr.Dir = opts.App
+	csr.Dir = options.App
 	csr.Env = append(os.Environ())
 	csr.Stderr = os.Stderr
 	csr.Stdout = os.Stdout
 	csr.Stdin = os.Stdin
-	err = csr.Run()
-	if err != nil {
+	if err = csr.Run(); err != nil {
 		return err
 	}
 
 	esb := exec.Command(filepath.Join("node_modules", ".bin", "esbuild"), "--bundle", "--outfile=dist/server.js", "--format=cjs", "--allow-overwrite", "dist/server.js")
-	esb.Dir = opts.App
+	esb.Dir = options.App
 	esb.Env = append(os.Environ())
 	esb.Stderr = os.Stderr
 	esb.Stdout = os.Stdout
 	esb.Stdin = os.Stdin
-	err = esb.Run()
-	if err != nil {
-		return err
+	if err = esb.Run(); err != nil {
+		return
 	}
 
-	messages.Success("project app package generated in ", filepath.Join(opts.App, "dist"))
+	messages.Success("project app package generated in ", filepath.Join(options.App, "dist"))
 
-	return nil
+	return
 }

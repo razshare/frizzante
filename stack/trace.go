@@ -16,18 +16,18 @@ func Trace() string {
 		return ""
 	}
 
-	var sb strings.Builder
-	ptr := make([]uintptr, TraceSize)
-	runtime.Callers(2, ptr)
-	frames := runtime.CallersFrames(ptr)
+	var builder strings.Builder
+	ptrs := make([]uintptr, TraceSize)
+	runtime.Callers(2, ptrs)
+	frames := runtime.CallersFrames(ptrs)
 
 	for {
 		frame, more := frames.Next()
-		sb.WriteString(fmt.Sprintf("%s:%d\n", frame.File, frame.Line))
+		builder.WriteString(fmt.Sprintf("%s:%d\n", frame.File, frame.Line))
 		if !more {
 			break
 		}
 	}
 
-	return sb.String()
+	return builder.String()
 }

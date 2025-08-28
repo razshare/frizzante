@@ -6,21 +6,22 @@ import (
 	"github.com/razshare/frizzante/tui/program"
 )
 
-func Send(msg string) (string, error) {
-	ti := textinput.New()
-	ti.Placeholder = "Type here..."
-	ti.Focus()
-	ti.Width = 50
+func Send(message string) (value string, err error) {
+	input := textinput.New()
+	input.Placeholder = "Type here..."
+	input.Focus()
+	input.Width = 50
 
-	model, err := program.Run(&Model{TextInput: ti, Prompt: msg})
-
-	if err != nil {
-		return "", err
+	var model *Model
+	if model, err = program.Run(&Model{TextInput: input, Prompt: message}); err != nil {
+		return
 	}
 
-	return model.TextInput.Value(), nil
+	value = model.TextInput.Value()
+
+	return
 }
 
-func Sendf(format string, vars ...any) (string, error) {
+func Sendf(format string, vars ...any) (input string, err error) {
 	return Send(fmt.Sprintf(format, vars...))
 }

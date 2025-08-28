@@ -12,21 +12,21 @@ import (
 	"strings"
 )
 
-func Database(opts DatabaseOptions) (err error) {
-	if files.IsDirectory(opts.Lib) {
-		if !opts.Auto {
+func Database(options DatabaseOptions) (err error) {
+	if files.IsDirectory(options.Lib) {
+		if !options.Auto {
 			var overwrite bool
-			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", opts.Lib); err != nil {
+			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", options.Lib); err != nil {
 				return
 			}
 
 			if !overwrite {
-				messages.Infof("skipping %s", opts.Lib)
+				messages.Infof("skipping %s", options.Lib)
 				return nil
 			}
 		}
 
-		if err = os.RemoveAll(opts.Lib); err != nil {
+		if err = os.RemoveAll(options.Lib); err != nil {
 			return
 		}
 	}
@@ -38,7 +38,7 @@ func Database(opts DatabaseOptions) (err error) {
 
 	choice = strings.ToLower(choice)
 
-	if err = Copy(CopyOptions{From: "internal/template/lib/database/" + choice, To: opts.Lib, Auto: opts.Auto}); err != nil {
+	if err = Copy(CopyOptions{From: "internal/template/lib/database/" + choice, To: options.Lib, Auto: options.Auto}); err != nil {
 		return
 	}
 
@@ -46,7 +46,7 @@ func Database(opts DatabaseOptions) (err error) {
 		spin := spinner.New("adding github.com/mattn/go-sqlite3")
 
 		go spinner.Start(spin)
-		install := exec.Command(opts.Go, "get", "github.com/mattn/go-sqlite3")
+		install := exec.Command(options.Go, "get", "github.com/mattn/go-sqlite3")
 		install.Env = append(os.Environ())
 		install.Stderr = os.Stderr
 		install.Stdout = os.Stdout
@@ -61,7 +61,7 @@ func Database(opts DatabaseOptions) (err error) {
 		spin = spinner.New("updating go dependencies")
 
 		go spinner.Start(spin)
-		get := exec.Command(opts.Go, "get", "-u", "./...")
+		get := exec.Command(options.Go, "get", "-u", "./...")
 		get.Env = append(os.Environ())
 		get.Stderr = os.Stderr
 		get.Stdout = os.Stdout
@@ -75,14 +75,14 @@ func Database(opts DatabaseOptions) (err error) {
 
 		messages.Success("sqlite database is ready")
 
-		if strings.Contains(strings.ToLower(opts.Generate), "queries") {
+		if strings.Contains(strings.ToLower(options.Generate), "queries") {
 			var queries bool
 			if queries, err = confirm.Send(true, "would you like to also generate your queries?"); err != nil {
 				return
 			}
 
 			if queries {
-				if err = Queries(QueriesOptions{Auto: opts.Auto, Sqlc: opts.Sqlc, Platform: opts.Platform}); err != nil {
+				if err = Queries(QueriesOptions{Auto: options.Auto, Sqlc: options.Sqlc, Platform: options.Platform}); err != nil {
 					return
 				}
 			}

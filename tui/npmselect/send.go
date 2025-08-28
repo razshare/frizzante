@@ -9,10 +9,11 @@ import (
 	"time"
 )
 
-func Send() ([]string, error) {
-	in := textinput.New()
-	in.Width = 80
-	m, err := program.Run(&Model{
+func Send() (selected []string, err error) {
+	input := textinput.New()
+	input.Width = 80
+	var model *Model
+	model, err = program.Run(&Model{
 		Prompt:    "search npm packages",
 		Viewport:  &viewport.Viewport{Visible: 6},
 		Selected:  make([]string, 0),
@@ -21,23 +22,23 @@ func Send() ([]string, error) {
 		Search: &search.Search{
 			Choices:  []search.Choice{},
 			Filtered: []search.Choice{},
-			Input:    in,
+			Input:    input,
 		},
 	})
 
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	ns := make([]string, 0, len(m.Selected))
-	for _, id := range m.Selected {
+	selected = make([]string, 0, len(model.Selected))
+	for _, id := range model.Selected {
 		// Remove version suffix if present (e.g., "package@1.0.0" -> "package")
-		if idx := strings.IndexByte(id, '@'); idx != -1 {
-			ns = append(ns, id[:idx])
+		if index := strings.IndexByte(id, '@'); index != -1 {
+			selected = append(selected, id[:index])
 		} else {
-			ns = append(ns, id)
+			selected = append(selected, id)
 		}
 	}
 
-	return ns, nil
+	return
 }

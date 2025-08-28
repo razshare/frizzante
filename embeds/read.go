@@ -11,20 +11,20 @@ import (
 
 func ReadDirectory(efs embed.FS, from string) (entries []string, err error) {
 	entries = make([]string, 0)
-	names, err := efs.ReadDir(from)
-	if err != nil {
-		return nil, err
+	var names []fs.DirEntry
+	if names, err = efs.ReadDir(from); err != nil {
+		return
 	}
 
 	for _, name := range names {
 		if name.IsDir() {
-			var subNames []string
-			subNames, err = ReadDirectory(efs, fmt.Sprintf("%s/%s", from, name.Name()))
+			var subentries []string
+			subentries, err = ReadDirectory(efs, fmt.Sprintf("%s/%s", from, name.Name()))
 			if err != nil {
 				return
 			}
 
-			entries = slices.Concat(entries, subNames)
+			entries = slices.Concat(entries, subentries)
 			continue
 		}
 

@@ -7,24 +7,21 @@ import (
 	"path/filepath"
 )
 
-func Build(opts BuildOptions) error {
-	err := Pkg(PkgOptions{App: opts.App, Bun: opts.Bun})
-	if err != nil {
-		return err
+func Build(options BuildOptions) (err error) {
+	if err = Pkg(PkgOptions{App: options.App, Bun: options.Bun}); err != nil {
+		return
 	}
 
-	build := exec.Command(opts.Go, "build", "-o="+filepath.Join(".gen", "bin", "app"), ".")
+	build := exec.Command(options.Go, "build", "-o="+filepath.Join(".gen", "bin", "app"), ".")
 	build.Env = os.Environ()
-
 	build.Stderr = os.Stderr
 	build.Stdout = os.Stdout
 	build.Stdin = os.Stdin
-	err = build.Run()
-	if err != nil {
-		return err
+	if err = build.Run(); err != nil {
+		return
 	}
 
 	messages.Success("project built into ", filepath.Join(".gen", "bin", "app"))
 
-	return nil
+	return
 }

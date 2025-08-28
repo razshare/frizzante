@@ -9,16 +9,15 @@ import (
 	"path/filepath"
 )
 
-func Update(opts UpdateOptions) error {
-	err := Touch(TouchOptions{App: opts.App})
-	if err != nil {
-		return err
+func Update(options UpdateOptions) (err error) {
+	if err = Touch(TouchOptions{App: options.App}); err != nil {
+		return
 	}
 
 	spin := spinner.New("updating go dependencies")
 
 	go spinner.Start(spin)
-	get := exec.Command(opts.Go, "get", "-u", "./...")
+	get := exec.Command(options.Go, "get", "-u", "./...")
 	get.Env = append(os.Environ())
 	get.Stderr = os.Stderr
 	get.Stdout = os.Stdout
@@ -27,30 +26,29 @@ func Update(opts UpdateOptions) error {
 	spinner.Stop(spin)
 
 	if err != nil {
-		return err
+		return
 	}
 
 	var bun string
-	if files.IsFile(opts.Bun) {
-		if bun, err = filepath.Rel(opts.App, opts.Bun); err != nil {
-			return err
+	if files.IsFile(options.Bun) {
+		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
+			return
 		}
-	} else if bun, err = exec.LookPath(opts.Bun); err != nil {
-		bun = opts.Bun
+	} else if bun, err = exec.LookPath(options.Bun); err != nil {
+		bun = options.Bun
 	}
 
 	pretty := exec.Command(bun, "update")
-	pretty.Dir = opts.App
+	pretty.Dir = options.App
 	pretty.Env = append(os.Environ())
 	pretty.Stderr = os.Stderr
 	pretty.Stdout = os.Stdout
 	pretty.Stdin = os.Stdin
-	err = pretty.Run()
-	if err != nil {
-		return err
+	if err = pretty.Run(); err != nil {
+		return
 	}
 
 	messages.Success("project dependencies updated")
 
-	return nil
+	return
 }

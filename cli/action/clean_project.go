@@ -7,43 +7,37 @@ import (
 	"path/filepath"
 )
 
-func CleanProject(opts CleanProjectOptions) error {
-	clean := exec.Command(opts.Go, "clean")
+func CleanProject(options CleanProjectOptions) (err error) {
+	clean := exec.Command(options.Go, "clean")
 	clean.Env = append(os.Environ())
 	clean.Stderr = os.Stderr
 	clean.Stdout = os.Stdout
 	clean.Stdin = os.Stdin
-	err := clean.Run()
-	if err != nil {
-		return err
+	if err = clean.Run(); err != nil {
+		return
 	}
 
-	err = os.RemoveAll(".gen")
-	if err != nil {
-		return err
+	if err = os.RemoveAll(".gen"); err != nil {
+		return
 	}
 
-	err = os.RemoveAll(filepath.Join(opts.App, "dist"))
-	if err != nil {
-		return err
+	if err = os.RemoveAll(filepath.Join(options.App, "dist")); err != nil {
+		return
 	}
 
-	err = os.RemoveAll(filepath.Join(opts.App, "node_modules"))
-	if err != nil {
-		return err
+	if err = os.RemoveAll(filepath.Join(options.App, "node_modules")); err != nil {
+		return
 	}
 
-	err = os.RemoveAll(filepath.Join(".vite"))
-	if err != nil {
-		return err
+	if err = os.RemoveAll(filepath.Join(".vite")); err != nil {
+		return
 	}
 
-	err = Touch(TouchOptions{App: opts.App})
-	if err != nil {
-		return err
+	if err = Touch(TouchOptions{App: options.App}); err != nil {
+		return
 	}
 
 	messages.Success("project cleaned")
 
-	return nil
+	return
 }

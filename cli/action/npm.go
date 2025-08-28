@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 )
 
-func Npm(opts NpmOptions) error {
-	pkgs, err := npmselect.Send()
-	if err != nil {
-		return err
+func Npm(options NpmOptions) (err error) {
+	var pkgs []string
+	if pkgs, err = npmselect.Send(); err != nil {
+		return
 	}
 
 	if len(pkgs) == 0 {
@@ -19,13 +19,13 @@ func Npm(opts NpmOptions) error {
 	}
 
 	var bun string
-	if files.IsFile(opts.Bun) {
-		if bun, err = filepath.Rel(opts.App, opts.Bun); err != nil {
-			return err
+	if files.IsFile(options.Bun) {
+		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
+			return
 		}
-	} else if bun, err = exec.LookPath(opts.Bun); err != nil {
-		bun = opts.Bun
+	} else if bun, err = exec.LookPath(options.Bun); err != nil {
+		bun = options.Bun
 	}
 
-	return npm.Install(bun, opts.App, pkgs...)
+	return npm.Install(bun, options.App, pkgs...)
 }

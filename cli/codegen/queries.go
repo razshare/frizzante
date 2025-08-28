@@ -10,14 +10,14 @@ import (
 	"path/filepath"
 )
 
-func Queries(opts QueriesOptions) (err error) {
-	if _, perr := exec.LookPath(opts.Sqlc); perr != nil && !files.IsFile(opts.Sqlc) {
-		if err = Sqlc(SqlcOptions{Sqlc: opts.Sqlc, Platform: opts.Platform, Auto: opts.Auto}); err != nil {
+func Queries(options QueriesOptions) (err error) {
+	if _, err = exec.LookPath(options.Sqlc); err != nil && !files.IsFile(options.Sqlc) {
+		if err = Sqlc(SqlcOptions{Sqlc: options.Sqlc, Platform: options.Platform, Auto: options.Auto}); err != nil {
 			return
 		}
 	}
 
-	yaml := filepath.Join(opts.Lib, "sqlc.yaml")
+	yaml := filepath.Join(options.Lib, "sqlc.yaml")
 
 	if !files.IsFile(yaml) {
 		return fmt.Errorf("%s not found", yaml)
@@ -26,17 +26,17 @@ func Queries(opts QueriesOptions) (err error) {
 	spin := spinner.New("generating queries")
 
 	var sqlc string
-	if files.IsFile(opts.Sqlc) {
-		if sqlc, err = filepath.Rel(opts.Lib, opts.Sqlc); err != nil {
+	if files.IsFile(options.Sqlc) {
+		if sqlc, err = filepath.Rel(options.Lib, options.Sqlc); err != nil {
 			return err
 		}
-	} else if sqlc, err = exec.LookPath(opts.Sqlc); err != nil {
-		sqlc = opts.Sqlc
+	} else if sqlc, err = exec.LookPath(options.Sqlc); err != nil {
+		sqlc = options.Sqlc
 	}
 
 	go spinner.Start(spin)
 	gen := exec.Command(sqlc, "generate")
-	gen.Dir = opts.Lib
+	gen.Dir = options.Lib
 	gen.Env = append(os.Environ())
 	gen.Stderr = os.Stderr
 	gen.Stdout = os.Stdout
@@ -50,7 +50,7 @@ func Queries(opts QueriesOptions) (err error) {
 
 	messages.Success(
 		"queries generated at database.Queries.*\n",
-		opts.Lib+"/queries.go",
+		options.Lib+"/queries.go",
 	)
 	messages.Tip(
 		"## usage example\n",

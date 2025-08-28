@@ -7,10 +7,10 @@ import (
 )
 
 func TestForm(t *testing.T) {
-	c := mock.NewClient()
-	c.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	b := c.Request.Body.(*mock.RequestBody)
-	b.MockBuffer = bytes.Join(
+	client := mock.NewClient()
+	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
+	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
 			[]byte(`Content-Disposition: form-data; name="key"`),
@@ -21,7 +21,7 @@ func TestForm(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if Form(c).Get("key") != "value" {
+	if Form(client).Get("key") != "value" {
 		t.Fatal("key should be value")
 	}
 }

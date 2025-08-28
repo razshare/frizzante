@@ -5,18 +5,18 @@ import "github.com/razshare/frizzante/client"
 // Header reads a header field and returns the value.
 //
 // Compatible with web sockets.
-func Header(c *client.Client, k string) string {
-	return c.Request.Header.Get(k)
+func Header(client *client.Client, key string) string {
+	return client.Request.Header.Get(key)
 }
 
 // ContentType reads the Content-Type header field and returns the value.
 //
 // Compatible with web sockets.
-func ContentType(c *client.Client) string {
-	return c.Request.Header.Get("Content-Type")
+func ContentType(client *client.Client) string {
+	return client.Request.Header.Get("Content-Type")
 }
 
 // Accept reads if the Accept header entries and returns the values.
-func Accept(c *client.Client) string {
-	return c.Request.Header.Get("Accept")
+func Accept(client *client.Client) string {
+	return client.Request.Header.Get("Accept")
 }

@@ -6,9 +6,9 @@ import (
 )
 
 func TestStatus(t *testing.T) {
-	c := mock.NewClient()
-	Status(c, 400)
-	if c.Status != 400 {
+	client := mock.NewClient()
+	Status(client, 400)
+	if client.Status != 400 {
 		t.Fatal("status should be 400")
 	}
 }

@@ -9,36 +9,36 @@ import (
 
 // SessionId tries to find a session id among the user's cookies.
 // If no session id is found, it creates a new one and returns it.
-func SessionId(c *client.Client) string {
-	if c.SessionId != "" {
-		return c.SessionId
+func SessionId(client *client.Client) string {
+	if client.SessionId != "" {
+		return client.SessionId
 	}
 
-	var j uint
+	var count uint
 	var id string
 
-	for _, ck := range c.Request.CookiesNamed("session-id") {
-		id = ck.Value
-		j++
+	for _, cookie := range client.Request.CookiesNamed("session-id") {
+		id = cookie.Value
+		count++
 	}
 
-	if j > 0 {
-		c.SessionId = id
+	if count > 0 {
+		client.SessionId = id
 		return id
 	}
 
 	// Create new session.
 	ido, err := uuid.NewV4()
 	if err != nil {
-		c.Config.ErrorLog.Println(err, stack.Trace())
+		client.Config.ErrorLog.Println(err, stack.Trace())
 		return ""
 	}
 
 	id = ido.String()
 
-	send.Cookie(c, "session-id", id)
+	send.Cookie(client, "session-id", id)
 
-	c.SessionId = id
+	client.SessionId = id
 
 	return id
 }

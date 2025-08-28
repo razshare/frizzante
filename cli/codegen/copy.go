@@ -10,21 +10,21 @@ import (
 	"path/filepath"
 )
 
-func Copy(opts CopyOptions) (err error) {
-	if files.IsFile(opts.To) || files.IsDirectory(opts.To) {
-		if !opts.Auto {
+func Copy(options CopyOptions) (err error) {
+	if files.IsFile(options.To) || files.IsDirectory(options.To) {
+		if !options.Auto {
 			var overwrite bool
-			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", opts.To); err != nil {
+			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", options.To); err != nil {
 				return
 			}
 
 			if !overwrite {
-				messages.Infof("skipping %s", opts.To)
+				messages.Infof("skipping %s", options.To)
 				return
 			}
 		}
 
-		if err = os.RemoveAll(opts.To); err != nil {
+		if err = os.RemoveAll(options.To); err != nil {
 			return
 		}
 	}
@@ -34,20 +34,20 @@ func Copy(opts CopyOptions) (err error) {
 		return
 	}
 
-	if files.IsDirectory(filepath.Join(home, opts.From)) {
-		if err = files.CopyDirectory(filepath.Join(home, opts.From), opts.To); err != nil {
+	if files.IsDirectory(filepath.Join(home, options.From)) {
+		if err = files.CopyDirectory(filepath.Join(home, options.From), options.To); err != nil {
 			return
 		}
-	} else if files.IsFile(filepath.Join(home, opts.From)) {
-		if err = files.CopyFile(filepath.Join(home, opts.From), opts.To); err != nil {
+	} else if files.IsFile(filepath.Join(home, options.From)) {
+		if err = files.CopyFile(filepath.Join(home, options.From), options.To); err != nil {
 			return
 		}
 	} else {
-		err = fmt.Errorf("%s not found", opts.From)
+		err = fmt.Errorf("%s not found", options.From)
 		return
 	}
 
-	messages.Successf("%s created", opts.To)
+	messages.Successf("%s created", options.To)
 
 	return
 }

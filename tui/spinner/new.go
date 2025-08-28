@@ -6,18 +6,18 @@ import (
 	"github.com/razshare/frizzante/tui/config"
 )
 
-func New(msg string) *Spinner {
-	s := spinner.New()
-	s.Spinner = spinner.Moon
-	s.Style = config.Styles.Spinner
+func New(message string) *Spinner {
+	spin := spinner.New()
+	spin.Spinner = spinner.Moon
+	spin.Style = config.Styles.Spinner
 
-	m := &Model{
-		Spinner: s,
-		Message: msg,
+	model := &Model{
+		Spinner: spin,
+		Message: message,
 	}
 
 	return &Spinner{
-		Model:   m,
-		Program: tea.NewProgram(m),
+		Model:   model,
+		Program: tea.NewProgram(model),
 	}
 }

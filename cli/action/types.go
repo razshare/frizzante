@@ -90,7 +90,7 @@ type BuildOptions struct {
 	Platform platform.Platform
 }
 
-type ConfigOptions struct {
+type ConfigureOptions struct {
 	App      string
 	Go       string
 	Air      string

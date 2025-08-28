@@ -11,11 +11,8 @@ import (
 	"time"
 )
 
-var counter = 0
-
 func Search(query string) tea.Cmd {
 	return func() tea.Msg {
-		defer func() { counter++ }()
 		if query == "" {
 			return SearchResultMsg{Packages: []npm.PackageInfo{}}
 		}

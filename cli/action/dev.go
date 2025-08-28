@@ -1,7 +1,6 @@
 package action
 
 import (
-	"fmt"
 	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
@@ -9,25 +8,22 @@ import (
 	"sync"
 )
 
-func Dev(opts DevOptions) (err error) {
-	err = Touch(TouchOptions{App: opts.App})
-	if err != nil {
+func Dev(options DevOptions) (err error) {
+	if err = Touch(TouchOptions{App: options.App}); err != nil {
 		return
 	}
 
-	err = os.MkdirAll(filepath.Join(".gen", "tmp"), os.ModePerm)
-	if err != nil {
+	if err = os.MkdirAll(filepath.Join(".gen", "tmp"), os.ModePerm); err != nil {
 		return
 	}
 
-	airwatch := exec.Command(opts.Air)
+	airwatch := exec.Command(options.Air)
 	airwatch.Env = append(os.Environ(), "DEV=1")
 	airwatch.Stderr = os.Stderr
 	airwatch.Stdout = os.Stdout
 	airwatch.Stdin = os.Stdin
-	err = airwatch.Start()
-	if err != nil {
-		return fmt.Errorf("air watcher failed to launch\n%s", err)
+	if err = airwatch.Start(); err != nil {
+		return
 	}
 
 	messages.Success("air watcher launched")
@@ -36,14 +32,13 @@ func Dev(opts DevOptions) (err error) {
 
 	group.Add(1)
 
-	go func() { err = PkgWatch(PkgWatchOptions{App: opts.App, Bun: opts.Bun}) }()
+	go func() { err = PkgWatch(PkgWatchOptions{App: options.App, Bun: options.Bun}) }()
 
 	group.Wait()
 
-	err = airwatch.Wait()
-	if err != nil {
+	if err = airwatch.Wait(); err != nil {
 		return
 	}
 
-	return nil
+	return
 }

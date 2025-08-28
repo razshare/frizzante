@@ -23,12 +23,12 @@ func TestSqlcAtHome(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	usr, err := os.UserHomeDir()
+	user, err := os.UserHomeDir()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !strings.HasPrefix(sqlc, usr) {
+	if !strings.HasPrefix(sqlc, user) {
 		t.Fatal("binary should be prefixed with user home dir")
 	}
 }

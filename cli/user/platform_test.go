@@ -15,10 +15,8 @@ func TestPlatformLinuxAmd64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = os.Remove(filepath.Join(home, "platform.txt"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	_ = os.Remove(filepath.Join(home, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
 
 	plats := "linux/amd64"
 	a := &app.App{Platform: &plats}
@@ -52,10 +50,8 @@ func TestPlatformLinuxArm64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = os.Remove(filepath.Join(home, "platform.txt"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	_ = os.Remove(filepath.Join(home, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
 
 	plats := "linux/arm64"
 	a := &app.App{Platform: &plats}
@@ -89,10 +85,8 @@ func TestPlatformDarwinAmd64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = os.Remove(filepath.Join(home, "platform.txt"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	_ = os.Remove(filepath.Join(home, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
 
 	plats := "darwin/amd64"
 	a := &app.App{Platform: &plats}
@@ -126,10 +120,8 @@ func TestPlatformDarwinArm64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = os.Remove(filepath.Join(home, "platform.txt"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	_ = os.Remove(filepath.Join(home, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
 
 	plats := "darwin/arm64"
 	a := &app.App{Platform: &plats}
@@ -163,10 +155,8 @@ func TestPlatformWindowsAmd64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = os.Remove(filepath.Join(home, "platform.txt"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	_ = os.Remove(filepath.Join(home, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
 
 	plats := "windows/amd64"
 	a := &app.App{Platform: &plats}
@@ -200,10 +190,8 @@ func TestPlatformWindowsArm64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = os.Remove(filepath.Join(home, "platform.txt"))
-	if err != nil {
-		t.Fatal(err)
-	}
+	_ = os.Remove(filepath.Join(home, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
 
 	plats := "windows/arm64"
 	a := &app.App{Platform: &plats}

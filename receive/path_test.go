@@ -6,9 +6,9 @@ import (
 )
 
 func TestPath(t *testing.T) {
-	c := mock.NewClient()
-	c.Request.SetPathValue("key", "value")
-	if Path(c, "key") != "value" {
+	client := mock.NewClient()
+	client.Request.SetPathValue("key", "value")
+	if Path(client, "key") != "value" {
 		t.Fatal("key should be value")
 	}
 }

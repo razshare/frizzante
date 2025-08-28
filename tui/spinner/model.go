@@ -5,30 +5,30 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 )
 
-func (m *Model) Init() tea.Cmd {
-	return m.Spinner.Tick
+func (model *Model) Init() tea.Cmd {
+	return model.Spinner.Tick
 }
 
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch k := msg.(type) {
+func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
+	switch assert := message.(type) {
 	case tea.KeyMsg:
-		if k.Type == tea.KeyEsc {
-			return m, tea.Quit
+		if assert.Type == tea.KeyEsc {
+			return model, tea.Quit
 		}
 
-		if k.Type == tea.KeyCtrlC {
-			if m.SoftInterrupt {
-				return m, tea.Quit
+		if assert.Type == tea.KeyCtrlC {
+			if model.SoftInterrupt {
+				return model, tea.Quit
 			}
-			return m, tea.Interrupt
+			return model, tea.Interrupt
 		}
 	}
 
 	var cmd tea.Cmd
-	m.Spinner, cmd = m.Spinner.Update(msg)
-	return m, cmd
+	model.Spinner, cmd = model.Spinner.Update(message)
+	return model, cmd
 }
 
-func (m *Model) View() string {
-	return fmt.Sprintf("%s %s\n", m.Spinner.View(), m.Message)
+func (model *Model) View() string {
+	return fmt.Sprintf("%s %s\n", model.Spinner.View(), model.Message)
 }

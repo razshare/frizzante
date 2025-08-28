@@ -6,38 +6,35 @@ import (
 	"path/filepath"
 )
 
-func Touch(opts TouchOptions) error {
-	touch := func(name string) error {
+func Touch(options TouchOptions) (err error) {
+	touch := func(name string) (err error) {
 		dir := filepath.Dir(name)
 
 		if !files.IsDirectory(dir) {
-			err := os.MkdirAll(dir, os.ModePerm)
-			if err != nil {
-				return err
+			if err = os.MkdirAll(dir, os.ModePerm); err != nil {
+				return
 			}
 		}
 
-		file, err := os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0666)
-		if err != nil {
-			return err
+		var file *os.File
+		if file, err = os.OpenFile(name, os.O_RDONLY|os.O_CREATE, 0666); err != nil {
+			return
 		}
 
-		err = file.Close()
-		if err != nil {
-			return err
+		if err = file.Close(); err != nil {
+			return
 		}
-		return nil
+
+		return
 	}
 
-	err := os.MkdirAll(filepath.Join(opts.App, "dist"), os.ModePerm)
-	if err != nil {
-		return err
+	if err = os.MkdirAll(filepath.Join(options.App, "dist"), os.ModePerm); err != nil {
+		return
 	}
 
-	err = touch(filepath.Join(opts.App, "dist", "server.js"))
-	if err != nil {
-		return err
+	if err = touch(filepath.Join(options.App, "dist", "server.js")); err != nil {
+		return
 	}
 
-	return touch(filepath.Join(opts.App, "dist", "client", "index.html"))
+	return touch(filepath.Join(options.App, "dist", "client", "index.html"))
 }

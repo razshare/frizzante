@@ -2,23 +2,18 @@ package path
 
 import (
 	"os"
-	"path/filepath"
 	"strings"
 )
 
-func Bun(bin string) (string, error) {
+func Bun(bin string) (out string, err error) {
 	if strings.HasPrefix(bin, "~") {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			return "", err
+		var home string
+		if home, err = os.UserHomeDir(); err != nil {
+			return
 		}
-		bin = strings.Replace(bin, "~", home, 1)
-		return bin, nil
+		out = strings.Replace(bin, "~", home, 1)
+		return
 	}
-
-	if !strings.Contains(bin, string(filepath.Separator)) {
-		return bin, nil
-	}
-
-	return bin, nil
+	out = bin
+	return
 }

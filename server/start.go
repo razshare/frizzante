@@ -50,8 +50,8 @@ func Start(server *Server) {
 	var exit bool
 
 	go func() {
-		haddr := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-		server.InfoLog.Printf("server bound to address %s; visit your application at http://%s", server.Addr, haddr)
+		address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+		server.InfoLog.Printf("server bound to address %s; visit your application at http://%s", server.Addr, address)
 		if exit {
 			server.InfoLog.Println("cancelling server startup")
 			return
@@ -68,8 +68,8 @@ func Start(server *Server) {
 
 	go func() {
 		if "" != server.Certificate && "" != server.Key {
-			haddr := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-			server.InfoLog.Printf("server bound to address %s; visit your application at https://%s", server.Addr, haddr)
+			address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+			server.InfoLog.Printf("server bound to address %s; visit your application at https://%s", server.Addr, address)
 			if exit {
 				server.InfoLog.Println("cancelling server startup")
 				return

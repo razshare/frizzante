@@ -2,10 +2,10 @@ package codegen
 
 import "path/filepath"
 
-func Forms(opts FormsOptions) error {
+func Forms(options FormsOptions) error {
 	return Copy(CopyOptions{
 		From: filepath.Join("internal", "template", "project", "app", "frizzante", "forms"),
-		To:   opts.Lib,
-		Auto: opts.Auto,
+		To:   options.Lib,
+		Auto: options.Auto,
 	})
 }

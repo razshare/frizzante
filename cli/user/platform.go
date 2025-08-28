@@ -14,81 +14,78 @@ import (
 
 var Mutex sync.Mutex
 
-func Platform(a *app.App) (platform.Platform, error) {
+func Platform(a *app.App) (plat platform.Platform, err error) {
 	Mutex.Lock()
 	defer Mutex.Unlock()
 
-	home, err := FrizzanteHome()
-	if err != nil {
+	var home string
+	if home, err = FrizzanteHome(); err != nil {
 		return 0, err
 	}
 
 	txt := filepath.Join(home, "platform.txt")
 
-	var plat string
+	var platStr string
 	if files.IsFile(txt) {
-		var d []byte
-		d, err = os.ReadFile(txt)
-		if err != nil {
+		var data []byte
+		if data, err = os.ReadFile(txt); err != nil {
 			return 0, err
 		}
 
-		plat = strings.TrimSpace(string(d))
+		platStr = strings.TrimSpace(string(data))
 	} else {
-		plat = strings.TrimSpace(*a.Platform)
+		platStr = strings.TrimSpace(*a.Platform)
 	}
 
-	if plat == "" {
-		plat = runtime.GOOS + "/" + runtime.GOARCH
+	if platStr == "" {
+		platStr = runtime.GOOS + "/" + runtime.GOARCH
 	}
 
 	save := func() {
 		dir := filepath.Dir(txt)
 		if !files.IsDirectory(dir) {
-			err = os.MkdirAll(dir, os.ModePerm)
-			if err != nil {
+			if err = os.MkdirAll(dir, os.ModePerm); err != nil {
 				messages.Error(err)
 				return
 			}
 		}
 
-		err = os.WriteFile(txt, []byte(plat), os.ModePerm)
-		if err != nil {
+		if err = os.WriteFile(txt, []byte(platStr), os.ModePerm); err != nil {
 			messages.Error(err)
 		}
 	}
 
-	if strings.ToLower(plat) == "linux/amd64" {
+	if strings.ToLower(platStr) == "linux/amd64" {
 		save()
 		return platform.LinuxAmd64, nil
 	}
 
-	if strings.ToLower(plat) == "linux/arm64" {
+	if strings.ToLower(platStr) == "linux/arm64" {
 		save()
 		return platform.LinuxArm64, nil
 	}
 
-	if strings.ToLower(plat) == "darwin/arm64" {
+	if strings.ToLower(platStr) == "darwin/arm64" {
 		save()
 		return platform.DarwinArm64, nil
 	}
 
-	if strings.ToLower(plat) == "darwin/amd64" {
+	if strings.ToLower(platStr) == "darwin/amd64" {
 		save()
 		return platform.DarwinAmd64, nil
 	}
 
-	if strings.ToLower(plat) == "windows/arm64" {
+	if strings.ToLower(platStr) == "windows/arm64" {
 		save()
 		return platform.WindowsArm64, nil
 	}
 
-	if strings.ToLower(plat) == "windows/amd64" {
+	if strings.ToLower(platStr) == "windows/amd64" {
 		save()
 		return platform.WindowsAmd64, nil
 	}
 
-	messages.Infof("unknown platform %s, falling back to linux/amd64", plat)
+	messages.Infof("unknown platform %s, falling back to linux/amd64", platStr)
 
 	return platform.LinuxAmd64, nil
 }

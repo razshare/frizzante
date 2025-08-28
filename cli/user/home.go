@@ -5,16 +5,16 @@ import (
 	"path/filepath"
 )
 
-func FrizzanteHome() (string, error) {
-	home := os.Getenv("FRIZZANTE_HOME")
+func FrizzanteHome() (home string, err error) {
+	home = os.Getenv("FRIZZANTE_HOME")
+
 	if home == "" {
 		var user string
-		user, err := os.UserHomeDir()
-		if err != nil {
+		if user, err = os.UserHomeDir(); err != nil {
 			return "", err
 		}
 		home = filepath.Join(user, ".frizzante")
 	}
 
-	return home, nil
+	return
 }

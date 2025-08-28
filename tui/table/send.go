@@ -7,14 +7,14 @@ import (
 	"github.com/razshare/frizzante/tui/wrap"
 )
 
-func Send(headers []string, rows [][]string, opts ...Options) {
+func Send(headers []string, rows [][]string, options ...Options) {
 	if len(headers) == 0 || len(rows) == 0 {
 		return
 	}
 
-	opt := DefaultOptions()
-	if len(opts) > 0 {
-		opt = opts[0]
+	defaultOptions := DefaultOptions()
+	if len(options) > 0 {
+		defaultOptions = options[0]
 	}
 
 	colWidths := make([]int, len(headers))
@@ -33,8 +33,8 @@ func Send(headers []string, rows [][]string, opts ...Options) {
 	}
 
 	for i := range colWidths {
-		if colWidths[i] > opt.MaxColumnWidth {
-			colWidths[i] = opt.MaxColumnWidth
+		if colWidths[i] > defaultOptions.MaxColumnWidth {
+			colWidths[i] = defaultOptions.MaxColumnWidth
 		}
 	}
 
@@ -75,14 +75,14 @@ func Send(headers []string, rows [][]string, opts ...Options) {
 		}
 	}
 
-	t := table.New().
+	tbl := table.New().
 		Headers(headers...).
 		Rows(processedRows...).
 		Border(lipgloss.NormalBorder()).
 		BorderStyle(lipgloss.NewStyle().Foreground(lipgloss.Color("240"))).
 		StyleFunc(func(row, col int) lipgloss.Style {
 			if row == table.HeaderRow {
-				return opt.HeaderStyle
+				return defaultOptions.HeaderStyle
 			}
 
 			if row < len(logicalRowIndices) {
@@ -92,14 +92,14 @@ func Send(headers []string, rows [][]string, opts ...Options) {
 				}
 
 				if logicalRow%2 == 0 {
-					return opt.RowStyle
+					return defaultOptions.RowStyle
 				} else {
-					return opt.AltRowStyle
+					return defaultOptions.AltRowStyle
 				}
 			}
 
 			return lipgloss.NewStyle()
 		})
 
-	fmt.Println(t.Render())
+	fmt.Println(tbl.Render())
 }

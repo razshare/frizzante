@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-func Filter(search *Search, vport *viewport.Viewport) {
+func Filter(search *Search, viewport *viewport.Viewport) {
 	input := strings.ToLower(search.Input.Value())
 	if input == "" {
 		search.Filtered = search.Choices
@@ -18,6 +18,6 @@ func Filter(search *Search, vport *viewport.Viewport) {
 		}
 		search.Filtered = filtered
 	}
-	vport.Cursor = 0
-	vport.Start = 0
+	viewport.Cursor = 0
+	viewport.Start = 0
 }

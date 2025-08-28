@@ -49,7 +49,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "configure", Description: "installs required binaries and packages"},
 				Active: func() bool { return *a.Configure },
 				Handler: func() error {
-					return action.Config(action.ConfigOptions{
+					return action.Configure(action.ConfigureOptions{
 						App:      *a.App,
 						Auto:     *a.Yes,
 						Platform: plat,

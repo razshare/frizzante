@@ -5,20 +5,23 @@ import (
 	"github.com/razshare/frizzante/tui/program"
 )
 
-func Send(def bool, msg string) (bool, error) {
-	model, err := program.Run(&Model{
-		Prompt:       msg,
-		DefaultValue: def,
-		Confirmed:    def,
+func Send(defaultValue bool, message string) (yes bool, err error) {
+	var model *Model
+	model, err = program.Run(&Model{
+		Prompt:       message,
+		DefaultValue: defaultValue,
+		Confirmed:    defaultValue,
 	})
 
 	if err != nil {
-		return false, err
+		return
 	}
 
-	return model.Confirmed, nil
+	yes = model.Confirmed
+
+	return
 }
 
-func Sendf(def bool, format string, vars ...any) (bool, error) {
-	return Send(def, fmt.Sprintf(format, vars...))
+func Sendf(defaultValue bool, format string, vars ...any) (yes bool, err error) {
+	return Send(defaultValue, fmt.Sprintf(format, vars...))
 }

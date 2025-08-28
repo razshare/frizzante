@@ -9,16 +9,15 @@ import (
 	"path/filepath"
 )
 
-func Install(opts InstallOptions) error {
-	err := Touch(TouchOptions{App: opts.App})
-	if err != nil {
-		return err
+func Install(options InstallOptions) (err error) {
+	if err = Touch(TouchOptions{App: options.App}); err != nil {
+		return
 	}
 
 	spin := spinner.New("installing go dependencies")
 
 	go spinner.Start(spin)
-	tidy := exec.Command(opts.Go, "mod", "tidy")
+	tidy := exec.Command(options.Go, "mod", "tidy")
 	tidy.Env = append(os.Environ())
 	tidy.Stderr = os.Stderr
 	tidy.Stdout = os.Stdout
@@ -27,30 +26,29 @@ func Install(opts InstallOptions) error {
 	spinner.Stop(spin)
 
 	if err != nil {
-		return err
+		return
 	}
 
 	var bun string
-	if files.IsFile(opts.Bun) {
-		if bun, err = filepath.Rel(opts.App, opts.Bun); err != nil {
+	if files.IsFile(options.Bun) {
+		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
 			return err
 		}
-	} else if bun, err = exec.LookPath(opts.Bun); err != nil {
-		bun = opts.Bun
+	} else if bun, err = exec.LookPath(options.Bun); err != nil {
+		bun = options.Bun
 	}
 
 	ins := exec.Command(bun, "install")
-	ins.Dir = opts.App
+	ins.Dir = options.App
 	ins.Env = append(os.Environ())
 	ins.Stderr = os.Stderr
 	ins.Stdout = os.Stdout
 	ins.Stdin = os.Stdin
-	err = ins.Run()
-	if err != nil {
-		return err
+	if err = ins.Run(); err != nil {
+		return
 	}
 
 	messages.Success("project dependencies installed")
 
-	return nil
+	return
 }

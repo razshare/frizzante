@@ -7,17 +7,17 @@ import (
 )
 
 func TestBasicAuth(t *testing.T) {
-	c := mock.NewClient()
-	b := base64.URLEncoding.EncodeToString([]byte("test:123"))
-	c.Request.Header.Set("Authorization", "Basic "+b)
-	u, p, ok := BasicAuth(c)
+	client := mock.NewClient()
+	text64 := base64.URLEncoding.EncodeToString([]byte("test:123"))
+	client.Request.Header.Set("Authorization", "Basic "+text64)
+	user, pass, ok := BasicAuth(client)
 	if !ok {
 		t.Fatal("auth should pass")
 	}
-	if u != "test" {
+	if user != "test" {
 		t.Fatal("user should be test")
 	}
-	if p != "123" {
+	if pass != "123" {
 		t.Fatal("password should be 123")
 	}
 }

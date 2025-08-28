@@ -7,15 +7,15 @@ import (
 )
 
 func TestMessage(t *testing.T) {
-	c := mock.NewClient()
-	b := c.Request.Body.(*mock.RequestBody)
-	b.MockBuffer = []byte("hello")
-	d, err := io.ReadAll(c.Request.Body)
+	client := mock.NewClient()
+	body := client.Request.Body.(*mock.RequestBody)
+	body.MockBuffer = []byte("hello")
+	data, err := io.ReadAll(client.Request.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if string(d) != "hello" {
+	if string(data) != "hello" {
 		t.Fatal("request body should be hello")
 	}
 }

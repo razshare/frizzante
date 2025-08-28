@@ -8,28 +8,31 @@ import (
 	"github.com/razshare/frizzante/tui/viewport"
 )
 
-func Send(chs []search.Choice, msg string) ([]string, error) {
+func Send(choices []search.Choice, message string) (selected []string, err error) {
 	// Initialize the search input
 	input := textinput.New()
 	input.Width = 80
-	model, err := program.Run(&Model{
-		Prompt:   msg,
+	var model *Model
+	model, err = program.Run(&Model{
+		Prompt:   message,
 		Viewport: &viewport.Viewport{Visible: 6},
 		Selected: make([]string, 0),
 		Search: &search.Search{
-			Choices:  chs,
-			Filtered: chs,
+			Choices:  choices,
+			Filtered: choices,
 			Input:    input,
 		},
 	})
 
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	return model.Selected, nil
+	selected = model.Selected
+
+	return
 }
 
-func Sendf(chs []search.Choice, format string, vars ...any) ([]string, error) {
-	return Send(chs, fmt.Sprintf(format, vars...))
+func Sendf(choices []search.Choice, format string, vars ...any) (selected []string, err error) {
+	return Send(choices, fmt.Sprintf(format, vars...))
 }

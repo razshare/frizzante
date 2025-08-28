@@ -7,28 +7,27 @@ import (
 	"path/filepath"
 )
 
-func Reset(_ ResetOptions) error {
+func Reset(_ ResetOptions) (err error) {
 	home := os.Getenv("FRIZZANTE_HOME")
 	if home == "" {
-		user, err := os.UserHomeDir()
-		if err != nil {
-			return err
+		var user string
+		if user, err = os.UserHomeDir(); err != nil {
+			return
 		}
 		home = filepath.Join(user, ".frizzante")
 	}
 
 	if files.IsDirectory(home) {
-		err := os.RemoveAll(home)
-		if err != nil {
-			return err
+		if err = os.RemoveAll(home); err != nil {
+			return
 		}
 
 		messages.Successf("%s deleted", home)
 
-		return nil
+		return
 	}
 
 	messages.Infof("%s not found", home)
 
-	return nil
+	return
 }

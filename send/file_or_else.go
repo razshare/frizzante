@@ -16,63 +16,63 @@ import (
 )
 
 // FileOrElse sends the file requested by the client, or else falls back.
-func FileOrElse(c *client.Client, or func()) {
-	if c.WebSocket != nil {
-		c.Config.ErrorLog.Println("FileOrElse does not support web sockets")
+func FileOrElse(client *client.Client, or func()) {
+	if client.WebSocket != nil {
+		client.Config.ErrorLog.Println("FileOrElse does not support web sockets")
 		return
 	}
 
-	if c.EventName != "" {
-		c.Config.ErrorLog.Println("FileOrElse does not support server sent events")
+	if client.EventName != "" {
+		client.Config.ErrorLog.Println("FileOrElse does not support server sent events")
 		return
 	}
 
-	var n string
+	var name string
 
-	if strings.HasPrefix(c.Request.RequestURI, "/") {
-		n = filepath.Join(c.Config.PublicRoot, c.Request.RequestURI[1:])
+	if strings.HasPrefix(client.Request.RequestURI, "/") {
+		name = filepath.Join(client.Config.PublicRoot, client.Request.RequestURI[1:])
 	} else {
-		n = filepath.Join(c.Config.PublicRoot, c.Request.RequestURI)
+		name = filepath.Join(client.Config.PublicRoot, client.Request.RequestURI)
 	}
 
-	if embeds.IsFile(c.Config.Efs, n) {
-		var f fs.File
+	if embeds.IsFile(client.Config.Efs, name) {
+		var file fs.File
 		var err error
-		if f, err = c.Config.Efs.Open(n); err != nil {
-			c.Config.ErrorLog.Println(err, stack.Trace())
+		if file, err = client.Config.Efs.Open(name); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
-		var i os.FileInfo
-		if i, err = f.Stat(); err != nil {
-			c.Config.ErrorLog.Println(err, stack.Trace())
+		var info os.FileInfo
+		if info, err = file.Stat(); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
-		if "" == c.Writer.Header().Get("Content-Type") {
-			Header(c, "Content-Type", mime.Parse(n))
+		if "" == client.Writer.Header().Get("Content-Type") {
+			Header(client, "Content-Type", mime.Parse(name))
 		}
 
-		if "" == c.Writer.Header().Get("Content-Length") {
-			Header(c, "Content-Length", fmt.Sprintf("%d", i.Size()))
+		if "" == client.Writer.Header().Get("Content-Length") {
+			Header(client, "Content-Length", fmt.Sprintf("%d", info.Size()))
 		}
 
-		buf := make([]byte, i.Size())
-		if _, err = f.Read(buf); err != nil {
-			c.Config.ErrorLog.Println(err, stack.Trace())
+		buf := make([]byte, info.Size())
+		if _, err = file.Read(buf); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
-		http.ServeContent(c.Writer, c.Request, n, i.ModTime(), bytes.NewReader(buf))
+		http.ServeContent(client.Writer, client.Request, name, info.ModTime(), bytes.NewReader(buf))
 		return
 	}
 
-	if files.IsFile(n) {
-		if "" == c.Writer.Header().Get("Content-Type") {
-			Header(c, "Content-Type", mime.Parse(n))
+	if files.IsFile(name) {
+		if "" == client.Writer.Header().Get("Content-Type") {
+			Header(client, "Content-Type", mime.Parse(name))
 		}
 
-		http.ServeFile(c.Writer, c.Request, n)
+		http.ServeFile(client.Writer, client.Request, name)
 		return
 	}
 

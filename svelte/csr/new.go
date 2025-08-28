@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/razshare/frizzante/embeds"
-	"github.com/razshare/frizzante/view"
+	v "github.com/razshare/frizzante/view"
 	"os"
 	"path/filepath"
 	"strings"
@@ -23,7 +23,7 @@ var BodyFormat string
 //go:embed data.format
 var DataFormat string
 
-func New(conf Config) view.Render {
+func New(conf Config) v.Render {
 	var efs = conf.Efs
 	var app = conf.App
 	var disk = conf.Disk
@@ -37,7 +37,7 @@ func New(conf Config) view.Render {
 	var nameDoc = filepath.Join(nameDist, "client", "index.html")
 	var nameDocFixed = strings.ReplaceAll(nameDoc, "\\", "/")
 
-	return func(v view.View) (string, error) {
+	return func(view v.View) (string, error) {
 		var data []byte
 		var err error
 
@@ -54,12 +54,12 @@ func New(conf Config) view.Render {
 		doc := string(data)
 
 		var props []byte
-		if props, err = json.Marshal(view.Data(v)); err != nil {
+		if props, err = json.Marshal(v.Data(view)); err != nil {
 			return "", err
 		}
 
 		doc = strings.Replace(doc, "<!--app-target-->", fmt.Sprintf(TargetFormat, id), 1)
-		doc = strings.Replace(doc, "<!--app-head-->", fmt.Sprintf(HeadFormat, v.Title), 1)
+		doc = strings.Replace(doc, "<!--app-head-->", fmt.Sprintf(HeadFormat, view.Title), 1)
 		doc = strings.Replace(doc, "<!--app-body-->", fmt.Sprintf(BodyFormat, id, ""), 1)
 		doc = strings.Replace(doc, "<!--app-props-->", fmt.Sprintf(DataFormat, props), 1)
 

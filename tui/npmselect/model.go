@@ -11,86 +11,86 @@ import (
 	"strings"
 )
 
-func (m *Model) Init() tea.Cmd {
+func (model *Model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch k := msg.(type) {
+func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
+	switch assert := message.(type) {
 	case tea.KeyMsg:
-		if k.Type == tea.KeyCtrlC {
-			return m, tea.Interrupt
+		if assert.Type == tea.KeyCtrlC {
+			return model, tea.Interrupt
 		}
 
-		if k.Type == tea.KeyEsc {
-			m.Quitting = true
-			m.Selected = make([]string, 0)
-			return m, tea.Quit
+		if assert.Type == tea.KeyEsc {
+			model.Quitting = true
+			model.Selected = make([]string, 0)
+			return model, tea.Quit
 		}
 
-		if k.Type == tea.KeyEnter {
-			if len(m.Selected) == 0 && len(m.Search.Filtered) > 0 {
-				val := m.Search.Filtered[m.Viewport.Cursor].Id
-				m.Selected = append(m.Selected, val)
+		if assert.Type == tea.KeyEnter {
+			if len(model.Selected) == 0 && len(model.Search.Filtered) > 0 {
+				val := model.Search.Filtered[model.Viewport.Cursor].Id
+				model.Selected = append(model.Selected, val)
 			}
-			m.Confirmed = true
-			return m, tea.Quit
+			model.Confirmed = true
+			return model, tea.Quit
 		}
 
-		if k.Type == tea.KeySpace {
-			if len(m.Search.Filtered) > 0 {
-				val := m.Search.Filtered[m.Viewport.Cursor].Id
-				if slices.Contains(m.Selected, val) {
-					if i := slices.Index(m.Selected, val); i >= 0 {
-						m.Selected = append(m.Selected[:i], m.Selected[i+1:]...)
+		if assert.Type == tea.KeySpace {
+			if len(model.Search.Filtered) > 0 {
+				val := model.Search.Filtered[model.Viewport.Cursor].Id
+				if slices.Contains(model.Selected, val) {
+					if i := slices.Index(model.Selected, val); i >= 0 {
+						model.Selected = append(model.Selected[:i], model.Selected[i+1:]...)
 					}
 				} else {
-					m.Selected = append(m.Selected, val)
+					model.Selected = append(model.Selected, val)
 				}
 			}
-			return m, nil
+			return model, nil
 		}
 
-		if k.Type == tea.KeyUp || k.Type == tea.KeyCtrlP {
-			navigate.Apply(m.Search, m.Viewport, -1)
-			return m, nil
+		if assert.Type == tea.KeyUp || assert.Type == tea.KeyCtrlP {
+			navigate.Apply(model.Search, model.Viewport, -1)
+			return model, nil
 		}
 
-		if k.Type == tea.KeyDown || k.Type == tea.KeyCtrlN || k.Type == tea.KeyTab {
-			navigate.Apply(m.Search, m.Viewport, 1)
-			return m, nil
+		if assert.Type == tea.KeyDown || assert.Type == tea.KeyCtrlN || assert.Type == tea.KeyTab {
+			navigate.Apply(model.Search, model.Viewport, 1)
+			return model, nil
 		}
 
 		// Handle search input
-		if len(k.String()) == 1 || k.Type == tea.KeyBackspace || k.Type == tea.KeyCtrlH {
-			if !m.Search.Active {
-				m.Search.Active = true
-				m.Search.Input.Focus()
+		if len(assert.String()) == 1 || assert.Type == tea.KeyBackspace || assert.Type == tea.KeyCtrlH {
+			if !model.Search.Active {
+				model.Search.Active = true
+				model.Search.Input.Focus()
 			}
 
 			var cmd tea.Cmd
-			m.Debouncer.Reset(m.Debounce)
-			m.Search.Input, cmd = m.Search.Input.Update(k)
-			m.LastQuery = m.Search.Input.Value()
+			model.Debouncer.Reset(model.Debounce)
+			model.Search.Input, cmd = model.Search.Input.Update(assert)
+			model.LastQuery = model.Search.Input.Value()
 
-			return m, tea.Batch(cmd, func() tea.Msg {
-				<-m.Debouncer.C
-				return DebouncedSearchMsg{Query: m.Search.Input.Value()}
+			return model, tea.Batch(cmd, func() tea.Msg {
+				<-model.Debouncer.C
+				return DebouncedSearchMsg{Query: model.Search.Input.Value()}
 			})
 		}
 
 	case DebouncedSearchMsg:
-		if k.Query != "" && k.Query == m.Search.Input.Value() {
-			m.Loading = true
-			return m, Search(k.Query)
+		if assert.Query != "" && assert.Query == model.Search.Input.Value() {
+			model.Loading = true
+			return model, Search(assert.Query)
 		}
 
 	case SearchResultMsg:
-		m.Loading = false
-		m.Error = k.Error
-		m.Packages = k.Packages
-		choices := make([]search.Choice, len(k.Packages))
-		for i, pkg := range k.Packages {
+		model.Loading = false
+		model.Error = assert.Error
+		model.Packages = assert.Packages
+		choices := make([]search.Choice, len(assert.Packages))
+		for i, pkg := range assert.Packages {
 			id := pkg.Name
 			if pkg.Version != "" {
 				id = fmt.Sprintf("%s@%s", pkg.Name, pkg.Version)
@@ -104,111 +104,110 @@ func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				Description: description,
 			}
 		}
-		m.Search.Choices = choices
-		m.Search.Filtered = choices
-		m.Viewport.Cursor = 0
-		return m, nil
+		model.Search.Choices = choices
+		model.Search.Filtered = choices
+		model.Viewport.Cursor = 0
+		return model, nil
 	}
 
-	return m, nil
+	return model, nil
 }
 
-func (m *Model) View() string {
+func (model *Model) View() string {
+	var builder strings.Builder
+	builder.Grow(1024)
 
-	var sb strings.Builder
-	sb.Grow(1024)
+	builder.WriteString(config.Styles.Menu.Render(model.Prompt))
 
-	sb.WriteString(config.Styles.Menu.Render(m.Prompt))
-
-	if m.Search.Input.Value() != "" {
-		sb.WriteString(config.Styles.UserInput.Render(" ⁋/" + m.Search.Input.Value()))
+	if model.Search.Input.Value() != "" {
+		builder.WriteString(config.Styles.UserInput.Render(" ⁋/" + model.Search.Input.Value()))
 	} else {
-		sb.WriteString(config.Styles.UserGuide.Render(" ⁋/type to search"))
+		builder.WriteString(config.Styles.UserGuide.Render(" ⁋/type to search"))
 	}
 
-	sb.WriteString("\n")
+	builder.WriteString("\n")
 
-	if m.Loading {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		sb.WriteString(config.Styles.UserGuide.PaddingLeft(1).Render("ⓘ  loading..."))
-		sb.WriteString("\n")
-		if m.Search.Active {
-			sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+	if model.Loading {
+		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.UserGuide.PaddingLeft(1).Render("ⓘ  loading..."))
+		builder.WriteString("\n")
+		if model.Search.Active {
+			builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
 		}
-		return sb.String()
-	} else if m.Error != nil {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		sb.WriteString(config.Styles.Status(config.Colors.Error).PaddingLeft(1).Render("✗  " + m.Error.Error()))
-		sb.WriteString("\n")
-		if m.Search.Active {
-			sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+		return builder.String()
+	} else if model.Error != nil {
+		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Status(config.Colors.Error).PaddingLeft(1).Render("✗  " + model.Error.Error()))
+		builder.WriteString("\n")
+		if model.Search.Active {
+			builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
 		}
-		return sb.String()
+		return builder.String()
 	}
 
-	filtered := len(m.Search.Filtered)
+	filtered := len(model.Search.Filtered)
 	if filtered == 0 {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		sb.WriteString(config.Styles.UserGuide.PaddingLeft(1).Render("ⓘ  no matches found"))
+		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.UserGuide.PaddingLeft(1).Render("ⓘ  no matches found"))
 
-		sb.WriteString("\n")
+		builder.WriteString("\n")
 
-		sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+		builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
 
-		if m.Search.Active {
-			sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+		if model.Search.Active {
+			builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
 		} else {
-			sb.WriteString(config.Styles.UserGuide.Render(" • esc back"))
+			builder.WriteString(config.Styles.UserGuide.Render(" • esc back"))
 		}
 
-		return sb.String()
+		return builder.String()
 	}
 
-	height := m.Viewport.Start + m.Viewport.Visible
+	height := model.Viewport.Start + model.Viewport.Visible
 	if height > filtered {
 		height = filtered
 	}
 
-	if m.Viewport.Start > 0 {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
-		sb.WriteString("\n")
+	if model.Viewport.Start > 0 {
+		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
+		builder.WriteString("\n")
 	}
 
-	for i := m.Viewport.Start; i < height; i++ {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		if m.Viewport.Cursor == i {
-			if slices.Contains(m.Selected, m.Search.Filtered[i].Id) {
-				sb.WriteString(config.Styles.Selected.Render("● " + m.Search.Filtered[i].Id))
+	for i := model.Viewport.Start; i < height; i++ {
+		builder.WriteString(config.Styles.Menu.Render("│"))
+		if model.Viewport.Cursor == i {
+			if slices.Contains(model.Selected, model.Search.Filtered[i].Id) {
+				builder.WriteString(config.Styles.Selected.Render("● " + model.Search.Filtered[i].Id))
 			} else {
-				sb.WriteString(config.Styles.Selected.Render("◉ " + m.Search.Filtered[i].Id))
+				builder.WriteString(config.Styles.Selected.Render("◉ " + model.Search.Filtered[i].Id))
 			}
 
-			j := slices.Index(m.Search.Choices, m.Search.Filtered[i])
-			if j >= 0 && m.Search.Choices[j].Description != "" {
-				sb.WriteString(config.Styles.UserGuide.Render("  ⇢  " + m.Search.Choices[j].Description))
+			j := slices.Index(model.Search.Choices, model.Search.Filtered[i])
+			if j >= 0 && model.Search.Choices[j].Description != "" {
+				builder.WriteString(config.Styles.UserGuide.Render("  ⇢  " + model.Search.Choices[j].Description))
 			}
-		} else if slices.Contains(m.Selected, m.Search.Filtered[i].Id) {
-			sb.WriteString(config.Styles.Item.Render("● " + m.Search.Filtered[i].Id))
+		} else if slices.Contains(model.Selected, model.Search.Filtered[i].Id) {
+			builder.WriteString(config.Styles.Item.Render("● " + model.Search.Filtered[i].Id))
 		} else {
-			sb.WriteString(config.Styles.Item.Render("○ " + m.Search.Filtered[i].Id))
+			builder.WriteString(config.Styles.Item.Render("○ " + model.Search.Filtered[i].Id))
 		}
-		sb.WriteString("\n")
+		builder.WriteString("\n")
 	}
 
 	if height < filtered {
-		sb.WriteString(config.Styles.Menu.Render("│"))
-		sb.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
-		sb.WriteString("\n")
+		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
+		builder.WriteString("\n")
 	}
 
-	sb.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+	builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
 
-	if m.Search.Active {
-		sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+	if model.Search.Active {
+		builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
 	} else {
-		sb.WriteString(config.Styles.UserGuide.Render(" • esc back"))
+		builder.WriteString(config.Styles.UserGuide.Render(" • esc back"))
 	}
 
-	return sb.String()
+	return builder.String()
 }

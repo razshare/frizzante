@@ -6,12 +6,12 @@ import (
 	"strings"
 )
 
-func Sha1(txt string) (string, error) {
+func Sha1(txt string) (hash string, err error) {
 	hasher := sha1.New()
-	_, err := hasher.Write([]byte(txt))
-	if err != nil {
-		return "", err
+	if _, err = hasher.Write([]byte(txt)); err != nil {
+		return
 	}
-	b64 := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
-	return strings.ReplaceAll(b64, "=", ""), nil
+	text64 := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
+	hash = strings.ReplaceAll(text64, "=", "")
+	return
 }

@@ -2,23 +2,18 @@ package path
 
 import (
 	"os"
-	"path/filepath"
 	"strings"
 )
 
-func Sqlc(bin string) (string, error) {
+func Sqlc(bin string) (out string, err error) {
 	if strings.HasPrefix(bin, "~") {
-		home, err := os.UserHomeDir()
-		if err != nil {
+		var user string
+		if user, err = os.UserHomeDir(); err != nil {
 			return "", err
 		}
-		bin = strings.Replace(bin, "~", home, 1)
-		return bin, nil
+		out = strings.Replace(bin, "~", user, 1)
+		return
 	}
-
-	if !strings.Contains(bin, string(filepath.Separator)) {
-		return bin, nil
-	}
-
-	return bin, nil
+	out = bin
+	return
 }

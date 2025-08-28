@@ -2,12 +2,12 @@ package wrap
 
 import "strings"
 
-func Send(txt string, width int) []string {
+func Send(text string, width int) []string {
 	if width <= 0 {
-		return strings.Split(txt, "\n")
+		return strings.Split(text, "\n")
 	}
 
-	lines := strings.Split(txt, "\n")
+	lines := strings.Split(text, "\n")
 	var result []string
 
 	for _, line := range lines {

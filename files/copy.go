@@ -11,24 +11,22 @@ func CopyFile(from string, to string) (err error) {
 	dir := filepath.Dir(to)
 
 	if !IsDirectory(dir) {
-		err = os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
+		if err = os.MkdirAll(dir, os.ModePerm); err != nil {
 			return
 		}
 	}
 
 	if IsFile(to) {
-		err = os.Remove(to)
-		if err != nil {
+		if err = os.Remove(to); err != nil {
 			return
 		}
 	}
 
 	var fromFile *os.File
-	fromFile, err = os.Open(from)
-	if err != nil {
+	if fromFile, err = os.Open(from); err != nil {
 		return
 	}
+
 	defer func() {
 		if fromFile == nil {
 			return
@@ -39,8 +37,7 @@ func CopyFile(from string, to string) (err error) {
 	}()
 
 	var toFile *os.File
-	toFile, err = os.Create(to)
-	if err != nil {
+	if toFile, err = os.Create(to); err != nil {
 		return
 	}
 	defer func() {
@@ -52,8 +49,7 @@ func CopyFile(from string, to string) (err error) {
 		}
 	}()
 
-	_, err = io.Copy(toFile, fromFile)
-	if err != nil {
+	if _, err = io.Copy(toFile, fromFile); err != nil {
 		return
 	}
 
@@ -61,15 +57,14 @@ func CopyFile(from string, to string) (err error) {
 }
 
 func CopyDirectory(from string, to string) (err error) {
-	var ents []string
-	if ents, err = ReadDirectory(from); err != nil {
+	var entries []string
+	if entries, err = ReadDirectory(from); err != nil {
 		return
 	}
 
-	for _, ent := range ents {
-		n := filepath.Join(to, strings.TrimPrefix(ent, from))
-		err = CopyFile(ent, n)
-		if err != nil {
+	for _, entry := range entries {
+		name := filepath.Join(to, strings.TrimPrefix(entry, from))
+		if err = CopyFile(entry, name); err != nil {
 			return
 		}
 	}

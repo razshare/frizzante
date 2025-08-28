@@ -6,72 +6,66 @@ import (
 )
 
 func TestHeader(t *testing.T) {
-	c := mock.NewClient()
-	Header(c, "key", "value")
-	w := c.Writer.(*mock.ResponseWriter)
-	if w.MockHeader.Get("key") != "value" {
+	client := mock.NewClient()
+	Header(client, "key", "value")
+	writer := client.Writer.(*mock.ResponseWriter)
+	if writer.MockHeader.Get("key") != "value" {
 		t.Fatal("key should be value")
 	}
 }
 
 func TestHeaders(t *testing.T) {
-	c := mock.NewClient()
-	Headers(c, map[string]string{
+	client := mock.NewClient()
+	Headers(client, map[string]string{
 		"key1": "value1",
 		"key2": "value2",
 	})
 
-	w := c.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mock.ResponseWriter)
 
-	if w.MockHeader.Get("key1") != "value1" {
+	if writer.MockHeader.Get("key1") != "value1" {
 		t.Fatal("key1 should be value1")
 	}
 
-	if w.MockHeader.Get("key2") != "value2" {
+	if writer.MockHeader.Get("key2") != "value2" {
 		t.Fatal("key2 should be value2")
 	}
 }
 
 func TestRedirect(t *testing.T) {
-	c := mock.NewClient()
-	Redirect(c, "/about", 303)
-	w := c.Writer.(*mock.ResponseWriter)
+	client := mock.NewClient()
+	Redirect(client, "/about", 303)
+	writer := client.Writer.(*mock.ResponseWriter)
 
-	if c.Status != 303 {
+	if client.Status != 303 {
 		t.Fatal("status should be 303")
 	}
 
-	l := w.MockHeader.Get("Location")
-
-	if l != "/about" {
+	if writer.MockHeader.Get("Location") != "/about" {
 		t.Fatal("location should be about")
 	}
 }
 
 func TestNavigate(t *testing.T) {
-	c := mock.NewClient()
-	Navigate(c, "/about")
-	w := c.Writer.(*mock.ResponseWriter)
+	client := mock.NewClient()
+	Navigate(client, "/about")
+	writer := client.Writer.(*mock.ResponseWriter)
 
-	if c.Status != 302 {
+	if client.Status != 302 {
 		t.Fatal("status should be 302")
 	}
 
-	l := w.MockHeader.Get("Location")
-
-	if l != "/about" {
+	if writer.MockHeader.Get("Location") != "/about" {
 		t.Fatal("location should be about")
 	}
 }
 
 func TestContentType(t *testing.T) {
-	c := mock.NewClient()
-	ContentType(c, "text/html")
-	w := c.Writer.(*mock.ResponseWriter)
+	client := mock.NewClient()
+	ContentType(client, "text/html")
+	writer := client.Writer.(*mock.ResponseWriter)
 
-	ct := w.MockHeader.Get("Content-Type")
-
-	if ct != "text/html" {
+	if writer.MockHeader.Get("Content-Type") != "text/html" {
 		t.Fatal("content type should be text/html")
 	}
 }

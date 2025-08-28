@@ -8,25 +8,25 @@ import (
 )
 
 // Json reads the next JSON-encoded message from the
-// c and stores it in the value pointed to by v.
+// c and stores it in the value pointed to by value.
 //
 // Compatible with web sockets.
-func Json(c *client.Client, v any) {
-	if c.WebSocket != nil {
-		if err := c.WebSocket.ReadJSON(&v); err != nil {
-			c.Config.ErrorLog.Println(err, stack.Trace())
+func Json(client *client.Client, value any) {
+	if client.WebSocket != nil {
+		if err := client.WebSocket.ReadJSON(&value); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 		return
 	}
 
-	d, err := io.ReadAll(c.Request.Body)
+	data, err := io.ReadAll(client.Request.Body)
 	if err != nil {
-		c.Config.ErrorLog.Println(err, stack.Trace())
+		client.Config.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
-	if err = json.Unmarshal(d, &v); err != nil {
-		c.Config.ErrorLog.Println(err, stack.Trace())
+	if err = json.Unmarshal(data, &value); err != nil {
+		client.Config.ErrorLog.Println(err, stack.Trace())
 	}
 }

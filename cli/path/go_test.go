@@ -23,12 +23,12 @@ func TestGoAtHome(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	usr, err := os.UserHomeDir()
+	user, err := os.UserHomeDir()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if !strings.HasPrefix(_go, usr) {
+	if !strings.HasPrefix(_go, user) {
 		t.Fatal("binary should be prefixed with user home dir")
 	}
 }

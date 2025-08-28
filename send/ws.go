@@ -8,8 +8,8 @@ import (
 )
 
 // WsUpgrade upgrades to web sockets.
-func WsUpgrade(c *client.Client) {
-	WsUpgradeWithUpgrader(c, websocket.Upgrader{
+func WsUpgrade(client *client.Client) {
+	WsUpgradeWithUpgrader(client, websocket.Upgrader{
 		ReadBufferSize:  10 * globals.KB,
 		WriteBufferSize: 10 * globals.KB,
 	})

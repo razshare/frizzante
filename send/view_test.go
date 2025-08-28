@@ -8,47 +8,47 @@ import (
 )
 
 func TestViewWithLocation(t *testing.T) {
-	c := mock.NewClient()
-	Header(c, "Location", "/about")
-	View(c, view.View{}) // This should be a noop.
+	client := mock.NewClient()
+	Header(client, "Location", "/about")
+	View(client, view.View{}) // This should be a noop.
 }
 
 func TestViewWithAcceptJson(t *testing.T) {
-	c := mock.NewClient()
-	c.Request.Header.Set("Accept", "application/json")
+	client := mock.NewClient()
+	client.Request.Header.Set("Accept", "application/json")
 
-	View(c, view.View{Name: "test", Props: map[string]any{"key": "value"}})
+	View(client, view.View{Name: "test", Props: map[string]any{"key": "value"}})
 
-	w := c.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mock.ResponseWriter)
 
-	if w.MockHeader.Get("Cache-Control") != "no-store, no-cache, must-revalidate, max-age=0" {
+	if writer.MockHeader.Get("Cache-Control") != "no-store, no-cache, must-revalidate, max-age=0" {
 		t.Fatal("cache control should be disabled")
 	}
 
-	if w.MockHeader.Get("Pragma") != "no-cache" {
+	if writer.MockHeader.Get("Pragma") != "no-cache" {
 		t.Fatal("pragma should be no-cache")
 	}
 
-	if w.MockHeader.Get("Content-Type") != "application/json" {
+	if writer.MockHeader.Get("Content-Type") != "application/json" {
 		t.Fatal("content type should be json")
 	}
 
-	if string(w.MockBytes) != `{"align":0,"name":"test","props":{"key":"value"},"render":0}` {
+	if string(writer.MockBytes) != `{"align":0,"name":"test","props":{"key":"value"},"render":0}` {
 		t.Fatal("content should be view as json")
 	}
 }
 
 func TestView(t *testing.T) {
-	c := mock.NewClient()
-	c.Config.Render = func(v view.View) (html string, err error) {
+	client := mock.NewClient()
+	client.Config.Render = func(v view.View) (html string, err error) {
 		return fmt.Sprintf("hello from %s", v.Name), nil
 	}
 
-	View(c, view.View{Name: "test", Props: map[string]any{"key": "value"}})
+	View(client, view.View{Name: "test", Props: map[string]any{"key": "value"}})
 
-	w := c.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mock.ResponseWriter)
 
-	if string(w.MockBytes) != "hello from test" {
+	if string(writer.MockBytes) != "hello from test" {
 		t.Fatal("content should be hello from test")
 	}
 }

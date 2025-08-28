@@ -5,15 +5,15 @@ import (
 	"strings"
 )
 
-func Air(bin string) (string, error) {
+func Air(bin string) (out string, err error) {
 	if strings.HasPrefix(bin, "~") {
-		usr, err := os.UserHomeDir()
-		if err != nil {
-			return "", err
+		var user string
+		if user, err = os.UserHomeDir(); err != nil {
+			return
 		}
-		bin = strings.Replace(bin, "~", usr, 1)
-		return bin, nil
+		out = strings.Replace(bin, "~", user, 1)
+		return
 	}
-
-	return bin, nil
+	out = bin
+	return
 }

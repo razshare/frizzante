@@ -1,6 +1,6 @@
 package spinner
 
-func Stop(s *Spinner) {
-	s.Program.Quit()
-	<-s.Done
+func Stop(spin *Spinner) {
+	spin.Program.Quit()
+	<-spin.Done
 }
