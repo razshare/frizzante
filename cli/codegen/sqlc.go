@@ -1,6 +1,9 @@
 package codegen
 
-import "github.com/razshare/frizzante/platform"
+import (
+	"github.com/razshare/frizzante/platform"
+	"path/filepath"
+)
 
 func Sqlc(opts SqlcOptions) (err error) {
 	var url string
@@ -24,7 +27,7 @@ func Sqlc(opts SqlcOptions) (err error) {
 		return
 	}
 
-	_, err = install(opts.Sqlc)
+	_, err = install(filepath.Dir(opts.Sqlc))
 
 	return
 }
