@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func Parse(source string, build Build) (txt string, err error) {
+func Parse(source string, build Build) (text string, err error) {
 	var find strings.Builder
 	var repl strings.Builder
 
@@ -121,7 +121,7 @@ func Parse(source string, build Build) (txt string, err error) {
 		sb.WriteString(line + "\n")
 	}
 
-	txt = sb.String()
+	text = sb.String()
 
 	return
 }

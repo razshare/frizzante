@@ -7,9 +7,9 @@ import (
 )
 
 func Warning(args ...any) {
-	l := len(args)
-	entries := make([]string, l)
-	for i := 0; i < l; i++ {
+	length := len(args)
+	entries := make([]string, length)
+	for i := 0; i < length; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
 	Status("WARNING", strings.Join(entries, ""), config.Colors.Warning, "0", config.Colors.Warning)

@@ -7,13 +7,7 @@ import (
 
 func Send(defaultValue bool, message string) (yes bool, err error) {
 	var model *Model
-	model, err = program.Run(&Model{
-		Prompt:       message,
-		DefaultValue: defaultValue,
-		Confirmed:    defaultValue,
-	})
-
-	if err != nil {
+	if model, err = program.Run(&Model{Prompt: message, DefaultValue: defaultValue}); err != nil {
 		return
 	}
 

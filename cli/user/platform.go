@@ -23,12 +23,12 @@ func Platform(a *app.App) (plat platform.Platform, err error) {
 		return 0, err
 	}
 
-	txt := filepath.Join(home, "platform.txt")
+	name := filepath.Join(home, "platform.txt")
 
 	var platStr string
-	if files.IsFile(txt) {
+	if files.IsFile(name) {
 		var data []byte
-		if data, err = os.ReadFile(txt); err != nil {
+		if data, err = os.ReadFile(name); err != nil {
 			return 0, err
 		}
 
@@ -42,7 +42,7 @@ func Platform(a *app.App) (plat platform.Platform, err error) {
 	}
 
 	save := func() {
-		dir := filepath.Dir(txt)
+		dir := filepath.Dir(name)
 		if !files.IsDirectory(dir) {
 			if err = os.MkdirAll(dir, os.ModePerm); err != nil {
 				messages.Error(err)
@@ -50,7 +50,7 @@ func Platform(a *app.App) (plat platform.Platform, err error) {
 			}
 		}
 
-		if err = os.WriteFile(txt, []byte(platStr), os.ModePerm); err != nil {
+		if err = os.WriteFile(name, []byte(platStr), os.ModePerm); err != nil {
 			messages.Error(err)
 		}
 	}

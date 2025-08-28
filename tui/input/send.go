@@ -22,6 +22,6 @@ func Send(message string) (value string, err error) {
 	return
 }
 
-func Sendf(format string, vars ...any) (input string, err error) {
+func Sendf(format string, vars ...any) (value string, err error) {
 	return Send(fmt.Sprintf(format, vars...))
 }

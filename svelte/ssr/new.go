@@ -72,23 +72,23 @@ func New(conf Config) v.Render {
 
 		runtime = goja.New()
 
-		var txt string
-		if txt, err = js.Bundle(app, api.FormatCommonJS, string(data)); err != nil {
+		var text string
+		if text, err = js.Bundle(app, api.FormatCommonJS, string(data)); err != nil {
 			return
 		}
 
 		var prog *goja.Program
-		if prog, err = goja.Compile(src, fmt.Sprintf(RenderFormat, txt), false); err != nil {
+		if prog, err = goja.Compile(src, fmt.Sprintf(RenderFormat, text), false); err != nil {
 			return
 		}
 
-		var val goja.Value
-		if val, err = runtime.RunProgram(prog); err != nil {
+		var value goja.Value
+		if value, err = runtime.RunProgram(prog); err != nil {
 			return
 		}
 
 		var isfun bool
-		if render, isfun = goja.AssertFunction(val); !isfun {
+		if render, isfun = goja.AssertFunction(value); !isfun {
 			err = errors.New("render is not a function")
 		}
 

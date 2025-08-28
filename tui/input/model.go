@@ -7,51 +7,51 @@ import (
 	"strings"
 )
 
-func (m *Model) Init() tea.Cmd {
+func (model *Model) Init() tea.Cmd {
 	return textinput.Blink
 }
 
-func (m *Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
-	switch k := msg.(type) {
+	switch assert := message.(type) {
 	case tea.KeyMsg:
-		if k.Type == tea.KeyCtrlC {
-			return m, tea.Interrupt
+		if assert.Type == tea.KeyCtrlC {
+			return model, tea.Interrupt
 		}
 
-		if k.Type == tea.KeyEsc {
-			m.TextInput.Reset()
+		if assert.Type == tea.KeyEsc {
+			model.TextInput.Reset()
 
-			if m.TextInput.Value() != "" {
-				return m, nil
+			if model.TextInput.Value() != "" {
+				return model, nil
 			}
 
-			return m, tea.Quit
+			return model, tea.Quit
 		}
 
-		if k.Type == tea.KeyEnter {
-			return m, tea.Quit
+		if assert.Type == tea.KeyEnter {
+			return model, tea.Quit
 		}
 	}
 
-	m.TextInput, cmd = m.TextInput.Update(msg)
-	return m, cmd
+	model.TextInput, cmd = model.TextInput.Update(message)
+	return model, cmd
 }
 
-func (m *Model) View() string {
-	var sb strings.Builder
-	sb.WriteString(config.Styles.Menu.Render("│"))
-	sb.WriteString(config.Styles.Menu.Render(" ⏣ " + m.Prompt))
-	sb.WriteString("\n")
-	sb.WriteString(config.Styles.Menu.Render("│"))
-	sb.WriteString(config.Styles.Title.Render(" " + m.TextInput.View()))
-	sb.WriteString("\n")
-	sb.WriteString(config.Styles.UserGuide.Render("enter submit"))
-	if m.TextInput.View() != "" {
-		sb.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+func (model *Model) View() string {
+	var builder strings.Builder
+	builder.WriteString(config.Styles.Menu.Render("│"))
+	builder.WriteString(config.Styles.Menu.Render(" ⏣ " + model.Prompt))
+	builder.WriteString("\n")
+	builder.WriteString(config.Styles.Menu.Render("│"))
+	builder.WriteString(config.Styles.Title.Render(" " + model.TextInput.View()))
+	builder.WriteString("\n")
+	builder.WriteString(config.Styles.UserGuide.Render("enter submit"))
+	if model.TextInput.View() != "" {
+		builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
 	} else {
-		sb.WriteString(config.Styles.UserGuide.Render(" • esc back"))
+		builder.WriteString(config.Styles.UserGuide.Render(" • esc back"))
 	}
-	sb.WriteString("\n")
-	return sb.String()
+	builder.WriteString("\n")
+	return builder.String()
 }

@@ -8,14 +8,14 @@ import (
 )
 
 func Error(args ...any) {
-	l := len(args)
-	entries := make([]string, l+1)
-	for i := 0; i < l; i++ {
+	length := len(args)
+	entries := make([]string, length+1)
+	for i := 0; i < length; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
 
 	if trace := stack.Trace(); trace != "" {
-		entries[l] = "\n" + stack.Trace()
+		entries[length] = "\n" + stack.Trace()
 	}
 
 	Status("ERROR", strings.Join(entries, ""), config.Colors.Error, "233", config.Colors.Error)

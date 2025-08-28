@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-func Sha1(txt string) (hash string, err error) {
+func Sha1(text string) (hash string, err error) {
 	hasher := sha1.New()
-	if _, err = hasher.Write([]byte(txt)); err != nil {
+	if _, err = hasher.Write([]byte(text)); err != nil {
 		return
 	}
 	text64 := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
