@@ -159,9 +159,15 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "generate", Description: "generates code and resources"},
 				Active: func() bool { return *a.Generate != "" },
 				Handler: func() error {
+					var selected string
+
+					if *a.Generate != ":pick" {
+						selected = *a.Generate
+					}
+
 					return action.Generate(action.GenerateOptions{
 						App:      *a.App,
-						Selected: *a.Generate,
+						Selected: selected,
 						Auto:     *a.Yes,
 						Efs:      a.Efs,
 						Platform: plat,
