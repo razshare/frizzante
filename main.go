@@ -6,15 +6,15 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/razshare/frizzante/cli"
-	"github.com/razshare/frizzante/cli/app"
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/internal/cli"
+	"github.com/razshare/frizzante/internal/cli/app"
+	"github.com/razshare/frizzante/internal/tui/messages"
 	flag "github.com/spf13/pflag"
 )
 
 //go:embed logo.txt
 //go:embed version
-//go:embed internal/template/project
+//go:embed internal/project.zip
 var efs embed.FS
 var frz = app.New()
 
