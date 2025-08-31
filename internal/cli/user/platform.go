@@ -16,12 +16,12 @@ import (
 var PlatformMutex sync.Mutex
 
 func Platform(a *app.App) (plat platform.Platform, err error) {
-	var home string
-	if home, err = FrizzanteHome(); err != nil {
+	var cache string
+	if cache, err = FrizzanteCache(); err != nil {
 		return 0, err
 	}
 
-	name := filepath.Join(home, "platform.txt")
+	name := filepath.Join(cache, "platform.txt")
 
 	var platStr string
 	if files.IsFile(name) {

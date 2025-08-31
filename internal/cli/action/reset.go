@@ -2,33 +2,29 @@ package action
 
 import (
 	"os"
-	"path/filepath"
 
 	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/cli/user"
 	"github.com/razshare/frizzante/internal/tui/messages"
 )
 
 func Reset(_ ResetOptions) (err error) {
-	home := os.Getenv("FRIZZANTE_HOME")
-	if home == "" {
-		var user string
-		if user, err = os.UserHomeDir(); err != nil {
-			return
-		}
-		home = filepath.Join(user, ".frizzante")
+	var cache string
+	if cache, err = user.FrizzanteCache(); err != nil {
+		return
 	}
 
-	if files.IsDirectory(home) {
-		if err = os.RemoveAll(home); err != nil {
+	if files.IsDirectory(cache) {
+		if err = os.RemoveAll(cache); err != nil {
 			return
 		}
 
-		messages.Successf("%s deleted", home)
+		messages.Successf("%s deleted", cache)
 
 		return
 	}
 
-	messages.Infof("%s not found", home)
+	messages.Infof("%s not found", cache)
 
 	return
 }

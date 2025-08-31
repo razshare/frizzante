@@ -14,8 +14,8 @@ import (
 )
 
 func Copy(options CopyOptions) (err error) {
-	var home string
-	if home, err = user.FrizzanteHome(); err != nil {
+	var cache string
+	if cache, err = user.FrizzanteCache(); err != nil {
 		return
 	}
 
@@ -26,20 +26,20 @@ func Copy(options CopyOptions) (err error) {
 
 	version := string(data)
 
-	if !files.IsFile(filepath.Join(home, "project-"+version+".zip")) || !files.IsDirectory(filepath.Join(home, "project")) {
-		if err = os.RemoveAll(filepath.Join(home, "project")); err != nil {
+	if !files.IsFile(filepath.Join(cache, "project-"+version+".zip")) || !files.IsDirectory(filepath.Join(cache, "project")) {
+		if err = os.RemoveAll(filepath.Join(cache, "project")); err != nil {
 			return
 		}
 
-		if err = os.RemoveAll(filepath.Join(home, "project-"+version+".zip")); err != nil {
+		if err = os.RemoveAll(filepath.Join(cache, "project-"+version+".zip")); err != nil {
 			return
 		}
 
-		if err = embeds.CopyFile(options.Efs, "internal/project.zip", filepath.Join(home, "project-"+version+".zip")); err != nil {
+		if err = embeds.CopyFile(options.Efs, "internal/project.zip", filepath.Join(cache, "project-"+version+".zip")); err != nil {
 			return
 		}
 
-		if err = files.UnzipFile(filepath.Join(home, "project-"+version+".zip"), home); err != nil {
+		if err = files.UnzipFile(filepath.Join(cache, "project-"+version+".zip"), cache); err != nil {
 			return
 		}
 	}
@@ -62,14 +62,14 @@ func Copy(options CopyOptions) (err error) {
 		}
 	}
 
-	if files.IsDirectory(filepath.Join(home, "project", options.From)) {
+	if files.IsDirectory(filepath.Join(cache, "project", options.From)) {
 		var entries []string
-		if entries, err = files.ReadDirectory(filepath.Join(home, "project", options.From)); err != nil {
+		if entries, err = files.ReadDirectory(filepath.Join(cache, "project", options.From)); err != nil {
 			return
 		}
 
 		for _, entry := range entries {
-			entryRelative := strings.TrimPrefix(entry, home+string(filepath.Separator)+"project"+string(filepath.Separator))
+			entryRelative := strings.TrimPrefix(entry, cache+string(filepath.Separator)+"project"+string(filepath.Separator))
 			if options.Ignore != nil {
 				var ignored bool
 				for _, ignore := range options.Ignore {
@@ -90,12 +90,12 @@ func Copy(options CopyOptions) (err error) {
 				return
 			}
 		}
-	} else if files.IsFile(filepath.Join(home, "project", options.From)) {
-		if err = files.CopyFile(filepath.Join(home, "project", options.From), options.To); err != nil {
+	} else if files.IsFile(filepath.Join(cache, "project", options.From)) {
+		if err = files.CopyFile(filepath.Join(cache, "project", options.From), options.To); err != nil {
 			return
 		}
 	} else {
-		err = fmt.Errorf("%s not found", filepath.Join(home, "project", options.From))
+		err = fmt.Errorf("%s not found", filepath.Join(cache, "project", options.From))
 		return
 	}
 

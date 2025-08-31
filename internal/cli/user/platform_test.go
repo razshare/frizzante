@@ -14,13 +14,13 @@ func TestPlatformLinuxAmd64(t *testing.T) {
 	PlatformMutex.Lock()
 	defer PlatformMutex.Unlock()
 
-	home, err := FrizzanteHome()
+	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_ = os.Remove(filepath.Join(home, "platform.txt"))
-	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
+	_ = os.Remove(filepath.Join(cache, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "linux/amd64"
 	a := &app.App{Platform: &platStr}
@@ -34,11 +34,11 @@ func TestPlatformLinuxAmd64(t *testing.T) {
 		t.Fatal("platform should be linux amd64")
 	}
 
-	if !files.IsFile(filepath.Join(home, "platform.txt")) {
+	if !files.IsFile(filepath.Join(cache, "platform.txt")) {
 		t.Fatal("~/platform.txt should be a file")
 	}
 
-	d, err := os.ReadFile(filepath.Join(home, "platform.txt"))
+	d, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -52,13 +52,13 @@ func TestPlatformLinuxArm64(t *testing.T) {
 	PlatformMutex.Lock()
 	defer PlatformMutex.Unlock()
 
-	home, err := FrizzanteHome()
+	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_ = os.Remove(filepath.Join(home, "platform.txt"))
-	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
+	_ = os.Remove(filepath.Join(cache, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "linux/arm64"
 	a := &app.App{Platform: &platStr}
@@ -72,11 +72,11 @@ func TestPlatformLinuxArm64(t *testing.T) {
 		t.Fatal("platform should be linux arm64")
 	}
 
-	if !files.IsFile(filepath.Join(home, "platform.txt")) {
+	if !files.IsFile(filepath.Join(cache, "platform.txt")) {
 		t.Fatal("~/platform.txt should be a file")
 	}
 
-	d, err := os.ReadFile(filepath.Join(home, "platform.txt"))
+	d, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -90,13 +90,13 @@ func TestPlatformDarwinAmd64(t *testing.T) {
 	PlatformMutex.Lock()
 	defer PlatformMutex.Unlock()
 
-	home, err := FrizzanteHome()
+	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_ = os.Remove(filepath.Join(home, "platform.txt"))
-	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
+	_ = os.Remove(filepath.Join(cache, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "darwin/amd64"
 	a := &app.App{Platform: &platStr}
@@ -110,11 +110,11 @@ func TestPlatformDarwinAmd64(t *testing.T) {
 		t.Fatal("platform should be darwin amd64")
 	}
 
-	if !files.IsFile(filepath.Join(home, "platform.txt")) {
+	if !files.IsFile(filepath.Join(cache, "platform.txt")) {
 		t.Fatal("~/platform.txt should be a file")
 	}
 
-	d, err := os.ReadFile(filepath.Join(home, "platform.txt"))
+	d, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,13 +128,13 @@ func TestPlatformDarwinArm64(t *testing.T) {
 	PlatformMutex.Lock()
 	defer PlatformMutex.Unlock()
 
-	home, err := FrizzanteHome()
+	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_ = os.Remove(filepath.Join(home, "platform.txt"))
-	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
+	_ = os.Remove(filepath.Join(cache, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "darwin/arm64"
 	a := &app.App{Platform: &platStr}
@@ -148,11 +148,11 @@ func TestPlatformDarwinArm64(t *testing.T) {
 		t.Fatal("platform should be darwin arm64")
 	}
 
-	if !files.IsFile(filepath.Join(home, "platform.txt")) {
+	if !files.IsFile(filepath.Join(cache, "platform.txt")) {
 		t.Fatal("~/platform.txt should be a file")
 	}
 
-	d, err := os.ReadFile(filepath.Join(home, "platform.txt"))
+	d, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -166,13 +166,13 @@ func TestPlatformWindowsAmd64(t *testing.T) {
 	PlatformMutex.Lock()
 	defer PlatformMutex.Unlock()
 
-	home, err := FrizzanteHome()
+	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_ = os.Remove(filepath.Join(home, "platform.txt"))
-	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
+	_ = os.Remove(filepath.Join(cache, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "windows/amd64"
 	a := &app.App{Platform: &platStr}
@@ -186,11 +186,11 @@ func TestPlatformWindowsAmd64(t *testing.T) {
 		t.Fatal("platform should be windows amd64")
 	}
 
-	if !files.IsFile(filepath.Join(home, "platform.txt")) {
+	if !files.IsFile(filepath.Join(cache, "platform.txt")) {
 		t.Fatal("~/platform.txt should be a file")
 	}
 
-	d, err := os.ReadFile(filepath.Join(home, "platform.txt"))
+	d, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -204,13 +204,13 @@ func TestPlatformWindowsArm64(t *testing.T) {
 	PlatformMutex.Lock()
 	defer PlatformMutex.Unlock()
 
-	home, err := FrizzanteHome()
+	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_ = os.Remove(filepath.Join(home, "platform.txt"))
-	defer func() { _ = os.Remove(filepath.Join(home, "platform.txt")) }()
+	_ = os.Remove(filepath.Join(cache, "platform.txt"))
+	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "windows/arm64"
 	a := &app.App{Platform: &platStr}
@@ -224,11 +224,11 @@ func TestPlatformWindowsArm64(t *testing.T) {
 		t.Fatal("platform should be windows arm64")
 	}
 
-	if !files.IsFile(filepath.Join(home, "platform.txt")) {
+	if !files.IsFile(filepath.Join(cache, "platform.txt")) {
 		t.Fatal("~/platform.txt should be a file")
 	}
 
-	data, err := os.ReadFile(filepath.Join(home, "platform.txt"))
+	data, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -242,12 +242,12 @@ func TestTestPlatformFresh(t *testing.T) {
 	PlatformMutex.Lock()
 	defer PlatformMutex.Unlock()
 
-	home, err := FrizzanteHome()
+	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err = os.RemoveAll(home); err != nil {
+	if err = os.RemoveAll(cache); err != nil {
 		t.Fatal()
 		return
 	}
@@ -264,21 +264,21 @@ func TestPlatformCached(t *testing.T) {
 	PlatformMutex.Lock()
 	defer PlatformMutex.Unlock()
 
-	home, err := FrizzanteHome()
+	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err = os.WriteFile(filepath.Join(home, "platform.txt"), []byte("windows/arm64"), os.ModePerm); err != nil {
+	if err = os.WriteFile(filepath.Join(cache, "platform.txt"), []byte("windows/arm64"), os.ModePerm); err != nil {
 		t.Fatal(err)
 	}
 
 	plat, err := Platform(&app.App{})
 	if err != nil {
-		_ = os.Remove(filepath.Join(home, "platform.txt"))
+		_ = os.Remove(filepath.Join(cache, "platform.txt"))
 		t.Fatal(err)
 	}
-	_ = os.Remove(filepath.Join(home, "platform.txt"))
+	_ = os.Remove(filepath.Join(cache, "platform.txt"))
 
 	if plat != platform.WindowsArm64 {
 		t.Fatal("platform should be windows/arm64")

@@ -12,7 +12,7 @@ import (
 )
 
 func New(a *app.App) (*Menu, error) {
-	home, err := user.FrizzanteHome()
+	cache, err := user.FrizzanteCache()
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +225,7 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice: search.Choice{Id: "reset", Description: "deletes " + home},
+				Choice: search.Choice{Id: "reset", Description: "deletes " + cache},
 				Active: func() bool { return *a.Reset },
 				Handler: func() error {
 					return action.Reset(action.ResetOptions{})
