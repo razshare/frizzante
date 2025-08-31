@@ -9,7 +9,7 @@ import (
 	"github.com/razshare/frizzante/internal/tui/messages"
 )
 
-func PackageWatch(options PacakgeWatchOptions) (err error) {
+func PackageWatch(options PackageWatchOptions) (err error) {
 	if err = Touch(TouchOptions{App: options.App}); err != nil {
 		return
 	}

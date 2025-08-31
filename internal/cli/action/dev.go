@@ -33,7 +33,7 @@ func Dev(options DevOptions) (err error) {
 
 	group.Add(1)
 
-	go func() { err = PackageWatch(PacakgeWatchOptions{App: options.App, Bun: options.Bun}) }()
+	go func() { err = PackageWatch(PackageWatchOptions{App: options.App, Bun: options.Bun}) }()
 
 	group.Wait()
 

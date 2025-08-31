@@ -9,7 +9,7 @@ import (
 )
 
 func Build(options BuildOptions) (err error) {
-	if err = Package(PacakgeOptions{App: options.App, Bun: options.Bun}); err != nil {
+	if err = Package(PackageOptions{App: options.App, Bun: options.Bun}); err != nil {
 		return
 	}
 

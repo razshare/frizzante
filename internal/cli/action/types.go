@@ -39,12 +39,12 @@ type TestOptions struct {
 	Bun string
 }
 
-type PacakgeOptions struct {
+type PackageOptions struct {
 	App string
 	Bun string
 }
 
-type PacakgeWatchOptions struct {
+type PackageWatchOptions struct {
 	App string
 	Bun string
 }

@@ -168,7 +168,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "package", Description: "builds app"},
 				Active: func() bool { return *a.Package },
 				Handler: func() error {
-					return action.Package(action.PacakgeOptions{
+					return action.Package(action.PackageOptions{
 						App: *a.App,
 						Bun: bun,
 					})
@@ -178,7 +178,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "package (watch)", Description: "builds app on change"},
 				Active: func() bool { return *a.PackageWatch },
 				Handler: func() error {
-					return action.PackageWatch(action.PacakgeWatchOptions{
+					return action.PackageWatch(action.PackageWatchOptions{
 						App: *a.App,
 						Bun: bun,
 					})
