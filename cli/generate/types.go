@@ -2,6 +2,7 @@ package generate
 
 import (
 	"embed"
+
 	"github.com/razshare/frizzante/platform"
 )
 
@@ -53,7 +54,6 @@ type SqlcOptions struct {
 type CoreOptions struct {
 	App  string
 	Auto bool
-	Lib  string
 	Efs  embed.FS
 }
 
@@ -63,14 +63,12 @@ type DatabaseOptions struct {
 	Auto     bool
 	Go       string
 	Sqlc     string
-	Lib      string
 	Platform platform.Platform
 }
 
 type QueriesOptions struct {
 	Auto     bool
 	Sqlc     string
-	Lib      string
 	Platform platform.Platform
 }
 
@@ -80,9 +78,11 @@ type DownloadOptions struct {
 }
 
 type CopyOptions struct {
-	From string
-	To   string
-	Auto bool
+	Ignore []string
+	From   string
+	To     string
+	Auto   bool
+	Efs    embed.FS
 }
 
 type ProjectOptions struct {
@@ -100,19 +100,16 @@ type EmbeddedZipOptions struct {
 type FormsOptions struct {
 	App  string
 	Auto bool
-	Lib  string
 	Efs  embed.FS
 }
 
 type LinksOptions struct {
 	App  string
 	Auto bool
-	Lib  string
 	Efs  embed.FS
 }
 
 type SessionOptions struct {
 	Auto bool
-	Lib  string
 	Efs  embed.FS
 }

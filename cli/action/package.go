@@ -1,11 +1,12 @@
 package action
 
 import (
-	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/tui/messages"
 )
 
 func Pkg(options PkgOptions) (err error) {
@@ -22,7 +23,7 @@ func Pkg(options PkgOptions) (err error) {
 		bun = options.Bun
 	}
 
-	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=frizzante/core/scripts/server.ts")
+	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=app.server.ts")
 	ssr.Dir = options.App
 	ssr.Env = append(os.Environ())
 	ssr.Stderr = os.Stderr
@@ -42,7 +43,7 @@ func Pkg(options PkgOptions) (err error) {
 		return err
 	}
 
-	esb := exec.Command(filepath.Join("node_modules", ".bin", "esbuild"), "--bundle", "--outfile=dist/server.js", "--format=cjs", "--allow-overwrite", "dist/server.js")
+	esb := exec.Command(filepath.Join("node_modules", ".bin", "esbuild"), "--bundle", "--outfile=dist/app.server.js", "--format=cjs", "--allow-overwrite", "dist/app.server.js")
 	esb.Dir = options.App
 	esb.Env = append(os.Environ())
 	esb.Stderr = os.Stderr

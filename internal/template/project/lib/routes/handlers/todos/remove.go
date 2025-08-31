@@ -1,12 +1,13 @@
 package todos
 
 import (
+	"main/lib/session/memory"
+	"strconv"
+
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/receive"
 	"github.com/razshare/frizzante/send"
 	"github.com/razshare/frizzante/view"
-	"main/lib/session"
-	"strconv"
 )
 
 func Remove(c *client.Client) {

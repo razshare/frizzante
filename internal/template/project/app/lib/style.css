@@ -4,14 +4,14 @@ h1 {
     width: 400px;
 }
 
-.link {
+a, .link {
     color: cadetblue;
     text-decoration: none;
     background: transparent;
     border: 0;
 }
 
-.link:hover {
+a:hover, .link:hover {
     cursor: pointer;
     text-decoration: underline;
 }

@@ -2,9 +2,10 @@ package send
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/razshare/frizzante/mock"
 	"github.com/razshare/frizzante/view"
-	"testing"
 )
 
 func TestViewWithLocation(t *testing.T) {

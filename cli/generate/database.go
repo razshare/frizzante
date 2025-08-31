@@ -1,32 +1,36 @@
 package generate
 
 import (
+	"os"
+	"os/exec"
+	"path/filepath"
+	"strings"
+
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
 	"github.com/razshare/frizzante/tui/spinner"
-	"os"
-	"os/exec"
-	"strings"
 )
 
 func Database(options DatabaseOptions) (err error) {
-	if files.IsDirectory(options.Lib) {
+	lib := filepath.Join("lib", "database")
+
+	if files.IsDirectory(lib) {
 		if !options.Auto {
 			var overwrite bool
-			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", options.Lib); err != nil {
+			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", lib); err != nil {
 				return
 			}
 
 			if !overwrite {
-				messages.Infof("skipping %s", options.Lib)
+				messages.Infof("skipping %s", lib)
 				return nil
 			}
 		}
 
-		if err = os.RemoveAll(options.Lib); err != nil {
+		if err = os.RemoveAll(lib); err != nil {
 			return
 		}
 	}
@@ -38,7 +42,12 @@ func Database(options DatabaseOptions) (err error) {
 
 	choice = strings.ToLower(choice)
 
-	if err = Copy(CopyOptions{From: "internal/template/lib/database/" + choice, To: options.Lib, Auto: options.Auto}); err != nil {
+	if err = Copy(CopyOptions{
+		From: "internal/template/project/lib/database/" + choice,
+		To:   lib,
+		Auto: options.Auto,
+		Efs:  options.Efs,
+	}); err != nil {
 		return
 	}
 

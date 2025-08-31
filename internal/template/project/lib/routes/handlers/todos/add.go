@@ -1,11 +1,12 @@
 package todos
 
 import (
+	"main/lib/session/memory"
+
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/receive"
 	"github.com/razshare/frizzante/send"
 	"github.com/razshare/frizzante/view"
-	"main/lib/session"
 )
 
 func Add(c *client.Client) {

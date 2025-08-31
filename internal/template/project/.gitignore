@@ -63,3 +63,4 @@ go.work.sum
 
 # Frizzante
 /.gen
+/main

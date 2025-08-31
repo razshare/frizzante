@@ -2,13 +2,14 @@ package main
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/route"
-	"github.com/razshare/frizzante/server"
-	"github.com/razshare/frizzante/svelte/ssr"
 	"main/lib/routes/handlers/fallback"
 	"main/lib/routes/handlers/todos"
 	"main/lib/routes/handlers/welcome"
 	"os"
+
+	"github.com/razshare/frizzante/route"
+	"github.com/razshare/frizzante/server"
+	"github.com/razshare/frizzante/svelte/ssr"
 )
 
 //go:embed app/dist

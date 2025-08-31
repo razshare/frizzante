@@ -2,18 +2,14 @@ package action
 
 import (
 	"errors"
+	"strings"
+
 	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/tui/multiselect"
 	"github.com/razshare/frizzante/tui/search"
-	"path/filepath"
-	"strings"
 )
 
 func Generate(options GenerateOptions) (err error) {
-	if err = generate.Init(options.Efs); err != nil {
-		return
-	}
-
 	pick := func(gen string) error {
 		if gen == "air" {
 			return generate.Air(generate.AirOptions{
@@ -30,7 +26,6 @@ func Generate(options GenerateOptions) (err error) {
 		} else if gen == "session" {
 			return generate.Session(generate.SessionOptions{
 				Auto: options.Auto,
-				Lib:  filepath.Join("lib", "session"),
 				Efs:  options.Efs,
 			})
 		} else if gen == "database" {
@@ -41,35 +36,30 @@ func Generate(options GenerateOptions) (err error) {
 				Sqlc:     options.Sqlc,
 				Platform: options.Platform,
 				Efs:      options.Efs,
-				Lib:      filepath.Join("lib", "database"),
 			})
 		} else if gen == "queries" {
 			return generate.Queries(generate.QueriesOptions{
 				Auto:     options.Auto,
 				Sqlc:     options.Sqlc,
 				Platform: options.Platform,
-				Lib:      filepath.Join("lib", "database"),
 			})
 		} else if gen == "core" {
 			return generate.Core(generate.CoreOptions{
 				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,
-				Lib:  filepath.Join(options.App, "frizzante", "core"),
 			})
 		} else if gen == "forms" {
 			return generate.Forms(generate.FormsOptions{
 				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,
-				Lib:  filepath.Join(options.App, "frizzante", "forms"),
 			})
 		} else if gen == "links" {
 			return generate.Links(generate.LinksOptions{
 				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,
-				Lib:  filepath.Join(options.App, "frizzante", "forms"),
 			})
 		}
 

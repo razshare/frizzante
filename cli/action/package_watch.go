@@ -1,11 +1,12 @@
 package action
 
 import (
-	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/tui/messages"
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/tui/messages"
 )
 
 func PkgWatch(options PkgWatchOptions) (err error) {
@@ -22,7 +23,7 @@ func PkgWatch(options PkgWatchOptions) (err error) {
 		bun = options.Bun
 	}
 
-	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=frizzante/core/scripts/server.ts")
+	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=app.server.ts")
 	ssr.Dir = options.App
 	ssr.Env = append(os.Environ(), "DEV=1")
 	ssr.Stderr = os.Stderr

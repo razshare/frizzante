@@ -25,8 +25,8 @@
 
 <script lang="ts">
     import Layout from "$lib/components/Layout.svelte"
-    import { href } from "$frizzante/core/scripts/href.ts"
-    import Form from "$frizzante/forms/components/Form.svelte"
+    import { action } from "$lib/scripts/core/action.ts";
+    import { href } from "$lib/scripts/core/href.ts"
 
     type Todo = {
         Checked: boolean
@@ -45,37 +45,37 @@
     <ol>
         {#each todos as todo, index (index)}
             <li>
-                <Form action="/remove">
+                <form {...action("/remove")}>
                     <input type="hidden" name="index" value={index} />
                     <button class="link">[Remove]</button>
-                </Form>
+                </form>
                 {#if todo.Checked}
-                    <Form action="/uncheck">
+                    <form {...action("/uncheck")}>
                         <input type="hidden" name="index" value={index} />
                         <button class="link">
                             <!---->
                             (x) {todo.Description}
                             <!---->
                         </button>
-                    </Form>
+                    </form>
                 {:else}
-                    <Form action="/check">
+                    <form {...action("/check")}>
                         <input type="hidden" name="index" value={index} />
                         <button class="link">
                             <!---->
                             (&nbsp;&nbsp;) {todo.Description}
                             <!---->
                         </button>
-                    </Form>
+                    </form>
                 {/if}
             </li>
         {/each}
     </ol>
-    <Form action="/add">
+    <form {...action("/add")}>
         <span class="link">Description</span>
         <input type="text" value="" name="description" />
         <button class="link" type="submit">Add +</button>
-    </Form>
+    </form>
 
     {#if error}
         <br />

@@ -1,11 +1,12 @@
 package generate
 
 import (
-	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/platform"
 	"os"
 	"path/filepath"
 	"syscall"
+
+	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/platform"
 )
 
 func Bun(options BunOptions) (err error) {

@@ -1,9 +1,10 @@
 package action
 
 import (
-	"github.com/razshare/frizzante/files"
 	"os"
 	"path/filepath"
+
+	"github.com/razshare/frizzante/files"
 )
 
 func Touch(options TouchOptions) (err error) {
@@ -32,7 +33,7 @@ func Touch(options TouchOptions) (err error) {
 		return
 	}
 
-	if err = touch(filepath.Join(options.App, "dist", "server.js")); err != nil {
+	if err = touch(filepath.Join(options.App, "dist", "app.server.js")); err != nil {
 		return
 	}
 

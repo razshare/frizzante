@@ -1,9 +1,10 @@
 package fallback
 
 import (
+	"main/lib/routes/handlers/welcome"
+
 	"github.com/razshare/frizzante/client"
 	"github.com/razshare/frizzante/send"
-	"main/lib/routes/handlers/welcome"
 )
 
 func View(c *client.Client) {

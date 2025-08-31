@@ -1,34 +1,18 @@
 package generate
 
 import (
+	"os"
+	"path/filepath"
+	"strings"
+
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
-	"os"
-	"strings"
 )
 
 func Session(options SessionOptions) (err error) {
-	if files.IsDirectory(options.Lib) {
-		if !options.Auto {
-			var overwrite bool
-			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", options.Lib); err != nil {
-				return
-			}
-
-			if !overwrite {
-				messages.Infof("skipping %s", options.Lib)
-				return
-			}
-		}
-
-		if err = os.RemoveAll(options.Lib); err != nil {
-			return
-		}
-	}
-
 	var choice string
 	if choice, err = singleselect.Send([]search.Choice{{Id: "memory"}, {Id: "disk"}}, "session type"); err != nil {
 		return
@@ -36,7 +20,32 @@ func Session(options SessionOptions) (err error) {
 
 	choice = strings.ToLower(choice)
 
-	if err = Copy(CopyOptions{From: "internal/template/lib/session/" + choice, To: options.Lib, Auto: options.Auto}); err != nil {
+	lib := filepath.Join("lib", "session", choice)
+
+	if files.IsDirectory(lib) {
+		if !options.Auto {
+			var overwrite bool
+			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", lib); err != nil {
+				return
+			}
+
+			if !overwrite {
+				messages.Infof("skipping %s", lib)
+				return
+			}
+		}
+
+		if err = os.RemoveAll(lib); err != nil {
+			return
+		}
+	}
+
+	if err = Copy(CopyOptions{
+		From: "internal/template/project/lib/session/" + choice,
+		To:   lib,
+		Auto: options.Auto,
+		Efs:  options.Efs,
+	}); err != nil {
 		return
 	}
 
@@ -44,9 +53,9 @@ func Session(options SessionOptions) (err error) {
 	case "memory":
 		messages.Success(
 			"memory session generated into session.*\n",
-			options.Lib+"/new.go\n",
-			options.Lib+"/start.go\n",
-			options.Lib+"/types.go\n",
+			lib+"/new.go\n",
+			lib+"/start.go\n",
+			lib+"/types.go\n",
 		)
 		messages.Tip(
 			"## usage example\n",
@@ -56,18 +65,18 @@ func Session(options SessionOptions) (err error) {
 			"\n",
 			"## state shape\n",
 			"Your session state is defined by session.State,\n",
-			"which is located in "+options.Lib+"/types.go.\n",
+			"which is located in "+lib+"/types.go.\n",
 			"\n",
 			"## initial state\n",
 			"Every new session is initialized with session.New(), \n",
-			"which is located in "+options.Lib+"/new.go.\n",
+			"which is located in "+lib+"/new.go.\n",
 		)
 	case "disk":
 		messages.Success(
 			"disk session generated at session.*\n",
-			options.Lib+"/new.go\n",
-			options.Lib+"/start.go\n",
-			options.Lib+"/types.go\n",
+			lib+"/new.go\n",
+			lib+"/start.go\n",
+			lib+"/types.go\n",
 		)
 		messages.Tip(
 			"## usage example\n",
@@ -78,11 +87,11 @@ func Session(options SessionOptions) (err error) {
 			"\n",
 			"## state shape\n",
 			"session state is defined by session.State,\n",
-			"which is located in "+options.Lib+"/types.go.\n",
+			"which is located in "+lib+"/types.go.\n",
 			"\n",
 			"## initial state\n",
 			"ever new session is initialized with session.New(), \n",
-			"which is located in "+options.Lib+"/new.go.\n",
+			"which is located in "+lib+"/new.go.\n",
 		)
 	}
 

@@ -17,8 +17,6 @@
         "checkJs": true,
         "paths": {
             "$lib/*": ["./lib/*"],
-            "$frizzante/*": ["./frizzante/*"],
-            "$exports/*": ["./exports/*"]
         },
         "lib": ["esnext", "DOM", "DOM.Iterable"],
         "useDefineForClassFields": true,

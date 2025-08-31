@@ -4,11 +4,12 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
-	"github.com/razshare/frizzante/embeds"
-	v "github.com/razshare/frizzante/view"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/razshare/frizzante/embeds"
+	_view "github.com/razshare/frizzante/view"
 )
 
 //go:embed target.format
@@ -23,7 +24,7 @@ var BodyFormat string
 //go:embed data.format
 var DataFormat string
 
-func New(conf Config) v.Render {
+func New(conf Config) _view.Render {
 	var efs = conf.Efs
 	var app = conf.App
 	var disk = conf.Disk
@@ -33,18 +34,18 @@ func New(conf Config) v.Render {
 	}
 
 	var id = "svelte-app"
-	var nameDist = filepath.Join(app, "dist")
-	var nameDoc = filepath.Join(nameDist, "client", "index.html")
-	var nameDocFixed = strings.ReplaceAll(nameDoc, "\\", "/")
+	var dist = filepath.Join(app, "dist")
+	var index = filepath.Join(dist, "client", "index.html")
+	var indexFixed = strings.ReplaceAll(index, "\\", "/")
 
-	return func(view v.View) (string, error) {
+	return func(view _view.View) (string, error) {
 		var data []byte
 		var err error
 
-		if !disk && embeds.IsFile(efs, nameDocFixed) {
-			data, err = efs.ReadFile(nameDocFixed)
+		if !disk && embeds.IsFile(efs, indexFixed) {
+			data, err = efs.ReadFile(indexFixed)
 		} else {
-			data, err = os.ReadFile(nameDoc)
+			data, err = os.ReadFile(index)
 		}
 
 		if err != nil {
@@ -54,7 +55,7 @@ func New(conf Config) v.Render {
 		doc := string(data)
 
 		var props []byte
-		if props, err = json.Marshal(v.Data(view)); err != nil {
+		if props, err = json.Marshal(_view.Data(view)); err != nil {
 			return "", err
 		}
 

@@ -2,9 +2,10 @@ package ssr
 
 import (
 	"embed"
-	"github.com/razshare/frizzante/view"
 	"strings"
 	"testing"
+
+	"github.com/razshare/frizzante/view"
 )
 
 //go:embed app

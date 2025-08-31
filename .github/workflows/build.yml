@@ -27,18 +27,15 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: fix Version
-        id: fix_version
-        run: .github/scripts/200.fix_version.sh
+      - name: fix go.mod
+        id: fix_go_mod
+        run: .github/scripts/200.fix_go_mod.sh
       - name: create identity
         id: create_identity
         run: .github/scripts/300.create_identity.sh
-      - name: create zip
-        id: create_zip
-        run: .github/scripts/400.create_zip.sh
       - name: create tag
         id: create_tag
-        run: .github/scripts/500.create_tag.sh
+        run: .github/scripts/400.create_tag.sh
       - name: save changes
         id: save_changes
-        run: .github/scripts/600.save_changes.sh
+        run: .github/scripts/500.save_changes.sh

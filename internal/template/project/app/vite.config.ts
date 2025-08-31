@@ -20,8 +20,6 @@ export default defineConfig({
     resolve: {
         alias: {
             $lib: "./lib",
-            $frizzante: "./frizzante",
-            $exports: "./exports",
         },
     },
     build: {

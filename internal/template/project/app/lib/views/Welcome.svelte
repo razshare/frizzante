@@ -1,11 +1,9 @@
 <script lang="ts">
     import Layout from "$lib/components/Layout.svelte"
-    import Link from "$frizzante/links/components/Link.svelte"
+    import {href} from "$lib/scripts/core/href.ts";
 </script>
 
 <Layout title="Welcome">
     <h1>Welcome to Frizzante.</h1>
-    <Link class="link" href="/todos">
-        <span>Show todos</span>
-    </Link>
+    <a {...href("/todos")}>Show todos</a>
 </Layout>

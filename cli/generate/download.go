@@ -2,13 +2,14 @@ package generate
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/text"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
-	"os"
-	"path/filepath"
 )
 
 func Download(options DownloadOptions) (ins Install, evc Evict, err error) {

@@ -5,16 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/dop251/goja"
-	"github.com/evanw/esbuild/pkg/api"
-	"github.com/razshare/frizzante/embeds"
-	"github.com/razshare/frizzante/js"
-	v "github.com/razshare/frizzante/view"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
+
+	"github.com/dop251/goja"
+	"github.com/evanw/esbuild/pkg/api"
+	"github.com/razshare/frizzante/embeds"
+	"github.com/razshare/frizzante/js"
+	_view "github.com/razshare/frizzante/view"
 )
 
 //go:embed render.format
@@ -34,7 +35,7 @@ var DataFormat string
 
 var NoScript = regexp.MustCompile(`<script.*>.*</script>`)
 
-func New(conf Config) v.Render {
+func New(conf Config) _view.Render {
 	var efs = conf.Efs
 	var app = conf.App
 	var disk = conf.Disk
@@ -50,20 +51,20 @@ func New(conf Config) v.Render {
 
 	var mut sync.Mutex
 	var id = "svelte-app"
-	var dst = filepath.Join(app, "dist")
-	var src = filepath.Join(dst, "server.js")
-	var doc = filepath.Join(dst, "client", "index.html")
-	var srcfix = strings.ReplaceAll(src, "\\", "/")
-	var docfix = strings.ReplaceAll(doc, "\\", "/")
+	var dist = filepath.Join(app, "dist")
+	var appServer = filepath.Join(dist, "app.server.js")
+	var index = filepath.Join(dist, "client", "index.html")
+	var appServerFix = strings.ReplaceAll(appServer, "\\", "/")
+	var indexFix = strings.ReplaceAll(index, "\\", "/")
 	var renders = make(chan goja.Callable, 1)
 	var runtimes = make(chan *goja.Runtime, 1)
 	var compile = func() (render goja.Callable, runtime *goja.Runtime, err error) {
 		var data []byte
 
-		if !disk && embeds.IsFile(efs, srcfix) {
-			data, err = efs.ReadFile(srcfix)
+		if !disk && embeds.IsFile(efs, appServerFix) {
+			data, err = efs.ReadFile(appServerFix)
 		} else {
-			data, err = os.ReadFile(src)
+			data, err = os.ReadFile(appServer)
 		}
 
 		if err != nil {
@@ -78,7 +79,7 @@ func New(conf Config) v.Render {
 		}
 
 		var prog *goja.Program
-		if prog, err = goja.Compile(src, fmt.Sprintf(RenderFormat, text), false); err != nil {
+		if prog, err = goja.Compile(appServer, fmt.Sprintf(RenderFormat, text), false); err != nil {
 			return
 		}
 
@@ -95,13 +96,13 @@ func New(conf Config) v.Render {
 		return
 	}
 
-	return func(view v.View) (html string, err error) {
+	return func(view _view.View) (html string, err error) {
 		var data []byte
 
-		if !disk && embeds.IsFile(efs, docfix) {
-			data, err = efs.ReadFile(docfix)
+		if !disk && embeds.IsFile(efs, indexFix) {
+			data, err = efs.ReadFile(indexFix)
 		} else {
-			data, err = os.ReadFile(doc)
+			data, err = os.ReadFile(index)
 		}
 
 		if err != nil {
@@ -110,7 +111,7 @@ func New(conf Config) v.Render {
 
 		html = string(data)
 
-		if view.Render == v.RenderServer || view.Render == v.RenderFull {
+		if view.Render == _view.RenderServer || view.Render == _view.RenderFull {
 			var render goja.Callable
 			var runtime *goja.Runtime
 			if disk {
@@ -138,7 +139,7 @@ func New(conf Config) v.Render {
 			}
 
 			var promise goja.Value
-			if promise, err = render(goja.Undefined(), runtime.ToValue(v.Data(view))); err != nil {
+			if promise, err = render(goja.Undefined(), runtime.ToValue(_view.Data(view))); err != nil {
 				return
 			}
 
@@ -158,15 +159,15 @@ func New(conf Config) v.Render {
 				body = bodyv.String()
 			}
 
-			if view.Render == v.RenderServer {
+			if view.Render == _view.RenderServer {
 				html = NoScript.ReplaceAllString(html, "")
 			}
 
-			if view.Render == v.RenderServer {
+			if view.Render == _view.RenderServer {
 				html = strings.Replace(html, "<!--app-target-->", "", 1)
 				html = strings.Replace(html, "<!--app-data-->", "", 1)
 			} else {
-				if data, err = json.Marshal(v.Data(view)); err != nil {
+				if data, err = json.Marshal(_view.Data(view)); err != nil {
 					return
 				}
 
@@ -180,8 +181,8 @@ func New(conf Config) v.Render {
 			return
 		}
 
-		if view.Render == v.RenderClient {
-			if data, err = json.Marshal(v.Data(view)); err != nil {
+		if view.Render == _view.RenderClient {
+			if data, err = json.Marshal(_view.Data(view)); err != nil {
 				return
 			}
 

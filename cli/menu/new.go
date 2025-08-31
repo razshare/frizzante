@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+
 	"github.com/razshare/frizzante/cli/action"
 	"github.com/razshare/frizzante/cli/app"
 	"github.com/razshare/frizzante/cli/generate"
@@ -68,11 +69,6 @@ func New(a *app.App) (*Menu, error) {
 						if err != nil {
 							return err
 						}
-					}
-
-					err = generate.Init(a.Efs)
-					if err != nil {
-						return err
 					}
 
 					return generate.Project(generate.ProjectOptions{
