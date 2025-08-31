@@ -3,7 +3,6 @@ package main
 import (
 	"embed"
 	"main/lib/core/svelte/ssr"
-	"main/lib/core/view"
 	"main/lib/routes/handlers/fallback"
 	"main/lib/routes/handlers/todos"
 	"main/lib/routes/handlers/welcome"
@@ -17,10 +16,12 @@ import (
 var efs embed.FS
 var srv = server.New()
 var dev = os.Getenv("DEV") == "1"
+var render = ssr.New(ssr.Config{Efs: efs, Disk: dev})
 
 func main() {
 	defer server.Start(srv)
 	srv.Efs = efs
+	srv.Render = render
 	srv.Routes = []route.Route{
 		{Pattern: "GET /", Handler: fallback.View},
 		{Pattern: "GET /welcome", Handler: welcome.View},
@@ -30,8 +31,4 @@ func main() {
 		{Pattern: "GET /add", Handler: todos.Add},
 		{Pattern: "GET /remove", Handler: todos.Remove},
 	}
-	view.RenderFunction = ssr.New(ssr.Config{
-		Efs:  efs,
-		Disk: dev,
-	})
 }

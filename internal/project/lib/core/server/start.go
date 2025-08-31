@@ -19,6 +19,7 @@ func Start(server *Server) {
 		InfoLog:    server.InfoLog,
 		PublicRoot: server.PublicRoot,
 		Efs:        server.Efs,
+		Render:     server.Render,
 	}
 	for _, route := range server.Routes {
 		mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {

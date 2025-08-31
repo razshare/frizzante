@@ -17,10 +17,9 @@ const (
 )
 
 type View struct {
-	Name           string
-	Title          string
-	Props          map[string]any
-	AlignMode      AlignMode
-	RenderMode     RenderMode
-	RenderFunction func(view View) (html string, err error)
+	Name       string
+	Title      string
+	Props      map[string]any
+	AlignMode  AlignMode
+	RenderMode RenderMode
 }

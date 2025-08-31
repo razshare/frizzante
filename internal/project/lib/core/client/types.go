@@ -3,6 +3,7 @@ package client
 import (
 	"embed"
 	"log"
+	_view "main/lib/core/view"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -21,8 +22,9 @@ type Client struct {
 }
 
 type Config struct {
-	ErrorLog   *log.Logger
-	InfoLog    *log.Logger
 	PublicRoot string
 	Efs        embed.FS
+	ErrorLog   *log.Logger
+	InfoLog    *log.Logger
+	Render     func(view _view.View) (html string, err error)
 }

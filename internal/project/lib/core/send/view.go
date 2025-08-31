@@ -28,18 +28,14 @@ func View(client *client.Client, view _view.View) {
 		return
 	}
 
+	if client.Config.Render == nil {
+		client.Config.ErrorLog.Println("view render function is missing", stack.Trace())
+		return
+	}
+
 	var html string
 	var err error
-
-	if view.RenderFunction == nil {
-		if _view.RenderFunction == nil {
-			client.Config.ErrorLog.Println("view render function is missing", stack.Trace())
-			return
-		}
-		if html, err = _view.RenderFunction(view); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
-		}
-	} else if html, err = view.RenderFunction(view); err != nil {
+	if html, err = client.Config.Render(view); err != nil {
 		client.Config.ErrorLog.Println(err, stack.Trace())
 	}
 

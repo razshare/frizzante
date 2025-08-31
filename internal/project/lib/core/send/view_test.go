@@ -42,24 +42,8 @@ func TestViewWithAcceptJson(t *testing.T) {
 func TestView(t *testing.T) {
 	client := mock.NewClient()
 
-	View(client, _view.View{
-		Name:  "test",
-		Props: map[string]any{"key": "value"},
-		RenderFunction: func(view _view.View) (html string, err error) {
-			return fmt.Sprintf("hello from %s", view.Name), nil
-		},
-	})
+	client.Config.Render = func(view _view.View) (html string, err error) {
 
-	writer := client.Writer.(*mock.ResponseWriter)
-
-	if string(writer.MockBytes) != "hello from test" {
-		t.Fatal("content should be hello from test")
-	}
-}
-
-func TestViewWithFallbackRenderFunction(t *testing.T) {
-	client := mock.NewClient()
-	_view.RenderFunction = func(view _view.View) (html string, err error) {
 		return fmt.Sprintf("hello from %s", view.Name), nil
 	}
 

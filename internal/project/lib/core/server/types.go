@@ -5,6 +5,7 @@ import (
 	"log"
 	"main/lib/core/guard"
 	"main/lib/core/route"
+	_view "main/lib/core/view"
 	"net/http"
 )
 
@@ -19,6 +20,7 @@ type Server struct {
 	Efs         embed.FS
 	Certificate string
 	Key         string
+	Render      func(view _view.View) (html string, err error)
 }
 
 type Channels struct {
