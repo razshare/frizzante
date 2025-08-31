@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/internal/cli/user"
-	"github.com/razshare/frizzante/internal/embeds"
 	"github.com/razshare/frizzante/internal/tui/confirm"
 	"github.com/razshare/frizzante/internal/tui/messages"
 )
