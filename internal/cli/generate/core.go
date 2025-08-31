@@ -3,11 +3,9 @@ package generate
 import "path/filepath"
 
 func Core(options CoreOptions) (err error) {
-	lib := filepath.Join(options.App, "lib")
-
 	if err = Copy(CopyOptions{
-		From: "internal/project/app/lib/components/core",
-		To:   filepath.Join(lib, "components", "core"),
+		From: "lib/core",
+		To:   filepath.Join("lib", "core"),
 		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
@@ -15,8 +13,8 @@ func Core(options CoreOptions) (err error) {
 	}
 
 	if err = Copy(CopyOptions{
-		From: "internal/project/app/lib/scripts/core",
-		To:   filepath.Join(lib, "scripts", "core"),
+		From: "app/lib/scripts/core",
+		To:   filepath.Join(options.App, "lib", "scripts", "core"),
 		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {

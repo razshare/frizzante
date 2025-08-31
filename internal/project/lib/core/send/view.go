@@ -2,14 +2,14 @@ package send
 
 import (
 	"main/lib/core/client"
-	v "main/lib/core/view"
+	_view "main/lib/core/view"
 	"strings"
 
 	"github.com/razshare/frizzante/stack"
 )
 
 // View sends a view.
-func View(client *client.Client, view v.View) {
+func View(client *client.Client, view _view.View) {
 	if client.Writer.Header().Get("Location") != "" {
 		return
 	}
@@ -24,17 +24,22 @@ func View(client *client.Client, view v.View) {
 		if view.Props == nil {
 			view.Props = map[string]any{}
 		}
-		Json(client, v.Data(view))
+		Json(client, _view.Data(view))
 		return
 	}
 
-	if client.Config.Render == nil {
-		client.Config.ErrorLog.Println("render function is missing", stack.Trace())
-		return
-	}
+	var html string
+	var err error
 
-	html, err := client.Config.Render(view)
-	if err != nil {
+	if view.RenderFunction == nil {
+		if _view.RenderFunction == nil {
+			client.Config.ErrorLog.Println("view render function is missing", stack.Trace())
+			return
+		}
+		if html, err = _view.RenderFunction(view); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
+		}
+	} else if html, err = view.RenderFunction(view); err != nil {
 		client.Config.ErrorLog.Println(err, stack.Trace())
 	}
 

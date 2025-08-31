@@ -1,8 +1,6 @@
 package search
 
-import (
-	"github.com/razshare/frizzante/internal/tui/viewport"
-)
+import "github.com/razshare/frizzante/internal/tui/viewport"
 
 func Reset(search *Search, viewport *viewport.Viewport) {
 	search.Input.SetValue("")

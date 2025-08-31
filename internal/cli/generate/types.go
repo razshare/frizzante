@@ -70,6 +70,7 @@ type QueriesOptions struct {
 	Auto     bool
 	Sqlc     string
 	Platform platform.Platform
+	SqlcYaml string
 }
 
 type DownloadOptions struct {

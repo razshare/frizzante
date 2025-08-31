@@ -1,8 +1,6 @@
 package app
 
-import (
-	"github.com/razshare/frizzante/internal/tui/config"
-)
+import "github.com/razshare/frizzante/internal/tui/config"
 
 func Logo(options *App) (logo string, err error) {
 	var data []byte

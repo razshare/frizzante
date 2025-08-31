@@ -36,7 +36,7 @@ var DataFormat string
 
 var NoScript = regexp.MustCompile(`<script.*>.*</script>`)
 
-func New(conf Config) _view.Render {
+func New(conf Config) func(view _view.View) (html string, err error) {
 	var efs = conf.Efs
 	var app = conf.App
 	var disk = conf.Disk
@@ -112,7 +112,7 @@ func New(conf Config) _view.Render {
 
 		html = string(data)
 
-		if view.Render == _view.RenderServer || view.Render == _view.RenderFull {
+		if view.RenderMode == _view.RenderModeServer || view.RenderMode == _view.RenderModeFull {
 			var render goja.Callable
 			var runtime *goja.Runtime
 			if disk {
@@ -160,11 +160,11 @@ func New(conf Config) _view.Render {
 				body = bodyv.String()
 			}
 
-			if view.Render == _view.RenderServer {
+			if view.RenderMode == _view.RenderModeServer {
 				html = NoScript.ReplaceAllString(html, "")
 			}
 
-			if view.Render == _view.RenderServer {
+			if view.RenderMode == _view.RenderModeServer {
 				html = strings.Replace(html, "<!--app-target-->", "", 1)
 				html = strings.Replace(html, "<!--app-data-->", "", 1)
 			} else {
@@ -182,7 +182,7 @@ func New(conf Config) _view.Render {
 			return
 		}
 
-		if view.Render == _view.RenderClient {
+		if view.RenderMode == _view.RenderModeClient {
 			if data, err = json.Marshal(_view.Data(view)); err != nil {
 				return
 			}

@@ -3,8 +3,8 @@ package view
 func Data(v View) map[string]any {
 	return map[string]any{
 		"name":   v.Name,
-		"render": v.Render,
-		"align":  v.Align,
+		"render": v.RenderMode,
+		"align":  v.AlignMode,
 		"props":  v.Props,
 	}
 }

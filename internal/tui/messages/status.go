@@ -2,8 +2,9 @@ package messages
 
 import (
 	"fmt"
-	"github.com/charmbracelet/lipgloss"
 	"strings"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
 func Status(label string, text string, labelBg string, labelFg string, color string) {

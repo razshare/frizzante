@@ -1,7 +1,5 @@
 version: "2"
 sql:
-#  - engine: "postgresql"
-#  - engine: "mysql"
   - engine: "sqlite"
     queries: "queries.sql"
     schema: "schema.sql"

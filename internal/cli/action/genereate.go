@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	generate2 "github.com/razshare/frizzante/internal/cli/generate"
+	"github.com/razshare/frizzante/internal/cli/generate"
 	"github.com/razshare/frizzante/internal/tui/multiselect"
 	"github.com/razshare/frizzante/internal/tui/search"
 )
@@ -12,24 +12,24 @@ import (
 func Generate(options GenerateOptions) (err error) {
 	pick := func(gen string) error {
 		if gen == "air" {
-			return generate2.Air(generate2.AirOptions{
+			return generate.Air(generate.AirOptions{
 				Air:      options.Air,
 				Auto:     options.Auto,
 				Platform: options.Platform,
 			})
 		} else if gen == "bun" {
-			return generate2.Bun(generate2.BunOptions{
+			return generate.Bun(generate.BunOptions{
 				Bun:      options.Bun,
 				Auto:     options.Auto,
 				Platform: options.Platform,
 			})
 		} else if gen == "session" {
-			return generate2.Session(generate2.SessionOptions{
+			return generate.Session(generate.SessionOptions{
 				Auto: options.Auto,
 				Efs:  options.Efs,
 			})
 		} else if gen == "database" {
-			return generate2.Database(generate2.DatabaseOptions{
+			return generate.Database(generate.DatabaseOptions{
 				Generate: gen,
 				Auto:     options.Auto,
 				Go:       options.Go,
@@ -38,25 +38,25 @@ func Generate(options GenerateOptions) (err error) {
 				Efs:      options.Efs,
 			})
 		} else if gen == "queries" {
-			return generate2.Queries(generate2.QueriesOptions{
+			return generate.Queries(generate.QueriesOptions{
 				Auto:     options.Auto,
 				Sqlc:     options.Sqlc,
 				Platform: options.Platform,
 			})
 		} else if gen == "core" {
-			return generate2.Core(generate2.CoreOptions{
+			return generate.Core(generate.CoreOptions{
 				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,
 			})
 		} else if gen == "forms" {
-			return generate2.Forms(generate2.FormsOptions{
+			return generate.Forms(generate.FormsOptions{
 				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,
 			})
 		} else if gen == "links" {
-			return generate2.Links(generate2.LinksOptions{
+			return generate.Links(generate.LinksOptions{
 				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,
@@ -70,7 +70,7 @@ func Generate(options GenerateOptions) (err error) {
 		var items []string
 		items, err = multiselect.Send(
 			[]search.Choice{
-				{Id: "core", Description: "router and view swapping tools."},
+				{Id: "core", Description: "server, routing and view swapping tools."},
 				{Id: "forms", Description: "form component that provides status details"},
 				{Id: "links", Description: "hyperlink component that provides status details"},
 				{Id: "air", Description: "live reload tool for go programs"},

@@ -3,7 +3,6 @@ package client
 import (
 	"embed"
 	"log"
-	"main/lib/core/view"
 	"net/http"
 
 	"github.com/gorilla/websocket"
@@ -22,7 +21,6 @@ type Client struct {
 }
 
 type Config struct {
-	Render     view.Render
 	ErrorLog   *log.Logger
 	InfoLog    *log.Logger
 	PublicRoot string

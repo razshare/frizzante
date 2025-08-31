@@ -3,7 +3,7 @@ package action
 import (
 	"os"
 
-	messages2 "github.com/razshare/frizzante/internal/tui/messages"
+	"github.com/razshare/frizzante/internal/tui/messages"
 )
 
 func Welcome(_ WelcomeOptions) error {
@@ -26,10 +26,10 @@ func Welcome(_ WelcomeOptions) error {
 		println("    • Via docker compose: docker compose -f compose.yaml -f compose.prod.yaml up -d --build")
 		println("🎉 Enjoy!!")
 		println("")
-		messages2.Info("For more info: https://razshare.github.io/frizzante-docs/guides/get-started/")
+		messages.Info("For more info: https://razshare.github.io/frizzante-docs/guides/get-started/")
 	}
 	<-end
 
-	messages2.Success("Bye!")
+	messages.Success("Bye!")
 	return nil
 }

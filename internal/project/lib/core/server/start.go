@@ -15,7 +15,6 @@ import (
 func Start(server *Server) {
 	mux := server.Handler.(*http.ServeMux)
 	config := &client.Config{
-		Render:     server.Render,
 		ErrorLog:   server.ErrorLog,
 		InfoLog:    server.InfoLog,
 		PublicRoot: server.PublicRoot,

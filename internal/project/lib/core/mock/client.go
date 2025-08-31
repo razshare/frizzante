@@ -54,7 +54,6 @@ func NewClient() *client.Client {
 	srv := server.New()
 
 	conf := &client.Config{
-		Render:     srv.Render,
 		ErrorLog:   srv.ErrorLog,
 		InfoLog:    srv.InfoLog,
 		PublicRoot: srv.PublicRoot,

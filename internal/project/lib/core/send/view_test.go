@@ -5,20 +5,20 @@ import (
 	"testing"
 
 	"main/lib/core/mock"
-	"main/lib/core/view"
+	_view "main/lib/core/view"
 )
 
 func TestViewWithLocation(t *testing.T) {
 	client := mock.NewClient()
 	Header(client, "Location", "/about")
-	View(client, view.View{}) // This should be a noop.
+	View(client, _view.View{}) // This should be a noop.
 }
 
 func TestViewWithAcceptJson(t *testing.T) {
 	client := mock.NewClient()
 	client.Request.Header.Set("Accept", "application/json")
 
-	View(client, view.View{Name: "test", Props: map[string]any{"key": "value"}})
+	View(client, _view.View{Name: "test", Props: map[string]any{"key": "value"}})
 
 	writer := client.Writer.(*mock.ResponseWriter)
 
@@ -41,11 +41,29 @@ func TestViewWithAcceptJson(t *testing.T) {
 
 func TestView(t *testing.T) {
 	client := mock.NewClient()
-	client.Config.Render = func(v view.View) (html string, err error) {
-		return fmt.Sprintf("hello from %s", v.Name), nil
+
+	View(client, _view.View{
+		Name:  "test",
+		Props: map[string]any{"key": "value"},
+		RenderFunction: func(view _view.View) (html string, err error) {
+			return fmt.Sprintf("hello from %s", view.Name), nil
+		},
+	})
+
+	writer := client.Writer.(*mock.ResponseWriter)
+
+	if string(writer.MockBytes) != "hello from test" {
+		t.Fatal("content should be hello from test")
+	}
+}
+
+func TestViewWithFallbackRenderFunction(t *testing.T) {
+	client := mock.NewClient()
+	_view.RenderFunction = func(view _view.View) (html string, err error) {
+		return fmt.Sprintf("hello from %s", view.Name), nil
 	}
 
-	View(client, view.View{Name: "test", Props: map[string]any{"key": "value"}})
+	View(client, _view.View{Name: "test", Props: map[string]any{"key": "value"}})
 
 	writer := client.Writer.(*mock.ResponseWriter)
 

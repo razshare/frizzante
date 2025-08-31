@@ -4,14 +4,14 @@ import (
 	"errors"
 
 	tea "github.com/charmbracelet/bubbletea"
-	app2 "github.com/razshare/frizzante/internal/cli/app"
+	"github.com/razshare/frizzante/internal/cli/app"
 	"github.com/razshare/frizzante/internal/cli/menu"
 	"github.com/razshare/frizzante/internal/tui/messages"
 	"github.com/razshare/frizzante/internal/tui/search"
 	"github.com/razshare/frizzante/internal/tui/singleselect"
 )
 
-func Start(a *app2.App) error {
+func Start(a *app.App) error {
 	m, err := menu.New(a)
 	if err != nil {
 		return err
@@ -37,7 +37,7 @@ func Start(a *app2.App) error {
 	}
 
 	var logo string
-	if logo, err = app2.Logo(a); err == nil {
+	if logo, err = app.Logo(a); err == nil {
 		println(logo)
 	}
 
