@@ -4,14 +4,23 @@ on:
 permissions:
   contents: write
 jobs:
+  fix:
+    name: fix
+    runs-on: ubuntu-latest
+    steps:
+      - name: fix go.mod
+        id: fix_go_mod
+        run: .github/scripts/100.fix_go_mod.sh
   tests:
+    needs:
+      - fix
     name: run tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: run tests
         id: run_tests
-        run: .github/scripts/100.run_tests.sh
+        run: .github/scripts/200.run_tests.sh
   publish:
     needs:
       - tests
@@ -27,9 +36,6 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
-      - name: fix go.mod
-        id: fix_go_mod
-        run: .github/scripts/200.fix_go_mod.sh
       - name: create identity
         id: create_identity
         run: .github/scripts/300.create_identity.sh
