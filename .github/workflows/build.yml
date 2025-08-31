@@ -8,6 +8,7 @@ jobs:
     name: fix
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - name: fix go.mod
         id: fix_go_mod
         run: .github/scripts/100.fix_go_mod.sh
