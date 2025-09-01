@@ -1,7 +1,5 @@
-name: tests
+name: publish
 on:
-  - pull_request
-  - push
   - workflow_dispatch
 permissions:
   contents: write
@@ -22,3 +20,12 @@ jobs:
       - name: tests
         id: tests
         run: make test
+  publish:
+    needs: tests
+    name: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: publish
+        id: publish
+        run: ./publish.sh
