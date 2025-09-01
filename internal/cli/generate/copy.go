@@ -10,7 +10,7 @@ import (
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/internal/cli/user"
 	"github.com/razshare/frizzante/tui/confirm"
-	messages2 "github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/messages"
 )
 
 func Copy(options CopyOptions) (err error) {
@@ -52,7 +52,7 @@ func Copy(options CopyOptions) (err error) {
 			}
 
 			if !overwrite {
-				messages2.Infof("skipping %s", options.To)
+				messages.Infof("skipping %s", options.To)
 				return
 			}
 		}
@@ -107,7 +107,7 @@ func Copy(options CopyOptions) (err error) {
 		}
 	}
 
-	messages2.Successf("%s created", options.To)
+	messages.Successf("%s created", options.To)
 
 	return
 }
