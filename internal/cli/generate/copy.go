@@ -20,7 +20,7 @@ func Copy(options CopyOptions) (err error) {
 	}
 
 	var data []byte
-	if data, err = options.Efs.ReadFile("version"); err != nil {
+	if data, err = options.Efs.ReadFile("setup/install/version"); err != nil {
 		return
 	}
 
