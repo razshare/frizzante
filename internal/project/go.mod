@@ -2,7 +2,7 @@ module main
 
 go 1.24.0
 
-replace github.com/razshare/frizzante => /home/raz/Github/razshare/frizzante
+replace github.com/razshare/frizzante => ../../
 
 require (
 	github.com/dop251/goja v0.0.0-20250630131328-58d95d85e994
