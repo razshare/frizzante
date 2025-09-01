@@ -152,7 +152,7 @@ func install() {
 func clean() {
 	spin := spinner.New("cleaning up")
 	go spinner.Start(spin)
-	time.Sleep(1)
+	time.Sleep(2)
 	defer spinner.Stop(spin)
 	if err := os.RemoveAll(fmt.Sprintf("frizzante-%s", version)); err != nil {
 		messages.Fatal(err)

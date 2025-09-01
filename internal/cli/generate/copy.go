@@ -69,7 +69,15 @@ func Copy(options CopyOptions) (err error) {
 		}
 
 		for _, entry := range entries {
-			entryRelative := strings.TrimPrefix(entry, cache+string(filepath.Separator)+"project"+string(filepath.Separator))
+			items := strings.SplitN(entry, cache, 2)
+			if len(items) < 2 {
+				continue
+			}
+			items = strings.SplitN(items[1], "project", 2)
+			if len(items) < 2 {
+				continue
+			}
+			entryRelative := strings.TrimPrefix(items[1], string(filepath.Separator))
 			if options.Ignore != nil {
 				var ignored bool
 				for _, ignore := range options.Ignore {
