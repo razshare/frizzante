@@ -1,4 +1,4 @@
-module main
+module github.com/razshare/frizzante/install
 
 go 1.25
 
