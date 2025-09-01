@@ -12,14 +12,14 @@ Frizzante is an opinionated web server framework written in [Go](https://go.dev/
 Download the [latest binary](https://github.com/razshare/frizzante/releases).
 
 > [!TIP]
-> Or build it yourself.
+> Build it yourself with
 > ```sh
 > git clone https://github.com/razshare/frizzante --depth=1
 > cd frizzante && make zip && go build -o frizzante
 > ```
 
-> [!NOTE]
-> Remember to add the binary to your path.
+> [!TIP]
+> Add the binary to your path with
 > ```sh
 > export PATH="/path/to/frizzante:$PATH"
 > ```
