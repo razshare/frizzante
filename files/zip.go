@@ -31,6 +31,9 @@ func ZipFile(from string, to string) (err error) {
 
 	zipWriter := zip.NewWriter(zipFile)
 	defer func() {
+		if zipWriter == nil {
+			return
+		}
 		if cerr := zipWriter.Close(); cerr != nil {
 			err = cerr
 		}
@@ -48,6 +51,10 @@ func ZipFile(from string, to string) (err error) {
 	}
 
 	if _, err = io.Copy(writer, file); err != nil {
+		if cerr := file.Close(); cerr != nil {
+			err = cerr
+			return
+		}
 		return
 	}
 
@@ -56,44 +63,59 @@ func ZipFile(from string, to string) (err error) {
 
 // ZipDirectory zips a directory to the disk.
 func ZipDirectory(from string, to string) (err error) {
-	err = os.MkdirAll(filepath.Dir(to), os.ModePerm)
+	if err = os.MkdirAll(filepath.Dir(to), os.ModePerm); err != nil {
+		return
+	}
+
+	var zipFile *os.File
+	zipFile, err = os.Create(to)
 	if err != nil {
 		return
 	}
 
-	var z *os.File
+	defer func() {
+		if zipFile == nil {
+			return
+		}
+		if cerr := zipFile.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
 
-	z, err = os.Create(to)
-	if err != nil {
-		return
-	}
+	zipFileWriter := zip.NewWriter(zipFile)
 
-	defer func(z *os.File) { err = z.Close() }(z)
+	defer func() {
+		if zipFileWriter == nil {
+			return
+		}
+		if cerr := zipFileWriter.Close(); cerr != nil {
+			err = cerr
+		}
+	}()
 
-	zw := zip.NewWriter(z)
-
-	defer func(zw *zip.Writer) { err = zw.Close() }(zw)
-
-	err = filepath.Walk(from, func(p string, i fs.FileInfo, err error) error {
+	err = filepath.Walk(from, func(name string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if i.IsDir() {
+		if info.IsDir() {
 			return nil
 		}
 
-		f, err := os.Open(p)
+		file, err := os.Open(name)
 		if err != nil {
 			return err
 		}
 
-		zww, err := zw.Create(strings.TrimPrefix(p, from+"/"))
+		writer, err := zipFileWriter.Create(strings.TrimPrefix(name, from+"/"))
 		if err != nil {
+			if cerr := file.Close(); cerr != nil {
+				return cerr
+			}
 			return err
 		}
 
-		_, err = io.Copy(zww, f)
+		_, err = io.Copy(writer, file)
 		if err != nil {
 			return err
 		}

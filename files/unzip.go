@@ -14,6 +14,9 @@ func UnzipFile(from string, to string) (err error) {
 		return
 	}
 	defer func() {
+		if reader == nil {
+			return
+		}
 		if cerr := reader.Close(); cerr != nil {
 			err = cerr
 		}
@@ -49,10 +52,20 @@ func UnzipFile(from string, to string) (err error) {
 
 		var zipReader io.ReadCloser
 		if zipReader, err = file.Open(); err != nil {
+			if err = zipFile.Close(); err != nil {
+				return
+			}
 			return
 		}
 
 		if _, err = io.Copy(zipFile, zipReader); err != nil {
+			if err = zipFile.Close(); err != nil {
+				return
+			}
+
+			if err = zipReader.Close(); err != nil {
+				return
+			}
 			return
 		}
 
