@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
-	"github.com/razshare/frizzante/internal/tui/messages"
+	"github.com/razshare/frizzante/tui/messages"
 )
 
 func Dev(options DevOptions) (err error) {

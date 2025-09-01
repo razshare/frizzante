@@ -8,7 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/internal/cli"
 	"github.com/razshare/frizzante/internal/cli/app"
-	"github.com/razshare/frizzante/internal/tui/messages"
+	"github.com/razshare/frizzante/tui/messages"
 	flag "github.com/spf13/pflag"
 )
 

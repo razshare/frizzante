@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/internal/tui/confirm"
-	"github.com/razshare/frizzante/internal/tui/messages"
-	"github.com/razshare/frizzante/internal/tui/spinner"
+	"github.com/razshare/frizzante/tui/confirm"
+	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/spinner"
 )
 
 //go:embed version.mirror

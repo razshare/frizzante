@@ -1,7 +1,7 @@
 package menu
 
 import (
-	"github.com/razshare/frizzante/internal/tui/search"
+	"github.com/razshare/frizzante/tui/search"
 )
 
 type Menu struct {

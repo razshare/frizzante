@@ -6,9 +6,9 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/internal/cli/app"
 	"github.com/razshare/frizzante/internal/cli/menu"
-	"github.com/razshare/frizzante/internal/tui/messages"
-	"github.com/razshare/frizzante/internal/tui/search"
-	"github.com/razshare/frizzante/internal/tui/singleselect"
+	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/singleselect"
 )
 
 func Start(a *app.App) error {

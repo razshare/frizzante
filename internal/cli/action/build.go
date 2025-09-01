@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/internal/tui/messages"
+	"github.com/razshare/frizzante/tui/messages"
 )
 
 func Build(options BuildOptions) (err error) {

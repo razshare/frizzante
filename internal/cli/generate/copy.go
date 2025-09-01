@@ -9,8 +9,8 @@ import (
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/internal/cli/user"
-	"github.com/razshare/frizzante/internal/tui/confirm"
-	"github.com/razshare/frizzante/internal/tui/messages"
+	"github.com/razshare/frizzante/tui/confirm"
+	messages2 "github.com/razshare/frizzante/tui/messages"
 )
 
 func Copy(options CopyOptions) (err error) {
@@ -52,7 +52,7 @@ func Copy(options CopyOptions) (err error) {
 			}
 
 			if !overwrite {
-				messages.Infof("skipping %s", options.To)
+				messages2.Infof("skipping %s", options.To)
 				return
 			}
 		}
@@ -107,7 +107,7 @@ func Copy(options CopyOptions) (err error) {
 		}
 	}
 
-	messages.Successf("%s created", options.To)
+	messages2.Successf("%s created", options.To)
 
 	return
 }

@@ -7,8 +7,8 @@ import (
 	"github.com/razshare/frizzante/internal/cli/app"
 	"github.com/razshare/frizzante/internal/cli/path"
 	"github.com/razshare/frizzante/internal/cli/user"
-	"github.com/razshare/frizzante/internal/tui/search"
-	"github.com/razshare/frizzante/internal/tui/singleselect"
+	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/singleselect"
 )
 
 func New(a *app.App) (*Menu, error) {

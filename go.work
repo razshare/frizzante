@@ -5,4 +5,5 @@ toolchain go1.24.5
 use (
 	.
 	internal/project
+	install
 )

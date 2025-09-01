@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/internal/tui/messages"
+	"github.com/razshare/frizzante/tui/messages"
 )
 
 func Format(options FormatOptions) (err error) {

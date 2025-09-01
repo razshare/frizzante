@@ -2,7 +2,7 @@ package action
 
 import (
 	"github.com/razshare/frizzante/internal/cli/generate"
-	"github.com/razshare/frizzante/internal/tui/input"
+	"github.com/razshare/frizzante/tui/input"
 )
 
 func CreateProject(options CreateProjectOptions) (err error) {

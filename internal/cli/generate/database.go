@@ -7,11 +7,11 @@ import (
 	"strings"
 
 	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/internal/tui/confirm"
-	"github.com/razshare/frizzante/internal/tui/messages"
-	"github.com/razshare/frizzante/internal/tui/search"
-	"github.com/razshare/frizzante/internal/tui/singleselect"
-	"github.com/razshare/frizzante/internal/tui/spinner"
+	"github.com/razshare/frizzante/tui/confirm"
+	messages2 "github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/singleselect"
+	spinner2 "github.com/razshare/frizzante/tui/spinner"
 )
 
 func Database(options DatabaseOptions) (err error) {
@@ -32,7 +32,7 @@ func Database(options DatabaseOptions) (err error) {
 			}
 
 			if !overwrite {
-				messages.Infof("skipping %s", lib)
+				messages2.Infof("skipping %s", lib)
 				return nil
 			}
 		}
@@ -52,37 +52,37 @@ func Database(options DatabaseOptions) (err error) {
 	}
 
 	if choice == "sqlite" {
-		spin := spinner.New("adding github.com/mattn/go-sqlite3")
+		spin := spinner2.New("adding github.com/mattn/go-sqlite3")
 
-		go spinner.Start(spin)
+		go spinner2.Start(spin)
 		install := exec.Command(options.Go, "get", "github.com/mattn/go-sqlite3")
 		install.Env = append(os.Environ())
 		install.Stderr = os.Stderr
 		install.Stdout = os.Stdout
 		install.Stdin = os.Stdin
 		err = install.Run()
-		spinner.Stop(spin)
+		spinner2.Stop(spin)
 
 		if err != nil {
 			return
 		}
 
-		spin = spinner.New("updating go dependencies")
+		spin = spinner2.New("updating go dependencies")
 
-		go spinner.Start(spin)
+		go spinner2.Start(spin)
 		get := exec.Command(options.Go, "get", "-u", "./...")
 		get.Env = append(os.Environ())
 		get.Stderr = os.Stderr
 		get.Stdout = os.Stdout
 		get.Stdin = os.Stdin
 		err = get.Run()
-		spinner.Stop(spin)
+		spinner2.Stop(spin)
 
 		if err != nil {
 			return
 		}
 
-		messages.Success("sqlite database is ready")
+		messages2.Success("sqlite database is ready")
 
 		if strings.Contains(strings.ToLower(options.Generate), "queries") {
 			var queries bool

@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/razshare/frizzante/internal/cli/generate"
-	"github.com/razshare/frizzante/internal/tui/multiselect"
-	"github.com/razshare/frizzante/internal/tui/search"
+	"github.com/razshare/frizzante/tui/multiselect"
+	"github.com/razshare/frizzante/tui/search"
 )
 
 func Generate(options GenerateOptions) (err error) {

@@ -6,7 +6,7 @@ import (
 
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/internal/cli/npm"
-	"github.com/razshare/frizzante/internal/tui/npmselect"
+	"github.com/razshare/frizzante/tui/npmselect"
 )
 
 func Npm(options NpmOptions) (err error) {

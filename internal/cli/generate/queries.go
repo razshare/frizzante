@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 
 	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/internal/tui/messages"
-	"github.com/razshare/frizzante/internal/tui/search"
-	"github.com/razshare/frizzante/internal/tui/singleselect"
-	"github.com/razshare/frizzante/internal/tui/spinner"
+	messages2 "github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/singleselect"
+	spinner2 "github.com/razshare/frizzante/tui/spinner"
 )
 
 func Queries(options QueriesOptions) (err error) {
@@ -39,7 +39,7 @@ func Queries(options QueriesOptions) (err error) {
 		return fmt.Errorf("%s not found", yaml)
 	}
 
-	spin := spinner.New("generating queries")
+	spin := spinner2.New("generating queries")
 
 	var sqlc string
 	if files.IsFile(options.Sqlc) {
@@ -50,7 +50,7 @@ func Queries(options QueriesOptions) (err error) {
 		sqlc = options.Sqlc
 	}
 
-	go spinner.Start(spin)
+	go spinner2.Start(spin)
 	generate := exec.Command(sqlc, "generate")
 	generate.Dir = lib
 	generate.Env = append(os.Environ())
@@ -58,17 +58,17 @@ func Queries(options QueriesOptions) (err error) {
 	generate.Stdout = os.Stdout
 	generate.Stdin = os.Stdin
 	err = generate.Run()
-	spinner.Stop(spin)
+	spinner2.Stop(spin)
 
 	if err != nil {
 		return
 	}
 
-	messages.Success(
+	messages2.Success(
 		"queries generated at database.Queries.*\n",
 		lib+"/queries.go",
 	)
-	messages.Tip(
+	messages2.Tip(
 		"## usage example\n",
 		"func(c *client.Client){\n",
 		"    u, _ := database.Queries.FindUsers(c.Request.Context())\n",

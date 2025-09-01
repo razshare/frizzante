@@ -5,7 +5,7 @@ import (
 
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/internal/cli/user"
-	"github.com/razshare/frizzante/internal/tui/messages"
+	messages2 "github.com/razshare/frizzante/tui/messages"
 )
 
 func Reset(_ ResetOptions) (err error) {
@@ -19,12 +19,12 @@ func Reset(_ ResetOptions) (err error) {
 			return
 		}
 
-		messages.Successf("%s deleted", cache)
+		messages2.Successf("%s deleted", cache)
 
 		return
 	}
 
-	messages.Infof("%s not found", cache)
+	messages2.Infof("%s not found", cache)
 
 	return
 }

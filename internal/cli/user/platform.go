@@ -10,7 +10,7 @@ import (
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/internal/cli/app"
 	"github.com/razshare/frizzante/internal/platform"
-	"github.com/razshare/frizzante/internal/tui/messages"
+	messages2 "github.com/razshare/frizzante/tui/messages"
 )
 
 var PlatformMutex sync.Mutex
@@ -42,13 +42,13 @@ func Platform(a *app.App) (plat platform.Platform, err error) {
 	save := func() {
 		if dir := filepath.Dir(name); !files.IsDirectory(dir) {
 			if err = os.MkdirAll(dir, os.ModePerm); err != nil {
-				messages.Error(err)
+				messages2.Error(err)
 				return
 			}
 		}
 
 		if err = os.WriteFile(name, []byte(platStr), os.ModePerm); err != nil {
-			messages.Error(err)
+			messages2.Error(err)
 		}
 	}
 
@@ -82,7 +82,7 @@ func Platform(a *app.App) (plat platform.Platform, err error) {
 		return platform.WindowsAmd64, nil
 	}
 
-	messages.Infof("unknown platform %s, falling back to linux/amd64", platStr)
+	messages2.Infof("unknown platform %s, falling back to linux/amd64", platStr)
 
 	return platform.LinuxAmd64, nil
 }
