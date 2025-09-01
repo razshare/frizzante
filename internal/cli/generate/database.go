@@ -8,10 +8,10 @@ import (
 
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
-	messages2 "github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
-	spinner2 "github.com/razshare/frizzante/tui/spinner"
+	"github.com/razshare/frizzante/tui/spinner"
 )
 
 func Database(options DatabaseOptions) (err error) {
@@ -32,7 +32,7 @@ func Database(options DatabaseOptions) (err error) {
 			}
 
 			if !overwrite {
-				messages2.Infof("skipping %s", lib)
+				messages.Infof("skipping %s", lib)
 				return nil
 			}
 		}
@@ -43,7 +43,7 @@ func Database(options DatabaseOptions) (err error) {
 	}
 
 	if err = Copy(CopyOptions{
-		From: "lib/database/" + choice,
+		From: "internal/project/lib/database/" + choice,
 		To:   lib,
 		Auto: options.Auto,
 		Efs:  options.Efs,
@@ -52,37 +52,37 @@ func Database(options DatabaseOptions) (err error) {
 	}
 
 	if choice == "sqlite" {
-		spin := spinner2.New("adding github.com/mattn/go-sqlite3")
+		spin := spinner.New("adding github.com/mattn/go-sqlite3")
 
-		go spinner2.Start(spin)
+		go spinner.Start(spin)
 		install := exec.Command(options.Go, "get", "github.com/mattn/go-sqlite3")
 		install.Env = append(os.Environ())
 		install.Stderr = os.Stderr
 		install.Stdout = os.Stdout
 		install.Stdin = os.Stdin
 		err = install.Run()
-		spinner2.Stop(spin)
+		spinner.Stop(spin)
 
 		if err != nil {
 			return
 		}
 
-		spin = spinner2.New("updating go dependencies")
+		spin = spinner.New("updating go dependencies")
 
-		go spinner2.Start(spin)
+		go spinner.Start(spin)
 		get := exec.Command(options.Go, "get", "-u", "./...")
 		get.Env = append(os.Environ())
 		get.Stderr = os.Stderr
 		get.Stdout = os.Stdout
 		get.Stdin = os.Stdin
 		err = get.Run()
-		spinner2.Stop(spin)
+		spinner.Stop(spin)
 
 		if err != nil {
 			return
 		}
 
-		messages2.Success("sqlite database is ready")
+		messages.Success("sqlite database is ready")
 
 		if strings.Contains(strings.ToLower(options.Generate), "queries") {
 			var queries bool

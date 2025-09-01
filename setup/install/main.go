@@ -104,31 +104,20 @@ func fixmod() {
 	}
 }
 
-func zip() {
-	spin := spinner.New("archiving project")
+func embed() {
+	spin := spinner.New("embedding assets")
 	go spinner.Start(spin)
 	defer spinner.Stop(spin)
-
-	if err := files.ZipDirectory(
-		filepath.Join(fmt.Sprintf("frizzante-%s", version), "internal", "project"),
-		filepath.Join(fmt.Sprintf("frizzante-%s", version), "internal", "project.zip"),
+	if err := os.Rename(
+		filepath.Join(fmt.Sprintf("frizzante-%s", version), "internal", "project", "go.mod"),
+		filepath.Join(fmt.Sprintf("frizzante-%s", version), "internal", "project", "go.mod.txt"),
 	); err != nil {
 		messages.Fatal(err)
 	}
-}
-
-func update() {
-	spin := spinner.New("updating")
-	go spinner.Start(spin)
-	defer spinner.Stop(spin)
-
-	cmd := exec.Command("go", "mod", "tidy")
-	cmd.Dir = fmt.Sprintf("frizzante-%s", version)
-	cmd.Env = append(os.Environ())
-	cmd.Stderr = os.Stderr
-	cmd.Stdout = os.Stdout
-	cmd.Stdin = os.Stdin
-	if err := cmd.Run(); err != nil {
+	if err := os.Rename(
+		filepath.Join(fmt.Sprintf("frizzante-%s", version), "internal", "project", "go.sum"),
+		filepath.Join(fmt.Sprintf("frizzante-%s", version), "internal", "project", "go.sum.txt"),
+	); err != nil {
 		messages.Fatal(err)
 	}
 }
@@ -162,8 +151,7 @@ func clean() {
 func main() {
 	fetch()
 	fixmod()
-	zip()
-	update()
+	embed()
 	install()
 	clean()
 	messages.Successf("frizzante %s installed", version)

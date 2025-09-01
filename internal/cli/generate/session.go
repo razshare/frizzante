@@ -41,7 +41,7 @@ func Session(options SessionOptions) (err error) {
 	}
 
 	if err = Copy(CopyOptions{
-		From: "lib/session/" + choice,
+		From: "internal/project/lib/session/" + choice,
 		To:   lib,
 		Auto: options.Auto,
 		Efs:  options.Efs,

@@ -8,46 +8,11 @@ import (
 
 	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
-	"github.com/razshare/frizzante/internal/cli/user"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 )
 
 func Copy(options CopyOptions) (err error) {
-	var cache string
-	if cache, err = user.FrizzanteCache(); err != nil {
-		return
-	}
-
-	var data []byte
-	if data, err = options.Efs.ReadFile("setup/install/version"); err != nil {
-		return
-	}
-
-	version := string(data)
-
-	if !files.IsFile(filepath.Join(cache, "project-"+version+".zip")) || !files.IsDirectory(filepath.Join(cache, "project")) {
-		if err = os.RemoveAll(filepath.Join(cache, "project")); err != nil {
-			return
-		}
-
-		if err = os.RemoveAll(filepath.Join(cache, "project-"+version+".zip")); err != nil {
-			return
-		}
-
-		if err = embeds.CopyFile(options.Efs, "internal/project.zip", filepath.Join(cache, "project-"+version+".zip")); err != nil {
-			return
-		}
-
-		if os.Getenv("DEBUG") == "1" {
-			messages.Infof("unzipping %s to %s", filepath.Join(cache, "project-"+version+".zip"), filepath.Join(cache, "project"))
-		}
-
-		if err = files.UnzipFile(filepath.Join(cache, "project-"+version+".zip"), filepath.Join(cache, "project")); err != nil {
-			return
-		}
-	}
-
 	if files.IsFile(options.To) || files.IsDirectory(options.To) {
 		if !options.Auto {
 			var overwrite bool
@@ -66,26 +31,17 @@ func Copy(options CopyOptions) (err error) {
 		}
 	}
 
-	if files.IsDirectory(filepath.Join(cache, "project", options.From)) {
+	if embeds.IsDirectory(options.Efs, options.From) {
 		var entries []string
-		if entries, err = files.ReadDirectory(filepath.Join(cache, "project", options.From)); err != nil {
+		if entries, err = embeds.ReadDirectory(options.Efs, options.From); err != nil {
 			return
 		}
 
 		for _, entry := range entries {
-			items := strings.SplitN(entry, cache, 2)
-			if len(items) < 2 {
-				continue
-			}
-			items = strings.SplitN(items[1], "project", 2)
-			if len(items) < 2 {
-				continue
-			}
-			entryRelative := strings.TrimPrefix(items[1], string(filepath.Separator))
 			if options.Ignore != nil {
 				var ignored bool
 				for _, ignore := range options.Ignore {
-					ignored = strings.HasPrefix(entryRelative, ignore)
+					ignored = strings.HasPrefix(entry, ignore)
 					if ignored {
 						break
 					}
@@ -96,22 +52,35 @@ func Copy(options CopyOptions) (err error) {
 				}
 			}
 
-			name := filepath.Join(options.To, strings.TrimPrefix(entryRelative, options.From))
+			name := filepath.Join(
+				options.To,
+				strings.ReplaceAll(
+					strings.TrimPrefix(entry, "internal/project/"),
+					"/",
+					string(filepath.Separator),
+				),
+			)
 
 			if os.Getenv("DEBUG") == "1" {
 				messages.Infof("copying %s to %s", entry, name)
 			}
 
-			if err = files.CopyFile(entry, name); err != nil {
+			if strings.HasSuffix(name, "go.mod.txt") {
+				name = strings.TrimSuffix(name, ".txt")
+			} else if strings.HasSuffix(name, "go.sum.txt") {
+				name = strings.TrimSuffix(name, ".txt")
+			}
+
+			if err = embeds.CopyFile(options.Efs, entry, name); err != nil {
 				return
 			}
 		}
-	} else if files.IsFile(filepath.Join(cache, "project", options.From)) {
-		if err = files.CopyFile(filepath.Join(cache, "project", options.From), options.To); err != nil {
+	} else if embeds.IsFile(options.Efs, options.From) {
+		if err = embeds.CopyFile(options.Efs, options.From, options.To); err != nil {
 			return
 		}
 	} else {
-		err = fmt.Errorf("%s not found", filepath.Join(cache, "project", options.From))
+		err = fmt.Errorf("%s not found", options.From)
 		return
 	}
 
