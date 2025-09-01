@@ -39,6 +39,10 @@ func Copy(options CopyOptions) (err error) {
 			return
 		}
 
+		if os.Getenv("DEBUG") == "1" {
+			messages.Infof("unzipping %s to %s", filepath.Join(cache, "project-"+version+".zip"), filepath.Join(cache, "project"))
+		}
+
 		if err = files.UnzipFile(filepath.Join(cache, "project-"+version+".zip"), filepath.Join(cache, "project")); err != nil {
 			return
 		}
