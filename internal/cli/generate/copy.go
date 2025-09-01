@@ -38,6 +38,10 @@ func Copy(options CopyOptions) (err error) {
 		}
 
 		for _, entry := range entries {
+			if os.Getenv("DEBUG") == "1" {
+				messages.Infof("embedded file: %s", entry)
+			}
+
 			if options.Ignore != nil {
 				var ignored bool
 				for _, ignore := range options.Ignore {
@@ -60,10 +64,6 @@ func Copy(options CopyOptions) (err error) {
 					string(filepath.Separator),
 				),
 			)
-
-			if os.Getenv("DEBUG") == "1" {
-				messages.Infof("copying %s to %s", entry, name)
-			}
 
 			if strings.HasSuffix(name, "go.mod.txt") {
 				name = strings.TrimSuffix(name, ".txt")

@@ -9,7 +9,7 @@ require (
 	github.com/evanw/esbuild v0.25.9
 	github.com/gorilla/websocket v1.5.3
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
-	github.com/razshare/frizzante v1.27.5
+	github.com/razshare/frizzante v1.28.12
 )
 
 require (

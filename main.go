@@ -14,7 +14,7 @@ import (
 
 //go:embed logo.txt
 //go:embed setup/install/version
-//go:embed internal/project
+//go:embed internal/project/**
 var efs embed.FS
 var frz = app.New()
 
