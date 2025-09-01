@@ -11,7 +11,7 @@ Frizzante is an opinionated web server framework written in [Go](https://go.dev/
 
 Download the [latest binary](https://github.com/razshare/frizzante/releases).
 
-> [!NOTE]
+> [!TIP]
 > Or build it yourself.
 > ```sh
 > git clone https://github.com/razshare/frizzante --depth=1
