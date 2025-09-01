@@ -17,6 +17,10 @@ import (
 //go:embed version.mirror
 var version string
 
+func init() {
+	version = strings.TrimSpace(version)
+}
+
 func fetch() {
 	if files.IsDirectory(fmt.Sprintf("frizzante-%s", version)) {
 		var overwrite bool
