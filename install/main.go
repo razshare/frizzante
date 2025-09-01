@@ -98,9 +98,6 @@ func fixmod() {
 
 		builder.WriteString(line + "\n")
 	}
-	if err = os.RemoveAll(name); err != nil {
-		messages.Fatal(err)
-	}
 	if err = os.WriteFile(name, []byte(builder.String()), os.ModePerm); err != nil {
 		messages.Fatal(err)
 	}
