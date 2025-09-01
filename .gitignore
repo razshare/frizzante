@@ -43,6 +43,10 @@ node_modules
 # env file
 .env
 
+# Go
+/go.work
+/go.work.sum
+
 # Certificates
 *.pem
 *.crt
