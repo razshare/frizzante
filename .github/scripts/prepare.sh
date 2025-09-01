@@ -25,7 +25,3 @@ sed -i "/go-sqlite3 =>/d" internal/project/go.mod
 
 # Creates new project archive
 pushd internal && zip -rq9 project.zip project && popd
-
-# Restores go.mod
-rm -f internal/project/go.mod
-mv internal/go.mod.tmp internal/project/go.mod
