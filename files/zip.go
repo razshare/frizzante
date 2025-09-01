@@ -55,15 +55,15 @@ func ZipFile(from string, to string) (err error) {
 }
 
 // ZipDirectory zips a directory to the disk.
-func ZipDirectory(dn string, zn string) (err error) {
-	err = os.MkdirAll(filepath.Dir(zn), os.ModePerm)
+func ZipDirectory(from string, to string) (err error) {
+	err = os.MkdirAll(filepath.Dir(to), os.ModePerm)
 	if err != nil {
 		return
 	}
 
 	var z *os.File
 
-	z, err = os.Create(zn)
+	z, err = os.Create(to)
 	if err != nil {
 		return
 	}
@@ -74,7 +74,7 @@ func ZipDirectory(dn string, zn string) (err error) {
 
 	defer func(zw *zip.Writer) { err = zw.Close() }(zw)
 
-	err = filepath.Walk(dn, func(p string, i fs.FileInfo, err error) error {
+	err = filepath.Walk(from, func(p string, i fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -88,7 +88,7 @@ func ZipDirectory(dn string, zn string) (err error) {
 			return err
 		}
 
-		zww, err := zw.Create(strings.TrimPrefix(p, dn+"/"))
+		zww, err := zw.Create(strings.TrimPrefix(p, from+"/"))
 		if err != nil {
 			return err
 		}
