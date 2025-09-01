@@ -1,3 +1,3 @@
-module github.com/razshare/frizzante/install
+module install
 
 go 1.24
