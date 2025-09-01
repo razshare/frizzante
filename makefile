@@ -1,5 +1,5 @@
-sync:
-	cp version install/version.mirror
+publish: test
+	./publish.sh
 
 test:
 	./test.sh
