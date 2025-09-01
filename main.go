@@ -13,7 +13,7 @@ import (
 )
 
 //go:embed logo.txt
-//go:embed version
+//go:embed install/version
 //go:embed internal/project.zip
 var efs embed.FS
 var frz = app.New()

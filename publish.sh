@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
-VERSION=$(< version)
-echo "$VERSION" > install/version.mirror
+VERSION=$(< install/version)
 git config --global user.name "Publish Workflow"
 git config --global user.email "razvan@razshare.dev"
 git add .

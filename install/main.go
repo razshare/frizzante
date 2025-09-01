@@ -14,7 +14,7 @@ import (
 	"github.com/razshare/frizzante/tui/spinner"
 )
 
-//go:embed version.mirror
+//go:embed version
 var version string
 
 func init() {
