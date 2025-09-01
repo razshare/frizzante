@@ -12,6 +12,6 @@ jobs:
       - name: prepare
         id: prepare
         run: .github/scripts/prepare.sh
-      - name: run tests
-        id: run_tests
+      - name: test
+        id: test
         run: .github/scripts/test.sh
