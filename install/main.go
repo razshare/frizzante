@@ -22,6 +22,10 @@ func init() {
 }
 
 func fetch() {
+	spin := spinner.New(fmt.Sprintf("fetching frizzante %s", version))
+	go spinner.Start(spin)
+	defer spinner.Stop(spin)
+
 	if files.IsDirectory(fmt.Sprintf("frizzante-%s", version)) {
 		var overwrite bool
 		var err error
@@ -67,6 +71,10 @@ func fetch() {
 }
 
 func fixmod() {
+	spin := spinner.New("fixing go.mod")
+	go spinner.Start(spin)
+	defer spinner.Stop(spin)
+
 	name := filepath.Join(fmt.Sprintf("frizzante-%s", version), "internal", "project", "go.mod")
 	var data []byte
 	var err error
@@ -99,6 +107,10 @@ func fixmod() {
 }
 
 func zip() {
+	spin := spinner.New("archiving project")
+	go spinner.Start(spin)
+	defer spinner.Stop(spin)
+
 	if err := files.ZipDirectory(
 		filepath.Join(fmt.Sprintf("frizzante-%s", version), "internal", "project"),
 		filepath.Join(fmt.Sprintf("frizzante-%s", version), "internal", "project.zip"),
@@ -108,6 +120,10 @@ func zip() {
 }
 
 func update() {
+	spin := spinner.New("updating")
+	go spinner.Start(spin)
+	defer spinner.Stop(spin)
+
 	cmd := exec.Command("go", "mod", "tidy")
 	cmd.Dir = fmt.Sprintf("frizzante-%s", version)
 	cmd.Env = append(os.Environ())
@@ -120,6 +136,10 @@ func update() {
 }
 
 func install() {
+	spin := spinner.New(fmt.Sprintf("installing frizzante %s", version))
+	go spinner.Start(spin)
+	defer spinner.Stop(spin)
+
 	cmd := exec.Command("go", "install", ".")
 	cmd.Dir = fmt.Sprintf("frizzante-%s", version)
 	cmd.Env = append(os.Environ())
@@ -138,13 +158,11 @@ func clean() {
 }
 
 func main() {
-	spin := spinner.New("installing frizzante")
-	go spinner.Start(spin)
-	defer spinner.Stop(spin)
 	fetch()
 	fixmod()
 	zip()
 	update()
 	install()
 	clean()
+	messages.Successf("frizzante %s installed", version)
 }
