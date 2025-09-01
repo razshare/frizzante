@@ -39,7 +39,7 @@ func Copy(options CopyOptions) (err error) {
 			return
 		}
 
-		if err = files.UnzipFile(filepath.Join(cache, "project-"+version+".zip"), cache); err != nil {
+		if err = files.UnzipFile(filepath.Join(cache, "project-"+version+".zip"), filepath.Join(cache, "project")); err != nil {
 			return
 		}
 	}
