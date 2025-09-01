@@ -7,7 +7,7 @@ import (
 
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/messages"
-	spinner2 "github.com/razshare/frizzante/tui/spinner"
+	"github.com/razshare/frizzante/tui/spinner"
 )
 
 func Install(options InstallOptions) (err error) {
@@ -15,16 +15,16 @@ func Install(options InstallOptions) (err error) {
 		return
 	}
 
-	spin := spinner2.New("installing go dependencies")
+	spin := spinner.New("installing go dependencies")
 
-	go spinner2.Start(spin)
+	go spinner.Start(spin)
 	tidy := exec.Command(options.Go, "mod", "tidy")
 	tidy.Env = append(os.Environ())
 	tidy.Stderr = os.Stderr
 	tidy.Stdout = os.Stdout
 	tidy.Stdin = os.Stdin
 	err = tidy.Run()
-	spinner2.Stop(spin)
+	spinner.Stop(spin)
 
 	if err != nil {
 		return

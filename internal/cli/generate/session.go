@@ -7,7 +7,7 @@ import (
 
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
-	messages2 "github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
 )
@@ -30,7 +30,7 @@ func Session(options SessionOptions) (err error) {
 			}
 
 			if !overwrite {
-				messages2.Infof("skipping %s", lib)
+				messages.Infof("skipping %s", lib)
 				return
 			}
 		}
@@ -51,13 +51,13 @@ func Session(options SessionOptions) (err error) {
 
 	switch choice {
 	case "memory":
-		messages2.Success(
+		messages.Success(
 			"memory session generated into session.*\n",
 			lib+"/new.go\n",
 			lib+"/start.go\n",
 			lib+"/types.go\n",
 		)
-		messages2.Tip(
+		messages.Tip(
 			"## usage example\n",
 			"func(c *client.Client){\n",
 			"    s := session.Start(receive.SessionId(c))\n",
@@ -72,13 +72,13 @@ func Session(options SessionOptions) (err error) {
 			"which is located in "+lib+"/new.go.\n",
 		)
 	case "disk":
-		messages2.Success(
+		messages.Success(
 			"disk session generated at session.*\n",
 			lib+"/new.go\n",
 			lib+"/start.go\n",
 			lib+"/types.go\n",
 		)
-		messages2.Tip(
+		messages.Tip(
 			"## usage example\n",
 			"func(c *client.Client){\n",
 			"    s := session.Start(receive.SessionId(c))\n",
