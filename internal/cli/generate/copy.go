@@ -86,6 +86,10 @@ func Copy(options CopyOptions) (err error) {
 
 			name := filepath.Join(options.To, strings.TrimPrefix(entryRelative, options.From))
 
+			if os.Getenv("DEBUG") == "1" {
+				messages.Infof("copying %s to %s", entry, name)
+			}
+
 			if err = files.CopyFile(entry, name); err != nil {
 				return
 			}

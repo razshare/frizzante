@@ -12,7 +12,10 @@ rm -fr internal/project/app/node_modules
 rm -fr internal/project/app/lib/core/svelte/ssr/app
 
 # Creates new project archive
-pushd internal && zip -rq9 project.zip project && popd
+pushd internal/project
+zip -rq9 project.zip .
+popd
+mv internal/project/project.zip internal/project.zip
 
 # Creates a temporary binary
 go mod tidy
