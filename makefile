@@ -1,5 +1,2 @@
-zip:
-	./zip.sh
-
-publish: zip
-	./publish.sh
+sync:
+	cp version install/version.mirror

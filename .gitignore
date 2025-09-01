@@ -57,6 +57,7 @@ go.work.sum
 
 # Frizzante
 /frizzante
+/frizzante-*
 /main
 /.gen
 /.tmp
