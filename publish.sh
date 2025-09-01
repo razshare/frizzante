@@ -3,8 +3,5 @@ set -e
 VERSION=$(< install/version)
 git config --global user.name "Publish Workflow"
 git config --global user.email "razvan@razshare.dev"
-git add .
-git commit -m"chore(app): tagging version $VERSION"
 git tag "$VERSION"
 git push origin --tags
-git push origin
