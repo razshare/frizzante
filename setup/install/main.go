@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
@@ -149,6 +150,10 @@ func install() {
 }
 
 func clean() {
+	spin := spinner.New("cleaning up")
+	go spinner.Start(spin)
+	time.Sleep(1)
+	defer spinner.Stop(spin)
 	if err := os.RemoveAll(fmt.Sprintf("frizzante-%s", version)); err != nil {
 		messages.Fatal(err)
 	}
