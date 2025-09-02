@@ -10,19 +10,18 @@ Frizzante is an opinionated web server framework written in [Go](https://go.dev/
 
 # Prerequisites
 
-Download the [latest binary](https://github.com/razshare/frizzante/releases).
+Install frizzante.
 
-> [!TIP]
-> Or build it yourself.
-> ```sh
-> git clone https://github.com/razshare/frizzante --depth=1
-> cd frizzante && make zip && go build -o frizzante
-> ```
+```sh
+go run github.com/razshare/frizzante/setup/install@latest
+```
 
-> [!TIP]
-> Remember to add the binary to your path.
+> [!NOTE]
+> Remember to add Go binaries to your path.
+> 
 > ```sh
-> export PATH="/path/to/frizzante:$PATH"
+> export GOPATH=$HOME/go
+> export PATH=$PATH:$GOPATH/bin
 > ```
 
 # Get Started
