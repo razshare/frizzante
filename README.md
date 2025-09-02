@@ -1,6 +1,6 @@
 # Frizzante
 
-<img src="https://raw.githubusercontent.com/razshare/frizzante/refs/heads/main/assets/frizz-octo-header.webp" width="308" />
+<img alt="frizzante logo" src="https://raw.githubusercontent.com/razshare/frizzante/refs/heads/main/assets/frizz-octo-header.webp" width="308" />
 
 <a href="https://github.com/razshare/frizzante/releases"><img src="https://img.shields.io/github/release/razshare/frizzante" alt="Latest Release"></a>
 <a href="https://github.com/razshare/frizzante/actions"><img src="https://github.com/razshare/frizzante/actions/workflows/tests.yaml/badge.svg?branch=main" alt="Tests Status"></a>
@@ -16,7 +16,7 @@ Install frizzante.
 go run github.com/razshare/frizzante/setup/install@latest
 ```
 
-> [!NOTE]
+> [!TIP]
 > Remember to add Go binaries to your path.
 > 
 > ```sh
