@@ -3,7 +3,7 @@ package npmselect
 import (
 	"time"
 
-	"github.com/razshare/frizzante/internal/cli/npm"
+	"github.com/razshare/frizzante/cli/npm"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/viewport"
 )

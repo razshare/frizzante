@@ -1,6 +1,18 @@
 #!/usr/bin/env bash
 set -e
 
+# Tests cli
+go test ./cli/app/... &
+go test ./cli/extension/... &
+go test ./cli/menu/... &
+go test ./cli/npm/... &
+go test ./cli/path/... &
+go test ./cli/user/... &
+go test ./embeds/... &
+go test ./files/... &
+go test ./text/... &
+wait
+
 # Cleans project
 rm -fr internal/project/.gen
 rm -fr internal/project/app/dist

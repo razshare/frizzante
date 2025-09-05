@@ -6,8 +6,8 @@ import (
 	"os"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/razshare/frizzante/internal/cli"
-	"github.com/razshare/frizzante/internal/cli/app"
+	"github.com/razshare/frizzante/cli"
+	"github.com/razshare/frizzante/cli/app"
 	"github.com/razshare/frizzante/tui/messages"
 	flag "github.com/spf13/pflag"
 )
