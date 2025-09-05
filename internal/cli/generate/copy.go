@@ -59,7 +59,7 @@ func Copy(options CopyOptions) (err error) {
 			name := filepath.Join(
 				options.To,
 				strings.ReplaceAll(
-					strings.TrimPrefix(entry, "internal/project/"),
+					strings.TrimPrefix(entry, options.From),
 					"/",
 					string(filepath.Separator),
 				),
