@@ -15,6 +15,7 @@ import (
 //go:embed logo.txt
 //go:embed setup/install/version
 //go:embed internal/project/**
+//go:embed internal/project/lib/core/svelte/ssr/.gitignore
 var efs embed.FS
 var frz = app.New()
 
