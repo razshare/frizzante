@@ -4,7 +4,7 @@ import (
 	"main/lib/core/client"
 	"net/url"
 
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // Cookie reads the contents of a cookie from the message and returns the value.

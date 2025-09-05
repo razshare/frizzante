@@ -7,7 +7,7 @@ import (
 	"main/lib/core/client"
 	"net/http"
 
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // SseUpgrade upgrades to server sent events

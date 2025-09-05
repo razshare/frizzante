@@ -1,6 +1,3 @@
-publish: test
-	./publish.sh
-
 test:
 	./test.sh
 
@@ -13,3 +10,6 @@ unlock:
 	mv internal/project/go.mod internal/project/go.mod.txt &
 	mv internal/project/go.sum internal/project/go.sum.txt &
 	wait
+
+publish: test
+	./publish.sh

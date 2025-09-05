@@ -5,18 +5,17 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"main/lib/core/embeds"
+	"main/lib/core/js"
+	_view "main/lib/core/view"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
 
-	"main/lib/core/js"
-	_view "main/lib/core/view"
-
 	"github.com/dop251/goja"
 	"github.com/evanw/esbuild/pkg/api"
-	"github.com/razshare/frizzante/embeds"
 )
 
 //go:embed render.format

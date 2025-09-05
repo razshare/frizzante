@@ -4,13 +4,11 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"main/lib/core/embeds"
+	_view "main/lib/core/view"
 	"os"
 	"path/filepath"
 	"strings"
-
-	_view "main/lib/core/view"
-
-	"github.com/razshare/frizzante/embeds"
 )
 
 //go:embed target.format

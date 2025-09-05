@@ -28,4 +28,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: publish
         id: publish
-        run: ./publish.sh
+        run: |
+          git config --global user.name "Publish Workflow"
+          git config --global user.email "razvan@razshare.dev"
+          ./publish.sh

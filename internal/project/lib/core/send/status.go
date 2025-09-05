@@ -2,8 +2,7 @@ package send
 
 import (
 	"main/lib/core/client"
-
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // Status sets the status code.

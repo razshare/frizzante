@@ -5,7 +5,7 @@ import (
 	"io"
 	"main/lib/core/client"
 
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // Json reads the next JSON-encoded message from the

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // Content sends binary safe content.

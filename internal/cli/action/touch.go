@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/files"
 )
 
 func Touch(options TouchOptions) (err error) {

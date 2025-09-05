@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"os"
 	"time"
-
-	"github.com/razshare/frizzante/globals"
 )
 
 // New creates a new server.
@@ -23,7 +21,7 @@ func New() (server *Server) {
 			Handler:        http.NewServeMux(),
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
-			MaxHeaderBytes: 3 * globals.MB,
+			MaxHeaderBytes: 2097152, // 2MB
 			ErrorLog:       log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime),
 		},
 	}

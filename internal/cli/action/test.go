@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/files"
 )
 
 func Test(options TestOptions) (err error) {

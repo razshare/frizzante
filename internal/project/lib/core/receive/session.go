@@ -5,7 +5,7 @@ import (
 	"main/lib/core/send"
 
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // SessionId tries to find a session id among the user's cookies.

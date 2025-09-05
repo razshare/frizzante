@@ -4,7 +4,7 @@ import (
 	"io"
 	"main/lib/core/client"
 
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // Message reads the contents of the message and returns the value.

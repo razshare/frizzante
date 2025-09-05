@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/razshare/frizzante/files"
+	files2 "github.com/razshare/frizzante/internal/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
@@ -27,7 +27,7 @@ func fetch() {
 	go spinner.Start(spin)
 	defer spinner.Stop(spin)
 
-	if files.IsDirectory(fmt.Sprintf("frizzante-%s", version)) {
+	if files2.IsDirectory(fmt.Sprintf("frizzante-%s", version)) {
 		var overwrite bool
 		var err error
 		if overwrite, err = confirm.Sendf(true, "frizzante-%s already exists. Overwrite?", version); err != nil {
@@ -39,8 +39,8 @@ func fetch() {
 			messages.Fatal(err)
 		}
 	}
-	if !files.IsDirectory(fmt.Sprintf("frizzante-%s", version)) {
-		if files.IsFile(fmt.Sprintf("frizzante-%s.zip", version)) {
+	if !files2.IsDirectory(fmt.Sprintf("frizzante-%s", version)) {
+		if files2.IsFile(fmt.Sprintf("frizzante-%s.zip", version)) {
 			var overwrite bool
 			var err error
 			if overwrite, err = confirm.Sendf(true, "frizzante-%s.zip already exists. Overwrite?", version); err != nil {
@@ -54,10 +54,10 @@ func fetch() {
 		}
 	}
 	url := fmt.Sprintf("https://github.com/razshare/frizzante/archive/refs/tags/%s.zip", version)
-	if err := files.DownloadFile(url, fmt.Sprintf("frizzante-%s.zip", version)); err != nil {
+	if err := files2.DownloadFile(url, fmt.Sprintf("frizzante-%s.zip", version)); err != nil {
 		messages.Fatal(err)
 	}
-	if err := files.UnzipFile(fmt.Sprintf("frizzante-%s.zip", version), "."); err != nil {
+	if err := files2.UnzipFile(fmt.Sprintf("frizzante-%s.zip", version), "."); err != nil {
 		messages.Fatal(err)
 	}
 	if err := os.Rename(

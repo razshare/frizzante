@@ -4,15 +4,14 @@ import (
 	"main/lib/core/client"
 
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/globals"
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // WsUpgrade upgrades to web sockets.
 func WsUpgrade(client *client.Client) {
 	WsUpgradeWithUpgrader(client, websocket.Upgrader{
-		ReadBufferSize:  10 * globals.KB,
-		WriteBufferSize: 10 * globals.KB,
+		ReadBufferSize:  10240, // 10KB
+		WriteBufferSize: 10240, // 10KB
 	})
 }
 

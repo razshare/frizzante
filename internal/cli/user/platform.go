@@ -7,8 +7,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/internal/cli/app"
+	"github.com/razshare/frizzante/internal/files"
 	"github.com/razshare/frizzante/internal/platform"
 	"github.com/razshare/frizzante/tui/messages"
 )

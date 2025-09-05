@@ -5,7 +5,7 @@ import (
 	_view "main/lib/core/view"
 	"strings"
 
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // View sends a view.

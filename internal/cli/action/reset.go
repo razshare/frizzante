@@ -3,8 +3,8 @@ package action
 import (
 	"os"
 
-	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/internal/cli/user"
+	"github.com/razshare/frizzante/internal/files"
 	messages2 "github.com/razshare/frizzante/tui/messages"
 )
 

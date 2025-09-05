@@ -8,7 +8,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // Start starts a server from a configuration.

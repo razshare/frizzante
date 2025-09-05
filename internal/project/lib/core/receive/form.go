@@ -6,8 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/razshare/frizzante/globals"
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // Form reads the message as a form and returns the value.
@@ -15,7 +14,7 @@ import (
 // The whole request body is parsed and up to a total of 2MB
 // of its file parts are stored in memory, with the remainder stored on disk in temporary files.
 func Form(client *client.Client) url.Values {
-	return FormWithMaxMemory(client, 2*globals.MB)
+	return FormWithMaxMemory(client, 2097152) // 2MB
 }
 
 // FormWithMaxMemory reads the message as a form and returns the value.

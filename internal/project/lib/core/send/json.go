@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"main/lib/core/client"
 
-	"github.com/razshare/frizzante/stack"
+	"main/lib/core/stack"
 )
 
 // Json sends json content.

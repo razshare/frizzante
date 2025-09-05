@@ -3,8 +3,8 @@ package action
 import (
 	"os/exec"
 
-	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/internal/cli/generate"
+	"github.com/razshare/frizzante/internal/files"
 )
 
 func Configure(options ConfigureOptions) (err error) {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/razshare/frizzante/stack"
+	"github.com/razshare/frizzante/internal/stack"
 	"github.com/razshare/frizzante/tui/config"
 )
 
