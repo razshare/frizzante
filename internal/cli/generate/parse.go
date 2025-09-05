@@ -4,9 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/razshare/frizzante/globals"
 )
+
+var CodegenLineModHint = "//gen:mod"
+var CodegenGlobalModHint = "//gen:mods"
 
 func Parse(source string, build Build) (text string, err error) {
 	var find strings.Builder
@@ -87,16 +88,16 @@ func Parse(source string, build Build) (text string, err error) {
 
 	for _, line := range strings.Split(source, "\n") {
 		trimmed := strings.TrimSpace(line)
-		if strings.HasPrefix(trimmed, globals.CodegenGlobalModHint) {
-			offset := len(globals.CodegenGlobalModHint)
+		if strings.HasPrefix(trimmed, CodegenGlobalModHint) {
+			offset := len(CodegenGlobalModHint)
 			if mod, err = next(line[offset:]); err != nil {
 				return
 			}
 			modsGlobal = append(modsGlobal, mod)
 			modsGlobalLen++
 			continue
-		} else if strings.HasPrefix(trimmed, globals.CodegenLineModHint) {
-			o := len(globals.CodegenLineModHint)
+		} else if strings.HasPrefix(trimmed, CodegenLineModHint) {
+			o := len(CodegenLineModHint)
 			if mod, err = next(line[o:]); err != nil {
 				return
 			}
