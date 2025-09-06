@@ -87,8 +87,14 @@ func fixmod() {
 	count := len(lines)
 	for i := 0; i < count; i++ {
 		line := lines[i]
+
 		if strings.Contains(line, "=>") {
 			// ignore replacements
+			continue
+		}
+
+		if strings.Contains(line, "sqlite") {
+			// ignore sqlite
 			continue
 		}
 
