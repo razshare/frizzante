@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/razshare/frizzante/cli/user"
-	files2 "github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/text"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
@@ -32,17 +32,17 @@ func Download(options DownloadOptions) (install Install, evict Evict, err error)
 
 	global := filepath.Join(cache, hash+ext)
 
-	if !files2.IsFile(global) {
+	if !files.IsFile(global) {
 		spin := spinner.New(fmt.Sprintf("downloading %s", options.Url))
 		go spinner.Start(spin)
 		defer spinner.Stop(spin)
-		if err = files2.DownloadFile(options.Url, global); err != nil {
+		if err = files.DownloadFile(options.Url, global); err != nil {
 			return nil, nil, err
 		}
 	}
 
 	return func(to string) (installed bool, err error) {
-			if files2.IsDirectory(to) || files2.IsFile(to) {
+			if files.IsDirectory(to) || files.IsFile(to) {
 				if !options.Auto {
 					var overwrite bool
 					if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", to); err != nil {
@@ -65,12 +65,12 @@ func Download(options DownloadOptions) (install Install, evict Evict, err error)
 			defer spinner.Stop(spin)
 
 			if ext == ".zip" {
-				if err = files2.UnzipFile(global, to); err != nil {
+				if err = files.UnzipFile(global, to); err != nil {
 					return
 				}
 			} else {
 				local := filepath.Join(to, filepath.Base(to)+ext)
-				if err = files2.CopyFile(global, local); err != nil {
+				if err = files.CopyFile(global, local); err != nil {
 					return
 				}
 			}

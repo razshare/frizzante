@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	files2 "github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/messages"
 )
 
@@ -15,7 +15,7 @@ func Package(options PackageOptions) (err error) {
 	}
 
 	var bun string
-	if files2.IsFile(options.Bun) {
+	if files.IsFile(options.Bun) {
 		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
 			return
 		}
@@ -55,12 +55,12 @@ func Package(options PackageOptions) (err error) {
 
 	messages.Success("project app package generated in ", filepath.Join(options.App, "dist"))
 
-	if files2.IsDirectory(filepath.Join("lib", "core", "svelte", "ssr")) {
+	if files.IsDirectory(filepath.Join("lib", "core", "svelte", "ssr")) {
 		if err = os.RemoveAll(filepath.Join("lib", "core", "svelte", "ssr", "app")); err != nil {
 			return
 		}
 
-		if err = files2.CopyDirectory(filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "svelte", "ssr", "app", "dist")); err != nil {
+		if err = files.CopyDirectory(filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "svelte", "ssr", "app", "dist")); err != nil {
 			return
 		}
 	}

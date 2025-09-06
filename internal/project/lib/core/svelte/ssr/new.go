@@ -50,7 +50,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 	}
 
 	var mut sync.Mutex
-	var id = "svelte-app"
+	var id = "app"
 	var dist = filepath.Join(app, "dist")
 	var appServer = filepath.Join(dist, "app.server.js")
 	var appServerFix = strings.ReplaceAll(appServer, "\\", "/")
@@ -71,7 +71,41 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 			return
 		}
 
+		var builder strings.Builder
 		runtime = goja.New()
+		console := runtime.NewObject()
+		log := func(call goja.FunctionCall) goja.Value {
+			builder.Reset()
+			i := 0
+			for _, argument := range call.Arguments {
+				if i > 0 {
+					builder.WriteString(" ")
+				}
+				builder.WriteString(argument.String())
+				i++
+			}
+			return goja.Undefined()
+		}
+
+		if err = console.Set("log", log); err != nil {
+			return nil, nil, err
+		}
+
+		if err = console.Set("info", log); err != nil {
+			return
+		}
+
+		if err = console.Set("error", log); err != nil {
+			return
+		}
+
+		if err = console.Set("warn", log); err != nil {
+			return
+		}
+
+		if err = runtime.Set("console", console); err != nil {
+			return nil, nil, err
+		}
 
 		var text string
 		if text, err = js.Bundle(app, api.FormatCommonJS, string(data)); err != nil {

@@ -32,7 +32,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 		app = "app"
 	}
 
-	var id = "svelte-app"
+	var id = "app"
 	var dist = filepath.Join(app, "dist")
 	var index = filepath.Join(dist, "client", "index.html")
 	var indexFixed = strings.ReplaceAll(index, "\\", "/")

@@ -3,41 +3,41 @@ package menu
 import (
 	"fmt"
 
-	action2 "github.com/razshare/frizzante/cli/action"
+	"github.com/razshare/frizzante/cli/action"
 	"github.com/razshare/frizzante/cli/app"
-	path2 "github.com/razshare/frizzante/cli/path"
-	user2 "github.com/razshare/frizzante/cli/user"
+	"github.com/razshare/frizzante/cli/path"
+	"github.com/razshare/frizzante/cli/user"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
 )
 
 func New(a *app.App) (*Menu, error) {
-	cache, err := user2.FrizzanteCache()
+	cache, err := user.FrizzanteCache()
 	if err != nil {
 		return nil, err
 	}
 
-	plat, err := user2.Platform(a)
+	plat, err := user.Platform(a)
 	if err != nil {
 		return nil, err
 	}
 
-	_go, err := path2.Go(*a.Go)
+	_go, err := path.Go(*a.Go)
 	if err != nil {
 		return nil, err
 	}
 
-	air, err := path2.Air(*a.Air)
+	air, err := path.Air(*a.Air)
 	if err != nil {
 		return nil, err
 	}
 
-	bun, err := path2.Bun(*a.Bun)
+	bun, err := path.Bun(*a.Bun)
 	if err != nil {
 		return nil, err
 	}
 
-	sqlc, err := path2.Sqlc(*a.Sqlc)
+	sqlc, err := path.Sqlc(*a.Sqlc)
 	if err != nil {
 		return nil, err
 	}
@@ -48,7 +48,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "configure", Description: "installs required binaries and packages"},
 				Active: func() bool { return *a.Configure },
 				Handler: func() error {
-					return action2.Configure(action2.ConfigureOptions{
+					return action.Configure(action.ConfigureOptions{
 						App:      *a.App,
 						Auto:     *a.Yes,
 						Platform: plat,
@@ -62,7 +62,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "create project", Description: "creates a new project"},
 				Active: func() bool { return *a.CreateProject != "" },
 				Handler: func() error {
-					return action2.CreateProject(action2.CreateProjectOptions{
+					return action.CreateProject(action.CreateProjectOptions{
 						Name: *a.CreateProject,
 						Efs:  a.Efs,
 					})
@@ -72,7 +72,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "install", Description: "installs dependencies"},
 				Active: func() bool { return *a.Install },
 				Handler: func() error {
-					return action2.Install(action2.InstallOptions{
+					return action.Install(action.InstallOptions{
 						App: *a.App,
 						Go:  _go,
 						Bun: bun,
@@ -83,7 +83,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "update", Description: "updates dependencies"},
 				Active: func() bool { return *a.Update },
 				Handler: func() error {
-					return action2.Update(action2.UpdateOptions{
+					return action.Update(action.UpdateOptions{
 						App: *a.App,
 						Go:  _go,
 						Bun: bun,
@@ -108,7 +108,7 @@ func New(a *app.App) (*Menu, error) {
 					}
 
 					if t == "js" {
-						return action2.Npm(action2.NpmOptions{
+						return action.Npm(action.NpmOptions{
 							App: *a.App,
 							Bun: bun,
 						})
@@ -121,7 +121,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "dev", Description: "runs air and vite in parallel"},
 				Active: func() bool { return *a.Dev },
 				Handler: func() error {
-					return action2.Dev(action2.DevOptions{
+					return action.Dev(action.DevOptions{
 						App: *a.App,
 						Go:  _go,
 						Air: air,
@@ -133,7 +133,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "build", Description: "builds project"},
 				Active: func() bool { return *a.Build },
 				Handler: func() error {
-					return action2.Build(action2.BuildOptions{
+					return action.Build(action.BuildOptions{
 						App:      *a.App,
 						Platform: plat,
 						Go:       _go,
@@ -151,7 +151,7 @@ func New(a *app.App) (*Menu, error) {
 						selected = *a.Generate
 					}
 
-					return action2.Generate(action2.GenerateOptions{
+					return action.Generate(action.GenerateOptions{
 						App:      *a.App,
 						Selected: selected,
 						Auto:     *a.Yes,
@@ -168,7 +168,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "package", Description: "builds app"},
 				Active: func() bool { return *a.Package },
 				Handler: func() error {
-					return action2.Package(action2.PackageOptions{
+					return action.Package(action.PackageOptions{
 						App: *a.App,
 						Bun: bun,
 					})
@@ -178,7 +178,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "package (watch)", Description: "builds app on change"},
 				Active: func() bool { return *a.PackageWatch },
 				Handler: func() error {
-					return action2.PackageWatch(action2.PackageWatchOptions{
+					return action.PackageWatch(action.PackageWatchOptions{
 						App: *a.App,
 						Bun: bun,
 					})
@@ -188,7 +188,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "check", Description: "checks for code errors"},
 				Active: func() bool { return *a.Check },
 				Handler: func() error {
-					return action2.Check(action2.CheckOptions{
+					return action.Check(action.CheckOptions{
 						App: *a.App,
 						Bun: bun,
 					})
@@ -198,7 +198,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "format", Description: "format code"},
 				Active: func() bool { return *a.Format },
 				Handler: func() error {
-					return action2.Format(action2.FormatOptions{
+					return action.Format(action.FormatOptions{
 						App: *a.App,
 						Go:  _go,
 						Bun: bun,
@@ -209,7 +209,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "touch", Description: "adds placeholders in app/dist"},
 				Active: func() bool { return *a.Touch },
 				Handler: func() error {
-					return action2.Touch(action2.TouchOptions{
+					return action.Touch(action.TouchOptions{
 						App: *a.App,
 					})
 				},
@@ -218,7 +218,7 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "clean project", Description: "deletes .gen, .vite, app/{dist,node_modules}"},
 				Active: func() bool { return *a.CleanProject },
 				Handler: func() error {
-					return action2.CleanProject(action2.CleanProjectOptions{
+					return action.CleanProject(action.CleanProjectOptions{
 						App: *a.App,
 						Go:  _go,
 					})
@@ -228,21 +228,21 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "reset", Description: "deletes " + cache},
 				Active: func() bool { return *a.Reset },
 				Handler: func() error {
-					return action2.Reset(action2.ResetOptions{})
+					return action.Reset(action.ResetOptions{})
 				},
 			},
 			{
 				Choice: search.Choice{Id: "clear", Description: "clears screen"},
 				Active: func() bool { return *a.Clear },
 				Handler: func() error {
-					return action2.Clear(action2.ClearOptions{})
+					return action.Clear(action.ClearOptions{})
 				},
 			},
 			{
 				Choice: search.Choice{Id: "test", Description: "runs tests"},
 				Active: func() bool { return *a.Test },
 				Handler: func() error {
-					return action2.Test(action2.TestOptions{
+					return action.Test(action.TestOptions{
 						App: *a.App,
 						Go:  _go,
 						Bun: bun,
@@ -254,21 +254,21 @@ func New(a *app.App) (*Menu, error) {
 				Choice: search.Choice{Id: "welcome", Description: "shows a welcome message"},
 				Active: func() bool { return *a.Welcome },
 				Handler: func() error {
-					return action2.Welcome(action2.WelcomeOptions{})
+					return action.Welcome(action.WelcomeOptions{})
 				},
 			},
 			{
 				Choice: search.Choice{Id: "help", Description: "shows the help menu"},
 				Active: func() bool { return *a.Help },
 				Handler: func() error {
-					return action2.Help(action2.HelpOptions{})
+					return action.Help(action.HelpOptions{})
 				},
 			},
 			{
 				Choice: search.Choice{Id: "version", Description: "shows binary version"},
 				Active: func() bool { return *a.Version },
 				Handler: func() error {
-					return action2.Version(action2.VersionOptions{
+					return action.Version(action.VersionOptions{
 						Efs: a.Efs,
 					})
 				},

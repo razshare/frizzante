@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	embeds2 "github.com/razshare/frizzante/embeds"
+	"github.com/razshare/frizzante/embeds"
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
@@ -31,9 +31,9 @@ func Copy(options CopyOptions) (err error) {
 		}
 	}
 
-	if embeds2.IsDirectory(options.Efs, options.From) {
+	if embeds.IsDirectory(options.Efs, options.From) {
 		var entries []string
-		if entries, err = embeds2.ReadDirectory(options.Efs, options.From); err != nil {
+		if entries, err = embeds.ReadDirectory(options.Efs, options.From); err != nil {
 			return
 		}
 
@@ -71,12 +71,12 @@ func Copy(options CopyOptions) (err error) {
 				name = strings.TrimSuffix(name, ".txt")
 			}
 
-			if err = embeds2.CopyFile(options.Efs, entry, name); err != nil {
+			if err = embeds.CopyFile(options.Efs, entry, name); err != nil {
 				return
 			}
 		}
-	} else if embeds2.IsFile(options.Efs, options.From) {
-		if err = embeds2.CopyFile(options.Efs, options.From, options.To); err != nil {
+	} else if embeds.IsFile(options.Efs, options.From) {
+		if err = embeds.CopyFile(options.Efs, options.From, options.To); err != nil {
 			return
 		}
 	} else {

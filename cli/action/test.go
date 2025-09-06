@@ -5,13 +5,13 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	files2 "github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/files"
 )
 
 func Test(options TestOptions) (err error) {
-	if files2.IsFile(filepath.Join("lib", "core", "svelte", "ssr")) && !files2.IsDirectory(filepath.Join("lib", "core", "svelte", "ssr", "app")) {
-		if !files2.IsDirectory(filepath.Join(options.App, "dist")) && files2.IsDirectory(filepath.Join(options.App, "dist")) {
-			if err = files2.CopyDirectory(
+	if files.IsFile(filepath.Join("lib", "core", "svelte", "ssr")) && !files.IsDirectory(filepath.Join("lib", "core", "svelte", "ssr", "app")) {
+		if !files.IsDirectory(filepath.Join(options.App, "dist")) && files.IsDirectory(filepath.Join(options.App, "dist")) {
+			if err = files.CopyDirectory(
 				filepath.Join(options.App, "dist"),
 				filepath.Join("lib", "core", "svelte", "ssr", "app", "dist"),
 			); err != nil {
