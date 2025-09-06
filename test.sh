@@ -18,7 +18,7 @@ rm -fr internal/project/.gen
 rm -fr internal/project/app/dist
 rm -fr internal/project/app/.vite
 rm -fr internal/project/app/node_modules
-rm -fr internal/project/app/lib/core/svelte/ssr/app
+rm -fr internal/project/app/lib/core/view/ssr/app
 
 # Unlocking assets
 make unlock
