@@ -55,12 +55,12 @@ func Package(options PackageOptions) (err error) {
 
 	messages.Success("project app package generated in ", filepath.Join(options.App, "dist"))
 
-	if files.IsDirectory(filepath.Join("lib", "core", "svelte", "ssr")) {
-		if err = os.RemoveAll(filepath.Join("lib", "core", "svelte", "ssr", "app")); err != nil {
+	if files.IsDirectory(filepath.Join("lib", "core", "view", "ssr")) {
+		if err = os.RemoveAll(filepath.Join("lib", "core", "view", "ssr", "app")); err != nil {
 			return
 		}
 
-		if err = files.CopyDirectory(filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "svelte", "ssr", "app", "dist")); err != nil {
+		if err = files.CopyDirectory(filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "view", "ssr", "app", "dist")); err != nil {
 			return
 		}
 	}

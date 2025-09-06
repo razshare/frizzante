@@ -1,6 +1,7 @@
 package action
 
 import (
+	"encoding/json"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -32,12 +33,33 @@ func Check(options CheckOptions) (err error) {
 		return
 	}
 
-	svelteCheck := exec.Command(bun, "x", "svelte-check", "--tsconfig=./tsconfig.json")
-	svelteCheck.Dir = options.App
-	svelteCheck.Env = append(os.Environ())
-	svelteCheck.Stderr = os.Stderr
-	svelteCheck.Stdout = os.Stdout
-	svelteCheck.Stdin = os.Stdin
+	var data []byte
+	if data, err = os.ReadFile(filepath.Join(options.App, "package.json")); err != nil {
+		return err
+	}
 
-	return svelteCheck.Run()
+	type DevDependencies struct {
+		SvelteCheck string `json:"svelte-check"`
+	}
+
+	type PackageJson struct {
+		DevDependencies DevDependencies `json:"devDependencies"`
+	}
+
+	var pkg PackageJson
+	if err = json.Unmarshal(data, &pkg); err != nil {
+		return err
+	}
+
+	if pkg.DevDependencies.SvelteCheck != "" {
+		svelteCheck := exec.Command(bun, "x", "svelte-check", "--tsconfig=./tsconfig.json")
+		svelteCheck.Dir = options.App
+		svelteCheck.Env = append(os.Environ())
+		svelteCheck.Stderr = os.Stderr
+		svelteCheck.Stdout = os.Stdout
+		svelteCheck.Stdin = os.Stdin
+		err = svelteCheck.Run()
+	}
+
+	return
 }

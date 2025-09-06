@@ -9,11 +9,11 @@ import (
 )
 
 func Test(options TestOptions) (err error) {
-	if files.IsFile(filepath.Join("lib", "core", "svelte", "ssr")) && !files.IsDirectory(filepath.Join("lib", "core", "svelte", "ssr", "app")) {
+	if files.IsFile(filepath.Join("lib", "core", "view", "ssr")) && !files.IsDirectory(filepath.Join("lib", "core", "view", "ssr", "app")) {
 		if !files.IsDirectory(filepath.Join(options.App, "dist")) && files.IsDirectory(filepath.Join(options.App, "dist")) {
 			if err = files.CopyDirectory(
 				filepath.Join(options.App, "dist"),
-				filepath.Join("lib", "core", "svelte", "ssr", "app", "dist"),
+				filepath.Join("lib", "core", "view", "ssr", "app", "dist"),
 			); err != nil {
 				return
 			}
