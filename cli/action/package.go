@@ -53,15 +53,18 @@ func Package(options PackageOptions) (err error) {
 		return
 	}
 
-	messages.Success("project app package generated in ", filepath.Join(options.App, "dist"))
+	messages.Successf("%s generated", filepath.Join(options.App, "dist"))
 
-	if files.IsDirectory(filepath.Join("lib", "core", "view", "ssr")) {
-		if err = os.RemoveAll(filepath.Join("lib", "core", "view", "ssr", "app")); err != nil {
-			return
-		}
+	if files.IsFile(filepath.Join("lib", "core", "view", "ssr")) && !files.IsDirectory(filepath.Join("lib", "core", "view", "ssr", "app")) {
+		if !files.IsDirectory(filepath.Join(options.App, "dist")) && files.IsDirectory(filepath.Join(options.App, "dist")) {
+			if err = files.CopyDirectory(
+				filepath.Join(options.App, "dist"),
+				filepath.Join("lib", "core", "view", "ssr", "app", "dist"),
+			); err != nil {
+				return
+			}
 
-		if err = files.CopyDirectory(filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "view", "ssr", "app", "dist")); err != nil {
-			return
+			messages.Successf("%s copied to  %s", filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "view", "ssr"))
 		}
 	}
 
