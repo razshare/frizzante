@@ -40,8 +40,9 @@ type TestOptions struct {
 }
 
 type PackageOptions struct {
-	App string
-	Bun string
+	App  string
+	Bun  string
+	Prod bool
 }
 
 type PackageWatchOptions struct {

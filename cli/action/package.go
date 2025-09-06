@@ -55,7 +55,7 @@ func Package(options PackageOptions) (err error) {
 
 	messages.Successf("%s generated", filepath.Join(options.App, "dist"))
 
-	if files.IsDirectory(filepath.Join("lib", "core", "view", "ssr")) {
+	if !options.Prod && files.IsDirectory(filepath.Join("lib", "core", "view", "ssr")) {
 		if files.IsDirectory(filepath.Join(options.App, "dist")) {
 			if err = files.CopyDirectory(
 				filepath.Join(options.App, "dist"),
