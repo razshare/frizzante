@@ -2,7 +2,7 @@ package main
 
 import (
 	"embed"
-	ssr2 "main/lib/core/view/ssr"
+	"main/lib/core/view/ssr"
 	"main/lib/routes/handlers/fallback"
 	"main/lib/routes/handlers/todos"
 	"main/lib/routes/handlers/welcome"
@@ -16,7 +16,7 @@ import (
 var efs embed.FS
 var srv = server.New()
 var dev = os.Getenv("DEV") == "1"
-var render = ssr2.New(ssr2.Config{Efs: efs, Disk: dev})
+var render = ssr.New(ssr.Config{Efs: efs, Disk: dev})
 
 func main() {
 	defer server.Start(srv)
