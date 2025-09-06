@@ -75,9 +75,3 @@ func MyFunction(str *MyStruct){
 ## Pull Requests
 
 When you're done with your changes you can submit a pull request in order to implement them into `frizzante`.
-
-## Testing
-
-### Automation
-
-Tests will automatically run through GitHub actions when pushing into main or when pull requests are opened into main.
