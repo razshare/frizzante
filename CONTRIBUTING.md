@@ -18,7 +18,7 @@ git clone https://github.com/razshare/frizzante
 Install frizzante.
 
 ```sh
-go run github.com/razshare/frizzante/install@v1.26.6
+go run github.com/razshare/frizzante/install@latest
 ```
 
 > [!TIP]
