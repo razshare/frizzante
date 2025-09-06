@@ -1,7 +1,7 @@
 package action
 
 import (
-	generate2 "github.com/razshare/frizzante/cli/generate"
+	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/tui/input"
 )
 
@@ -13,7 +13,7 @@ func CreateProject(options CreateProjectOptions) (err error) {
 		}
 	}
 
-	return generate2.Project(generate2.ProjectOptions{
+	return generate.Project(generate.ProjectOptions{
 		Name: options.Name,
 		Efs:  options.Efs,
 	})
