@@ -13,22 +13,6 @@ git clone https://github.com/razshare/frizzante
 > 
 > Then when you're done with your changes you will need to submit a pull request.
 
-## Install Frizzante
-
-Install frizzante.
-
-```sh
-go run github.com/razshare/frizzante/install@latest
-```
-
-> [!TIP]
-> Remember to add Go binaries to your path.
-> 
-> ```sh
-> export GOPATH=$HOME/go
-> export PATH=$PATH:$GOPATH/bin
-> ```
-
 ## Create Branch
 
 Create a new branch and give it a name that describes your changes.
