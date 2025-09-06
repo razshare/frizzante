@@ -5,7 +5,8 @@ set -e
 mv main.go main.txt
 
 # Tests cli
-go test ./...
+go test ./... -coverprofile cover.out
+go tool cover -html=cover.out -o cover.html
 
 # Restore main.go
 mv main.txt main.go
@@ -33,7 +34,8 @@ go mod tidy
 ../../frizzante --clean-project
 ../../frizzante --configure
 ../../frizzante --package
-go test ./...
+go test ./... -coverprofile cover.out
+go tool cover -html=cover.out -o cover.html
 popd
 
 # Deletes temporary binary

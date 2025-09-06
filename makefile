@@ -1,6 +1,9 @@
 test:
 	./test.sh
 
+coverage:
+	./coverage.sh
+
 lock:
 	mv internal/project/go.mod.txt internal/project/go.mod &
 	mv internal/project/go.sum.txt internal/project/go.sum &
