@@ -146,9 +146,8 @@ func TestSpinnerOtherKeys(t *testing.T) {
 
 	for _, key := range keys {
 		_, cmd := model.Update(tea.KeyMsg{Type: key})
-		if cmd != nil {
-			// cmd could be spinner tick or nil, both are fine
-		}
+		// cmd could be spinner tick or nil, both are fine
+		_ = cmd
 	}
 }
 

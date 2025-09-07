@@ -124,7 +124,6 @@ func TestTableMultilineHandling(t *testing.T) {
 		{"3", "Another single"},
 	}
 
-	processedCount := 0
 	maxLines := 1
 
 	for _, row := range rows {
@@ -140,13 +139,10 @@ func TestTableMultilineHandling(t *testing.T) {
 				rowMaxLines = lines
 			}
 		}
-		processedCount += rowMaxLines
 		if rowMaxLines > maxLines {
 			maxLines = rowMaxLines
 		}
 	}
-
-	processedCount += len(rows) - 1
 
 	if maxLines != 2 {
 		t.Errorf("max lines = %d, want 2", maxLines)
