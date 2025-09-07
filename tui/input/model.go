@@ -21,9 +21,8 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if assert.Type == tea.KeyEsc {
-			model.TextInput.Reset()
-
 			if model.TextInput.Value() != "" {
+				model.TextInput.Reset()
 				return model, nil
 			}
 

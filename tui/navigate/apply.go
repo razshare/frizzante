@@ -11,7 +11,7 @@ func Apply(search *search.Search, viewport *viewport.Viewport, direction int) {
 		return
 	}
 
-	viewport.Cursor = (viewport.Cursor + direction + count) % count
+	viewport.Cursor = ((viewport.Cursor+direction)%count + count) % count
 
 	if viewport.Cursor < viewport.Start {
 		viewport.Start = viewport.Cursor
