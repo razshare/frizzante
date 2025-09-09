@@ -44,7 +44,7 @@ func TestPlatformLinuxAmd64(t *testing.T) {
 	}
 
 	if string(d) != "linux/amd64" {
-		t.Fatal("~/platform.txt should contain linux/amd64")
+		t.Fatalf("~/platform.txt should contain linux/amd64, found %s instead", string(d))
 	}
 }
 
@@ -82,7 +82,7 @@ func TestPlatformLinuxArm64(t *testing.T) {
 	}
 
 	if string(d) != "linux/arm64" {
-		t.Fatal("~/platform.txt should contain linux/arm64")
+		t.Fatalf("~/platform.txt should contain linux/arm64, found %s isntead", string(d))
 	}
 }
 
@@ -120,7 +120,7 @@ func TestPlatformDarwinAmd64(t *testing.T) {
 	}
 
 	if string(d) != "darwin/amd64" {
-		t.Fatal("~/platform.txt should contain darwin/amd64")
+		t.Fatalf("~/platform.txt should contain, found %s isntead", string(d))
 	}
 }
 
@@ -158,7 +158,7 @@ func TestPlatformDarwinArm64(t *testing.T) {
 	}
 
 	if string(d) != "darwin/arm64" {
-		t.Fatal("~/platform.txt should contain darwin/arm64")
+		t.Fatalf("~/platform.txt should contain darwin/arm64, found %s instead", string(d))
 	}
 }
 
@@ -196,7 +196,7 @@ func TestPlatformWindowsAmd64(t *testing.T) {
 	}
 
 	if string(d) != "windows/amd64" {
-		t.Fatal("~/platform.txt should contain windows/amd64")
+		t.Fatalf("~/platform.txt should contain windows/amd64, found %s isntead", string(d))
 	}
 }
 
@@ -228,13 +228,13 @@ func TestPlatformWindowsArm64(t *testing.T) {
 		t.Fatal("~/platform.txt should be a file")
 	}
 
-	data, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
+	d, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if string(data) != "windows/arm64" {
-		t.Fatal("~/platform.txt should contain windows/arm64")
+	if string(d) != "windows/arm64" {
+		t.Fatalf("~/platform.txt should contain windows/arm64, found %s isntead", string(d))
 	}
 }
 
@@ -248,7 +248,7 @@ func TestTestPlatformFresh(t *testing.T) {
 	}
 
 	if err = os.RemoveAll(cache); err != nil {
-		t.Fatal()
+		t.Fatal(err)
 		return
 	}
 

@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -15,14 +16,22 @@ import (
 )
 
 func Database(options DatabaseOptions) (err error) {
-	var choice string
-	if choice, err = singleselect.Send([]search.Choice{{Id: "sqlite"}}, "what type of database would you like to setup?"); err != nil {
+	if options.Type == "" {
+		if options.Auto {
+			options.Type = "sqlite"
+		} else if options.Type, err = singleselect.Send([]search.Choice{{Id: "sqlite"}}, "what type of database would you like to setup?"); err != nil {
+			return
+		}
+	}
+
+	if options.Type != "sqlite" {
+		err = fmt.Errorf("database of type %s id not supported", options.Type)
 		return
 	}
 
-	choice = strings.ToLower(choice)
+	dbtype := strings.ToLower(options.Type)
 
-	lib := filepath.Join("lib", "database", choice)
+	lib := filepath.Join("lib", "database", dbtype)
 
 	if files.IsDirectory(lib) {
 		if !options.Auto {
@@ -43,7 +52,7 @@ func Database(options DatabaseOptions) (err error) {
 	}
 
 	if err = Copy(CopyOptions{
-		From: "internal/project/lib/database/" + choice,
+		From: "internal/project/lib/database/" + dbtype,
 		To:   lib,
 		Auto: options.Auto,
 		Efs:  options.Efs,
@@ -51,7 +60,7 @@ func Database(options DatabaseOptions) (err error) {
 		return
 	}
 
-	if choice == "sqlite" {
+	if dbtype == "sqlite" {
 		spin := spinner.New("adding github.com/mattn/go-sqlite3")
 
 		go spinner.Start(spin)
@@ -92,8 +101,8 @@ func Database(options DatabaseOptions) (err error) {
 
 			yaml := "lib/core/database/sqlite/sqlc.yaml"
 
-			//if choice == "sqlite" {
-			//	yaml = "lib/core/database/sqlite/sqlc.yaml"
+			//if choice == "mysql" {
+			//	yaml = "lib/core/database/mysql/sqlc.yaml"
 			//}
 
 			if queries {

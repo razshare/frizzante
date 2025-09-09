@@ -2,6 +2,7 @@
 set -e
 
 # Hide main.go
+test -f main.txt && mv main.txt main.go
 mv main.go main.txt
 
 # Tests cli

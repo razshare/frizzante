@@ -62,6 +62,7 @@ type DatabaseOptions struct {
 	Generate string
 	Auto     bool
 	Go       string
+	Type     string
 	Sqlc     string
 	Platform platform.Platform
 }
