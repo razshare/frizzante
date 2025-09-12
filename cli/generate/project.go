@@ -4,7 +4,6 @@ func Project(options ProjectOptions) (err error) {
 	return Copy(CopyOptions{
 		Ignore: []string{
 			"internal/project/lib/session/disk",
-			"internal/project/lib/session/memory",
 			"internal/project/lib/database/sqlite",
 			"internal/project/app/lib/components/forms",
 			"internal/project/app/lib/components/links",
