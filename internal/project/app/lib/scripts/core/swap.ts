@@ -75,7 +75,7 @@ export async function swap(
     view.align = remote.align
     view.name = remote.name
     view.render = remote.render
-    if (view.align === 0) {
+    if (view.align === 1) {
         if (typeof view.props != "object") {
             console.warn(
                 "view alignment intends to merge props, but local view props is not an object",
