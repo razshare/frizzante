@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,14 +14,22 @@ import (
 )
 
 func Session(options SessionOptions) (err error) {
-	var choice string
-	if choice, err = singleselect.Send([]search.Choice{{Id: "memory"}, {Id: "disk"}}, "session type"); err != nil {
+	if options.Type == "" {
+		if options.Auto {
+			options.Type = "memory"
+		} else if options.Type, err = singleselect.Send([]search.Choice{{Id: "memory"}, {Id: "disk"}}, "session type"); err != nil {
+			return
+		}
+	}
+
+	if options.Type != "memory" && options.Type != "disk" {
+		err = fmt.Errorf("session of type %s id not supported", options.Type)
 		return
 	}
 
-	choice = strings.ToLower(choice)
+	stype := strings.ToLower(options.Type)
 
-	lib := filepath.Join("lib", "session", choice)
+	lib := filepath.Join("lib", "session", stype)
 
 	if files.IsDirectory(lib) {
 		if !options.Auto {
@@ -41,7 +50,7 @@ func Session(options SessionOptions) (err error) {
 	}
 
 	if err = Copy(CopyOptions{
-		From: "internal/project/lib/session/" + choice,
+		From: "internal/project/lib/session/" + stype,
 		To:   lib,
 		Auto: options.Auto,
 		Efs:  options.Efs,
@@ -49,7 +58,7 @@ func Session(options SessionOptions) (err error) {
 		return
 	}
 
-	switch choice {
+	switch stype {
 	case "memory":
 		messages.Success(
 			"memory session generated into session.*\n",

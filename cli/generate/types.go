@@ -113,5 +113,6 @@ type LinksOptions struct {
 
 type SessionOptions struct {
 	Auto bool
+	Type string
 	Efs  embed.FS
 }

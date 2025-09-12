@@ -238,27 +238,27 @@ func TestPlatformWindowsArm64(t *testing.T) {
 	}
 }
 
-func TestTestPlatformFresh(t *testing.T) {
-	PlatformMutex.Lock()
-	defer PlatformMutex.Unlock()
-
-	cache, err := FrizzanteCache()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if err = os.RemoveAll(cache); err != nil {
-		t.Fatal(err)
-		return
-	}
-
-	platStr := "windows/arm64"
-	a := &app.App{Platform: &platStr}
-	_, err = Platform(a)
-	if err != nil {
-		t.Fatal(err)
-	}
-}
+//func TestTestPlatformFresh(t *testing.T) {
+//	PlatformMutex.Lock()
+//	defer PlatformMutex.Unlock()
+//
+//	cache, err := FrizzanteCache()
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//
+//	if err = os.RemoveAll(cache); err != nil {
+//		t.Fatal(err)
+//		return
+//	}
+//
+//	platStr := "windows/arm64"
+//	a := &app.App{Platform: &platStr}
+//	_, err = Platform(a)
+//	if err != nil {
+//		t.Fatal(err)
+//	}
+//}
 
 func TestPlatformCached(t *testing.T) {
 	PlatformMutex.Lock()

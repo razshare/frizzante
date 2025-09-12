@@ -84,14 +84,6 @@ func Copy(options CopyOptions) (err error) {
 		return
 	}
 
-	if options.Ignore != nil {
-		for _, name := range options.Ignore {
-			if err = os.RemoveAll(name); err != nil {
-				return
-			}
-		}
-	}
-
 	messages.Successf("%s created", options.To)
 
 	return

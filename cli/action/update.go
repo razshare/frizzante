@@ -7,7 +7,7 @@ import (
 
 	"github.com/razshare/frizzante/files"
 	"github.com/razshare/frizzante/tui/messages"
-	spinner2 "github.com/razshare/frizzante/tui/spinner"
+	"github.com/razshare/frizzante/tui/spinner"
 )
 
 func Update(options UpdateOptions) (err error) {
@@ -15,16 +15,16 @@ func Update(options UpdateOptions) (err error) {
 		return
 	}
 
-	spin := spinner2.New("updating go dependencies")
+	spin := spinner.New("updating go dependencies")
 
-	go spinner2.Start(spin)
+	go spinner.Start(spin)
 	get := exec.Command(options.Go, "get", "-u", "./...")
 	get.Env = append(os.Environ())
 	get.Stderr = os.Stderr
 	get.Stdout = os.Stdout
 	get.Stdin = os.Stdin
 	err = get.Run()
-	spinner2.Stop(spin)
+	spinner.Stop(spin)
 
 	if err != nil {
 		return

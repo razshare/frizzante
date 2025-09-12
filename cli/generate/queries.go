@@ -22,7 +22,12 @@ func Queries(options QueriesOptions) (err error) {
 		}
 
 		choices = append(choices, search.Choice{Id: "other", Description: "other"})
-		options.SqlcYaml, err = singleselect.Sendf(choices, "where is your sqlc.yaml file located?")
+
+		if options.Auto {
+			options.SqlcYaml = choices[0].Id
+		} else {
+			options.SqlcYaml, err = singleselect.Sendf(choices, "where is your sqlc.yaml file located?")
+		}
 	}
 
 	lib := filepath.Dir(options.SqlcYaml)

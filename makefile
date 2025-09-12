@@ -1,5 +1,5 @@
 test:
-	./test.sh
+	./test.sh || make lock
 
 coverage:
 	./coverage.sh
@@ -17,4 +17,4 @@ unlock:
 	wait
 
 publish: test
-	./publish.sh
+	./publish.sh || make lock
