@@ -105,6 +105,13 @@ type FormsOptions struct {
 	Efs  embed.FS
 }
 
+type IconsOptions struct {
+	Bun  string
+	App  string
+	Auto bool
+	Efs  embed.FS
+}
+
 type LinksOptions struct {
 	App  string
 	Auto bool

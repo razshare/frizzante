@@ -1,12 +1,11 @@
 package todos
 
 import (
-	"main/lib/session/memory"
-
 	"main/lib/core/client"
 	"main/lib/core/receive"
 	"main/lib/core/send"
 	"main/lib/core/view"
+	session "main/lib/session/memory"
 )
 
 func View(c *client.Client) {
@@ -15,6 +14,7 @@ func View(c *client.Client) {
 		Name: "Todos",
 		Props: map[string]any{
 			"todos": s.Todos,
+			"mode":  s.Mode,
 		},
 	})
 }

@@ -1,12 +1,10 @@
 <style>
-    .content {
+    .layout {
         position: fixed;
         left: 0;
         right: 0;
         top: 0;
         bottom: 0;
-        background: #1e1e2e;
-        color: #ed6f49;
         display: grid;
         justify-content: center;
         align-content: center;
@@ -38,6 +36,6 @@
     <title>{title}</title>
 </svelte:head>
 
-<div class="content">
+<div class="layout">
     {@render children()}
 </div>

@@ -2,13 +2,14 @@ package main
 
 import (
 	"embed"
-	"main/lib/core/route"
-	"main/lib/core/server"
 	"main/lib/core/view/ssr"
 	"main/lib/routes/handlers/fallback"
 	"main/lib/routes/handlers/todos"
 	"main/lib/routes/handlers/welcome"
 	"os"
+
+	"main/lib/core/route"
+	"main/lib/core/server"
 )
 
 //go:embed app/dist
@@ -28,6 +29,7 @@ func main() {
 		{Pattern: "GET /check", Handler: todos.Check},
 		{Pattern: "GET /uncheck", Handler: todos.Uncheck},
 		{Pattern: "GET /add", Handler: todos.Add},
+		{Pattern: "GET /mode", Handler: todos.Mode},
 		{Pattern: "GET /remove", Handler: todos.Remove},
 	}
 }

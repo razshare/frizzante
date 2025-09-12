@@ -1,7 +1,7 @@
 package todos
 
 import (
-	"main/lib/session/memory"
+	session "main/lib/session/memory"
 
 	"main/lib/core/client"
 	"main/lib/core/receive"
@@ -23,6 +23,8 @@ func Add(c *client.Client) {
 		})
 		return
 	}
+
+	s.Mode = session.ModeToggle
 
 	s.Todos = append(s.Todos, session.Todo{
 		Checked:     false,

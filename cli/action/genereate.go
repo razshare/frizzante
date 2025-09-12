@@ -61,6 +61,13 @@ func Generate(options GenerateOptions) (err error) {
 				Auto: options.Auto,
 				Efs:  options.Efs,
 			})
+		} else if gen == "icons" {
+			return generate.Icons(generate.IconsOptions{
+				App:  options.App,
+				Bun:  options.Bun,
+				Auto: options.Auto,
+				Efs:  options.Efs,
+			})
 		}
 
 		return errors.New("unknown generation")
@@ -70,9 +77,10 @@ func Generate(options GenerateOptions) (err error) {
 		var items []string
 		items, err = multiselect.Send(
 			[]search.Choice{
-				{Id: "core", Description: "server, routing and view swapping tools."},
+				{Id: "core", Description: "core features"},
 				{Id: "forms", Description: "form component that provides status details"},
 				{Id: "links", Description: "hyperlink component that provides status details"},
+				{Id: "icons", Description: "icon component that renders using svg"},
 				{Id: "air", Description: "live reload tool for go programs"},
 				{Id: "bun", Description: "fast js toolkit"},
 				{Id: "session", Description: "functions for managing user session state"},

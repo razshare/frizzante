@@ -19,7 +19,7 @@ const (
 type View struct {
 	Name       string
 	Title      string
-	Props      any
+	Props      map[string]any
 	AlignMode  AlignMode
 	RenderMode RenderMode
 }

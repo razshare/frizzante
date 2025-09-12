@@ -1,30 +1,15 @@
-h1 {
-    color: cadetblue;
-    text-align: center;
-    width: 400px;
+@import "tailwindcss";
+@plugin "daisyui" {
+    themes:
+        light --default,
+        dark --prefersdark,
+        coffee;
 }
 
-a, .link {
-    color: cadetblue;
-    text-decoration: none;
-    background: transparent;
-    border: 0;
+.btn:not(.join-item) {
+    @apply rounded-3xl;
 }
 
-a:hover, .link:hover {
-    cursor: pointer;
-    text-decoration: underline;
-}
-
-.menu {
-    text-align: center;
-    width: 400px;
-}
-
-.error {
-    color: orangered;
-}
-
-form {
-    display: inline;
+.input.join-item:first-child {
+    @apply rounded-l-3xl;
 }

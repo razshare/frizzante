@@ -6,7 +6,7 @@
 
 <script lang="ts">
     import type { Snippet } from "svelte"
-    import {action} from "$lib/scripts/core/action.ts";
+    import { action } from "$lib/scripts/core/action.ts"
 
     type Props = {
         method?: "GET" | "POST"

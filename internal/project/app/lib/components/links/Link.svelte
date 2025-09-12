@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { Snippet } from "svelte"
-    import {href} from "$lib/scripts/core/href.ts";
+    import { href } from "$lib/scripts/core/href.ts"
 
     type Props = {
         href: string
