@@ -2,9 +2,10 @@ package mock
 
 import (
 	"io"
-	"main/lib/core/client"
-	"main/lib/core/server"
 	"net/http"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/server"
 )
 
 type ResponseWriter struct {

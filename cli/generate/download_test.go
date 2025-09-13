@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/cli/user"
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/text"
 )
 

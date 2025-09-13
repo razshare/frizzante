@@ -2,11 +2,11 @@ package receive
 
 import (
 	"errors"
-	"main/lib/core/client"
 	"net/http"
 	"net/url"
 
-	"main/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Form reads the message as a form and returns the value.

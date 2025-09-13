@@ -1,8 +1,8 @@
 package route
 
 import (
-	"main/lib/core/client"
-	"main/lib/core/tag"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/tag"
 )
 
 type Route struct {

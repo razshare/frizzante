@@ -3,10 +3,11 @@ package server
 import (
 	"embed"
 	"log"
-	"main/lib/core/guard"
-	"main/lib/core/route"
-	_view "main/lib/core/view"
 	"net/http"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/guard"
+	"github.com/razshare/frizzante/internal/project/lib/core/route"
+	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 type Server struct {

@@ -1,13 +1,17 @@
 package generate
 
 import (
+	"embed"
 	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/platform"
 )
+
+//go:embed internal/additions/**
+var TestQueriesEfs embed.FS
 
 func TestQueries(t *testing.T) {
 	if err := os.RemoveAll(".gen"); err != nil {
@@ -21,7 +25,7 @@ func TestQueries(t *testing.T) {
 
 	if err := Database(DatabaseOptions{
 		Platform: platform.LinuxAmd64,
-		Efs:      TestDatabaseEfs,
+		Efs:      TestQueriesEfs,
 		Auto:     true,
 		Go:       "go",
 		Type:     "sqlite",

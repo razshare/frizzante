@@ -1,10 +1,9 @@
 package send
 
 import (
-	"main/lib/core/client"
-
 	"github.com/gorilla/websocket"
-	"main/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // WsUpgrade upgrades to web sockets.

@@ -2,9 +2,9 @@ package receive
 
 import (
 	"io"
-	"main/lib/core/client"
 
-	"main/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Message reads the contents of the message and returns the value.

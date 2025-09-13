@@ -1,9 +1,9 @@
 package welcome
 
 import (
-	"main/lib/core/client"
-	"main/lib/core/send"
-	"main/lib/core/view"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/send"
+	"github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 func View(c *client.Client) {

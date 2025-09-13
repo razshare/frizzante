@@ -15,6 +15,7 @@ func CreateProject(options CreateProjectOptions) (err error) {
 
 	return generate.Project(generate.ProjectOptions{
 		Name: options.Name,
+		Go:   options.Go,
 		Efs:  options.Efs,
 	})
 }

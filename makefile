@@ -1,23 +1,17 @@
-test:
-	./test.sh || make lock
+test: clean configure
+	./test.sh
 
-coverage:
+coverage: clean configure
 	./coverage.sh
 
-lock:
-	(test -f main.txt && mv main.txt main.go) &
-	mv internal/project/go.mod.txt internal/project/go.mod &
-	mv internal/project/go.sum.txt internal/project/go.sum &
-	wait
-
-unlock:
-	(test -f main.txt && mv main.txt main.go) &
-	mv internal/project/go.mod internal/project/go.mod.txt &
-	mv internal/project/go.sum internal/project/go.sum.txt &
-	wait
-
 publish: test
-	./publish.sh || make lock
+	./publish.sh
+
+configure:
+	./configure.sh
+
+clean:
+	./clean.sh
 
 install:
-	FRIZZANTE_INSTALL_FROM_SRC=. go run ./setup/install/main.go
+	./install.sh

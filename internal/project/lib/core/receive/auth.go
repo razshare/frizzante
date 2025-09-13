@@ -1,6 +1,6 @@
 package receive
 
-import "main/lib/core/client"
+import "github.com/razshare/frizzante/internal/project/lib/core/client"
 
 // BasicAuth returns the username and password provided
 // in the request's Authorization header, if the request

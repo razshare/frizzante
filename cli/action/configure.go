@@ -4,7 +4,7 @@ import (
 	"os/exec"
 
 	"github.com/razshare/frizzante/cli/generate"
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 )
 
 func Configure(options ConfigureOptions) (err error) {

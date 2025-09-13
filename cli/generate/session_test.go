@@ -6,9 +6,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 )
 
+//go:embed internal/additions/**
 //go:embed internal/project/**
 var TestSessionEfs embed.FS
 

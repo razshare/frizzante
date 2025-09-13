@@ -2,9 +2,10 @@ package embeds
 
 import (
 	"embed"
-	"main/lib/core/files"
 	"os"
 	"testing"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 )
 
 //go:embed zip_test.go

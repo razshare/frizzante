@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"main/lib/core/client"
 	"net/http"
 
-	"main/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // SseUpgrade upgrades to server sent events

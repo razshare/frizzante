@@ -4,10 +4,11 @@ import (
 	"embed"
 	"io"
 	"io/fs"
-	"main/lib/core/files"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 )
 
 func CopyFile(efs embed.FS, from string, to string) (err error) {

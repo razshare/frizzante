@@ -1,11 +1,11 @@
 package send
 
 import (
-	"main/lib/core/client"
-	_view "main/lib/core/view"
 	"strings"
 
-	"main/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 // View sends a view.

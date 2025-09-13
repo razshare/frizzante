@@ -1,10 +1,10 @@
 package runtime
 
 import (
-	"main/lib/core/js"
 	"testing"
 
 	"github.com/dop251/goja"
+	"github.com/razshare/frizzante/internal/project/lib/core/js"
 )
 
 func TestWithFunctions(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
@@ -52,7 +52,7 @@ func Database(options DatabaseOptions) (err error) {
 	}
 
 	if err = Copy(CopyOptions{
-		From: "internal/project/lib/database/" + dbtype,
+		From: "internal/additions/lib/database/" + dbtype,
 		To:   lib,
 		Auto: options.Auto,
 		Efs:  options.Efs,
@@ -117,6 +117,8 @@ func Database(options DatabaseOptions) (err error) {
 			}
 		}
 	}
+
+	err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "database")})
 
 	return
 }

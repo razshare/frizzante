@@ -1,6 +1,6 @@
 package receive
 
-import "main/lib/core/client"
+import "github.com/razshare/frizzante/internal/project/lib/core/client"
 
 // Path reads a parameters fields and returns the value.
 //

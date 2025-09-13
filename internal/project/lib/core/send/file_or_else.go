@@ -4,15 +4,16 @@ import (
 	"bytes"
 	"fmt"
 	"io/fs"
-	"main/lib/core/client"
-	"main/lib/core/embeds"
-	"main/lib/core/files"
-	"main/lib/core/mime"
-	"main/lib/core/stack"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/mime"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // FileOrElse sends the file requested by the client, or else falls back.

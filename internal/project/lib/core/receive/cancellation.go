@@ -1,6 +1,6 @@
 package receive
 
-import "main/lib/core/client"
+import "github.com/razshare/frizzante/internal/project/lib/core/client"
 
 // Cancellation returns a channel that closes when the request gets cancelled.
 func Cancellation(client *client.Client) <-chan struct{} {

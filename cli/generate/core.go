@@ -21,5 +21,7 @@ func Core(options CoreOptions) (err error) {
 		return err
 	}
 
+	err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "core")})
+
 	return
 }

@@ -1,6 +1,6 @@
 package receive
 
-import "main/lib/core/client"
+import "github.com/razshare/frizzante/internal/project/lib/core/client"
 
 // Header reads a header field and returns the value.
 //

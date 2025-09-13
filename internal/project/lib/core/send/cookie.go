@@ -2,8 +2,9 @@ package send
 
 import (
 	"fmt"
-	"main/lib/core/client"
 	"net/url"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
 )
 
 // Cookie sends a cookies to the client.

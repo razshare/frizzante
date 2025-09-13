@@ -3,9 +3,9 @@ package receive
 import (
 	"encoding/json"
 	"io"
-	"main/lib/core/client"
 
-	"main/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Json reads the next JSON-encoded message from the

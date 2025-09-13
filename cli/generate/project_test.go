@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 )
 
 //go:embed internal/project/**
@@ -34,7 +34,7 @@ func TestProject(t *testing.T) {
 		t.Fatal("asd/lib/session/disk/example.txt should not exist")
 	}
 
-	if files.IsFile(filepath.Join("asd", "lib", "session", "memory", "example.txt")) {
+	if !files.IsFile(filepath.Join("asd", "lib", "session", "memory", "example.txt")) {
 		t.Fatal("asd/lib/session/memory/example.txt should not exist")
 	}
 

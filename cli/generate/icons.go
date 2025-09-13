@@ -9,7 +9,7 @@ import (
 
 func Icons(options IconsOptions) (err error) {
 	if err = Copy(CopyOptions{
-		From: "internal/project/app/lib/components/icons",
+		From: "internal/additions/app/lib/components/icons",
 		To:   filepath.Join(options.App, "lib", "components", "icons"),
 		Auto: options.Auto,
 		Efs:  options.Efs,

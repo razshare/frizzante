@@ -1,8 +1,9 @@
 package receive
 
 import (
-	"main/lib/core/mock"
 	"testing"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/mock"
 )
 
 func TestCookie(t *testing.T) {

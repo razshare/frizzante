@@ -91,7 +91,7 @@ func Generate(options GenerateOptions) (err error) {
 		)
 
 		if err != nil {
-			return err
+			return
 		}
 
 		for _, item := range items {

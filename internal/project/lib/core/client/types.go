@@ -3,10 +3,10 @@ package client
 import (
 	"embed"
 	"log"
-	_view "main/lib/core/view"
 	"net/http"
 
 	"github.com/gorilla/websocket"
+	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 type Client struct {

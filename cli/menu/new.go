@@ -64,6 +64,7 @@ func New(a *app.App) (*Menu, error) {
 				Handler: func() error {
 					return action.CreateProject(action.CreateProjectOptions{
 						Name: *a.CreateProject,
+						Go:   _go,
 						Efs:  a.Efs,
 					})
 				},

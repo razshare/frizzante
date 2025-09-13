@@ -2,10 +2,11 @@ package send
 
 import (
 	"embed"
-	"main/lib/core/mock"
 	"net/url"
 	"strings"
 	"testing"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/mock"
 )
 
 //go:embed file_or_else_test.go

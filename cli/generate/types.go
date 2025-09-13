@@ -90,7 +90,12 @@ type CopyOptions struct {
 type ProjectOptions struct {
 	Auto bool
 	Name string
+	Go   string
 	Efs  embed.FS
+}
+
+type FixImportsOptions struct {
+	Directory string
 }
 
 type EmbeddedZipOptions struct {

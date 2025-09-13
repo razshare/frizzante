@@ -14,6 +14,7 @@ import (
 
 //go:embed logo.txt
 //go:embed setup/install/version
+//go:embed internal/additions/**
 //go:embed internal/project/**
 //go:embed internal/project/lib/core/view/ssr/.gitignore
 //go:embed internal/project/app/.gitignore

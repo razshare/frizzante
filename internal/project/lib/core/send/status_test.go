@@ -1,8 +1,9 @@
 package send
 
 import (
-	"main/lib/core/mock"
 	"testing"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/mock"
 )
 
 func TestStatus(t *testing.T) {

@@ -2,8 +2,9 @@ package receive
 
 import (
 	"bytes"
-	"main/lib/core/mock"
 	"testing"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/mock"
 )
 
 func TestForm(t *testing.T) {

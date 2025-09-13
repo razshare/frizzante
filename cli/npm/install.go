@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 )
 

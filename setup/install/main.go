@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"

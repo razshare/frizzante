@@ -18,6 +18,7 @@ type VersionOptions struct {
 
 type CreateProjectOptions struct {
 	Name string
+	Go   string
 	Efs  embed.FS
 }
 

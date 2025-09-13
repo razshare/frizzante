@@ -3,12 +3,12 @@ package server
 import (
 	"context"
 	"errors"
-	"main/lib/core/client"
 	"net/http"
 	"slices"
 	"strings"
 
-	"main/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Start starts a server from a configuration.

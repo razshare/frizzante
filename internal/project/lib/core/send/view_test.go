@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"main/lib/core/mock"
-	_view "main/lib/core/view"
+	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 func TestViewWithLocation(t *testing.T) {

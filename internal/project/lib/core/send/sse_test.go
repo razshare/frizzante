@@ -1,9 +1,10 @@
 package send
 
 import (
-	"main/lib/core/mock"
 	"strings"
 	"testing"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/mock"
 )
 
 func TestSseUpgrade(t *testing.T) {

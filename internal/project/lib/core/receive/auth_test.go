@@ -2,8 +2,9 @@ package receive
 
 import (
 	"encoding/base64"
-	"main/lib/core/mock"
 	"testing"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/mock"
 )
 
 func TestBasicAuth(t *testing.T) {

@@ -2,9 +2,9 @@ package send
 
 import (
 	"encoding/json"
-	"main/lib/core/client"
 
-	"main/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Json sends json content.

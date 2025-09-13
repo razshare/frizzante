@@ -2,9 +2,9 @@ package generate
 
 import "path/filepath"
 
-func Forms(options FormsOptions) error {
+func Forms(options FormsOptions) (err error) {
 	return Copy(CopyOptions{
-		From: "internal/project/app/lib/components/forms",
+		From: "internal/additions/app/lib/components/forms",
 		To:   filepath.Join(options.App, "lib", "components", "forms"),
 		Auto: options.Auto,
 		Efs:  options.Efs,

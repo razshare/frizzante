@@ -2,8 +2,9 @@ package receive
 
 import (
 	"io"
-	"main/lib/core/mock"
 	"testing"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/mock"
 )
 
 func TestMessage(t *testing.T) {

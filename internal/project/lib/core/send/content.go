@@ -2,11 +2,11 @@ package send
 
 import (
 	"fmt"
-	"main/lib/core/client"
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"main/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Content sends binary safe content.

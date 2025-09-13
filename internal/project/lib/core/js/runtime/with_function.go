@@ -1,9 +1,8 @@
 package runtime
 
 import (
-	"main/lib/core/js"
-
 	"github.com/dop251/goja"
+	"github.com/razshare/frizzante/internal/project/lib/core/js"
 )
 
 // WithFunction sets a function.

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/razshare/frizzante/cli/user"
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/text"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"

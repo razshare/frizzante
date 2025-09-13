@@ -1,6 +1,6 @@
 package receive
 
-import "main/lib/core/client"
+import "github.com/razshare/frizzante/internal/project/lib/core/client"
 
 // Query reads a query field and returns the value.
 //

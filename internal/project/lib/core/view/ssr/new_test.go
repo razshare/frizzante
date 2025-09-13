@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"main/lib/core/view"
+	"github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 //go:embed app
@@ -17,7 +17,7 @@ func TestNew(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(html, "<h1>Welcome to Frizzante.</h1>") {
-		t.Fatal("view should contain <h1>Welcome to Frizzante.</h1>")
+	if !strings.Contains(html, "Powered by Svelte for smooth interfaces") {
+		t.Fatal("view should contain Powered by Svelte for smooth interfaces")
 	}
 }

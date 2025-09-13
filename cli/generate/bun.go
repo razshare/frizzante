@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/razshare/frizzante/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/platform"
 )
 

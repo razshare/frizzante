@@ -1,11 +1,10 @@
 package receive
 
 import (
-	"main/lib/core/client"
-	"main/lib/core/send"
-
 	uuid "github.com/nu7hatch/gouuid"
-	"main/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/send"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // SessionId tries to find a session id among the user's cookies.
