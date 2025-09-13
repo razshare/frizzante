@@ -4,10 +4,17 @@
 go mod tidy
 go get ./...
 
+# Create a temporary binary of the cli
+go build -o frizzante
+
 # Configures internal project
 pushd internal/project && \
-make configure package && \
+../../frizzante --configure && \
+../../frizzante --package && \
 popd || exit 1
+
+# Removes temporary binary
+rm -fr frizzante
 
 # Copies internal project over to the ssr testing directory
 cp -r internal/project/app internal/project/lib/core/view/ssr
