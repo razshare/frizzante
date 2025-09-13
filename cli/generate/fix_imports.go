@@ -10,7 +10,10 @@ import (
 )
 
 func FixImports(options FixImportsOptions) (err error) {
-	before := []byte("github.com/razshare/frizzante/internal/project")
+	befores := [][]byte{
+		[]byte("github.com/razshare/frizzante/internal/project"),
+		[]byte("github.com/razshare/frizzante/internal/additions"),
+	}
 	after := []byte("main")
 
 	var entries []string
@@ -32,7 +35,9 @@ func FixImports(options FixImportsOptions) (err error) {
 			return
 		}
 
-		data = bytes.ReplaceAll(data, before, after)
+		for _, before := range befores {
+			data = bytes.ReplaceAll(data, before, after)
+		}
 
 		if err = os.WriteFile(entry, data, os.ModePerm); err != nil {
 			return
