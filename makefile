@@ -18,3 +18,6 @@ unlock:
 
 publish: test
 	./publish.sh || make lock
+
+install:
+	FRIZZANTE_INSTALL_FROM_SRC=. go run ./setup/install/main.go

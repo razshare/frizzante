@@ -23,10 +23,6 @@ func init() {
 }
 
 func fetch() {
-	spin := spinner.New(fmt.Sprintf("fetching frizzante %s", version))
-	go spinner.Start(spin)
-	defer spinner.Stop(spin)
-
 	if files.IsDirectory(fmt.Sprintf("frizzante-%s", version)) {
 		var overwrite bool
 		var err error
@@ -39,6 +35,23 @@ func fetch() {
 			messages.Fatal(err)
 		}
 	}
+
+	var src string
+	if src = os.Getenv("FRIZZANTE_INSTALL_FROM_SRC"); src != "" {
+		spin := spinner.New(fmt.Sprintf("copying frizzante-%s from %s", version, src))
+		go spinner.Start(spin)
+		defer spinner.Stop(spin)
+
+		if err := files.CopyDirectory(src, fmt.Sprintf("frizzante-%s", version)); err != nil {
+			messages.Fatal(err)
+		}
+		return
+	}
+
+	spin := spinner.New(fmt.Sprintf("fetching frizzante %s", version))
+	go spinner.Start(spin)
+	defer spinner.Stop(spin)
+
 	if !files.IsDirectory(fmt.Sprintf("frizzante-%s", version)) {
 		if files.IsFile(fmt.Sprintf("frizzante-%s.zip", version)) {
 			var overwrite bool
