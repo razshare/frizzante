@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
-VERSION=$(< setup/install/version)
+VERSION=$(< version)
 git tag "$VERSION" && \
 git push origin --tags
