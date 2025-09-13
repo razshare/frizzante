@@ -13,7 +13,7 @@ Frizzante is an opinionated web server framework written in [Go](https://go.dev/
 Install frizzante.
 
 ```sh
-go run github.com/razshare/frizzante/setup/install@latest
+go install github.com/razshare/frizzante@latest
 ```
 
 > [!TIP]
@@ -28,7 +28,7 @@ go run github.com/razshare/frizzante/setup/install@latest
 
 Create project.
 ```sh
-frizzante -c MyProject
+frizzante -cMyProject
 ```
 
 Configure project.
