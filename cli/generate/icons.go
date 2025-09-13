@@ -1,9 +1,11 @@
 package generate
 
 import (
+	"os/exec"
 	"path/filepath"
 
 	"github.com/razshare/frizzante/cli/npm"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 )
 
@@ -17,7 +19,16 @@ func Icons(options IconsOptions) (err error) {
 		return
 	}
 
-	if err = npm.Install(options.Bun, options.App, "@mdi/js"); err != nil {
+	var bun string
+	if files.IsFile(options.Bun) {
+		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
+			return
+		}
+	} else if bun, err = exec.LookPath(options.Bun); err != nil {
+		bun = options.Bun
+	}
+
+	if err = npm.Install(bun, options.App, "@mdi/js"); err != nil {
 		return
 	}
 

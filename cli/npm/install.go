@@ -20,7 +20,7 @@ func Install(bun string, app string, pkgs ...string) error {
 
 	ok := 0
 	for _, pkg := range pkgs {
-		cmd := exec.Command(bun, "add", pkg)
+		cmd := exec.Command(bun, "add", "-D", pkg)
 		cmd.Dir = app
 		cmd.Env = os.Environ()
 		cmd.Stdout = os.Stdout
