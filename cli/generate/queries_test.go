@@ -29,6 +29,7 @@ func TestQueries(t *testing.T) {
 		Auto:     true,
 		Go:       "go",
 		Type:     "sqlite",
+		Sqlc:     filepath.Join(".gen", "sqlc", "sqlc"),
 	}); err != nil {
 		t.Fatal(err)
 	}

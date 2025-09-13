@@ -14,6 +14,10 @@ import (
 )
 
 func Queries(options QueriesOptions) (err error) {
+	if !files.IsFile(options.SqlcYaml) {
+		messages.Infof("%s not found", options.SqlcYaml)
+	}
+
 	if options.SqlcYaml == "" {
 		choices := make([]search.Choice, 0)
 
@@ -33,7 +37,11 @@ func Queries(options QueriesOptions) (err error) {
 	to := filepath.Dir(options.SqlcYaml)
 
 	if _, err = exec.LookPath(options.Sqlc); err != nil && !files.IsFile(options.Sqlc) {
-		if err = Sqlc(SqlcOptions{Sqlc: options.Sqlc, Platform: options.Platform, Auto: options.Auto}); err != nil {
+		if err = Sqlc(SqlcOptions{
+			Sqlc:     options.Sqlc,
+			Platform: options.Platform,
+			Auto:     options.Auto,
+		}); err != nil {
 			return
 		}
 	}
