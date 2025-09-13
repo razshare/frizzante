@@ -12,6 +12,8 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/routes/handlers/welcome"
 )
 
+//go:generate make clean configure
+//go:generate make package
 //go:embed app/dist
 var efs embed.FS
 var srv = server.New()
