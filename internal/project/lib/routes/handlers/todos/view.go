@@ -14,7 +14,6 @@ func View(c *client.Client) {
 		Name: "Todos",
 		Props: map[string]any{
 			"todos": s.Todos,
-			"mode":  s.Mode,
 		},
 	})
 }

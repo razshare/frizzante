@@ -24,8 +24,6 @@ func Add(c *client.Client) {
 		return
 	}
 
-	s.Mode = session.ModeToggle
-
 	s.Todos = append(s.Todos, session.Todo{
 		Checked:     false,
 		Description: d,

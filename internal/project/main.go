@@ -29,7 +29,6 @@ func main() {
 		{Pattern: "GET /check", Handler: todos.Check},
 		{Pattern: "GET /uncheck", Handler: todos.Uncheck},
 		{Pattern: "GET /add", Handler: todos.Add},
-		{Pattern: "GET /mode", Handler: todos.Mode},
 		{Pattern: "GET /remove", Handler: todos.Remove},
 	}
 }
