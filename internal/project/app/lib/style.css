@@ -1,15 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui" {
     themes:
-        light --default,
-        dark --prefersdark,
-        coffee;
-}
-
-.btn:not(.join-item) {
-    @apply rounded-3xl;
-}
-
-.input.join-item:first-child {
-    @apply rounded-l-3xl;
+        dark --default,
+        dracula;
 }

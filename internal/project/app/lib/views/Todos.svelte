@@ -3,15 +3,8 @@
     import Layout from "$lib/components/Layout.svelte"
     import { action } from "$lib/scripts/core/action.ts"
     import { href } from "$lib/scripts/core/href.ts"
-    import {
-        mdiCheck,
-        mdiChevronLeft,
-        mdiCloseCircle,
-        mdiInformationVariantCircle,
-        mdiMinusCircle,
-        mdiPlusCircle,
-    } from "@mdi/js"
-    import { slide } from "svelte/transition"
+    import { mdiArrowLeft, mdiCheck, mdiDelete, mdiPlus } from "@mdi/js"
+    import { fade, slide } from "svelte/transition"
 
     type Todo = {
         Checked: boolean
@@ -20,139 +13,148 @@
 
     type Props = {
         todos: Todo[]
-        mode: number
         error: string
     }
 
-    let { todos, mode, error }: Props = $props()
+    let { todos = [], error }: Props = $props()
 </script>
 
-{#snippet Toggle()}
-    <a class="btn btn-ghost absolute left-1 top-1" {...href("/")}>
-        <Icon path={mdiChevronLeft} />
-        <span>Welcome</span>
-    </a>
-    <div class="absolute right-1 top-1">
-        <a class="btn btn-ghost" {...href("/mode?value=remove")}>
-            <span>Remove</span>
-            <Icon path={mdiMinusCircle} />
-        </a>
-        <a class="btn btn-ghost" {...href("/mode?value=add")}>
-            <span>Add</span>
-            <Icon path={mdiPlusCircle} />
-        </a>
-    </div>
-    <div class="pt-8"></div>
-    <div class="card-body items-center text-start">
-        <h2 class="card-title text-3xl">My Todos</h2>
-        <div class="badge badge-info p-4">
-            <Icon path={mdiInformationVariantCircle} />
-            <span>Select an item in order to check or uncheck it.</span>
-        </div>
-        <div class="card-actions">
-            {#each todos as todo, index (index)}
-                {@const url = todo.Checked ? "/uncheck" : "/check"}
-                <form in:slide class="w-full" {...action(url)}>
-                    <input type="hidden" name="index" value={index} />
-                    <button class="relative btn btn-ghost w-full" type="submit">
-                        {#if todo.Checked}
-                            <div
-                                in:slide={{ axis: "x" }}
-                                out:slide={{ axis: "x" }}
-                                class="absolute left-1"
-                            >
-                                <Icon path={mdiCheck} />
-                            </div>
-                        {/if}
-                        <div class="pr-2"></div>
-                        <span>{todo.Description}</span>
-                    </button>
-                </form>
-            {/each}
-        </div>
-    </div>
-{/snippet}
-
-{#snippet Add()}
-    <a
-        class="btn btn-ghost absolute left-1 top-1"
-        {...href("/mode?value=toggle")}
-    >
-        <Icon path={mdiChevronLeft} />
-        <span>Toggle</span>
-    </a>
-    <div class="pt-8"></div>
-    <div class="card-body items-center text-start">
-        <h2 class="card-title text-3xl">Add a new Todo</h2>
-        <div class="card-actions">
-            <form {...action("/add")}>
-                <div class="join">
-                    <input
-                        class="input join-item"
-                        name="description"
-                        placeholder="Description"
-                    />
-                    <button class="btn join-item rounded-r-full" type="submit">
-                        <span>Add</span>
-                        <Icon path={mdiPlusCircle} />
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-{/snippet}
-
-{#snippet Remove()}
-    <a
-        class="btn btn-ghost absolute left-1 top-1"
-        {...href("/mode?value=toggle")}
-    >
-        <Icon path={mdiChevronLeft} />
-        <span>Toggle</span>
-    </a>
-    <div class="pt-8"></div>
-    <div class="card-body items-center text-start">
-        <h2 class="card-title text-3xl">Remove a Todo</h2>
-        <div class="card-actions">
-            {#each todos as todo, index (index)}
-                {@const url = "/remove"}
-                <form in:slide class="w-full" {...action(url)}>
-                    <input type="hidden" name="index" value={index} />
-                    <button class="relative btn btn-ghost w-full" type="submit">
-                        {#if todo.Checked}
-                            <div
-                                in:slide={{ axis: "x" }}
-                                out:slide={{ axis: "x" }}
-                                class="absolute left-1"
-                            >
-                                <Icon path={mdiCheck} />
-                            </div>
-                        {/if}
-                        <div class="pr-2"></div>
-                        <span>{todo.Description}</span>
-                    </button>
-                </form>
-            {/each}
-        </div>
-    </div>
-{/snippet}
-
 <Layout title="Todos">
-    <div in:slide class="card bg-neutral text-neutral-content w-96 relative">
-        {#if mode === 0}
-            {@render Toggle()}
-        {:else if mode === 1}
-            {@render Remove()}
-        {:else if mode === 2}
-            {@render Add()}
-        {/if}
-        {#if error}
-            <div class="pt-4"></div>
-            <div class="flex text-error p-4">
-                <Icon path={mdiCloseCircle} />
-                <div class="pr-2"></div>
-                <span>{error}</span>
+    <main
+        in:fade={{ duration: 300 }}
+        class="min-h-screen flex items-center justify-center p-4"
+    >
+        <div class="w-full min-w-[450px] max-w-2xl space-y-8">
+            <div class="text-center space-y-2 mb-5">
+                <a
+                    class="btn btn-ghost text-lg gap-1 absolute left-4 top-4"
+                    {...href("/")}
+                >
+                    <Icon path={mdiArrowLeft} size="18" />
+                    Back
+                </a>
+                <h1
+                    class="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent inline-block leading-tight mb-0"
+                >
+                    My Tasks
+                </h1>
+                <p class="text-lg text-base-content/60">
+                    Organize and track your daily activities
+                </p>
             </div>
-        {/if}
-    </div>
+
+            <div
+                class="card bg-base-200/50 backdrop-blur border border-base-300/70"
+            >
+                <div class="card-body p-6 space-y-4">
+                    <form {...action("/add")} class="flex gap-2 mb-0">
+                        <input
+                            type="text"
+                            name="description"
+                            placeholder="Add a new task..."
+                            class="input input-bordered flex-1 bg-base-100/ text-lg"
+                            required
+                        />
+                        <button type="submit" class="btn btn-primary text-lg">
+                            <Icon path={mdiPlus} size="20" />
+                            Add
+                        </button>
+                    </form>
+
+                    {#if error}
+                        <div in:slide class="alert alert-error">
+                            <span>{error}</span>
+                        </div>
+                    {/if}
+
+                    <div class="divider my-0.5"></div>
+
+                    {#if todos.length === 0}
+                        <div
+                            class="text-center py-4 text-base-content/50 text-lg"
+                        >
+                            No tasks yet. Add one above to get started!
+                        </div>
+                    {:else}
+                        <div class="space-y-2">
+                            {#each todos as todo, index (index)}
+                                <div
+                                    in:slide
+                                    class="group flex items-center gap-3 p-3 rounded-lg bg-base-100 border border-base-300/70 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all"
+                                >
+                                    <form
+                                        {...action(
+                                            todo.Checked
+                                                ? "/uncheck"
+                                                : "/check",
+                                        )}
+                                        class="flex-shrink-0"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="index"
+                                            value={index}
+                                        />
+                                        <button
+                                            type="submit"
+                                            class="btn btn-ghost btn-sm btn-square"
+                                            aria-label={todo.Checked
+                                                ? "Uncheck"
+                                                : "Check"}
+                                        >
+                                            <div
+                                                class={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
+                                                    todo.Checked
+                                                        ? "bg-primary border-primary"
+                                                        : "border-base-content/30 hover:border-primary"
+                                                }`}
+                                            >
+                                                {#if todo.Checked}
+                                                    <Icon
+                                                        path={mdiCheck}
+                                                        size="14"
+                                                    />
+                                                {/if}
+                                            </div>
+                                        </button>
+                                    </form>
+
+                                    <span
+                                        class={`flex-1 text-lg ${todo.Checked ? "line-through text-base-content/50" : ""}`}
+                                    >
+                                        {todo.Description}
+                                    </span>
+
+                                    <form
+                                        {...action("/remove")}
+                                        class="flex-shrink-0"
+                                    >
+                                        <input
+                                            type="hidden"
+                                            name="index"
+                                            value={index}
+                                        />
+                                        <button
+                                            type="submit"
+                                            class="btn btn-ghost btn-sm btn-square text-error hover:bg-error/20 transition-colors"
+                                            aria-label="Delete"
+                                        >
+                                            <Icon path={mdiDelete} size="18" />
+                                        </button>
+                                    </form>
+                                </div>
+                            {/each}
+                        </div>
+                    {/if}
+
+                    {#if todos.length > 0}
+                        <div class="text-lg text-base-content/50 text-center">
+                            {todos.filter(t => !t.Checked).length} of {todos.length}
+                            tasks remaining
+                        </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </main>
 </Layout>
