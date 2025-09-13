@@ -3,7 +3,6 @@ package generate
 import (
 	"bytes"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
@@ -23,10 +22,6 @@ func FixImports(options FixImportsOptions) (err error) {
 
 	for _, entry := range entries {
 		if !strings.HasSuffix(entry, ".go") {
-			continue
-		}
-
-		if entry != "main.go" && strings.HasPrefix(entry, "lib"+string(filepath.Separator)) {
 			continue
 		}
 

@@ -13,5 +13,5 @@ configure:
 clean:
 	./scripts/clean.sh
 
-install:
+install: clean
 	./scripts/install.sh

@@ -31,29 +31,30 @@ func Database(options DatabaseOptions) (err error) {
 
 	dbtype := strings.ToLower(options.Type)
 
-	lib := filepath.Join("lib", "database", dbtype)
+	from := "internal/additions/lib/database/" + dbtype
+	to := filepath.Join("lib", "database", dbtype)
 
-	if files.IsDirectory(lib) {
+	if files.IsDirectory(to) {
 		if !options.Auto {
 			var overwrite bool
-			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", lib); err != nil {
+			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", to); err != nil {
 				return
 			}
 
 			if !overwrite {
-				messages.Infof("skipping %s", lib)
+				messages.Infof("skipping %s", to)
 				return nil
 			}
 		}
 
-		if err = os.RemoveAll(lib); err != nil {
+		if err = os.RemoveAll(to); err != nil {
 			return
 		}
 	}
 
 	if err = Copy(CopyOptions{
-		From: "internal/additions/lib/database/" + dbtype,
-		To:   lib,
+		From: from,
+		To:   to,
 		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
@@ -91,26 +92,23 @@ func Database(options DatabaseOptions) (err error) {
 			return
 		}
 
+		if err = FixImports(FixImportsOptions{Directory: to}); err != nil {
+			return
+		}
+
 		messages.Success("sqlite database is ready")
 
-		if strings.Contains(strings.ToLower(options.Generate), "queries") {
-			var queries bool
+		queries := strings.Contains(strings.ToLower(options.Generate), "queries")
+
+		if !queries {
 			if queries, err = confirm.Send(true, "would you like to also generate your queries?"); err != nil {
 				return
 			}
-
-			yaml := "lib/core/database/sqlite/sqlc.yaml"
-
-			//if choice == "mysql" {
-			//	yaml = "lib/core/database/mysql/sqlc.yaml"
-			//}
-
 			if queries {
 				if err = Queries(QueriesOptions{
 					Auto:     options.Auto,
 					Sqlc:     options.Sqlc,
 					Platform: options.Platform,
-					SqlcYaml: yaml,
 				}); err != nil {
 					return
 				}

@@ -51,9 +51,9 @@ func Session(options SessionOptions) (err error) {
 
 	var from string
 	if stype == "memory" {
-		from = filepath.Join("internal", "project", to)
+		from = "internal/project/" + to
 	} else {
-		from = filepath.Join("internal", "additions", to)
+		from = "internal/additions/" + to
 	}
 
 	if err = Copy(CopyOptions{

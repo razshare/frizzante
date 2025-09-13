@@ -30,7 +30,7 @@ func Queries(options QueriesOptions) (err error) {
 		}
 	}
 
-	lib := filepath.Dir(options.SqlcYaml)
+	to := filepath.Dir(options.SqlcYaml)
 
 	if _, err = exec.LookPath(options.Sqlc); err != nil && !files.IsFile(options.Sqlc) {
 		if err = Sqlc(SqlcOptions{Sqlc: options.Sqlc, Platform: options.Platform, Auto: options.Auto}); err != nil {
@@ -38,7 +38,7 @@ func Queries(options QueriesOptions) (err error) {
 		}
 	}
 
-	yaml := filepath.Join(lib, "sqlc.yaml")
+	yaml := filepath.Join(to, "sqlc.yaml")
 
 	if !files.IsFile(yaml) {
 		return fmt.Errorf("%s not found", yaml)
@@ -48,7 +48,7 @@ func Queries(options QueriesOptions) (err error) {
 
 	var sqlc string
 	if files.IsFile(options.Sqlc) {
-		if sqlc, err = filepath.Rel(lib, options.Sqlc); err != nil {
+		if sqlc, err = filepath.Rel(to, options.Sqlc); err != nil {
 			return err
 		}
 	} else if sqlc, err = exec.LookPath(options.Sqlc); err != nil {
@@ -57,7 +57,7 @@ func Queries(options QueriesOptions) (err error) {
 
 	go spinner.Start(spin)
 	generate := exec.Command(sqlc, "generate")
-	generate.Dir = lib
+	generate.Dir = to
 	generate.Env = append(os.Environ())
 	generate.Stderr = os.Stderr
 	generate.Stdout = os.Stdout
@@ -69,9 +69,13 @@ func Queries(options QueriesOptions) (err error) {
 		return
 	}
 
+	if err = FixImports(FixImportsOptions{Directory: to}); err != nil {
+		return
+	}
+
 	messages.Success(
 		"queries generated at database.Queries.*\n",
-		lib+"/queries.go",
+		to+"/queries.go",
 	)
 	messages.Tip(
 		"## usage example\n",

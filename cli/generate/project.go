@@ -9,12 +9,6 @@ import (
 
 func Project(options ProjectOptions) (err error) {
 	if err = Copy(CopyOptions{
-		Ignore: []string{
-			"internal/project/lib/session/disk",
-			"internal/project/lib/database/sqlite",
-			"internal/project/app/lib/components/forms",
-			"internal/project/app/lib/components/links",
-		},
 		From: "internal/project",
 		To:   options.Name,
 		Auto: options.Auto,

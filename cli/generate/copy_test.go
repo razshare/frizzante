@@ -18,7 +18,11 @@ func TestCopy(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll(".gen") }()
 
-	if err := Copy(CopyOptions{From: "air.go", To: filepath.Join(".gen", "air.go.txt"), Efs: TestCopyEfs}); err != nil {
+	if err := Copy(CopyOptions{
+		From: "air.go",
+		To:   filepath.Join(".gen", "air.go.txt"),
+		Efs:  TestCopyEfs,
+	}); err != nil {
 		t.Fatal(err)
 	}
 
