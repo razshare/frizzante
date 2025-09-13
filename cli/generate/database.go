@@ -111,7 +111,6 @@ func Database(options DatabaseOptions) (err error) {
 					Auto:     options.Auto,
 					Sqlc:     options.Sqlc,
 					Platform: options.Platform,
-					SqlcYaml: filepath.Join("lib", "database", "sqlite", "sqlc.yaml"),
 				}); err != nil {
 					return
 				}

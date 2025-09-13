@@ -14,7 +14,7 @@ import (
 )
 
 func Queries(options QueriesOptions) (err error) {
-	if !files.IsFile(options.SqlcYaml) {
+	if options.SqlcYaml != "" && !files.IsFile(options.SqlcYaml) {
 		messages.Infof("%s not found", options.SqlcYaml)
 	}
 
