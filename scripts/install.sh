@@ -1,6 +1,4 @@
 #!/usr/bin/env bash
-set -e
-
 message="please clean the project before installing"
 
 # Cleans additions

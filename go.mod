@@ -9,6 +9,7 @@ require (
 	github.com/dop251/goja v0.0.0-20250630131328-58d95d85e994
 	github.com/evanw/esbuild v0.25.9
 	github.com/gorilla/websocket v1.5.3
+	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/spf13/pflag v1.0.10
 )
@@ -28,7 +29,6 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-localereader v0.0.1 // indirect
 	github.com/mattn/go-runewidth v0.0.16 // indirect
-	github.com/mattn/go-sqlite3 v1.14.32 // indirect
 	github.com/muesli/ansi v0.0.0-20230316100256-276c6243b2f6 // indirect
 	github.com/muesli/cancelreader v0.2.2 // indirect
 	github.com/muesli/termenv v0.16.0 // indirect
