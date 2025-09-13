@@ -21,4 +21,7 @@ jobs:
             ${{ runner.os }}-go-
       - name: tests
         id: tests
-        run: make test
+        run: |
+          ./scripts/clean.sh
+          ./scripts/configure.sh
+          ./scripts/test.sh

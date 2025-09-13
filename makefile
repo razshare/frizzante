@@ -1,17 +1,17 @@
 test: clean configure
-	./test.sh
+	./scripts/test.sh
 
 coverage: clean configure
-	./coverage.sh
+	./scripts/coverage.sh
 
 publish: test
-	./publish.sh
+	./scripts/publish.sh
 
 configure:
-	./configure.sh
+	./scripts/configure.sh
 
 clean:
-	./clean.sh
+	./scripts/clean.sh
 
 install:
-	./install.sh
+	./scripts/install.sh

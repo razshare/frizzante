@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
+# Installs go packages
+go mod tidy
+go get ./...
+
 # Configures internal project
 pushd internal/project
 make configure package
