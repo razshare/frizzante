@@ -4,7 +4,7 @@
 
 <a href="https://github.com/razshare/frizzante/releases"><img src="https://img.shields.io/github/release/razshare/frizzante" alt="Latest Release"></a>
 <a href="https://github.com/razshare/frizzante/actions"><img src="https://github.com/razshare/frizzante/actions/workflows/tests.yaml/badge.svg?branch=main" alt="Tests Status"></a>
-<a href="https://discord.gg/y7tTeR7yPH"><img src="https://dcbadge.limes.pink/api/server/https://discord.gg/y7tTeR7yPH?style=flat" alt="Discord Community"></a>
+<a href="https://discord.gg/y7tTeR7yPH"><img src="https://img.shields.io/badge/Discord-Join%20Server-7289da?logo=discord&logoColor=white&style=flat" alt="Discord Community"></a>
 
 Frizzante is an opinionated web server framework written in [Go](https://go.dev/) that uses [Svelte](https://svelte.dev/docs/svelte/overview) to render web pages.
 
