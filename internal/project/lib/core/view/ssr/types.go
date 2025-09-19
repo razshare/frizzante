@@ -3,8 +3,8 @@ package ssr
 import "embed"
 
 type Config struct {
-	Efs   embed.FS
 	App   string
-	Disk  bool
+	Efs   embed.FS
 	Limit int
+	Disk  bool
 }

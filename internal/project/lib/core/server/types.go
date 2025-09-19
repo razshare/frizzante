@@ -12,15 +12,15 @@ import (
 
 type Server struct {
 	*http.Server
-	PublicRoot  string
-	SecureAddr  string
 	Guards      []guard.Guard
 	Routes      []route.Route
-	InfoLog     *log.Logger
-	Channels    Channels
-	Efs         embed.FS
+	PublicRoot  string
+	SecureAddr  string
 	Certificate string
 	Key         string
+	Channels    Channels
+	InfoLog     *log.Logger
+	Efs         embed.FS
 	Render      func(view _view.View) (html string, err error)
 }
 

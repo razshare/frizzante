@@ -22,6 +22,7 @@ var render = ssr.New(ssr.Config{Efs: efs, Disk: dev})
 
 func main() {
 	defer server.Start(srv)
+
 	srv.Efs = efs
 	srv.Render = render
 	srv.Routes = []route.Route{

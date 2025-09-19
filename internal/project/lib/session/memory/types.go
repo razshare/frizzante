@@ -5,6 +5,6 @@ type Session struct {
 }
 
 type Todo struct {
-	Checked     bool
 	Description string
+	Checked     bool
 }

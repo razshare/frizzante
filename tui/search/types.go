@@ -3,10 +3,10 @@ package search
 import "github.com/charmbracelet/bubbles/textinput"
 
 type Search struct {
-	Active   bool            // Whether we're in search mode
+	Input    textinput.Model // Search input field
 	Choices  []Choice        // All available choices
 	Filtered []Choice        // Choices after filtering
-	Input    textinput.Model // Search input field
+	Active   bool            // Whether we're in search mode
 }
 
 type Choice struct {

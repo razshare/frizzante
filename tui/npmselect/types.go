@@ -9,23 +9,23 @@ import (
 )
 
 type Model struct {
+	Packages  []npm.PackageInfo
 	Selected  []string
 	Prompt    string
 	LastQuery string
+	Error     error
 	Search    *search.Search
 	Viewport  *viewport.Viewport
-	Packages  []npm.PackageInfo
 	Debounce  time.Duration
 	Debouncer *time.Timer
-	Error     error
 	Loading   bool
 	Quitting  bool
 	Confirmed bool
 }
 
 type SearchResultMsg struct {
-	Packages []npm.PackageInfo
 	Error    error
+	Packages []npm.PackageInfo
 }
 
 type DebouncedSearchMsg struct {

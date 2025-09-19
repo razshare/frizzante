@@ -25,13 +25,13 @@ type CreateProjectOptions struct {
 type GenerateOptions struct {
 	App      string
 	Selected string
-	Auto     bool
 	Go       string
 	Air      string
 	Bun      string
 	Sqlc     string
 	Efs      embed.FS
 	Platform platform.Platform
+	Auto     bool
 }
 
 type TestOptions struct {
@@ -102,8 +102,8 @@ type ConfigureOptions struct {
 	Go       string
 	Air      string
 	Bun      string
-	Auto     bool
 	Platform platform.Platform
+	Auto     bool
 }
 
 type WelcomeOptions struct{}

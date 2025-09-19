@@ -18,7 +18,6 @@ type ThemeStyles struct {
 	Popup     lipgloss.Style
 	Item      lipgloss.Style
 	Selected  lipgloss.Style
-	Status    func(color string) lipgloss.Style
 	BigText   lipgloss.Style
 	Section   lipgloss.Style
 	Subheader lipgloss.Style
@@ -29,4 +28,5 @@ type ThemeStyles struct {
 	Flag      lipgloss.Style
 	Category  lipgloss.Style
 	Example   lipgloss.Style
+	Status    func(color string) lipgloss.Style
 }

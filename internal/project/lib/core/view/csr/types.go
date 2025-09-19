@@ -3,7 +3,7 @@ package csr
 import "embed"
 
 type Config struct {
-	Efs  embed.FS
 	App  string
+	Efs  embed.FS
 	Disk bool
 }

@@ -6,8 +6,8 @@ import (
 )
 
 type Model struct {
-	Selected []string
 	Prompt   string
+	Selected []string
 	Search   *search.Search
 	Viewport *viewport.Viewport
 }

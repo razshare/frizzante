@@ -10,15 +10,15 @@ import (
 )
 
 type Client struct {
+	SessionId string
+	EventName string
+	EventId   int64
+	Status    int
 	Config    *Config
 	Request   *http.Request
 	WebSocket *websocket.Conn
 	Writer    http.ResponseWriter
-	SessionId string
-	EventName string
-	EventId   int64
 	Locked    bool
-	Status    int
 }
 
 type Config struct {

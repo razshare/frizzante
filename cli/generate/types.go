@@ -35,43 +35,43 @@ type Evict func() error
 
 type AirOptions struct {
 	Air      string
-	Auto     bool
 	Platform platform.Platform
+	Auto     bool
 }
 
 type BunOptions struct {
 	Bun      string
-	Auto     bool
 	Platform platform.Platform
+	Auto     bool
 }
 
 type SqlcOptions struct {
 	Sqlc     string
-	Auto     bool
 	Platform platform.Platform
+	Auto     bool
 }
 
 type CoreOptions struct {
 	App  string
-	Auto bool
 	Efs  embed.FS
+	Auto bool
 }
 
 type DatabaseOptions struct {
-	Efs      embed.FS
 	Generate string
-	Auto     bool
 	Go       string
 	Type     string
 	Sqlc     string
+	Efs      embed.FS
 	Platform platform.Platform
+	Auto     bool
 }
 
 type QueriesOptions struct {
-	Auto     bool
 	Sqlc     string
-	Platform platform.Platform
 	SqlcYaml string
+	Platform platform.Platform
+	Auto     bool
 }
 
 type DownloadOptions struct {
@@ -83,15 +83,15 @@ type CopyOptions struct {
 	Ignore []string
 	From   string
 	To     string
-	Auto   bool
 	Efs    embed.FS
+	Auto   bool
 }
 
 type ProjectOptions struct {
-	Auto bool
 	Name string
 	Go   string
 	Efs  embed.FS
+	Auto bool
 }
 
 type FixImportsOptions struct {
@@ -99,32 +99,32 @@ type FixImportsOptions struct {
 }
 
 type EmbeddedZipOptions struct {
-	Auto     bool
 	FileName string
 	Efs      embed.FS
+	Auto     bool
 }
 
 type FormsOptions struct {
 	App  string
-	Auto bool
 	Efs  embed.FS
+	Auto bool
 }
 
 type IconsOptions struct {
 	Bun  string
 	App  string
-	Auto bool
 	Efs  embed.FS
+	Auto bool
 }
 
 type LinksOptions struct {
 	App  string
-	Auto bool
 	Efs  embed.FS
+	Auto bool
 }
 
 type SessionOptions struct {
-	Auto bool
 	Type string
 	Efs  embed.FS
+	Auto bool
 }
