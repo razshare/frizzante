@@ -24,8 +24,8 @@ type Model struct {
 }
 
 type SearchResultMsg struct {
-	Error    error
 	Packages []npm.PackageInfo
+	Error    error
 }
 
 type DebouncedSearchMsg struct {
