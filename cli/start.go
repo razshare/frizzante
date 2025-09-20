@@ -6,6 +6,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli/app"
 	_menu "github.com/razshare/frizzante/cli/menu"
+	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
@@ -44,6 +45,8 @@ func Start(a *app.App) (err error) {
 	} else {
 		println(logo)
 	}
+
+	messages.Prefix = config.Styles.Menu.PaddingRight(1).Render("│")
 
 	// If we reach this point,
 	// it means we need to show the TUI menu.
