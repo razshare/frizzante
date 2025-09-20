@@ -46,7 +46,7 @@ func Start(a *app.App) (err error) {
 		println(logo)
 	}
 
-	messages.Prefix = config.Styles.Menu.PaddingRight(1).Render("│")
+	messages.Prefix = config.Styles.Menu.Render("│")
 
 	// If we reach this point,
 	// it means we need to show the TUI menu.

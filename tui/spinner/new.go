@@ -14,7 +14,7 @@ var _ = spinner.Spinner{
 }
 
 var _star = spinner.Spinner{
-	Frames: []string{"⯌", "⯍", "⯎", "⯏"},
+	Frames: []string{"⯌ ", "⯍ ", "⯎ ", "⯏ "},
 	FPS:    time.Second / 4,
 }
 

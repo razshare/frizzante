@@ -11,20 +11,20 @@ import (
 )
 
 func Install(options InstallOptions) (err error) {
+	spin := spinner.New("installing packages")
+	go spinner.Start(spin)
+	defer spinner.Stop(spin)
+
 	if err = Touch(TouchOptions{App: options.App}); err != nil {
 		return
 	}
 
-	spin := spinner.New("installing go dependencies")
-
-	go spinner.Start(spin)
 	tidy := exec.Command(options.Go, "mod", "tidy")
 	tidy.Env = append(os.Environ())
 	//tidy.Stderr = os.Stderr
 	//tidy.Stdout = os.Stdout
 	//tidy.Stdin = os.Stdin
 	err = tidy.Run()
-	spinner.Stop(spin)
 
 	if err != nil {
 		if tidy.Err != nil {
@@ -55,7 +55,7 @@ func Install(options InstallOptions) (err error) {
 		return
 	}
 
-	messages.Success("project dependencies installed")
+	messages.Success("packages installed")
 
 	return
 }

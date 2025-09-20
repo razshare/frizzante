@@ -130,7 +130,7 @@ func (model *Model) View() string {
 	builder.WriteString("\n")
 
 	if model.Loading {
-		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
+		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  loading..."))
 		builder.WriteString("\n")
 		if model.Search.Active {
@@ -138,7 +138,7 @@ func (model *Model) View() string {
 		}
 		return builder.String()
 	} else if model.Error != nil {
-		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
+		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.Status(config.Colors.Error).Render("✗  " + model.Error.Error()))
 		builder.WriteString("\n")
 		if model.Search.Active {
@@ -149,7 +149,7 @@ func (model *Model) View() string {
 
 	filtered := len(model.Search.Filtered)
 	if filtered == 0 {
-		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
+		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  no matches found"))
 
 		builder.WriteString("\n")
@@ -171,13 +171,13 @@ func (model *Model) View() string {
 	}
 
 	if model.Viewport.Start > 0 {
-		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
+		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
 		builder.WriteString("\n")
 	}
 
 	for i := model.Viewport.Start; i < height; i++ {
-		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
+		builder.WriteString(config.Styles.Menu.Render("│"))
 		if model.Viewport.Cursor == i {
 			if slices.Contains(model.Selected, model.Search.Filtered[i].Id) {
 				builder.WriteString(config.Styles.Selected.Render("● " + model.Search.Filtered[i].Id))
@@ -198,7 +198,7 @@ func (model *Model) View() string {
 	}
 
 	if height < filtered {
-		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
+		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
 		builder.WriteString("\n")
 	}

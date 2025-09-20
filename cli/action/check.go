@@ -8,9 +8,14 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/spinner"
 )
 
 func Check(options CheckOptions) (err error) {
+	spin := spinner.New("checking code")
+	go spinner.Start(spin)
+	defer spinner.Stop(spin)
+
 	if err = Touch(TouchOptions{App: options.App}); err != nil {
 		return
 	}

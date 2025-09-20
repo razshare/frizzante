@@ -1,15 +1,21 @@
 package action
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/spinner"
 )
 
 func Package(options PackageOptions) (err error) {
+	spin := spinner.New(fmt.Sprintf("packaging %s in %s/dist", options.App, options.App))
+	go spinner.Start(spin)
+	defer spinner.Stop(spin)
+
 	if err = Touch(TouchOptions{App: options.App}); err != nil {
 		return
 	}
