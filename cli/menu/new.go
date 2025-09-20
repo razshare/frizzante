@@ -55,6 +55,7 @@ func New(a *app.App) (*Menu, error) {
 						Go:       _go,
 						Air:      air,
 						Bun:      bun,
+						Efs:      a.Efs,
 					})
 				},
 			},

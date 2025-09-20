@@ -102,6 +102,7 @@ type ConfigureOptions struct {
 	Go       string
 	Air      string
 	Bun      string
+	Efs      embed.FS
 	Platform platform.Platform
 	Auto     bool
 }

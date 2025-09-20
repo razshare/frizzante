@@ -69,16 +69,10 @@ func Generate(options GenerateOptions) (err error) {
 				Auto: options.Auto,
 				Efs:  options.Efs,
 			})
-		} else if gen == "types:definitions" {
-			return generate.TypesDefinitions(generate.DefinitionsOptions{
-				App:  options.App,
-				Go:   options.Go,
-				Auto: options.Auto,
-				Efs:  options.Efs,
-			})
 		} else if gen == "types" {
 			return generate.Types(generate.TypesOptions{
 				App:  options.App,
+				Go:   options.Go,
 				Auto: options.Auto,
 				Efs:  options.Efs,
 			})
@@ -91,8 +85,7 @@ func Generate(options GenerateOptions) (err error) {
 		var items []string
 		items, err = multiselect.Send(
 			[]search.Choice{
-				{Id: "types:definitions", Description: ".d.ts files (uses -tags dry,types)"},
-				{Id: "types", Description: "type generation features"},
+				{Id: "types", Description: ".d.ts files (uses -tags dry,types)"},
 				{Id: "core", Description: "core features"},
 				{Id: "forms", Description: "form component that provides status details"},
 				{Id: "links", Description: "hyperlink component that provides status details"},
