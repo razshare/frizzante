@@ -36,14 +36,5 @@ func Configure(options ConfigureOptions) (err error) {
 		return
 	}
 
-	if err = generate.Types(generate.TypesOptions{
-		App:  options.App,
-		Go:   options.Go,
-		Efs:  options.Efs,
-		Auto: options.Auto,
-	}); err != nil {
-		return
-	}
-
 	return
 }

@@ -34,5 +34,5 @@ install:
 update:
 	frizzante --update
 
-hooks:
-	frizzante --hooks
+types:
+	frizzante -gtypes
