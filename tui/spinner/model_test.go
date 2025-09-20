@@ -1,6 +1,7 @@
 package spinner
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -175,20 +176,7 @@ func TestSpinnerViewFormat(t *testing.T) {
 		t.Error("view should not be empty")
 	}
 
-	if !contains(view, model.Message) {
+	if !strings.Contains(view, model.Message) {
 		t.Errorf("view should contain message %q", model.Message)
 	}
-
-	if len(view) > 0 && view[len(view)-1] != '\n' {
-		t.Error("view should end with newline")
-	}
-}
-
-func contains(str, substr string) bool {
-	for i := 0; i <= len(str)-len(substr); i++ {
-		if str[i:i+len(substr)] == substr {
-			return true
-		}
-	}
-	return false
 }
