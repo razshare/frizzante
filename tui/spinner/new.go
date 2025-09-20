@@ -8,15 +8,20 @@ import (
 	"github.com/razshare/frizzante/tui/config"
 )
 
-var _wall = spinner.Spinner{
+var _ = spinner.Spinner{
 	Frames: []string{"䷀", "䷫", "䷠", "䷋", "䷓", "䷚", "䷨", "䷙", "䷍", "䷍", "䷍", "䷡", "䷪"},
 	FPS:    time.Second / 6,
 }
 
+var _star = spinner.Spinner{
+	Frames: []string{"⯌", "⯍", "⯎", "⯏"},
+	FPS:    time.Second / 4,
+}
+
 func New(message string) *Spinner {
 	spin := spinner.New()
-	spin.Spinner = _wall
-	spin.Style = config.Styles.Spinner
+	spin.Spinner = _star
+	spin.Style = config.Styles.Menu
 
 	model := &Model{
 		Spinner: spin,

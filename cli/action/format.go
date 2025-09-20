@@ -7,19 +7,27 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/spinner"
 )
 
 func Format(options FormatOptions) (err error) {
+	spin := spinner.New("formatting code")
+	go spinner.Start(spin)
+	defer spinner.Stop(spin)
+
 	if err = Touch(TouchOptions{App: options.App}); err != nil {
 		return
 	}
 
 	gofmt := exec.Command(options.Go, "fmt", "./...")
 	gofmt.Env = append(os.Environ())
-	gofmt.Stderr = os.Stderr
-	gofmt.Stdout = os.Stdout
-	gofmt.Stdin = os.Stdin
+	//gofmt.Stderr = os.Stderr
+	//gofmt.Stdout = os.Stdout
+	//gofmt.Stdin = os.Stdin
 	if err = gofmt.Run(); err != nil {
+		if gofmt.Err != nil {
+			messages.Error(gofmt.Err.Error())
+		}
 		return
 	}
 
@@ -35,10 +43,13 @@ func Format(options FormatOptions) (err error) {
 	pretty := exec.Command(bun, "x", "prettier", "--write", ".")
 	pretty.Dir = options.App
 	pretty.Env = append(os.Environ())
-	pretty.Stderr = os.Stderr
-	pretty.Stdout = os.Stdout
-	pretty.Stdin = os.Stdin
+	//pretty.Stderr = os.Stderr
+	//pretty.Stdout = os.Stdout
+	//pretty.Stdin = os.Stdin
 	if err = pretty.Run(); err != nil {
+		if pretty.Err != nil {
+			messages.Error(pretty.Err.Error())
+		}
 		return
 	}
 

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/razshare/frizzante/tui/config"
 )
 
 func (model *Model) Init() tea.Cmd {
@@ -31,5 +32,5 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (model *Model) View() string {
-	return fmt.Sprintf("%s %s\n", model.Spinner.View(), model.Message)
+	return fmt.Sprintf("\r%s %s", model.Spinner.View(), config.Styles.Menu.Render(model.Message))
 }

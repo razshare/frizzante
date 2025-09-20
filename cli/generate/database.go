@@ -67,13 +67,16 @@ func Database(options DatabaseOptions) (err error) {
 		go spinner.Start(spin)
 		install := exec.Command(options.Go, "get", "github.com/mattn/go-sqlite3")
 		install.Env = append(os.Environ())
-		install.Stderr = os.Stderr
-		install.Stdout = os.Stdout
-		install.Stdin = os.Stdin
+		//install.Stderr = os.Stderr
+		//install.Stdout = os.Stdout
+		//install.Stdin = os.Stdin
 		err = install.Run()
 		spinner.Stop(spin)
 
 		if err != nil {
+			if install.Err != nil {
+				messages.Error(install.Err.Error())
+			}
 			return
 		}
 
@@ -82,21 +85,24 @@ func Database(options DatabaseOptions) (err error) {
 		go spinner.Start(spin)
 		get := exec.Command(options.Go, "get", "-u", "./...")
 		get.Env = append(os.Environ())
-		get.Stderr = os.Stderr
-		get.Stdout = os.Stdout
-		get.Stdin = os.Stdin
+		//get.Stderr = os.Stderr
+		//get.Stdout = os.Stdout
+		//get.Stdin = os.Stdin
 		err = get.Run()
 		spinner.Stop(spin)
 
 		if err != nil {
-			return
-		}
-
-		if err = FixImports(FixImportsOptions{Directory: to}); err != nil {
+			if get.Err != nil {
+				messages.Error(get.Err.Error())
+			}
 			return
 		}
 
 		messages.Success("sqlite database is ready")
+
+		if err = FixImports(FixImportsOptions{Directory: to}); err != nil {
+			return
+		}
 
 		queries := strings.Contains(strings.ToLower(options.Generate), "queries")
 

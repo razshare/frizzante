@@ -24,10 +24,13 @@ func Dev(options DevOptions) (err error) {
 	airwatch.Stdout = os.Stdout
 	airwatch.Stdin = os.Stdin
 	if err = airwatch.Start(); err != nil {
+		if airwatch.Err != nil {
+			messages.Error(airwatch.Err.Error())
+		}
 		return
 	}
 
-	messages.Success("air watcher launched")
+	//messages.Success("air watcher launched")
 
 	var group sync.WaitGroup
 

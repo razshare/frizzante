@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/razshare/frizzante/tui/config"
 )
 
 func Status(label string, text string, labelBg string, labelFg string, color string) {
@@ -27,9 +28,9 @@ func Status(label string, text string, labelBg string, labelFg string, color str
 			continue
 		}
 		if i == 0 {
-			fmt.Println(labelStyle.Render(label) + " " + textStyle.Render(line))
+			fmt.Println(config.Styles.Menu.PaddingRight(1).Render("│") + labelStyle.Render(label) + " " + textStyle.Render(line))
 		} else {
-			fmt.Println(labelStyle.Render("") + " " + textStyle.Render(line))
+			fmt.Println(config.Styles.Menu.PaddingRight(1).Render("│") + labelStyle.Render("") + " " + textStyle.Render(line))
 		}
 	}
 }

@@ -260,6 +260,7 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
+				Hidden: true,
 				Choice: search.Choice{Id: "help", Description: "shows the help menu"},
 				Active: func() bool { return *a.Help },
 				Handler: func() error {

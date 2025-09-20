@@ -6,9 +6,9 @@ import (
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	config2 "github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/navigate"
-	search2 "github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/search"
 )
 
 func (model *Model) Init() tea.Cmd {
@@ -31,7 +31,7 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 
 		if assert.Type == tea.KeyEsc {
 			if model.Search.Active {
-				search2.Reset(model.Search, model.Viewport)
+				search.Reset(model.Search, model.Viewport)
 			}
 
 			model.Selected = ""
@@ -50,7 +50,7 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 
 		if assert.Type == tea.KeyBackspace || assert.Type == tea.KeyCtrlH {
 			if model.Search.Active {
-				return model, search2.Apply(model.Search, model.Viewport, assert)
+				return model, search.Apply(model.Search, model.Viewport, assert)
 			}
 		}
 
@@ -59,7 +59,7 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 				model.Search.Active = true
 				model.Search.Input.Focus()
 			}
-			return model, search2.Apply(model.Search, model.Viewport, assert)
+			return model, search.Apply(model.Search, model.Viewport, assert)
 		}
 	}
 
@@ -70,29 +70,30 @@ func (model *Model) View() string {
 	var builder strings.Builder
 	builder.Grow(1024)
 
-	builder.WriteString(config2.Styles.Menu.Render(model.Prompt))
+	builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+	builder.WriteString(config.Styles.Menu.Render(model.Prompt))
 
 	if model.Search.Input.Value() != "" {
-		builder.WriteString(config2.Styles.UserInput.Render(" ⁋/" + model.Search.Input.Value()))
+		builder.WriteString(config.Styles.UserInput.Render(" ⁋/" + model.Search.Input.Value()))
 	} else {
-		builder.WriteString(config2.Styles.UserGuide.Render(" ⁋/type to search"))
+		builder.WriteString(config.Styles.UserGuide.Render(" ⁋/type to search"))
 	}
 
 	builder.WriteString("\n")
 
 	filtered := len(model.Search.Filtered)
 	if filtered == 0 {
-		builder.WriteString(config2.Styles.Menu.Render("│"))
-		builder.WriteString(config2.Styles.UserGuide.PaddingLeft(1).Render("ⓘ  no matches found"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
+		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  no matches found"))
 
 		builder.WriteString("\n")
 
-		builder.WriteString(config2.Styles.UserGuide.Render("↑ up • ↓ down • enter submit"))
+		builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • enter submit"))
 
 		if model.Search.Active {
-			builder.WriteString(config2.Styles.UserGuide.Render(" • esc clear"))
+			builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
 		} else {
-			builder.WriteString(config2.Styles.UserGuide.Render(" • esc back"))
+			builder.WriteString(config.Styles.UserGuide.Render(" • esc back"))
 		}
 
 		return builder.String()
@@ -104,37 +105,37 @@ func (model *Model) View() string {
 	}
 
 	if model.Viewport.Start > 0 {
-		builder.WriteString(config2.Styles.Menu.Render("│"))
-		builder.WriteString(config2.Styles.Status(config2.Colors.Muted).Render("↑ more above"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
+		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
 		builder.WriteString("\n")
 	}
 
 	for i := model.Viewport.Start; i < height; i++ {
-		builder.WriteString(config2.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
 		if model.Viewport.Cursor == i {
-			builder.WriteString(config2.Styles.Selected.Render("● " + model.Search.Filtered[i].Id))
+			builder.WriteString(config.Styles.Selected.Render("● " + model.Search.Filtered[i].Id))
 			j := slices.Index(model.Search.Choices, model.Search.Filtered[i])
 			if j >= 0 && model.Search.Choices[j].Description != "" {
-				builder.WriteString(config2.Styles.UserGuide.Render("  ⇢  " + model.Search.Choices[j].Description))
+				builder.WriteString(config.Styles.UserGuide.Render("  ⇢  " + model.Search.Choices[j].Description))
 			}
 		} else {
-			builder.WriteString(config2.Styles.Item.Render("○ " + model.Search.Filtered[i].Id))
+			builder.WriteString(config.Styles.Item.Render("○ " + model.Search.Filtered[i].Id))
 		}
 		builder.WriteString("\n")
 	}
 
 	if height < filtered {
-		builder.WriteString(config2.Styles.Menu.Render("│"))
-		builder.WriteString(config2.Styles.Status(config2.Colors.Muted).Render("↓ more below"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
+		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
 		builder.WriteString("\n")
 	}
 
-	builder.WriteString(config2.Styles.UserGuide.Render("↑ up • ↓ down • enter submit"))
+	builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • enter submit"))
 
 	if model.Search.Active {
-		builder.WriteString(config2.Styles.UserGuide.Render(" • esc clear"))
+		builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
 	} else {
-		builder.WriteString(config2.Styles.UserGuide.Render(" • esc back"))
+		builder.WriteString(config.Styles.UserGuide.Render(" • esc back"))
 	}
 
 	return builder.String()

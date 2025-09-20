@@ -24,6 +24,9 @@ func Types(options TypesOptions) (err error) {
 	spinner.Stop(spin)
 
 	if err != nil {
+		if get.Err != nil {
+			messages.Error(get.Err.Error())
+		}
 		return
 	}
 

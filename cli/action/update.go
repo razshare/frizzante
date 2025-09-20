@@ -11,22 +11,25 @@ import (
 )
 
 func Update(options UpdateOptions) (err error) {
+	spin := spinner.New("updating packages")
+	go spinner.Start(spin)
+	defer spinner.Stop(spin)
+
 	if err = Touch(TouchOptions{App: options.App}); err != nil {
 		return
 	}
 
-	spin := spinner.New("updating go dependencies")
-
-	go spinner.Start(spin)
 	get := exec.Command(options.Go, "get", "-u", "./...")
 	get.Env = append(os.Environ())
-	get.Stderr = os.Stderr
-	get.Stdout = os.Stdout
-	get.Stdin = os.Stdin
+	//get.Stderr = os.Stderr
+	//get.Stdout = os.Stdout
+	//get.Stdin = os.Stdin
 	err = get.Run()
-	spinner.Stop(spin)
 
 	if err != nil {
+		if get.Err != nil {
+			messages.Error(get.Err.Error())
+		}
 		return
 	}
 
@@ -42,10 +45,15 @@ func Update(options UpdateOptions) (err error) {
 	pretty := exec.Command(bun, "update")
 	pretty.Dir = options.App
 	pretty.Env = append(os.Environ())
-	pretty.Stderr = os.Stderr
-	pretty.Stdout = os.Stdout
-	pretty.Stdin = os.Stdin
-	if err = pretty.Run(); err != nil {
+	//pretty.Stderr = os.Stderr
+	//pretty.Stdout = os.Stdout
+	//pretty.Stdin = os.Stdin
+	err = pretty.Run()
+
+	if err != nil {
+		if pretty.Err != nil {
+			messages.Error(pretty.Err.Error())
+		}
 		return
 	}
 

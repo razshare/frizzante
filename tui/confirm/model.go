@@ -43,7 +43,7 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 
 func (model *Model) View() string {
 	if model.DefaultValue {
-		return config.Styles.Title.Render(model.Prompt, "(Y/n)")
+		return config.Styles.Menu.PaddingRight(1).Render("⎚") + config.Styles.Menu.Render(model.Prompt, "(Y/n)")
 	}
-	return config.Styles.Title.Render(model.Prompt, "(y/N)")
+	return config.Styles.Menu.PaddingRight(1).Render("⎚") + config.Styles.Menu.Render(model.Prompt, "(y/N)")
 }

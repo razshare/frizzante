@@ -20,13 +20,16 @@ func Install(options InstallOptions) (err error) {
 	go spinner.Start(spin)
 	tidy := exec.Command(options.Go, "mod", "tidy")
 	tidy.Env = append(os.Environ())
-	tidy.Stderr = os.Stderr
-	tidy.Stdout = os.Stdout
-	tidy.Stdin = os.Stdin
+	//tidy.Stderr = os.Stderr
+	//tidy.Stdout = os.Stdout
+	//tidy.Stdin = os.Stdin
 	err = tidy.Run()
 	spinner.Stop(spin)
 
 	if err != nil {
+		if tidy.Err != nil {
+			messages.Error(tidy.Err.Error())
+		}
 		return
 	}
 
@@ -39,13 +42,16 @@ func Install(options InstallOptions) (err error) {
 		bun = options.Bun
 	}
 
-	ins := exec.Command(bun, "install")
-	ins.Dir = options.App
-	ins.Env = append(os.Environ())
-	ins.Stderr = os.Stderr
-	ins.Stdout = os.Stdout
-	ins.Stdin = os.Stdin
-	if err = ins.Run(); err != nil {
+	install := exec.Command(bun, "install")
+	install.Dir = options.App
+	install.Env = append(os.Environ())
+	//ins.Stderr = os.Stderr
+	//ins.Stdout = os.Stdout
+	//ins.Stdin = os.Stdin
+	if err = install.Run(); err != nil {
+		if install.Err != nil {
+			messages.Error(install.Err.Error())
+		}
 		return
 	}
 

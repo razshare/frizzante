@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/tui/messages"
 )
 
 func Check(options CheckOptions) (err error) {
@@ -26,10 +27,13 @@ func Check(options CheckOptions) (err error) {
 	eslint := exec.Command(bun, "x", "eslint")
 	eslint.Dir = options.App
 	eslint.Env = append(os.Environ())
-	eslint.Stderr = os.Stderr
-	eslint.Stdout = os.Stdout
-	eslint.Stdin = os.Stdin
+	//eslint.Stderr = os.Stderr
+	//eslint.Stdout = os.Stdout
+	//eslint.Stdin = os.Stdin
 	if err = eslint.Run(); err != nil {
+		if eslint.Err != nil {
+			messages.Error(eslint.Err.Error())
+		}
 		return
 	}
 
@@ -55,10 +59,13 @@ func Check(options CheckOptions) (err error) {
 		svelteCheck := exec.Command(bun, "x", "svelte-check", "--tsconfig=./tsconfig.json")
 		svelteCheck.Dir = options.App
 		svelteCheck.Env = append(os.Environ())
-		svelteCheck.Stderr = os.Stderr
-		svelteCheck.Stdout = os.Stdout
-		svelteCheck.Stdin = os.Stdin
+		//svelteCheck.Stderr = os.Stderr
+		//svelteCheck.Stdout = os.Stdout
+		//svelteCheck.Stdin = os.Stdin
 		err = svelteCheck.Run()
+		if svelteCheck.Err != nil {
+			messages.Error(eslint.Err.Error())
+		}
 	}
 
 	return
