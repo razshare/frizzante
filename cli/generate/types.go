@@ -129,14 +129,14 @@ type SessionOptions struct {
 	Auto bool
 }
 
-type TypesOptions struct {
+type DefinitionsOptions struct {
 	App  string
 	Go   string
 	Efs  embed.FS
 	Auto bool
 }
 
-type TypesFeatureOptions struct {
+type TypesOptions struct {
 	App  string
 	Efs  embed.FS
 	Auto bool
