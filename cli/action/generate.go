@@ -2,6 +2,7 @@ package action
 
 import (
 	"errors"
+	"slices"
 	"strings"
 
 	"github.com/razshare/frizzante/cli/generate"
@@ -68,6 +69,19 @@ func Generate(options GenerateOptions) (err error) {
 				Auto: options.Auto,
 				Efs:  options.Efs,
 			})
+		} else if gen == "types" {
+			return generate.Types(generate.TypesOptions{
+				App:  options.App,
+				Go:   options.Go,
+				Auto: options.Auto,
+				Efs:  options.Efs,
+			})
+		} else if gen == "types:features" {
+			return generate.TypesFeature(generate.TypesFeatureOptions{
+				App:  options.App,
+				Auto: options.Auto,
+				Efs:  options.Efs,
+			})
 		}
 
 		return errors.New("unknown generation")
@@ -77,6 +91,8 @@ func Generate(options GenerateOptions) (err error) {
 		var items []string
 		items, err = multiselect.Send(
 			[]search.Choice{
+				{Id: "types", Description: ".d.ts files (uses -tags dry,types)"},
+				{Id: "types:features", Description: "type generation features"},
 				{Id: "core", Description: "core features"},
 				{Id: "forms", Description: "form component that provides status details"},
 				{Id: "links", Description: "hyperlink component that provides status details"},
@@ -89,6 +105,16 @@ func Generate(options GenerateOptions) (err error) {
 			},
 			"generate",
 		)
+
+		if slices.Contains(items, "types:features") && slices.Contains(items, "types") {
+			typesFeaturesIndex := slices.Index(items, "types:features")
+			typesIndex := slices.Index(items, "types")
+
+			if typesIndex < typesFeaturesIndex {
+				items[typesIndex] = "types:features"
+				items[typesFeaturesIndex] = "types"
+			}
+		}
 
 		if err != nil {
 			return

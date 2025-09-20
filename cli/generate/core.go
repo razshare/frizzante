@@ -9,7 +9,7 @@ func Core(options CoreOptions) (err error) {
 		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
-		return err
+		return
 	}
 
 	if err = Copy(CopyOptions{
@@ -18,7 +18,7 @@ func Core(options CoreOptions) (err error) {
 		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
-		return err
+		return
 	}
 
 	err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "core")})

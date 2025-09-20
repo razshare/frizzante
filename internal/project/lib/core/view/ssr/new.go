@@ -88,7 +88,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 		}
 
 		if err = console.Set("log", log); err != nil {
-			return nil, nil, err
+			return
 		}
 
 		if err = console.Set("info", log); err != nil {
@@ -104,7 +104,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 		}
 
 		if err = runtime.Set("console", console); err != nil {
-			return nil, nil, err
+			return
 		}
 
 		var text string
@@ -140,7 +140,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 		}
 
 		if err != nil {
-			return "", err
+			return
 		}
 
 		html = string(data)

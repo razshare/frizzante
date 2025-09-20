@@ -6,7 +6,6 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
-	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 	"github.com/razshare/frizzante/internal/project/lib/session/memory"
 )
 
@@ -29,13 +28,7 @@ func Remove(c *client.Client) {
 
 	i, e := strconv.ParseInt(is, 10, 64)
 	if nil != e {
-		send.View(c, _view.View{
-			Name: "Todos",
-			Props: map[string]any{
-				"todos": s.Todos,
-				"error": e.Error(),
-			},
-		})
+		send.Navigatef(c, "/todos?error=%s", e.Error())
 		return
 	}
 	if i >= l {

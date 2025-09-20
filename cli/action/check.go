@@ -48,7 +48,7 @@ func Check(options CheckOptions) (err error) {
 
 	var pkg PackageJson
 	if err = json.Unmarshal(data, &pkg); err != nil {
-		return err
+		return
 	}
 
 	if pkg.DevDependencies.SvelteCheck != "" {

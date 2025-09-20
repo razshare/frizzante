@@ -7,8 +7,8 @@
     import { fade, slide } from "svelte/transition"
 
     type Todo = {
-        Checked: boolean
-        Description: string
+        checked: boolean
+        description: string
     }
 
     type Props = {
@@ -84,7 +84,7 @@
                                 >
                                     <form
                                         {...action(
-                                            todo.Checked
+                                            todo.checked
                                                 ? "/uncheck"
                                                 : "/check",
                                         )}
@@ -98,18 +98,18 @@
                                         <button
                                             type="submit"
                                             class="btn btn-ghost btn-sm btn-square"
-                                            aria-label={todo.Checked
+                                            aria-label={todo.checked
                                                 ? "Uncheck"
                                                 : "Check"}
                                         >
                                             <div
                                                 class={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
-                                                    todo.Checked
+                                                    todo.checked
                                                         ? "bg-primary border-primary"
                                                         : "border-base-content/30 hover:border-primary"
                                                 }`}
                                             >
-                                                {#if todo.Checked}
+                                                {#if todo.checked}
                                                     <Icon
                                                         path={mdiCheck}
                                                         size="14"
@@ -120,9 +120,9 @@
                                     </form>
 
                                     <span
-                                        class={`flex-1 text-lg ${todo.Checked ? "line-through text-base-content/50" : ""}`}
+                                        class={`flex-1 text-lg ${todo.checked ? "line-through text-base-content/50" : ""}`}
                                     >
-                                        {todo.Description}
+                                        {todo.description}
                                     </span>
 
                                     <form
@@ -149,7 +149,7 @@
 
                     {#if todos.length > 0}
                         <div class="text-lg text-base-content/50 text-center">
-                            {todos.filter(t => !t.Checked).length} of {todos.length}
+                            {todos.filter(t => !t.checked).length} of {todos.length}
                             tasks remaining
                         </div>
                     {/if}

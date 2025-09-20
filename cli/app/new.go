@@ -14,7 +14,7 @@ func New() *App {
 	ver := flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
 	res := flag.BoolP("reset", "", false, "deletes frizzante global directory")
 	crt := flag.StringP("create-project", "c", "", "creates a frizzante project")
-	gen := flag.StringP("generate", "g", "", "generates code and binaries")
+	gen := flag.StringP("generate", "g", "", "generates code and resources")
 	tst := flag.BoolP("test", "t", false, "runs tests")
 	pkg := flag.BoolP("package", "p", false, "packages app, result will be dropped in app/dist")
 	pkgw := flag.BoolP("package-watch", "", false, "watches and packages app, result will be dropped in app/dist")

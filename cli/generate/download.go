@@ -37,50 +37,52 @@ func Download(options DownloadOptions) (install Install, evict Evict, err error)
 		go spinner.Start(spin)
 		defer spinner.Stop(spin)
 		if err = files.DownloadFile(options.Url, global); err != nil {
-			return nil, nil, err
+			return
 		}
 	}
 
-	return func(to string) (installed bool, err error) {
-			if files.IsDirectory(to) || files.IsFile(to) {
-				if !options.Auto {
-					var overwrite bool
-					if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", to); err != nil {
-						return
-					}
-
-					if !overwrite {
-						messages.Infof("skipping %s", to)
-						return
-					}
+	install = func(to string) (installed bool, err error) {
+		if files.IsDirectory(to) || files.IsFile(to) {
+			if !options.Auto {
+				var overwrite bool
+				if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", to); err != nil {
+					return
 				}
 
-				if err = os.RemoveAll(to); err != nil {
+				if !overwrite {
+					messages.Infof("skipping %s", to)
 					return
 				}
 			}
 
-			spin := spinner.New(fmt.Sprintf("installing %s", to))
-			go spinner.Start(spin)
-			defer spinner.Stop(spin)
-
-			if ext == ".zip" {
-				if err = files.UnzipFile(global, to); err != nil {
-					return
-				}
-			} else {
-				local := filepath.Join(to, filepath.Base(to)+ext)
-				if err = files.CopyFile(global, local); err != nil {
-					return
-				}
+			if err = os.RemoveAll(to); err != nil {
+				return
 			}
+		}
 
-			installed = true
+		spin := spinner.New(fmt.Sprintf("installing %s", to))
+		go spinner.Start(spin)
+		defer spinner.Stop(spin)
 
-			messages.Successf("%s installed", to)
+		if ext == ".zip" {
+			if err = files.UnzipFile(global, to); err != nil {
+				return
+			}
+		} else {
+			local := filepath.Join(to, filepath.Base(to)+ext)
+			if err = files.CopyFile(global, local); err != nil {
+				return
+			}
+		}
 
-			return
-		},
-		func() error { return os.RemoveAll(global) },
-		nil
+		installed = true
+
+		messages.Successf("%s installed", to)
+
+		return
+	}
+
+	evict = func() error { return os.RemoveAll(global) }
+
+	return
 }

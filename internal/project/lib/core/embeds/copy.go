@@ -34,37 +34,38 @@ func CopyFile(efs embed.FS, from string, to string) (err error) {
 	var dst *os.File
 	if dst, err = os.Create(to); err != nil {
 		_ = src.Close()
-		return err
+		return
 	}
 
 	if _, err = io.Copy(dst, src); err != nil {
 		_ = src.Close()
 		_ = dst.Close()
-		return err
+		return
 	}
 
 	if err = src.Close(); err != nil {
-		return err
+		return
 	}
 
 	if err = dst.Close(); err != nil {
-		return err
+		return
 	}
 
 	return nil
 }
 
-func CopyDirectory(efs embed.FS, from string, to string) error {
-	ents, err := ReadDirectory(efs, from)
+func CopyDirectory(efs embed.FS, from string, to string) (err error) {
+	var entries []string
+	entries, err = ReadDirectory(efs, from)
 	if err != nil {
-		return err
+		return
 	}
 
-	for _, ent := range ents {
+	for _, ent := range entries {
 		n := filepath.Join(to, strings.TrimPrefix(ent, from))
 		err = CopyFile(efs, ent, n)
 		if err != nil {
-			return err
+			return
 		}
 	}
 

@@ -16,9 +16,6 @@ popd || exit 1
 # Removes temporary binary
 rm -fr frizzante
 
-# Copies internal project over to the ssr testing directory
-cp -r internal/project/app internal/project/lib/core/view/ssr
-
 # Installs packages in internal additions
 pushd internal/additions/app && \
 ../../project/.gen/bun/bun i && \

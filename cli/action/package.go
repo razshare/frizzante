@@ -40,7 +40,7 @@ func Package(options PackageOptions) (err error) {
 	csr.Stdout = os.Stdout
 	csr.Stdin = os.Stdin
 	if err = csr.Run(); err != nil {
-		return err
+		return
 	}
 
 	esb := exec.Command(filepath.Join("node_modules", ".bin", "esbuild"), "--bundle", "--outfile=dist/app.server.js", "--format=cjs", "--allow-overwrite", "dist/app.server.js")

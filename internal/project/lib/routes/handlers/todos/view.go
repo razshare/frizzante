@@ -12,8 +12,9 @@ func View(c *client.Client) {
 	s := session.Start(receive.SessionId(c))
 	send.View(c, view.View{
 		Name: "Todos",
-		Props: map[string]any{
-			"todos": s.Todos,
+		Props: Props{
+			Todos: s.Todos,
+			Error: receive.Query(c, "error"),
 		},
 	})
 }

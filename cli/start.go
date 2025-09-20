@@ -5,21 +5,22 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli/app"
-	"github.com/razshare/frizzante/cli/menu"
+	_menu "github.com/razshare/frizzante/cli/menu"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
 )
 
-func Start(a *app.App) error {
-	m, err := menu.New(a)
+func Start(a *app.App) (err error) {
+	var menu *_menu.Menu
+	menu, err = _menu.New(a)
 	if err != nil {
-		return err
+		return
 	}
 
 	chs := make([]search.Choice, 0)
 
-	for _, it := range m.Items {
+	for _, it := range menu.Items {
 		if it.Hidden {
 			continue
 		}
@@ -28,7 +29,7 @@ func Start(a *app.App) error {
 
 	// If this for loop returns,
 	// it means the choice has been inlined.
-	for _, it := range m.Items {
+	for _, it := range menu.Items {
 		if !it.Active() {
 			continue
 		}
@@ -37,7 +38,10 @@ func Start(a *app.App) error {
 	}
 
 	var logo string
-	if logo, err = app.Logo(a); err == nil {
+	if logo, err = app.Logo(a); err != nil {
+		messages.Error(err)
+		err = nil
+	} else {
 		println(logo)
 	}
 
@@ -48,22 +52,24 @@ func Start(a *app.App) error {
 		id, err = singleselect.Send(chs, "menu")
 		if err != nil {
 			if errors.Is(err, tea.ErrInterrupted) {
-				return err
+				return
 			}
 			messages.Error(err)
+			err = nil
 			continue
 		}
 
-		for _, it := range m.Items {
+		for _, it := range menu.Items {
 			if it.Choice.Id != id {
 				continue
 			}
 
 			if err = it.Handler(); err != nil {
 				if errors.Is(err, tea.ErrInterrupted) {
-					return err
+					return
 				}
 				messages.Error(err)
+				err = nil
 			}
 			break
 		}

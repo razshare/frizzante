@@ -128,3 +128,16 @@ type SessionOptions struct {
 	Efs  embed.FS
 	Auto bool
 }
+
+type TypesOptions struct {
+	App  string
+	Go   string
+	Efs  embed.FS
+	Auto bool
+}
+
+type TypesFeatureOptions struct {
+	App  string
+	Efs  embed.FS
+	Auto bool
+}

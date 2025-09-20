@@ -1,10 +1,10 @@
 package session
 
 type Session struct {
-	Todos []Todo
+	Todos []Todo `json:"todos"`
 }
 
 type Todo struct {
-	Description string
-	Checked     bool
+	Description string `json:"description"`
+	Checked     bool   `json:"checked"`
 }

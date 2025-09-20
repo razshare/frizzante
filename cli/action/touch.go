@@ -43,7 +43,7 @@ func Touch(options TouchOptions) (err error) {
 
 	if files.IsDirectory(filepath.Join("lib", "core", "view", "ssr")) && !files.IsDirectory(filepath.Join("lib", "core", "view", "ssr", "app")) {
 		if err = files.CopyDirectory(filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "view", "ssr", "app", "dist")); err != nil {
-
+			return
 		}
 	}
 

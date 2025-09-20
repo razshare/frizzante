@@ -1,6 +1,8 @@
 package send
 
 import (
+	"fmt"
+
 	"github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
@@ -42,6 +44,12 @@ func Redirect(client *client.Client, location string, status int) {
 // Navigate redirects the request to a location with status 302.
 func Navigate(client *client.Client, location string) {
 	Redirect(client, location, 302)
+	Message(client, "")
+}
+
+// Navigatef redirects the request to a location with status 302.
+func Navigatef(client *client.Client, format string, vars ...any) {
+	Redirect(client, fmt.Sprintf(format, vars...), 302)
 	Message(client, "")
 }
 

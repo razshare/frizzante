@@ -148,7 +148,7 @@ func New(a *app.App) (*Menu, error) {
 				Handler: func() error {
 					var selected string
 
-					if *a.Generate != ":pick" {
+					if *a.Generate != ":pick" && *a.Generate != "pick" {
 						selected = *a.Generate
 					}
 
