@@ -27,7 +27,9 @@ func Project(options ProjectOptions) (err error) {
 		}
 	}
 
-	err = FixImports(FixImportsOptions{Directory: options.Name})
+	if err = FixImports(FixImportsOptions{Directory: options.Name}); err != nil {
+		return
+	}
 
 	return
 }

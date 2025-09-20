@@ -21,7 +21,10 @@ func FixImports(options FixImportsOptions) (err error) {
 	}
 
 	for _, entry := range entries {
-		if !strings.HasSuffix(entry, ".go") {
+		if !strings.HasSuffix(entry, ".go") &&
+			!strings.HasSuffix(entry, ".svelte") &&
+			!strings.HasSuffix(entry, ".js") &&
+			!strings.HasSuffix(entry, ".ts") {
 			continue
 		}
 

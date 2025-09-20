@@ -28,7 +28,18 @@ func Generate[T any]() {
 		}
 	}
 
-	dname := filepath.Join(".gen", "types", strings.ReplaceAll(t.PkgPath(), "/", string(filepath.Separator)))
+	befores := []string{
+		"github.com/razshare/frizzante/internal/project",
+		"github.com/razshare/frizzante/internal/additions",
+	}
+	after := "main"
+	pkg := t.PkgPath()
+
+	for _, before := range befores {
+		pkg = strings.ReplaceAll(pkg, before, after)
+	}
+
+	dname := filepath.Join(".gen", "types", strings.ReplaceAll(pkg, "/", string(filepath.Separator)))
 	if !files.IsDirectory(dname) {
 		if err = os.MkdirAll(dname, os.ModePerm); err != nil {
 			log.Fatal(err)
