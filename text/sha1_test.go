@@ -3,12 +3,9 @@ package text
 import "testing"
 
 func TestSha1(t *testing.T) {
-	hash, err := Sha1("hello")
-	if err != nil {
-		t.Fatal(err)
-	}
+	hash := Sha1("hello")
 
-	if hash != "qvTGHdzF6KLavt4PO0gs2a6pQ00" {
-		t.Fatal("hash should be qvTGHdzF6KLavt4PO0gs2a6pQ00")
+	if hash != "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d" {
+		t.Fatal("hash should be aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d")
 	}
 }

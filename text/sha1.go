@@ -2,16 +2,14 @@ package text
 
 import (
 	"crypto/sha1"
-	"encoding/base64"
-	"strings"
+	"encoding/hex"
 )
 
-func Sha1(text string) (hash string, err error) {
-	hasher := sha1.New()
-	if _, err = hasher.Write([]byte(text)); err != nil {
-		return
+func Sha1(text string) string {
+	from := sha1.Sum([]byte(text))
+	to := make([]byte, 20)
+	for i := len(to) - 1; i >= 0; i-- {
+		to[i] = from[i]
 	}
-	text64 := base64.URLEncoding.EncodeToString(hasher.Sum(nil))
-	hash = strings.ReplaceAll(text64, "=", "")
-	return
+	return hex.EncodeToString(to)
 }

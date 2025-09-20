@@ -20,10 +20,7 @@ func TestDownload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var hash string
-	if hash, err = text.Sha1(url); err != nil {
-		t.Fatal(err)
-	}
+	hash := text.Sha1(url)
 
 	cached := filepath.Join(cache, hash+".zip")
 

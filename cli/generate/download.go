@@ -19,10 +19,7 @@ func Download(options DownloadOptions) (install Install, evict Evict, err error)
 		return
 	}
 
-	var hash string
-	if hash, err = text.Sha1(options.Url); err != nil {
-		return
-	}
+	hash := text.Sha1(options.Url)
 
 	ext := filepath.Ext(options.Url)
 
