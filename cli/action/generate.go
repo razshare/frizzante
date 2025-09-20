@@ -85,7 +85,7 @@ func Generate(options GenerateOptions) (err error) {
 		var items []string
 		items, err = multiselect.Send(
 			[]search.Choice{
-				{Id: "types", Description: ".d.ts files (uses -tags dry,types)"},
+				{Id: "types", Description: "type definitions"},
 				{Id: "core", Description: "core features"},
 				{Id: "forms", Description: "form component that provides status details"},
 				{Id: "links", Description: "hyperlink component that provides status details"},

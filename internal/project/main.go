@@ -1,3 +1,5 @@
+//go:build !types
+
 package main
 
 import (
@@ -12,6 +14,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/routes/handlers/welcome"
 )
 
+//go:generate make types
 //go:generate make clean configure
 //go:generate make package
 //go:embed app/dist

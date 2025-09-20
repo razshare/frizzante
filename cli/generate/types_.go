@@ -12,10 +12,10 @@ import (
 )
 
 func Types(options TypesOptions) (err error) {
-	spin := spinner.New("running program with -tags dry,types")
+	spin := spinner.New("running types.go with -tags types")
 
 	go spinner.Start(spin)
-	get := exec.Command(options.Go, "run", "-tags", "dry,types", "main.go")
+	get := exec.Command(options.Go, "run", "-tags", "types", "types.go")
 	get.Env = append(os.Environ())
 	get.Stderr = os.Stderr
 	get.Stdout = os.Stdout

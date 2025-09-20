@@ -1,5 +1,3 @@
-//go:build !dry
-
 package server
 
 import (
