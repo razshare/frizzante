@@ -8,12 +8,12 @@ import (
 
 var Mutexes = map[string]*sync.Mutex{}
 
-func Start(c *client.Client) *State {
-	if !Exists(c) {
-		s := New()
-		Save(c, s)
-		return s
+func Start(client *client.Client) *State {
+	if !Exists(client) {
+		state := New()
+		Save(client, state)
+		return state
 	}
 
-	return Load(c)
+	return Load(client)
 }

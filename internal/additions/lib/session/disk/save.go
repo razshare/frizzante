@@ -11,31 +11,30 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-func Save(c *client.Client, s *State) {
-	mtx := Lock(c)
+func Save(client *client.Client, s *State) {
+	mtx := Lock(client)
 	defer mtx.Unlock()
 
-	dn := filepath.Join(".gen", "sessions")
-	if !files.IsDirectory(dn) {
-		err := os.MkdirAll(dn, os.ModePerm)
+	dname := filepath.Join(".gen", "sessions")
+	if !files.IsDirectory(dname) {
+		err := os.MkdirAll(dname, os.ModePerm)
 		if err != nil {
-			c.Config.ErrorLog.Println(err, stack.Trace())
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 	}
 
-	id := receive.SessionId(c)
+	id := receive.SessionId(client)
 
-	n := filepath.Join(dn, id+".json")
+	fname := filepath.Join(dname, id+".json")
 
-	d, err := json.Marshal(s)
+	data, err := json.Marshal(s)
 	if err != nil {
-		c.Config.ErrorLog.Println(err, stack.Trace())
+		client.Config.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
-	err = os.WriteFile(n, d, os.ModePerm)
-	if err != nil {
-		c.Config.ErrorLog.Println(err, stack.Trace())
+	if err = os.WriteFile(fname, data, os.ModePerm); err != nil {
+		client.Config.ErrorLog.Println(err, stack.Trace())
 	}
 }

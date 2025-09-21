@@ -8,9 +8,9 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 )
 
-func Exists(c *client.Client) bool {
-	id := receive.SessionId(c)
-	mtx := Lock(c)
+func Exists(client *client.Client) bool {
+	id := receive.SessionId(client)
+	mtx := Lock(client)
 	defer mtx.Unlock()
 	return files.IsFile(filepath.Join(".gen", "sessions", id+".json"))
 }

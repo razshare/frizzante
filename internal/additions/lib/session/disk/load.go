@@ -11,35 +11,35 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-func Load(c *client.Client) *State {
-	mtx := Lock(c)
+func Load(client *client.Client) *State {
+	mtx := Lock(client)
 	defer mtx.Unlock()
 
-	dn := filepath.Join(".gen", "sessions")
-	if !files.IsDirectory(dn) {
-		err := os.MkdirAll(dn, os.ModePerm)
+	dname := filepath.Join(".gen", "sessions")
+	if !files.IsDirectory(dname) {
+		err := os.MkdirAll(dname, os.ModePerm)
 		if err != nil {
-			c.Config.ErrorLog.Println(err, stack.Trace())
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return nil
 		}
 	}
 
-	id := receive.SessionId(c)
-	n := filepath.Join(dn, id+".json")
+	id := receive.SessionId(client)
+	fname := filepath.Join(dname, id+".json")
 
-	v := New()
+	state := New()
 
-	var d []byte
-	d, err := os.ReadFile(n)
+	var data []byte
+	data, err := os.ReadFile(fname)
 	if err != nil {
-		c.Config.ErrorLog.Println(err, stack.Trace())
-		return v
+		client.Config.ErrorLog.Println(err, stack.Trace())
+		return state
 	}
 
-	err = json.Unmarshal(d, v)
+	err = json.Unmarshal(data, state)
 	if err != nil {
-		c.Config.ErrorLog.Println(err, stack.Trace())
-		return v
+		client.Config.ErrorLog.Println(err, stack.Trace())
+		return state
 	}
-	return v
+	return state
 }

@@ -7,8 +7,8 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 )
 
-func Lock(c *client.Client) *sync.Mutex {
-	id := receive.SessionId(c)
+func Lock(client *client.Client) *sync.Mutex {
+	id := receive.SessionId(client)
 	mtx, ok := Mutexes[id]
 
 	if !ok {

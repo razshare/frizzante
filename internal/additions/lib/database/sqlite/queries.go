@@ -18,9 +18,9 @@ var Efs embed.FS
 
 func init() {
 	if !files.IsFile("source.sqlite") {
-		data, readError := Efs.ReadFile("source.sqlite")
-		if readError != nil {
-			log.Fatal(readError)
+		data, err := Efs.ReadFile("source.sqlite")
+		if err != nil {
+			log.Fatal(err)
 		}
 		writeError := os.WriteFile("source.sqlite", data, os.ModePerm)
 		if writeError != nil {
