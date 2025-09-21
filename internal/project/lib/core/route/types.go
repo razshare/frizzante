@@ -7,6 +7,6 @@ import (
 
 type Route struct {
 	Pattern string
-	Handler func(c *client.Client)
+	Handler func(client *client.Client)
 	Tags    []tag.Tag
 }

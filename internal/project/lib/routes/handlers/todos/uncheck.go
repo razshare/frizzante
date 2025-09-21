@@ -9,31 +9,31 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/session/memory"
 )
 
-func Uncheck(c *client.Client) {
-	s := session.Start(receive.SessionId(c))
+func Uncheck(client *client.Client) {
+	state := session.Start(receive.SessionId(client))
 
-	is := receive.Query(c, "index")
-	if is == "" {
+	query := receive.Query(client, "index")
+	if query == "" {
 		// No index found, ignore the request.
-		send.Navigate(c, "/todos")
+		send.Navigate(client, "/todos")
 		return
 	}
 
-	i, e := strconv.ParseInt(is, 10, 64)
-	if nil != e {
-		send.Navigatef(c, "/todos?error=%s", e.Error())
+	index, err := strconv.ParseInt(query, 10, 64)
+	if nil != err {
+		send.Navigatef(client, "/todos?error=%s", err.Error())
 		return
 	}
 
-	l := int64(len(s.Todos))
+	count := int64(len(state.Todos))
 
-	if i >= l {
+	if index >= count {
 		// Index is out of bounds, ignore the request.
-		send.Navigate(c, "/todos")
+		send.Navigate(client, "/todos")
 		return
 	}
 
-	s.Todos[i].Checked = false
+	state.Todos[index].Checked = false
 
-	send.Navigate(c, "/todos")
+	send.Navigate(client, "/todos")
 }

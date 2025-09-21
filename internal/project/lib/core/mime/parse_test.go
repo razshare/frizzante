@@ -3,7 +3,7 @@ package mime
 import "testing"
 
 func TestParse(t *testing.T) {
-	var exms = map[string]string{
+	var items = map[string]string{
 		"my.file.html":  "text/html",
 		"my.file.css":   "text/css",
 		"my.file.txt":   "text/plain",
@@ -73,10 +73,9 @@ func TestParse(t *testing.T) {
 	}
 
 	// Positives.
-	for n, ex := range exms {
-		ac := Parse(n)
-		if ac != ex {
-			t.Fatalf("file %s was expected to resolve into mime %s, received %s instead", n, ex, ac)
+	for key, expected := range items {
+		if mime := Parse(key); mime != expected {
+			t.Fatalf("file %s was expected to resolve into mime %s, received %s instead", key, expected, mime)
 		}
 	}
 
@@ -85,6 +84,6 @@ func TestParse(t *testing.T) {
 	ac := Parse(n)
 	ex := "text/plain"
 	if ac != ex {
-		t.Fatalf("file %s was expected to resolve into mime %s, received %s instead", n, exms, ac)
+		t.Fatalf("file %s was expected to resolve into mime %s, received %s instead", n, items, ac)
 	}
 }

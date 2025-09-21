@@ -7,6 +7,6 @@ import (
 
 type Guard struct {
 	Name    string
-	Handler func(c *client.Client, allow func())
+	Handler func(client *client.Client, allow func())
 	Tags    []tag.Tag
 }

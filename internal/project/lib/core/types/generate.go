@@ -11,12 +11,12 @@ import (
 )
 
 func Generate[T any]() {
-	var val T
+	var value T
 	var err error
 	var primary string
 	var secondary string
 
-	t := reflect.TypeOf(val)
+	t := reflect.TypeOf(value)
 
 	if primary, secondary, _, err = Extract(t, make([]string, 0)); err != nil {
 		log.Fatal(err)

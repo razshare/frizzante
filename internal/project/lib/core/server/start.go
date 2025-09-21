@@ -69,7 +69,7 @@ func Start(server *Server) {
 	}()
 
 	go func() {
-		if "" != server.Certificate && "" != server.Key {
+		if server.Certificate != "" && server.Key != "" {
 			address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
 			server.InfoLog.Printf("server bound to address %s; visit your application at https://%s", server.Addr, address)
 			if exit {

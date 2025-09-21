@@ -14,20 +14,20 @@ type ResponseWriter struct {
 	MockBytes      []byte
 }
 
-func (m *ResponseWriter) Header() http.Header {
-	return m.MockHeader
+func (model *ResponseWriter) Header() http.Header {
+	return model.MockHeader
 }
 
-func (m *ResponseWriter) Write(bytes []byte) (int, error) {
-	m.MockBytes = append(m.MockBytes, bytes...)
+func (model *ResponseWriter) Write(bytes []byte) (int, error) {
+	model.MockBytes = append(model.MockBytes, bytes...)
 	return len(bytes), nil
 }
 
-func (m *ResponseWriter) WriteHeader(status int) {
-	m.MockStatusCode = status
+func (model *ResponseWriter) WriteHeader(status int) {
+	model.MockStatusCode = status
 }
 
-func (m *ResponseWriter) Flush() {
+func (model *ResponseWriter) Flush() {
 	// Noop.
 }
 
@@ -35,18 +35,18 @@ type RequestBody struct {
 	MockBuffer []byte
 }
 
-func (b *RequestBody) Read(p []byte) (int, error) {
-	if len(b.MockBuffer) == 0 {
+func (body *RequestBody) Read(p []byte) (int, error) {
+	if len(body.MockBuffer) == 0 {
 		return 0, io.EOF
 	}
 
-	n := copy(p, b.MockBuffer)
-	b.MockBuffer = make([]byte, 0)
+	count := copy(p, body.MockBuffer)
+	body.MockBuffer = make([]byte, 0)
 
-	return n, nil
+	return count, nil
 }
 
-func (b *RequestBody) Close() error {
+func (body *RequestBody) Close() error {
 	// Noop.
 	return nil
 }

@@ -1,12 +1,12 @@
 package session
 
-var Sessions = map[string]*Session{}
+var States = map[string]*State{}
 
-func Start(id string) *Session {
-	v, ok := Sessions[id]
+func Start(id string) *State {
+	v, ok := States[id]
 	if !ok {
-		Sessions[id] = New()
-		return Sessions[id]
+		States[id] = New()
+		return States[id]
 	}
 	return v
 }

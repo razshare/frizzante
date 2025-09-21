@@ -12,22 +12,24 @@ import (
 // c and stores it in the value pointed to by value.
 //
 // Compatible with web sockets.
-func Json(client *client.Client, value any) {
+func Json(client *client.Client, value any) bool {
 	if client.WebSocket != nil {
 		if err := client.WebSocket.ReadJSON(&value); err != nil {
 			client.Config.ErrorLog.Println(err, stack.Trace())
-			return
+			return false
 		}
-		return
+		return true
 	}
 
 	data, err := io.ReadAll(client.Request.Body)
 	if err != nil {
 		client.Config.ErrorLog.Println(err, stack.Trace())
-		return
+		return false
 	}
 
 	if err = json.Unmarshal(data, &value); err != nil {
 		client.Config.ErrorLog.Println(err, stack.Trace())
 	}
+
+	return true
 }

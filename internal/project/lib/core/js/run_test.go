@@ -9,18 +9,18 @@ import (
 )
 
 func TestRun(t *testing.T) {
-	run := goja.New()
-	src := "1+1"
-	val, err := run.RunString(src)
+	runtime := goja.New()
+	source := "1+1"
+	value, err := runtime.RunString(source)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if val.ToInteger() != 2 {
+	if value.ToInteger() != 2 {
 		t.Fatal("value should be 2")
 	}
 
-	src = `
+	source = `
 	/**
 	 * @param {boolean} payload
 	 * @returns
@@ -43,13 +43,13 @@ func TestRun(t *testing.T) {
 	
 	result
 	`
-	val, err = run.RunString(src)
+	value, err = runtime.RunString(source)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	obj := val.ToObject(run)
-	keys := obj.Keys()
+	object := value.ToObject(runtime)
+	keys := object.Keys()
 
 	if !slices.Contains(keys, "long") {
 		t.Fatal("value should have a 'long' key")
@@ -59,8 +59,8 @@ func TestRun(t *testing.T) {
 		t.Fatal("value should have a 'short' key")
 	}
 
-	long := obj.Get("long")
-	short := obj.Get("short")
+	long := object.Get("long")
+	short := object.Get("short")
 
 	longs := strings.Split(long.String(), "-")
 	if len(longs) != 5 {
@@ -71,5 +71,4 @@ func TestRun(t *testing.T) {
 	if len(shorts) != 1 {
 		t.Fatal("string should not contain any -", short.String())
 	}
-
 }

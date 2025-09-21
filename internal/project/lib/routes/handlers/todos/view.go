@@ -8,13 +8,13 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/session/memory"
 )
 
-func View(c *client.Client) {
-	s := session.Start(receive.SessionId(c))
-	send.View(c, view.View{
+func View(client *client.Client) {
+	state := session.Start(receive.SessionId(client))
+	send.View(client, view.View{
 		Name: "Todos",
 		Props: Props{
-			Todos: s.Todos,
-			Error: receive.Query(c, "error"),
+			Todos: state.Todos,
+			Error: receive.Query(client, "error"),
 		},
 	})
 }

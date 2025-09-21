@@ -31,7 +31,7 @@ func Content(client *client.Client, data []byte) {
 		return
 	}
 
-	if "" != client.EventName {
+	if client.EventName != "" {
 		EventContent(client, data)
 		return
 	}

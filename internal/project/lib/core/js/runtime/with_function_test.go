@@ -7,18 +7,19 @@ import (
 )
 
 func TestWithFunction(t *testing.T) {
+	var err error
 	var invoked bool
-	run := goja.New()
-	err := WithFunction(run, "custom_function", func(call goja.FunctionCall) goja.Value {
+
+	runtime := goja.New()
+
+	if err = WithFunction(runtime, "custom_function", func(call goja.FunctionCall) goja.Value {
 		invoked = true
 		return goja.Undefined()
-	})
-	if err != nil {
+	}); err != nil {
 		return
 	}
 
-	_, err = run.RunString("custom_function()")
-	if err != nil {
+	if _, err = runtime.RunString("custom_function()"); err != nil {
 		t.Fatal(err)
 	}
 

@@ -1,6 +1,6 @@
 package session
 
-type Session struct {
+type State struct {
 	Todos []Todo `json:"todos"`
 }
 

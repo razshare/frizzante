@@ -9,38 +9,38 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/session/memory"
 )
 
-func Remove(c *client.Client) {
-	s := session.Start(receive.SessionId(c))
+func Remove(client *client.Client) {
+	state := session.Start(receive.SessionId(client))
 
-	l := int64(len(s.Todos))
-	if 0 == l {
+	count := int64(len(state.Todos))
+	if count == 0 {
 		// No index found, ignore the request.
-		send.Navigate(c, "/todos")
+		send.Navigate(client, "/todos")
 		return
 	}
 
-	is := receive.Query(c, "index")
-	if is == "" {
+	query := receive.Query(client, "index")
+	if query == "" {
 		// No index found, ignore the request.
-		send.Navigate(c, "/todos")
+		send.Navigate(client, "/todos")
 		return
 	}
 
-	i, e := strconv.ParseInt(is, 10, 64)
-	if nil != e {
-		send.Navigatef(c, "/todos?error=%s", e.Error())
+	index, err := strconv.ParseInt(query, 10, 64)
+	if err != nil {
+		send.Navigatef(client, "/todos?error=%s", err.Error())
 		return
 	}
-	if i >= l {
+	if index >= count {
 		// Index is out of bounds, ignore the request.
-		send.Navigate(c, "/todos")
+		send.Navigate(client, "/todos")
 		return
 	}
 
-	s.Todos = append(
-		s.Todos[:i],
-		s.Todos[i+1:]...,
+	state.Todos = append(
+		state.Todos[:index],
+		state.Todos[index+1:]...,
 	)
 
-	send.Navigate(c, "/todos")
+	send.Navigate(client, "/todos")
 }

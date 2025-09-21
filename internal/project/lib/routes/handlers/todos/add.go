@@ -7,19 +7,19 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/session/memory"
 )
 
-func Add(c *client.Client) {
-	s := session.Start(receive.SessionId(c))
+func Add(client *client.Client) {
+	state := session.Start(receive.SessionId(client))
 
-	d := receive.Query(c, "description")
-	if d == "" {
-		send.Navigate(c, "/todos?error=todo description cannot be empty")
+	query := receive.Query(client, "description")
+	if query == "" {
+		send.Navigate(client, "/todos?error=todo description cannot be empty")
 		return
 	}
 
-	s.Todos = append(s.Todos, session.Todo{
+	state.Todos = append(state.Todos, session.Todo{
 		Checked:     false,
-		Description: d,
+		Description: query,
 	})
 
-	send.Navigate(c, "/todos")
+	send.Navigate(client, "/todos")
 }

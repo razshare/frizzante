@@ -11,8 +11,8 @@ type Props struct {
 	Error   string `json:"error"`
 }
 
-func View(c *client.Client) {
-	send.View(c, view.View{
+func View(client *client.Client) {
+	send.View(client, view.View{
 		Name: "Welcome",
 		Props: Props{
 			Message: "hello",

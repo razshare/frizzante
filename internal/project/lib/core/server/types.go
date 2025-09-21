@@ -7,7 +7,7 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/guard"
 	"github.com/razshare/frizzante/internal/project/lib/core/route"
-	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
+	view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 type Server struct {
@@ -21,7 +21,7 @@ type Server struct {
 	Channels    Channels
 	InfoLog     *log.Logger
 	Efs         embed.FS
-	Render      func(view _view.View) (html string, err error)
+	Render      func(view view.View) (html string, err error)
 }
 
 type Channels struct {

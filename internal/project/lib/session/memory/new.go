@@ -1,7 +1,7 @@
 package session
 
-func New() *Session {
-	return &Session{
+func New() *State {
+	return &State{
 		Todos: []Todo{
 			{Checked: false, Description: "Pet the cat."},
 			{Checked: false, Description: "Do laundry"},

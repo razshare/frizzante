@@ -6,6 +6,6 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/routes/handlers/welcome"
 )
 
-func View(c *client.Client) {
-	send.FileOrElse(c, func() { welcome.View(c) })
+func View(client *client.Client) {
+	send.FileOrElse(client, func() { welcome.View(client) })
 }
