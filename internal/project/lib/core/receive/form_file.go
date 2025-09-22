@@ -7,8 +7,8 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-// File reads the first form file associated with the given key and returns it.
-func File(client *client.Client, key string) MultipartFormFile {
+// FormFile reads the first form file associated with the given key and returns it.
+func FormFile(client *client.Client, key string) MultipartFormFile {
 	if !client.Parsed {
 		Parse(client)
 	}

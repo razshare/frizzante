@@ -22,7 +22,7 @@ func TestValue(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if Value(client, "key") != "value" {
+	if FormValue(client, "key") != "value" {
 		t.Fatal("key should be value")
 	}
 }
