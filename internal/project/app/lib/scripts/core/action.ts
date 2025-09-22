@@ -1,5 +1,5 @@
 import { getContext } from "svelte"
-import type { View } from "$lib/scripts/core/types.ts"
+import type { View } from "$lib/scripts/core/types"
 import { route } from "$lib/scripts/core/route.ts"
 import { swap } from "$lib/scripts/core/swap.ts"
 import { IS_BROWSER } from "$lib/scripts/core/constants.ts"

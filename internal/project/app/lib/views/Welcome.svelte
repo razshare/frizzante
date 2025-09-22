@@ -1,80 +1,91 @@
 <script lang="ts">
     import Layout from "$lib/components/Layout.svelte"
     import { href } from "$lib/scripts/core/href.ts"
-    import { fade } from "svelte/transition"
+    import Logo from "$lib/components/Logo.svelte"
+    import { mdiArrowRight } from "@mdi/js"
+    import Icon from "$lib/components/icons/Icon.svelte"
+    import Sparkle from "$lib/components/Sparkle.svelte"
+    import { scale } from "svelte/transition"
 </script>
 
 <Layout title="Welcome">
-    <main
-        in:fade={{ duration: 300 }}
-        class="min-h-screen flex items-center justify-center p-4"
-    >
-        <div class="max-w-4xl w-full space-y-8">
-            <div class="text-center space-y-4">
-                <h1
-                    class="text-6xl md:text-8xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent inline-block leading-tight mb-0"
-                >
-                    Frizzante
-                </h1>
-                <p class="text-xl text-base-content/60">
-                    Modern Go + Svelte Framework
-                </p>
-            </div>
-
-            <div class="grid md:grid-cols-3 gap-4">
-                <div
-                    class="card bg-base-200/50 backdrop-blur border border-base-300/70"
-                >
-                    <div class="card-body">
-                        <h2 class="card-title text-lg text-secondary">
-                            Lightning Fast
-                        </h2>
-                        <p class="text-base-content/70 text-base">
-                            Built with Go for exceptional performance
-                        </p>
-                    </div>
-                </div>
-
-                <div
-                    class="card bg-base-200/50 backdrop-blur border border-base-300/70"
-                >
-                    <div class="card-body">
-                        <h2 class="card-title text-lg text-secondary">
-                            Reactive UI
-                        </h2>
-                        <p class="text-base-content/70 text-base">
-                            Powered by Svelte for smooth interfaces
-                        </p>
-                    </div>
-                </div>
-
-                <div
-                    class="card bg-base-200/50 backdrop-blur border border-base-300/70"
-                >
-                    <div class="card-body">
-                        <h2 class="card-title text-lg text-secondary">
-                            Developer First
-                        </h2>
-                        <p class="text-base-content/70 text-base">
-                            Opinionated choices that streamline workflow
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a class="btn btn-primary btn-lg" {...href("/todos")}>
-                    Show Todos
-                    <span class="text-lg">→</span>
-                </a>
-                <a
-                    class="btn btn-outline btn-lg"
-                    href="https://razshare.github.io/frizzante-docs/guides/get-started"
-                    target="_blank"
-                >
-                    Documentation
-                </a>
-            </div>
-        </div>
-    </main>
+    {@render PageDescription()}
+    <div class="pt-6"></div>
+    <div class="flex justify-center gap-2 relative">
+        {@render Sparkles()}
+        {@render ShowTodos()}
+        {@render Documentation()}
+    </div>
 </Layout>
+
+{#snippet PageDescription()}
+    <Logo />
+    <div class="pt-6"></div>
+    <p class="text-xl text-base-content/60">Modern Go + Svelte Framework</p>
+{/snippet}
+
+{#snippet Sparkles()}
+    {@const color = "text-secondary"}
+    <Sparkle refresh={500}>
+        {#snippet children(frame: string)}
+            <span in:scale={{ duration: 500 * 10 }} class="{color} absolute left-32 -top-10">{frame}</span>
+        {/snippet}
+    </Sparkle>
+    <Sparkle refresh={300}>
+        {#snippet children(frame: string)}
+            <span in:scale={{ duration: 300 * 10 }} class="{color} absolute left-24 -top-52">{frame}</span>
+        {/snippet}
+    </Sparkle>
+    <Sparkle refresh={1200}>
+        {#snippet children(frame: string)}
+            <span in:scale={{ duration: 1200 * 10 }} class="{color} absolute right-4 -top-40">{frame}</span>
+        {/snippet}
+    </Sparkle>
+    <Sparkle refresh={570}>
+        {#snippet children(frame: string)}
+            <span in:scale={{ duration: 570 * 10 }} class="{color} absolute right-20 -top-14">{frame}</span>
+        {/snippet}
+    </Sparkle>
+    <Sparkle refresh={330}>
+        {#snippet children(frame: string)}
+            <span in:scale={{ duration: 330 * 10 }} class="{color} absolute right-40 -top-56">{frame}</span>
+        {/snippet}
+    </Sparkle>
+    <Sparkle refresh={400}>
+        {#snippet children(frame: string)}
+            <span in:scale={{ duration: 400 * 10 }} class="{color} absolute left-40 -top-56">{frame}</span>
+        {/snippet}
+    </Sparkle>
+    <Sparkle refresh={490}>
+        {#snippet children(frame: string)}
+            <span in:scale={{ duration: 490 * 10 }} class="{color} absolute -right-10 -top-16">{frame}</span>
+        {/snippet}
+    </Sparkle>
+    <Sparkle refresh={350}>
+        {#snippet children(frame: string)}
+            <span in:scale={{ duration: 350 * 10 }} class="{color} absolute -left-10 -top-16">{frame}</span>
+        {/snippet}
+    </Sparkle>
+    <Sparkle refresh={560}>
+        {#snippet children(frame: string)}
+            <span in:scale={{ duration: 560 * 10 }} class="{color} absolute text-center -top-60">{frame}</span>
+        {/snippet}
+    </Sparkle>
+{/snippet}
+
+{#snippet ShowTodos()}
+    <a class="btn btn-primary btn-lg" {...href("/todos")}>
+        <span>Show Todos</span>
+        <Icon path={mdiArrowRight} size="18" />
+    </a>
+{/snippet}
+
+{#snippet Documentation()}
+    <a
+        class="btn btn-secondary btn-lg"
+        href="https://razshare.github.io/frizzante-docs/guides/get-started"
+        target="_blank"
+    >
+        <span>Documentation</span>
+    </a>
+{/snippet}

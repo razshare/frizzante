@@ -10,12 +10,15 @@
         align-content: center;
         font-family: "Noto Sans Gothic", serif;
         text-align: center;
+        overflow-y: auto;
+        overflow-x: hidden;
     }
 </style>
 
 <script lang="ts">
     import { getContext, type Snippet } from "svelte"
-    import type { View } from "$lib/scripts/core/types.ts"
+    import type { View } from "$lib/scripts/core/types"
+    import { fade } from "svelte/transition"
 
     type Props = {
         title?: string
@@ -37,5 +40,7 @@
 </svelte:head>
 
 <div class="layout">
-    {@render children()}
+    <div in:fade class="content">
+        {@render children()}
+    </div>
 </div>

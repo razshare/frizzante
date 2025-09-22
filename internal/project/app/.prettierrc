@@ -2,7 +2,7 @@
     "arrowParens": "avoid",
     "singleQuote": false,
     "trailingComma": "all",
-    "printWidth": 80,
+    "printWidth": 120,
     "tabWidth": 4,
     "plugins": ["prettier-plugin-svelte"],
     "semi": false,
