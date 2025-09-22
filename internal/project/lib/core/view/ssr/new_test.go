@@ -20,7 +20,7 @@ func TestNew(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if !strings.Contains(html, "Powered by Svelte for smooth interfaces") {
-		t.Fatal("view should contain Powered by Svelte for smooth interfaces")
+	if !strings.Contains(html, "Show Todos") {
+		t.Fatal("view should contain Show Todos")
 	}
 }
