@@ -7,19 +7,38 @@ import (
 )
 
 // File returns the first file for the provided form key.
-func (form *MultipartForm) File(key string) (file multipart.File, header *multipart.FileHeader, ok bool) {
+func (form *MultipartForm) File(key string) MultipartFormFile {
 	multipartForm := form.Client.Request.MultipartForm
 	if multipartForm != nil && multipartForm.File != nil {
 		if headers := multipartForm.File[key]; len(headers) > 0 {
+			var header *multipart.FileHeader
+			if header = headers[0]; header == nil {
+				form.Client.Config.ErrorLog.Println("file header not found", stack.Trace())
+				return MultipartFormFile{
+					FileHeader: multipart.FileHeader{
+						Header: map[string][]string{},
+					},
+				}
+			}
+
 			var err error
-			header = headers[0]
+			var file multipart.File
 			if file, err = header.Open(); err != nil {
 				form.Client.Config.ErrorLog.Println(err, stack.Trace())
-				return
+				return MultipartFormFile{
+					FileHeader: *header,
+				}
 			}
-			ok = true
-			return
+			return MultipartFormFile{
+				File:       file,
+				FileHeader: *header,
+			}
 		}
 	}
-	return
+
+	return MultipartFormFile{
+		FileHeader: multipart.FileHeader{
+			Header: map[string][]string{},
+		},
+	}
 }
