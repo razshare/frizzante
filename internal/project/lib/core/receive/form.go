@@ -42,7 +42,7 @@ func Form(client *client.Client) MultipartForm {
 // The whole request body is parsed and up to a total of m bytes
 // of its file parts are stored in memory, with the remainder stored on disk in temporary files.
 //
-// Deprecated: use Form instead and set MaxFormSize.
+// Deprecated: use Form and MaxFormSize instead.
 func FormWithMaxMemory(client *client.Client, max int64) url.Values {
 	if client.WebSocket != nil {
 		client.Config.ErrorLog.Println("web socket connections cannot parse forms", stack.Trace())
