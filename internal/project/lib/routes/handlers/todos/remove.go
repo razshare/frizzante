@@ -10,28 +10,26 @@ import (
 )
 
 func Remove(client *client.Client) {
-	state := session.Start(receive.SessionId(client))
+	var err error
+	var index int64
+	var count int64
+	var query string
+	var state *session.State
 
-	count := int64(len(state.Todos))
-	if count == 0 {
+	state = session.Start(receive.SessionId(client))
+
+	if query = receive.Query(client, "index"); query == "" {
 		// No index found, ignore the request.
 		send.Navigate(client, "/todos")
 		return
 	}
 
-	query := receive.Query(client, "index")
-	if query == "" {
-		// No index found, ignore the request.
-		send.Navigate(client, "/todos")
-		return
-	}
-
-	index, err := strconv.ParseInt(query, 10, 64)
-	if err != nil {
+	if index, err = strconv.ParseInt(query, 10, 64); err != nil {
 		send.Navigatef(client, "/todos?error=%s", err.Error())
 		return
 	}
-	if index >= count {
+
+	if count = int64(len(state.Todos)); index >= count || index < 0 {
 		// Index is out of bounds, ignore the request.
 		send.Navigate(client, "/todos")
 		return

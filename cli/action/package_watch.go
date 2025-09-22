@@ -26,9 +26,9 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=app.server.ts")
 	ssr.Dir = options.App
 	ssr.Env = append(os.Environ(), "DEV=1")
-	//ssr.Stderr = os.Stderr
-	//ssr.Stdout = os.Stdout
-	//ssr.Stdin = os.Stdin
+	ssr.Stderr = os.Stderr
+	ssr.Stdout = os.Stdout
+	ssr.Stdin = os.Stdin
 	if err = ssr.Start(); err != nil {
 		if ssr.Err != nil {
 			messages.Error(ssr.Err.Error())
@@ -41,9 +41,9 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 	csr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
 	csr.Dir = options.App
 	csr.Env = append(os.Environ())
-	//csr.Stderr = os.Stderr
-	//csr.Stdout = os.Stdout
-	//csr.Stdin = os.Stdin
+	csr.Stderr = os.Stderr
+	csr.Stdout = os.Stdout
+	csr.Stdin = os.Stdin
 	if err = csr.Start(); err != nil {
 		if csr.Err != nil {
 			messages.Error(csr.Err.Error())

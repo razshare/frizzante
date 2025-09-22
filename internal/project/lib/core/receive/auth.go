@@ -7,8 +7,6 @@ import "github.com/razshare/frizzante/internal/project/lib/core/client"
 // pointed to by username and password, if the request uses HTTP Basic Authentication.
 //
 // See RFC 2617, Section 2
-func BasicAuth(client *client.Client, username *string, password *string) bool {
-	var ok bool
-	*username, *password, ok = client.Request.BasicAuth()
-	return ok
+func BasicAuth(client *client.Client) (username string, password string, ok bool) {
+	return client.Request.BasicAuth()
 }

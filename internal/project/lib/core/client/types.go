@@ -19,6 +19,7 @@ type Client struct {
 	WebSocket *websocket.Conn
 	Writer    http.ResponseWriter
 	Locked    bool
+	Parsed    bool
 }
 
 type Config struct {

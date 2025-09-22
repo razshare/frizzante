@@ -13,8 +13,9 @@ func TestBasicAuth(t *testing.T) {
 	client.Request.Header.Set("Authorization", "Basic "+token)
 	var username string
 	var password string
+	var ok bool
 
-	if !BasicAuth(client, &username, &password) {
+	if username, password, ok = BasicAuth(client); !ok {
 		t.Fatal("auth should pass")
 	}
 	if username != "test" {

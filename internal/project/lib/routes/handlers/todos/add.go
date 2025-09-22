@@ -8,10 +8,12 @@ import (
 )
 
 func Add(client *client.Client) {
-	state := session.Start(receive.SessionId(client))
+	var query string
+	var state *session.State
 
-	query := receive.Query(client, "description")
-	if query == "" {
+	state = session.Start(receive.SessionId(client))
+
+	if query = receive.Query(client, "description"); query == "" {
 		send.Navigate(client, "/todos?error=todo description cannot be empty")
 		return
 	}
