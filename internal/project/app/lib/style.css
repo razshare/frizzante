@@ -2,6 +2,7 @@
 
 @plugin "daisyui";
 
+/* https://daisyui.com/theme-generator/#theme=eJyNk-uOnDAMhV8lQqrUSjsRdq70bTIQdqJlYBRA3W7Vd29I2pkwYaX-xP5snxybX9Vorrb6XvXefZhxsdVL1U7D5E9ze7ExM7jXyxLCp1NKnM1sT1DXITW9De3lK-AXUtOaI0HJqWzEt2cac5pHuuaENxRLlmUsNpGVkiBnFIQq6HYKmsflXtGk7owAUqFz_Obd1fifd5Jr2sgNhqYhTGjKjvBigIZYA4oAULmvmW2gu3yIqiPNCeigp2aHdDEDo65aAAEVygTmZaZtc1bojUXGCCq16SrZ0qTUH3SoQcqA5zWjXRdvhodPIsJaEEROUbMDuJyg0oSwB_VkrBv76eFPcpMH9SAoIjyTZWedOjckHBXVam_pGh48z3dYxvvZdiWRcn2AfqYcg_dSBj93_X8YP7rx9SE_HZDWRG0WHaCf6UckTXiw2q3Lej_5h3iWNqsICsoYFOT_ue5N59Y5XNtg2yW2R2-veap3dugO4ufpPY_O7sPmbepwOSh22X-d9qnz5Du7VcDtPQY6e1suGxa_xsnN9u9XZ3uzDuFFi1_tS3Xztrd-Dj_JWwr9_gOfDVNE */
 @plugin "daisyui/theme" {
     name: "frizante";
     default: true;
