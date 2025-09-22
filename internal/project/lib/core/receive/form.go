@@ -33,18 +33,18 @@ func init() {
 func Form(client *client.Client) MultipartForm {
 	if client.WebSocket != nil {
 		client.Config.ErrorLog.Println("web socket connections cannot parse forms", stack.Trace())
-		return MultipartForm{}
+		return MultipartForm{Values: url.Values{}}
 	}
 
 	if err := client.Request.ParseMultipartForm(MaxFormSize); err != nil {
 		if !errors.Is(err, http.ErrNotMultipart) {
-			return MultipartForm{}
+			return MultipartForm{Values: url.Values{}}
 		}
 
 		err = client.Request.ParseForm()
 		if err != nil {
 			client.Config.ErrorLog.Println(err, stack.Trace())
-			return MultipartForm{}
+			return MultipartForm{Values: url.Values{}}
 		}
 	}
 

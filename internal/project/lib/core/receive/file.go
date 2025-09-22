@@ -7,7 +7,7 @@ import (
 )
 
 // File returns the first file for the provided form key.
-func (form *MultipartForm) File(key string) MultipartFormFile {
+func (form MultipartForm) File(key string) MultipartFormFile {
 	multipartForm := form.Client.Request.MultipartForm
 	if multipartForm != nil && multipartForm.File != nil {
 		if headers := multipartForm.File[key]; len(headers) > 0 {
