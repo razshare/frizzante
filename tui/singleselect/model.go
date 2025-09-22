@@ -88,6 +88,7 @@ func (model *Model) View() string {
 
 		builder.WriteString("\n")
 
+		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • enter submit"))
 
 		if model.Search.Active {
@@ -130,6 +131,7 @@ func (model *Model) View() string {
 		builder.WriteString("\n")
 	}
 
+	builder.WriteString(config.Styles.Menu.Render("│"))
 	builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • enter submit"))
 
 	if model.Search.Active {
