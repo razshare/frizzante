@@ -3,17 +3,22 @@ package receive
 import (
 	"mime/multipart"
 
+	"github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-// File returns the first file for the provided form key.
-func (form MultipartForm) File(key string) MultipartFormFile {
-	multipartForm := form.Client.Request.MultipartForm
+// File reads the first form file associated with the given key and returns it.
+func File(client *client.Client, key string) MultipartFormFile {
+	if !client.Parsed {
+		Parse(client)
+	}
+
+	multipartForm := client.Request.MultipartForm
 	if multipartForm != nil && multipartForm.File != nil {
 		if headers := multipartForm.File[key]; len(headers) > 0 {
 			var header *multipart.FileHeader
 			if header = headers[0]; header == nil {
-				form.Client.Config.ErrorLog.Println("file header not found", stack.Trace())
+				client.Config.ErrorLog.Println("file header not found", stack.Trace())
 				return MultipartFormFile{
 					FileHeader: multipart.FileHeader{
 						Header: map[string][]string{},
@@ -24,7 +29,7 @@ func (form MultipartForm) File(key string) MultipartFormFile {
 			var err error
 			var file multipart.File
 			if file, err = header.Open(); err != nil {
-				form.Client.Config.ErrorLog.Println(err, stack.Trace())
+				client.Config.ErrorLog.Println(err, stack.Trace())
 				return MultipartFormFile{
 					FileHeader: *header,
 				}
