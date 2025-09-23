@@ -16,9 +16,8 @@ func Toggle(client *client.Client) {
 	var count int64
 	var queryIndex string
 	var queryValue string
-	var state *session.State
 
-	state = session.Start(receive.SessionId(client))
+	state := session.Start(receive.SessionId(client))
 
 	if queryIndex = receive.Query(client, "index"); queryIndex == "" {
 		// No index found, ignore the request.
