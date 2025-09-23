@@ -26,7 +26,7 @@ func Toggle(client *client.Client) {
 		return
 	}
 
-	if queryValue = receive.Query(client, "index"); queryValue == "" {
+	if queryValue = receive.Query(client, "value"); queryValue == "" {
 		// No index found, ignore the request.
 		send.Navigate(client, "/todos")
 		return
