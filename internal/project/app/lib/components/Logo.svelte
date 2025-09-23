@@ -2,6 +2,11 @@
     pre {
         font-size: calc(0.5vw + 0.2rem);
     }
+    @media (width <= 720px) {
+        pre {
+            font-size: calc(2vw);
+        }
+    }
 </style>
 
 <pre class="text-primary" style="line-height:1.1em">
