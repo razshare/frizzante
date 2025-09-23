@@ -13,8 +13,8 @@
     <div class="pt-6"></div>
     <div class="flex justify-center gap-2 relative">
         {@render Sparkles()}
-        {@render TodosButton()}
-        {@render DocumentationButton()}
+        {@render Todos()}
+        {@render Documentation()}
     </div>
 </Layout>
 
@@ -73,14 +73,14 @@
     </Sparkle>
 {/snippet}
 
-{#snippet TodosButton()}
+{#snippet Todos()}
     <a class="btn btn-primary btn-lg" {...href("/todos")}>
         <span>Show Todos</span>
         <Icon path={mdiArrowRight} size="18" />
     </a>
 {/snippet}
 
-{#snippet DocumentationButton()}
+{#snippet Documentation()}
     <a
         class="btn btn-secondary btn-lg"
         href="https://razshare.github.io/frizzante-docs/guides/get-started"
