@@ -109,7 +109,12 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 						}
 						builder.WriteString(string(data))
 					default:
-						builder.WriteString(argument.String())
+						value := argument.String()
+						if value == "https://svelte.dev/e/experimental_async_ssr" {
+							// Skipping experimental async ssr warnings.
+							return goja.Undefined()
+						}
+						builder.WriteString(value)
 					}
 					i++
 				}
