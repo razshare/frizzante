@@ -10,7 +10,7 @@ import (
 
 func CleanProject(options CleanProjectOptions) (err error) {
 	clean := exec.Command(options.Go, "clean")
-	clean.Env = append(os.Environ())
+	clean.Env = os.Environ()
 	//clean.Stderr = os.Stderr
 	//clean.Stdout = os.Stdout
 	//clean.Stdin = os.Stdin

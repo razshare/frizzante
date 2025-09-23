@@ -20,7 +20,7 @@ func Format(options FormatOptions) (err error) {
 	}
 
 	gofmt := exec.Command(options.Go, "fmt", "./...")
-	gofmt.Env = append(os.Environ())
+	gofmt.Env = os.Environ()
 	//gofmt.Stderr = os.Stderr
 	//gofmt.Stdout = os.Stdout
 	//gofmt.Stdin = os.Stdin
@@ -42,7 +42,7 @@ func Format(options FormatOptions) (err error) {
 
 	pretty := exec.Command(bun, "x", "prettier", "--write", ".")
 	pretty.Dir = options.App
-	pretty.Env = append(os.Environ())
+	pretty.Env = os.Environ()
 	//pretty.Stderr = os.Stderr
 	//pretty.Stdout = os.Stdout
 	//pretty.Stdin = os.Stdin

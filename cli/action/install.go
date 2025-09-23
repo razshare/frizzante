@@ -20,7 +20,7 @@ func Install(options InstallOptions) (err error) {
 	}
 
 	tidy := exec.Command(options.Go, "mod", "tidy")
-	tidy.Env = append(os.Environ())
+	tidy.Env = os.Environ()
 	//tidy.Stderr = os.Stderr
 	//tidy.Stdout = os.Stdout
 	//tidy.Stdin = os.Stdin
@@ -44,7 +44,7 @@ func Install(options InstallOptions) (err error) {
 
 	install := exec.Command(bun, "install")
 	install.Dir = options.App
-	install.Env = append(os.Environ())
+	install.Env = os.Environ()
 	//ins.Stderr = os.Stderr
 	//ins.Stdout = os.Stdout
 	//ins.Stdin = os.Stdin

@@ -31,7 +31,7 @@ func Package(options PackageOptions) (err error) {
 
 	ssr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=app.server.ts")
 	ssr.Dir = options.App
-	ssr.Env = append(os.Environ())
+	ssr.Env = os.Environ()
 	//ssr.Stderr = os.Stderr
 	//ssr.Stdout = os.Stdout
 	//ssr.Stdin = os.Stdin
@@ -44,7 +44,7 @@ func Package(options PackageOptions) (err error) {
 
 	csr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true")
 	csr.Dir = options.App
-	csr.Env = append(os.Environ())
+	csr.Env = os.Environ()
 	//csr.Stderr = os.Stderr
 	//csr.Stdout = os.Stdout
 	//csr.Stdin = os.Stdin
@@ -57,7 +57,7 @@ func Package(options PackageOptions) (err error) {
 
 	esb := exec.Command(filepath.Join("node_modules", ".bin", "esbuild"), "--bundle", "--outfile=dist/app.server.js", "--format=cjs", "--allow-overwrite", "dist/app.server.js")
 	esb.Dir = options.App
-	esb.Env = append(os.Environ())
+	esb.Env = os.Environ()
 	//esb.Stderr = os.Stderr
 	//esb.Stdout = os.Stdout
 	//esb.Stdin = os.Stdin

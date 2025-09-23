@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -12,20 +13,31 @@ import (
 )
 
 func Types(options TypesOptions) (err error) {
-	spin := spinner.New("running types.go with -tags types")
+	var types *exec.Cmd
+	var spin *spinner.Spinner
+
+	if files.IsFile("types.go") {
+		spin = spinner.New("running types.go with -tags types")
+		types = exec.Command(options.Go, "run", "-tags", "types", "types.go")
+	} else if files.IsFile(filepath.Join("lib", "types", "main.go")) {
+		spin = spinner.New("running lib/types/main.go")
+		types = exec.Command(options.Go, "run", filepath.Join("lib", "types", "main.go"))
+	} else {
+		err = errors.New("neither types.go nor lib/types/main.go were found")
+		return
+	}
 
 	go spinner.Start(spin)
-	get := exec.Command(options.Go, "run", "-tags", "types", "types.go")
-	get.Env = append(os.Environ())
-	get.Stderr = os.Stderr
-	get.Stdout = os.Stdout
-	get.Stdin = os.Stdin
-	err = get.Run()
+	types.Env = os.Environ()
+	// get.Stderr = os.Stderr
+	// get.Stdout = os.Stdout
+	// get.Stdin = os.Stdin
+	err = types.Run()
 	spinner.Stop(spin)
 
 	if err != nil {
-		if get.Err != nil {
-			messages.Error(get.Err.Error())
+		if types.Err != nil {
+			messages.Error(types.Err.Error())
 		}
 		return
 	}

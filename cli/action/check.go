@@ -31,7 +31,7 @@ func Check(options CheckOptions) (err error) {
 
 	eslint := exec.Command(bun, "x", "eslint")
 	eslint.Dir = options.App
-	eslint.Env = append(os.Environ())
+	eslint.Env = os.Environ()
 	//eslint.Stderr = os.Stderr
 	//eslint.Stdout = os.Stdout
 	//eslint.Stdin = os.Stdin
@@ -63,7 +63,7 @@ func Check(options CheckOptions) (err error) {
 	if pkg.DevDependencies.SvelteCheck != "" {
 		svelteCheck := exec.Command(bun, "x", "svelte-check", "--tsconfig=./tsconfig.json")
 		svelteCheck.Dir = options.App
-		svelteCheck.Env = append(os.Environ())
+		svelteCheck.Env = os.Environ()
 		//svelteCheck.Stderr = os.Stderr
 		//svelteCheck.Stdout = os.Stdout
 		//svelteCheck.Stdin = os.Stdin

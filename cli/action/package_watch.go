@@ -40,7 +40,7 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 
 	csr := exec.Command(bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch")
 	csr.Dir = options.App
-	csr.Env = append(os.Environ())
+	csr.Env = os.Environ()
 	csr.Stderr = os.Stderr
 	csr.Stdout = os.Stdout
 	csr.Stdin = os.Stdin

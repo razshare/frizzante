@@ -20,7 +20,7 @@ func Update(options UpdateOptions) (err error) {
 	}
 
 	get := exec.Command(options.Go, "get", "-u", "./...")
-	get.Env = append(os.Environ())
+	get.Env = os.Environ()
 	//get.Stderr = os.Stderr
 	//get.Stdout = os.Stdout
 	//get.Stdin = os.Stdin
@@ -44,7 +44,7 @@ func Update(options UpdateOptions) (err error) {
 
 	pretty := exec.Command(bun, "update")
 	pretty.Dir = options.App
-	pretty.Env = append(os.Environ())
+	pretty.Env = os.Environ()
 	//pretty.Stderr = os.Stderr
 	//pretty.Stdout = os.Stdout
 	//pretty.Stdin = os.Stdin
