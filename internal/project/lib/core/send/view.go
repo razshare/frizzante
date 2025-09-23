@@ -22,9 +22,9 @@ func View(client *client.Client, view _view.View) {
 			Header(client, "Pragma", "no-cache")
 		}
 		if view.Props == nil {
-			view.Props = map[string]any{}
+			view.Props = map[string]string{}
 		}
-		Json(client, _view.Data(view))
+		Json(client, _view.Wrap(view))
 		return
 	}
 

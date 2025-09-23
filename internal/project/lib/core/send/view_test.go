@@ -34,7 +34,7 @@ func TestViewWithAcceptJson(t *testing.T) {
 		t.Fatal("content type should be json")
 	}
 
-	if string(writer.MockBytes) != `{"align":0,"name":"test","props":{"key":"value"},"render":0}` {
+	if string(writer.MockBytes) != `{"Name":"test","Render":0,"Align":0,"Props":{"key":"value"}}` {
 		t.Fatal("content should be view as json")
 	}
 }

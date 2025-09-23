@@ -1,9 +1,9 @@
 export type Props = {
-    error: string
-    todos: Todo[]
+    Error: string
+    Todos: Todo[]
 }
 
 export type Todo = {
-    checked: boolean
-    description: string
+    Checked: boolean
+    Description: string
 }

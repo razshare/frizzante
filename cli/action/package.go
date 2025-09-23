@@ -79,7 +79,7 @@ func Package(options PackageOptions) (err error) {
 				return
 			}
 
-			messages.Successf("%s copied to  %s", filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "view", "ssr"))
+			messages.Successf("%s copied to %s", filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "view", "ssr"))
 		}
 	}
 

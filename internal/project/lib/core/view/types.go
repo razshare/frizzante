@@ -1,5 +1,12 @@
 package view
 
+type Data struct {
+	Name   string
+	Render RenderMode
+	Align  AlignMode
+	Props  any
+}
+
 type RenderMode int
 
 const (

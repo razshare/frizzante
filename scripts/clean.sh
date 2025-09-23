@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# Removes temporary binary
+rm -fr frizzante
+
 # Cleans additions
 rm -fr internal/additions/app/.vite
 rm -fr internal/additions/app/node_modules

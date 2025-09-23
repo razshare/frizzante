@@ -7,12 +7,12 @@
     import type { Props, Todo } from "$lib/types/gen/main/lib/routes/handlers/todos/Props"
     import { slide } from "svelte/transition"
 
-    let { todos = [], error }: Props = $props()
+    let { Todos = [], Error }: Props = $props()
 
     let unchecked = $derived.by(function count(): number {
         let value = 0
-        for (const todo of todos) {
-            if (!todo.checked) {
+        for (const todo of Todos) {
+            if (!todo.Checked) {
                 value++
             }
         }
@@ -28,14 +28,14 @@
         <div class="card-body relative p-6">
             {@render AddTodo()}
             <div class="divider"></div>
-            {#if todos.length === 0}
+            {#if Todos.length === 0}
                 {@render NoTasks()}
             {:else}
-                {#each todos as todo, index (index)}
+                {#each Todos as todo, index (index)}
                     {@render TodoItem(todo, index)}
                 {/each}
             {/if}
-            {#if todos.length > 0}
+            {#if Todos.length > 0}
                 {@render RemainingTasks()}
             {/if}
             {@render BackButton()}
@@ -63,10 +63,10 @@
         </button>
     </form>
 
-    {#if error}
+    {#if Error}
         <div class="pt-4"></div>
         <div in:slide out:slide class="alert alert-error">
-            <span>{error}</span>
+            <span>{Error}</span>
         </div>
     {/if}
 {/snippet}
@@ -78,23 +78,23 @@
 {/snippet}
 
 {#snippet TodoItem(todo: Todo, index: number)}
-    {@const aria = todo.checked ? "Uncheck" : "Check"}
-    {@const path = todo.checked ? "/uncheck" : "/check"}
-    {@const icon = todo.checked ? mdiCheckCircleOutline : mdiCircleOutline}
+    {@const aria = todo.Checked ? "Uncheck" : "Check"}
+    {@const path = todo.Checked ? "/uncheck" : "/check"}
+    {@const icon = todo.Checked ? mdiCheckCircleOutline : mdiCircleOutline}
     <div in:slide out:slide class="flex w-full text-base-content/80">
         <form {...action(path)} class="grow content-center">
             <input type="hidden" name="index" value={index} />
             <button
                 type="submit"
                 class="w-full flex cursor-pointer"
-                class:line-through={todo.checked}
-                class:text-base-content={todo.checked}
-                class:opacity-50={todo.checked}
+                class:line-through={todo.Checked}
+                class:text-base-content={todo.Checked}
+                class:opacity-50={todo.Checked}
                 aria-label={aria}
             >
                 <Icon path={icon} />
                 <div class="pr-4"></div>
-                <span>{todo.description}</span>
+                <span>{todo.Description}</span>
             </button>
         </form>
         <form {...action("/remove")}>

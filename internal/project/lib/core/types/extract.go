@@ -24,9 +24,10 @@ func Extract(_type reflect.Type, ignore []string) (primary string, secondary str
 		t := f.Type
 		k := t.Kind()
 		name := f.Name
-		if tag := f.Tag.Get("json"); tag != "" {
-			name = tag
-		}
+		// We cannot use this, goja' runtime.ToValue() will ignore tags since it's not marshaling.
+		//if tag := f.Tag.Get("json"); tag != "" {
+		//	name = tag
+		//}
 		switch k {
 		case
 			reflect.Chan,

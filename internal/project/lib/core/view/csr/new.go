@@ -55,7 +55,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 		doc := string(data)
 
 		var props []byte
-		if props, err = json.Marshal(_view.Data(view)); err != nil {
+		if props, err = json.Marshal(_view.Wrap(view)); err != nil {
 			return "", err
 		}
 

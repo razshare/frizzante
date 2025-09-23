@@ -1,8 +1,8 @@
 export type View<T> = {
-    name: string
-    props: T
-    render: number
-    align: number
+    Name: string
+    Props: T
+    Render: number
+    Align: number
 }
 
 export type HistoryEntry = {

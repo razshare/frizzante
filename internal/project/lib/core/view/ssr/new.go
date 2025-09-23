@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -15,6 +16,7 @@ import (
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
 	"github.com/razshare/frizzante/internal/project/lib/core/js"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
@@ -40,6 +42,12 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 	var app = conf.App
 	var disk = conf.Disk
 	var limit = conf.Limit
+	if conf.ErrorLog == nil {
+		conf.ErrorLog = log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
+	}
+	if conf.InfoLog == nil {
+		conf.InfoLog = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
+	}
 
 	if limit <= 0 {
 		limit = 1
@@ -74,32 +82,55 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 		var builder strings.Builder
 		runtime = goja.New()
 		console := runtime.NewObject()
-		log := func(call goja.FunctionCall) goja.Value {
-			builder.Reset()
-			i := 0
-			for _, argument := range call.Arguments {
-				if i > 0 {
-					builder.WriteString(" ")
-				}
-				builder.WriteString(argument.String())
-				i++
+		createLogger := func(level LogLevel) func(call goja.FunctionCall) goja.Value {
+			var logger *log.Logger
+
+			switch level {
+			case LogLevelDanger:
+				logger = conf.ErrorLog
+			default:
+				logger = conf.InfoLog
 			}
-			return goja.Undefined()
+
+			return func(call goja.FunctionCall) goja.Value {
+				builder.Reset()
+				i := 0
+				for _, argument := range call.Arguments {
+					if i > 0 {
+						builder.WriteString(" ")
+					}
+					switch argument.(type) {
+					case *goja.Object:
+						object := argument.ToObject(runtime)
+						data, err = object.MarshalJSON()
+						if err != nil {
+							conf.ErrorLog.Println(err, stack.Trace())
+							return goja.Undefined()
+						}
+						builder.WriteString(string(data))
+					default:
+						builder.WriteString(argument.String())
+					}
+					i++
+				}
+				logger.Println(builder.String())
+				return goja.Undefined()
+			}
 		}
 
-		if err = console.Set("log", log); err != nil {
+		if err = console.Set("log", createLogger(LogLevelBase)); err != nil {
 			return
 		}
 
-		if err = console.Set("info", log); err != nil {
+		if err = console.Set("info", createLogger(LogLevelBase)); err != nil {
 			return
 		}
 
-		if err = console.Set("error", log); err != nil {
+		if err = console.Set("warn", createLogger(LogLevelWarning)); err != nil {
 			return
 		}
 
-		if err = console.Set("warn", log); err != nil {
+		if err = console.Set("error", createLogger(LogLevelDanger)); err != nil {
 			return
 		}
 
@@ -173,7 +204,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 			}
 
 			var promise goja.Value
-			if promise, err = render(goja.Undefined(), runtime.ToValue(_view.Data(view))); err != nil {
+			if promise, err = render(goja.Undefined(), runtime.ToValue(_view.Wrap(view))); err != nil {
 				return
 			}
 
@@ -201,7 +232,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 				html = strings.Replace(html, "<!--app-target-->", "", 1)
 				html = strings.Replace(html, "<!--app-data-->", "", 1)
 			} else {
-				if data, err = json.Marshal(_view.Data(view)); err != nil {
+				if data, err = json.Marshal(_view.Wrap(view)); err != nil {
 					return
 				}
 
@@ -216,7 +247,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 		}
 
 		if view.RenderMode == _view.RenderModeClient {
-			if data, err = json.Marshal(_view.Data(view)); err != nil {
+			if data, err = json.Marshal(_view.Wrap(view)); err != nil {
 				return
 			}
 

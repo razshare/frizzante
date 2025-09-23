@@ -6,13 +6,13 @@
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
     const components = views as Record<string, Component>
-    let { name, props: remoteProps, render, align } = $props() as View<Record<string, unknown>>
-    const view = $state({ name, props: remoteProps, render, align })
+    let { Name, Props, Render, Align } = $props() as View<Record<string, unknown>>
+    const view = $state({ Name, Props, Render, Align })
     setContext("view", view)
 </script>
 
 {#each Object.keys(components) as key (key)}
-    {#if key === view.name}
-        <Async from={components[key]} properties={view.props} />
+    {#if key === view.Name}
+        <Async from={components[key]} properties={view.Props} />
     {/if}
 {/each}

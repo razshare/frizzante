@@ -17,5 +17,8 @@ install: clean
 	./scripts/install.sh
 	make configure
 
+dev:
+	./scripts/dev.sh
+
 types:
 	./scripts/types.sh

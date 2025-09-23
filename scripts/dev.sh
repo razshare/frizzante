@@ -4,5 +4,5 @@ test -f frizzante || go build -o frizzante
 
 # Generate type definitions
 pushd internal/project && \
-../../frizzante -gtypes && \
+../../frizzante --dev && \
 popd || exit 1

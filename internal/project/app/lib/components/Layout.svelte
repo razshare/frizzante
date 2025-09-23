@@ -27,7 +27,7 @@
 
     const view = getContext("view") as View<unknown>
 
-    let { title = view.name, children }: Props = $props()
+    let { title = view.Name, children }: Props = $props()
 </script>
 
 <svelte:head>
