@@ -9,16 +9,16 @@
 </script>
 
 <Layout title="Welcome">
-    {@render PageDescription()}
+    {@render Description()}
     <div class="pt-6"></div>
     <div class="flex justify-center gap-2 relative">
         {@render Sparkles()}
-        {@render ShowTodos()}
-        {@render Documentation()}
+        {@render TodosButton()}
+        {@render DocumentationButton()}
     </div>
 </Layout>
 
-{#snippet PageDescription()}
+{#snippet Description()}
     <Logo />
     <div class="pt-6"></div>
     <p class="text-xl text-base-content/60">Modern Go + Svelte Framework</p>
@@ -73,14 +73,14 @@
     </Sparkle>
 {/snippet}
 
-{#snippet ShowTodos()}
+{#snippet TodosButton()}
     <a class="btn btn-primary btn-lg" {...href("/todos")}>
         <span>Show Todos</span>
         <Icon path={mdiArrowRight} size="18" />
     </a>
 {/snippet}
 
-{#snippet Documentation()}
+{#snippet DocumentationButton()}
     <a
         class="btn btn-secondary btn-lg"
         href="https://razshare.github.io/frizzante-docs/guides/get-started"

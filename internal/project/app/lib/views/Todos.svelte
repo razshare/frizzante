@@ -23,32 +23,32 @@
 <Layout title="Todos">
     <div class="w-full min-w-[450px] max-w-2xl">
         <div class="text-center">
-            {@render PageDescription()}
+            {@render Description()}
         </div>
         <div class="card-body relative p-6">
-            {@render AddTodo()}
+            {@render Add()}
             <div class="divider"></div>
             {#if Todos.length === 0}
-                {@render NoTasks()}
+                {@render Empty()}
             {:else}
                 {#each Todos as todo, index (index)}
-                    {@render TodoItem(todo, index)}
+                    {@render Todo(todo, index)}
                 {/each}
             {/if}
             {#if Todos.length > 0}
-                {@render RemainingTasks()}
+                {@render Remaining()}
             {/if}
-            {@render BackButton()}
+            {@render Back()}
         </div>
     </div>
 </Layout>
 
-{#snippet PageDescription()}
+{#snippet Description()}
     <h1 class="text-3xl">Daily Tasks</h1>
     <p class="text-lg text-base-content/60">Organize and track your daily activities</p>
 {/snippet}
 
-{#snippet AddTodo()}
+{#snippet Add()}
     <form {...action("/add")} class="flex">
         <input
             type="text"
@@ -71,52 +71,61 @@
     {/if}
 {/snippet}
 
-{#snippet NoTasks()}
+{#snippet Empty()}
     <div in:slide out:slide class="text-center text-base-content/50 text-lg">
         <span>No tasks yet. Add one above to get started!</span>
     </div>
 {/snippet}
 
-{#snippet TodoItem(todo: Todo, index: number)}
-    {@const aria = todo.Checked ? "Uncheck" : "Check"}
-    {@const path = todo.Checked ? "/uncheck" : "/check"}
-    {@const icon = todo.Checked ? mdiCheckCircleOutline : mdiCircleOutline}
+{#snippet Todo(todo: Todo, index: number)}
     <div in:slide out:slide class="flex w-full text-base-content/80">
-        <form {...action(path)} class="grow content-center">
-            <input type="hidden" name="index" value={index} />
-            <button
-                type="submit"
-                class="w-full flex cursor-pointer"
-                class:line-through={todo.Checked}
-                class:text-base-content={todo.Checked}
-                class:opacity-50={todo.Checked}
-                aria-label={aria}
-            >
-                <Icon path={icon} />
-                <div class="pr-4"></div>
-                <span>{todo.Description}</span>
-            </button>
-        </form>
-        <form {...action("/remove")}>
-            <input type="hidden" name="index" value={index} />
-            <button
-                type="submit"
-                class="btn btn-ghost btn-sm btn-square hover:text-error hover:bg-error/20 transition-colors"
-                aria-label="Delete"
-            >
-                <Icon path={mdiClose} size="18" />
-            </button>
-        </form>
+        {@render Toggle(todo, index)}
+        {@render Remove(index)}
     </div>
 {/snippet}
 
-{#snippet RemainingTasks()}
+{#snippet Toggle(todo: Todo, index: number)}
+    {@const aria = todo.Checked ? "Uncheck" : "Check"}
+    {@const value = todo.Checked ? "0" : "1"}
+    {@const icon = todo.Checked ? mdiCheckCircleOutline : mdiCircleOutline}
+    <form {...action("/toggle")} class="grow content-center">
+        <input type="hidden" name="index" value={index} />
+        <input type="hidden" name="value" {value} />
+        <button
+            type="submit"
+            class="w-full flex cursor-pointer"
+            class:line-through={todo.Checked}
+            class:text-base-content={todo.Checked}
+            class:opacity-50={todo.Checked}
+            aria-label={aria}
+        >
+            <Icon path={icon} />
+            <div class="pr-4"></div>
+            <span>{todo.Description}</span>
+        </button>
+    </form>
+{/snippet}
+
+{#snippet Remove(index: number)}
+    <form {...action("/remove")}>
+        <input type="hidden" name="index" value={index} />
+        <button
+            type="submit"
+            class="btn btn-ghost btn-sm btn-square hover:text-error hover:bg-error/20 transition-colors"
+            aria-label="Delete"
+        >
+            <Icon path={mdiClose} size="18" />
+        </button>
+    </form>
+{/snippet}
+
+{#snippet Remaining()}
     <div in:slide out:slide class="text-lg text-base-content/50 text-center">
         <span>{unchecked} tasks remaining</span>
     </div>
 {/snippet}
 
-{#snippet BackButton()}
+{#snippet Back()}
     <div class="pt-4"></div>
     <a class="btn btn-neutral text-lg" {...href("/")}>
         <Icon path={mdiArrowLeft} size="18" />
