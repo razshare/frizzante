@@ -63,22 +63,24 @@ func TestInputEscapeBehavior(t *testing.T) {
 }
 
 func TestInputEnterBehavior(t *testing.T) {
-	tests := []struct {
+	type TestData struct {
 		name       string
 		inputValue string
-	}{
+	}
+
+	data := []TestData{
 		{"enter with value", "test input"},
 		{"enter with empty", ""},
 		{"enter with spaces", "   "},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
 			model := &Model{
 				Prompt:    "Enter value:",
 				TextInput: textinput.New(),
 			}
-			model.TextInput.SetValue(tt.inputValue)
+			model.TextInput.SetValue(d.inputValue)
 
 			_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
@@ -86,8 +88,8 @@ func TestInputEnterBehavior(t *testing.T) {
 				t.Error("enter should always quit")
 			}
 
-			if model.TextInput.Value() != tt.inputValue {
-				t.Errorf("value should be preserved, got %q, want %q", model.TextInput.Value(), tt.inputValue)
+			if model.TextInput.Value() != d.inputValue {
+				t.Errorf("value should be preserved, got %q, want %q", model.TextInput.Value(), d.inputValue)
 			}
 		})
 	}

@@ -9,13 +9,15 @@ import (
 )
 
 func TestSpinnerInterruptHandling(t *testing.T) {
-	tests := []struct {
+	type TestData struct {
 		name            string
 		softInterrupt   bool
 		keyType         tea.KeyType
 		shouldQuit      bool
 		shouldInterrupt bool
-	}{
+	}
+
+	data := []TestData{
 		{
 			name:            "soft interrupt with ctrl+c quits",
 			softInterrupt:   true,
@@ -46,25 +48,25 @@ func TestSpinnerInterruptHandling(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
 			model := &Model{
-				SoftInterrupt: tt.softInterrupt,
+				SoftInterrupt: d.softInterrupt,
 				Message:       "Loading...",
 				Spinner:       spinner.New(),
 			}
 
-			_, cmd := model.Update(tea.KeyMsg{Type: tt.keyType})
+			_, cmd := model.Update(tea.KeyMsg{Type: d.keyType})
 
-			if tt.shouldQuit && cmd == nil {
+			if d.shouldQuit && cmd == nil {
 				t.Error("expected quit command")
 			}
 
-			if tt.shouldInterrupt && cmd == nil {
+			if d.shouldInterrupt && cmd == nil {
 				t.Error("expected interrupt command")
 			}
 
-			if !tt.shouldQuit && !tt.shouldInterrupt && cmd != nil {
+			if !d.shouldQuit && !d.shouldInterrupt && cmd != nil {
 				t.Error("expected no command for normal operation")
 			}
 		})
@@ -72,11 +74,13 @@ func TestSpinnerInterruptHandling(t *testing.T) {
 }
 
 func TestSpinnerMessage(t *testing.T) {
-	tests := []struct {
+	type TestData struct {
 		name     string
 		message  string
 		expected string
-	}{
+	}
+
+	data := []TestData{
 		{
 			name:     "simple message",
 			message:  "Loading...",
@@ -94,15 +98,15 @@ func TestSpinnerMessage(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
 			model := &Model{
-				Message: tt.message,
+				Message: d.message,
 				Spinner: spinner.New(),
 			}
 
-			if model.Message != tt.expected {
-				t.Errorf("message = %q, want %q", model.Message, tt.expected)
+			if model.Message != d.expected {
+				t.Errorf("message = %q, want %q", model.Message, d.expected)
 			}
 		})
 	}

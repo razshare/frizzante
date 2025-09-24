@@ -4,17 +4,19 @@ import (
 	"testing"
 
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/razshare/frizzante/tui/viewport"
+	_viewport "github.com/razshare/frizzante/tui/viewport"
 )
 
 func TestFilter(t *testing.T) {
-	tests := []struct {
+	type TestData struct {
 		name          string
 		choices       []Choice
 		searchInput   string
 		expectedCount int
 		expectedFirst string
-	}{
+	}
+
+	data := []TestData{
 		{
 			name: "empty search returns all choices",
 			choices: []Choice{
@@ -87,24 +89,25 @@ func TestFilter(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
 			search := &Search{
-				Choices:  tt.choices,
-				Filtered: tt.choices,
+				Choices:  d.choices,
+				Filtered: d.choices,
 				Input:    textinput.New(),
 			}
-			viewport := &viewport.Viewport{}
 
-			search.Input.SetValue(tt.searchInput)
+			viewport := &_viewport.Viewport{}
+
+			search.Input.SetValue(d.searchInput)
 			Filter(search, viewport)
 
-			if len(search.Filtered) != tt.expectedCount {
-				t.Errorf("Filter() resulted in %d items, want %d", len(search.Filtered), tt.expectedCount)
+			if len(search.Filtered) != d.expectedCount {
+				t.Errorf("Filter() resulted in %d items, want %d", len(search.Filtered), d.expectedCount)
 			}
 
-			if tt.expectedCount > 0 && search.Filtered[0].Id != tt.expectedFirst {
-				t.Errorf("Filter() first item = %s, want %s", search.Filtered[0].Id, tt.expectedFirst)
+			if d.expectedCount > 0 && search.Filtered[0].Id != d.expectedFirst {
+				t.Errorf("Filter() first item = %s, want %s", search.Filtered[0].Id, d.expectedFirst)
 			}
 
 			if viewport.Cursor != 0 {
@@ -132,7 +135,7 @@ func TestReset(t *testing.T) {
 		Input:    textinput.New(),
 	}
 
-	viewport := &viewport.Viewport{
+	viewport := &_viewport.Viewport{
 		Cursor: 5,
 		Start:  2,
 	}
@@ -198,7 +201,7 @@ func TestSearchStateTransitions(t *testing.T) {
 			Filtered: choices,
 			Input:    textinput.New(),
 		}
-		viewport := &viewport.Viewport{}
+		viewport := &_viewport.Viewport{}
 
 		search.Active = true
 		search.Input.SetValue("app")

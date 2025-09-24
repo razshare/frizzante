@@ -10,13 +10,15 @@ import (
 )
 
 func TestSingleSelectSelection(t *testing.T) {
-	tests := []struct {
+	type TestData struct {
 		name             string
 		filteredChoices  []search.Choice
 		cursorPosition   int
 		expectedSelected string
 		shouldQuit       bool
-	}{
+	}
+
+	data := []TestData{
 		{
 			name: "select first item",
 			filteredChoices: []search.Choice{
@@ -58,28 +60,28 @@ func TestSingleSelectSelection(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
 			model := &Model{
 				Selected: "",
 				Search: &search.Search{
-					Filtered: tt.filteredChoices,
+					Filtered: d.filteredChoices,
 					Input:    textinput.New(),
 				},
 				Viewport: &viewport.Viewport{
-					Cursor: tt.cursorPosition,
+					Cursor: d.cursorPosition,
 				},
 			}
 
 			_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
-			if model.Selected != tt.expectedSelected {
-				t.Errorf("got selected %q, want %q", model.Selected, tt.expectedSelected)
+			if model.Selected != d.expectedSelected {
+				t.Errorf("got selected %q, want %q", model.Selected, d.expectedSelected)
 			}
 
-			if tt.shouldQuit && cmd == nil {
+			if d.shouldQuit && cmd == nil {
 				t.Error("expected quit command, got nil")
-			} else if !tt.shouldQuit && cmd != nil {
+			} else if !d.shouldQuit && cmd != nil {
 				t.Error("expected no command, got quit")
 			}
 		})
@@ -146,16 +148,18 @@ func TestSingleSelectEscapeBehavior(t *testing.T) {
 }
 
 func TestSingleSelectNavigation(t *testing.T) {
-	choices := []search.Choice{
-		{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"},
-	}
-
-	tests := []struct {
+	type TestData struct {
 		name           string
 		keyType        tea.KeyType
 		initialCursor  int
 		expectedCursor int
-	}{
+	}
+
+	choices := []search.Choice{
+		{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"},
+	}
+
+	data := []TestData{
 		{"move down with arrow", tea.KeyDown, 0, 1},
 		{"move down with tab", tea.KeyTab, 0, 1},
 		{"move down with ctrl+n", tea.KeyCtrlN, 0, 1},
@@ -165,23 +169,23 @@ func TestSingleSelectNavigation(t *testing.T) {
 		{"wrap from top", tea.KeyUp, 0, 4},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
 			model := &Model{
 				Search: &search.Search{
 					Filtered: choices,
 					Input:    textinput.New(),
 				},
 				Viewport: &viewport.Viewport{
-					Cursor:  tt.initialCursor,
+					Cursor:  d.initialCursor,
 					Visible: 5,
 				},
 			}
 
-			model.Update(tea.KeyMsg{Type: tt.keyType})
+			model.Update(tea.KeyMsg{Type: d.keyType})
 
-			if model.Viewport.Cursor != tt.expectedCursor {
-				t.Errorf("cursor = %d, want %d", model.Viewport.Cursor, tt.expectedCursor)
+			if model.Viewport.Cursor != d.expectedCursor {
+				t.Errorf("cursor = %d, want %d", model.Viewport.Cursor, d.expectedCursor)
 			}
 		})
 	}

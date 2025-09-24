@@ -6,12 +6,14 @@ import (
 )
 
 func TestSend(t *testing.T) {
-	tests := []struct {
+	type TestData struct {
 		name     string
 		text     string
 		width    int
 		expected []string
-	}{
+	}
+
+	data := []TestData{
 		{
 			name:     "empty text",
 			text:     "",
@@ -98,11 +100,11 @@ func TestSend(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			result := Send(tt.text, tt.width)
-			if !reflect.DeepEqual(result, tt.expected) {
-				t.Errorf("Send() = %v, want %v", result, tt.expected)
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
+			result := Send(d.text, d.width)
+			if !reflect.DeepEqual(result, d.expected) {
+				t.Errorf("Send() = %v, want %v", result, d.expected)
 			}
 		})
 	}

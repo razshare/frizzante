@@ -7,13 +7,15 @@ import (
 )
 
 func TestTableColumnWidthCalculation(t *testing.T) {
-	tests := []struct {
+	type TestData struct {
 		name           string
 		headers        []string
 		rows           [][]string
 		maxWidth       int
 		expectedWidths []int
-	}{
+	}
+
+	data := []TestData{
 		{
 			name:           "headers determine width",
 			headers:        []string{"Name", "Description", "ID"},
@@ -53,14 +55,14 @@ func TestTableColumnWidthCalculation(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			colWidths := make([]int, len(tt.headers))
-			for i, header := range tt.headers {
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
+			colWidths := make([]int, len(d.headers))
+			for i, header := range d.headers {
 				colWidths[i] = len(header)
 			}
 
-			for _, row := range tt.rows {
+			for _, row := range d.rows {
 				for i, cell := range row {
 					if i < len(colWidths) {
 						if len(cell) > colWidths[i] {
@@ -71,12 +73,12 @@ func TestTableColumnWidthCalculation(t *testing.T) {
 			}
 
 			for i := range colWidths {
-				if colWidths[i] > tt.maxWidth {
-					colWidths[i] = tt.maxWidth
+				if colWidths[i] > d.maxWidth {
+					colWidths[i] = d.maxWidth
 				}
 			}
 
-			for i, expected := range tt.expectedWidths {
+			for i, expected := range d.expectedWidths {
 				if colWidths[i] != expected {
 					t.Errorf("column %d width = %d, want %d", i, colWidths[i], expected)
 				}

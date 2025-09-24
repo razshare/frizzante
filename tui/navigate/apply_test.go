@@ -3,24 +3,26 @@ package navigate
 import (
 	"testing"
 
-	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/viewport"
+	_search "github.com/razshare/frizzante/tui/search"
+	_viewport "github.com/razshare/frizzante/tui/viewport"
 )
 
 func TestApply(t *testing.T) {
-	tests := []struct {
+	type TestData struct {
 		name           string
-		filtered       []search.Choice
+		filtered       []_search.Choice
 		initialCursor  int
 		initialStart   int
 		visibleItems   int
 		direction      int
 		expectedCursor int
 		expectedStart  int
-	}{
+	}
+
+	data := []TestData{
 		{
 			name: "move down within viewport",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"},
 			},
 			initialCursor:  0,
@@ -32,7 +34,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name: "move down triggers scroll",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"},
 			},
 			initialCursor:  2,
@@ -44,7 +46,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name: "move up within viewport",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"},
 			},
 			initialCursor:  2,
@@ -56,7 +58,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name: "move up triggers scroll",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"},
 			},
 			initialCursor:  3,
@@ -68,7 +70,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name: "wrap around from bottom to top",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"}, {Id: "2"}, {Id: "3"},
 			},
 			initialCursor:  2,
@@ -80,7 +82,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name: "wrap around from top to bottom",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"}, {Id: "2"}, {Id: "3"},
 			},
 			initialCursor:  0,
@@ -92,7 +94,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name:           "empty list does nothing",
-			filtered:       []search.Choice{},
+			filtered:       []_search.Choice{},
 			initialCursor:  0,
 			initialStart:   0,
 			visibleItems:   3,
@@ -102,7 +104,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name: "single item list stays at 0",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"},
 			},
 			initialCursor:  0,
@@ -114,7 +116,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name: "move multiple steps down",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"},
 			},
 			initialCursor:  0,
@@ -126,7 +128,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name: "move multiple steps up",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"},
 			},
 			initialCursor:  4,
@@ -138,7 +140,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name: "large positive direction wraps correctly",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"}, {Id: "2"}, {Id: "3"},
 			},
 			initialCursor:  0,
@@ -150,7 +152,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name: "large negative direction wraps correctly",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"}, {Id: "2"}, {Id: "3"},
 			},
 			initialCursor:  0,
@@ -162,7 +164,7 @@ func TestApply(t *testing.T) {
 		},
 		{
 			name: "viewport larger than list",
-			filtered: []search.Choice{
+			filtered: []_search.Choice{
 				{Id: "1"}, {Id: "2"},
 			},
 			initialCursor:  0,
@@ -174,39 +176,39 @@ func TestApply(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			search := &search.Search{
-				Filtered: tt.filtered,
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
+			search := &_search.Search{
+				Filtered: d.filtered,
 			}
-			viewport := &viewport.Viewport{
-				Cursor:  tt.initialCursor,
-				Start:   tt.initialStart,
-				Visible: tt.visibleItems,
-			}
-
-			Apply(search, viewport, tt.direction)
-
-			if viewport.Cursor != tt.expectedCursor {
-				t.Errorf("Apply() cursor = %d, want %d", viewport.Cursor, tt.expectedCursor)
+			viewport := &_viewport.Viewport{
+				Cursor:  d.initialCursor,
+				Start:   d.initialStart,
+				Visible: d.visibleItems,
 			}
 
-			if viewport.Start != tt.expectedStart {
-				t.Errorf("Apply() start = %d, want %d", viewport.Start, tt.expectedStart)
+			Apply(search, viewport, d.direction)
+
+			if viewport.Cursor != d.expectedCursor {
+				t.Errorf("Apply() cursor = %d, want %d", viewport.Cursor, d.expectedCursor)
+			}
+
+			if viewport.Start != d.expectedStart {
+				t.Errorf("Apply() start = %d, want %d", viewport.Start, d.expectedStart)
 			}
 		})
 	}
 }
 
 func TestApplySequence(t *testing.T) {
-	filtered := []search.Choice{
+	filtered := []_search.Choice{
 		{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}, {Id: "6"},
 	}
 
-	search := &search.Search{
+	search := &_search.Search{
 		Filtered: filtered,
 	}
-	viewport := &viewport.Viewport{
+	viewport := &_viewport.Viewport{
 		Cursor:  0,
 		Start:   0,
 		Visible: 3,

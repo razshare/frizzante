@@ -7,14 +7,16 @@ import (
 )
 
 func TestConfirmKeyHandling(t *testing.T) {
-	tests := []struct {
+	type TestData struct {
 		name            string
 		defaultValue    bool
 		keyInput        tea.KeyMsg
 		expectedConfirm bool
 		shouldQuit      bool
 		shouldInterrupt bool
-	}{
+	}
+
+	data := []TestData{
 		{
 			name:            "y key confirms",
 			defaultValue:    false,
@@ -80,29 +82,29 @@ func TestConfirmKeyHandling(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
 			model := &Model{
 				Prompt:       "Test prompt",
-				DefaultValue: tt.defaultValue,
+				DefaultValue: d.defaultValue,
 				Confirmed:    false,
 			}
 
-			_, cmd := model.Update(tt.keyInput)
+			_, cmd := model.Update(d.keyInput)
 
-			if model.Confirmed != tt.expectedConfirm {
-				t.Errorf("Confirmed = %v, want %v", model.Confirmed, tt.expectedConfirm)
+			if model.Confirmed != d.expectedConfirm {
+				t.Errorf("Confirmed = %v, want %v", model.Confirmed, d.expectedConfirm)
 			}
 
-			if tt.shouldQuit && cmd == nil {
+			if d.shouldQuit && cmd == nil {
 				t.Error("expected quit command, got nil")
 			}
 
-			if tt.shouldInterrupt && cmd == nil {
+			if d.shouldInterrupt && cmd == nil {
 				t.Error("expected interrupt command, got nil")
 			}
 
-			if !tt.shouldQuit && !tt.shouldInterrupt && cmd != nil {
+			if !d.shouldQuit && !d.shouldInterrupt && cmd != nil {
 				t.Error("expected no command, got one")
 			}
 		})
@@ -138,21 +140,23 @@ func TestConfirmDefaultValueBehavior(t *testing.T) {
 }
 
 func TestConfirmEscapeAlwaysDenies(t *testing.T) {
-	tests := []struct {
+	type TestData struct {
 		name         string
 		defaultValue bool
 		initial      bool
-	}{
+	}
+
+	data := []TestData{
 		{"escape with default true", true, true},
 		{"escape with default false", false, true},
 		{"escape already false", false, false},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, d := range data {
+		t.Run(d.name, func(t *testing.T) {
 			model := &Model{
-				DefaultValue: tt.defaultValue,
-				Confirmed:    tt.initial,
+				DefaultValue: d.defaultValue,
+				Confirmed:    d.initial,
 			}
 
 			model.Update(tea.KeyMsg{Type: tea.KeyEsc})
