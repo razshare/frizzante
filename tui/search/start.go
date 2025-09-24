@@ -20,5 +20,5 @@ func Filter(search *Search, viewport *viewport.Viewport) {
 		search.Filtered = filtered
 	}
 	viewport.Cursor = 0
-	viewport.Start = 0
+	viewport.Offset = 0
 }

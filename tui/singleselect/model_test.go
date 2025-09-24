@@ -1,6 +1,7 @@
 package singleselect
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -9,221 +10,186 @@ import (
 	"github.com/razshare/frizzante/tui/viewport"
 )
 
-func TestSingleSelectSelection(t *testing.T) {
-	type TestData struct {
-		name             string
-		filteredChoices  []search.Choice
-		cursorPosition   int
-		expectedSelected string
-		shouldQuit       bool
+func TestUpdate(t *testing.T) {
+	var model *Model
+	var cmd tea.Cmd
+
+	// select first item
+	model = &Model{
+		Selected: "",
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "apple"}, {Id: "banana"}}, Input: textinput.New()},
+		Viewport: &viewport.Viewport{Cursor: 0},
+	}
+	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyEnter})
+	if model.Selected != "apple" {
+		t.Fatal("singleselect should be apple")
+	}
+	if _, ok := reflect.TypeAssert[tea.QuitMsg](reflect.ValueOf(cmd())); !ok {
+		t.Fatal("singleselect should quit")
 	}
 
-	data := []TestData{
-		{
-			name: "select first item",
-			filteredChoices: []search.Choice{
-				{Id: "apple"},
-				{Id: "banana"},
-			},
-			cursorPosition:   0,
-			expectedSelected: "apple",
-			shouldQuit:       true,
-		},
-		{
-			name: "select middle item",
-			filteredChoices: []search.Choice{
-				{Id: "apple"},
-				{Id: "banana"},
-				{Id: "cherry"},
-			},
-			cursorPosition:   1,
-			expectedSelected: "banana",
-			shouldQuit:       true,
-		},
-		{
-			name: "select last item",
-			filteredChoices: []search.Choice{
-				{Id: "apple"},
-				{Id: "banana"},
-				{Id: "cherry"},
-			},
-			cursorPosition:   2,
-			expectedSelected: "cherry",
-			shouldQuit:       true,
-		},
-		{
-			name:             "empty filtered list",
-			filteredChoices:  []search.Choice{},
-			cursorPosition:   0,
-			expectedSelected: "",
-			shouldQuit:       false,
-		},
+	// move down then select
+	model = &Model{
+		Selected: "",
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "apple"}, {Id: "banana"}}, Input: textinput.New()},
+		Viewport: &viewport.Viewport{Cursor: 0},
 	}
-
-	for _, d := range data {
-		t.Run(d.name, func(t *testing.T) {
-			model := &Model{
-				Selected: "",
-				Search: &search.Search{
-					Filtered: d.filteredChoices,
-					Input:    textinput.New(),
-				},
-				Viewport: &viewport.Viewport{
-					Cursor: d.cursorPosition,
-				},
-			}
-
-			_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
-
-			if model.Selected != d.expectedSelected {
-				t.Errorf("got selected %q, want %q", model.Selected, d.expectedSelected)
-			}
-
-			if d.shouldQuit && cmd == nil {
-				t.Error("expected quit command, got nil")
-			} else if !d.shouldQuit && cmd != nil {
-				t.Error("expected no command, got quit")
-			}
-		})
-	}
-}
-
-func TestSingleSelectEscapeBehavior(t *testing.T) {
-	t.Run("escape clears search when active", func(t *testing.T) {
-		model := &Model{
-			Selected: "",
-			Search: &search.Search{
-				Active: true,
-				Choices: []search.Choice{
-					{Id: "apple"},
-					{Id: "banana"},
-				},
-				Filtered: []search.Choice{
-					{Id: "apple"},
-				},
-				Input: textinput.New(),
-			},
-			Viewport: &viewport.Viewport{
-				Cursor: 0,
-			},
-		}
-
-		model.Search.Input.SetValue("app")
-
-		model.Update(tea.KeyMsg{Type: tea.KeyEsc})
-
-		if model.Search.Active {
-			t.Error("search should be inactive after escape")
-		}
-
-		if model.Search.Input.Value() != "" {
-			t.Error("search input should be cleared")
-		}
-
-		if len(model.Search.Filtered) != len(model.Search.Choices) {
-			t.Error("filtered should be reset to all choices")
-		}
-	})
-
-	t.Run("escape quits and clears selection when search inactive", func(t *testing.T) {
-		model := &Model{
-			Selected: "previous",
-			Search: &search.Search{
-				Active: false,
-				Input:  textinput.New(),
-			},
-			Viewport: &viewport.Viewport{},
-		}
-
-		_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
-
-		if model.Selected != "" {
-			t.Errorf("selected should be cleared, got %q", model.Selected)
-		}
-
-		if cmd == nil {
-			t.Error("expected quit command")
-		}
-	})
-}
-
-func TestSingleSelectNavigation(t *testing.T) {
-	type TestData struct {
-		name           string
-		keyType        tea.KeyType
-		initialCursor  int
-		expectedCursor int
-	}
-
-	choices := []search.Choice{
-		{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"},
-	}
-
-	data := []TestData{
-		{"move down with arrow", tea.KeyDown, 0, 1},
-		{"move down with tab", tea.KeyTab, 0, 1},
-		{"move down with ctrl+n", tea.KeyCtrlN, 0, 1},
-		{"move up with arrow", tea.KeyUp, 2, 1},
-		{"move up with ctrl+p", tea.KeyCtrlP, 2, 1},
-		{"wrap from bottom", tea.KeyDown, 4, 0},
-		{"wrap from top", tea.KeyUp, 0, 4},
-	}
-
-	for _, d := range data {
-		t.Run(d.name, func(t *testing.T) {
-			model := &Model{
-				Search: &search.Search{
-					Filtered: choices,
-					Input:    textinput.New(),
-				},
-				Viewport: &viewport.Viewport{
-					Cursor:  d.initialCursor,
-					Visible: 5,
-				},
-			}
-
-			model.Update(tea.KeyMsg{Type: d.keyType})
-
-			if model.Viewport.Cursor != d.expectedCursor {
-				t.Errorf("cursor = %d, want %d", model.Viewport.Cursor, d.expectedCursor)
-			}
-		})
-	}
-}
-
-func TestSingleSelectReplaceSelection(t *testing.T) {
-	model := &Model{
-		Selected: "initial",
-		Search: &search.Search{
-			Filtered: []search.Choice{
-				{Id: "apple"},
-				{Id: "banana"},
-			},
-			Input: textinput.New(),
-		},
-		Viewport: &viewport.Viewport{
-			Cursor: 1,
-		},
-	}
-
-	model.Update(tea.KeyMsg{Type: tea.KeyEnter})
-
+	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyDown})
+	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 	if model.Selected != "banana" {
-		t.Errorf("selected = %q, want 'banana'", model.Selected)
+		t.Fatal("singleselect should be banana")
 	}
-}
+	if _, ok := reflect.TypeAssert[tea.QuitMsg](reflect.ValueOf(cmd())); !ok {
+		t.Fatal("singleselect should quit")
+	}
 
-func TestSingleSelectInterrupt(t *testing.T) {
-	model := &Model{
+	// ctrl+c
+	model = &Model{
+		Selected: "",
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "apple"}, {Id: "banana"}}, Input: textinput.New()},
+		Viewport: &viewport.Viewport{Cursor: 0},
+	}
+	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyCtrlC})
+	if model.Selected != "" {
+		t.Fatal("singleselect should be empty")
+	}
+	if _, ok := reflect.TypeAssert[tea.InterruptMsg](reflect.ValueOf(cmd())); !ok {
+		t.Fatal("singleselect should interrupt")
+	}
+
+	// escape clears search when active
+	model = &Model{
+		Selected: "",
 		Search: &search.Search{
-			Input: textinput.New(),
+			Active:   true,
+			Choices:  []search.Choice{{Id: "apple"}, {Id: "banana"}},
+			Filtered: []search.Choice{{Id: "apple"}},
+			Input:    textinput.New(),
 		},
+		Viewport: &viewport.Viewport{Cursor: 0},
+	}
+	model.Search.Input.SetValue("app")
+	model.Update(tea.KeyMsg{Type: tea.KeyEsc})
+	if model.Search.Active {
+		t.Fatal("singleselect search be inactive")
+	}
+	if model.Search.Input.Value() != "" {
+		t.Fatal("singleselect search should be empty")
+	}
+	if len(model.Search.Filtered) != len(model.Search.Choices) {
+		t.Fatal("singleselect choices should be the same as filtered choices")
+	}
+
+	// escape quits when search inactive
+	model = &Model{
+		Selected: "apple",
+		Search:   &search.Search{Active: false, Input: textinput.New()},
 		Viewport: &viewport.Viewport{},
 	}
 
-	_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyCtrlC})
+	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyEsc})
+	if len(model.Selected) != 0 {
+		t.Fatal("singleselect should be empty")
+	}
+	if _, ok := reflect.TypeAssert[tea.QuitMsg](reflect.ValueOf(cmd())); !ok {
+		t.Fatal("singleselect should quit")
+	}
 
-	if cmd == nil {
-		t.Error("expected interrupt command")
+	// move down with arrow
+	model = &Model{
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Viewport: &viewport.Viewport{Visible: 5, Cursor: 0},
+	}
+	model.Update(tea.KeyMsg{Type: tea.KeyDown})
+	if model.Viewport.Cursor != 1 {
+		t.Fatal("multi select cursor should be 1")
+	}
+
+	// move down with tab
+	model = &Model{
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Viewport: &viewport.Viewport{Visible: 5, Cursor: 0},
+	}
+	model.Update(tea.KeyMsg{Type: tea.KeyTab})
+	if model.Viewport.Cursor != 1 {
+		t.Fatal("multi select cursor should be 1")
+	}
+
+	// move down with ctrl+pgdown
+	model = &Model{
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Viewport: &viewport.Viewport{Visible: 5, Cursor: 0},
+	}
+	model.Update(tea.KeyMsg{Type: tea.KeyCtrlPgDown})
+	if model.Viewport.Cursor != 1 {
+		t.Fatal("multi select cursor should be 1")
+	}
+
+	// move down with arrow
+	model = &Model{
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Viewport: &viewport.Viewport{Visible: 5, Cursor: 2},
+	}
+	model.Update(tea.KeyMsg{Type: tea.KeyUp})
+	if model.Viewport.Cursor != 1 {
+		t.Fatal("multi select cursor should be 1")
+	}
+
+	// move down with tab
+	model = &Model{
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Viewport: &viewport.Viewport{Visible: 5, Cursor: 2},
+	}
+	model.Update(tea.KeyMsg{Type: tea.KeyShiftTab})
+	if model.Viewport.Cursor != 1 {
+		t.Fatal("multi select cursor should be 1")
+	}
+
+	// move down with ctrl+pgdown
+	model = &Model{
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Viewport: &viewport.Viewport{Visible: 5, Cursor: 2},
+	}
+	model.Update(tea.KeyMsg{Type: tea.KeyCtrlPgUp})
+	if model.Viewport.Cursor != 1 {
+		t.Fatal("multi select cursor should be 1")
+	}
+
+	// move down and wrap
+	model = &Model{
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Viewport: &viewport.Viewport{Visible: 5, Cursor: 4},
+	}
+	model.Update(tea.KeyMsg{Type: tea.KeyDown})
+	if model.Viewport.Cursor != 0 {
+		t.Fatal("multi select cursor should be 0")
+	}
+
+	// move up and wrap
+	model = &Model{
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Viewport: &viewport.Viewport{Visible: 5, Cursor: 0},
+	}
+	model.Update(tea.KeyMsg{Type: tea.KeyUp})
+	if model.Viewport.Cursor != 4 {
+		t.Fatal("multi select cursor should be 4")
+	}
+
+	// activate search when typing
+	model = &Model{
+		Search: &search.Search{
+			Active:   false,
+			Choices:  []search.Choice{{Id: "apple"}, {Id: "banana"}},
+			Filtered: []search.Choice{{Id: "apple"}, {Id: "banana"}},
+			Input:    textinput.New(),
+		},
+		Viewport: &viewport.Viewport{},
+	}
+	model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'a'}})
+	if !model.Search.Active {
+		t.Fatal("singleselect search should be active")
+	}
+	if model.Search.Input.Value() != "a" {
+		t.Fatal("singleselect search value should be a")
 	}
 }

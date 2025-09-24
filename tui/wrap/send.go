@@ -8,7 +8,7 @@ func Send(text string, width int) []string {
 	}
 
 	lines := strings.Split(text, "\n")
-	var result []string
+	result := make([]string, 0)
 
 	for _, line := range lines {
 		if line == "" {

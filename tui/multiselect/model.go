@@ -22,9 +22,11 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if assert.Type == tea.KeyEnter {
-			if len(model.Selected) == 0 && len(model.Search.Filtered) > 0 {
+			if len(model.Search.Filtered) > 0 {
 				value := model.Search.Filtered[model.Viewport.Cursor].Id
-				model.Selected = append(model.Selected, value)
+				if !slices.Contains(model.Selected, value) {
+					model.Selected = append(model.Selected, value)
+				}
 			}
 			return model, tea.Quit
 		}
@@ -52,12 +54,12 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			return model, tea.Quit
 		}
 
-		if assert.Type == tea.KeyUp || assert.Type == tea.KeyCtrlP {
+		if assert.Type == tea.KeyUp || assert.Type == tea.KeyCtrlP || assert.Type == tea.KeyShiftTab || assert.Type == tea.KeyCtrlPgUp {
 			navigate.Apply(model.Search, model.Viewport, -1)
 			return model, nil
 		}
 
-		if assert.Type == tea.KeyDown || assert.Type == tea.KeyCtrlN || assert.Type == tea.KeyTab {
+		if assert.Type == tea.KeyDown || assert.Type == tea.KeyCtrlN || assert.Type == tea.KeyTab || assert.Type == tea.KeyCtrlPgDown {
 			navigate.Apply(model.Search, model.Viewport, 1)
 			return model, nil
 		}
@@ -112,18 +114,18 @@ func (model *Model) View() string {
 		return builder.String()
 	}
 
-	height := model.Viewport.Start + model.Viewport.Visible
+	height := model.Viewport.Offset + model.Viewport.Visible
 	if height > filtered {
 		height = filtered
 	}
 
-	if model.Viewport.Start > 0 {
+	if model.Viewport.Offset > 0 {
 		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
 		builder.WriteString("\n")
 	}
 
-	for i := model.Viewport.Start; i < height; i++ {
+	for i := model.Viewport.Offset; i < height; i++ {
 		builder.WriteString(config.Styles.Menu.Render("│"))
 		if model.Viewport.Cursor == i {
 			if slices.Contains(model.Selected, model.Search.Filtered[i].Id) {

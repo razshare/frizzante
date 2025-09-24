@@ -165,18 +165,18 @@ func (model *Model) View() string {
 		return builder.String()
 	}
 
-	height := model.Viewport.Start + model.Viewport.Visible
+	height := model.Viewport.Offset + model.Viewport.Visible
 	if height > filtered {
 		height = filtered
 	}
 
-	if model.Viewport.Start > 0 {
+	if model.Viewport.Offset > 0 {
 		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
 		builder.WriteString("\n")
 	}
 
-	for i := model.Viewport.Start; i < height; i++ {
+	for i := model.Viewport.Offset; i < height; i++ {
 		builder.WriteString(config.Styles.Menu.Render("│"))
 		if model.Viewport.Cursor == i {
 			if slices.Contains(model.Selected, model.Search.Filtered[i].Id) {

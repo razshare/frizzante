@@ -11,9 +11,6 @@ import (
 )
 
 func TestPlatformLinuxAmd64(t *testing.T) {
-	PlatformMutex.Lock()
-	defer PlatformMutex.Unlock()
-
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -38,20 +35,17 @@ func TestPlatformLinuxAmd64(t *testing.T) {
 		t.Fatal("~/platform.txt should be a file")
 	}
 
-	d, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
+	data, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if string(d) != "linux/amd64" {
-		t.Fatalf("~/platform.txt should contain linux/amd64, found %s instead", string(d))
+	if string(data) != "linux/amd64" {
+		t.Fatalf("~/platform.txt should contain linux/amd64, found %s instead", string(data))
 	}
 }
 
 func TestPlatformLinuxArm64(t *testing.T) {
-	PlatformMutex.Lock()
-	defer PlatformMutex.Unlock()
-
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -87,9 +81,6 @@ func TestPlatformLinuxArm64(t *testing.T) {
 }
 
 func TestPlatformDarwinAmd64(t *testing.T) {
-	PlatformMutex.Lock()
-	defer PlatformMutex.Unlock()
-
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -125,9 +116,6 @@ func TestPlatformDarwinAmd64(t *testing.T) {
 }
 
 func TestPlatformDarwinArm64(t *testing.T) {
-	PlatformMutex.Lock()
-	defer PlatformMutex.Unlock()
-
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -163,9 +151,6 @@ func TestPlatformDarwinArm64(t *testing.T) {
 }
 
 func TestPlatformWindowsAmd64(t *testing.T) {
-	PlatformMutex.Lock()
-	defer PlatformMutex.Unlock()
-
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -201,9 +186,6 @@ func TestPlatformWindowsAmd64(t *testing.T) {
 }
 
 func TestPlatformWindowsArm64(t *testing.T) {
-	PlatformMutex.Lock()
-	defer PlatformMutex.Unlock()
-
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -238,32 +220,26 @@ func TestPlatformWindowsArm64(t *testing.T) {
 	}
 }
 
-//func TestTestPlatformFresh(t *testing.T) {
-//	PlatformMutex.Lock()
-//	defer PlatformMutex.Unlock()
-//
-//	cache, err := FrizzanteCache()
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//
-//	if err = os.RemoveAll(cache); err != nil {
-//		t.Fatal(err)
-//		return
-//	}
-//
-//	platStr := "windows/arm64"
-//	a := &app.App{Platform: &platStr}
-//	_, err = Platform(a)
-//	if err != nil {
-//		t.Fatal(err)
-//	}
-//}
+func TestTestPlatformFresh(t *testing.T) {
+	cache, err := FrizzanteCache()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err = os.RemoveAll(cache); err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	platStr := "windows/arm64"
+	a := &app.App{Platform: &platStr}
+	_, err = Platform(a)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
 
 func TestPlatformCached(t *testing.T) {
-	PlatformMutex.Lock()
-	defer PlatformMutex.Unlock()
-
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
