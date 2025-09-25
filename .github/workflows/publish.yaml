@@ -22,6 +22,7 @@ jobs:
         run: |
           ./scripts/clean.sh
           ./scripts/configure.sh
+          ./scripts/package.sh
           ./scripts/test.sh
   publish:
     needs: tests

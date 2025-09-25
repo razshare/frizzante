@@ -20,7 +20,6 @@ import (
 //go:embed app/dist
 var efs embed.FS
 var srv = server.New()
-
 var dev = os.Getenv("DEV") == "1"
 var render = ssr.New(ssr.Config{Efs: efs, Disk: dev})
 
