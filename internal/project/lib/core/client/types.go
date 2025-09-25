@@ -14,6 +14,8 @@ type Client struct {
 	EventName string
 	EventId   int64
 	Status    int
+	Token     string
+	UserId    string
 	Config    *Config
 	Request   *http.Request
 	WebSocket *websocket.Conn
