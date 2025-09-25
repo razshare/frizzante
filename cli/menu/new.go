@@ -71,7 +71,7 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice: search.Choice{Id: "install", Description: "installs dependencies"},
+				Choice: search.Choice{Id: "install", Description: "installs go and js packages"},
 				Active: func() bool { return *a.Install },
 				Handler: func() error {
 					return action.Install(action.InstallOptions{
@@ -82,7 +82,7 @@ func New(a *app.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice: search.Choice{Id: "update", Description: "updates dependencies"},
+				Choice: search.Choice{Id: "update", Description: "updates go and js packages"},
 				Active: func() bool { return *a.Update },
 				Handler: func() error {
 					return action.Update(action.UpdateOptions{

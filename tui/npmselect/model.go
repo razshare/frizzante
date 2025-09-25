@@ -118,7 +118,7 @@ func (model *Model) View() string {
 	var builder strings.Builder
 	builder.Grow(1024)
 
-	builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("\r⎚"))
+	builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("⎚"))
 	builder.WriteString(config.Styles.Menu.Render(model.Prompt))
 
 	if model.Search.Input.Value() != "" {

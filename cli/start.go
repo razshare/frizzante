@@ -14,6 +14,7 @@ import (
 )
 
 func Start(a *app.App) (err error) {
+	messages.Prefix = config.Styles.Menu.PaddingRight(1).Render("│")
 	var menu *_menu.Menu
 	menu, err = _menu.New(a)
 	if err != nil {
@@ -38,7 +39,6 @@ func Start(a *app.App) (err error) {
 
 		print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
 		println(config.Styles.Menu.Render(fmt.Sprintf("running ▷ %s (%s)", it.Choice.Id, it.Choice.Description)))
-		messages.Prefix = config.Styles.Menu.PaddingRight(1).Render("│")
 
 		return it.Handler()
 	}
@@ -50,10 +50,6 @@ func Start(a *app.App) (err error) {
 	} else {
 		println(logo)
 	}
-
-	print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
-	println(config.Styles.Menu.Render("menu"))
-	messages.Prefix = config.Styles.Menu.PaddingRight(1).Render("│")
 
 	// If we reach this point,
 	// it means we need to show the TUI menu.
