@@ -33,20 +33,19 @@ var BodyFormat string
 var DataFormat string
 
 var NoScript = regexp.MustCompile(`<script.*>.*</script>`)
-var UseDisk = os.Getenv("DEV") == "1"
 
-func New(conf Config) func(view _view.View) (html string, err error) {
-	var efs = conf.Efs
-	var app = conf.App
-	var limit = conf.Limit
-	if conf.ErrorLog == nil {
-		conf.ErrorLog = log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
+func New(config Config) func(view _view.View) (html string, err error) {
+	var efs = config.Efs
+	var app = config.App
+	var limit = config.Limit
+	if config.ErrorLog == nil {
+		config.ErrorLog = log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
 	}
-	if conf.InfoLog == nil {
-		conf.InfoLog = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
+	if config.InfoLog == nil {
+		config.InfoLog = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
 	}
-	if conf.App == "" {
-		conf.App = "app"
+	if config.App == "" {
+		config.App = "app"
 	}
 
 	if limit <= 0 {
@@ -68,7 +67,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 	var compile = func() (render goja.Callable, runtime *goja.Runtime, err error) {
 		var data []byte
 
-		if !UseDisk && embeds.IsFile(efs, appServerFix) {
+		if !config.UseDisk && embeds.IsFile(efs, appServerFix) {
 			data, err = efs.ReadFile(appServerFix)
 		} else {
 			data, err = os.ReadFile(appServer)
@@ -86,9 +85,9 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 
 			switch level {
 			case LogLevelDanger:
-				logger = conf.ErrorLog
+				logger = config.ErrorLog
 			default:
-				logger = conf.InfoLog
+				logger = config.InfoLog
 			}
 
 			return func(call goja.FunctionCall) goja.Value {
@@ -103,7 +102,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 						object := argument.ToObject(runtime)
 						data, err = object.MarshalJSON()
 						if err != nil {
-							conf.ErrorLog.Println(err, stack.Trace())
+							config.ErrorLog.Println(err, stack.Trace())
 							return goja.Undefined()
 						}
 						builder.WriteString(string(data))
@@ -168,7 +167,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 	return func(view _view.View) (indexString string, err error) {
 		var propsData []byte
 
-		if !UseDisk && embeds.IsFile(efs, indexFix) {
+		if !config.UseDisk && embeds.IsFile(efs, indexFix) {
 			propsData, err = efs.ReadFile(indexFix)
 		} else {
 			propsData, err = os.ReadFile(index)
@@ -183,7 +182,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 		if view.RenderMode == _view.RenderModeServer || view.RenderMode == _view.RenderModeFull {
 			var render goja.Callable
 			var runtime *goja.Runtime
-			if UseDisk {
+			if config.UseDisk {
 				render, runtime, err = compile()
 				if err != nil {
 					return

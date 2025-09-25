@@ -15,6 +15,7 @@ type Config struct {
 	App      string
 	Efs      embed.FS
 	Limit    int
+	UseDisk  bool
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 }

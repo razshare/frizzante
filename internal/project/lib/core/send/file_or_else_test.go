@@ -18,7 +18,10 @@ func TestFileOrElse(t *testing.T) {
 	client.Config.PublicRoot = ""
 	client.Request.RequestURI = "file_or_else_test.go"
 	var orElse bool
-	FileOrElse(client, false, func() { orElse = true })
+	FileOrElse(client, FileOrElseConfig{
+		UseDisk: false,
+		OrElse:  func() { orElse = true },
+	})
 	writer := client.Writer.(*mock.ResponseWriter)
 
 	if orElse {
@@ -36,7 +39,10 @@ func TestFileOrElseFromFs(t *testing.T) {
 	client.Request.RequestURI = "file_or_else_test.go"
 	client.Request.URL = &url.URL{Path: "file_or_else_test.go"}
 	var orElse bool
-	FileOrElse(client, true, func() { orElse = true })
+	FileOrElse(client, FileOrElseConfig{
+		UseDisk: true,
+		OrElse:  func() { orElse = true },
+	})
 	writer := client.Writer.(*mock.ResponseWriter)
 
 	if orElse {
@@ -54,7 +60,10 @@ func TestFileOrElseShouldFail(t *testing.T) {
 	client.Config.PublicRoot = ""
 	client.Request.RequestURI = "some_file.go"
 	var orElse bool
-	FileOrElse(client, false, func() { orElse = true })
+	FileOrElse(client, FileOrElseConfig{
+		UseDisk: false,
+		OrElse:  func() { orElse = true },
+	})
 	if !orElse {
 		t.Fatal("or else should trigger")
 	}
