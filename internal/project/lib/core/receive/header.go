@@ -3,15 +3,11 @@ package receive
 import "github.com/razshare/frizzante/internal/project/lib/core/client"
 
 // Header reads a header field and returns the value.
-//
-// Compatible with web sockets.
 func Header(client *client.Client, key string) string {
 	return client.Request.Header.Get(key)
 }
 
 // ContentType reads the Content-Type header field and returns the value.
-//
-// Compatible with web sockets.
 func ContentType(client *client.Client) string {
 	return client.Request.Header.Get("Content-Type")
 }

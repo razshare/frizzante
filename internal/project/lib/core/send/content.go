@@ -11,13 +11,7 @@ import (
 
 // Content sends binary safe content.
 //
-// If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
-//
-// The status code and the header will become locked and further attempts to send either of them will fail with an error.
-//
-// All errors are sent to the server notifier.
-//
-// Compatible with web sockets.
+// Compatible with web sockets and server sent events.
 func Content(client *client.Client, data []byte) {
 	if !client.Locked {
 		client.Writer.WriteHeader(client.Status)
@@ -43,26 +37,14 @@ func Content(client *client.Client, data []byte) {
 
 // Message sends utf-8 safe content.
 //
-// If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
-//
-// The status code and the header will become locked and further attempts to send either of them will fail with an error.
-//
-// All errors are sent to the server notifier.
-//
-// Compatible with web sockets.
+// Compatible with web sockets and server sent events.
 func Message(client *client.Client, message string) {
 	Content(client, []byte(message))
 }
 
 // Messagef sends utf-8 safe content using a format.
 //
-// If the status code or the header have not been sent already, a default status of "200 OK" will be sent immediately along with whatever headers you've previously defined.
-//
-// The status code and the header will become locked and further attempts to send either of them will fail with an error.
-//
-// All errors are sent to the server notifier.
-//
-// Compatible with web sockets.
+// Compatible with web sockets and server sent events.
 func Messagef(client *client.Client, format string, vars ...any) {
 	Content(client, []byte(fmt.Sprintf(format, vars...)))
 }
@@ -85,8 +67,7 @@ func BadRequest(client *client.Client, message string) {
 	Message(client, message)
 }
 
-// Error sends a message with status 500 Internal server Error
-// and also sends the error to the server notifier.
+// Error sends a message with status 500 Internal Server Error.
 func Error(client *client.Client, err error) {
 	Status(client, http.StatusInternalServerError)
 	Message(client, err.Error())
@@ -105,6 +86,8 @@ func TooManyRequests(client *client.Client, message string) {
 }
 
 // Flush send an empty message.
+//
+// Compatible with web sockets and server sent events.
 func Flush(client *client.Client) {
 	Message(client, "")
 }

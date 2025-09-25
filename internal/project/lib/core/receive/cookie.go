@@ -8,8 +8,6 @@ import (
 )
 
 // Cookie reads the contents of a cookie from the message and returns the value.
-//
-// Compatible with web sockets.
 func Cookie(client *client.Client, key string) string {
 	cookie, err := client.Request.Cookie(key)
 	if err != nil {

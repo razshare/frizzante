@@ -30,6 +30,4 @@ func WsUpgradeWithUpgrader(client *client.Client, upgrader websocket.Upgrader) {
 
 	client.WebSocket = conn
 	client.Locked = true
-
-	return
 }

@@ -11,7 +11,7 @@ import (
 // Json reads the next JSON-encoded message from the
 // c and stores it in the value pointed to by value.
 //
-// Compatible with web sockets.
+// Compatible with web sockets and server sent events.
 func Json(client *client.Client, value any) bool {
 	if client.WebSocket != nil {
 		if err := client.WebSocket.ReadJSON(&value); err != nil {
