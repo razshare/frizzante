@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { setContext, SvelteComponent } from "svelte"
+    import { setContext, type SvelteComponent } from "svelte"
     import { views } from "$exports.client"
     import Async from "$lib/components/core/Async.svelte"
     import type { View } from "$lib/scripts/core/types.js"
