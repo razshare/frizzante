@@ -102,5 +102,5 @@ func Send(headers []string, rows [][]string, options ...Options) {
 			return lipgloss.NewStyle()
 		})
 
-	fmt.Println("\r" + tbl.Render())
+	fmt.Println(tbl.Render())
 }

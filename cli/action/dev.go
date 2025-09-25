@@ -19,10 +19,10 @@ func Dev(options DevOptions) (err error) {
 
 	var group sync.WaitGroup
 	group.Go(func() {
-		messages.Command(".", append(os.Environ(), "DEV=1"), options.Air)
+		_ = PackageWatch(PackageWatchOptions{App: options.App, Bun: options.Bun})
 	})
 	group.Go(func() {
-		_ = PackageWatch(PackageWatchOptions{App: options.App, Bun: options.Bun})
+		messages.Command(".", append(os.Environ(), "DEV=1"), options.Air)
 	})
 	group.Wait()
 

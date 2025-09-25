@@ -41,6 +41,10 @@ func Package(options PackageOptions) (err error) {
 		return
 	}
 
+	if err = os.RemoveAll(filepath.Join(options.App, "dist", "assets")); err != nil {
+		return
+	}
+
 	messages.Successf("%s generated", filepath.Join(options.App, "dist"))
 
 	if !options.Prod && files.IsDirectory(filepath.Join("lib", "core", "view", "ssr")) {

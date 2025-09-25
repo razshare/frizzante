@@ -35,7 +35,7 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 	group.Go(func() {
 		messages.Command(
 			options.App,
-			append(os.Environ(), "DEV=1"),
+			os.Environ(),
 			bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch",
 		)
 	})

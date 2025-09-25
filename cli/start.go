@@ -2,6 +2,7 @@ package cli
 
 import (
 	"errors"
+	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli/app"
@@ -35,6 +36,10 @@ func Start(a *app.App) (err error) {
 			continue
 		}
 
+		print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+		println(config.Styles.Menu.Render(fmt.Sprintf("running ▷ %s (%s)", it.Choice.Id, it.Choice.Description)))
+		messages.Prefix = config.Styles.Menu.PaddingRight(1).Render("│")
+
 		return it.Handler()
 	}
 
@@ -46,6 +51,8 @@ func Start(a *app.App) (err error) {
 		println(logo)
 	}
 
+	print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+	println(config.Styles.Menu.Render("menu"))
 	messages.Prefix = config.Styles.Menu.PaddingRight(1).Render("│")
 
 	// If we reach this point,

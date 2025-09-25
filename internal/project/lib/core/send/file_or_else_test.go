@@ -36,7 +36,7 @@ func TestFileOrElseFromFs(t *testing.T) {
 	client.Request.RequestURI = "file_or_else_test.go"
 	client.Request.URL = &url.URL{Path: "file_or_else_test.go"}
 	var orElse bool
-	FileOrElse(client, false, func() { orElse = true })
+	FileOrElse(client, true, func() { orElse = true })
 	writer := client.Writer.(*mock.ResponseWriter)
 
 	if orElse {

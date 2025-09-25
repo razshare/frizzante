@@ -13,7 +13,7 @@ func Subheader(args ...any) {
 	for i := 0; i < length; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	fmt.Println("\r" + config.Styles.Subheader.Render(strings.Join(entries, "")))
+	fmt.Println(config.Styles.Subheader.Render(strings.Join(entries, "")))
 }
 
 func Subheaderf(format string, vars ...any) {

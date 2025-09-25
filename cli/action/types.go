@@ -47,8 +47,9 @@ type PackageOptions struct {
 }
 
 type PackageWatchOptions struct {
-	App string
-	Bun string
+	App      string
+	Bun      string
+	Callback func()
 }
 
 type CheckOptions struct {

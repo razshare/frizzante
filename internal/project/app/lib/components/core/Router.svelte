@@ -7,6 +7,7 @@
     let { Name, Props, Render, Align } = $props() as View<Record<string, unknown>>
     const view = $state({ Name, Props, Render, Align })
     setContext("view", view)
+    console.log("Name", Name)
 </script>
 
 {#each Object.keys(components) as key (key)}

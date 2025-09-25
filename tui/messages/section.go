@@ -13,7 +13,7 @@ func Section(args ...any) {
 	for i := 0; i < length; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	fmt.Println("\r" + config.Styles.Section.Render("## "+strings.Join(entries, "")))
+	fmt.Println(config.Styles.Section.Render("## " + strings.Join(entries, "")))
 }
 
 func Sectionf(format string, vars ...any) {
