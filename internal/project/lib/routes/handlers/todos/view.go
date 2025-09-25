@@ -5,7 +5,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/view"
-	"github.com/razshare/frizzante/internal/project/lib/session/memory"
+	session "github.com/razshare/frizzante/internal/project/lib/session/memory"
 )
 
 func View(client *client.Client) {

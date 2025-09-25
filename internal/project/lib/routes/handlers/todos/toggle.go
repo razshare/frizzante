@@ -11,32 +11,34 @@ import (
 
 func Toggle(client *client.Client) {
 	var err error
+	var count int64
 	var index int64
 	var value int64
-	var count int64
-	var queryIndex string
-	var queryValue string
+	var indexQuery string
+	var valueQuery string
 
 	state := session.Start(receive.SessionId(client))
 
-	if queryIndex = receive.Query(client, "index"); queryIndex == "" {
+	if indexQuery = receive.Query(client, "index"); indexQuery == "" {
 		// No index found, ignore the request.
 		send.Navigate(client, "/todos")
 		return
 	}
 
-	if queryValue = receive.Query(client, "value"); queryValue == "" {
-		// No index found, ignore the request.
+	if valueQuery = receive.Query(client, "value"); valueQuery == "" {
+		// No value found, ignore the request.
 		send.Navigate(client, "/todos")
 		return
 	}
 
-	if index, err = strconv.ParseInt(queryIndex, 10, 64); err != nil {
+	if index, err = strconv.ParseInt(indexQuery, 10, 64); err != nil {
+		// Could not parse index, redirect with error.
 		send.Navigatef(client, "/todos?error=%s", err.Error())
 		return
 	}
 
-	if value, err = strconv.ParseInt(queryValue, 10, 64); err != nil {
+	if value, err = strconv.ParseInt(valueQuery, 10, 64); err != nil {
+		// Could not parse value, redirect with error.
 		send.Navigatef(client, "/todos?error=%s", err.Error())
 		return
 	}
