@@ -17,9 +17,8 @@
         "checkJs": true,
         "paths": {
             "$lib/*": ["./lib/*"],
-            "$client": ["./app.client.ts"],
-            "$server": ["./app.server.ts"],
-            "$views": ["./app.views.ts"]
+            "$exports.client": ["./$exports.client.ts"],
+            "$exports.server": ["./$exports.server.ts"]
         },
         "lib": ["esnext", "DOM", "DOM.Iterable"],
         "useDefineForClassFields": true,

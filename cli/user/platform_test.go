@@ -11,6 +11,9 @@ import (
 )
 
 func TestPlatformLinuxAmd64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -46,6 +49,9 @@ func TestPlatformLinuxAmd64(t *testing.T) {
 }
 
 func TestPlatformLinuxArm64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -81,6 +87,9 @@ func TestPlatformLinuxArm64(t *testing.T) {
 }
 
 func TestPlatformDarwinAmd64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -116,6 +125,9 @@ func TestPlatformDarwinAmd64(t *testing.T) {
 }
 
 func TestPlatformDarwinArm64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -151,6 +163,9 @@ func TestPlatformDarwinArm64(t *testing.T) {
 }
 
 func TestPlatformWindowsAmd64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -186,6 +201,9 @@ func TestPlatformWindowsAmd64(t *testing.T) {
 }
 
 func TestPlatformWindowsArm64(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -221,6 +239,9 @@ func TestPlatformWindowsArm64(t *testing.T) {
 }
 
 func TestTestPlatformFresh(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)
@@ -240,6 +261,9 @@ func TestTestPlatformFresh(t *testing.T) {
 }
 
 func TestPlatformCached(t *testing.T) {
+	PlatformMutex.Lock()
+	defer PlatformMutex.Unlock()
+
 	cache, err := FrizzanteCache()
 	if err != nil {
 		t.Fatal(err)

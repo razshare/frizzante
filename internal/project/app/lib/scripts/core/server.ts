@@ -1,6 +1,5 @@
 import { render as _render } from "svelte/server"
-import Router from "$lib/components/core/Router.svelte"
+import Router from "$lib/components/core/ServerRouter.svelte"
 export async function render(args: Record<string, never>) {
-    // @ts-expect-error
     return _render(Router, { props: args })
 }

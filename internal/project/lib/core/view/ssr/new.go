@@ -1,7 +1,6 @@
 package ssr
 
 import (
-	"bytes"
 	_ "embed"
 	"encoding/json"
 	"errors"
@@ -77,10 +76,6 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 
 		if err != nil {
 			return
-		}
-
-		if conf.Disk {
-			data = bytes.ReplaceAll(data, []byte("import(\"./assets/"), []byte("import(\"./dist/assets/"))
 		}
 
 		var builder strings.Builder

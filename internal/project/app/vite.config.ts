@@ -16,15 +16,17 @@ export default defineConfig({
         svelte({
             compilerOptions: {
                 css: "injected",
+                experimental: {
+                    async: true,
+                }
             },
         }),
     ],
     resolve: {
         alias: {
             $lib: "./lib",
-            $client: "./app.client.ts",
-            $server: "./app.server.ts",
-            $views: "./app.views.ts",
+            "$exports.client": "./exports.client.ts",
+            "$exports.server": "./exports.server.ts",
         },
     },
     build: {
