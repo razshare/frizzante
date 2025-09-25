@@ -4,6 +4,7 @@ package main
 
 import (
 	"embed"
+	"os"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/route"
 	"github.com/razshare/frizzante/internal/project/lib/core/server"
@@ -20,8 +21,8 @@ import (
 var efs embed.FS
 var srv = server.New()
 
-// var dev = os.Getenv("DEV") == "1"
-var render = ssr.New(ssr.Config{Efs: efs, Disk: true})
+var dev = os.Getenv("DEV") == "1"
+var render = ssr.New(ssr.Config{Efs: efs, Disk: dev})
 
 func main() {
 	defer server.Start(srv)
