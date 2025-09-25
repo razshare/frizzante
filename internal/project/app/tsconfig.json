@@ -25,9 +25,10 @@
         "moduleDetection": "force"
     },
     "include": [
-        "./app.views.ts",
         "./app.client.ts",
         "./app.server.ts",
+        "./exports.client.ts",
+        "./exports.server.ts",
         "./index.html",
         "./**/*.svelte.js",
         "./**/*.svelte.ts",
