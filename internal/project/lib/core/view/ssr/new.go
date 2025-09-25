@@ -33,11 +33,11 @@ var BodyFormat string
 var DataFormat string
 
 var NoScript = regexp.MustCompile(`<script.*>.*</script>`)
+var UseDisk = os.Getenv("DEV") == "1"
 
 func New(conf Config) func(view _view.View) (html string, err error) {
 	var efs = conf.Efs
 	var app = conf.App
-	var disk = conf.Disk
 	var limit = conf.Limit
 	if conf.ErrorLog == nil {
 		conf.ErrorLog = log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
@@ -68,7 +68,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 	var compile = func() (render goja.Callable, runtime *goja.Runtime, err error) {
 		var data []byte
 
-		if !disk && embeds.IsFile(efs, appServerFix) {
+		if !UseDisk && embeds.IsFile(efs, appServerFix) {
 			data, err = efs.ReadFile(appServerFix)
 		} else {
 			data, err = os.ReadFile(appServer)
@@ -168,7 +168,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 	return func(view _view.View) (indexString string, err error) {
 		var propsData []byte
 
-		if !disk && embeds.IsFile(efs, indexFix) {
+		if !UseDisk && embeds.IsFile(efs, indexFix) {
 			propsData, err = efs.ReadFile(indexFix)
 		} else {
 			propsData, err = os.ReadFile(index)
@@ -183,7 +183,7 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 		if view.RenderMode == _view.RenderModeServer || view.RenderMode == _view.RenderModeFull {
 			var render goja.Callable
 			var runtime *goja.Runtime
-			if disk {
+			if UseDisk {
 				render, runtime, err = compile()
 				if err != nil {
 					return

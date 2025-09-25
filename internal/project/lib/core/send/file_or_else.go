@@ -16,8 +16,10 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
+var UseDisk = os.Getenv("DEV") == "1"
+
 // FileOrElse sends the file requested by the client, or else falls back.
-func FileOrElse(client *client.Client, disk bool, orElse func()) {
+func FileOrElse(client *client.Client, orElse func()) {
 	if client.WebSocket != nil {
 		client.Config.ErrorLog.Println("file_or_else does not support web sockets", stack.Trace())
 		return
@@ -36,7 +38,7 @@ func FileOrElse(client *client.Client, disk bool, orElse func()) {
 		name = filepath.Join(client.Config.PublicRoot, client.Request.RequestURI)
 	}
 
-	if disk && files.IsFile(name) {
+	if UseDisk && files.IsFile(name) {
 		if "" == client.Writer.Header().Get("Content-Type") {
 			Header(client, "Content-Type", mime.Parse(name))
 		}
