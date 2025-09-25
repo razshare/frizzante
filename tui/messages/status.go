@@ -26,6 +26,7 @@ func Status(label string, text string, labelBg string, labelFg string, color str
 		if strings.TrimSpace(line) == "" {
 			continue
 		}
+
 		if i == 0 {
 			fmt.Println("\r" + Prefix + labelStyle.Render(label) + " " + textStyle.Render(line))
 		} else {

@@ -29,9 +29,9 @@ func Types(options TypesOptions) (err error) {
 
 	go spinner.Start(spin)
 	types.Env = os.Environ()
-	// get.Stderr = os.Stderr
-	// get.Stdout = os.Stdout
-	// get.Stdin = os.Stdin
+	types.Stderr = os.Stderr
+	types.Stdout = os.Stdout
+	types.Stdin = os.Stdin
 	err = types.Run()
 	spinner.Stop(spin)
 

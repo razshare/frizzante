@@ -2,7 +2,6 @@ package action
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/razshare/frizzante/tui/messages"
@@ -18,19 +17,9 @@ func Build(options BuildOptions) (err error) {
 		return
 	}
 
-	build := exec.Command(options.Go, "build", "-o="+filepath.Join(".gen", "bin", "app"), ".")
-	build.Env = os.Environ()
-	//build.Stderr = os.Stderr
-	//build.Stdout = os.Stdout
-	//build.Stdin = os.Stdin
-	if err = build.Run(); err != nil {
-		if build.Err != nil {
-			messages.Error(build.Err.Error())
-		}
-		return
+	if messages.Command(".", os.Environ(), options.Go, "build", "-o="+filepath.Join(".gen", "bin", "app"), ".") {
+		messages.Success("project built into ", filepath.Join(".gen", "bin", "app"))
 	}
-
-	messages.Success("project built into ", filepath.Join(".gen", "bin", "app"))
 
 	return
 }

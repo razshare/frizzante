@@ -21,9 +21,9 @@ func Format(options FormatOptions) (err error) {
 
 	gofmt := exec.Command(options.Go, "fmt", "./...")
 	gofmt.Env = os.Environ()
-	//gofmt.Stderr = os.Stderr
-	//gofmt.Stdout = os.Stdout
-	//gofmt.Stdin = os.Stdin
+	gofmt.Stderr = os.Stderr
+	gofmt.Stdout = os.Stdout
+	gofmt.Stdin = os.Stdin
 	if err = gofmt.Run(); err != nil {
 		if gofmt.Err != nil {
 			messages.Error(gofmt.Err.Error())
@@ -43,9 +43,9 @@ func Format(options FormatOptions) (err error) {
 	pretty := exec.Command(bun, "x", "prettier", "--write", ".")
 	pretty.Dir = options.App
 	pretty.Env = os.Environ()
-	//pretty.Stderr = os.Stderr
-	//pretty.Stdout = os.Stdout
-	//pretty.Stdin = os.Stdin
+	pretty.Stderr = os.Stderr
+	pretty.Stdout = os.Stdout
+	pretty.Stdin = os.Stdin
 	if err = pretty.Run(); err != nil {
 		if pretty.Err != nil {
 			messages.Error(pretty.Err.Error())

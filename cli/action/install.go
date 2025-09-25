@@ -19,20 +19,6 @@ func Install(options InstallOptions) (err error) {
 		return
 	}
 
-	tidy := exec.Command(options.Go, "mod", "tidy")
-	tidy.Env = os.Environ()
-	//tidy.Stderr = os.Stderr
-	//tidy.Stdout = os.Stdout
-	//tidy.Stdin = os.Stdin
-	err = tidy.Run()
-
-	if err != nil {
-		if tidy.Err != nil {
-			messages.Error(tidy.Err.Error())
-		}
-		return
-	}
-
 	var bun string
 	if files.IsFile(options.Bun) {
 		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
@@ -42,20 +28,13 @@ func Install(options InstallOptions) (err error) {
 		bun = options.Bun
 	}
 
-	install := exec.Command(bun, "install")
-	install.Dir = options.App
-	install.Env = os.Environ()
-	//ins.Stderr = os.Stderr
-	//ins.Stdout = os.Stdout
-	//ins.Stdin = os.Stdin
-	if err = install.Run(); err != nil {
-		if install.Err != nil {
-			messages.Error(install.Err.Error())
-		}
-		return
+	if messages.Command(".", os.Environ(), options.Go, "mod", "tidy") {
+		messages.Success("go packages installed")
 	}
 
-	messages.Success("packages installed")
+	if messages.Command(options.App, os.Environ(), bun, "install") {
+		messages.Success("js packages installed")
+	}
 
 	return
 }

@@ -118,7 +118,7 @@ func (model *Model) View() string {
 	var builder strings.Builder
 	builder.Grow(1024)
 
-	builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+	builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("\r⎚"))
 	builder.WriteString(config.Styles.Menu.Render(model.Prompt))
 
 	if model.Search.Input.Value() != "" {
@@ -130,7 +130,6 @@ func (model *Model) View() string {
 	builder.WriteString("\n")
 
 	if model.Loading {
-		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  loading..."))
 		builder.WriteString("\n")
 		if model.Search.Active {
@@ -138,7 +137,6 @@ func (model *Model) View() string {
 		}
 		return builder.String()
 	} else if model.Error != nil {
-		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.Status(config.Colors.Error).Render("✗  " + model.Error.Error()))
 		builder.WriteString("\n")
 		if model.Search.Active {
@@ -154,6 +152,7 @@ func (model *Model) View() string {
 
 		builder.WriteString("\n")
 
+		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
 
 		if model.Search.Active {
@@ -203,6 +202,7 @@ func (model *Model) View() string {
 		builder.WriteString("\n")
 	}
 
+	builder.WriteString(config.Styles.Menu.Render("│"))
 	builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
 
 	if model.Search.Active {

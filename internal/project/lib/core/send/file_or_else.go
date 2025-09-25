@@ -17,7 +17,7 @@ import (
 )
 
 // FileOrElse sends the file requested by the client, or else falls back.
-func FileOrElse(client *client.Client, orElse func()) {
+func FileOrElse(client *client.Client, disk bool, orElse func()) {
 	if client.WebSocket != nil {
 		client.Config.ErrorLog.Println("file_or_else does not support web sockets", stack.Trace())
 		return
@@ -36,7 +36,14 @@ func FileOrElse(client *client.Client, orElse func()) {
 		name = filepath.Join(client.Config.PublicRoot, client.Request.RequestURI)
 	}
 
-	if embeds.IsFile(client.Config.Efs, name) {
+	if disk && files.IsFile(name) {
+		if "" == client.Writer.Header().Get("Content-Type") {
+			Header(client, "Content-Type", mime.Parse(name))
+		}
+
+		http.ServeFile(client.Writer, client.Request, name)
+		return
+	} else if embeds.IsFile(client.Config.Efs, name) {
 		var file fs.File
 		var err error
 		if file, err = client.Config.Efs.Open(name); err != nil {
@@ -65,15 +72,6 @@ func FileOrElse(client *client.Client, orElse func()) {
 		}
 
 		http.ServeContent(client.Writer, client.Request, name, info.ModTime(), bytes.NewReader(buf))
-		return
-	}
-
-	if files.IsFile(name) {
-		if "" == client.Writer.Header().Get("Content-Type") {
-			Header(client, "Content-Type", mime.Parse(name))
-		}
-
-		http.ServeFile(client.Writer, client.Request, name)
 		return
 	}
 

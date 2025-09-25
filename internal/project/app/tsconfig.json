@@ -16,13 +16,20 @@
         "skipLibCheck": true,
         "checkJs": true,
         "paths": {
-            "$lib/*": ["./lib/*"]
+            "$lib/*": ["./lib/*"],
+            "$client": ["./app.client.ts"],
+            "$server": ["./app.server.ts"],
+            "$views": ["./app.views.ts"]
         },
         "lib": ["esnext", "DOM", "DOM.Iterable"],
         "useDefineForClassFields": true,
         "moduleDetection": "force"
     },
     "include": [
+        "./app.views.ts",
+        "./app.client.ts",
+        "./app.server.ts",
+        "./index.html",
         "./**/*.svelte.js",
         "./**/*.svelte.ts",
         "./**/*.svelte",

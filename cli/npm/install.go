@@ -3,7 +3,6 @@ package npm
 import (
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
@@ -21,18 +20,10 @@ func Install(bun string, app string, pkgs ...string) error {
 	ok := 0
 	for _, pkg := range pkgs {
 		messages.Infof("adding %s", pkg)
-		cmd := exec.Command(bun, "add", "-D", pkg)
-		cmd.Dir = app
-		cmd.Env = os.Environ()
-		//cmd.Stdout = os.Stdout
-		//cmd.Stderr = os.Stderr
-		err := cmd.Run()
-
-		if err != nil {
-			messages.Errorf("failed to add package %s: %v", pkg, err)
+		if !messages.Command(app, os.Environ(), bun, "add", "-D", pkg) {
+			messages.Errorf("failed to add package %s", pkg)
 			continue
 		}
-
 		messages.Successf("added %s packages to %s/node_modules", pkg, app)
 		ok++
 	}

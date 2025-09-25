@@ -4,10 +4,13 @@
         <!--app-head-->
         <!--app-target-->
         <!--app-data-->
-        <link rel="stylesheet" href="lib/style.css" />
+        <link rel="stylesheet" href="./lib/style.css" />
     </head>
     <body>
         <!--app-body-->
-        <script type="module" src="app.client.ts"></script>
+        <script type="module">
+            import {render} from "./app.client.ts"
+            render(document.getElementById("app"), window.data())
+        </script>
     </body>
 </html>

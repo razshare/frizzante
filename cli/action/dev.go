@@ -2,7 +2,6 @@ package action
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sync"
 
@@ -18,31 +17,14 @@ func Dev(options DevOptions) (err error) {
 		return
 	}
 
-	airwatch := exec.Command(options.Air)
-	airwatch.Env = append(os.Environ(), "DEV=1")
-	airwatch.Stderr = os.Stderr
-	airwatch.Stdout = os.Stdout
-	airwatch.Stdin = os.Stdin
-	if err = airwatch.Start(); err != nil {
-		if airwatch.Err != nil {
-			messages.Error(airwatch.Err.Error())
-		}
-		return
-	}
-
-	//messages.Success("air watcher launched")
-
 	var group sync.WaitGroup
-
-	group.Add(1)
-
-	go func() { err = PackageWatch(PackageWatchOptions{App: options.App, Bun: options.Bun}) }()
-
+	group.Go(func() {
+		messages.Command(".", append(os.Environ(), "DEV=1"), options.Air)
+	})
+	group.Go(func() {
+		_ = PackageWatch(PackageWatchOptions{App: options.App, Bun: options.Bun})
+	})
 	group.Wait()
-
-	if err = airwatch.Wait(); err != nil {
-		return
-	}
 
 	return
 }

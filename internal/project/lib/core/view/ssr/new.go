@@ -1,6 +1,7 @@
 package ssr
 
 import (
+	"bytes"
 	_ "embed"
 	"encoding/json"
 	"errors"
@@ -22,9 +23,6 @@ import (
 
 //go:embed render.format
 var RenderFormat string
-
-//go:embed target.format
-var TargetFormat string
 
 //go:embed head.format
 var HeadFormat string
@@ -48,6 +46,9 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 	if conf.InfoLog == nil {
 		conf.InfoLog = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
 	}
+	if conf.App == "" {
+		conf.App = "app"
+	}
 
 	if limit <= 0 {
 		limit = 1
@@ -58,7 +59,6 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 	}
 
 	var mut sync.Mutex
-	var id = "app"
 	var dist = filepath.Join(app, "dist")
 	var appServer = filepath.Join(dist, "app.server.js")
 	var appServerFix = strings.ReplaceAll(appServer, "\\", "/")
@@ -77,6 +77,10 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 
 		if err != nil {
 			return
+		}
+
+		if conf.Disk {
+			data = bytes.ReplaceAll(data, []byte("import(\"./assets/"), []byte("import(\"./dist/assets/"))
 		}
 
 		var builder strings.Builder
@@ -166,20 +170,20 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 		return
 	}
 
-	return func(view _view.View) (html string, err error) {
-		var data []byte
+	return func(view _view.View) (indexString string, err error) {
+		var propsData []byte
 
 		if !disk && embeds.IsFile(efs, indexFix) {
-			data, err = efs.ReadFile(indexFix)
+			propsData, err = efs.ReadFile(indexFix)
 		} else {
-			data, err = os.ReadFile(index)
+			propsData, err = os.ReadFile(index)
 		}
 
 		if err != nil {
 			return
 		}
 
-		html = string(data)
+		indexString = string(propsData)
 
 		if view.RenderMode == _view.RenderModeServer || view.RenderMode == _view.RenderModeFull {
 			var render goja.Callable
@@ -230,36 +234,33 @@ func New(conf Config) func(view _view.View) (html string, err error) {
 			}
 
 			if view.RenderMode == _view.RenderModeServer {
-				html = NoScript.ReplaceAllString(html, "")
+				indexString = NoScript.ReplaceAllString(indexString, "")
 			}
 
 			if view.RenderMode == _view.RenderModeServer {
-				html = strings.Replace(html, "<!--app-target-->", "", 1)
-				html = strings.Replace(html, "<!--app-data-->", "", 1)
+				indexString = strings.Replace(indexString, "<!--app-data-->", "", 1)
 			} else {
-				if data, err = json.Marshal(_view.Wrap(view)); err != nil {
+				if propsData, err = json.Marshal(_view.Wrap(view)); err != nil {
 					return
 				}
 
-				html = strings.Replace(html, "<!--app-target-->", fmt.Sprintf(TargetFormat, id), 1)
-				html = strings.Replace(html, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
+				indexString = strings.Replace(indexString, "<!--app-data-->", fmt.Sprintf(DataFormat, propsData), 1)
 			}
 
-			html = strings.Replace(html, "<!--app-head-->", head, 1)
-			html = strings.Replace(html, "<!--app-body-->", fmt.Sprintf(BodyFormat, id, body), 1)
+			indexString = strings.Replace(indexString, "<!--app-head-->", head, 1)
+			indexString = strings.Replace(indexString, "<!--app-body-->", fmt.Sprintf(BodyFormat, body), 1)
 
 			return
 		}
 
 		if view.RenderMode == _view.RenderModeClient {
-			if data, err = json.Marshal(_view.Wrap(view)); err != nil {
+			if propsData, err = json.Marshal(_view.Wrap(view)); err != nil {
 				return
 			}
 
-			html = strings.Replace(html, "<!--app-target-->", fmt.Sprintf(TargetFormat, id), 1)
-			html = strings.Replace(html, "<!--app-body-->", fmt.Sprintf(BodyFormat, id, ""), 1)
-			html = strings.Replace(html, "<!--app-head-->", fmt.Sprintf(HeadFormat, view.Title), 1)
-			html = strings.Replace(html, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
+			indexString = strings.Replace(indexString, "<!--app-body-->", fmt.Sprintf(BodyFormat, ""), 1)
+			indexString = strings.Replace(indexString, "<!--app-head-->", fmt.Sprintf(HeadFormat, view.Title), 1)
+			indexString = strings.Replace(indexString, "<!--app-data-->", fmt.Sprintf(DataFormat, propsData), 1)
 
 			return
 		}

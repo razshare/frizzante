@@ -21,6 +21,7 @@ type Server struct {
 	Channels    Channels
 	InfoLog     *log.Logger
 	Efs         embed.FS
+	Cors        *http.CrossOriginProtection
 	Render      func(view view.View) (html string, err error)
 }
 

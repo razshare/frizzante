@@ -13,6 +13,7 @@ func New() (server *Server) {
 		InfoLog:    log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
 		SecureAddr: "0.0.0.0:8383",
 		PublicRoot: "app/dist/client",
+		Cors:       http.NewCrossOriginProtection(),
 		Channels: Channels{
 			Stop: make(chan any, 1),
 		},

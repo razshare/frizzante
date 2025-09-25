@@ -1,7 +1,7 @@
-test: clean configure
+test: clean configure package
 	./scripts/test.sh
 
-coverage: clean configure
+coverage: clean configure package
 	./scripts/coverage.sh
 
 publish: test
@@ -16,6 +16,9 @@ clean:
 install: clean
 	./scripts/install.sh
 	make configure
+
+package:
+	./scripts/package.sh
 
 dev:
 	./scripts/dev.sh

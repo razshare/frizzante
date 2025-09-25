@@ -67,9 +67,9 @@ func Database(options DatabaseOptions) (err error) {
 		go spinner.Start(spin)
 		install := exec.Command(options.Go, "get", "github.com/mattn/go-sqlite3")
 		install.Env = os.Environ()
-		//install.Stderr = os.Stderr
-		//install.Stdout = os.Stdout
-		//install.Stdin = os.Stdin
+		install.Stderr = os.Stderr
+		install.Stdout = os.Stdout
+		install.Stdin = os.Stdin
 		err = install.Run()
 		spinner.Stop(spin)
 
@@ -85,9 +85,9 @@ func Database(options DatabaseOptions) (err error) {
 		go spinner.Start(spin)
 		get := exec.Command(options.Go, "get", "-u", "./...")
 		get.Env = os.Environ()
-		//get.Stderr = os.Stderr
-		//get.Stdout = os.Stdout
-		//get.Stdin = os.Stdin
+		get.Stderr = os.Stderr
+		get.Stdout = os.Stdout
+		get.Stdin = os.Stdin
 		err = get.Run()
 		spinner.Stop(spin)
 

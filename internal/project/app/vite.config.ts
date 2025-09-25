@@ -22,6 +22,9 @@ export default defineConfig({
     resolve: {
         alias: {
             $lib: "./lib",
+            $client: "./app.client.ts",
+            $server: "./app.server.ts",
+            $views: "./app.views.ts",
         },
     },
     build: {

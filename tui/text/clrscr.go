@@ -11,6 +11,8 @@ func Clrscr() {
 	if runtime.GOOS == "windows" {
 		cmd := exec.Command("cmd", "/c", "cls")
 		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
 		_ = cmd.Run()
 		return
 	}
@@ -18,6 +20,8 @@ func Clrscr() {
 	if runtime.GOOS == "linux" {
 		cmd := exec.Command("clear")
 		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
 		_ = cmd.Run()
 		return
 	}
@@ -25,6 +29,8 @@ func Clrscr() {
 	if runtime.GOOS == "darwin" {
 		cmd := exec.Command("clear")
 		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+		cmd.Stdin = os.Stdin
 		_ = cmd.Run()
 		return
 	}

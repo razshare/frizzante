@@ -67,9 +67,9 @@ func Queries(options QueriesOptions) (err error) {
 	generate := exec.Command(sqlc, "generate")
 	generate.Dir = to
 	generate.Env = os.Environ()
-	//generate.Stderr = os.Stderr
-	//generate.Stdout = os.Stdout
-	//generate.Stdin = os.Stdin
+	generate.Stderr = os.Stderr
+	generate.Stdout = os.Stdout
+	generate.Stdin = os.Stdin
 	err = generate.Run()
 	spinner.Stop(spin)
 

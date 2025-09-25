@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
+	"os"
 	"slices"
 	"strings"
 
@@ -13,7 +14,7 @@ import (
 
 // Start starts a server from a configuration.
 func Start(server *Server) {
-	mux := server.Handler.(*http.ServeMux)
+	handler := server.Handler.(*http.ServeMux)
 	config := &client.Config{
 		ErrorLog:   server.ErrorLog,
 		InfoLog:    server.InfoLog,
@@ -22,7 +23,11 @@ func Start(server *Server) {
 		Render:     server.Render,
 	}
 	for _, route := range server.Routes {
-		mux.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
+		handler.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
+			if err := server.Cors.Check(request); err != nil {
+				server.ErrorLog.Println(err)
+				return
+			}
 			con := &client.Client{
 				Writer:  writer,
 				Request: request,
@@ -30,7 +35,6 @@ func Start(server *Server) {
 				EventId: 1,
 				Status:  200,
 			}
-
 			for _, tag := range route.Tags {
 				for _, guard := range server.Guards {
 					if !slices.Contains(guard.Tags, tag) {
@@ -44,13 +48,10 @@ func Start(server *Server) {
 					}
 				}
 			}
-
 			route.Handler(con)
 		})
 	}
-
 	var exit bool
-
 	go func() {
 		address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
 		server.InfoLog.Printf("server bound to address %s; visit your application at http://%s", server.Addr, address)
@@ -58,16 +59,15 @@ func Start(server *Server) {
 			server.InfoLog.Println("cancelling server startup")
 			return
 		}
-		err := http.ListenAndServe(server.Addr, server.Handler)
-		if err != nil {
+		if err := server.ListenAndServe(); err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
 				server.InfoLog.Println("shutting down server")
 				return
 			}
 			server.ErrorLog.Println(err, stack.Trace())
+			os.Exit(1)
 		}
 	}()
-
 	go func() {
 		if server.Certificate != "" && server.Key != "" {
 			address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
@@ -76,20 +76,18 @@ func Start(server *Server) {
 				server.InfoLog.Println("cancelling server startup")
 				return
 			}
-			err := http.ListenAndServeTLS(server.SecureAddr, server.Certificate, server.Key, server.Handler)
-			if err != nil {
+			if err := server.ListenAndServeTLS(server.Certificate, server.Key); err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
 					server.InfoLog.Println("shutting down server")
 					return
 				}
 				server.ErrorLog.Println(err, stack.Trace())
+				os.Exit(1)
 			}
 		}
 	}()
-
 	<-server.Channels.Stop
 	exit = true
-
 	if err := server.Shutdown(context.Background()); err != nil {
 		server.ErrorLog.Println(err)
 	}

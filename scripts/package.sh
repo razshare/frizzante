@@ -9,10 +9,5 @@ test -f frizzante || go build -o frizzante
 
 # Configures internal project
 pushd internal/project && \
-../../frizzante --configure && \
-popd || exit 1
-
-# Installs packages in internal additions
-pushd internal/additions/app && \
-../../project/.gen/bun/bun i && \
+../../frizzante --package && \
 popd || exit 1

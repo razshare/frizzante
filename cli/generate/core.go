@@ -21,6 +21,15 @@ func Core(options CoreOptions) (err error) {
 		return
 	}
 
+	if err = Copy(CopyOptions{
+		From: "internal/project/app/lib/components/core",
+		To:   filepath.Join(options.App, "lib", "components", "core"),
+		Auto: options.Auto,
+		Efs:  options.Efs,
+	}); err != nil {
+		return
+	}
+
 	if err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "core")}); err != nil {
 		return
 	}

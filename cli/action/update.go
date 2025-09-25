@@ -18,21 +18,6 @@ func Update(options UpdateOptions) (err error) {
 	if err = Touch(TouchOptions{App: options.App}); err != nil {
 		return
 	}
-
-	get := exec.Command(options.Go, "get", "-u", "./...")
-	get.Env = os.Environ()
-	//get.Stderr = os.Stderr
-	//get.Stdout = os.Stdout
-	//get.Stdin = os.Stdin
-	err = get.Run()
-
-	if err != nil {
-		if get.Err != nil {
-			messages.Error(get.Err.Error())
-		}
-		return
-	}
-
 	var bun string
 	if files.IsFile(options.Bun) {
 		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
@@ -42,22 +27,13 @@ func Update(options UpdateOptions) (err error) {
 		bun = options.Bun
 	}
 
-	pretty := exec.Command(bun, "update")
-	pretty.Dir = options.App
-	pretty.Env = os.Environ()
-	//pretty.Stderr = os.Stderr
-	//pretty.Stdout = os.Stdout
-	//pretty.Stdin = os.Stdin
-	err = pretty.Run()
-
-	if err != nil {
-		if pretty.Err != nil {
-			messages.Error(pretty.Err.Error())
-		}
-		return
+	if messages.Command(".", os.Environ(), options.Go, "get", "-u", "./...") {
+		messages.Success("go packages updated")
 	}
 
-	messages.Success("project dependencies updated")
+	if messages.Command(options.App, os.Environ(), bun, "update") {
+		messages.Success("js packages updated")
+	}
 
 	return
 }
