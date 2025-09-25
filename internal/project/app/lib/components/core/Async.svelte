@@ -5,10 +5,14 @@
 </script>
 
 <script lang="ts">
-    let { from, properties } = $props()
+    type Props = {
+        from: Promise<SvelteComponent>
+        properties: Record<string, unknown>
+    }
+    let { from, properties }: Props = $props()
     PreviousProperties = properties
-    from.then(function next(view: SvelteComponent) {
-        PreviousComponent = view
+    from.then(function next(component: SvelteComponent) {
+        PreviousComponent = component
     })
 </script>
 
