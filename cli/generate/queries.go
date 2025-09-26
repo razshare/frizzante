@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -52,8 +53,6 @@ func Queries(options QueriesOptions) (err error) {
 		return fmt.Errorf("%s not found", yaml)
 	}
 
-	spin := spinner.New("generating queries")
-
 	var sqlc string
 	if files.IsFile(options.Sqlc) {
 		if sqlc, err = filepath.Rel(to, options.Sqlc); err != nil {
@@ -63,22 +62,15 @@ func Queries(options QueriesOptions) (err error) {
 		sqlc = options.Sqlc
 	}
 
-	go spinner.Start(spin)
-	generate := exec.Command(sqlc, "generate")
-	generate.Dir = to
-	generate.Env = os.Environ()
-	generate.Stderr = os.Stderr
-	generate.Stdout = os.Stdout
-	generate.Stdin = os.Stdin
-	err = generate.Run()
-	spinner.Stop(spin)
+	spin := spinner.New("generating queries")
 
-	if err != nil {
-		if generate.Err != nil {
-			messages.Error(generate.Err.Error())
-		}
+	go spinner.Start(spin)
+	if !messages.Command(to, os.Environ(), sqlc, "generate") {
+		spinner.Stop(spin)
+		err = errors.New("could not generate queries")
 		return
 	}
+	spinner.Stop(spin)
 
 	if err = FixImports(FixImportsOptions{Directory: to}); err != nil {
 		return

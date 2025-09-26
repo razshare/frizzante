@@ -1,9 +1,9 @@
 package generate
 
 import (
+	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -30,7 +30,6 @@ func Database(options DatabaseOptions) (err error) {
 	}
 
 	dbtype := strings.ToLower(options.Type)
-
 	from := "internal/additions/lib/database/" + dbtype
 	to := filepath.Join("lib", "database", dbtype)
 
@@ -52,12 +51,7 @@ func Database(options DatabaseOptions) (err error) {
 		}
 	}
 
-	if err = Copy(CopyOptions{
-		From: from,
-		To:   to,
-		Auto: options.Auto,
-		Efs:  options.Efs,
-	}); err != nil {
+	if err = Copy(CopyOptions{From: from, To: to, Auto: options.Auto, Efs: options.Efs}); err != nil {
 		return
 	}
 
@@ -65,38 +59,12 @@ func Database(options DatabaseOptions) (err error) {
 		spin := spinner.New("adding github.com/mattn/go-sqlite3")
 
 		go spinner.Start(spin)
-		install := exec.Command(options.Go, "get", "github.com/mattn/go-sqlite3")
-		install.Env = os.Environ()
-		install.Stderr = os.Stderr
-		install.Stdout = os.Stdout
-		install.Stdin = os.Stdin
-		err = install.Run()
-		spinner.Stop(spin)
-
-		if err != nil {
-			if install.Err != nil {
-				messages.Error(install.Err.Error())
-			}
+		if !messages.Command(".", os.Environ(), options.Go, "get", "github.com/mattn/go-sqlite3") {
+			spinner.Stop(spin)
+			err = errors.New("could not add github.com/mattn/go-sqlite3")
 			return
 		}
-
-		spin = spinner.New("updating go dependencies")
-
-		go spinner.Start(spin)
-		get := exec.Command(options.Go, "get", "-u", "./...")
-		get.Env = os.Environ()
-		get.Stderr = os.Stderr
-		get.Stdout = os.Stdout
-		get.Stdin = os.Stdin
-		err = get.Run()
 		spinner.Stop(spin)
-
-		if err != nil {
-			if get.Err != nil {
-				messages.Error(get.Err.Error())
-			}
-			return
-		}
 
 		messages.Success("sqlite database is ready")
 
@@ -113,11 +81,7 @@ func Database(options DatabaseOptions) (err error) {
 				return
 			}
 			if queries {
-				if err = Queries(QueriesOptions{
-					Auto:     options.Auto,
-					Sqlc:     options.Sqlc,
-					Platform: options.Platform,
-				}); err != nil {
+				if err = Queries(QueriesOptions{Auto: options.Auto, Sqlc: options.Sqlc, Platform: options.Platform}); err != nil {
 					return
 				}
 			}

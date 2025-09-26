@@ -2,9 +2,10 @@ package generate
 
 import (
 	"errors"
+	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/confirm"
@@ -13,34 +14,26 @@ import (
 )
 
 func Types(options TypesOptions) (err error) {
-	var types *exec.Cmd
-	var spin *spinner.Spinner
+	var flags []string
 
 	if files.IsFile("types.go") {
-		spin = spinner.New("running types.go with -tags types")
-		types = exec.Command(options.Go, "run", "-tags", "types", "types.go")
+		flags = []string{"run", "-tags", "types", "types.go"}
 	} else if files.IsFile(filepath.Join("lib", "types", "main.go")) {
-		spin = spinner.New("running lib/types/main.go")
-		types = exec.Command(options.Go, "run", filepath.Join("lib", "types", "main.go"))
+		flags = []string{"run", "-tags", "types", filepath.Join("lib", "types", "main.go")}
 	} else {
 		err = errors.New("neither types.go nor lib/types/main.go were found")
 		return
 	}
 
-	go spinner.Start(spin)
-	types.Env = os.Environ()
-	types.Stderr = os.Stderr
-	types.Stdout = os.Stdout
-	types.Stdin = os.Stdin
-	err = types.Run()
-	spinner.Stop(spin)
+	spin := spinner.New(fmt.Sprintf("running %s %s", options.Go, strings.Join(flags, "")))
 
-	if err != nil {
-		if types.Err != nil {
-			messages.Error(types.Err.Error())
-		}
+	go spinner.Start(spin)
+	if !messages.Command(".", os.Environ(), options.Go, flags...) {
+		spinner.Stop(spin)
+		err = fmt.Errorf("could not run %s %s", options.Go, strings.Join(flags, " "))
 		return
 	}
+	spinner.Stop(spin)
 
 	if !files.IsDirectory(filepath.Join(".gen", "types")) {
 		if err = os.MkdirAll(filepath.Join(".gen", "types"), os.ModePerm); err != nil {
