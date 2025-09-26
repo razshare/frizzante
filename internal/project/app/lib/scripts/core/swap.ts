@@ -53,7 +53,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         } else {
             res = await fetch(form.action, {
                 method,
-                body: data as unknown as any,
+                body: data as unknown as BodyInit,
                 headers: {
                     Accept: "application/json",
                 },
