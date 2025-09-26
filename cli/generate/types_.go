@@ -21,7 +21,7 @@ func Types(options TypesOptions) (err error) {
 	} else if files.IsFile(filepath.Join("lib", "types", "main.go")) {
 		flags = []string{"run", "-tags", "types", filepath.Join("lib", "types", "main.go")}
 	} else {
-		err = errors.New("neither types.go nor lib/types/main.go were found")
+		err = errors.New("could not generate types because neither types.go nor lib/types/main.go were found")
 		return
 	}
 
