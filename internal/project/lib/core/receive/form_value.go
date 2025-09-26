@@ -21,9 +21,6 @@ func FormValue(client *client.Client, key string) string {
 				client.Config.ErrorLog.Println(err, stack.Trace())
 				return ""
 			}
-
-			client.Config.ErrorLog.Println(err, stack.Trace())
-			return ""
 		}
 	}
 
