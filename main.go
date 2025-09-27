@@ -18,6 +18,9 @@ import (
 //go:embed internal/project/**
 //go:embed internal/project/lib/core/view/ssr/.gitignore
 //go:embed internal/project/app/.gitignore
+//go:embed internal/project/app/.npmrc
+//go:embed internal/project/app/.prettierrc
+//go:embed internal/project/app/.prettierignore
 var efs embed.FS
 var frz = app.New()
 
