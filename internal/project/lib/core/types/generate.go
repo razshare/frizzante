@@ -18,7 +18,7 @@ func Generate[T any]() {
 
 	t := reflect.TypeOf(value)
 
-	if primary, secondary, _, err = Extract(t, make([]string, 0)); err != nil {
+	if primary, secondary, _, err = Extract("", t, make([]string, 0)); err != nil {
 		log.Fatal(err)
 	}
 
