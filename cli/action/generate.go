@@ -6,12 +6,14 @@ import (
 	"strings"
 
 	"github.com/razshare/frizzante/cli/generate"
+	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/multiselect"
 	"github.com/razshare/frizzante/tui/search"
 )
 
 func Generate(options GenerateOptions) (err error) {
 	pick := func(gen string) error {
+		messages.Infof("generating %s", gen)
 		if gen == "air" {
 			return generate.Air(generate.AirOptions{
 				Air:      options.Air,

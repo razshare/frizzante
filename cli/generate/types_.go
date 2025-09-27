@@ -16,7 +16,9 @@ import (
 func Types(options TypesOptions) (err error) {
 	var flags []string
 
-	if files.IsFile("types.go") {
+	if files.IsFile(filepath.Join("lib", "types.go")) {
+		flags = []string{"run", filepath.Join("lib", "types.go")}
+	} else if files.IsFile("types.go") {
 		flags = []string{"run", "-tags", "types", "types.go"}
 	} else if files.IsFile(filepath.Join("lib", "types", "main.go")) {
 		flags = []string{"run", "-tags", "types", filepath.Join("lib", "types", "main.go")}
@@ -25,7 +27,7 @@ func Types(options TypesOptions) (err error) {
 		return
 	}
 
-	spin := spinner.New(fmt.Sprintf("running %s %s", options.Go, strings.Join(flags, "")))
+	spin := spinner.New(fmt.Sprintf("running %s %s", options.Go, strings.Join(flags, " ")))
 
 	go spinner.Start(spin)
 	if !messages.Command(".", os.Environ(), options.Go, flags...) {
