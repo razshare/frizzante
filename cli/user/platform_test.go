@@ -61,9 +61,8 @@ func TestPlatformLinuxArm64(t *testing.T) {
 	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "linux/arm64"
-	a := &app.App{Platform: &platStr}
 
-	plat, err := Platform(a)
+	plat, err := Platform(&app.App{Platform: &platStr})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,13 +75,13 @@ func TestPlatformLinuxArm64(t *testing.T) {
 		t.Fatal("~/platform.txt should be a file")
 	}
 
-	d, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
+	data, err := os.ReadFile(filepath.Join(cache, "platform.txt"))
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if string(d) != "linux/arm64" {
-		t.Fatalf("~/platform.txt should contain linux/arm64, found %s isntead", string(d))
+	if string(data) != "linux/arm64" {
+		t.Fatalf("~/platform.txt should contain linux/arm64, found %s isntead", string(data))
 	}
 }
 
