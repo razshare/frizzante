@@ -6,19 +6,13 @@ import (
 )
 
 func TestRandomHex(t *testing.T) {
-	hex1, err := RandomHex(16)
-	if err != nil {
-		t.Fatal("error generating random hex:", err)
-	}
+	hex1 := RandomHex(16)
 
 	if len(hex1) != 32 {
 		t.Fatal("random hex should be 32 characters for 16 bytes")
 	}
 
-	hex2, err := RandomHex(16)
-	if err != nil {
-		t.Fatal("error generating second random hex:", err)
-	}
+	hex2 := RandomHex(16)
 
 	if hex1 == hex2 {
 		t.Fatal("two random hex values should not be equal")
@@ -26,10 +20,7 @@ func TestRandomHex(t *testing.T) {
 }
 
 func TestRandomBase64(t *testing.T) {
-	b64, err := RandomBase64(24)
-	if err != nil {
-		t.Fatal("error generating random base64:", err)
-	}
+	b64 := RandomBase64(24)
 
 	if len(b64) == 0 {
 		t.Fatal("random base64 should not be empty")
@@ -41,10 +32,7 @@ func TestRandomBase64(t *testing.T) {
 }
 
 func TestRandomBase64Standard(t *testing.T) {
-	b64, err := RandomBase64Standard(24)
-	if err != nil {
-		t.Fatal("error generating random standard base64:", err)
-	}
+	b64 := RandomBase64Standard(24)
 
 	if len(b64) == 0 {
 		t.Fatal("random base64 should not be empty")

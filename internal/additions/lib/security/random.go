@@ -5,11 +5,9 @@ import (
 	"encoding/base64"
 )
 
-func RandomHex(length int) (string, error) {
+func RandomHex(length int) string {
 	bytes := make([]byte, length)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
+	_, _ = rand.Read(bytes)
 
 	to := make([]byte, length*2)
 	var i int
@@ -18,21 +16,17 @@ func RandomHex(length int) (string, error) {
 		to[i+1] = HexTable[b&0x0f]
 		i += 2
 	}
-	return string(to), nil
+	return string(to)
 }
 
-func RandomBase64(length int) (string, error) {
+func RandomBase64(length int) string {
 	bytes := make([]byte, length)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return base64.RawURLEncoding.EncodeToString(bytes), nil
+	_, _ = rand.Read(bytes)
+	return base64.RawURLEncoding.EncodeToString(bytes)
 }
 
-func RandomBase64Standard(length int) (string, error) {
+func RandomBase64Standard(length int) string {
 	bytes := make([]byte, length)
-	if _, err := rand.Read(bytes); err != nil {
-		return "", err
-	}
-	return base64.StdEncoding.EncodeToString(bytes), nil
+	_, _ = rand.Read(bytes)
+	return base64.StdEncoding.EncodeToString(bytes)
 }
