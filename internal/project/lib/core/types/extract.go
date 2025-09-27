@@ -35,6 +35,11 @@ func Extract(prefix string, _type reflect.Type, ignore []string) (primary string
 			t = t.Elem()
 		}
 
+		if t.Name() == "error" {
+			builder.WriteString(fmt.Sprintf("%s%s: string\n", padding, name))
+			continue
+		}
+
 		// We cannot use this, goja's runtime.ToValue() will ignore tags since it's not marshaling.
 		//if tag := f.Tag.Get("json"); tag != "" {
 		//	name = tag
@@ -44,7 +49,6 @@ func Extract(prefix string, _type reflect.Type, ignore []string) (primary string
 			reflect.Chan,
 			reflect.Func,
 			reflect.Invalid,
-			reflect.Interface,
 			reflect.UnsafePointer:
 			err = fmt.Errorf("type %s of kind %s is not supported", t.String(), k.String())
 			return
@@ -87,8 +91,9 @@ func Extract(prefix string, _type reflect.Type, ignore []string) (primary string
 				xbuilder.WriteString(secondaryLoc)
 			}
 		case
+			reflect.Struct,
 			reflect.Pointer,
-			reflect.Struct:
+			reflect.Interface:
 			var primaryLoc string
 			var secondaryLoc string
 			var definitionsLoc = make([]string, 0)
