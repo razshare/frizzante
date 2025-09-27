@@ -14,15 +14,15 @@
             | "multipart/form-data"
             | "application/x-www-form-urlencoded"
             | "text/plain"
-        action: string
+        action?: string
         children: Snippet<[{ pending: boolean; error: false | Error }]>
         class?: string
         style?: string
     }
     let {
         method = "GET",
-        enctype,
-        action: actionPath,
+        enctype.,
+        action: actionPath = "",
         children,
         class: cls,
         style,
