@@ -80,13 +80,6 @@ func Queries(options QueriesOptions) (err error) {
 		"queries generated at database.Queries.*\n",
 		to+"/queries.go",
 	)
-	messages.Tip(
-		"## usage example\n",
-		"func(c *client.Client){\n",
-		"    u, _ := database.Queries.FindUsers(c.Request.Context())\n",
-		"    send.Json(c, u)\n",
-		"}",
-	)
 
 	return
 }
