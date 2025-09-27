@@ -21,7 +21,7 @@
     }
     let {
         method = "GET",
-        enctype.,
+        enctype,
         action: actionPath = "",
         children,
         class: cls,
