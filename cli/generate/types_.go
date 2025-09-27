@@ -16,12 +16,12 @@ import (
 func Types(options TypesOptions) (err error) {
 	var flags []string
 
-	if files.IsFile(filepath.Join("lib", "types.go")) {
-		flags = []string{"run", filepath.Join("lib", "types.go")}
-	} else if files.IsFile("types.go") {
+	if files.IsFile("types.go") {
 		flags = []string{"run", "-tags", "types", "types.go"}
+	} else if files.IsFile(filepath.Join("lib", "types.go")) {
+		flags = []string{"run", filepath.Join("lib", "types.go")}
 	} else if files.IsFile(filepath.Join("lib", "types", "main.go")) {
-		flags = []string{"run", "-tags", "types", filepath.Join("lib", "types", "main.go")}
+		flags = []string{"run", filepath.Join("lib", "types", "main.go")}
 	} else {
 		err = errors.New("could not generate types because neither types.go nor lib/types/main.go were found")
 		return
