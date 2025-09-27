@@ -2,7 +2,6 @@ package security
 
 import (
 	"crypto/rand"
-	"encoding/base64"
 )
 
 func RandomHex(length int) string {
@@ -17,16 +16,4 @@ func RandomHex(length int) string {
 		i += 2
 	}
 	return string(to)
-}
-
-func RandomBase64(length int) string {
-	bytes := make([]byte, length)
-	_, _ = rand.Read(bytes)
-	return base64.RawURLEncoding.EncodeToString(bytes)
-}
-
-func RandomBase64Standard(length int) string {
-	bytes := make([]byte, length)
-	_, _ = rand.Read(bytes)
-	return base64.StdEncoding.EncodeToString(bytes)
 }
