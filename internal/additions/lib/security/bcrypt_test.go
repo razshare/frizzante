@@ -1,33 +1,33 @@
-package text
+package security
 
 import "testing"
 
-func TestBcrypt(t *testing.T) {
+func TestBcryptHash(t *testing.T) {
 	password := "hello"
 
-	hash, err := BcryptHashDefault(password)
+	hash, err := BcryptHash(password)
 	if err != nil {
 		t.Fatal("error generating bcrypt hash:", err)
 	}
 
-	if !BcryptCompare(hash, password) {
+	if !BcryptVerify(hash, password) {
 		t.Fatal("bcrypt compare should return true for correct password")
 	}
 
-	if BcryptCompare(hash, "wrong") {
+	if BcryptVerify(hash, "wrong") {
 		t.Fatal("bcrypt compare should return false for wrong password")
 	}
 }
 
-func TestBcryptWithCustomCost(t *testing.T) {
+func TestBcryptHashWithCost(t *testing.T) {
 	password := "hello"
 
-	hash, err := BcryptHash(password, 4)
+	hash, err := BcryptHashWithCost(password, 4)
 	if err != nil {
 		t.Fatal("error generating bcrypt hash with custom cost:", err)
 	}
 
-	if !BcryptCompare(hash, password) {
+	if !BcryptVerify(hash, password) {
 		t.Fatal("bcrypt compare should return true for correct password with custom cost")
 	}
 }

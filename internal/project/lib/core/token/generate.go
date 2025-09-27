@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/razshare/frizzante/text"
+	text2 "github.com/razshare/frizzante/internal/additions/lib/security"
 	"golang.org/x/crypto/bcrypt"
 	"golang.org/x/crypto/sha3"
 )
@@ -40,8 +40,8 @@ func Generate(userId string, hashType HashType, secret string) (token string, er
 	data = append(data, ':')
 
 	for _, b := range randomBytes {
-		data = append(data, text.HexTable[b>>4])
-		data = append(data, text.HexTable[b&0x0f])
+		data = append(data, text2.HexTable[b>>4])
+		data = append(data, text2.HexTable[b&0x0f])
 	}
 
 	switch hashType {
@@ -92,15 +92,15 @@ func VerifyPassword(hash string, password string) bool {
 }
 
 func GenerateSecure(length int) (token string, err error) {
-	return text.RandomBase64(length)
+	return text2.RandomBase64(length)
 }
 
 func EncodeToHex(data []byte) string {
 	result := make([]byte, len(data)*2)
 	j := 0
 	for _, b := range data {
-		result[j] = text.HexTable[b>>4]
-		result[j+1] = text.HexTable[b&0x0f]
+		result[j] = text2.HexTable[b>>4]
+		result[j+1] = text2.HexTable[b&0x0f]
 		j += 2
 	}
 	return string(result)

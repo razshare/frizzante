@@ -6,8 +6,8 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/cli/user"
+	"github.com/razshare/frizzante/internal/additions/lib/security"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/text"
 )
 
 func TestDownload(t *testing.T) {
@@ -20,7 +20,7 @@ func TestDownload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	hash := text.Sha1(url)
+	hash := security.Sha1(url)
 
 	cached := filepath.Join(cache, hash+".zip")
 

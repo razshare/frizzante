@@ -6,14 +6,12 @@ import (
 	"strings"
 
 	"github.com/razshare/frizzante/cli/generate"
-	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/multiselect"
 	"github.com/razshare/frizzante/tui/search"
 )
 
 func Generate(options GenerateOptions) (err error) {
 	pick := func(gen string) error {
-		messages.Infof("generating %s", gen)
 		if gen == "air" {
 			return generate.Air(generate.AirOptions{
 				Air:      options.Air,
@@ -78,6 +76,11 @@ func Generate(options GenerateOptions) (err error) {
 				Auto: options.Auto,
 				Efs:  options.Efs,
 			})
+		} else if gen == "security" {
+			return generate.Security(generate.SecurityOptions{
+				Auto: options.Auto,
+				Efs:  options.Efs,
+			})
 		}
 
 		return errors.New("unknown generation")
@@ -97,6 +100,7 @@ func Generate(options GenerateOptions) (err error) {
 				{Id: "session", Description: "user session features"},
 				{Id: "database", Description: "full database setup"},
 				{Id: "queries", Description: "sql code to go code using sqlc"},
+				{Id: "security", Description: "security and cryptographic functions"},
 			},
 			"generate",
 		)

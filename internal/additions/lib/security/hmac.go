@@ -1,4 +1,4 @@
-package text
+package security
 
 import (
 	"crypto/hmac"
@@ -6,6 +6,7 @@ import (
 	"crypto/sha512"
 )
 
+// HmacSha256 computes hmac hash using sha256 checksum.
 func HmacSha256(text string, key string) string {
 	h := hmac.New(sha256.New, []byte(key))
 	h.Write([]byte(text))
@@ -20,6 +21,7 @@ func HmacSha256(text string, key string) string {
 	return string(to)
 }
 
+// HmacSha512 computes hmac hash using sha512 checksum.
 func HmacSha512(text string, key string) string {
 	h := hmac.New(sha512.New, []byte(key))
 	h.Write([]byte(text))
@@ -34,11 +36,13 @@ func HmacSha512(text string, key string) string {
 	return string(to)
 }
 
+// HmacVerifySha256 verifies hmac hash using sha256 checksum.
 func HmacVerifySha256(text string, key string, signature string) bool {
 	expectedSignature := HmacSha256(text, key)
 	return hmac.Equal([]byte(signature), []byte(expectedSignature))
 }
 
+// HmacVerifySha512 verifies hmac hash using sha512 checksum.
 func HmacVerifySha512(text string, key string, signature string) bool {
 	expectedSignature := HmacSha512(text, key)
 	return hmac.Equal([]byte(signature), []byte(expectedSignature))

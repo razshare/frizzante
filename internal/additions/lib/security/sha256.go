@@ -1,7 +1,8 @@
-package text
+package security
 
 import "crypto/sha256"
 
+// Sha256 returns the sha256 checksum of the text.
 func Sha256(text string) string {
 	from := sha256.Sum256([]byte(text))
 	to := make([]byte, 64)

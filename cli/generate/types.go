@@ -57,6 +57,11 @@ type CoreOptions struct {
 	Auto bool
 }
 
+type SecurityOptions struct {
+	Efs  embed.FS
+	Auto bool
+}
+
 type DatabaseOptions struct {
 	Generate string
 	Go       string

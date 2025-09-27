@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 
 	"github.com/razshare/frizzante/cli/user"
+	"github.com/razshare/frizzante/internal/additions/lib/security"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/text"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
@@ -19,7 +19,7 @@ func Download(options DownloadOptions) (install Install, evict Evict, err error)
 		return
 	}
 
-	hash := text.Sha1(options.Url)
+	hash := security.Sha1(options.Url)
 
 	ext := filepath.Ext(options.Url)
 

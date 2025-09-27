@@ -1,19 +1,13 @@
-package text
+package security
 
 import (
 	"crypto/rand"
 	"encoding/base64"
 )
 
-func RandomBytes(length int) ([]byte, error) {
-	bytes := make([]byte, length)
-	_, err := rand.Read(bytes)
-	return bytes, err
-}
-
 func RandomHex(length int) (string, error) {
-	bytes, err := RandomBytes(length)
-	if err != nil {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
 
@@ -28,16 +22,16 @@ func RandomHex(length int) (string, error) {
 }
 
 func RandomBase64(length int) (string, error) {
-	bytes, err := RandomBytes(length)
-	if err != nil {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
 	return base64.RawURLEncoding.EncodeToString(bytes), nil
 }
 
 func RandomBase64Standard(length int) (string, error) {
-	bytes, err := RandomBytes(length)
-	if err != nil {
+	bytes := make([]byte, length)
+	if _, err := rand.Read(bytes); err != nil {
 		return "", err
 	}
 	return base64.StdEncoding.EncodeToString(bytes), nil

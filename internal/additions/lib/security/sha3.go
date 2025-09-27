@@ -1,8 +1,9 @@
-package text
+package security
 
 import "golang.org/x/crypto/sha3"
 
-func Sha3_256(text string) string {
+// Sha3Variant256 returns the sha3-256 digest of the text.
+func Sha3Variant256(text string) string {
 	from := sha3.Sum256([]byte(text))
 	to := make([]byte, 64)
 	var i int
@@ -14,7 +15,8 @@ func Sha3_256(text string) string {
 	return string(to)
 }
 
-func Sha3_512(text string) string {
+// Sha3Variant512 returns the sha3-512 digest of the text.
+func Sha3Variant512(text string) string {
 	from := sha3.Sum512([]byte(text))
 	to := make([]byte, 128)
 	var i int

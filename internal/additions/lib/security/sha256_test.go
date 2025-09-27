@@ -1,4 +1,4 @@
-package text
+package security
 
 import "testing"
 
