@@ -24,6 +24,15 @@ func Extract(_type reflect.Type, ignore []string) (primary string, secondary str
 		t := f.Type
 		k := t.Kind()
 		name := f.Name
+
+		if strings.ToLower(f.Name[0:1]) == f.Name[0:1] {
+			continue
+		}
+
+		if k == reflect.Pointer {
+			t = t.Elem()
+		}
+
 		// We cannot use this, goja' runtime.ToValue() will ignore tags since it's not marshaling.
 		//if tag := f.Tag.Get("json"); tag != "" {
 		//	name = tag
@@ -32,7 +41,6 @@ func Extract(_type reflect.Type, ignore []string) (primary string, secondary str
 		case
 			reflect.Chan,
 			reflect.Func,
-			reflect.Pointer,
 			reflect.Invalid,
 			reflect.Interface,
 			reflect.UnsafePointer:
@@ -72,12 +80,15 @@ func Extract(_type reflect.Type, ignore []string) (primary string, secondary str
 				xbuilder.WriteString(secondaryLoc)
 			}
 		case
+			reflect.Pointer,
 			reflect.Struct:
 			var primaryLoc string
 			var secondaryLoc string
+
 			if primaryLoc, secondaryLoc, definitions, err = Extract(t, ignore); err != nil {
 				return
 			}
+
 			builder.WriteString(fmt.Sprintf("%s%s: %s", prefix, name, t.Name()))
 			if primaryLoc != "" {
 				xbuilder.WriteString("\n")
