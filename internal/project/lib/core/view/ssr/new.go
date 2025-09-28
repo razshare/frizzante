@@ -15,6 +15,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/js"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
@@ -141,10 +142,16 @@ func New(config Config) func(view _view.View) (html string, err error) {
 			return
 		}
 
-		source := strings.ReplaceAll(string(data), "./assets/", fmt.Sprintf("./%s/assets/", strings.TrimPrefix(strings.TrimSuffix(app, "/"), "./")))
+		if config.UseDisk {
+			if !files.IsDirectory(filepath.Join(app, "assets")) && files.IsDirectory(filepath.Join(app, "dist", "assets")) {
+				if err = files.CopyDirectory(filepath.Join(app, "dist", "assets"), filepath.Join(app, "assets")); err != nil {
+					return
+				}
+			}
+		}
 
 		var text string
-		if text, err = js.Bundle(app, api.FormatCommonJS, source); err != nil {
+		if text, err = js.Bundle(app, api.FormatCommonJS, string(data)); err != nil {
 			return
 		}
 
