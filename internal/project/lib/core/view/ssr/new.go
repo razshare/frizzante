@@ -141,8 +141,10 @@ func New(config Config) func(view _view.View) (html string, err error) {
 			return
 		}
 
+		source := strings.ReplaceAll(string(data), "./assets/", fmt.Sprintf("./%s/assets/", strings.TrimPrefix(strings.TrimSuffix(app, "/"), "./")))
+
 		var text string
-		if text, err = js.Bundle(app, api.FormatCommonJS, string(data)); err != nil {
+		if text, err = js.Bundle(app, api.FormatCommonJS, source); err != nil {
 			return
 		}
 
