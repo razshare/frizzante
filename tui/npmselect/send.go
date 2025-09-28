@@ -1,7 +1,6 @@
 package npmselect
 
 import (
-	"strings"
 	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -14,7 +13,7 @@ func Send() (selected []string, err error) {
 	input := textinput.New()
 	input.Width = 80
 	var model *Model
-	model, err = program.Run(&Model{
+	if model, err = program.Run(&Model{
 		Prompt:    "search npm packages",
 		Viewport:  &viewport.Viewport{Visible: 6},
 		Selected:  make([]string, 0),
@@ -25,21 +24,11 @@ func Send() (selected []string, err error) {
 			Filtered: []search.Choice{},
 			Input:    input,
 		},
-	})
-
-	if err != nil {
+	}); err != nil {
 		return
 	}
 
-	selected = make([]string, 0, len(model.Selected))
-	for _, id := range model.Selected {
-		// Remove version suffix if present (e.g., "package@1.0.0" -> "package")
-		if index := strings.IndexByte(id, '@'); index != -1 {
-			selected = append(selected, id[:index])
-		} else {
-			selected = append(selected, id)
-		}
-	}
+	selected = model.Selected
 
 	return
 }

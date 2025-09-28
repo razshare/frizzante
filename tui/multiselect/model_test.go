@@ -90,8 +90,8 @@ func TestUpdate(t *testing.T) {
 		Viewport: &viewport.Viewport{Cursor: 1},
 	}
 	model.Update(tea.KeyMsg{Type: tea.KeyEnter})
-	if !slices.Equal(model.Selected, []string{"apple", "banana"}) {
-		t.Fatal("multiselect should contain apple and banana")
+	if !slices.Equal(model.Selected, []string{"apple"}) {
+		t.Fatal("multiselect should contain apple")
 	}
 
 	// enter with no selection auto-selects current

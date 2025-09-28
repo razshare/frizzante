@@ -22,7 +22,7 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if assert.Type == tea.KeyEnter {
-			if len(model.Search.Filtered) > 0 {
+			if len(model.Selected) == 0 && len(model.Search.Filtered) > 0 {
 				value := model.Search.Filtered[model.Viewport.Cursor].Id
 				if !slices.Contains(model.Selected, value) {
 					model.Selected = append(model.Selected, value)
