@@ -56,13 +56,16 @@ func Types(options TypesOptions) (err error) {
 
 	if files.IsDirectory(filepath.Join(options.App, "lib", "types", "gen")) {
 		var yes bool
-		if yes, err = confirm.Sendf(true, "%s already exsists. Overwrite?", filepath.Join(options.App, "lib", "types", "gen")); err != nil {
-			return
-		}
 
-		if !yes {
-			messages.Infof("skipping types generation")
-			return
+		if !options.Auto {
+			if yes, err = confirm.Sendf(true, "%s already exsists. Overwrite?", filepath.Join(options.App, "lib", "types", "gen")); err != nil {
+				return
+			}
+
+			if !yes {
+				messages.Infof("skipping types generation")
+				return
+			}
 		}
 
 		if err = os.RemoveAll(filepath.Join(options.App, "lib", "types", "gen")); err != nil {
