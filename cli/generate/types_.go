@@ -55,9 +55,9 @@ func Types(options TypesOptions) (err error) {
 	// so we place those files in the correct directory.
 
 	if files.IsDirectory(filepath.Join(options.App, "lib", "types", "gen")) {
-		var yes bool
 
 		if !options.Auto {
+			var yes bool
 			if yes, err = confirm.Sendf(true, "%s already exsists. Overwrite?", filepath.Join(options.App, "lib", "types", "gen")); err != nil {
 				return
 			}
