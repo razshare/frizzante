@@ -5,7 +5,7 @@ tmp_dir = ".gen/tmp"
 [build]
   args_bin = []
   bin = "./.gen/tmp/main.exe"
-  cmd = "go build -tags dev -o ./.gen/tmp/main.exe ."
+  cmd = "go build -tags dev,trace,types -o ./.gen/tmp/main.exe ."
   delay = 50
   exclude_dir = ["app",".gen",".git",".github", "lib/core/view/ssr/app"]
   exclude_file = []
@@ -24,7 +24,7 @@ tmp_dir = ".gen/tmp"
   pre_cmd = []
   rerun = false
   rerun_delay = 50
-  send_interrupt = false
+  send_interrupt = true
   stop_on_error = false
 
 [color]

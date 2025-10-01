@@ -4,8 +4,8 @@
     import { action } from "$lib/scripts/core/action.ts"
     import { href } from "$lib/scripts/core/href.ts"
     import { mdiArrowLeft, mdiCheckCircleOutline, mdiCircleOutline, mdiClose, mdiPlus } from "@mdi/js"
-    import type { Props, Todo } from "$lib/types/gen/main/lib/routes/handlers/todos/Props"
     import { slide } from "svelte/transition"
+    import type { Props, Todo} from "$gen/types/main/lib/routes/handlers/todos/Props"
 
     let { Todos = [], Error }: Props = $props()
 

@@ -57,11 +57,22 @@ func Extract(prefix string, _type reflect.Type, ignore []string) (primary string
 			var primaryLoc string
 			var secondaryLoc string
 			var definitionsLoc = make([]string, 0)
-			if primaryLoc, secondaryLoc, definitionsLoc, err = Extract(prefix+name, t.Elem(), definitions); err != nil {
+			var prefixLoc string
+			var typeLoc string
+
+			if slices.Contains(definitions, t.Elem().Name()) {
+				prefixLoc = prefix + name
+				typeLoc = name + t.Elem().Name()
+			} else {
+				prefixLoc = prefix
+				typeLoc = t.Elem().Name()
+			}
+
+			if primaryLoc, secondaryLoc, definitionsLoc, err = Extract(prefixLoc, t.Elem(), definitions); err != nil {
 				return
 			}
 			definitions = append(definitions, definitionsLoc...)
-			builder.WriteString(fmt.Sprintf("%s%s: Record<string, %s>", padding, name, t.Elem().Name()))
+			builder.WriteString(fmt.Sprintf("%s%s: Record<string, %s>", padding, name, typeLoc))
 			if primaryLoc != "" {
 				xbuilder.WriteString("\n")
 				xbuilder.WriteString(primaryLoc)
@@ -77,11 +88,22 @@ func Extract(prefix string, _type reflect.Type, ignore []string) (primary string
 			var primaryLoc string
 			var secondaryLoc string
 			var definitionsLoc = make([]string, 0)
-			if primaryLoc, secondaryLoc, definitionsLoc, err = Extract(prefix+name, t.Elem(), definitions); err != nil {
+			var prefixLoc string
+			var typeLoc string
+
+			if slices.Contains(definitions, t.Elem().Name()) {
+				prefixLoc = prefix + name
+				typeLoc = name + t.Elem().Name()
+			} else {
+				prefixLoc = prefix
+				typeLoc = t.Elem().Name()
+			}
+
+			if primaryLoc, secondaryLoc, definitionsLoc, err = Extract(prefixLoc, t.Elem(), definitions); err != nil {
 				return
 			}
 			definitions = append(definitions, definitionsLoc...)
-			builder.WriteString(fmt.Sprintf("%s%s: %s[]", padding, name, t.Elem().Name()))
+			builder.WriteString(fmt.Sprintf("%s%s: %s[]", padding, name, typeLoc))
 			if primaryLoc != "" {
 				xbuilder.WriteString("\n")
 				xbuilder.WriteString(primaryLoc)
@@ -97,11 +119,22 @@ func Extract(prefix string, _type reflect.Type, ignore []string) (primary string
 			var primaryLoc string
 			var secondaryLoc string
 			var definitionsLoc = make([]string, 0)
-			if primaryLoc, secondaryLoc, definitionsLoc, err = Extract(prefix+name, t, definitions); err != nil {
+			var prefixLoc string
+			var typeLoc string
+
+			if slices.Contains(definitions, t.Name()) {
+				prefixLoc = prefix + name
+				typeLoc = name + t.Name()
+			} else {
+				prefixLoc = prefix
+				typeLoc = t.Name()
+			}
+
+			if primaryLoc, secondaryLoc, definitionsLoc, err = Extract(prefixLoc, t, definitions); err != nil {
 				return
 			}
 			definitions = append(definitions, definitionsLoc...)
-			builder.WriteString(fmt.Sprintf("%s%s: %s", padding, name, t.Name()))
+			builder.WriteString(fmt.Sprintf("%s%s: %s", padding, name, typeLoc))
 			if primaryLoc != "" {
 				xbuilder.WriteString("\n")
 				xbuilder.WriteString(primaryLoc)

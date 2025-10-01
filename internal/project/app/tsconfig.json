@@ -17,6 +17,7 @@
         "checkJs": true,
         "paths": {
             "$lib/*": ["./lib/*"],
+            "$gen/*": ["../.gen/*"],
             "$exports.client": ["./exports.client.ts"],
             "$exports.server": ["./exports.server.ts"]
         },
@@ -30,6 +31,9 @@
         "./exports.client.ts",
         "./exports.server.ts",
         "./index.html",
+        "./.gen/types/**/*.d.ts",
+        "./.gen/types/**/*.js",
+        "./.gen/types/**/*.ts",
         "./**/*.svelte.js",
         "./**/*.svelte.ts",
         "./**/*.svelte",
