@@ -17,7 +17,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
 	"github.com/razshare/frizzante/internal/project/lib/core/js"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
-	"github.com/razshare/frizzante/internal/project/lib/core/structs"
+	"github.com/razshare/frizzante/internal/project/lib/core/types"
 	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
@@ -210,8 +210,13 @@ func New(config Config) func(view _view.View) (html string, err error) {
 				defer func() { go func() { runtimes <- runtime }() }()
 			}
 
+			var props map[string]any
+			if props, err = types.EncodeInterface(_view.Wrap(view)); err != nil {
+				return
+			}
+
 			var promise goja.Value
-			if promise, err = render(goja.Undefined(), runtime.ToValue(structs.Map(_view.Wrap(view)))); err != nil {
+			if promise, err = render(goja.Undefined(), runtime.ToValue(props)); err != nil {
 				return
 			}
 

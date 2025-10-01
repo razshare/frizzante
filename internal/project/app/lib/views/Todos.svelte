@@ -5,7 +5,7 @@
     import { href } from "$lib/scripts/core/href.ts"
     import { mdiArrowLeft, mdiCheckCircleOutline, mdiCircleOutline, mdiClose, mdiPlus } from "@mdi/js"
     import { slide } from "svelte/transition"
-    import type { Props, Todo} from "$gen/types/main/lib/routes/handlers/todos/Props"
+    import type { Props, Todo } from "$gen/types/main/lib/routes/handlers/todos/Props"
 
     let { todos = [], error }: Props = $props()
 

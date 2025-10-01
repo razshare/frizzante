@@ -15,6 +15,9 @@ func View(client *client.Client) {
 		Props: Props{
 			Todos: state.Todos,
 			Error: receive.Query(client, "error"),
+			//OtherItems: map[string]string{
+			//	"asd": "asd",
+			//},
 		},
 	})
 }

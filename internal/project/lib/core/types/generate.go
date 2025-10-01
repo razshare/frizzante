@@ -13,12 +13,11 @@ import (
 
 func Generate[T any]() (err error) {
 	var value T
-	var primary string
-	var secondary string
+	var definitions string
 
-	t := reflect.TypeOf(value)
+	type_ := reflect.TypeOf(value)
 
-	if primary, secondary, _, err = Extract("", t, make([]string, 0)); err != nil {
+	if definitions, _, _, err = Define(type_, []string{}); err != nil {
 		return
 	}
 
@@ -37,7 +36,7 @@ func Generate[T any]() (err error) {
 		"github.com/razshare/frizzante/internal/additions",
 	}
 	after := "main"
-	pkg := t.PkgPath()
+	pkg := type_.PkgPath()
 
 	for _, before := range befores {
 		pkg = strings.ReplaceAll(pkg, before, after)
@@ -50,8 +49,8 @@ func Generate[T any]() (err error) {
 		}
 	}
 
-	fname := filepath.Join(dname, t.Name()+".d.ts")
-	if err = os.WriteFile(fname, []byte(primary+secondary), os.ModePerm); err != nil {
+	fname := filepath.Join(dname, type_.Name()+".d.ts")
+	if err = os.WriteFile(fname, []byte(definitions), os.ModePerm); err != nil {
 		return
 	}
 
