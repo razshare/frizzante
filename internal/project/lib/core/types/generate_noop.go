@@ -2,4 +2,4 @@
 
 package types
 
-func Generate[T any]() {}
+func Generate[T any]() error { return nil }
