@@ -24,7 +24,7 @@ var DataFormat string
 func New(conf Config) func(view _view.View) (html string, err error) {
 	var efs = conf.Efs
 	var app = conf.App
-	var disk = conf.Disk
+	var disk = conf.UseDisk
 
 	if app == "" {
 		app = "app"
