@@ -26,19 +26,10 @@
             {@render Description()}
         </div>
         <div class="card-body relative p-6">
-            {@render Add()}
+            {@render AddTodoForm()}
             <div class="divider"></div>
-            {#if todos.length === 0}
-                {@render Empty()}
-            {:else}
-                {#each todos as todo, index (index)}
-                    {@render Todo(todo, index)}
-                {/each}
-            {/if}
-            {#if todos.length > 0}
-                {@render Remaining()}
-            {/if}
-            {@render Back()}
+            {@render ShowTodosList(todos)}
+            {@render BackButton()}
         </div>
     </div>
 </Layout>
@@ -48,7 +39,7 @@
     <p class="text-lg text-base-content/60">Organize and track your daily activities</p>
 {/snippet}
 
-{#snippet Add()}
+{#snippet AddTodoForm()}
     <form {...action("/add")} class="flex">
         <input
             type="text"
@@ -71,20 +62,27 @@
     {/if}
 {/snippet}
 
-{#snippet Empty()}
+{#snippet ShowTodosList(todos: Todo[])}
+    {#if todos.length > 0}
+        {#each todos as todo, index (index)}
+            <div in:slide out:slide class="flex w-full text-base-content/80">
+                {@render ToggleTodoButton(todo, index)}
+                {@render RemoveTodoButton(index)}
+            </div>
+        {/each}
+        {@render CountUncheckedTodos()}
+    {:else}
+        {@render NoTodosFound()}
+    {/if}
+{/snippet}
+
+{#snippet NoTodosFound()}
     <div in:slide out:slide class="text-center text-base-content/50 text-lg">
         <span>No tasks yet. Add one above to get started!</span>
     </div>
 {/snippet}
 
-{#snippet Todo(todo: Todo, index: number)}
-    <div in:slide out:slide class="flex w-full text-base-content/80">
-        {@render Toggle(todo, index)}
-        {@render Remove(index)}
-    </div>
-{/snippet}
-
-{#snippet Toggle(todo: Todo, index: number)}
+{#snippet ToggleTodoButton(todo: Todo, index: number)}
     {@const aria = todo.checked ? "Uncheck" : "Check"}
     {@const value = todo.checked ? "0" : "1"}
     {@const icon = todo.checked ? mdiCheckCircleOutline : mdiCircleOutline}
@@ -106,7 +104,7 @@
     </form>
 {/snippet}
 
-{#snippet Remove(index: number)}
+{#snippet RemoveTodoButton(index: number)}
     <form {...action("/remove")}>
         <input type="hidden" name="index" value={index} />
         <button
@@ -119,13 +117,13 @@
     </form>
 {/snippet}
 
-{#snippet Remaining()}
+{#snippet CountUncheckedTodos()}
     <div in:slide out:slide class="text-lg text-base-content/50 text-center">
         <span>{unchecked} tasks remaining</span>
     </div>
 {/snippet}
 
-{#snippet Back()}
+{#snippet BackButton()}
     <div class="pt-4"></div>
     <a class="btn btn-neutral text-lg" {...href("/")}>
         <Icon path={mdiArrowLeft} size="18" />
