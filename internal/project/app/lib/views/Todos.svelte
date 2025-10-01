@@ -7,12 +7,12 @@
     import { slide } from "svelte/transition"
     import type { Props, Todo} from "$gen/types/main/lib/routes/handlers/todos/Props"
 
-    let { Todos = [], Error }: Props = $props()
+    let { todos = [], error }: Props = $props()
 
     let unchecked = $derived.by(function count(): number {
         let value = 0
-        for (const todo of Todos) {
-            if (!todo.Checked) {
+        for (const todo of todos) {
+            if (!todo.checked) {
                 value++
             }
         }
@@ -28,14 +28,14 @@
         <div class="card-body relative p-6">
             {@render Add()}
             <div class="divider"></div>
-            {#if Todos.length === 0}
+            {#if todos.length === 0}
                 {@render Empty()}
             {:else}
-                {#each Todos as todo, index (index)}
+                {#each todos as todo, index (index)}
                     {@render Todo(todo, index)}
                 {/each}
             {/if}
-            {#if Todos.length > 0}
+            {#if todos.length > 0}
                 {@render Remaining()}
             {/if}
             {@render Back()}
@@ -63,10 +63,10 @@
         </button>
     </form>
 
-    {#if Error}
+    {#if error}
         <div class="pt-4"></div>
         <div in:slide out:slide class="alert alert-error">
-            <span>{Error}</span>
+            <span>{error}</span>
         </div>
     {/if}
 {/snippet}
@@ -85,23 +85,23 @@
 {/snippet}
 
 {#snippet Toggle(todo: Todo, index: number)}
-    {@const aria = todo.Checked ? "Uncheck" : "Check"}
-    {@const value = todo.Checked ? "0" : "1"}
-    {@const icon = todo.Checked ? mdiCheckCircleOutline : mdiCircleOutline}
+    {@const aria = todo.checked ? "Uncheck" : "Check"}
+    {@const value = todo.checked ? "0" : "1"}
+    {@const icon = todo.checked ? mdiCheckCircleOutline : mdiCircleOutline}
     <form {...action("/toggle")} class="grow content-center">
         <input type="hidden" name="index" value={index} />
         <input type="hidden" name="value" {value} />
         <button
             type="submit"
             class="w-full flex cursor-pointer"
-            class:line-through={todo.Checked}
-            class:text-base-content={todo.Checked}
-            class:opacity-50={todo.Checked}
+            class:line-through={todo.checked}
+            class:text-base-content={todo.checked}
+            class:opacity-50={todo.checked}
             aria-label={aria}
         >
             <Icon path={icon} />
             <div class="pr-4"></div>
-            <span>{todo.Description}</span>
+            <span>{todo.description}</span>
         </button>
     </form>
 {/snippet}

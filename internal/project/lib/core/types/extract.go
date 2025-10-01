@@ -40,10 +40,9 @@ func Extract(prefix string, _type reflect.Type, ignore []string) (primary string
 			continue
 		}
 
-		// We cannot use this, goja's runtime.ToValue() will ignore tags since it's not marshaling.
-		//if tag := f.Tag.Get("json"); tag != "" {
-		//	name = tag
-		//}
+		if tag := f.Tag.Get("json"); tag != "" {
+			name = tag
+		}
 		switch k {
 		case
 			reflect.Chan,

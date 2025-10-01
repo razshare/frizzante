@@ -1,10 +1,10 @@
 package view
 
 type Data struct {
-	Name   string
-	Render RenderMode
-	Align  AlignMode
-	Props  any
+	Name   string     `json:"name"`
+	Render RenderMode `json:"render"`
+	Align  AlignMode  `json:"align"`
+	Props  any        `json:"props"`
 }
 
 type RenderMode int

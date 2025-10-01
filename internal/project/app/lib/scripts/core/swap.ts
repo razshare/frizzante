@@ -69,26 +69,26 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         return function push() {}
     }
 
-    const remote = JSON.parse(txt)
+    const remote = JSON.parse(txt) as View<Record<string, unknown>>
 
-    view.Align = remote.Align
-    view.Name = remote.Name
-    view.Render = remote.Render
-    if (view.Align === 1) {
-        if (typeof view.Props != "object") {
+    view.align = remote.align
+    view.name = remote.name
+    view.render = remote.render
+    if (view.align === 1) {
+        if (typeof view.props != "object") {
             console.warn("view alignment intends to merge props, but local view props is not an object")
             // Noop.
-        } else if (typeof remote.Props != "object") {
+        } else if (typeof remote.props != "object") {
             console.warn("view alignment intends to merge props, but remote props is not an object")
             // Noop.
         } else {
-            view.Props = {
-                ...view.Props,
-                ...remote.Props,
+            view.props = {
+                ...view.props,
+                ...remote.props,
             }
         }
     } else {
-        view.Props = remote.Props
+        view.props = remote.props
     }
 
     const stationary = lastUrl === res.url

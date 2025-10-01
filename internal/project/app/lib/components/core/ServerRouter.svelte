@@ -2,15 +2,15 @@
     import { setContext, type Component } from "svelte"
     import { views } from "$exports.server"
     import type { View } from "$lib/scripts/core/types.js"
-    let { Name, Props, Render, Align } = $props() as View<Record<string, unknown>>
+    let { name, props, render, align }:View<Record<string, unknown>> = $props()
     const components = views as unknown as Record<string, Component>
-    const view = $state({ Name, Props, Render, Align })
+    const view:View<Record<string, unknown>> = $state({ name, props, render, align })
     setContext("view", view)
 </script>
 
 {#each Object.keys(components) as key (key)}
-    {@const Component = components[key]}
-    {#if key === Name}
-        <Component {...view.Props} />
+    {#if key === name}
+        {@const Component = components[key]}
+        <Component {...view.props} />
     {/if}
 {/each}
