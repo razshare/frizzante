@@ -14,14 +14,12 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/dop251/goja"
 	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
-	"github.com/razshare/frizzante/internal/project/lib/core/types"
 	view_ "github.com/razshare/frizzante/internal/project/lib/core/view"
-	compile_ "github.com/razshare/frizzante/internal/project/lib/core/view/render/compile"
+	"github.com/razshare/frizzante/internal/project/lib/core/view/render_function"
 )
 
-func New(config Config) func(view view_.View) (html string, err error) {
+func New(config Config) Render {
 	var efs = config.Efs
 	var app = config.App
 	var limit = config.Limit
@@ -58,13 +56,12 @@ func New(config Config) func(view view_.View) (html string, err error) {
 	var mut sync.Mutex
 	var server = filepath.Join(app, "dist", "app.server.js")
 	var index = filepath.Join(app, "dist", "client", "index.html")
-	var renders = make(chan goja.Callable, 1)
-	var runtimes = make(chan *goja.Runtime, 1)
+	var renders = make(chan render_function.RenderFunction, 1)
 
 	server = strings.ReplaceAll(server, "\\", "/")
 	index = strings.ReplaceAll(index, "\\", "/")
 
-	var compile = func() (render goja.Callable, runtime *goja.Runtime, err error) {
+	var compile = func() (render render_function.RenderFunction, err error) {
 		if !embeds.IsFile(efs, server) {
 			err = fmt.Errorf("file %s not found", server)
 			return
@@ -75,7 +72,7 @@ func New(config Config) func(view view_.View) (html string, err error) {
 			return
 		}
 
-		render, runtime, err = compile_.New(compile_.Config{
+		render, err = render_function.New(render_function.Config{
 			Data:     data,
 			Format:   RenderFormat,
 			App:      app,
@@ -86,95 +83,73 @@ func New(config Config) func(view view_.View) (html string, err error) {
 		return
 	}
 
-	return func(view view_.View) (indexString string, err error) {
-		var propsData []byte
-
-		if embeds.IsFile(efs, index) {
-			propsData, err = efs.ReadFile(index)
-		}
-
-		if err != nil {
+	return func(view view_.View) (document string, err error) {
+		if !embeds.IsFile(efs, index) {
+			err = fmt.Errorf("file %s not found", index)
 			return
 		}
 
-		indexString = string(propsData)
+		var indexData []byte
+		if indexData, err = efs.ReadFile(index); err != nil {
+			return
+		}
+
+		document = string(indexData)
 
 		if view.RenderMode == view_.RenderModeServer || view.RenderMode == view_.RenderModeFull {
-			var render goja.Callable
-			var runtime *goja.Runtime
+			var render render_function.RenderFunction
 			if limit >= 0 {
 				mut.Lock()
 				if limit >= 0 {
 					limit--
 				}
 				mut.Unlock()
-				render, runtime, err = compile()
-				if err != nil {
+
+				if render, err = compile(); err != nil {
 					return
 				}
 				defer func() { go func() { renders <- render }() }()
-				defer func() { go func() { runtimes <- runtime }() }()
 			} else {
 				render = <-renders
-				runtime = <-runtimes
 				defer func() { go func() { renders <- render }() }()
-				defer func() { go func() { runtimes <- runtime }() }()
 			}
-
-			var props map[string]any
-			if props, err = types.EncodeInterface(view_.NewData(view)); err != nil {
-				return
-			}
-
-			var promise goja.Value
-			if promise, err = render(goja.Undefined(), runtime.ToValue(props)); err != nil {
-				return
-			}
-
-			result := promise.Export().(*goja.Promise).Result().ToObject(runtime)
-
-			headv := result.Get("head")
-			bodyv := result.Get("body")
 
 			var head string
 			var body string
-
-			if headv != nil {
-				head = headv.String()
-			}
-
-			if bodyv != nil {
-				body = bodyv.String()
+			if head, body, err = render(view); err != nil {
+				return
 			}
 
 			if view.RenderMode == view_.RenderModeServer {
-				indexString = NoScript.ReplaceAllString(indexString, "")
+				document = NoScript.ReplaceAllString(document, "")
 			}
 
 			if view.RenderMode == view_.RenderModeServer {
-				indexString = strings.Replace(indexString, "<!--app-data-->", "", 1)
+				document = strings.Replace(document, "<!--app-data-->", "", 1)
 			} else {
-				if propsData, err = json.Marshal(view_.NewData(view)); err != nil {
+				var data []byte
+				if data, err = json.Marshal(view_.NewData(view)); err != nil {
 					return
 				}
 
-				indexString = strings.Replace(indexString, "<!--app-data-->", fmt.Sprintf(DataFormat, propsData), 1)
+				document = strings.Replace(document, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
 			}
 
-			indexString = strings.Replace(indexString, "<!--app-head-->", head, 1)
-			indexString = strings.Replace(indexString, "<!--app-body-->", fmt.Sprintf(BodyFormat, body), 1)
+			document = strings.Replace(document, "<!--app-head-->", head, 1)
+			document = strings.Replace(document, "<!--app-body-->", fmt.Sprintf(BodyFormat, body), 1)
 
 			return
 		}
 
 		if view.RenderMode == view_.RenderModeClient {
-			if propsData, err = json.Marshal(view_.NewData(view)); err != nil {
+			var data []byte
+			if data, err = json.Marshal(view_.NewData(view)); err != nil {
 				return
 			}
 
-			indexString = strings.Replace(indexString, "<!--app-body-->", fmt.Sprintf(BodyFormat, ""), 1)
-			indexString = strings.Replace(indexString, "<!--app-head-->", fmt.Sprintf(HeadFormat, view.Title), 1)
-			indexString = strings.Replace(indexString, "<!--app-data-->", fmt.Sprintf(DataFormat, propsData), 1)
+			document = strings.Replace(document, "<!--app-body-->", fmt.Sprintf(BodyFormat, ""), 1)
+			document = strings.Replace(document, "<!--app-head-->", fmt.Sprintf(HeadFormat, view.Title), 1)
+			document = strings.Replace(document, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
 
 			return
 		}

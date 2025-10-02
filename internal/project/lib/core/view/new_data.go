@@ -1,4 +1,4 @@
-package view
+package view_
 
 func NewData(view View) Data {
 	return Data{

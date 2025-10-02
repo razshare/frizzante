@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/razshare/frizzante/cli/app"
+	app_ "github.com/razshare/frizzante/cli/app"
 	menu_ "github.com/razshare/frizzante/cli/menu"
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/messages"

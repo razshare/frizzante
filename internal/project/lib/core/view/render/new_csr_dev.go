@@ -1,4 +1,4 @@
-//go:build dev && no_js_runtime
+//go:build dev && no_js_runtime && !experimental_qjs_runtime
 
 package render
 
@@ -14,7 +14,7 @@ import (
 	view_ "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
-func New(conf Config) func(view view_.View) (html string, err error) {
+func New(conf Config) Render {
 	var app = conf.App
 
 	if app == "" {
@@ -26,33 +26,28 @@ func New(conf Config) func(view view_.View) (html string, err error) {
 	index = strings.ReplaceAll(index, "/", string(filepath.Separator))
 	index = strings.ReplaceAll(index, "\\", string(filepath.Separator))
 
-	return func(view view_.View) (string, error) {
-		if view.RenderMode != view_.RenderModeClient {
-			return "", nil
+	return func(view view_.View) (document string, err error) {
+		if !files.IsFile(index) {
+			err = fmt.Errorf("file %s not found", index)
+			return
 		}
 
 		var indexData []byte
-		var err error
-
-		if files.IsFile(index) {
-			indexData, err = os.ReadFile(index)
+		if indexData, err = os.ReadFile(index); err != nil {
+			return
 		}
 
-		if err != nil {
+		document = string(indexData)
+
+		var data []byte
+		if data, err = json.Marshal(view_.NewData(view)); err != nil {
 			return "", err
 		}
 
-		indexString := string(indexData)
+		document = strings.Replace(document, "<!--app-head-->", fmt.Sprintf(HeadFormat, view.Title), 1)
+		document = strings.Replace(document, "<!--app-body-->", fmt.Sprintf(BodyFormat, ""), 1)
+		document = strings.Replace(document, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
 
-		var propsData []byte
-		if propsData, err = json.Marshal(view_.NewData(view)); err != nil {
-			return "", err
-		}
-
-		indexString = strings.Replace(indexString, "<!--app-head-->", fmt.Sprintf(HeadFormat, view.Title), 1)
-		indexString = strings.Replace(indexString, "<!--app-body-->", fmt.Sprintf(BodyFormat, ""), 1)
-		indexString = strings.Replace(indexString, "<!--app-data-->", fmt.Sprintf(DataFormat, propsData), 1)
-
-		return indexString, nil
+		return document, nil
 	}
 }

@@ -39,6 +39,11 @@ type AirOptions struct {
 	Auto     bool
 }
 
+type AirConfigOptions struct {
+	Tags []string
+	Efs  embed.FS
+}
+
 type BunOptions struct {
 	Bun      string
 	Platform platform.Platform

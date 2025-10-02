@@ -3,7 +3,7 @@ package menu
 import (
 	"testing"
 
-	"github.com/razshare/frizzante/cli/app"
+	app_ "github.com/razshare/frizzante/cli/app"
 )
 
 func TestNew(t *testing.T) {

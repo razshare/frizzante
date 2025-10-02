@@ -1,4 +1,4 @@
-package view
+package view_
 
 import "testing"
 

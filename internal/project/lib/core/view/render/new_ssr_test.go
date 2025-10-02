@@ -16,7 +16,7 @@ var TestNewEfs embed.FS
 
 func TestNew(t *testing.T) {
 	render := New(Config{Efs: TestNewEfs})
-	html, err := render(view.View{Name: "Welcome"})
+	html, err := render(view_.View{Name: "Welcome"})
 	if err != nil {
 		t.Fatal(err)
 	}

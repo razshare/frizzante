@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/razshare/frizzante/cli/app"
+	app_ "github.com/razshare/frizzante/cli/app"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/platform"
 )

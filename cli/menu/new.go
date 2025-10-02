@@ -2,15 +2,12 @@ package menu
 
 import (
 	"fmt"
-	"slices"
-	"strings"
 
 	"github.com/razshare/frizzante/cli/action"
-	"github.com/razshare/frizzante/cli/app"
+	app_ "github.com/razshare/frizzante/cli/app"
 	"github.com/razshare/frizzante/cli/path"
+	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/cli/user"
-	"github.com/razshare/frizzante/tui/input"
-	"github.com/razshare/frizzante/tui/multiselect"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
 )
@@ -126,59 +123,53 @@ func New(app *app_.App) (*Menu, error) {
 			{
 				Choice: search.Choice{Id: "dev", Description: "runs air and vite in parallel"},
 				Active: func() bool { return *app.Dev },
-				Handler: func() error {
-					return action.Dev(action.DevOptions{
-						App: *app.App,
-						Go:  _go,
-						Air: air,
-						Bun: bun,
+				Handler: func() (err error) {
+					var tags []string
+					if tags, err = tags_.Parse(*app.Tags); err != nil {
+						return
+					}
+
+					if !*app.Dev {
+						if tags, err = tags_.Select([]search.Choice{
+							{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
+							{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
+							{Id: "other", Description: "adds custom tags"},
+						}); err != nil {
+							return
+						}
+					}
+
+					tags = append(tags, "dev", "types", "trace")
+
+					err = action.Dev(action.DevOptions{
+						App:  *app.App,
+						Go:   _go,
+						Air:  air,
+						Bun:  bun,
+						Tags: tags,
+						Efs:  app.Efs,
 					})
+
+					return
 				},
 			},
 			{
 				Choice: search.Choice{Id: "build", Description: "builds project"},
 				Active: func() bool { return *app.Build },
 				Handler: func() (err error) {
-					var parseTags = func(text string) (tags []string) {
-						if text = strings.TrimSpace(text); text == "" {
-							tags = make([]string, 0)
-							return
-						}
-
-						var table = "Aa_B_bC_cD_dE_eF_fG_gH_hI_iJ_jK_kL_lM_mN_nO_oP_pQ_qR_rS_sT_tU_uV_vW_wX_xY_yZ_z_0123456789 "
-						for _, tag := range strings.Split(text, ",") {
-							tag = strings.TrimSpace(tag)
-							for _, char := range tag {
-								if !strings.Contains(table, string(char)) {
-									err = fmt.Errorf("character %s is not allowed in tag, only english alphabet, digits from 0 to 9 and _ are allowd", string(char))
-									return
-								}
-							}
-							tags = append(tags, tag)
-						}
+					var tags []string
+					if tags, err = tags_.Parse(*app.Tags); err != nil {
 						return
 					}
 
-					tags := parseTags(*app.Tags)
-
-					if !*app.Build && len(tags) == 0 && !*app.Yes {
-						if tags, err = multiselect.Send(
-							[]search.Choice{
-								{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
-								{Id: "trace", Description: "enables stack.Trace()"},
-								{Id: "other", Description: "adds custom tags"},
-							},
-							"select build tags",
-						); err != nil {
+					if !*app.Build {
+						if tags, err = tags_.Select([]search.Choice{
+							{Id: "trace", Description: "enables tracing with stack.Trace()"},
+							{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
+							{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
+							{Id: "other", Description: "adds custom tags"},
+						}); err != nil {
 							return
-						}
-
-						if slices.Contains(tags, "other") {
-							var text string
-							if text, err = input.Send("add your custom tags separated by comma"); err != nil {
-								return
-							}
-							tags = append(tags, parseTags(text)...)
 						}
 					}
 
@@ -196,14 +187,18 @@ func New(app *app_.App) (*Menu, error) {
 			{
 				Choice: search.Choice{Id: "generate", Description: "generates code and resources"},
 				Active: func() bool { return *app.Generate != "" },
-				Handler: func() error {
+				Handler: func() (err error) {
+					var tags []string
+					tags, err = tags_.Parse(*app.Tags)
+					tags = append(tags, "dev")
+
 					var selected string
 
 					if *app.Generate != ":pick" && *app.Generate != "pick" {
 						selected = *app.Generate
 					}
 
-					return action.Generate(action.GenerateOptions{
+					err = action.Generate(action.GenerateOptions{
 						App:      *app.App,
 						Selected: selected,
 						Auto:     *app.Yes,
@@ -213,7 +208,10 @@ func New(app *app_.App) (*Menu, error) {
 						Air:      air,
 						Bun:      bun,
 						Sqlc:     sqlc,
+						Tags:     tags,
+						Active:   selected != "",
 					})
+					return
 				},
 			},
 			{

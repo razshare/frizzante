@@ -10,7 +10,7 @@ import (
 
 func View(client *client.Client) {
 	state := session.Start(receive.SessionId(client))
-	send.View(client, view.View{
+	send.View(client, view_.View{
 		Name: "Todos",
 		Props: Props{
 			Todos: state.Todos,

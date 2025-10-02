@@ -1,4 +1,4 @@
-package view
+package view_
 
 type Data struct {
 	Name   string     `json:"name"`

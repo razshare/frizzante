@@ -27,5 +27,5 @@ type Config struct {
 	Efs        embed.FS
 	ErrorLog   *log.Logger
 	InfoLog    *log.Logger
-	Render     func(view view.View) (html string, err error)
+	Render     func(view view_.View) (html string, err error)
 }

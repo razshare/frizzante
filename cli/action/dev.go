@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/tui/messages"
 )
 
@@ -14,6 +15,13 @@ func Dev(options DevOptions) (err error) {
 	}
 
 	if err = os.MkdirAll(filepath.Join(".gen", "tmp"), os.ModePerm); err != nil {
+		return
+	}
+
+	if err = generate.AirConfig(generate.AirConfigOptions{
+		Efs:  options.Efs,
+		Tags: options.Tags,
+	}); err != nil {
 		return
 	}
 

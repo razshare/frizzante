@@ -1,8 +1,9 @@
-package compile_
+//go:build !experimental_qjs_runtime
+
+package render_function
 
 import (
 	"errors"
-	"fmt"
 	"log"
 	"path/filepath"
 	"strings"
@@ -11,9 +12,11 @@ import (
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/razshare/frizzante/internal/project/lib/core/js"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/types"
+	view_ "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
-func New(config Config) (render goja.Callable, runtime *goja.Runtime, err error) {
+func New(config Config) (render RenderFunction, err error) {
 	var builder strings.Builder
 	var server = filepath.Join(config.App, "dist", "app.server.js")
 	var index = filepath.Join(config.App, "dist", "client", "index.html")
@@ -21,7 +24,7 @@ func New(config Config) (render goja.Callable, runtime *goja.Runtime, err error)
 	server = strings.ReplaceAll(server, "\\", "/")
 	index = strings.ReplaceAll(index, "\\", "/")
 
-	runtime = goja.New()
+	runtime := goja.New()
 	console := runtime.NewObject()
 	createLogger := func(level LogLevel) func(call goja.FunctionCall) goja.Value {
 		var logger *log.Logger
@@ -85,24 +88,60 @@ func New(config Config) (render goja.Callable, runtime *goja.Runtime, err error)
 		return
 	}
 
+	var renderValue goja.Value
+	if err = runtime.Set("frizzante_set_render", func(call goja.FunctionCall) goja.Value {
+		renderValue = call.Arguments[0]
+		return goja.Undefined()
+	}); err != nil {
+		return
+	}
+
 	var text string
 	if text, err = js.Bundle(filepath.Join(config.App, "dist"), api.FormatCommonJS, string(config.Data)); err != nil {
 		return
 	}
 
 	var prog *goja.Program
-	if prog, err = goja.Compile(server, fmt.Sprintf(config.Format, text), false); err != nil {
+	if prog, err = goja.Compile(server, "const module={exports:{}};\n"+text+"\nfrizzante_set_render(render)", false); err != nil {
 		return
 	}
 
-	var value goja.Value
-	if value, err = runtime.RunProgram(prog); err != nil {
+	if _, err = runtime.RunProgram(prog); err != nil {
 		return
 	}
 
 	var isfun bool
-	if render, isfun = goja.AssertFunction(value); !isfun {
+	var renderJs goja.Callable
+	if renderJs, isfun = goja.AssertFunction(renderValue); !isfun {
 		err = errors.New("render is not a function")
+		return
+	}
+
+	render = func(view view_.View) (head string, body string, err error) {
+		var props map[string]any
+		if props, err = types.EncodeInterface(view_.NewData(view)); err != nil {
+			return
+		}
+
+		var promise goja.Value
+		if promise, err = renderJs(goja.Undefined(), runtime.ToValue(props)); err != nil {
+			return
+		}
+
+		result := promise.Export().(*goja.Promise).Result().ToObject(runtime)
+
+		headv := result.Get("head")
+		bodyv := result.Get("body")
+
+		if headv != nil {
+			head = headv.String()
+		}
+
+		if bodyv != nil {
+			body = bodyv.String()
+		}
+
+		return
 	}
 
 	return

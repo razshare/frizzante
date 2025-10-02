@@ -29,9 +29,11 @@ type GenerateOptions struct {
 	Air      string
 	Bun      string
 	Sqlc     string
+	Tags     []string
 	Efs      embed.FS
 	Platform platform.Platform
 	Auto     bool
+	Active   bool
 }
 
 type TestOptions struct {
@@ -85,10 +87,12 @@ type CleanProjectOptions struct {
 }
 
 type DevOptions struct {
-	App string
-	Go  string
-	Air string
-	Bun string
+	App  string
+	Go   string
+	Air  string
+	Bun  string
+	Efs  embed.FS
+	Tags []string
 }
 
 type BuildOptions struct {

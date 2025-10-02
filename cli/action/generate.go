@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/razshare/frizzante/cli/generate"
+	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/tui/multiselect"
 	"github.com/razshare/frizzante/tui/search"
 )
@@ -17,6 +18,27 @@ func Generate(options GenerateOptions) (err error) {
 				Air:      options.Air,
 				Auto:     options.Auto,
 				Platform: options.Platform,
+			})
+		} else if gen == "air_config" {
+			tags := make([]string, 0)
+
+			if !options.Active {
+				if tags, err = tags_.Select([]search.Choice{
+					{Id: "trace", Description: "enables tracing with stack.Trace()"},
+					{Id: "types", Description: "enables type generations"},
+					{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
+					{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
+					{Id: "other", Description: "adds custom tags"},
+				}); err != nil {
+					return err
+				}
+			}
+
+			tags = append(tags, options.Tags...)
+
+			return generate.AirConfig(generate.AirConfigOptions{
+				Efs:  options.Efs,
+				Tags: tags,
 			})
 		} else if gen == "bun" {
 			return generate.Bun(generate.BunOptions{
@@ -88,6 +110,7 @@ func Generate(options GenerateOptions) (err error) {
 				{Id: "links", Description: "hyperlink component that provides status details"},
 				{Id: "icons", Description: "icon component that renders using svg"},
 				{Id: "air", Description: "live reload tool for go programs"},
+				{Id: "air_config", Description: "air configuration file .air.toml"},
 				{Id: "bun", Description: "fast js toolkit"},
 				{Id: "session", Description: "user session features"},
 				{Id: "database", Description: "full database setup"},

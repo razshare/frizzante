@@ -1,7 +1,9 @@
-package compile_
+package render_function
 
 import (
 	"log"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 type LogLevel uint8
@@ -18,3 +20,5 @@ type Config struct {
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 }
+
+type RenderFunction = func(view view_.View) (head string, body string, err error)
