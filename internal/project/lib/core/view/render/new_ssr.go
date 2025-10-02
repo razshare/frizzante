@@ -41,7 +41,7 @@ func New(config Config) func(view view_.View) (html string, err error) {
 	}
 
 	if limit <= 0 {
-		if limitString := os.Getenv("FRIZZANTE_RENDER_LIMIT"); limitString != "" {
+		if limitString := os.Getenv("FRIZZANTE_JS_RUNTIME_LIMIT"); limitString != "" {
 			var err error
 			var limit64 int64
 			if limit64, err = strconv.ParseInt(limitString, 10, 64); err != nil {
