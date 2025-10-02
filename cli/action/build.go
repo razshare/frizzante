@@ -3,13 +3,21 @@ package action
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinner"
 )
 
 func Build(options BuildOptions) (err error) {
-	spin := spinner.New("building binary")
+	var spin *spinner.Spinner
+
+	if len(options.Tags) > 0 {
+		spin = spinner.Newf("building binary with tags %s", strings.Join(options.Tags, ","))
+	} else {
+		spin = spinner.New("building binary")
+	}
+
 	go spinner.Start(spin)
 	defer spinner.Stop(spin)
 
@@ -17,8 +25,14 @@ func Build(options BuildOptions) (err error) {
 		return
 	}
 
-	if messages.Command(".", os.Environ(), options.Go, "build", "-o="+filepath.Join(".gen", "bin", "app"), ".") {
-		messages.Success("project built into ", filepath.Join(".gen", "bin", "app"))
+	if len(options.Tags) > 0 {
+		if messages.Command(".", os.Environ(), options.Go, "build", "-tags="+strings.Join(options.Tags, ","), "-o="+filepath.Join(".gen", "bin", "app"), ".") {
+			messages.Success("project built into ", filepath.Join(".gen", "bin", "app"))
+		}
+	} else {
+		if messages.Command(".", os.Environ(), options.Go, "build", "-o="+filepath.Join(".gen", "bin", "app"), ".") {
+			messages.Success("project built into ", filepath.Join(".gen", "bin", "app"))
+		}
 	}
 
 	return

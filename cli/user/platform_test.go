@@ -23,7 +23,7 @@ func TestPlatformLinuxAmd64(t *testing.T) {
 	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "linux/amd64"
-	a := &app.App{Platform: &platStr}
+	a := &app_.App{Platform: &platStr}
 
 	plat, err := Platform(a)
 	if err != nil {
@@ -62,7 +62,7 @@ func TestPlatformLinuxArm64(t *testing.T) {
 
 	platStr := "linux/arm64"
 
-	plat, err := Platform(&app.App{Platform: &platStr})
+	plat, err := Platform(&app_.App{Platform: &platStr})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -98,7 +98,7 @@ func TestPlatformDarwinAmd64(t *testing.T) {
 	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "darwin/amd64"
-	a := &app.App{Platform: &platStr}
+	a := &app_.App{Platform: &platStr}
 
 	plat, err := Platform(a)
 	if err != nil {
@@ -136,7 +136,7 @@ func TestPlatformDarwinArm64(t *testing.T) {
 	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "darwin/arm64"
-	a := &app.App{Platform: &platStr}
+	a := &app_.App{Platform: &platStr}
 
 	plat, err := Platform(a)
 	if err != nil {
@@ -174,7 +174,7 @@ func TestPlatformWindowsAmd64(t *testing.T) {
 	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "windows/amd64"
-	a := &app.App{Platform: &platStr}
+	a := &app_.App{Platform: &platStr}
 
 	plat, err := Platform(a)
 	if err != nil {
@@ -212,7 +212,7 @@ func TestPlatformWindowsArm64(t *testing.T) {
 	defer func() { _ = os.Remove(filepath.Join(cache, "platform.txt")) }()
 
 	platStr := "windows/arm64"
-	a := &app.App{Platform: &platStr}
+	a := &app_.App{Platform: &platStr}
 
 	plat, err := Platform(a)
 	if err != nil {
@@ -250,7 +250,7 @@ func TestPlatformCached(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	plat, err := Platform(&app.App{})
+	plat, err := Platform(&app_.App{})
 	if err != nil {
 		_ = os.Remove(filepath.Join(cache, "platform.txt"))
 		t.Fatal(err)

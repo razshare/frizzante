@@ -1,6 +1,6 @@
 package view
 
-func Wrap(view View) Data {
+func NewData(view View) Data {
 	return Data{
 		Name:   view.Name,
 		Render: view.RenderMode,

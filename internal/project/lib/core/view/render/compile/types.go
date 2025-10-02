@@ -1,7 +1,6 @@
-package ssr
+package compile_
 
 import (
-	"embed"
 	"log"
 )
 
@@ -12,10 +11,10 @@ const LogLevelWarning LogLevel = 1
 const LogLevelDanger LogLevel = 2
 
 type Config struct {
+	Data     []byte
+	Format   string
 	App      string
-	Efs      embed.FS
-	Limit    int
-	UseDisk  bool
+	Server   string
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 }

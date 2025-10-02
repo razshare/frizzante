@@ -47,16 +47,16 @@ func Package(options PackageOptions) (err error) {
 
 	messages.Successf("%s generated", filepath.Join(options.App, "dist"))
 
-	if !options.Prod && files.IsDirectory(filepath.Join("lib", "core", "view", "ssr")) {
+	if !options.Prod && files.IsDirectory(filepath.Join("lib", "core", "view", "render")) {
 		if files.IsDirectory(filepath.Join(options.App, "dist")) {
 			if err = files.CopyDirectory(
 				filepath.Join(options.App, "dist"),
-				filepath.Join("lib", "core", "view", "ssr", "app", "dist"),
+				filepath.Join("lib", "core", "view", "render", "app", "dist"),
 			); err != nil {
 				return
 			}
 
-			messages.Successf("%s copied to %s", filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "view", "ssr"))
+			messages.Successf("%s copied to %s", filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "view", "render"))
 		}
 	}
 

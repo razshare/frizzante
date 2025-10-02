@@ -95,6 +95,7 @@ type BuildOptions struct {
 	App      string
 	Go       string
 	Bun      string
+	Tags     []string
 	Platform platform.Platform
 }
 

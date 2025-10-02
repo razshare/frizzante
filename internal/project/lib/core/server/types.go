@@ -7,22 +7,21 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/guard"
 	"github.com/razshare/frizzante/internal/project/lib/core/route"
-	view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 type Server struct {
 	*http.Server
 	Guards      []guard.Guard
 	Routes      []route.Route
+	App         string
 	PublicRoot  string
 	SecureAddr  string
 	Certificate string
 	Key         string
-	Channels    Channels
 	InfoLog     *log.Logger
-	Efs         embed.FS
 	Cors        *http.CrossOriginProtection
-	Render      func(view view.View) (html string, err error)
+	Channels    Channels
+	Efs         embed.FS
 }
 
 type Channels struct {

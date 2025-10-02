@@ -1,4 +1,4 @@
-package app
+package app_
 
 import "embed"
 
@@ -30,5 +30,6 @@ type App struct {
 	Sqlc          *string
 	Welcome       *bool
 	Clear         *bool
+	Tags          *string
 	Efs           embed.FS
 }

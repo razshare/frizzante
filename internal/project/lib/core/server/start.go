@@ -12,6 +12,7 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/view/render"
 )
 
 // Start starts a server from a configuration.
@@ -22,7 +23,12 @@ func Start(server *Server) {
 		InfoLog:    server.InfoLog,
 		PublicRoot: server.PublicRoot,
 		Efs:        server.Efs,
-		Render:     server.Render,
+		Render: render.New(render.Config{
+			App:      server.App,
+			Efs:      server.Efs,
+			InfoLog:  server.InfoLog,
+			ErrorLog: server.ErrorLog,
+		}),
 	}
 	for _, route := range server.Routes {
 		handler.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {

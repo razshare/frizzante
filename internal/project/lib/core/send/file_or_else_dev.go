@@ -1,18 +1,13 @@
-//go:build !dev
+//go:build dev
 
 package send
 
 import (
-	"bytes"
-	"fmt"
-	"io/fs"
 	"net/http"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/client"
-	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/mime"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
@@ -44,38 +39,6 @@ func FileOrElse(client *client.Client, orElse func()) {
 		}
 
 		http.ServeFile(client.Writer, client.Request, name)
-		return
-	}
-
-	if embeds.IsFile(client.Config.Efs, name) {
-		var file fs.File
-		var err error
-		if file, err = client.Config.Efs.Open(name); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
-			return
-		}
-
-		var info os.FileInfo
-		if info, err = file.Stat(); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
-			return
-		}
-
-		if "" == client.Writer.Header().Get("Content-Type") {
-			Header(client, "Content-Type", mime.Parse(name))
-		}
-
-		if "" == client.Writer.Header().Get("Content-Length") {
-			Header(client, "Content-Length", fmt.Sprintf("%d", info.Size()))
-		}
-
-		buf := make([]byte, info.Size())
-		if _, err = file.Read(buf); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
-			return
-		}
-
-		http.ServeContent(client.Writer, client.Request, name, info.ModTime(), bytes.NewReader(buf))
 		return
 	}
 

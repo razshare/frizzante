@@ -13,4 +13,4 @@ rm -fr internal/project/.gen
 rm -fr internal/project/app/dist
 rm -fr internal/project/app/.vite
 rm -fr internal/project/app/node_modules
-rm -fr internal/project/lib/core/view/ssr/app
+rm -fr internal/project/lib/core/view/app

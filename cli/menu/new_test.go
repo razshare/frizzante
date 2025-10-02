@@ -7,7 +7,7 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	a := app.New()
+	a := app_.New()
 	menu, err := New(a)
 	if err != nil {
 		t.Fatal(err)

@@ -1,6 +1,7 @@
 package spinner
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -32,4 +33,8 @@ func New(message string) *Spinner {
 		Model:   model,
 		Program: tea.NewProgram(model),
 	}
+}
+
+func Newf(format string, vars ...any) *Spinner {
+	return New(fmt.Sprintf(format, vars...))
 }

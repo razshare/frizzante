@@ -24,7 +24,7 @@ func View(client *client.Client, view _view.View) {
 		if view.Props == nil {
 			view.Props = map[string]string{}
 		}
-		Json(client, _view.Wrap(view))
+		Json(client, _view.NewData(view))
 		return
 	}
 

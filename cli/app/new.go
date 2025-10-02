@@ -1,4 +1,4 @@
-package app
+package app_
 
 import (
 	"path/filepath"
@@ -35,6 +35,7 @@ func New() *App {
 	sqc := flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"+extension.Find()), "sets the sqlc binary")
 	wel := flag.BoolP("welcome", "", false, "shows a welcome message")
 	clr := flag.BoolP("clear", "", false, "clears screen")
+	tags := flag.StringP("tags", "", "", "sets build tags")
 
 	return &App{
 		Add:           add,
@@ -63,6 +64,7 @@ func New() *App {
 		Bun:           bun,
 		Sqlc:          sqc,
 		Welcome:       wel,
+		Tags:          tags,
 		Clear:         clr,
 	}
 }

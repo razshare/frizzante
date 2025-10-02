@@ -15,7 +15,7 @@ import (
 
 var PlatformMutex sync.Mutex
 
-func Platform(a *app.App) (plat platform.Platform, err error) {
+func Platform(a *app_.App) (plat platform.Platform, err error) {
 	var cache string
 	if cache, err = FrizzanteCache(); err != nil {
 		return 0, err

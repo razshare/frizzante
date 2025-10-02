@@ -1,4 +1,4 @@
-package ssr
+package render
 
 import (
 	"embed"

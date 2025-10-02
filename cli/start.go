@@ -6,45 +6,45 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli/app"
-	_menu "github.com/razshare/frizzante/cli/menu"
+	menu_ "github.com/razshare/frizzante/cli/menu"
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
 )
 
-func Start(a *app.App) (err error) {
+func Start(app *app_.App) (err error) {
 	messages.Prefix = config.Styles.Menu.PaddingRight(1).Render("│")
-	var menu *_menu.Menu
-	menu, err = _menu.New(a)
+	var menu *menu_.Menu
+	menu, err = menu_.New(app)
 	if err != nil {
 		return
 	}
 
-	chs := make([]search.Choice, 0)
+	choices := make([]search.Choice, 0)
 
-	for _, it := range menu.Items {
-		if it.Hidden {
+	for _, item := range menu.Items {
+		if item.Hidden {
 			continue
 		}
-		chs = append(chs, it.Choice)
+		choices = append(choices, item.Choice)
 	}
 
 	// If this for loop returns,
 	// it means the choice has been inlined.
-	for _, it := range menu.Items {
-		if !it.Active() {
+	for _, item := range menu.Items {
+		if !item.Active() {
 			continue
 		}
 
 		print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
-		println(config.Styles.Menu.Render(fmt.Sprintf("running ▷ %s (%s)", it.Choice.Id, it.Choice.Description)))
+		println(config.Styles.Menu.Render(fmt.Sprintf("running ▷ %s (%s)", item.Choice.Id, item.Choice.Description)))
 
-		return it.Handler()
+		return item.Handler()
 	}
 
 	var logo string
-	if logo, err = app.Logo(a); err != nil {
+	if logo, err = app_.Logo(app); err != nil {
 		messages.Error(err)
 		err = nil
 	} else {
@@ -55,8 +55,7 @@ func Start(a *app.App) (err error) {
 	// it means we need to show the TUI menu.
 	for {
 		var id string
-		id, err = singleselect.Send(chs, "menu")
-		if err != nil {
+		if id, err = singleselect.Send(choices, "menu"); err != nil {
 			if errors.Is(err, tea.ErrInterrupted) {
 				return
 			}
@@ -65,12 +64,12 @@ func Start(a *app.App) (err error) {
 			continue
 		}
 
-		for _, it := range menu.Items {
-			if it.Choice.Id != id {
+		for _, item := range menu.Items {
+			if item.Choice.Id != id {
 				continue
 			}
 
-			if err = it.Handler(); err != nil {
+			if err = item.Handler(); err != nil {
 				if errors.Is(err, tea.ErrInterrupted) {
 					return
 				}

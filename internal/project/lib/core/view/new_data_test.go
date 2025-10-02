@@ -3,7 +3,7 @@ package view
 import "testing"
 
 func TestData(t *testing.T) {
-	data := Wrap(View{
+	data := NewData(View{
 		Name:  "name",
 		Title: "title",
 		Props: map[string]any{
