@@ -1,6 +1,11 @@
 package action
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/razshare/frizzante/tui/config"
+)
 
 func Version(options VersionOptions) (err error) {
 	var data []byte
@@ -16,7 +21,7 @@ func Version(options VersionOptions) (err error) {
 		return
 	}
 
-	println(lines[0])
+	fmt.Println(config.Styles.Menu.PaddingRight(1).Render("│") + lines[0])
 
 	return
 }
