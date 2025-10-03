@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	view_ "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
@@ -27,11 +26,6 @@ func New(conf Config) Render {
 	index = strings.ReplaceAll(index, "\\", string(filepath.Separator))
 
 	return func(view view_.View) (document string, err error) {
-		if !files.IsFile(index) {
-			err = fmt.Errorf("file %s not found", index)
-			return
-		}
-
 		var indexData []byte
 		if indexData, err = os.ReadFile(index); err != nil {
 			return

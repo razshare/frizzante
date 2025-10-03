@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
 	view_ "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
@@ -26,11 +25,6 @@ func New(conf Config) Render {
 	index = strings.ReplaceAll(index, "\\", "/")
 
 	return func(view view_.View) (document string, err error) {
-		if !embeds.IsFile(efs, index) {
-			err = fmt.Errorf("file %s not found", index)
-			return
-		}
-
 		var indexData []byte
 		if indexData, err = efs.ReadFile(index); err != nil {
 			return
