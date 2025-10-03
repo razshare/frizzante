@@ -12,7 +12,7 @@ import (
 func Select(choices []search.Choice) (tags []string, err error) {
 	tags = make([]string, 0)
 	var yes bool
-	if yes, err = confirm.Send(true, "use build tags?"); err != nil {
+	if yes, err = confirm.Send(false, "use build tags?"); err != nil {
 		return
 	}
 
