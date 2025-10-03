@@ -1,4 +1,4 @@
-//go:build !trace
+//go:build trace
 
 package stack
 
