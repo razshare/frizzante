@@ -18,11 +18,6 @@ import (
 func New(config Config) (render RenderFunction, err error) {
 	var runtime *qjs.Runtime
 	var builder strings.Builder
-	var server = filepath.Join(config.App, "dist", "app.server.js")
-	var index = filepath.Join(config.App, "dist", "client", "index.html")
-
-	server = strings.ReplaceAll(server, "\\", "/")
-	index = strings.ReplaceAll(index, "\\", "/")
 
 	if runtime, err = qjs.New(); err != nil {
 		return
@@ -56,7 +51,7 @@ func New(config Config) (render RenderFunction, err error) {
 							config.ErrorLog.Println(err, stack.Trace())
 							return
 						}
-						builder.WriteString(string(marshalData))
+						builder.WriteString(marshalData)
 						continue
 					}
 
@@ -91,11 +86,13 @@ func New(config Config) (render RenderFunction, err error) {
 	})
 
 	var text string
-	if text, err = js.Bundle(filepath.Join(config.App, "dist"), api.FormatESModule, string(config.Data)); err != nil {
+	if text, err = js.Bundle(filepath.Join(config.App, "dist"), api.FormatCommonJS, string(config.Data)); err != nil {
 		return
 	}
 
-	if _, err = context.Eval(server, qjs.Code(text+"\nfrizzante_set_render(render)"), qjs.TypeModule()); err != nil {
+	source := "const module={exports:{}};\n" + text + "\nfrizzante_set_render(render)"
+
+	if _, err = context.Eval("app.server.js", qjs.Code(source)); err != nil {
 		return
 	}
 

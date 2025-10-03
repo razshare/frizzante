@@ -1,4 +1,4 @@
-//go:build !dev && no_js_runtime && !experimental_qjs_runtime
+//go:build !dev && no_js_runtime
 
 package render
 

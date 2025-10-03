@@ -18,11 +18,6 @@ import (
 
 func New(config Config) (render RenderFunction, err error) {
 	var builder strings.Builder
-	var server = filepath.Join(config.App, "dist", "app.server.js")
-	var index = filepath.Join(config.App, "dist", "client", "index.html")
-
-	server = strings.ReplaceAll(server, "\\", "/")
-	index = strings.ReplaceAll(index, "\\", "/")
 
 	runtime := goja.New()
 	console := runtime.NewObject()
@@ -101,8 +96,10 @@ func New(config Config) (render RenderFunction, err error) {
 		return
 	}
 
+	source := "const module={exports:{}};\n" + text + "\nfrizzante_set_render(render)"
+
 	var prog *goja.Program
-	if prog, err = goja.Compile(server, "const module={exports:{}};\n"+text+"\nfrizzante_set_render(render)", false); err != nil {
+	if prog, err = goja.Compile("app.server.js", source, false); err != nil {
 		return
 	}
 
