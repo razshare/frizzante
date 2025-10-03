@@ -84,6 +84,12 @@ type QueriesOptions struct {
 	Auto     bool
 }
 
+type TypesOptions struct {
+	Go   string
+	Efs  embed.FS
+	Auto bool
+}
+
 type DownloadOptions struct {
 	Url  string
 	Auto bool
