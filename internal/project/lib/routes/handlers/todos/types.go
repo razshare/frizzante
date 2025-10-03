@@ -10,6 +10,6 @@ func init() {
 }
 
 type Props struct {
-	Todos []session.Todo `json:"todos"`
+	Items []session.Todo `json:"items"`
 	Error string         `json:"error"`
 }

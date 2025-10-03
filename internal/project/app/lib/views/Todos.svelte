@@ -5,13 +5,13 @@
     import { href } from "$lib/scripts/core/href.ts"
     import { mdiArrowLeft, mdiCheckCircleOutline, mdiCircleOutline, mdiClose, mdiPlus } from "@mdi/js"
     import { slide } from "svelte/transition"
-    import type { Props, Todo } from "$gen/types/main/lib/routes/handlers/todos/Props"
+    import type { Props, memory } from "$gen/types/main/lib/routes/handlers/todos/Props"
 
-    let { todos = [], error }: Props = $props()
+    let { items = [], error }: Props = $props()
 
     let unchecked = $derived.by(function count(): number {
         let value = 0
-        for (const todo of todos) {
+        for (const todo of items) {
             if (!todo.checked) {
                 value++
             }
@@ -28,7 +28,7 @@
         <div class="card-body relative p-6">
             {@render AddTodoForm()}
             <div class="divider"></div>
-            {@render ShowTodosList(todos)}
+            {@render ShowTodosList(items)}
             {@render BackButton()}
         </div>
     </div>
@@ -62,9 +62,9 @@
     {/if}
 {/snippet}
 
-{#snippet ShowTodosList(todos: Todo[])}
-    {#if todos.length > 0}
-        {#each todos as todo, index (index)}
+{#snippet ShowTodosList(items: memory.Todo[])}
+    {#if items.length > 0}
+        {#each items as todo, index (index)}
             <div in:slide out:slide class="flex w-full text-base-content/80">
                 {@render ToggleTodoButton(todo, index)}
                 {@render RemoveTodoButton(index)}
@@ -82,7 +82,7 @@
     </div>
 {/snippet}
 
-{#snippet ToggleTodoButton(todo: Todo, index: number)}
+{#snippet ToggleTodoButton(todo: memory.Todo, index: number)}
     {@const aria = todo.checked ? "Uncheck" : "Check"}
     {@const value = todo.checked ? "0" : "1"}
     {@const icon = todo.checked ? mdiCheckCircleOutline : mdiCircleOutline}

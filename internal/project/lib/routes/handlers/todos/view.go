@@ -13,7 +13,7 @@ func View(client *client.Client) {
 	send.View(client, view_.View{
 		Name: "Todos",
 		Props: Props{
-			Todos: state.Todos,
+			Items: state.Todos,
 			Error: receive.Query(client, "error"),
 			//OtherItems: map[string]string{
 			//	"asd": "asd",

@@ -33,13 +33,12 @@ func IsPrimitive(type_ reflect.Type) bool {
 	}
 }
 
-func Define(type_ reflect.Type, ignore []string) (definitions string, root string, known []string, err error) {
-	known = ignore
+func Define(type_ reflect.Type, packages map[string][]string, definitions map[string]map[string][]string) (root string, err error) {
 	kind := type_.Kind()
 	switch kind {
 	case
 		reflect.Pointer:
-		definitions, root, known, err = Define(type_.Elem(), known)
+		root, err = Define(type_.Elem(), packages, definitions)
 		return
 	case
 		reflect.Struct,
@@ -56,27 +55,29 @@ func Define(type_ reflect.Type, ignore []string) (definitions string, root strin
 			return
 		}
 
-		id := fmt.Sprintf("%s:%s", type_.PkgPath(), type_.Name())
-
-		if slices.Contains(known, id) {
-			root = type_.Name()
-			return
+		parts := strings.Split(type_.PkgPath(), "/")
+		count := len(parts)
+		package_ := parts[count-1]
+		if _, exists := definitions[package_]; !exists {
+			definitions[package_] = map[string][]string{}
 		}
 
-		if slices.Contains(known, name) {
-			parts := strings.Split(type_.PkgPath(), "/")
-			count := len(parts)
-			name = parts[count-1] + "_" + type_.Name()
+		if _, exists := definitions[package_][name]; !exists {
+			definitions[package_][name] = make([]string, 0)
 		}
 
-		known = append(known, id)
-		known = append(known, name)
+		if _, exists := packages[package_]; exists {
+			if slices.Contains(packages[package_], name) {
+				root = package_ + "." + name
+				return
+			}
+			packages[package_] = append(packages[package_], name)
+		} else {
+			packages[package_] = []string{name}
+		}
 
-		var definitionsExtern string
-
-		root = name
-		count := type_.NumField()
-		definitions += fmt.Sprintf("export type %s = {\n", name)
+		root = package_ + "." + name
+		count = type_.NumField()
 		for i := 0; i < count; i++ {
 			field := type_.Field(i)
 
@@ -86,8 +87,6 @@ func Define(type_ reflect.Type, ignore []string) (definitions string, root strin
 
 			var nameLoc string
 			var rootLoc string
-			var knownLoc []string
-			var definitionsLoc string
 
 			if tag := field.Tag.Get("json"); tag != "" {
 				nameLoc = tag
@@ -95,23 +94,14 @@ func Define(type_ reflect.Type, ignore []string) (definitions string, root strin
 				nameLoc = field.Name
 			}
 
-			if definitionsLoc, rootLoc, knownLoc, err = Define(field.Type, known); err != nil {
+			if rootLoc, err = Define(field.Type, packages, definitions); err != nil {
 				return
 			}
 
 			if rootLoc != "" {
-				definitions += fmt.Sprintf("    %s: %s\n", nameLoc, rootLoc)
+				definitions[package_][name] = append(definitions[package_][name], fmt.Sprintf("%s: %s", nameLoc, rootLoc))
 			}
-
-			if definitionsLoc != "" {
-				definitionsExtern += definitionsLoc + "\n\n"
-			}
-
-			known = knownLoc
 		}
-		definitions += "}\n\n"
-		definitions += definitionsExtern
-		definitions = strings.TrimSpace(definitions)
 		root = strings.TrimSpace(root)
 	case
 		reflect.Slice,
@@ -119,20 +109,12 @@ func Define(type_ reflect.Type, ignore []string) (definitions string, root strin
 		valueType := type_.Elem()
 
 		var rootLoc string
-		var knownLoc []string
-		var definitionsLoc string
 
-		if rootLoc, definitionsLoc, knownLoc, err = Define(valueType, known); err != nil {
+		if rootLoc, err = Define(valueType, packages, definitions); err != nil {
 			return
 		}
 
-		root = fmt.Sprintf("%s[]", definitionsLoc)
-
-		if rootLoc != "" {
-			definitions = strings.TrimSpace(rootLoc)
-		}
-
-		known = knownLoc
+		root = fmt.Sprintf("%s[]", rootLoc)
 	case
 		reflect.Map:
 		keyType := type_.Key()
@@ -146,20 +128,12 @@ func Define(type_ reflect.Type, ignore []string) (definitions string, root strin
 		valueType := type_.Elem()
 
 		var rootLoc string
-		var knownLoc []string
-		var definitionsLoc string
 
-		if definitionsLoc, rootLoc, knownLoc, err = Define(valueType, known); err != nil {
+		if rootLoc, err = Define(valueType, packages, definitions); err != nil {
 			return
 		}
 
 		root = fmt.Sprintf("Record<%s, %s>", keyTypeName, rootLoc)
-
-		if definitionsLoc != "" {
-			definitions = strings.TrimSpace(definitionsLoc)
-		}
-
-		known = knownLoc
 	case
 		reflect.Chan,
 		reflect.Func,
