@@ -1,7 +1,7 @@
 package send
 
 import (
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
@@ -12,7 +12,7 @@ import (
 // function it will fail with an error.
 //
 // All errors are sent to the server notifier.
-func Status(client *client.Client, status int) {
+func Status(client *_client.Client, status int) {
 	if client.Locked {
 		client.Config.ErrorLog.Println("status is locked", stack.Trace())
 		return

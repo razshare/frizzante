@@ -10,7 +10,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/view/render"
 )
@@ -18,7 +18,7 @@ import (
 // Start starts a server from a configuration.
 func Start(server *Server) {
 	handler := server.Handler.(*http.ServeMux)
-	config := &client.Config{
+	config := &_client.Config{
 		ErrorLog:   server.ErrorLog,
 		InfoLog:    server.InfoLog,
 		PublicRoot: server.PublicRoot,
@@ -36,7 +36,7 @@ func Start(server *Server) {
 				server.ErrorLog.Println(err)
 				return
 			}
-			con := &client.Client{
+			con := &_client.Client{
 				Writer:  writer,
 				Request: request,
 				Config:  config,

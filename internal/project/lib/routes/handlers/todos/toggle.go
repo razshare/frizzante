@@ -3,13 +3,13 @@ package todos
 import (
 	"strconv"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
-	session "github.com/razshare/frizzante/internal/project/lib/session/memory"
+	"github.com/razshare/frizzante/internal/project/lib/session"
 )
 
-func Toggle(client *client.Client) {
+func Toggle(client *_client.Client) {
 	var err error
 	var count int64
 	var index int64

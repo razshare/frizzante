@@ -2,7 +2,7 @@ package todos
 
 import (
 	"github.com/razshare/frizzante/internal/project/lib/core/types"
-	session "github.com/razshare/frizzante/internal/project/lib/session/memory"
+	"github.com/razshare/frizzante/internal/project/lib/session"
 )
 
 func init() {

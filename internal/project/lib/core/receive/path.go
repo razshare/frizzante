@@ -1,8 +1,8 @@
 package receive
 
-import "github.com/razshare/frizzante/internal/project/lib/core/client"
+import _client "github.com/razshare/frizzante/internal/project/lib/core/client"
 
 // Path reads a parameters fields and returns the value.
-func Path(client *client.Client, key string) string {
+func Path(client *_client.Client, key string) string {
 	return client.Request.PathValue(key)
 }

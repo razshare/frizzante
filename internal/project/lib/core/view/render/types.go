@@ -4,7 +4,7 @@ import (
 	"embed"
 	"log"
 
-	view_ "github.com/razshare/frizzante/internal/project/lib/core/view"
+	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 type Config struct {
@@ -15,4 +15,4 @@ type Config struct {
 	InfoLog  *log.Logger
 }
 
-type Render = func(view view_.View) (html string, err error)
+type Render = func(view _view.View) (html string, err error)

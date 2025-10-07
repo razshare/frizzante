@@ -13,7 +13,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/js"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/types"
-	view_ "github.com/razshare/frizzante/internal/project/lib/core/view"
+	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 func New(config Config) (render RenderFunction, err error) {
@@ -114,9 +114,9 @@ func New(config Config) (render RenderFunction, err error) {
 		return
 	}
 
-	render = func(view view_.View) (head string, body string, err error) {
+	render = func(view _view.View) (head string, body string, err error) {
 		var props map[string]any
-		if props, err = types.EncodeInterface(view_.NewData(view)); err != nil {
+		if props, err = types.EncodeInterface(_view.NewData(view)); err != nil {
 			return
 		}
 

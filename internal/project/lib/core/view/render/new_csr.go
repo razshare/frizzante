@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	view_ "github.com/razshare/frizzante/internal/project/lib/core/view"
+	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 func New(conf Config) Render {
@@ -24,7 +24,7 @@ func New(conf Config) Render {
 
 	index = strings.ReplaceAll(index, "\\", "/")
 
-	return func(view view_.View) (document string, err error) {
+	return func(view _view.View) (document string, err error) {
 		var indexData []byte
 		if indexData, err = efs.ReadFile(index); err != nil {
 			return
@@ -33,7 +33,7 @@ func New(conf Config) Render {
 		document = string(indexData)
 
 		var data []byte
-		if data, err = json.Marshal(view_.NewData(view)); err != nil {
+		if data, err = json.Marshal(_view.NewData(view)); err != nil {
 			return "", err
 		}
 

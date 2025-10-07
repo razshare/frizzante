@@ -5,12 +5,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // FormValue reads the first form value associated with the given key and returns it.
-func FormValue(client *client.Client, key string) string {
+//
+// If there are no values associated with the key, FormValue returns an empty string.
+func FormValue(client *_client.Client, key string) string {
 	if client.WebSocket != nil {
 		client.Config.ErrorLog.Println("web socket connections cannot parse forms", stack.Trace())
 		return ""
@@ -28,7 +30,7 @@ func FormValue(client *client.Client, key string) string {
 }
 
 // FormValueIsFloat checks if the form value associated with the given key is a valid float.
-func FormValueIsFloat(client *client.Client, key string) bool {
+func FormValueIsFloat(client *_client.Client, key string) bool {
 	value := FormValue(client, key)
 	if value == "" {
 		return false
@@ -38,8 +40,11 @@ func FormValueIsFloat(client *client.Client, key string) bool {
 }
 
 // FormValueAsFloat reads the first form value associated with the given key and returns it as a float64.
-// Returns 0 if the value is not a valid float.
-func FormValueAsFloat(client *client.Client, key string) float64 {
+//
+// If there are no values associated with the key or the value is not a valid float, FormValueAsFloat returns 0.
+//
+// Use FormValueIsFloat to make sure the key exists and its value is a float.
+func FormValueAsFloat(client *_client.Client, key string) float64 {
 	value := FormValue(client, key)
 	if value == "" {
 		return 0

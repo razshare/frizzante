@@ -3,11 +3,11 @@ package session
 import (
 	"sync"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 )
 
-func Lock(client *client.Client) *sync.Mutex {
+func Lock(client *_client.Client) *sync.Mutex {
 	id := receive.SessionId(client)
 	mtx, ok := Mutexes[id]
 

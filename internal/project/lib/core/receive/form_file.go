@@ -3,7 +3,7 @@ package receive
 import (
 	"mime/multipart"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
@@ -13,7 +13,7 @@ var MultipartByReader = &multipart.Form{
 }
 
 // FormFile reads the first form file associated with the given key and returns it.
-func FormFile(client *client.Client, key string) MultipartFormFile {
+func FormFile(client *_client.Client, key string) MultipartFormFile {
 	if client.Request.MultipartForm == MultipartByReader {
 		client.Config.ErrorLog.Println("http: multipart handled by MultipartReader", stack.Trace())
 		return MultipartFormFile{

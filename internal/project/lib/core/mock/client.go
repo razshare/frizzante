@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/server"
 )
 

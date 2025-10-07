@@ -3,14 +3,14 @@ package send
 import (
 	"encoding/json"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Json sends json content.
 //
 // Compatible with web sockets and server sent events.
-func Json(client *client.Client, value any) {
+func Json(client *_client.Client, value any) {
 	data, err := json.Marshal(value)
 	if err != nil {
 		client.Config.ErrorLog.Println(err, stack.Trace())

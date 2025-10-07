@@ -11,7 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/mime"
@@ -19,7 +19,7 @@ import (
 )
 
 // FileOrElse sends the file requested by the client, or else falls back.
-func FileOrElse(client *client.Client, orElse func()) {
+func FileOrElse(client *_client.Client, orElse func()) {
 	if client.WebSocket != nil {
 		client.Config.ErrorLog.Println("file_or_else does not support web sockets", stack.Trace())
 		return

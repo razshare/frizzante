@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
@@ -12,7 +12,7 @@ import (
 // c and stores it in the value pointed to by value.
 //
 // Compatible with web sockets and server sent events.
-func Json(client *client.Client, value any) bool {
+func Json(client *_client.Client, value any) bool {
 	if client.WebSocket != nil {
 		if err := client.WebSocket.ReadJSON(&value); err != nil {
 			client.Config.ErrorLog.Println(err, stack.Trace())

@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/internal/project/lib/core/view"
+	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 type Client struct {
@@ -27,5 +27,5 @@ type Config struct {
 	Efs        embed.FS
 	ErrorLog   *log.Logger
 	InfoLog    *log.Logger
-	Render     func(view view_.View) (html string, err error)
+	Render     func(view _view.View) (html string, err error)
 }

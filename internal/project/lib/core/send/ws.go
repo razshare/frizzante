@@ -2,12 +2,12 @@ package send
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // WsUpgrade upgrades to web sockets.
-func WsUpgrade(client *client.Client) {
+func WsUpgrade(client *_client.Client) {
 	WsUpgradeWithUpgrader(client, websocket.Upgrader{
 		ReadBufferSize:  10240, // 10KB
 		WriteBufferSize: 10240, // 10KB
@@ -15,7 +15,7 @@ func WsUpgrade(client *client.Client) {
 }
 
 // WsUpgradeWithUpgrader upgrades to web sockets.
-func WsUpgradeWithUpgrader(client *client.Client, upgrader websocket.Upgrader) {
+func WsUpgradeWithUpgrader(client *_client.Client, upgrader websocket.Upgrader) {
 	conn, err := upgrader.Upgrade(client.Writer, client.Request, nil)
 	if err != nil {
 		client.Config.ErrorLog.Println(err, stack.Trace())

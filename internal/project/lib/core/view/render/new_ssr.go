@@ -15,7 +15,7 @@ import (
 	"sync"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
-	view_ "github.com/razshare/frizzante/internal/project/lib/core/view"
+	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 	"github.com/razshare/frizzante/internal/project/lib/core/view/render_function"
 )
 
@@ -83,7 +83,7 @@ func New(config Config) Render {
 		return
 	}
 
-	return func(view view_.View) (document string, err error) {
+	return func(view _view.View) (document string, err error) {
 		if !embeds.IsFile(efs, index) {
 			err = fmt.Errorf("file %s not found", index)
 			return
@@ -96,7 +96,7 @@ func New(config Config) Render {
 
 		document = string(indexData)
 
-		if view.RenderMode == view_.RenderModeServer || view.RenderMode == view_.RenderModeFull {
+		if view.RenderMode == _view.RenderModeServer || view.RenderMode == _view.RenderModeFull {
 			var render render_function.RenderFunction
 			if limit >= 0 {
 				mut.Lock()
@@ -120,15 +120,15 @@ func New(config Config) Render {
 				return
 			}
 
-			if view.RenderMode == view_.RenderModeServer {
+			if view.RenderMode == _view.RenderModeServer {
 				document = NoScript.ReplaceAllString(document, "")
 			}
 
-			if view.RenderMode == view_.RenderModeServer {
+			if view.RenderMode == _view.RenderModeServer {
 				document = strings.Replace(document, "<!--app-data-->", "", 1)
 			} else {
 				var data []byte
-				if data, err = json.Marshal(view_.NewData(view)); err != nil {
+				if data, err = json.Marshal(_view.NewData(view)); err != nil {
 					return
 				}
 
@@ -141,9 +141,9 @@ func New(config Config) Render {
 			return
 		}
 
-		if view.RenderMode == view_.RenderModeClient {
+		if view.RenderMode == _view.RenderModeClient {
 			var data []byte
-			if data, err = json.Marshal(view_.NewData(view)); err != nil {
+			if data, err = json.Marshal(_view.NewData(view)); err != nil {
 				return
 			}
 

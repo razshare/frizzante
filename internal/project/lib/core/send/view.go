@@ -3,13 +3,13 @@ package send
 import (
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 // View sends a view.
-func View(client *client.Client, view _view.View) {
+func View(client *_client.Client, view _view.View) {
 	if client.Writer.Header().Get("Location") != "" {
 		return
 	}

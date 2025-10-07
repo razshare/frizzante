@@ -5,13 +5,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/client"
+	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-func Load(client *client.Client) *State {
+func Save(client *_client.Client, s *State) {
 	mtx := Lock(client)
 	defer mtx.Unlock()
 
@@ -20,26 +20,21 @@ func Load(client *client.Client) *State {
 		err := os.MkdirAll(dname, os.ModePerm)
 		if err != nil {
 			client.Config.ErrorLog.Println(err, stack.Trace())
-			return nil
+			return
 		}
 	}
 
 	id := receive.SessionId(client)
+
 	fname := filepath.Join(dname, id+".json")
 
-	state := New()
-
-	var data []byte
-	data, err := os.ReadFile(fname)
+	data, err := json.Marshal(s)
 	if err != nil {
 		client.Config.ErrorLog.Println(err, stack.Trace())
-		return state
+		return
 	}
 
-	err = json.Unmarshal(data, state)
-	if err != nil {
+	if err = os.WriteFile(fname, data, os.ModePerm); err != nil {
 		client.Config.ErrorLog.Println(err, stack.Trace())
-		return state
 	}
-	return state
 }

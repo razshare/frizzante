@@ -27,9 +27,7 @@ func Session(options SessionOptions) (err error) {
 		return
 	}
 
-	stype := strings.ToLower(options.Type)
-
-	to := filepath.Join("lib", "session", stype)
+	to := filepath.Join("lib", "session")
 
 	if files.IsDirectory(to) {
 		if !options.Auto {
@@ -50,7 +48,7 @@ func Session(options SessionOptions) (err error) {
 	}
 
 	var from string
-	if stype == "memory" {
+	if strings.ToLower(options.Type) == "memory" {
 		from = "internal/project/" + to
 	} else {
 		from = "internal/additions/" + to
@@ -69,7 +67,7 @@ func Session(options SessionOptions) (err error) {
 		return
 	}
 
-	switch stype {
+	switch strings.ToLower(options.Type) {
 	case "memory":
 		messages.Success(
 			"memory session generated into session.*\n",
@@ -79,8 +77,8 @@ func Session(options SessionOptions) (err error) {
 		)
 		messages.Tip(
 			"## usage example\n",
-			"func(c *client.Client){\n",
-			"    s := session.Start(receive.SessionId(c))\n",
+			"func(client *client_.Client){\n",
+			"    session := session_.Start(receive.SessionId(client))\n",
 			"}\n",
 			"\n",
 			"## state shape\n",
@@ -100,9 +98,9 @@ func Session(options SessionOptions) (err error) {
 		)
 		messages.Tip(
 			"## usage example\n",
-			"func(c *client.Client){\n",
-			"    s := session.Start(receive.SessionId(c))\n",
-			"    defer session.Save(c, s)\n",
+			"func(client *client_.Client){\n",
+			"    session := session_.Start(receive.SessionId(client))\n",
+			"    defer session.Save(client, session)\n",
 			"}\n",
 			"\n",
 			"## state shape\n",

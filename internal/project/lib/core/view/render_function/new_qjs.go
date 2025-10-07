@@ -12,7 +12,7 @@ import (
 	"github.com/fastschema/qjs"
 	"github.com/razshare/frizzante/internal/project/lib/core/js"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
-	"github.com/razshare/frizzante/internal/project/lib/core/view"
+	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
 )
 
 func New(config Config) (render RenderFunction, err error) {
@@ -101,9 +101,9 @@ func New(config Config) (render RenderFunction, err error) {
 		return
 	}
 
-	render = func(view view_.View) (head string, body string, err error) {
+	render = func(view _view.View) (head string, body string, err error) {
 		var propsObject *qjs.Value
-		if propsObject, err = qjs.ToJSValue(context, view_.NewData(view)); err != nil {
+		if propsObject, err = qjs.ToJSValue(context, _view.NewData(view)); err != nil {
 			return
 		}
 
