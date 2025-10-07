@@ -77,7 +77,7 @@ func Session(options SessionOptions) (err error) {
 		)
 		messages.Tip(
 			"## usage example\n",
-			"func(client *client_.Client){\n",
+			"func(client *_client.Client){\n",
 			"    session := _session.Start(receive.SessionId(client))\n",
 			"}\n",
 			"\n",
@@ -98,7 +98,7 @@ func Session(options SessionOptions) (err error) {
 		)
 		messages.Tip(
 			"## usage example\n",
-			"func(client *client_.Client){\n",
+			"func(client *_client.Client){\n",
 			"    session := _session.Start(receive.SessionId(client))\n",
 			"    defer session.Save(client, session)\n",
 			"}\n",
