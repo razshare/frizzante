@@ -78,7 +78,7 @@ func Session(options SessionOptions) (err error) {
 		messages.Tip(
 			"## usage example\n",
 			"func(client *client_.Client){\n",
-			"    session := session_.Start(receive.SessionId(client))\n",
+			"    session := _session.Start(receive.SessionId(client))\n",
 			"}\n",
 			"\n",
 			"## state shape\n",
@@ -99,7 +99,7 @@ func Session(options SessionOptions) (err error) {
 		messages.Tip(
 			"## usage example\n",
 			"func(client *client_.Client){\n",
-			"    session := session_.Start(receive.SessionId(client))\n",
+			"    session := _session.Start(receive.SessionId(client))\n",
 			"    defer session.Save(client, session)\n",
 			"}\n",
 			"\n",
