@@ -149,7 +149,7 @@ func TestFormValueAsInt(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormValueAsInt(client, "key", &value); ok || value32 != 0 {
+	if ok := FormValueAsInt(client, "key", &value); ok || value != 0 {
 		t.Fatal("key should not be a valid int")
 	}
 
