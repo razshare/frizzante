@@ -5,18 +5,18 @@ import (
 	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
-	app_ "github.com/razshare/frizzante/cli/app"
-	menu_ "github.com/razshare/frizzante/cli/menu"
+	"github.com/razshare/frizzante/cli/apps"
+	"github.com/razshare/frizzante/cli/menus"
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
 )
 
-func Start(app *app_.App) (err error) {
+func Start(app *apps.App) (err error) {
 	messages.Prefix = config.Styles.Menu.PaddingRight(1).Render("│")
-	var menu *menu_.Menu
-	menu, err = menu_.New(app)
+	var menu *menus.Menu
+	menu, err = menus.New(app)
 	if err != nil {
 		return
 	}
@@ -44,7 +44,7 @@ func Start(app *app_.App) (err error) {
 	}
 
 	var logo string
-	if logo, err = app_.Logo(app); err != nil {
+	if logo, err = apps.Logo(app); err != nil {
 		messages.Error(err)
 		err = nil
 	} else {

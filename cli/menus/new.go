@@ -1,10 +1,10 @@
-package menu
+package menus
 
 import (
 	"fmt"
 
 	"github.com/razshare/frizzante/cli/action"
-	app_ "github.com/razshare/frizzante/cli/app"
+	"github.com/razshare/frizzante/cli/apps"
 	"github.com/razshare/frizzante/cli/path"
 	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/cli/user"
@@ -12,7 +12,7 @@ import (
 	"github.com/razshare/frizzante/tui/singleselect"
 )
 
-func New(app *app_.App) (*Menu, error) {
+func New(app *apps.App) (*Menu, error) {
 	cache, err := user.FrizzanteCache()
 	if err != nil {
 		return nil, err

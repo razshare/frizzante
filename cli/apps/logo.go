@@ -1,4 +1,4 @@
-package app_
+package apps
 
 import (
 	"github.com/razshare/frizzante/tui/config"

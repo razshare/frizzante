@@ -1,13 +1,13 @@
-package menu
+package menus
 
 import (
 	"testing"
 
-	app_ "github.com/razshare/frizzante/cli/app"
+	"github.com/razshare/frizzante/cli/apps"
 )
 
 func TestNew(t *testing.T) {
-	a := app_.New()
+	a := apps.New()
 	menu, err := New(a)
 	if err != nil {
 		t.Fatal(err)

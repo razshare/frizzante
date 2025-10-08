@@ -7,7 +7,7 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli"
-	app_ "github.com/razshare/frizzante/cli/app"
+	"github.com/razshare/frizzante/cli/apps"
 	"github.com/razshare/frizzante/tui/messages"
 	flag "github.com/spf13/pflag"
 )
@@ -22,7 +22,7 @@ import (
 //go:embed internal/project/app/.prettierrc
 //go:embed internal/project/app/.prettierignore
 var efs embed.FS
-var frz = app_.New()
+var frz = apps.New()
 
 func main() {
 	flag.Parse()
