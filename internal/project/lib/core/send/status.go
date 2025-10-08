@@ -2,7 +2,7 @@ package send
 
 import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Status sets the status code.
@@ -14,7 +14,7 @@ import (
 // All errors are sent to the server notifier.
 func Status(client *clients.Client, status int) {
 	if client.Locked {
-		client.Config.ErrorLog.Println("status is locked", stacks.Trace())
+		client.Config.ErrorLog.Println("status is locked", stack.Trace())
 		return
 	}
 

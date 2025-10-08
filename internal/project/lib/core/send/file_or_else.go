@@ -15,18 +15,18 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/mime"
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // FileOrElse sends the file requested by the client, or else falls back.
 func FileOrElse(client *clients.Client, orElse func()) {
 	if client.WebSocket != nil {
-		client.Config.ErrorLog.Println("file_or_else does not support web sockets", stacks.Trace())
+		client.Config.ErrorLog.Println("file_or_else does not support web sockets", stack.Trace())
 		return
 	}
 
 	if client.EventName != "" {
-		client.Config.ErrorLog.Println("file_or_else does not support server sent events", stacks.Trace())
+		client.Config.ErrorLog.Println("file_or_else does not support server sent events", stack.Trace())
 		return
 	}
 
@@ -51,13 +51,13 @@ func FileOrElse(client *clients.Client, orElse func()) {
 		var file fs.File
 		var err error
 		if file, err = client.Config.Efs.Open(name); err != nil {
-			client.Config.ErrorLog.Println(err, stacks.Trace())
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
 		var info os.FileInfo
 		if info, err = file.Stat(); err != nil {
-			client.Config.ErrorLog.Println(err, stacks.Trace())
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
@@ -71,7 +71,7 @@ func FileOrElse(client *clients.Client, orElse func()) {
 
 		buf := make([]byte, info.Size())
 		if _, err = file.Read(buf); err != nil {
-			client.Config.ErrorLog.Println(err, stacks.Trace())
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 

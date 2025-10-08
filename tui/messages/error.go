@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/tui/config"
 )
 
@@ -15,8 +15,8 @@ func Error(args ...any) {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
 
-	if trace := stacks.Trace(); trace != "" {
-		entries[length] = "\n" + stacks.Trace()
+	if trace := stack.Trace(); trace != "" {
+		entries[length] = "\n" + stack.Trace()
 	}
 
 	Status("ERROR", strings.Join(entries, ""), config.Colors.Error, "233", config.Colors.Error)

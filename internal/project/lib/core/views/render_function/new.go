@@ -11,7 +11,7 @@ import (
 	"github.com/dop251/goja"
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/razshare/frizzante/internal/project/lib/core/js"
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/types"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
@@ -44,7 +44,7 @@ func New(config Config) (render RenderFunction, err error) {
 					object := argument.ToObject(runtime)
 					marshalData, err = object.MarshalJSON()
 					if err != nil {
-						config.ErrorLog.Println(err, stacks.Trace())
+						config.ErrorLog.Println(err, stack.Trace())
 						return goja.Undefined()
 					}
 					builder.WriteString(string(marshalData))

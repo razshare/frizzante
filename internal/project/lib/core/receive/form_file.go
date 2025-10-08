@@ -4,7 +4,7 @@ import (
 	"mime/multipart"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 var MultipartByReader = &multipart.Form{
@@ -15,7 +15,7 @@ var MultipartByReader = &multipart.Form{
 // FormFile reads the first form file associated with the given key and returns it.
 func FormFile(client *clients.Client, key string) MultipartFormFile {
 	if client.Request.MultipartForm == MultipartByReader {
-		client.Config.ErrorLog.Println("http: multipart handled by MultipartReader", stacks.Trace())
+		client.Config.ErrorLog.Println("http: multipart handled by MultipartReader", stack.Trace())
 		return MultipartFormFile{
 			FileHeader: multipart.FileHeader{
 				Header: map[string][]string{},
@@ -25,7 +25,7 @@ func FormFile(client *clients.Client, key string) MultipartFormFile {
 
 	if client.Request.MultipartForm == nil {
 		if err := client.Request.ParseMultipartForm(MaxFormSize); err != nil {
-			client.Config.ErrorLog.Println(err, stacks.Trace())
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return MultipartFormFile{
 				FileHeader: multipart.FileHeader{
 					Header: map[string][]string{},
@@ -38,7 +38,7 @@ func FormFile(client *clients.Client, key string) MultipartFormFile {
 		if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
 			file, err := headers[0].Open()
 			if err != nil {
-				client.Config.ErrorLog.Println(err, stacks.Trace())
+				client.Config.ErrorLog.Println(err, stack.Trace())
 				return MultipartFormFile{
 					FileHeader: multipart.FileHeader{
 						Header: map[string][]string{},

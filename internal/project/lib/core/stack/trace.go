@@ -1,6 +1,6 @@
 //go:build trace
 
-package stacks
+package stack
 
 import (
 	"fmt"

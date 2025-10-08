@@ -1,6 +1,6 @@
 //go:build !trace
 
-package stacks
+package stack
 
 var TraceSize = 10
 

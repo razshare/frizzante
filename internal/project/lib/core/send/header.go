@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Header sends a header field.
@@ -16,7 +16,7 @@ import (
 // All errors are sent to the server notifier.
 func Header(client *clients.Client, key string, value string) {
 	if client.Locked {
-		client.Config.ErrorLog.Println("header is locked", stacks.Trace())
+		client.Config.ErrorLog.Println("header is locked", stack.Trace())
 		return
 	}
 
@@ -26,7 +26,7 @@ func Header(client *clients.Client, key string, value string) {
 // Headers sends header fields.
 func Headers(client *clients.Client, fields map[string]string) {
 	if client.Locked {
-		client.Config.ErrorLog.Println("header is locked", stacks.Trace())
+		client.Config.ErrorLog.Println("header is locked", stack.Trace())
 		return
 	}
 

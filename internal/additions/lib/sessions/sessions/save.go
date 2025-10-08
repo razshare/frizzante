@@ -8,7 +8,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 func Save(client *clients.Client, s *Session) {
@@ -19,7 +19,7 @@ func Save(client *clients.Client, s *Session) {
 	if !files.IsDirectory(dname) {
 		err := os.MkdirAll(dname, os.ModePerm)
 		if err != nil {
-			client.Config.ErrorLog.Println(err, stacks.Trace())
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 	}
@@ -30,11 +30,11 @@ func Save(client *clients.Client, s *Session) {
 
 	data, err := json.Marshal(s)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stacks.Trace())
+		client.Config.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
 	if err = os.WriteFile(fname, data, os.ModePerm); err != nil {
-		client.Config.ErrorLog.Println(err, stacks.Trace())
+		client.Config.ErrorLog.Println(err, stack.Trace())
 	}
 }

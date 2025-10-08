@@ -11,7 +11,7 @@ import (
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/fastschema/qjs"
 	"github.com/razshare/frizzante/internal/project/lib/core/js"
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
 
@@ -48,7 +48,7 @@ func New(config Config) (render RenderFunction, err error) {
 
 						marshalData, err = argument.JSONStringify()
 						if err != nil {
-							config.ErrorLog.Println(err, stacks.Trace())
+							config.ErrorLog.Println(err, stack.Trace())
 							return
 						}
 						builder.WriteString(marshalData)

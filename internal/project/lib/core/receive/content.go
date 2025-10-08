@@ -4,7 +4,7 @@ import (
 	"io"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Message reads the contents of the message and returns the value.
@@ -14,7 +14,7 @@ func Message(client *clients.Client) string {
 	if client.WebSocket != nil {
 		_, data, err := client.WebSocket.ReadMessage()
 		if err != nil {
-			client.Config.ErrorLog.Println(err, stacks.Trace())
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return ""
 		}
 		return string(data)
@@ -22,7 +22,7 @@ func Message(client *clients.Client) string {
 
 	data, err := io.ReadAll(client.Request.Body)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stacks.Trace())
+		client.Config.ErrorLog.Println(err, stack.Trace())
 		return ""
 	}
 	return string(data)

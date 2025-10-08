@@ -3,7 +3,7 @@ package send
 import (
 	"github.com/gorilla/websocket"
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // WsUpgrade upgrades to web sockets.
@@ -18,13 +18,13 @@ func WsUpgrade(client *clients.Client) {
 func WsUpgradeWithUpgrader(client *clients.Client, upgrader websocket.Upgrader) {
 	conn, err := upgrader.Upgrade(client.Writer, client.Request, nil)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stacks.Trace())
+		client.Config.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
 	defer func() {
 		if cerr := client.WebSocket.Close(); cerr != nil {
-			client.Config.ErrorLog.Println(cerr, stacks.Trace())
+			client.Config.ErrorLog.Println(cerr, stack.Trace())
 		}
 	}()
 

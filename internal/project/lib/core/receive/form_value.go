@@ -6,7 +6,7 @@ import (
 	"strconv"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // FormValue reads the first form value associated with the given key and returns it.
@@ -14,7 +14,7 @@ import (
 // If there are no values associated with the key, FormValue returns an empty string.
 func FormValue(client *clients.Client, key string) string {
 	if client.WebSocket != nil {
-		client.Config.ErrorLog.Println("web socket connections cannot parse forms", stacks.Trace())
+		client.Config.ErrorLog.Println("web socket connections cannot parse forms", stack.Trace())
 		return ""
 	}
 
@@ -52,7 +52,7 @@ func FormValueAsFloat(client *clients.Client, key string) float64 {
 
 	result, err := strconv.ParseFloat(value, 64)
 	if err != nil {
-		client.Config.ErrorLog.Println("form value is not a valid float", stacks.Trace())
+		client.Config.ErrorLog.Println("form value is not a valid float", stack.Trace())
 		return 0
 	}
 

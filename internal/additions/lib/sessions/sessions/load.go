@@ -8,7 +8,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
-	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 func Load(client *clients.Client) *Session {
@@ -19,7 +19,7 @@ func Load(client *clients.Client) *Session {
 	if !files.IsDirectory(dname) {
 		err := os.MkdirAll(dname, os.ModePerm)
 		if err != nil {
-			client.Config.ErrorLog.Println(err, stacks.Trace())
+			client.Config.ErrorLog.Println(err, stack.Trace())
 			return nil
 		}
 	}
@@ -32,13 +32,13 @@ func Load(client *clients.Client) *Session {
 	var data []byte
 	data, err := os.ReadFile(fname)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stacks.Trace())
+		client.Config.ErrorLog.Println(err, stack.Trace())
 		return state
 	}
 
 	err = json.Unmarshal(data, state)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stacks.Trace())
+		client.Config.ErrorLog.Println(err, stack.Trace())
 		return state
 	}
 	return state
