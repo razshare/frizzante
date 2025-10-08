@@ -8,16 +8,15 @@ import (
 )
 
 func Add(client *clients.Client) {
+	session := sessions.Start(receive.SessionId(client))
+
 	var description string
-
-	state := sessions.Start(receive.SessionId(client))
-
 	if description = receive.Query(client, "description"); description == "" {
 		send.Navigate(client, "/todos?error=todo description cannot be empty")
 		return
 	}
 
-	state.Todos = append(state.Todos, sessions.Todo{
+	session.Todos = append(session.Todos, sessions.Todo{
 		Checked:     false,
 		Description: description,
 	})

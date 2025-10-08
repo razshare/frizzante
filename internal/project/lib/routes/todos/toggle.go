@@ -8,7 +8,7 @@ import (
 )
 
 func Toggle(client *clients.Client) {
-	state := sessions.Start(receive.SessionId(client))
+	session := sessions.Start(receive.SessionId(client))
 
 	var index int
 	if !receive.FormInt(client, "index", &index) {
@@ -22,13 +22,13 @@ func Toggle(client *clients.Client) {
 		return
 	}
 
-	if count := len(state.Todos); index >= count || index < 0 {
+	if count := len(session.Todos); index >= count || index < 0 {
 		// Index is out of bounds, ignore the request.
 		send.Navigate(client, "/todos")
 		return
 	}
 
-	state.Todos[index].Checked = value > 0
+	session.Todos[index].Checked = value > 0
 
 	send.Navigate(client, "/todos")
 }
