@@ -4,7 +4,7 @@
     import Async from "$lib/components/core/Async.svelte"
     import type { View } from "$lib/scripts/core/types.js"
     let { name, props, render, align }: View<Record<string, unknown>> = $props()
-    const components = views as unknown as Record<string, ()=>Promise<SvelteComponent>>
+    const components = views as unknown as Record<string, () => Promise<SvelteComponent>>
     const view: View<Record<string, unknown>> = $state({ name, props, render, align })
     setContext("view", view)
 </script>
