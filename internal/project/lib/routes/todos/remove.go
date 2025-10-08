@@ -1,8 +1,6 @@
 package todos
 
 import (
-	"strconv"
-
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
@@ -10,26 +8,15 @@ import (
 )
 
 func Remove(client *clients.Client) {
-	var err error
-	var count int64
-	var index int64
-	var indexQuery string
-
 	state := sessions.Start(receive.SessionId(client))
 
-	if indexQuery = receive.Query(client, "index"); indexQuery == "" {
-		// No index found, ignore the request.
-		send.Navigate(client, "/todos")
-		return
-	}
-
-	if index, err = strconv.ParseInt(indexQuery, 10, 64); err != nil {
+	var index int
+	if !receive.FormValueAsInt(client, "index", &index) {
 		// Could not parse index, redirect with error.
-		send.Navigatef(client, "/todos?error=%s", err.Error())
-		return
+		send.Navigate(client, "/todos?error=could not parse index")
 	}
 
-	if count = int64(len(state.Todos)); index >= count || index < 0 {
+	if count := len(state.Todos); index >= count || index < 0 {
 		// Index is out of bounds, ignore the request.
 		send.Navigate(client, "/todos")
 		return

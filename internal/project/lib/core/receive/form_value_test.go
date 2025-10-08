@@ -7,7 +7,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/mock"
 )
 
-func TestValue(t *testing.T) {
+func TestFormValue(t *testing.T) {
 	client := mock.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
 	boundary := client.Request.Body.(*mock.RequestBody)
