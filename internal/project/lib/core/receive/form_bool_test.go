@@ -88,6 +88,24 @@ func TestFormBool(t *testing.T) {
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
 			[]byte(`Content-Disposition: form-data; name="key"`),
 			[]byte(``),
+			[]byte(`True`),
+			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW--`),
+		},
+		[]byte("\n"),
+	)
+
+	if ok := FormBool(client, "key"); !ok {
+		t.Fatal("key should be true")
+	}
+
+	client = mock.NewClient()
+	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
+	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary.MockBuffer = bytes.Join(
+		[][]byte{
+			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
+			[]byte(`Content-Disposition: form-data; name="key"`),
+			[]byte(``),
 			[]byte(`TRUE`),
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW--`),
 		},
@@ -179,6 +197,24 @@ func TestFormBool(t *testing.T) {
 			[]byte(`Content-Disposition: form-data; name="key"`),
 			[]byte(``),
 			[]byte(`false`),
+			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW--`),
+		},
+		[]byte("\n"),
+	)
+
+	if ok := FormBool(client, "key"); ok {
+		t.Fatal("key should be false")
+	}
+
+	client = mock.NewClient()
+	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
+	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary.MockBuffer = bytes.Join(
+		[][]byte{
+			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
+			[]byte(`Content-Disposition: form-data; name="key"`),
+			[]byte(``),
+			[]byte(`False`),
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW--`),
 		},
 		[]byte("\n"),
