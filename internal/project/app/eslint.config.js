@@ -23,7 +23,7 @@ export default ts.config(
         rules: { "no-undef": "off" },
     },
     {
-        files: ["**/*.html", "**/*.svelte", "**/*.svelte.ts", "**/*.svelte.js"],
+        files: ["**/*.svelte", "**/*.svelte.ts", "**/*.svelte.js"],
         languageOptions: {
             parserOptions: {
                 projectService: true,
