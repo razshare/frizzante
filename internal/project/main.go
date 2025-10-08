@@ -3,11 +3,11 @@ package main
 import (
 	"embed"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/route"
-	"github.com/razshare/frizzante/internal/project/lib/core/server"
-	"github.com/razshare/frizzante/internal/project/lib/routes/handlers/fallback"
-	"github.com/razshare/frizzante/internal/project/lib/routes/handlers/todos"
-	"github.com/razshare/frizzante/internal/project/lib/routes/handlers/welcome"
+	"github.com/razshare/frizzante/internal/project/lib/core/routes"
+	"github.com/razshare/frizzante/internal/project/lib/core/servers"
+	"github.com/razshare/frizzante/internal/project/lib/routes/fallback"
+	"github.com/razshare/frizzante/internal/project/lib/routes/todos"
+	"github.com/razshare/frizzante/internal/project/lib/routes/welcome"
 )
 
 //go:generate make clean configure
@@ -15,12 +15,12 @@ import (
 //go:generate make types
 //go:embed app/dist
 var efs embed.FS
-var srv = server.New()
+var server = servers.New()
 
 func main() {
-	defer server.Start(srv)
-	srv.Efs = efs
-	srv.Routes = []route.Route{
+	defer servers.Start(server)
+	server.Efs = efs
+	server.Routes = []routes.Route{
 		{Pattern: "GET /", Handler: fallback.View},
 		{Pattern: "GET /welcome", Handler: welcome.View},
 		{Pattern: "GET /todos", Handler: todos.View},

@@ -31,7 +31,7 @@ func Database(options DatabaseOptions) (err error) {
 
 	dbtype := strings.ToLower(options.Type)
 	from := "internal/additions/lib/database/" + dbtype
-	to := filepath.Join("lib", "database", dbtype)
+	to := filepath.Join("lib", "database")
 
 	if files.IsDirectory(to) {
 		if !options.Auto {

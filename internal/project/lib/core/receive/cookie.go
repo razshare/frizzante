@@ -3,21 +3,21 @@ package receive
 import (
 	"net/url"
 
-	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
 )
 
 // Cookie reads the contents of a cookie from the message and returns the value.
-func Cookie(client *_client.Client, key string) string {
+func Cookie(client *clients.Client, key string) string {
 	cookie, err := client.Request.Cookie(key)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		client.Config.ErrorLog.Println(err, stacks.Trace())
 		return ""
 	}
 
 	data, err := url.QueryUnescape(cookie.Value)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		client.Config.ErrorLog.Println(err, stacks.Trace())
 		return ""
 	}
 

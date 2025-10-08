@@ -36,3 +36,6 @@ update:
 
 types:
 	frizzante -gtypes
+
+generate:
+	frizzante -g:pick

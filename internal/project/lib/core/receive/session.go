@@ -2,14 +2,14 @@ package receive
 
 import (
 	uuid "github.com/nu7hatch/gouuid"
-	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
 )
 
 // SessionId tries to find a session id among the user's cookies.
 // If no session id is found, it creates a new one and returns it.
-func SessionId(client *_client.Client) string {
+func SessionId(client *clients.Client) string {
 	if client.SessionId != "" {
 		return client.SessionId
 	}
@@ -30,7 +30,7 @@ func SessionId(client *_client.Client) string {
 	// Create new session.
 	ido, err := uuid.NewV4()
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		client.Config.ErrorLog.Println(err, stacks.Trace())
 		return ""
 	}
 

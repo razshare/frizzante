@@ -14,3 +14,9 @@ rm -fr internal/project/app/dist
 rm -fr internal/project/app/.vite
 rm -fr internal/project/app/node_modules
 rm -fr internal/project/lib/core/view/app
+
+# Cleans coverage
+rm -fr cover.html
+rm -fr cover.out
+rm -fr internal/project/cover.html
+rm -fr internal/project/cover.out

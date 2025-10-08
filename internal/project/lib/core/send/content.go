@@ -5,14 +5,14 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
 )
 
 // Content sends binary safe content.
 //
 // Compatible with web sockets and server sent events.
-func Content(client *_client.Client, data []byte) {
+func Content(client *clients.Client, data []byte) {
 	if !client.Locked {
 		client.Writer.WriteHeader(client.Status)
 		client.Locked = true
@@ -20,7 +20,7 @@ func Content(client *_client.Client, data []byte) {
 
 	if client.WebSocket != nil {
 		if err := client.WebSocket.WriteMessage(websocket.TextMessage, data); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+			client.Config.ErrorLog.Println(err, stacks.Trace())
 		}
 		return
 	}
@@ -31,56 +31,56 @@ func Content(client *_client.Client, data []byte) {
 	}
 
 	if _, err := client.Writer.Write(data); err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		client.Config.ErrorLog.Println(err, stacks.Trace())
 	}
 }
 
 // Message sends utf-8 safe content.
 //
 // Compatible with web sockets and server sent events.
-func Message(client *_client.Client, message string) {
+func Message(client *clients.Client, message string) {
 	Content(client, []byte(message))
 }
 
 // Messagef sends utf-8 safe content using a format.
 //
 // Compatible with web sockets and server sent events.
-func Messagef(client *_client.Client, format string, vars ...any) {
+func Messagef(client *clients.Client, format string, vars ...any) {
 	Content(client, []byte(fmt.Sprintf(format, vars...)))
 }
 
 // NotFound sends a message with status 404 Not Found.
-func NotFound(client *_client.Client, message string) {
+func NotFound(client *clients.Client, message string) {
 	Status(client, http.StatusNotFound)
 	Message(client, message)
 }
 
 // Unauthorized sends a message with status 401 Unauthorized.
-func Unauthorized(client *_client.Client, message string) {
+func Unauthorized(client *clients.Client, message string) {
 	Status(client, http.StatusUnauthorized)
 	Message(client, message)
 }
 
 // BadRequest sends a message with status 400 Bad Request.
-func BadRequest(client *_client.Client, message string) {
+func BadRequest(client *clients.Client, message string) {
 	Status(client, http.StatusBadRequest)
 	Message(client, message)
 }
 
 // Error sends a message with status 500 Internal Server Error.
-func Error(client *_client.Client, err error) {
+func Error(client *clients.Client, err error) {
 	Status(client, http.StatusInternalServerError)
 	Message(client, err.Error())
 }
 
 // Forbidden sends a message with status 403 Forbidden.
-func Forbidden(client *_client.Client, message string) {
+func Forbidden(client *clients.Client, message string) {
 	Status(client, http.StatusForbidden)
 	Message(client, message)
 }
 
 // TooManyRequests sends a message with status 403 Forbidden.
-func TooManyRequests(client *_client.Client, message string) {
+func TooManyRequests(client *clients.Client, message string) {
 	Status(client, http.StatusTooManyRequests)
 	Message(client, message)
 }
@@ -88,6 +88,6 @@ func TooManyRequests(client *_client.Client, message string) {
 // Flush send an empty message.
 //
 // Compatible with web sockets and server sent events.
-func Flush(client *_client.Client) {
+func Flush(client *clients.Client) {
 	Message(client, "")
 }

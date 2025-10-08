@@ -4,8 +4,8 @@ import (
 	"io"
 	"net/http"
 
-	client "github.com/razshare/frizzante/internal/project/lib/core/client"
-	"github.com/razshare/frizzante/internal/project/lib/core/server"
+	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 )
 
 type ResponseWriter struct {
@@ -51,10 +51,10 @@ func (body *RequestBody) Close() error {
 	return nil
 }
 
-func NewClient() *client.Client {
-	srv := server.New()
+func NewClient() *clients.Client {
+	srv := servers.New()
 
-	conf := &client.Config{
+	conf := &clients.Config{
 		ErrorLog:   srv.ErrorLog,
 		InfoLog:    srv.InfoLog,
 		PublicRoot: srv.PublicRoot,
@@ -73,7 +73,7 @@ func NewClient() *client.Client {
 		},
 	}
 
-	return &client.Client{
+	return &clients.Client{
 		Writer:  writer,
 		Request: request,
 		Config:  conf,

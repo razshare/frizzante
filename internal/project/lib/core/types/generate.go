@@ -23,14 +23,10 @@ func Generate[T any]() (err error) {
 		return
 	}
 
-	if files.IsDirectory(filepath.Join(".gen", "types")) {
-		if err = os.RemoveAll(filepath.Join(".gen", "types")); err != nil {
+	if !files.IsDirectory(filepath.Join(".gen", "types")) {
+		if err = os.MkdirAll(filepath.Join(".gen", "types"), os.ModePerm); err != nil {
 			return
 		}
-	}
-
-	if err = os.MkdirAll(filepath.Join(".gen", "types"), os.ModePerm); err != nil {
-		return
 	}
 
 	befores := []string{
@@ -45,10 +41,14 @@ func Generate[T any]() (err error) {
 	}
 
 	dname := filepath.Join(".gen", "types", strings.ReplaceAll(packagePath, "/", string(filepath.Separator)))
-	if !files.IsDirectory(dname) {
-		if err = os.MkdirAll(dname, os.ModePerm); err != nil {
+	if files.IsDirectory(dname) {
+		if err = os.RemoveAll(dname); err != nil {
 			return
 		}
+	}
+
+	if err = os.MkdirAll(dname, os.ModePerm); err != nil {
+		return
 	}
 
 	parts := strings.Split(type_.PkgPath(), "/")

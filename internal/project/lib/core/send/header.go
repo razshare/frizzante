@@ -3,8 +3,8 @@ package send
 import (
 	"fmt"
 
-	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
 )
 
 // Header sends a header field.
@@ -14,9 +14,9 @@ import (
 // This means the status will become locked and further attempts to send the status will fail with an error.
 //
 // All errors are sent to the server notifier.
-func Header(client *_client.Client, key string, value string) {
+func Header(client *clients.Client, key string, value string) {
 	if client.Locked {
-		client.Config.ErrorLog.Println("header is locked", stack.Trace())
+		client.Config.ErrorLog.Println("header is locked", stacks.Trace())
 		return
 	}
 
@@ -24,9 +24,9 @@ func Header(client *_client.Client, key string, value string) {
 }
 
 // Headers sends header fields.
-func Headers(client *_client.Client, fields map[string]string) {
+func Headers(client *clients.Client, fields map[string]string) {
 	if client.Locked {
-		client.Config.ErrorLog.Println("header is locked", stack.Trace())
+		client.Config.ErrorLog.Println("header is locked", stacks.Trace())
 		return
 	}
 
@@ -36,24 +36,24 @@ func Headers(client *_client.Client, fields map[string]string) {
 }
 
 // Redirect redirects the request to a location with a status.
-func Redirect(client *_client.Client, location string, status int) {
+func Redirect(client *clients.Client, location string, status int) {
 	Status(client, status)
 	Header(client, "Location", location)
 }
 
 // Navigate redirects the request to a location with status 302.
-func Navigate(client *_client.Client, location string) {
+func Navigate(client *clients.Client, location string) {
 	Redirect(client, location, 302)
 	Message(client, "")
 }
 
 // Navigatef redirects the request to a location with status 302.
-func Navigatef(client *_client.Client, format string, vars ...any) {
+func Navigatef(client *clients.Client, format string, vars ...any) {
 	Redirect(client, fmt.Sprintf(format, vars...), 302)
 	Message(client, "")
 }
 
 // ContentType sets the Content-Type header field.
-func ContentType(client *_client.Client, ctype string) {
+func ContentType(client *clients.Client, ctype string) {
 	Header(client, "Content-Type", ctype)
 }

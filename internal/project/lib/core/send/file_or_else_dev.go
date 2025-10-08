@@ -7,21 +7,21 @@ import (
 	"path/filepath"
 	"strings"
 
-	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/mime"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
 )
 
 // FileOrElse sends the file requested by the client, or else falls back.
-func FileOrElse(client *_client.Client, orElse func()) {
+func FileOrElse(client *clients.Client, orElse func()) {
 	if client.WebSocket != nil {
-		client.Config.ErrorLog.Println("file_or_else does not support web sockets", stack.Trace())
+		client.Config.ErrorLog.Println("file_or_else does not support web sockets", stacks.Trace())
 		return
 	}
 
 	if client.EventName != "" {
-		client.Config.ErrorLog.Println("file_or_else does not support server sent events", stack.Trace())
+		client.Config.ErrorLog.Println("file_or_else does not support server sent events", stacks.Trace())
 		return
 	}
 

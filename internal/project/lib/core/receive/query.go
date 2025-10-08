@@ -1,8 +1,8 @@
 package receive
 
-import _client "github.com/razshare/frizzante/internal/project/lib/core/client"
+import "github.com/razshare/frizzante/internal/project/lib/core/clients"
 
 // Query reads a query field and returns the value.
-func Query(client *_client.Client, key string) string {
+func Query(client *clients.Client, key string) string {
 	return client.Request.URL.Query().Get(key)
 }

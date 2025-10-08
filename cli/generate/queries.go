@@ -22,6 +22,10 @@ func Queries(options QueriesOptions) (err error) {
 	if options.SqlcYaml == "" {
 		choices := make([]search.Choice, 0)
 
+		if files.IsFile(filepath.Join("lib", "database", "sqlc.yaml")) {
+			choices = append(choices, search.Choice{Id: "lib/database/sqlc.yaml", Description: "lib/database/sqlc.yaml"})
+		}
+
 		if files.IsFile(filepath.Join("lib", "database", "sqlite", "sqlc.yaml")) {
 			choices = append(choices, search.Choice{Id: "lib/database/sqlite/sqlc.yaml", Description: "lib/database/sqlite/sqlc.yaml"})
 		}

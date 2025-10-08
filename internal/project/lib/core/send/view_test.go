@@ -5,20 +5,20 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/mock"
-	_view "github.com/razshare/frizzante/internal/project/lib/core/view"
+	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
 
 func TestViewWithLocation(t *testing.T) {
 	client := mock.NewClient()
 	Header(client, "Location", "/about")
-	View(client, _view.View{}) // This should be a noop.
+	View(client, views.View{}) // This should be a noop.
 }
 
 func TestViewWithAcceptJson(t *testing.T) {
 	client := mock.NewClient()
 	client.Request.Header.Set("Accept", "application/json")
 
-	View(client, _view.View{Name: "test", Props: map[string]any{"key": "value"}})
+	View(client, views.View{Name: "test", Props: map[string]any{"key": "value"}})
 
 	writer := client.Writer.(*mock.ResponseWriter)
 
@@ -42,12 +42,12 @@ func TestViewWithAcceptJson(t *testing.T) {
 func TestView(t *testing.T) {
 	client := mock.NewClient()
 
-	client.Config.Render = func(view _view.View) (html string, err error) {
+	client.Config.Render = func(view views.View) (html string, err error) {
 
 		return fmt.Sprintf("hello from %s", view.Name), nil
 	}
 
-	View(client, _view.View{Name: "test", Props: map[string]any{"key": "value"}})
+	View(client, views.View{Name: "test", Props: map[string]any{"key": "value"}})
 
 	writer := client.Writer.(*mock.ResponseWriter)
 

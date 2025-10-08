@@ -4,7 +4,7 @@ import (
 	"mime/multipart"
 	"net/url"
 
-	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
+	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 )
 
 type MultipartFormFile struct {
@@ -14,5 +14,5 @@ type MultipartFormFile struct {
 
 type MultipartForm struct {
 	url.Values
-	Client *_client.Client
+	Client *clients.Client
 }

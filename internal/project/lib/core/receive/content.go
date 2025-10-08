@@ -3,18 +3,18 @@ package receive
 import (
 	"io"
 
-	_client "github.com/razshare/frizzante/internal/project/lib/core/client"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/stacks"
 )
 
 // Message reads the contents of the message and returns the value.
 //
 // Compatible with web sockets and server sent events.
-func Message(client *_client.Client) string {
+func Message(client *clients.Client) string {
 	if client.WebSocket != nil {
 		_, data, err := client.WebSocket.ReadMessage()
 		if err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+			client.Config.ErrorLog.Println(err, stacks.Trace())
 			return ""
 		}
 		return string(data)
@@ -22,7 +22,7 @@ func Message(client *_client.Client) string {
 
 	data, err := io.ReadAll(client.Request.Body)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		client.Config.ErrorLog.Println(err, stacks.Trace())
 		return ""
 	}
 	return string(data)

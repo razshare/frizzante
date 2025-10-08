@@ -37,7 +37,7 @@ func CleanProject(options CleanProjectOptions) (err error) {
 		return
 	}
 
-	if err = os.RemoveAll(filepath.Join("lib", "core", "view", "ssr", "app")); err != nil {
+	if err = os.RemoveAll(filepath.Join("lib", "core", "views", "ssr", "app")); err != nil {
 		return
 	}
 
