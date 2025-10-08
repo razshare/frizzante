@@ -11,13 +11,13 @@ func Toggle(client *clients.Client) {
 	state := sessions.Start(receive.SessionId(client))
 
 	var index int
-	if !receive.FormValueAsInt(client, "index", &index) {
+	if !receive.FormInt(client, "index", &index) {
 		send.Navigate(client, "/todos?error=could not parse index")
 		return
 	}
 
 	var value int
-	if !receive.FormValueAsInt(client, "value", &value) {
+	if !receive.FormInt(client, "value", &value) {
 		send.Navigate(client, "/todos?error=could not parse value")
 		return
 	}

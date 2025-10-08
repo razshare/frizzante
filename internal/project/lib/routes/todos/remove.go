@@ -11,7 +11,7 @@ func Remove(client *clients.Client) {
 	state := sessions.Start(receive.SessionId(client))
 
 	var index int
-	if !receive.FormValueAsInt(client, "index", &index) {
+	if !receive.FormInt(client, "index", &index) {
 		// Could not parse index, redirect with error.
 		send.Navigate(client, "/todos?error=could not parse index")
 	}

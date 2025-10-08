@@ -1,0 +1,79 @@
+package receive
+
+import (
+	"bytes"
+	"testing"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+)
+
+func TestFormFloat(t *testing.T) {
+	client := mock.NewClient()
+	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
+	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary.MockBuffer = bytes.Join(
+		[][]byte{
+			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
+			[]byte(`Content-Disposition: form-data; name="key"`),
+			[]byte(``),
+			[]byte(`3.14`),
+			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW--`),
+		},
+		[]byte("\n"),
+	)
+
+	var value32 float32
+	var value64 float64
+
+	if ok := FormFloat32(client, "key", &value32); !ok || value32 != 3.14 {
+		t.Fatal("key should be a valid float32 with value 3.14")
+	}
+
+	if ok := FormFloat64(client, "key", &value64); !ok || value64 != 3.14 {
+		t.Fatal("key should be a valid float64 with value 3.14")
+	}
+
+	client = mock.NewClient()
+	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
+	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary.MockBuffer = bytes.Join(
+		[][]byte{
+			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
+			[]byte(`Content-Disposition: form-data; name="key"`),
+			[]byte(``),
+			[]byte(`-1.1`),
+			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW--`),
+		},
+		[]byte("\n"),
+	)
+
+	if ok := FormFloat32(client, "key", &value32); !ok || value32 != -1.1 {
+		t.Fatal("key should be a valid float32 with value -1.1")
+	}
+
+	if ok := FormFloat64(client, "key", &value64); !ok || value64 != -1.1 {
+		t.Fatal("key should be a valid float64 with value -1.1")
+	}
+
+	client = mock.NewClient()
+	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
+	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary.MockBuffer = bytes.Join(
+		[][]byte{
+			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
+			[]byte(`Content-Disposition: form-data; name="key"`),
+			[]byte(``),
+			[]byte(`1qwerty`),
+			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW--`),
+		},
+		[]byte("\n"),
+	)
+
+	if ok := FormFloat32(client, "key", &value32); ok || value32 != 0 {
+		t.Fatal("key should not be a valid float32")
+	}
+
+	if ok := FormFloat64(client, "key", &value64); ok || value64 != 0 {
+		t.Fatal("key should not be a valid float64")
+	}
+}
