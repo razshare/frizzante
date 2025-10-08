@@ -22,7 +22,9 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); !ok {
+	var value bool
+
+	if ok := FormBool(client, "key", &value); !ok || !value {
 		t.Fatal("key should be true")
 	}
 
@@ -40,7 +42,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); !ok {
+	if ok := FormBool(client, "key", &value); !ok || !value {
 		t.Fatal("key should be true")
 	}
 
@@ -58,7 +60,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); !ok {
+	if ok := FormBool(client, "key", &value); !ok || !value {
 		t.Fatal("key should be true")
 	}
 
@@ -76,7 +78,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); !ok {
+	if ok := FormBool(client, "key", &value); !ok || !value {
 		t.Fatal("key should be true")
 	}
 
@@ -94,7 +96,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); !ok {
+	if ok := FormBool(client, "key", &value); !ok || !value {
 		t.Fatal("key should be true")
 	}
 
@@ -112,7 +114,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); !ok {
+	if ok := FormBool(client, "key", &value); !ok || !value {
 		t.Fatal("key should be true")
 	}
 
@@ -130,7 +132,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); ok {
+	if ok := FormBool(client, "key", &value); ok || value {
 		t.Fatal("key should be false")
 	}
 
@@ -148,7 +150,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); ok {
+	if ok := FormBool(client, "key", &value); !ok || value {
 		t.Fatal("key should be false")
 	}
 
@@ -166,7 +168,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); ok {
+	if ok := FormBool(client, "key", &value); !ok || value {
 		t.Fatal("key should be false")
 	}
 
@@ -184,7 +186,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); ok {
+	if ok := FormBool(client, "key", &value); !ok || value {
 		t.Fatal("key should be false")
 	}
 
@@ -202,7 +204,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); ok {
+	if ok := FormBool(client, "key", &value); !ok || value {
 		t.Fatal("key should be false")
 	}
 
@@ -220,7 +222,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); ok {
+	if ok := FormBool(client, "key", &value); !ok || value {
 		t.Fatal("key should be false")
 	}
 
@@ -238,7 +240,7 @@ func TestFormBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormBool(client, "key"); ok {
+	if ok := FormBool(client, "key", &value); !ok || value {
 		t.Fatal("key should be false")
 	}
 }
