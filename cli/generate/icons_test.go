@@ -9,7 +9,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 )
 
-//go:embed internal/additions/**
+//go:embed internal/project/**
 var TestIconsEfs embed.FS
 
 func TestIcons(t *testing.T) {
