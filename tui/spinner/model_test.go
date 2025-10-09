@@ -13,13 +13,6 @@ func TestUpdate(t *testing.T) {
 	var model *Model
 	var cmd tea.Cmd
 
-	// soft interrupt with ctrl+c
-	model = &Model{SoftInterrupt: true, Message: "Loading...", Spinner: spinner.New()}
-	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyCtrlC})
-	if _, ok := reflect.TypeAssert[tea.QuitMsg](reflect.ValueOf(cmd())); !ok {
-		t.Fatal("spinner should quit")
-	}
-
 	// hard interrupt with ctrl+c
 	model = &Model{Message: "Loading...", Spinner: spinner.New()}
 	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyCtrlC})
@@ -27,30 +20,11 @@ func TestUpdate(t *testing.T) {
 		t.Fatal("spinner should interrupt")
 	}
 
-	// escape quits
-	model = &Model{Message: "Loading...", SoftInterrupt: true, Spinner: spinner.New()}
-	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyEscape})
-	if _, ok := reflect.TypeAssert[tea.QuitMsg](reflect.ValueOf(cmd())); !ok {
-		t.Fatal("spinner should quit")
-	}
-
-	// escape quits even with hard interrupt
+	// escape does nothing
 	model = &Model{Message: "Loading...", Spinner: spinner.New()}
 	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyEscape})
-	if _, ok := reflect.TypeAssert[tea.QuitMsg](reflect.ValueOf(cmd())); !ok {
-		t.Fatal("spinner should quit")
-	}
-
-	// soft to hard interrupt transition
-	model = &Model{Message: "Loading...", SoftInterrupt: true, Spinner: spinner.New()}
-	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyCtrlC})
-	if _, ok := reflect.TypeAssert[tea.QuitMsg](reflect.ValueOf(cmd())); !ok {
-		t.Fatal("spinner should quit")
-	}
-	model.SoftInterrupt = false
-	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyCtrlC})
-	if _, ok := reflect.TypeAssert[tea.InterruptMsg](reflect.ValueOf(cmd())); !ok {
-		t.Fatal("spinner should interrupt")
+	if cmd != nil {
+		t.Fatal("spinner should ignore esc key")
 	}
 
 	// tick

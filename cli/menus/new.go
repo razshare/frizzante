@@ -1,6 +1,7 @@
 package menus
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/razshare/frizzante/cli/action"
@@ -97,8 +98,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "add", Description: "adds packages"},
 				Active: func() bool { return *app.Add != "" },
 				Handler: func() error {
-					var t string
-					t, err = singleselect.Send(
+					var packageType string
+					packageType, err = singleselect.Send(
 						[]search.Choice{
 							{Id: "js", Description: fmt.Sprintf("installs js packages in %s/node_modules", *app.App)},
 							//{Id: "go", Description: "installs go packages"},
@@ -110,14 +111,18 @@ func New(app *apps.App) (*Menu, error) {
 						return err
 					}
 
-					if t == "js" {
+					if packageType == "js" {
 						return action.Npm(action.NpmOptions{
 							App: *app.App,
 							Bun: bun,
 						})
 					}
 
-					return fmt.Errorf("%s packages are not supported", t)
+					if packageType == "" {
+						return errors.New("no package type selected")
+					}
+
+					return fmt.Errorf("%s packages are not supported", packageType)
 				},
 			},
 			{
@@ -184,6 +189,39 @@ func New(app *apps.App) (*Menu, error) {
 					return
 				},
 			},
+			//{
+			//	Choice: search.Choice{Id: "assembly explorer", Description: "explores application assembly output"},
+			//	Active: func() bool { return false },
+			//	Handler: func() (err error) {
+			//		var tags []string
+			//		if tags, err = tags_.Parse(*app.Tags); err != nil {
+			//			return
+			//		}
+			//
+			//		if len(tags) == 0 {
+			//			if tags, err = tags_.Select([]search.Choice{
+			//				{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
+			//				{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
+			//				{Id: "trace", Description: "enables tracing with stack.Trace()"},
+			//				{Id: "dry", Description: "enables dry mode"},
+			//				{Id: "types", Description: "enables types generation"},
+			//				{Id: "other", Description: "adds custom tags"},
+			//			}); err != nil {
+			//				return
+			//			}
+			//		}
+			//
+			//		err = action.AssemblyExplorer(action.AssemblyExplorerOptions{
+			//			App:      *app.App,
+			//			Platform: plat,
+			//			Go:       _go,
+			//			Bun:      bun,
+			//			Tags:     tags,
+			//			Auto:     *app.Yes,
+			//		})
+			//		return
+			//	},
+			//},
 			{
 				Choice: search.Choice{Id: "generate", Description: "generates code and resources"},
 				Active: func() bool { return *app.Generate != "" },
