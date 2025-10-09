@@ -191,7 +191,7 @@ func New(app *apps.App) (*Menu, error) {
 			},
 			{
 				Choice: search.Choice{Id: "assembly explorer", Description: "explores application assembly output"},
-				Active: func() bool { return false },
+				Active: func() bool { return *app.AssemblyExplorer },
 				Handler: func() (err error) {
 					var tags []string
 					if tags, err = tags_.Parse(*app.Tags); err != nil {
