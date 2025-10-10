@@ -103,6 +103,15 @@ type BuildOptions struct {
 	Platform platform.Platform
 }
 
+type AssemblyExplorerOptions struct {
+	App      string
+	Go       string
+	Bun      string
+	Tags     []string
+	Platform platform.Platform
+	Auto     bool
+}
+
 type ConfigureOptions struct {
 	App      string
 	Go       string

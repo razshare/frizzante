@@ -368,6 +368,23 @@ func TestNew(t *testing.T) {
 			//}
 			continue
 		}
+
+		if item.Choice.Id == "assembly explorer" {
+			i++
+			if item.Active() {
+				t.Fatal("assembly explorer should not be active")
+			}
+			*a.AssemblyExplorer = true
+			if !item.Active() {
+				t.Fatal("assembly explorer should be active")
+			}
+			*a.AssemblyExplorer = false
+			//err = item.Handler()
+			//if err != nil {
+			//	t.Fatal(err)
+			//}
+			continue
+		}
 	}
 
 	if i != len(menu.Items) {

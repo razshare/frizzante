@@ -35,12 +35,12 @@ func Database(options DatabaseOptions) (err error) {
 
 	if files.IsDirectory(to) {
 		if !options.Auto {
-			var overwrite bool
-			if overwrite, err = confirm.Sendf(true, "%s already exists. Overwrite?", to); err != nil {
+			var yes bool
+			if yes, err = confirm.Sendf(true, "%s already exists. Overwrite?", to); err != nil {
 				return
 			}
 
-			if !overwrite {
+			if !yes {
 				messages.Infof("skipping %s", to)
 				return nil
 			}

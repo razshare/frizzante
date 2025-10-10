@@ -14,7 +14,7 @@ func Send(choices []search.Choice, message string) (selected []string, err error
 	input := textinput.New()
 	input.Width = 80
 	var model *Model
-	model, err = program.Run(&Model{
+	if model, err = program.Run(&Model{
 		Prompt:   message,
 		Viewport: &viewport.Viewport{Visible: 6},
 		Selected: make([]string, 0),
@@ -23,9 +23,7 @@ func Send(choices []search.Choice, message string) (selected []string, err error
 			Filtered: choices,
 			Input:    input,
 		},
-	})
-
-	if err != nil {
+	}); err != nil {
 		return
 	}
 

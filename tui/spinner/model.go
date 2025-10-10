@@ -14,14 +14,7 @@ func (model *Model) Init() tea.Cmd {
 func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 	switch assert := message.(type) {
 	case tea.KeyMsg:
-		if assert.Type == tea.KeyEsc {
-			return model, tea.Quit
-		}
-
 		if assert.Type == tea.KeyCtrlC {
-			if model.SoftInterrupt {
-				return model, tea.Quit
-			}
 			return model, tea.Interrupt
 		}
 	}

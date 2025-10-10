@@ -1,9 +1,9 @@
-package multiselect
+package textviewer
 
 import (
-	"slices"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/navigate"
@@ -11,7 +11,7 @@ import (
 )
 
 func (model *Model) Init() tea.Cmd {
-	return nil
+	return textinput.Blink
 }
 
 func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
@@ -21,37 +21,11 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			return model, tea.Interrupt
 		}
 
-		if assert.Type == tea.KeyEnter {
-			if len(model.Selected) == 0 && len(model.Search.Filtered) > 0 {
-				value := model.Search.Filtered[model.Viewport.Cursor].Id
-				if !slices.Contains(model.Selected, value) {
-					model.Selected = append(model.Selected, value)
-				}
-			}
-			return model, tea.Quit
-		}
-
-		if assert.Type == tea.KeySpace {
-			if len(model.Search.Filtered) > 0 {
-				value := model.Search.Filtered[model.Viewport.Cursor].Id
-				if slices.Contains(model.Selected, value) {
-					if i := slices.Index(model.Selected, value); i >= 0 {
-						model.Selected = append(model.Selected[:i], model.Selected[i+1:]...)
-					}
-				} else {
-					model.Selected = append(model.Selected, value)
-				}
-			}
-			return model, nil
-		}
-
 		if assert.Type == tea.KeyEsc {
 			if model.Search.Active {
 				search.Reset(model.Search, model.Viewport)
 				return model, nil
 			}
-
-			model.Selected = make([]string, 0)
 			return model, tea.Quit
 		}
 
@@ -79,6 +53,7 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			return model, search.Apply(model.Search, model.Viewport, assert)
 		}
 	}
+
 	return model, nil
 }
 
@@ -105,7 +80,7 @@ func (model *Model) View() string {
 		builder.WriteString("\n")
 
 		builder.WriteString(config.Styles.Menu.Render("│"))
-		builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+		builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down"))
 
 		if model.Search.Active {
 			builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
@@ -130,20 +105,9 @@ func (model *Model) View() string {
 	for i := model.Viewport.Offset; i < height; i++ {
 		builder.WriteString(config.Styles.Menu.Render("│"))
 		if model.Viewport.Cursor == i {
-			if slices.Contains(model.Selected, model.Search.Filtered[i].Id) {
-				builder.WriteString(config.Styles.Selected.Render("● " + model.Search.Filtered[i].Id))
-			} else {
-				builder.WriteString(config.Styles.Selected.Render("◉ " + model.Search.Filtered[i].Id))
-			}
-
-			j := slices.Index(model.Search.Choices, model.Search.Filtered[i])
-			if j >= 0 && model.Search.Choices[j].Description != "" {
-				builder.WriteString(config.Styles.UserGuide.Render("  ⇢  " + model.Search.Choices[j].Description))
-			}
-		} else if slices.Contains(model.Selected, model.Search.Filtered[i].Id) {
-			builder.WriteString(config.Styles.Item.Render("● " + model.Search.Filtered[i].Id))
+			builder.WriteString(config.Styles.Selected.PaddingRight(1).Render(model.Search.Filtered[i].Id))
 		} else {
-			builder.WriteString(config.Styles.Item.Render("○ " + model.Search.Filtered[i].Id))
+			builder.WriteString(config.Styles.Item.PaddingRight(1).Render(model.Search.Filtered[i].Id))
 		}
 		builder.WriteString("\n")
 	}
@@ -155,7 +119,7 @@ func (model *Model) View() string {
 	}
 
 	builder.WriteString(config.Styles.Menu.Render("│"))
-	builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+	builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down"))
 
 	if model.Search.Active {
 		builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))

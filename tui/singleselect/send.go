@@ -1,11 +1,9 @@
 package singleselect
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/charmbracelet/bubbles/textinput"
-	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/tui/program"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/viewport"
@@ -15,7 +13,7 @@ func Send(choices []search.Choice, message string) (selected string, err error) 
 	input := textinput.New()
 	input.Width = 80
 	var model *Model
-	model, err = program.Run(&Model{
+	if model, err = program.Run(&Model{
 		Prompt:   message,
 		Viewport: &viewport.Viewport{Visible: 6},
 		Search: &search.Search{
@@ -23,12 +21,7 @@ func Send(choices []search.Choice, message string) (selected string, err error) 
 			Filtered: choices,
 			Input:    input,
 		},
-	})
-
-	if err != nil {
-		if errors.Is(err, tea.ErrInterrupted) {
-			return
-		}
+	}); err != nil {
 		return
 	}
 

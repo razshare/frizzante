@@ -32,6 +32,7 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		if assert.Type == tea.KeyEsc {
 			if model.Search.Active {
 				search.Reset(model.Search, model.Viewport)
+				return model, nil
 			}
 
 			model.Selected = ""

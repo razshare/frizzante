@@ -1,6 +1,7 @@
 package menus
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/razshare/frizzante/cli/action"
@@ -97,8 +98,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "add", Description: "adds packages"},
 				Active: func() bool { return *app.Add != "" },
 				Handler: func() error {
-					var t string
-					t, err = singleselect.Send(
+					var packageType string
+					packageType, err = singleselect.Send(
 						[]search.Choice{
 							{Id: "js", Description: fmt.Sprintf("installs js packages in %s/node_modules", *app.App)},
 							//{Id: "go", Description: "installs go packages"},
@@ -110,14 +111,18 @@ func New(app *apps.App) (*Menu, error) {
 						return err
 					}
 
-					if t == "js" {
+					if packageType == "js" {
 						return action.Npm(action.NpmOptions{
 							App: *app.App,
 							Bun: bun,
 						})
 					}
 
-					return fmt.Errorf("%s packages are not supported", t)
+					if packageType == "" {
+						return errors.New("no package type selected")
+					}
+
+					return fmt.Errorf("%s packages are not supported", packageType)
 				},
 			},
 			{
@@ -181,6 +186,26 @@ func New(app *apps.App) (*Menu, error) {
 						Tags:     tags,
 					})
 
+					return
+				},
+			},
+			{
+				Choice: search.Choice{Id: "assembly explorer", Description: "explores application assembly output"},
+				Active: func() bool { return *app.AssemblyExplorer },
+				Handler: func() (err error) {
+					var tags []string
+					if tags, err = tags_.Parse(*app.Tags); err != nil {
+						return
+					}
+
+					err = action.AssemblyExplorer(action.AssemblyExplorerOptions{
+						App:      *app.App,
+						Platform: plat,
+						Go:       _go,
+						Bun:      bun,
+						Tags:     tags,
+						Auto:     *app.Yes,
+					})
 					return
 				},
 			},
