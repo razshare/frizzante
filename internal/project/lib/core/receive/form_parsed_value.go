@@ -36,7 +36,7 @@ func FormParsedValue(client *clients.Client, key string, value any) bool {
 		return true
 	case *bool:
 		text := client.Request.Form.Get(key)
-		if value, err = strconv.ParseBool(text); err != nil {
+		if *proxy, err = strconv.ParseBool(text); err != nil {
 			client.Config.ErrorLog.Println("form value is not a valid bool", stack.Trace())
 			return false
 		}
@@ -59,6 +59,7 @@ func FormParsedValue(client *clients.Client, key string, value any) bool {
 			local[index] = parsed
 		}
 		*proxy = local
+		return true
 	case *uint:
 		text := client.Request.Form.Get(key)
 		var tmp uint64
@@ -86,10 +87,11 @@ func FormParsedValue(client *clients.Client, key string, value any) bool {
 			local[index] = uint(tmp)
 		}
 		*proxy = local
+		return true
 	case *uint32:
 		text := client.Request.Form.Get(key)
-		var tmp int64
-		if tmp, err = strconv.ParseInt(text, 10, 32); err != nil {
+		var tmp uint64
+		if tmp, err = strconv.ParseUint(text, 10, 32); err != nil {
 			client.Config.ErrorLog.Println("form value is not a valid uint32", stack.Trace())
 			return false
 		}
@@ -113,9 +115,10 @@ func FormParsedValue(client *clients.Client, key string, value any) bool {
 			local[index] = uint32(tmp)
 		}
 		*proxy = local
+		return true
 	case *uint64:
 		text := client.Request.Form.Get(key)
-		if value, err = strconv.ParseUint(text, 10, 64); err != nil {
+		if *proxy, err = strconv.ParseUint(text, 10, 64); err != nil {
 			client.Config.ErrorLog.Println("form value is not a valid uint64", stack.Trace())
 			return false
 		}
@@ -138,6 +141,7 @@ func FormParsedValue(client *clients.Client, key string, value any) bool {
 			local[index] = tmp
 		}
 		*proxy = local
+		return true
 	case *int:
 		text := client.Request.Form.Get(key)
 		var tmp int64
@@ -165,6 +169,7 @@ func FormParsedValue(client *clients.Client, key string, value any) bool {
 			local[index] = int(tmp)
 		}
 		*proxy = local
+		return true
 	case *int32:
 		text := client.Request.Form.Get(key)
 		var tmp int64
@@ -192,9 +197,10 @@ func FormParsedValue(client *clients.Client, key string, value any) bool {
 			local[index] = int32(tmp)
 		}
 		*proxy = local
+		return true
 	case *int64:
 		text := client.Request.Form.Get(key)
-		if value, err = strconv.ParseInt(text, 10, 64); err != nil {
+		if *proxy, err = strconv.ParseInt(text, 10, 64); err != nil {
 			client.Config.ErrorLog.Println("form value is not a valid int64", stack.Trace())
 			return false
 		}
@@ -217,6 +223,7 @@ func FormParsedValue(client *clients.Client, key string, value any) bool {
 			local[index] = tmp
 		}
 		*proxy = local
+		return true
 	case *float32:
 		text := client.Request.Form.Get(key)
 		var tmp float64
@@ -244,9 +251,10 @@ func FormParsedValue(client *clients.Client, key string, value any) bool {
 			local[index] = float32(tmp)
 		}
 		*proxy = local
+		return true
 	case *float64:
 		text := client.Request.Form.Get(key)
-		if value, err = strconv.ParseFloat(text, 64); err != nil {
+		if *proxy, err = strconv.ParseFloat(text, 64); err != nil {
 			client.Config.ErrorLog.Println("form value is not a valid float64", stack.Trace())
 			return false
 		}
@@ -269,6 +277,7 @@ func FormParsedValue(client *clients.Client, key string, value any) bool {
 			local[index] = tmp
 		}
 		*proxy = local
+		return true
 	case *multipart.FileHeader:
 		if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
 			*proxy = *headers[0]

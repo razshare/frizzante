@@ -359,6 +359,7 @@ func TestFormParsedValueFloat32(t *testing.T) {
 		[]byte("\n"),
 	)
 
+	value = 0
 	if ok := FormParsedValue(client, "key", &value); ok || value != 0 {
 		t.Fatal("key should not be a valid float32")
 	}
@@ -417,6 +418,7 @@ func TestFormParsedValueFloat64(t *testing.T) {
 		[]byte("\n"),
 	)
 
+	value = 0
 	if ok := FormParsedValue(client, "key", &value); ok || value != 0 {
 		t.Fatal("key should not be a valid float64")
 	}
@@ -475,6 +477,7 @@ func TestFormParsedValueInt(t *testing.T) {
 		[]byte("\n"),
 	)
 
+	value = 0
 	if ok := FormParsedValue(client, "key", &value); ok || value != 0 {
 		t.Fatal("key should not be a valid int")
 	}
@@ -551,6 +554,7 @@ func TestFormParsedValueInt32(t *testing.T) {
 		[]byte("\n"),
 	)
 
+	value = 0
 	if ok := FormParsedValue(client, "key", &value); ok || value != 0 {
 		t.Fatal("key should not be a valid int32")
 	}
@@ -685,6 +689,7 @@ func TestFormParsedValueUint(t *testing.T) {
 		[]byte("\n"),
 	)
 
+	value = 0
 	if ok := FormParsedValue(client, "key", &value); ok || value != 0 {
 		t.Fatal("key should not be a valid uint")
 	}
@@ -761,6 +766,7 @@ func TestFormParsedValueUint32(t *testing.T) {
 		[]byte("\n"),
 	)
 
+	value = 0
 	if ok := FormParsedValue(client, "key", &value); ok || value != 0 {
 		t.Fatal("key should not be a valid uint32")
 	}
