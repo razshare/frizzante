@@ -24,8 +24,8 @@ func main() {
 		{Pattern: "GET /", Handler: fallback.View},
 		{Pattern: "GET /welcome", Handler: welcome.View},
 		{Pattern: "GET /todos", Handler: todos.View},
-		{Pattern: "GET /toggle", Handler: todos.Toggle},
-		{Pattern: "GET /add", Handler: todos.Add},
-		{Pattern: "GET /remove", Handler: todos.Remove},
+		{Pattern: "POST /toggle", Handler: todos.Toggle},
+		{Pattern: "POST /add", Handler: todos.Add},
+		{Pattern: "POST /remove", Handler: todos.Remove},
 	}
 }

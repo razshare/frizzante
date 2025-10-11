@@ -10,7 +10,9 @@ import (
 
 func View(client *clients.Client) {
 	session := sessions.Start(receive.SessionId(client))
+	defer func() { session.Error = "" }()
 	send.View(client, views.View{Name: "Todos", Props: Props{
+		Error: session.Error,
 		Items: session.Todos,
 	}})
 }

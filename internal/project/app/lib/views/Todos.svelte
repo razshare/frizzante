@@ -40,7 +40,7 @@
 {/snippet}
 
 {#snippet AddTodoForm()}
-    <form {...action("/add")} class="flex">
+    <form method="POST" {...action("/add")} class="flex">
         <input
             type="text"
             name="description"
@@ -86,7 +86,7 @@
     {@const aria = todo.checked ? "Uncheck" : "Check"}
     {@const value = todo.checked ? "0" : "1"}
     {@const icon = todo.checked ? mdiCheckCircleOutline : mdiCircleOutline}
-    <form {...action("/toggle")} class="grow content-center">
+    <form method="POST" {...action("/toggle")} class="grow content-center">
         <input type="hidden" name="index" value={index} />
         <input type="hidden" name="value" {value} />
         <button
@@ -105,7 +105,7 @@
 {/snippet}
 
 {#snippet RemoveTodoButton(index: number)}
-    <form {...action("/remove")}>
+    <form method="POST" {...action("/remove")}>
         <input type="hidden" name="index" value={index} />
         <button
             type="submit"

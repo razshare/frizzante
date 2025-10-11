@@ -29,19 +29,33 @@ func Package(options PackageOptions) (err error) {
 		bun = options.Bun
 	}
 
-	if !messages.Command(options.App, os.Environ(), bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=app.server.ts") {
+	if !messages.Command(
+		options.App,
+		os.Environ(),
+		bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=app.server.ts") {
 		return
 	}
 
-	if !messages.Command(options.App, os.Environ(), bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true") {
+	if !messages.Command(
+		options.App,
+		os.Environ(),
+		bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true") {
 		return
 	}
 
-	if !messages.Command(options.App, os.Environ(), filepath.Join("node_modules", ".bin", "esbuild"), "--bundle", "--outfile=dist/app.server.js", "--format=cjs", "--allow-overwrite", "dist/app.server.js") {
+	if !messages.Command(
+		options.App,
+		os.Environ(),
+		filepath.Join("node_modules", ".bin", "esbuild"),
+		"--bundle", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js") {
 		return
 	}
 
 	if err = os.RemoveAll(filepath.Join(options.App, "dist", "assets")); err != nil {
+		return
+	}
+
+	if err = os.RemoveAll(filepath.Join(options.App, "dist", "app.server.js")); err != nil {
 		return
 	}
 

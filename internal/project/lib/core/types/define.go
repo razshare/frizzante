@@ -50,11 +50,6 @@ func Define(type_ reflect.Type, packages map[string][]string, definitions map[st
 			return
 		}
 
-		if name == "error" {
-			root = "string"
-			return
-		}
-
 		parts := strings.Split(type_.PkgPath(), "/")
 		count := len(parts)
 		package_ := parts[count-1]

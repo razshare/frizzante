@@ -92,7 +92,7 @@ func New(config Config) (render RenderFunction, err error) {
 
 	source := "const module={exports:{}};\n" + text + "\nfrizzante_set_render(render)"
 
-	if _, err = context.Eval("app.server.js", qjs.Code(source)); err != nil {
+	if _, err = context.Eval("app.server.cjs", qjs.Code(source)); err != nil {
 		return
 	}
 

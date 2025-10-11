@@ -4,43 +4,33 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
-	"github.com/razshare/frizzante/internal/project/lib/core/views"
 	"github.com/razshare/frizzante/internal/project/lib/sessions"
 )
 
 func Toggle(client *clients.Client) {
-	var value int
-
 	session := sessions.Start(receive.SessionId(client))
 
 	var index int
-	if !receive.FormParsedValue(client, "index", &index) {
-		send.View(client, views.View{Name: "Todos", Props: Props{
-			Error: "could not parse index",
-			Items: session.Todos,
-		}})
+	if !receive.FormValue(client, "index", &index) {
+		session.Error = "could not parse index"
+		send.Navigate(client, "/todos")
 		return
 	}
 
-	if !receive.FormParsedValue(client, "value", &value) {
-		send.View(client, views.View{Name: "Todos", Props: Props{
-			Error: "could not parse value",
-			Items: session.Todos,
-		}})
+	var value int
+	if !receive.FormValue(client, "value", &value) {
+		session.Error = "could not parse value"
+		send.Navigate(client, "/todos")
 		return
 	}
 
 	if count := len(session.Todos); index >= count || index < 0 {
-		send.View(client, views.View{Name: "Todos", Props: Props{
-			Error: "index out of bounds",
-			Items: session.Todos,
-		}})
+		session.Error = "index out of bounds"
+		send.Navigate(client, "/todos")
 		return
 	}
 
 	session.Todos[index].Checked = value > 0
 
-	send.View(client, views.View{Name: "Todos", Props: Props{
-		Items: session.Todos,
-	}})
+	send.Navigate(client, "/todos")
 }
