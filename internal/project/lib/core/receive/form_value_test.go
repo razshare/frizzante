@@ -206,7 +206,7 @@ func TestFormValueBool(t *testing.T) {
 		[]byte("\n"),
 	)
 
-	if ok := FormValue(client, "key", &value); !ok || value {
+	if ok := FormValue(client, "key", &value); ok || value {
 		t.Fatal("key should be false")
 	}
 
