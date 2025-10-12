@@ -298,6 +298,10 @@ func Form(client *clients.Client, value any) bool {
 			}
 			pointer = local
 
+		case *multipart.FileHeader:
+			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
+				pointer = headers[0]
+			}
 		case multipart.FileHeader:
 			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
 				pointer = *headers[0]
