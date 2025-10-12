@@ -3,6 +3,7 @@ export type View<T> = {
     props: T
     render: number
     align: number
+    pending: boolean
 }
 
 export type HistoryEntry = {

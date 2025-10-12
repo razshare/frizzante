@@ -4,7 +4,7 @@
     import type { View } from "$lib/scripts/core/types.js"
     let { name, props, render, align }: View<Record<string, unknown>> = $props()
     const components = views as unknown as Record<string, () => Promise<SvelteComponent>>
-    const view: View<Record<string, unknown>> = $state({ name, props, render, align })
+    const view: View<Record<string, unknown>> = $state({ name, props, render, align, pending: true })
     setContext("view", view)
 
     let Component: false | SvelteComponent = $state(false)
@@ -12,16 +12,16 @@
     let locked = false
 
     $effect(function run() {
-        if (locked) {
+        if (view.pending) {
             return
         }
         for (const key of Object.keys(components)) {
             if (key == view.name) {
-                locked = true
+                view.pending = true
                 components[key]().then(function run(result) {
                     Component = result
                     properties = view.props
-                    locked = false
+                    view.pending = true
                 })
                 break
             }
