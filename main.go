@@ -17,6 +17,7 @@ import (
 //go:embed internal/additions/**
 //go:embed internal/project/**
 //go:embed internal/project/lib/core/views/render/.gitignore
+//go:embed internal/project/.vscode/launch.json
 //go:embed internal/project/app/.gitignore
 //go:embed internal/project/app/.npmrc
 //go:embed internal/project/app/.prettierrc
