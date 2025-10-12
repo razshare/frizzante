@@ -6,10 +6,10 @@ import { fileURLToPath } from "url"
 
 const file = fileURLToPath(import.meta.url)
 const dir = path.dirname(file).replace(/\\+/, "/")
-const IS_DEV = (process.env.DEV ?? "0") === "1"
+const dev = (process.env.DEV ?? "0") === "1"
 
 let sourcemap: "inline" | boolean = false
-if (IS_DEV) {
+if (dev) {
     sourcemap = "inline"
 }
 

@@ -28,21 +28,21 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 	group.Go(func() {
 		messages.Command(
 			options.App,
-			os.Environ(),
+			append(os.Environ(), "DEV=1"),
 			bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch",
 		)
 	})
 	group.Go(func() {
 		messages.Command(
 			options.App,
-			append(os.Environ(), "SOURCE_MAP=1"),
+			os.Environ(),
 			bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=app.server.ts",
 		)
 	})
 	group.Go(func() {
 		messages.Command(
 			options.App,
-			os.Environ(),
+			append(os.Environ(), "DEV=1"),
 			filepath.Join("node_modules", ".bin", "esbuild"),
 			"--bundle", "--watch", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js",
 		)
