@@ -57,7 +57,6 @@ func Form(client *clients.Client, value any) bool {
 
 		reference := reflectionValue.Interface()
 
-		var ok bool
 		var err error
 		var pointer any
 		switch reference.(type) {
@@ -69,17 +68,16 @@ func Form(client *clients.Client, value any) bool {
 
 		case bool:
 			text := client.Request.Form.Get(key)
+			if text == "" {
+				continue
+			}
 			if pointer, err = strconv.ParseBool(text); err != nil {
 				client.Config.ErrorLog.Println("form value is not a valid bool", stack.Trace())
 				return false
 			}
 
 		case []bool:
-			var entries []string
-			if entries, ok = client.Request.Form[key]; !ok {
-				return false
-			}
-
+			entries := client.Request.Form[key]
 			local := make([]bool, len(entries))
 
 			for jndex, entry := range entries {
@@ -94,6 +92,9 @@ func Form(client *clients.Client, value any) bool {
 
 		case uint:
 			text := client.Request.Form.Get(key)
+			if text == "" {
+				continue
+			}
 			var tmp uint64
 			if tmp, err = strconv.ParseUint(text, 10, 64); err != nil {
 				client.Config.ErrorLog.Println("form value is not a valid uint", stack.Trace())
@@ -102,11 +103,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = uint(tmp)
 
 		case []uint:
-			var entries []string
-			if entries, ok = client.Request.Form[key]; !ok {
-				return false
-			}
-
+			entries := client.Request.Form[key]
 			local := make([]uint, len(entries))
 
 			for jndex, entry := range entries {
@@ -121,6 +118,9 @@ func Form(client *clients.Client, value any) bool {
 
 		case uint32:
 			text := client.Request.Form.Get(key)
+			if text == "" {
+				continue
+			}
 			var tmp uint64
 			if tmp, err = strconv.ParseUint(text, 10, 32); err != nil {
 				client.Config.ErrorLog.Println("form value is not a valid uint32", stack.Trace())
@@ -129,11 +129,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = uint32(tmp)
 
 		case []uint32:
-			var entries []string
-			if entries, ok = client.Request.Form[key]; !ok {
-				return false
-			}
-
+			entries := client.Request.Form[key]
 			local := make([]uint32, len(entries))
 
 			for jndex, entry := range entries {
@@ -148,17 +144,16 @@ func Form(client *clients.Client, value any) bool {
 
 		case uint64:
 			text := client.Request.Form.Get(key)
+			if text == "" {
+				continue
+			}
 			if pointer, err = strconv.ParseUint(text, 10, 64); err != nil {
 				client.Config.ErrorLog.Println("form value is not a valid uint64", stack.Trace())
 				return false
 			}
 
 		case []uint64:
-			var entries []string
-			if entries, ok = client.Request.Form[key]; !ok {
-				return false
-			}
-
+			entries := client.Request.Form[key]
 			local := make([]uint64, len(entries))
 
 			for jndex, entry := range entries {
@@ -173,6 +168,9 @@ func Form(client *clients.Client, value any) bool {
 
 		case int:
 			text := client.Request.Form.Get(key)
+			if text == "" {
+				continue
+			}
 			var tmp int64
 			if tmp, err = strconv.ParseInt(text, 10, 64); err != nil {
 				client.Config.ErrorLog.Println("form value is not a valid int", stack.Trace())
@@ -181,11 +179,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = int(tmp)
 
 		case []int:
-			var entries []string
-			if entries, ok = client.Request.Form[key]; !ok {
-				return false
-			}
-
+			entries := client.Request.Form[key]
 			local := make([]int, len(entries))
 
 			for jndex, entry := range entries {
@@ -200,6 +194,9 @@ func Form(client *clients.Client, value any) bool {
 
 		case int32:
 			text := client.Request.Form.Get(key)
+			if text == "" {
+				continue
+			}
 			var tmp int64
 			if tmp, err = strconv.ParseInt(text, 10, 32); err != nil {
 				client.Config.ErrorLog.Println("form value is not a valid int32", stack.Trace())
@@ -208,11 +205,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = int32(tmp)
 
 		case []int32:
-			var entries []string
-			if entries, ok = client.Request.Form[key]; !ok {
-				return false
-			}
-
+			entries := client.Request.Form[key]
 			local := make([]int32, len(entries))
 
 			for jndex, entry := range entries {
@@ -227,17 +220,16 @@ func Form(client *clients.Client, value any) bool {
 
 		case int64:
 			text := client.Request.Form.Get(key)
+			if text == "" {
+				continue
+			}
 			if pointer, err = strconv.ParseInt(text, 10, 64); err != nil {
 				client.Config.ErrorLog.Println("form value is not a valid int64", stack.Trace())
 				return false
 			}
 
 		case []int64:
-			var entries []string
-			if entries, ok = client.Request.Form[key]; !ok {
-				return false
-			}
-
+			entries := client.Request.Form[key]
 			local := make([]int64, len(entries))
 
 			for jndex, entry := range entries {
@@ -252,6 +244,9 @@ func Form(client *clients.Client, value any) bool {
 
 		case float32:
 			text := client.Request.Form.Get(key)
+			if text == "" {
+				continue
+			}
 			var tmp float64
 			if tmp, err = strconv.ParseFloat(text, 32); err != nil {
 				client.Config.ErrorLog.Println("form value is not a valid float32", stack.Trace())
@@ -260,11 +255,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = float32(tmp)
 
 		case []float32:
-			var entries []string
-			if entries, ok = client.Request.Form[key]; !ok {
-				return false
-			}
-
+			entries := client.Request.Form[key]
 			local := make([]float32, len(entries))
 
 			for jndex, entry := range entries {
@@ -279,17 +270,16 @@ func Form(client *clients.Client, value any) bool {
 
 		case float64:
 			text := client.Request.Form.Get(key)
+			if text == "" {
+				continue
+			}
 			if pointer, err = strconv.ParseFloat(text, 64); err != nil {
 				client.Config.ErrorLog.Println("form value is not a valid float64", stack.Trace())
 				return false
 			}
 
 		case []float64:
-			var entries []string
-			if entries, ok = client.Request.Form[key]; !ok {
-				return false
-			}
-
+			entries := client.Request.Form[key]
 			local := make([]float64, len(entries))
 
 			for jndex, entry := range entries {
@@ -309,7 +299,6 @@ func Form(client *clients.Client, value any) bool {
 		case multipart.FileHeader:
 			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
 				pointer = *headers[0]
-
 			}
 		case []multipart.FileHeader:
 			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
@@ -318,12 +307,10 @@ func Form(client *clients.Client, value any) bool {
 					locals[jndex] = *header
 				}
 				pointer = locals
-
 			}
 		case []*multipart.FileHeader:
 			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
 				pointer = headers
-
 			}
 		case multipart.File:
 			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
@@ -334,7 +321,6 @@ func Form(client *clients.Client, value any) bool {
 					return false
 				}
 				pointer = file
-
 			}
 		case []multipart.File:
 			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
@@ -348,7 +334,6 @@ func Form(client *clients.Client, value any) bool {
 					locals[jndex] = file
 				}
 				pointer = locals
-
 			}
 		case []*multipart.File:
 			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
@@ -362,7 +347,6 @@ func Form(client *clients.Client, value any) bool {
 					locals[jndex] = &file
 				}
 				pointer = locals
-
 			}
 		default:
 			client.Config.ErrorLog.Println("unknown form value type for key "+key, stack.Trace())
