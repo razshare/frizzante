@@ -1,8 +1,6 @@
 package security
 
-import (
-	"crypto/rand"
-)
+import "crypto/rand"
 
 func RandomHex(length int) string {
 	bytes := make([]byte, length)

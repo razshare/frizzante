@@ -13,17 +13,19 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-// FileOrElse sends the file requested by the client, or else falls back.
-// Deprecated: use send.RequestedFile() instead.
-func FileOrElse(client *clients.Client, orElse func()) {
+// RequestedFile sends the file requested by the client.
+//
+// Returns false if connection is web sockets, server sent events
+// or the file was not found.
+func RequestedFile(client *clients.Client) bool {
 	if client.WebSocket != nil {
-		client.Config.ErrorLog.Println("file_or_else does not support web sockets", stack.Trace())
-		return
+		client.Config.ErrorLog.Println("send.RequestedFile() does not support web sockets", stack.Trace())
+		return false
 	}
 
 	if client.EventName != "" {
-		client.Config.ErrorLog.Println("file_or_else does not support server sent events", stack.Trace())
-		return
+		client.Config.ErrorLog.Println("send.RequestedFile() does not support server sent events", stack.Trace())
+		return false
 	}
 
 	var name string
@@ -40,8 +42,8 @@ func FileOrElse(client *clients.Client, orElse func()) {
 		}
 
 		http.ServeFile(client.Writer, client.Request, name)
-		return
+		return true
 	}
 
-	orElse()
+	return false
 }

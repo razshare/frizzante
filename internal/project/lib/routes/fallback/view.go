@@ -7,5 +7,7 @@ import (
 )
 
 func View(client *clients.Client) {
-	send.FileOrElse(client, func() { welcome.View(client) })
+	if !send.RequestedFile(client) {
+		welcome.View(client)
+	}
 }
