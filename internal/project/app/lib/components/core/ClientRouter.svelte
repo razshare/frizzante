@@ -20,7 +20,7 @@
                 components[key]().then(function run(result) {
                     Component = result
                     properties = view.props
-                    view.pending = true
+                    view.pending = false
                 })
                 break
             }
