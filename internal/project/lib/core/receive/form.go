@@ -42,7 +42,11 @@ func Form(client *clients.Client, value any) bool {
 		if tag := reflectionField.Tag.Get("form"); tag != "" {
 			key = tag
 		} else {
-			key = reflectionField.Name
+			if tag = reflectionField.Tag.Get("json"); tag != "" {
+				key = tag
+			} else {
+				key = reflectionField.Name
+			}
 		}
 
 		reflectionValue := reflection.Field(index)
