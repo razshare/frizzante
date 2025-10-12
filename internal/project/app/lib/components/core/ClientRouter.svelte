@@ -4,7 +4,7 @@
     import type { View } from "$lib/scripts/core/types.js"
     let { name, props, render, align }: View<Record<string, unknown>> = $props()
     const components = views as unknown as Record<string, () => Promise<SvelteComponent>>
-    const view: View<Record<string, unknown>> = $state({ name, props, render, align, pending: true })
+    const view: View<Record<string, unknown>> = $state({ name, props, render, align, pending: false })
     setContext("view", view)
 
     let Component: false | SvelteComponent = $state(false)
