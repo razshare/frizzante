@@ -9,6 +9,8 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
+var FormMetadataCache = map[reflect.Type]*FormMetadata{}
+
 // Form reads the next multipart form or url encoded form message from the
 // client and stores it in the value pointed to by value.
 func Form(client *clients.Client, value any) bool {
@@ -26,48 +28,68 @@ func Form(client *clients.Client, value any) bool {
 
 	reflection := reflect.ValueOf(value)
 
-	if reflection.Kind() == reflect.Pointer {
-		reflection = reflection.Elem()
+	if reflection.Kind() != reflect.Pointer {
+		client.Config.ErrorLog.Println("form value must be a pointer", stack.Trace())
+		return false
 	}
 
+	reflection = reflection.Elem()
 	type_ := reflection.Type()
+
 	for index := range reflection.NumField() {
-		reflectionField := type_.Field(index)
-		if !reflectionField.IsExported() {
+		var ok bool
+		var metadata *FormMetadata
+		if metadata, ok = FormMetadataCache[type_]; !ok {
+			reflectionField := type_.Field(index)
+			var key string
+			if tag := reflectionField.Tag.Get("form"); tag != "" {
+				key = tag
+			} else {
+				if tag = reflectionField.Tag.Get("json"); tag != "" {
+					key = tag
+				} else {
+					key = reflectionField.Name
+				}
+			}
+
+			reflectionValue := reflection.Field(index)
+
+			if reflectionValue.Kind() == reflect.Pointer {
+				reflectionValue = reflectionValue.Elem()
+			}
+
+			if reflectionField.IsExported() {
+				metadata = &FormMetadata{
+					Key:       key,
+					Exported:  true,
+					Value:     reflectionValue,
+					Reference: reflectionValue.Interface(),
+				}
+			} else {
+				metadata = &FormMetadata{
+					Key:      key,
+					Exported: false,
+					Value:    reflectionValue,
+				}
+			}
+			FormMetadataCache[type_] = metadata
+		}
+
+		if !metadata.Exported {
 			continue
 		}
 
-		var key string
-
-		if tag := reflectionField.Tag.Get("form"); tag != "" {
-			key = tag
-		} else {
-			if tag = reflectionField.Tag.Get("json"); tag != "" {
-				key = tag
-			} else {
-				key = reflectionField.Name
-			}
-		}
-
-		reflectionValue := reflection.Field(index)
-
-		if reflectionValue.Kind() == reflect.Pointer {
-			reflectionValue = reflectionValue.Elem()
-		}
-
-		reference := reflectionValue.Interface()
-
 		var err error
 		var pointer any
-		switch reference.(type) {
+		switch metadata.Reference.(type) {
 		case string:
-			pointer = client.Request.Form.Get(key)
+			pointer = client.Request.Form.Get(metadata.Key)
 
 		case []byte:
-			pointer = []byte(client.Request.Form.Get(key))
+			pointer = []byte(client.Request.Form.Get(metadata.Key))
 
 		case bool:
-			text := client.Request.Form.Get(key)
+			text := client.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
@@ -77,7 +99,7 @@ func Form(client *clients.Client, value any) bool {
 			}
 
 		case []bool:
-			entries := client.Request.Form[key]
+			entries := client.Request.Form[metadata.Key]
 			local := make([]bool, len(entries))
 
 			for jndex, entry := range entries {
@@ -91,7 +113,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = local
 
 		case uint:
-			text := client.Request.Form.Get(key)
+			text := client.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
@@ -103,7 +125,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = uint(tmp)
 
 		case []uint:
-			entries := client.Request.Form[key]
+			entries := client.Request.Form[metadata.Key]
 			local := make([]uint, len(entries))
 
 			for jndex, entry := range entries {
@@ -117,7 +139,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = local
 
 		case uint32:
-			text := client.Request.Form.Get(key)
+			text := client.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
@@ -129,7 +151,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = uint32(tmp)
 
 		case []uint32:
-			entries := client.Request.Form[key]
+			entries := client.Request.Form[metadata.Key]
 			local := make([]uint32, len(entries))
 
 			for jndex, entry := range entries {
@@ -143,7 +165,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = local
 
 		case uint64:
-			text := client.Request.Form.Get(key)
+			text := client.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
@@ -153,7 +175,7 @@ func Form(client *clients.Client, value any) bool {
 			}
 
 		case []uint64:
-			entries := client.Request.Form[key]
+			entries := client.Request.Form[metadata.Key]
 			local := make([]uint64, len(entries))
 
 			for jndex, entry := range entries {
@@ -167,7 +189,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = local
 
 		case int:
-			text := client.Request.Form.Get(key)
+			text := client.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
@@ -179,7 +201,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = int(tmp)
 
 		case []int:
-			entries := client.Request.Form[key]
+			entries := client.Request.Form[metadata.Key]
 			local := make([]int, len(entries))
 
 			for jndex, entry := range entries {
@@ -193,7 +215,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = local
 
 		case int32:
-			text := client.Request.Form.Get(key)
+			text := client.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
@@ -205,7 +227,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = int32(tmp)
 
 		case []int32:
-			entries := client.Request.Form[key]
+			entries := client.Request.Form[metadata.Key]
 			local := make([]int32, len(entries))
 
 			for jndex, entry := range entries {
@@ -219,7 +241,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = local
 
 		case int64:
-			text := client.Request.Form.Get(key)
+			text := client.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
@@ -229,7 +251,7 @@ func Form(client *clients.Client, value any) bool {
 			}
 
 		case []int64:
-			entries := client.Request.Form[key]
+			entries := client.Request.Form[metadata.Key]
 			local := make([]int64, len(entries))
 
 			for jndex, entry := range entries {
@@ -243,7 +265,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = local
 
 		case float32:
-			text := client.Request.Form.Get(key)
+			text := client.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
@@ -255,7 +277,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = float32(tmp)
 
 		case []float32:
-			entries := client.Request.Form[key]
+			entries := client.Request.Form[metadata.Key]
 			local := make([]float32, len(entries))
 
 			for jndex, entry := range entries {
@@ -269,7 +291,7 @@ func Form(client *clients.Client, value any) bool {
 			pointer = local
 
 		case float64:
-			text := client.Request.Form.Get(key)
+			text := client.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
@@ -279,7 +301,7 @@ func Form(client *clients.Client, value any) bool {
 			}
 
 		case []float64:
-			entries := client.Request.Form[key]
+			entries := client.Request.Form[metadata.Key]
 			local := make([]float64, len(entries))
 
 			for jndex, entry := range entries {
@@ -293,15 +315,15 @@ func Form(client *clients.Client, value any) bool {
 			pointer = local
 
 		case *multipart.FileHeader:
-			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
+			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
 				pointer = headers[0]
 			}
 		case multipart.FileHeader:
-			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
+			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
 				pointer = *headers[0]
 			}
 		case []multipart.FileHeader:
-			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
+			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
 				locals := make([]multipart.FileHeader, len(headers))
 				for jndex, header := range headers {
 					locals[jndex] = *header
@@ -309,11 +331,11 @@ func Form(client *clients.Client, value any) bool {
 				pointer = locals
 			}
 		case []*multipart.FileHeader:
-			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
+			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
 				pointer = headers
 			}
 		case multipart.File:
-			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
+			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
 				header := *headers[0]
 				var file multipart.File
 				if file, err = header.Open(); err != nil {
@@ -323,7 +345,7 @@ func Form(client *clients.Client, value any) bool {
 				pointer = file
 			}
 		case []multipart.File:
-			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
+			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
 				locals := make([]multipart.File, len(headers))
 				for jndex, header := range headers {
 					var file multipart.File
@@ -336,7 +358,7 @@ func Form(client *clients.Client, value any) bool {
 				pointer = locals
 			}
 		case []*multipart.File:
-			if headers := client.Request.MultipartForm.File[key]; len(headers) > 0 {
+			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
 				locals := make([]*multipart.File, len(headers))
 				for jndex, header := range headers {
 					var file multipart.File
@@ -349,10 +371,10 @@ func Form(client *clients.Client, value any) bool {
 				pointer = locals
 			}
 		default:
-			client.Config.ErrorLog.Println("unknown form value type for key "+key, stack.Trace())
+			client.Config.ErrorLog.Println("unknown form value type for key "+metadata.Key, stack.Trace())
 			return false
 		}
-		reflectionValue.Set(reflect.ValueOf(pointer))
+		metadata.Value.Set(reflect.ValueOf(pointer))
 	}
 
 	return true
