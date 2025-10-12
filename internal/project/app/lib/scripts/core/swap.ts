@@ -7,13 +7,13 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         lastUrl = location.toString()
     }
 
-    let res: Response
+    let response: Response
     let method: "GET" | "POST" = "GET"
     const body: Record<string, string> = {}
 
     if (target.nodeName === "A") {
         const anchor = target as HTMLAnchorElement
-        res = await fetch(anchor.href, {
+        response = await fetch(anchor.href, {
             headers: {
                 Accept: "application/json",
             },
@@ -45,13 +45,13 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
                     query = "?" + query
                 }
             }
-            res = await fetch(`${form.action}${query}`, {
+            response = await fetch(`${form.action}${query}`, {
                 headers: {
                     Accept: "application/json",
                 },
             })
         } else {
-            res = await fetch(form.action, {
+            response = await fetch(form.action, {
                 method,
                 body: data as unknown as BodyInit,
                 headers: {
@@ -63,16 +63,18 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         return function push() {}
     }
 
-    const txt = await res.text()
+    view.pending = true
+    const text = await response.text()
 
-    if ("" === txt) {
+    if ("" === text) {
         return function push() {}
     }
 
-    const remote = JSON.parse(txt) as View<Record<string, unknown>>
+    const remote = JSON.parse(text) as View<Record<string, unknown>>
 
-    view.align = remote.align
+    await view.snapshot()
     view.name = remote.name
+    view.align = remote.align
     view.render = remote.render
     if (view.align === 1) {
         if (typeof view.props != "object") {
@@ -90,9 +92,10 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
     } else {
         view.props = remote.props
     }
+    view.pending = false
 
-    const stationary = lastUrl === res.url
-    lastUrl = res.url
+    const stationary = lastUrl === response.url
+    lastUrl = response.url
 
     return function push() {
         if (stationary) {
@@ -102,10 +105,10 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         const entry: HistoryEntry = {
             nodeName: target.nodeName,
             method,
-            url: res.url,
+            url: response.url,
             body,
         }
 
-        window.history.pushState(JSON.stringify(entry), "", res.url)
+        window.history.pushState(JSON.stringify(entry), "", response.url)
     }
 }

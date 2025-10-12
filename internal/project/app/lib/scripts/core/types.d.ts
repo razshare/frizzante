@@ -1,9 +1,10 @@
 export type View<T> = {
-    name: string
     props: T
-    render: number
+    name: string
     align: number
+    render: number
     pending: boolean
+    snapshot: () => Promise<void>
 }
 
 export type HistoryEntry = {
