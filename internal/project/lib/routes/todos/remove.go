@@ -10,21 +10,22 @@ import (
 func Remove(client *clients.Client) {
 	session := sessions.Start(receive.SessionId(client))
 
-	var index int
-	if !receive.FormInt(client, "index", &index) {
-		// Could not parse index, redirect with error.
-		send.Navigate(client, "/todos?error=could not parse index")
+	var form RemoveForm
+	if !receive.Form(client, &form) {
+		session.Error = "could not parse form"
+		send.Navigate(client, "/todos")
+		return
 	}
 
-	if count := len(session.Todos); index >= count || index < 0 {
-		// Index is out of bounds, ignore the request.
+	if count := len(session.Todos); form.Index >= count || form.Index < 0 {
+		session.Error = "index out of bounds"
 		send.Navigate(client, "/todos")
 		return
 	}
 
 	session.Todos = append(
-		session.Todos[:index],
-		session.Todos[index+1:]...,
+		session.Todos[:form.Index],
+		session.Todos[form.Index+1:]...,
 	)
 
 	send.Navigate(client, "/todos")

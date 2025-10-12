@@ -33,7 +33,7 @@ func Touch(options TouchOptions) (err error) {
 		return
 	}
 
-	if err = touch(filepath.Join(options.App, "dist", "app.server.js")); err != nil {
+	if err = touch(filepath.Join(options.App, "dist", "app.server.cjs")); err != nil {
 		return
 	}
 

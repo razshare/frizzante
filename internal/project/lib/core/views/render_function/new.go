@@ -5,12 +5,9 @@ package render_function
 import (
 	"errors"
 	"log"
-	"path/filepath"
 	"strings"
 
 	"github.com/dop251/goja"
-	"github.com/evanw/esbuild/pkg/api"
-	"github.com/razshare/frizzante/internal/project/lib/core/js"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/types"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
@@ -91,15 +88,15 @@ func New(config Config) (render RenderFunction, err error) {
 		return
 	}
 
-	var text string
-	if text, err = js.Bundle(filepath.Join(config.App, "dist"), api.FormatCommonJS, string(config.Data)); err != nil {
-		return
-	}
+	//var text string
+	//if text, err = js.Bundle(filepath.Join(config.App, "dist"), api.FormatCommonJS, string(config.Data)); err != nil {
+	//	return
+	//}
 
-	source := "const module={exports:{}};\n" + text + "\nfrizzante_set_render(render)"
+	source := "const module={exports:{}};\n" + string(config.Data) + "\nfrizzante_set_render(render)"
 
 	var prog *goja.Program
-	if prog, err = goja.Compile("app.server.js", source, false); err != nil {
+	if prog, err = goja.Compile("app.server.cjs", source, false); err != nil {
 		return
 	}
 

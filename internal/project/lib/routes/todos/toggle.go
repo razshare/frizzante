@@ -10,25 +10,19 @@ import (
 func Toggle(client *clients.Client) {
 	session := sessions.Start(receive.SessionId(client))
 
-	var index int
-	if !receive.FormInt(client, "index", &index) {
-		send.Navigate(client, "/todos?error=could not parse index")
-		return
+	var form ToggleForm
+	if !receive.Form(client, &form) {
+		session.Error = "could not parse form"
+		send.Navigate(client, "/todos")
 	}
 
-	var value int
-	if !receive.FormInt(client, "value", &value) {
-		send.Navigate(client, "/todos?error=could not parse value")
-		return
-	}
-
-	if count := len(session.Todos); index >= count || index < 0 {
-		// Index is out of bounds, ignore the request.
+	if count := len(session.Todos); form.Index >= count || form.Index < 0 {
+		session.Error = "index out of bounds"
 		send.Navigate(client, "/todos")
 		return
 	}
 
-	session.Todos[index].Checked = value > 0
+	session.Todos[form.Index].Checked = form.Value > 0
 
 	send.Navigate(client, "/todos")
 }

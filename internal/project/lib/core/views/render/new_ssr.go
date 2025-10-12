@@ -54,7 +54,7 @@ func New(config Config) Render {
 	}
 
 	var mut sync.Mutex
-	var server = filepath.Join(app, "dist", "app.server.js")
+	var server = filepath.Join(app, "dist", "app.server.cjs")
 	var index = filepath.Join(app, "dist", "client", "index.html")
 	var renders = make(chan render_function.RenderFunction, 1)
 
@@ -106,6 +106,9 @@ func New(config Config) Render {
 				mut.Unlock()
 
 				if render, err = compile(); err != nil {
+					mut.Lock()
+					limit++
+					mut.Unlock()
 					return
 				}
 				defer func() { go func() { renders <- render }() }()

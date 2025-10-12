@@ -51,7 +51,7 @@ func New(config Config) Render {
 		}
 	}
 
-	var server = filepath.Join(app, "dist", "app.server.js")
+	var server = filepath.Join(app, "dist", "app.server.cjs")
 	var index = filepath.Join(app, "dist", "client", "index.html")
 
 	server = strings.ReplaceAll(server, "/", string(filepath.Separator))
