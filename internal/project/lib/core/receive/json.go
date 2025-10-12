@@ -9,7 +9,7 @@ import (
 )
 
 // Json reads the next JSON-encoded message from the
-// c and stores it in the value pointed to by value.
+// client and stores it in the value pointed to by value.
 //
 // Compatible with web sockets and server sent events.
 func Json(client *clients.Client, value any) bool {

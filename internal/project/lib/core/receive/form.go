@@ -9,6 +9,8 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
+// Form reads the next multipart form or url encoded form message from the
+// client and stores it in the value pointed to by value.
 func Form(client *clients.Client, value any) bool {
 	if client.WebSocket != nil {
 		client.Config.ErrorLog.Println("web socket connections cannot parse forms", stack.Trace())
