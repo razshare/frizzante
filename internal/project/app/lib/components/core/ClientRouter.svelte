@@ -9,7 +9,6 @@
 
     let Component: false | SvelteComponent = $state(false)
     let properties: Record<string, unknown> = $state({})
-    let locked = false
 
     $effect(function run() {
         if (view.pending) {
