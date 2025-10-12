@@ -6,12 +6,31 @@
     const components = views as unknown as Record<string, () => Promise<SvelteComponent>>
     const view: View<Record<string, unknown>> = $state({ name, props, render, align, pending: false })
     setContext("view", view)
+
+    let Component: false | SvelteComponent = $state(false)
+    let properties: Record<string, unknown> = $state({})
+    let pending = view.pending
+
+    $effect(function run() {
+        if (pending) {
+            return
+        }
+        for (const key of Object.keys(components)) {
+            if (key == view.name) {
+                view.pending = true
+                pending = true
+                components[key]().then(function run(result) {
+                    Component = result
+                    properties = view.props
+                    view.pending = false
+                    pending = false
+                })
+                break
+            }
+        }
+    })
 </script>
 
-{#each Object.keys(components) as key (key)}
-    {#if key === view.name}
-        {#await components[key]() then Component}
-            <Component.default {...view.props} />
-        {/await}
-    {/if}
-{/each}
+{#if Component}
+    <Component.default {...properties} />
+{/if}
