@@ -4,12 +4,14 @@ import (
 	"mime/multipart"
 	"reflect"
 	"strconv"
+	"sync"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-var FormMetadataCache = map[reflect.Type]*FormMetadata{}
+var FormMetadataCache = map[reflect.Type][]*FormFieldMetadata{}
+var FormMetadataCacheMutex sync.Mutex
 
 // Form reads the next multipart form or url encoded form message from the
 // client and stores it in the value pointed to by value.
@@ -36,11 +38,14 @@ func Form(client *clients.Client, value any) bool {
 	reflection = reflection.Elem()
 	type_ := reflection.Type()
 
-	for index := range reflection.NumField() {
-		var ok bool
-		var metadata *FormMetadata
-		if metadata, ok = FormMetadataCache[type_]; !ok {
+	var ok bool
+	var cache []*FormFieldMetadata
+	if cache, ok = FormMetadataCache[type_]; !ok {
+		count := reflection.NumField()
+		cache = make([]*FormFieldMetadata, count)
+		for index := 0; index < count; index++ {
 			reflectionField := type_.Field(index)
+
 			var key string
 			if tag := reflectionField.Tag.Get("form"); tag != "" {
 				key = tag
@@ -53,28 +58,32 @@ func Form(client *clients.Client, value any) bool {
 			}
 
 			reflectionValue := reflection.Field(index)
-
 			if reflectionValue.Kind() == reflect.Pointer {
 				reflectionValue = reflectionValue.Elem()
 			}
-
+			var metadata *FormFieldMetadata
 			if reflectionField.IsExported() {
-				metadata = &FormMetadata{
+				metadata = &FormFieldMetadata{
 					Key:       key,
 					Exported:  true,
 					Value:     reflectionValue,
 					Reference: reflectionValue.Interface(),
 				}
 			} else {
-				metadata = &FormMetadata{
+				metadata = &FormFieldMetadata{
 					Key:      key,
 					Exported: false,
 					Value:    reflectionValue,
 				}
 			}
-			FormMetadataCache[type_] = metadata
+			cache[index] = metadata
 		}
+		FormMetadataCacheMutex.Lock()
+		FormMetadataCache[type_] = cache
+		FormMetadataCacheMutex.Unlock()
+	}
 
+	for index, metadata := range cache {
 		if !metadata.Exported {
 			continue
 		}
@@ -374,7 +383,7 @@ func Form(client *clients.Client, value any) bool {
 			client.Config.ErrorLog.Println("unknown form value type for key "+metadata.Key, stack.Trace())
 			return false
 		}
-		metadata.Value.Set(reflect.ValueOf(pointer))
+		reflection.Field(index).Set(reflect.ValueOf(pointer))
 	}
 
 	return true

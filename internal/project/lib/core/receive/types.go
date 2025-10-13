@@ -2,7 +2,7 @@ package receive
 
 import "reflect"
 
-type FormMetadata struct {
+type FormFieldMetadata struct {
 	Key       string
 	Value     reflect.Value
 	Exported  bool
