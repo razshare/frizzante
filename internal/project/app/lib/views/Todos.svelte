@@ -4,8 +4,8 @@
     import { action } from "$lib/scripts/core/action.ts"
     import { href } from "$lib/scripts/core/href.ts"
     import { mdiArrowLeft, mdiCheckCircleOutline, mdiCircleOutline, mdiClose, mdiPlus } from "@mdi/js"
-    import { slide } from "svelte/transition"
     import type { Props, sessions } from "$gen/types/main/lib/routes/todos/Props"
+    import { slide } from "svelte/transition"
 
     let { items = [], error }: Props = $props()
 
@@ -42,10 +42,10 @@
 {#snippet AddTodoForm()}
     <form method="POST" {...action("/add")} class="flex">
         <input
-            type="text"
-            name="description"
-            placeholder="Add a new task..."
-            class="input bg-base-100/ text-lg w-full"
+                type="text"
+                name="description"
+                placeholder="Add a new task..."
+                class="input bg-base-100/ text-lg w-full"
         />
         <div class="pt-4"></div>
         <button type="submit" class="btn btn-ghost text-lg">
@@ -56,7 +56,7 @@
 
     {#if error}
         <div class="pt-4"></div>
-        <div in:slide out:slide class="alert alert-error">
+        <div transition:slide class="alert alert-error">
             <span>{error}</span>
         </div>
     {/if}
@@ -65,7 +65,7 @@
 {#snippet ShowTodosList(items: sessions.Todo[])}
     {#if items.length > 0}
         {#each items as todo, index (index)}
-            <div in:slide out:slide class="flex w-full text-base-content/80">
+            <div transition:slide class="flex w-full text-base-content/80">
                 {@render ToggleTodoButton(todo, index)}
                 {@render RemoveTodoButton(index)}
             </div>
@@ -77,7 +77,7 @@
 {/snippet}
 
 {#snippet NoTodosFound()}
-    <div in:slide out:slide class="text-center text-base-content/50 text-lg">
+    <div class="text-center text-base-content/50 text-lg">
         <span>No tasks yet. Add one above to get started!</span>
     </div>
 {/snippet}
@@ -90,12 +90,12 @@
         <input type="hidden" name="index" value={index} />
         <input type="hidden" name="value" {value} />
         <button
-            type="submit"
-            class="w-full flex cursor-pointer"
-            class:line-through={todo.checked}
-            class:text-base-content={todo.checked}
-            class:opacity-50={todo.checked}
-            aria-label={aria}
+                type="submit"
+                class="w-full flex cursor-pointer"
+                class:line-through={todo.checked}
+                class:text-base-content={todo.checked}
+                class:opacity-50={todo.checked}
+                aria-label={aria}
         >
             <Icon path={icon} />
             <div class="pr-4"></div>
@@ -108,9 +108,9 @@
     <form method="POST" {...action("/remove")}>
         <input type="hidden" name="index" value={index} />
         <button
-            type="submit"
-            class="btn btn-ghost btn-sm btn-square hover:text-error hover:bg-error/20 transition-colors"
-            aria-label="Delete"
+                type="submit"
+                class="btn btn-ghost btn-sm btn-square hover:text-error hover:bg-error/20 transition-colors"
+                aria-label="Delete"
         >
             <Icon path={mdiClose} size="18" />
         </button>
@@ -118,7 +118,7 @@
 {/snippet}
 
 {#snippet CountUncheckedTodos()}
-    <div in:slide out:slide class="text-lg text-base-content/50 text-center">
+    <div class="text-lg text-base-content/50 text-center">
         <span>{unchecked} tasks remaining</span>
     </div>
 {/snippet}

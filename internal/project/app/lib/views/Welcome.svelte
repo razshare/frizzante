@@ -82,9 +82,9 @@
 
 {#snippet DocumentationButton()}
     <a
-        class="btn btn-secondary btn-lg"
-        href="https://razshare.github.io/frizzante-docs/guides/get-started"
-        target="_blank"
+            class="btn btn-secondary btn-lg"
+            href="https://razshare.github.io/frizzante-docs/guides/get-started"
+            target="_blank"
     >
         <span>Documentation</span>
     </a>

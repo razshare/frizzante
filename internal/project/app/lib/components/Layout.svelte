@@ -18,7 +18,7 @@
 <script lang="ts">
     import { getContext, type Snippet } from "svelte"
     import type { View } from "$lib/scripts/core/types"
-    import { fade } from "svelte/transition"
+    import { scale } from "svelte/transition"
 
     type Props = {
         title?: string
@@ -33,14 +33,12 @@
 <svelte:head>
     <meta charset="UTF-8" />
     <meta
-        name="viewport"
-        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
+            name="viewport"
+            content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"
     />
     <title>{title}</title>
 </svelte:head>
 
-<div class="layout">
-    <div in:fade class="content">
-        {@render children()}
-    </div>
+<div in:scale={{ duration: 100 }} class="layout">
+    {@render children()}
 </div>
