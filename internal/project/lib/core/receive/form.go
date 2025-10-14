@@ -1,7 +1,9 @@
 package receive
 
 import (
+	"errors"
 	"mime/multipart"
+	"net/http"
 	"reflect"
 	"strconv"
 	"sync"
@@ -21,10 +23,16 @@ func Form(client *clients.Client, value any) bool {
 		return false
 	}
 
+	var isMultipart bool
+
 	if client.Request.Form == nil && client.Request.MultipartForm == nil {
 		if err := client.Request.ParseMultipartForm(MaxFormSize); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
-			return false
+			if errors.Is(err, http.ErrNotMultipart) {
+				isMultipart = false
+			} else {
+				client.Config.ErrorLog.Println(err, stack.Trace())
+				return false
+			}
 		}
 	}
 
@@ -61,6 +69,7 @@ func Form(client *clients.Client, value any) bool {
 			if reflectionValue.Kind() == reflect.Pointer {
 				reflectionValue = reflectionValue.Elem()
 			}
+
 			var metadata *FormFieldMetadata
 			if reflectionField.IsExported() {
 				metadata = &FormFieldMetadata{
@@ -323,15 +332,22 @@ func Form(client *clients.Client, value any) bool {
 			}
 			pointer = local
 
-		case *multipart.FileHeader:
-			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
-				pointer = headers[0]
-			}
 		case multipart.FileHeader:
+			if !isMultipart {
+				client.Config.ErrorLog.Println("could not parse file in form because it is not multipart")
+				return false
+			}
+
 			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
 				pointer = *headers[0]
 			}
+
 		case []multipart.FileHeader:
+			if !isMultipart {
+				client.Config.ErrorLog.Println("could not parse file in form because it is not multipart")
+				return false
+			}
+
 			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
 				locals := make([]multipart.FileHeader, len(headers))
 				for jndex, header := range headers {
@@ -339,49 +355,11 @@ func Form(client *clients.Client, value any) bool {
 				}
 				pointer = locals
 			}
-		case []*multipart.FileHeader:
-			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
-				pointer = headers
-			}
-		case multipart.File:
-			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
-				header := *headers[0]
-				var file multipart.File
-				if file, err = header.Open(); err != nil {
-					client.Config.ErrorLog.Println(err, stack.Trace())
-					return false
-				}
-				pointer = file
-			}
-		case []multipart.File:
-			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
-				locals := make([]multipart.File, len(headers))
-				for jndex, header := range headers {
-					var file multipart.File
-					if file, err = header.Open(); err != nil {
-						client.Config.ErrorLog.Println(err, stack.Trace())
-						return false
-					}
-					locals[jndex] = file
-				}
-				pointer = locals
-			}
-		case []*multipart.File:
-			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
-				locals := make([]*multipart.File, len(headers))
-				for jndex, header := range headers {
-					var file multipart.File
-					if file, err = header.Open(); err != nil {
-						client.Config.ErrorLog.Println(err, stack.Trace())
-						return false
-					}
-					locals[jndex] = &file
-				}
-				pointer = locals
-			}
+
 		default:
 			client.Config.ErrorLog.Println("unknown form value type for key "+metadata.Key, stack.Trace())
 			return false
+
 		}
 		reflection.Field(index).Set(reflect.ValueOf(pointer))
 	}

@@ -14,6 +14,7 @@ func Toggle(client *clients.Client) {
 	if !receive.Form(client, &form) {
 		session.Error = "could not parse form"
 		send.Navigate(client, "/todos")
+		return
 	}
 
 	if count := len(session.Todos); form.Index >= count || form.Index < 0 {
