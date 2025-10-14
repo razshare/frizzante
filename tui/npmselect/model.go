@@ -127,9 +127,8 @@ func (model *Model) View() string {
 		builder.WriteString(config.Styles.UserGuide.Render(" ⁋/type to search"))
 	}
 
-	builder.WriteString("\n")
-
 	if model.Loading {
+		builder.WriteString("\n")
 		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  loading..."))
 		builder.WriteString("\n")
 		if model.Search.Active {
@@ -137,6 +136,7 @@ func (model *Model) View() string {
 		}
 		return builder.String()
 	} else if model.Error != nil {
+		builder.WriteString("\n")
 		builder.WriteString(config.Styles.Status(config.Colors.Error).Render("✗  " + model.Error.Error()))
 		builder.WriteString("\n")
 		if model.Search.Active {
@@ -147,6 +147,7 @@ func (model *Model) View() string {
 
 	filtered := len(model.Search.Filtered)
 	if filtered == 0 {
+		builder.WriteString("\n")
 		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  no matches found"))
 
@@ -162,6 +163,11 @@ func (model *Model) View() string {
 		}
 
 		return builder.String()
+	} else {
+		if filtered > 0 {
+			builder.WriteString(config.Styles.UserInput.Render(fmt.Sprintf(" (%d)", filtered)))
+		}
+		builder.WriteString("\n")
 	}
 
 	height := model.Viewport.Offset + model.Viewport.Visible

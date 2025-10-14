@@ -1,6 +1,7 @@
 package textviewer
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
@@ -70,10 +71,9 @@ func (model *Model) View() string {
 		builder.WriteString(config.Styles.UserGuide.Render(" ⁋/type to search"))
 	}
 
-	builder.WriteString("\n")
-
 	filtered := len(model.Search.Filtered)
 	if filtered == 0 {
+		builder.WriteString("\n")
 		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  no matches found"))
 
@@ -89,6 +89,11 @@ func (model *Model) View() string {
 		}
 
 		return builder.String()
+	} else {
+		if filtered > 0 {
+			builder.WriteString(config.Styles.UserInput.Render(fmt.Sprintf(" (%d)", filtered)))
+		}
+		builder.WriteString("\n")
 	}
 
 	height := model.Viewport.Offset + model.Viewport.Visible
@@ -102,12 +107,13 @@ func (model *Model) View() string {
 		builder.WriteString("\n")
 	}
 
-	for i := model.Viewport.Offset; i < height; i++ {
-		builder.WriteString(config.Styles.Menu.Render("│"))
-		if model.Viewport.Cursor == i {
-			builder.WriteString(config.Styles.Selected.PaddingRight(1).Render(model.Search.Filtered[i].Id))
+	for index := model.Viewport.Offset; index < height; index++ {
+		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render(fmt.Sprintf("%d.", index)))
+		if model.Viewport.Cursor == index {
+			builder.WriteString(config.Styles.Selected.PaddingRight(1).Render(model.Search.Filtered[index].Id))
 		} else {
-			builder.WriteString(config.Styles.Item.PaddingRight(1).Render(model.Search.Filtered[i].Id))
+			builder.WriteString(config.Styles.Item.PaddingRight(1).Render(model.Search.Filtered[index].Id))
 		}
 		builder.WriteString("\n")
 	}

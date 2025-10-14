@@ -1,6 +1,7 @@
 package singleselect
 
 import (
+	"fmt"
 	"slices"
 	"strings"
 
@@ -80,10 +81,9 @@ func (model *Model) View() string {
 		builder.WriteString(config.Styles.UserGuide.Render(" ⁋/type to search"))
 	}
 
-	builder.WriteString("\n")
-
 	filtered := len(model.Search.Filtered)
 	if filtered == 0 {
+		builder.WriteString("\n")
 		builder.WriteString(config.Styles.Menu.Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  no matches found"))
 
@@ -99,6 +99,11 @@ func (model *Model) View() string {
 		}
 
 		return builder.String()
+	} else {
+		if filtered > 0 {
+			builder.WriteString(config.Styles.UserInput.Render(fmt.Sprintf(" (%d)", filtered)))
+		}
+		builder.WriteString("\n")
 	}
 
 	height := model.Viewport.Offset + model.Viewport.Visible
