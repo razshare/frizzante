@@ -23,7 +23,7 @@ func Form(client *clients.Client, value any) bool {
 		return false
 	}
 
-	var isMultipart bool
+	isMultipart := true
 
 	if client.Request.Form == nil && client.Request.MultipartForm == nil {
 		if err := client.Request.ParseMultipartForm(MaxFormSize); err != nil {
