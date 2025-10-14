@@ -4,7 +4,7 @@
     import { action } from "$lib/scripts/core/action.ts"
     import { href } from "$lib/scripts/core/href.ts"
     import { mdiArrowLeft, mdiCheckCircleOutline, mdiCircleOutline, mdiClose, mdiPlus } from "@mdi/js"
-    import type { Props, sessions } from "$gen/types/main/lib/routes/todos/Props"
+    import type { Props, memory } from "$gen/types/main/lib/routes/todos/Props"
     import { slide } from "svelte/transition"
 
     let { items = [], error }: Props = $props()
@@ -62,7 +62,7 @@
     {/if}
 {/snippet}
 
-{#snippet ShowTodosList(items: sessions.Todo[])}
+{#snippet ShowTodosList(items: memory.Todo[])}
     {#if items.length > 0}
         {#each items as todo, index (index)}
             <div transition:slide class="flex w-full text-base-content/80">
@@ -82,7 +82,7 @@
     </div>
 {/snippet}
 
-{#snippet ToggleTodoButton(todo: sessions.Todo, index: number)}
+{#snippet ToggleTodoButton(todo: memory.Todo, index: number)}
     {@const aria = todo.checked ? "Uncheck" : "Check"}
     {@const value = todo.checked ? "0" : "1"}
     {@const icon = todo.checked ? mdiCheckCircleOutline : mdiCircleOutline}
