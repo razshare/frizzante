@@ -1,8 +1,6 @@
 package todos
 
 import (
-	"mime/multipart"
-
 	"github.com/razshare/frizzante/internal/project/lib/core/types"
 	"github.com/razshare/frizzante/internal/project/lib/sessions/memory"
 )
@@ -17,9 +15,8 @@ type Props struct {
 }
 
 type ToggleForm struct {
-	Index int                  `form:"index"`
-	Value int                  `form:"value"`
-	File  multipart.FileHeader `form:"file"`
+	Index int `form:"index"`
+	Value int `form:"value"`
 }
 
 type AddForm struct {
