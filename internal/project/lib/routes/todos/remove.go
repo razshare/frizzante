@@ -4,7 +4,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
-	"github.com/razshare/frizzante/internal/project/lib/sessions"
+	"github.com/razshare/frizzante/internal/project/lib/sessions/memory"
 )
 
 func Remove(client *clients.Client) {

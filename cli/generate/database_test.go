@@ -30,19 +30,19 @@ func TestDatabase(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "example.txt")) {
-		t.Fatal("lib/database/example.txt should exist")
+	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "example.txt")) {
+		t.Fatal("lib/database/sqlite/example.txt should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "sqlc.yaml")) {
-		t.Fatal("lib/database/sqlc.yaml should exist")
+	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "sqlc.yaml")) {
+		t.Fatal("lib/database/sqlite/sqlc.yaml should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "queries.sql")) {
-		t.Fatal("lib/database/queries.sql should exist")
+	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "queries.sql")) {
+		t.Fatal("lib/database/sqlite/queries.sql should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "schema.sql")) {
-		t.Fatal("lib/database/schema.sql should exist")
+	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "schema.sql")) {
+		t.Fatal("lib/database/sqlite/schema.sql should exist")
 	}
 }

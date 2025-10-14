@@ -30,12 +30,12 @@ func TestProject(t *testing.T) {
 		t.Fatal("asd/app/lib/scripts/core/example.txt should exist")
 	}
 
-	if files.IsFile(filepath.Join("asd", "lib", "session", "disk", "example.txt")) {
-		t.Fatal("asd/lib/session/disk/example.txt should not exist")
+	if files.IsFile(filepath.Join("asd", "lib", "sessions", "disk", "example.txt")) {
+		t.Fatal("asd/lib/sessions/disk/example.txt should not exist")
 	}
 
-	if !files.IsFile(filepath.Join("asd", "lib", "session", "memory", "example.txt")) {
-		t.Fatal("asd/lib/session/memory/example.txt should not exist")
+	if !files.IsFile(filepath.Join("asd", "lib", "sessions", "memory", "example.txt")) {
+		t.Fatal("asd/lib/sessions/memory/example.txt should not exist")
 	}
 
 	if files.IsFile(filepath.Join("asd", "lib", "database", "sqlite", "example.txt")) {

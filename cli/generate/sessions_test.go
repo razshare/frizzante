@@ -19,7 +19,7 @@ func TestSession(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll("lib") }()
 
-	if err := Session(SessionOptions{
+	if err := Sessions(SessionsOptions{
 		Efs:  TestSessionEfs,
 		Auto: true,
 		Type: "memory",
@@ -27,11 +27,11 @@ func TestSession(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !files.IsFile(filepath.Join("lib", "session", "memory", "example.txt")) {
-		t.Fatal("lib/session/memory/example.txt should exist")
+	if !files.IsFile(filepath.Join("lib", "sessions", "memory", "example.txt")) {
+		t.Fatal("lib/sessions/memory/example.txt should exist")
 	}
 
-	if err := Session(SessionOptions{
+	if err := Sessions(SessionsOptions{
 		Efs:  TestSessionEfs,
 		Auto: true,
 		Type: "disk",
@@ -39,7 +39,7 @@ func TestSession(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !files.IsFile(filepath.Join("lib", "session", "disk", "example.txt")) {
-		t.Fatal("lib/session/disk/example.txt should exist")
+	if !files.IsFile(filepath.Join("lib", "sessions", "disk", "example.txt")) {
+		t.Fatal("lib/sessions/disk/example.txt should exist")
 	}
 }

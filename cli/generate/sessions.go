@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
@@ -13,21 +14,23 @@ import (
 	"github.com/razshare/frizzante/tui/singleselect"
 )
 
-func Session(options SessionOptions) (err error) {
+func Sessions(options SessionsOptions) (err error) {
 	if options.Type == "" {
 		if options.Auto {
 			options.Type = "memory"
-		} else if options.Type, err = singleselect.Send([]search.Choice{{Id: "memory"}, {Id: "disk"}}, "session type"); err != nil {
+		} else if options.Type, err = singleselect.Send([]search.Choice{{Id: "memory"}, {Id: "disk"}}, "type of sessions"); err != nil {
 			return
 		}
 	}
 
-	if options.Type != "memory" && options.Type != "disk" {
-		err = fmt.Errorf("session of type %s id not supported", options.Type)
+	stype := strings.ToLower(options.Type)
+
+	if !slices.Contains([]string{"memory", "disk"}, stype) {
+		err = fmt.Errorf("sessions of type %s are not supported", stype)
 		return
 	}
 
-	to := filepath.Join("lib", "session")
+	to := filepath.Join("lib", "sessions", stype)
 
 	if files.IsDirectory(to) {
 		if !options.Auto {
@@ -48,7 +51,7 @@ func Session(options SessionOptions) (err error) {
 	}
 
 	var from string
-	if strings.ToLower(options.Type) == "memory" {
+	if stype == "memory" {
 		from = "internal/project/" + to
 	} else {
 		from = "internal/additions/" + to
@@ -67,10 +70,10 @@ func Session(options SessionOptions) (err error) {
 		return
 	}
 
-	switch strings.ToLower(options.Type) {
+	switch stype {
 	case "memory":
 		messages.Success(
-			"memory session generated into session.*\n",
+			"memory sessions generated into sessions.*\n",
 			to+"/new.go\n",
 			to+"/start.go\n",
 			to+"/types.go\n",
@@ -82,16 +85,16 @@ func Session(options SessionOptions) (err error) {
 			"}\n",
 			"\n",
 			"## state shape\n",
-			"Your session state is defined by session.State,\n",
+			"Your session state is defined by sessions.State,\n",
 			"which is located in "+to+"/types.go.\n",
 			"\n",
 			"## initial state\n",
-			"Every new session is initialized with session.New(), \n",
+			"Every new session is initialized with sessions.New(), \n",
 			"which is located in "+to+"/new.go.\n",
 		)
 	case "disk":
 		messages.Success(
-			"disk session generated at session.*\n",
+			"disk sessions generated at session.*\n",
 			to+"/new.go\n",
 			to+"/start.go\n",
 			to+"/types.go\n",
@@ -100,15 +103,15 @@ func Session(options SessionOptions) (err error) {
 			"## usage example\n",
 			"func(client *clients.Client){\n",
 			"    session := sessions.Start(receive.SessionId(client))\n",
-			"    defer session.Save(client, session)\n",
+			"    defer sessions.Save(client, session)\n",
 			"}\n",
 			"\n",
 			"## state shape\n",
-			"session state is defined by session.State,\n",
+			"session state is defined by sessions.State,\n",
 			"which is located in "+to+"/types.go.\n",
 			"\n",
 			"## initial state\n",
-			"ever new session is initialized with session.New(), \n",
+			"ever new session is initialized with sessions.New(), \n",
 			"which is located in "+to+"/new.go.\n",
 		)
 	}

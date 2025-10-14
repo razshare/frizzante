@@ -139,7 +139,7 @@ type LinksOptions struct {
 	Auto bool
 }
 
-type SessionOptions struct {
+type SessionsOptions struct {
 	Type string
 	Efs  embed.FS
 	Auto bool

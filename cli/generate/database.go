@@ -25,13 +25,13 @@ func Database(options DatabaseOptions) (err error) {
 	}
 
 	if options.Type != "sqlite" {
-		err = fmt.Errorf("database of type %s id not supported", options.Type)
+		err = fmt.Errorf("database of type %s is not supported", options.Type)
 		return
 	}
 
 	dbtype := strings.ToLower(options.Type)
 	from := "internal/additions/lib/database/" + dbtype
-	to := filepath.Join("lib", "database")
+	to := filepath.Join("lib", "database", dbtype)
 
 	if files.IsDirectory(to) {
 		if !options.Auto {
