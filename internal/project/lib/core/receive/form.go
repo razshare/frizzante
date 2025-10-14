@@ -361,7 +361,10 @@ func Form(client *clients.Client, value any) bool {
 			return false
 
 		}
-		reflection.Field(index).Set(reflect.ValueOf(pointer))
+
+		if pointer != nil {
+			reflection.Field(index).Set(reflect.ValueOf(pointer))
+		}
 	}
 
 	return true
