@@ -65,6 +65,14 @@ func Generate(options GenerateOptions) (err error) {
 				Auto:     options.Auto,
 				Sqlc:     options.Sqlc,
 				Platform: options.Platform,
+				SqlcYaml: options.SqlcYaml,
+			})
+		} else if gen == "migration" {
+			return generate.Migration(generate.MigrationOptions{
+				Auto:     options.Auto,
+				Sqlc:     options.Sqlc,
+				Platform: options.Platform,
+				SqlcYaml: options.SqlcYaml,
 			})
 		} else if gen == "core" {
 			return generate.Core(generate.CoreOptions{
@@ -121,6 +129,7 @@ func Generate(options GenerateOptions) (err error) {
 				{Id: "sessions", Description: "features for managing user sessions"},
 				{Id: "database", Description: "full database setup"},
 				{Id: "queries", Description: "sql code to go code using sqlc"},
+				{Id: "migration", Description: "new migration file from the current schema"},
 				{Id: "security", Description: "security and cryptographic functions"},
 				{Id: "types", Description: "type definitions using .d.ts files"},
 			},

@@ -22,12 +22,15 @@ type App struct {
 	Dev              *bool
 	Build            *bool
 	Configure        *bool
+	Migrate          *bool
+	MigrateIndex     *int64
 	Platform         *string
 	Yes              *bool
 	Go               *string
 	Air              *string
 	Bun              *string
 	Sqlc             *string
+	SqlcYaml         *string
 	Welcome          *bool
 	Clear            *bool
 	Tags             *string

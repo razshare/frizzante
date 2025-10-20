@@ -190,6 +190,19 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
+				Choice: search.Choice{Id: "migrate", Description: "migrates database schema"},
+				Active: func() bool { return *app.Migrate },
+				Handler: func() error {
+					return action.Migrate(action.MigrateOptions{
+						Auto:     *app.Yes,
+						Platform: plat,
+						Sqlc:     sqlc,
+						SqlcYaml: *app.SqlcYaml,
+						Index:    *app.MigrateIndex,
+					})
+				},
+			},
+			{
 				Choice: search.Choice{Id: "assembly explorer", Description: "explores application assembly output"},
 				Active: func() bool { return *app.AssemblyExplorer },
 				Handler: func() (err error) {
@@ -206,6 +219,7 @@ func New(app *apps.App) (*Menu, error) {
 						Tags:     tags,
 						Auto:     *app.Yes,
 					})
+
 					return
 				},
 			},
@@ -235,7 +249,9 @@ func New(app *apps.App) (*Menu, error) {
 						Sqlc:     sqlc,
 						Tags:     tags,
 						Active:   selected != "",
+						SqlcYaml: *app.SqlcYaml,
 					})
+
 					return
 				},
 			},

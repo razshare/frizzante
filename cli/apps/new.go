@@ -33,10 +33,13 @@ func New() *App {
 	air := flag.StringP("air", "", filepath.Join(".gen", "air", "air"+extension.Find()), "sets the air binary")
 	bun := flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"+extension.Find()), "sets the bun binary")
 	sqc := flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"+extension.Find()), "sets the sqlc binary")
+	sqy := flag.StringP("sqlc-yaml", "", "", "sets the sqlc configuration file")
 	wel := flag.BoolP("welcome", "", false, "shows a welcome message")
 	clr := flag.BoolP("clear", "", false, "clears screen")
 	tags := flag.StringP("tags", "", "", "sets build tags")
 	asme := flag.BoolP("assembly-explorer", "", false, "shows the assembly explorer")
+	mig := flag.BoolP("migrate", "", false, "migrates database schema")
+	mii := flag.Int64P("migrate-index", "", 0, "index to which to migrate database schema")
 
 	return &App{
 		Add:              add,
@@ -64,9 +67,12 @@ func New() *App {
 		Air:              air,
 		Bun:              bun,
 		Sqlc:             sqc,
+		SqlcYaml:         sqy,
 		Welcome:          wel,
 		Tags:             tags,
 		AssemblyExplorer: asme,
 		Clear:            clr,
+		Migrate:          mig,
+		MigrateIndex:     mii,
 	}
 }

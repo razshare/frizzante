@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
@@ -15,31 +16,40 @@ import (
 )
 
 func Queries(options QueriesOptions) (err error) {
-	if options.SqlcYaml != "" && !files.IsFile(options.SqlcYaml) {
-		messages.Infof("%s not found", options.SqlcYaml)
+	yamlFileName := options.SqlcYaml
+
+	if yamlFileName != "" && !files.IsFile(yamlFileName) {
+		messages.Infof("%s not found", yamlFileName)
 	}
 
-	if options.SqlcYaml == "" {
-		choices := make([]search.Choice, 0)
-
-		if files.IsFile(filepath.Join("lib", "database", "sqlc.yaml")) {
-			choices = append(choices, search.Choice{Id: "lib/database/sqlc.yaml", Description: "lib/database/sqlc.yaml"})
+	if yamlFileName == "" {
+		var items []string
+		if items, err = files.ReadDirectory("lib"); err != nil {
+			return
 		}
 
-		if files.IsFile(filepath.Join("lib", "database", "sqlite", "sqlc.yaml")) {
-			choices = append(choices, search.Choice{Id: "lib/database/sqlite/sqlc.yaml", Description: "lib/database/sqlite/sqlc.yaml"})
+		names := make([]string, 0)
+		for _, item := range items {
+			if strings.HasSuffix(item, string(filepath.Separator)+"sqlc.yaml") {
+				names = append(names, item)
+			}
+		}
+
+		choices := make([]search.Choice, len(names))
+		for index, name := range names {
+			choices[index] = search.Choice{Id: name}
 		}
 
 		choices = append(choices, search.Choice{Id: "other", Description: "other"})
 
 		if options.Auto {
-			options.SqlcYaml = choices[0].Id
+			yamlFileName = choices[0].Id
 		} else {
-			options.SqlcYaml, err = singleselect.Sendf(choices, "where is your sqlc.yaml file located?")
+			yamlFileName, err = singleselect.Sendf(choices, "where is your sqlc.yaml file located?")
 		}
 	}
 
-	to := filepath.Dir(options.SqlcYaml)
+	baseDirectory := filepath.Dir(yamlFileName)
 
 	if _, err = exec.LookPath(options.Sqlc); err != nil && !files.IsFile(options.Sqlc) {
 		if err = Sqlc(SqlcOptions{
@@ -51,15 +61,13 @@ func Queries(options QueriesOptions) (err error) {
 		}
 	}
 
-	yaml := filepath.Join(to, "sqlc.yaml")
-
-	if !files.IsFile(yaml) {
-		return fmt.Errorf("%s not found", yaml)
+	if !files.IsFile(yamlFileName) {
+		return fmt.Errorf("%s not found", yamlFileName)
 	}
 
 	var sqlc string
 	if files.IsFile(options.Sqlc) {
-		if sqlc, err = filepath.Rel(to, options.Sqlc); err != nil {
+		if sqlc, err = filepath.Rel(baseDirectory, options.Sqlc); err != nil {
 			return err
 		}
 	} else if sqlc, err = exec.LookPath(options.Sqlc); err != nil {
@@ -69,21 +77,18 @@ func Queries(options QueriesOptions) (err error) {
 	spin := spinner.New("generating queries")
 
 	go spinner.Start(spin)
-	if !messages.Command(to, os.Environ(), sqlc, "generate") {
+	if !messages.Command(baseDirectory, os.Environ(), sqlc, "generate") {
 		spinner.Stop(spin)
 		err = errors.New("could not generate queries")
 		return
 	}
 	spinner.Stop(spin)
 
-	if err = FixImports(FixImportsOptions{Directory: to}); err != nil {
+	if err = FixImports(FixImportsOptions{Directory: baseDirectory}); err != nil {
 		return
 	}
 
-	messages.Success(
-		"queries generated at database.Queries.*\n",
-		to+"/queries.go",
-	)
+	messages.Success(filepath.Join(baseDirectory, "queries.go"))
 
 	return
 }

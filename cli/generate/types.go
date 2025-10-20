@@ -77,6 +77,13 @@ type DatabaseOptions struct {
 	Auto     bool
 }
 
+type MigrationOptions struct {
+	Sqlc     string
+	SqlcYaml string
+	Platform platform.Platform
+	Auto     bool
+}
+
 type QueriesOptions struct {
 	Sqlc     string
 	SqlcYaml string

@@ -30,53 +30,53 @@ func Sessions(options SessionsOptions) (err error) {
 		return
 	}
 
-	to := filepath.Join("lib", "sessions", stype)
+	baseDirectory := filepath.Join("lib", "sessions", stype)
 
-	if files.IsDirectory(to) {
+	if files.IsDirectory(baseDirectory) {
 		if !options.Auto {
 			var yes bool
-			if yes, err = confirm.Sendf(true, "%s already exists. Overwrite?", to); err != nil {
+			if yes, err = confirm.Sendf(true, "%s already exists. Overwrite?", baseDirectory); err != nil {
 				return
 			}
 
 			if !yes {
-				messages.Infof("skipping %s", to)
+				messages.Infof("skipping %s", baseDirectory)
 				return
 			}
 		}
 
-		if err = os.RemoveAll(to); err != nil {
+		if err = os.RemoveAll(baseDirectory); err != nil {
 			return
 		}
 	}
 
 	var from string
 	if stype == "memory" {
-		from = "internal/project/" + to
+		from = "internal/project/" + baseDirectory
 	} else {
-		from = "internal/additions/" + to
+		from = "internal/additions/" + baseDirectory
 	}
 
 	if err = Copy(CopyOptions{
 		From: from,
-		To:   to,
+		To:   baseDirectory,
 		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
 		return
 	}
 
-	if err = FixImports(FixImportsOptions{Directory: to}); err != nil {
+	if err = FixImports(FixImportsOptions{Directory: baseDirectory}); err != nil {
 		return
 	}
 
 	switch stype {
 	case "memory":
 		messages.Success(
-			"memory sessions generated into sessions.*\n",
-			to+"/new.go\n",
-			to+"/start.go\n",
-			to+"/types.go\n",
+			"memory sessions generated.\n",
+			baseDirectory+"/new.go\n",
+			baseDirectory+"/start.go\n",
+			baseDirectory+"/types.go\n",
 		)
 		messages.Tip(
 			"## usage example\n",
@@ -86,18 +86,18 @@ func Sessions(options SessionsOptions) (err error) {
 			"\n",
 			"## state shape\n",
 			"Your session state is defined by sessions.State,\n",
-			"which is located in "+to+"/types.go.\n",
+			"which is located in "+baseDirectory+"/types.go.\n",
 			"\n",
 			"## initial state\n",
 			"Every new session is initialized with sessions.New(), \n",
-			"which is located in "+to+"/new.go.\n",
+			"which is located in "+baseDirectory+"/new.go.\n",
 		)
 	case "disk":
 		messages.Success(
 			"disk sessions generated at session.*\n",
-			to+"/new.go\n",
-			to+"/start.go\n",
-			to+"/types.go\n",
+			baseDirectory+"/new.go\n",
+			baseDirectory+"/start.go\n",
+			baseDirectory+"/types.go\n",
 		)
 		messages.Tip(
 			"## usage example\n",
@@ -108,11 +108,11 @@ func Sessions(options SessionsOptions) (err error) {
 			"\n",
 			"## state shape\n",
 			"session state is defined by sessions.State,\n",
-			"which is located in "+to+"/types.go.\n",
+			"which is located in "+baseDirectory+"/types.go.\n",
 			"\n",
 			"## initial state\n",
 			"ever new session is initialized with sessions.New(), \n",
-			"which is located in "+to+"/new.go.\n",
+			"which is located in "+baseDirectory+"/new.go.\n",
 		)
 	}
 

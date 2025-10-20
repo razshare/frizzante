@@ -29,6 +29,7 @@ type GenerateOptions struct {
 	Air      string
 	Bun      string
 	Sqlc     string
+	SqlcYaml string
 	Tags     []string
 	Efs      embed.FS
 	Platform platform.Platform
@@ -128,4 +129,12 @@ type NpmOptions struct {
 	App   string
 	Query string
 	Bun   string
+}
+
+type MigrateOptions struct {
+	Sqlc     string
+	SqlcYaml string
+	Index    int64
+	Platform platform.Platform
+	Auto     bool
 }
