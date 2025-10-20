@@ -42,7 +42,7 @@ func TestDatabase(t *testing.T) {
 		t.Fatal("lib/database/sqlite/queries.sql should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "schema.sql")) {
-		t.Fatal("lib/database/sqlite/schema.sql should exist")
+	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "schema.up.sql")) {
+		t.Fatal("lib/database/sqlite/schema.up.sql should exist")
 	}
 }
