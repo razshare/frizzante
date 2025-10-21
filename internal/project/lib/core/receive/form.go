@@ -51,7 +51,7 @@ func Form(client *clients.Client, value any) bool {
 	if cache, ok = FormMetadataCache[type_]; !ok {
 		count := reflection.NumField()
 		cache = make([]*FormFieldMetadata, count)
-		for index := 0; index < count; index++ {
+		for index := range count {
 			reflectionField := type_.Field(index)
 
 			var key string
