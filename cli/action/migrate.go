@@ -144,7 +144,7 @@ func Migrate(options MigrateOptions) (err error) {
 		return
 	}
 
-	messages.Infof("migratind database schema using %s", migration)
+	messages.Infof("migrating database schema using %s", migration)
 
 	var data []byte
 	if data, err = os.ReadFile(migration); err != nil {
