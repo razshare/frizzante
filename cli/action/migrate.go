@@ -109,15 +109,15 @@ func Migrate(options MigrateOptions) (err error) {
 	}
 
 	keys := make([]int, 0)
-	for key := range mixed {
-		keys = append(keys, key)
+	for id := range mixed {
+		keys = append(keys, id)
 	}
 
 	slices.Sort(keys)
 
 	sorted := map[int]string{}
-	for _, key := range keys {
-		sorted[key] = mixed[key]
+	for index, key := range keys {
+		sorted[index] = mixed[key]
 	}
 
 	queryString := options.QueryString
@@ -147,6 +147,7 @@ func Migrate(options MigrateOptions) (err error) {
 		for _, name := range sorted {
 			choices = append(choices, search.Choice{Id: name})
 		}
+		slices.Reverse(choices)
 		if migrations, err = multiselect.Sendf(choices, "select a migration to execute"); err != nil {
 			return err
 		}
@@ -156,11 +157,12 @@ func Migrate(options MigrateOptions) (err error) {
 		}
 	} else if strings.HasPrefix(queryString, ">") {
 		if queryString == ">" {
-			offsets := make([]search.Choice, 0)
-			for _, name := range sorted {
-				offsets = append(offsets, search.Choice{Id: name})
+			choices := make([]search.Choice, len(sorted))
+			for key, name := range sorted {
+				choices[key] = search.Choice{Id: name}
 			}
-			if queryString, err = singleselect.Send(offsets, "pick an offset (exclusive)"); err != nil {
+			slices.Reverse(choices)
+			if queryString, err = singleselect.Send(choices, "pick an offset (exclusive)"); err != nil {
 				return err
 			}
 			queryString = ">" + strings.SplitN(filepath.Base(queryString), "_", 2)[0]
@@ -171,18 +173,19 @@ func Migrate(options MigrateOptions) (err error) {
 			return
 		}
 
-		for index, name := range sorted {
-			if index > int(value) {
+		for key, name := range sorted {
+			if key > int(value-1) {
 				migrations = append(migrations, name)
 			}
 		}
 	} else if strings.HasPrefix(queryString, "<") {
 		if queryString == "<" {
-			offsets := make([]search.Choice, 0)
-			for _, name := range sorted {
-				offsets = append(offsets, search.Choice{Id: name})
+			choices := make([]search.Choice, len(sorted))
+			for key, name := range sorted {
+				choices[key] = search.Choice{Id: name}
 			}
-			if queryString, err = singleselect.Send(offsets, "pick an offset (exclusive)"); err != nil {
+			slices.Reverse(choices)
+			if queryString, err = singleselect.Send(choices, "pick an offset (exclusive)"); err != nil {
 				return err
 			}
 			queryString = "<" + strings.SplitN(filepath.Base(queryString), "_", 2)[0]
@@ -193,8 +196,8 @@ func Migrate(options MigrateOptions) (err error) {
 			return
 		}
 
-		for index, name := range sorted {
-			if index < int(value) {
+		for key, name := range sorted {
+			if key < int(value-1) {
 				migrations = append(migrations, name)
 			}
 		}
@@ -213,6 +216,11 @@ func Migrate(options MigrateOptions) (err error) {
 
 	var transaction *sql.Tx
 	if transaction, err = options.Database.Begin(); err != nil {
+		return
+	}
+
+	if len(migrations) == 0 {
+		messages.Info("no migrations matched for execution")
 		return
 	}
 
