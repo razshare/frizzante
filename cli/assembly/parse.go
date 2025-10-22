@@ -13,8 +13,12 @@ func ParseFunctionsInFile(source *os.File, references map[string]map[string]*Fun
 	var functionName string
 	var start uint64
 	var index uint64
+
 	for scanner.Scan() {
 		line := scanner.Text()
+		if strings.TrimSpace(line) == "" {
+			continue
+		}
 		online(line)
 		if strings.HasPrefix(line, "TEXT") {
 			if file, fileExists := references[fileName]; fileExists {

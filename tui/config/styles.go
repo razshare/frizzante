@@ -5,22 +5,19 @@ import "github.com/charmbracelet/lipgloss"
 var Styles = ThemeStyles{
 	Title: lipgloss.NewStyle().Bold(true),
 
-	Item: lipgloss.NewStyle().
-		PaddingLeft(1),
+	Item: lipgloss.NewStyle(),
 
 	Popup: lipgloss.NewStyle().
 		Foreground(lipgloss.Color(Colors.Info)),
 
 	Selected: lipgloss.NewStyle().
-		PaddingLeft(1).
 		Foreground(lipgloss.Color(Colors.Primary)),
 
 	Status: func(color string) lipgloss.Style {
 		return lipgloss.
 			NewStyle().
 			Foreground(lipgloss.Color(color)).
-			Bold(true).
-			PaddingLeft(1)
+			Bold(true)
 	},
 
 	BigText: lipgloss.
@@ -29,19 +26,16 @@ var Styles = ThemeStyles{
 		Bold(true).
 		Align(lipgloss.Center).
 		Border(lipgloss.DoubleBorder()).
-		BorderForeground(lipgloss.Color(Colors.Primary)).
-		Padding(1, 1),
+		BorderForeground(lipgloss.Color(Colors.Primary)),
 
 	Section: lipgloss.NewStyle().
 		Foreground(lipgloss.Color(Colors.Secondary)).
 		Bold(true).
-		Underline(true).
-		Padding(1, 0),
+		Underline(true),
 
 	Subheader: lipgloss.NewStyle().
 		Foreground(lipgloss.Color(Colors.Warning)).
-		Bold(true).
-		Padding(1, 0),
+		Bold(true),
 
 	Menu: lipgloss.NewStyle().
 		Foreground(lipgloss.Color(Colors.Secondary)),

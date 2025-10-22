@@ -84,12 +84,12 @@ func (model *Model) View() string {
 	filtered := len(model.Search.Filtered)
 	if filtered == 0 {
 		builder.WriteString("\n")
-		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  no matches found"))
 
 		builder.WriteString("\n")
 
-		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down"))
 
 		if model.Search.Active {
@@ -112,7 +112,7 @@ func (model *Model) View() string {
 	}
 
 	if model.Viewport.Offset > 0 {
-		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
 		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
 		builder.WriteString("\n")
 	}
@@ -121,24 +121,30 @@ func (model *Model) View() string {
 
 	for index := model.Viewport.Offset; index < height; index++ {
 		key := fmt.Sprintf("%d.", index)
-		padding := maxKeyWidth - len(key) + 1
-		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
+		padding := maxKeyWidth - len(key) + 3
+		content := model.Search.Filtered[index].Id
+
+		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
 		builder.WriteString(config.Styles.Menu.PaddingRight(padding).Render(key))
+
 		if model.Viewport.Cursor == index {
-			builder.WriteString(config.Styles.Selected.Render(model.Search.Filtered[index].Id))
+			builder.WriteString(config.Styles.Selected.Render(content))
+		} else if !strings.HasPrefix(strings.TrimSpace(content), "0x") {
+			builder.WriteString(config.Styles.Menu.Render(content))
 		} else {
-			builder.WriteString(config.Styles.Item.Render(model.Search.Filtered[index].Id))
+			builder.WriteString(config.Styles.Item.Render(content))
 		}
+
 		builder.WriteString("\n")
 	}
 
 	if height < filtered {
-		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
 		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
 		builder.WriteString("\n")
 	}
 
-	builder.WriteString(config.Styles.Menu.Render("│"))
+	builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
 	builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down"))
 
 	if model.Search.Active {

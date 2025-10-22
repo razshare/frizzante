@@ -9,6 +9,6 @@ func Logo(options *App) (logo string, err error) {
 	if data, err = options.Efs.ReadFile("logo.txt"); err != nil {
 		return
 	}
-	logo = config.Styles.BigText.Render(string(data))
+	logo = config.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data))
 	return
 }

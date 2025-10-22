@@ -109,12 +109,12 @@ func (model *Model) View() string {
 	filtered := len(model.Search.Filtered)
 	if filtered == 0 {
 		builder.WriteString("\n")
-		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  no matches found"))
 
 		builder.WriteString("\n")
 
-		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
 		builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
 
 		if model.Search.Active {
@@ -137,13 +137,13 @@ func (model *Model) View() string {
 	}
 
 	if model.Viewport.Offset > 0 {
-		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
 		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
 		builder.WriteString("\n")
 	}
 
 	for i := model.Viewport.Offset; i < height; i++ {
-		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
 		if model.Viewport.Cursor == i {
 			if slices.Contains(model.Selected, model.Search.Filtered[i].Id) {
 				builder.WriteString(config.Styles.Selected.Render("● " + model.Search.Filtered[i].Id))
@@ -164,12 +164,12 @@ func (model *Model) View() string {
 	}
 
 	if height < filtered {
-		builder.WriteString(config.Styles.Menu.Render("│"))
+		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
 		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
 		builder.WriteString("\n")
 	}
 
-	builder.WriteString(config.Styles.Menu.Render("│"))
+	builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
 	builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
 
 	if model.Search.Active {

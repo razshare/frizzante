@@ -133,7 +133,7 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 	for {
 		index := 0
 		for fileName, file := range references {
-			filesChoices[index] = search.Choice{Id: fileName, Description: fmt.Sprintf("explore file (%d functions)", len(file))}
+			filesChoices[index] = search.Choice{Id: fileName, Description: fmt.Sprintf("%d functions", len(file))}
 			index++
 		}
 
@@ -153,9 +153,9 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 			var description string
 
 			if function.BinarySize > 1024 {
-				description = fmt.Sprintf("explore function (%dKB)", function.BinarySize/1024)
+				description = fmt.Sprintf("%dKB", function.BinarySize/1024)
 			} else {
-				description = fmt.Sprintf("explore function (%dB)", function.BinarySize)
+				description = fmt.Sprintf("%dB", function.BinarySize)
 			}
 
 			functionsChoices[index] = search.Choice{Id: functionName, Description: description}
