@@ -87,7 +87,7 @@ func TestUpdate(t *testing.T) {
 		t.Fatal("multi select cursor should be 1")
 	}
 
-	// move down with arrow
+	// move up with arrow
 	model = &Model{
 		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
 		Viewport: &viewport.Viewport{Visible: 5, Cursor: 2},
@@ -97,7 +97,7 @@ func TestUpdate(t *testing.T) {
 		t.Fatal("multi select cursor should be 1")
 	}
 
-	// move down with tab
+	// move up with shift+tab
 	model = &Model{
 		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
 		Viewport: &viewport.Viewport{Visible: 5, Cursor: 2},
@@ -107,7 +107,7 @@ func TestUpdate(t *testing.T) {
 		t.Fatal("multi select cursor should be 1")
 	}
 
-	// move down with ctrl+pgdown
+	// move up with ctrl+pgup
 	model = &Model{
 		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
 		Viewport: &viewport.Viewport{Visible: 5, Cursor: 2},
@@ -153,5 +153,43 @@ func TestUpdate(t *testing.T) {
 	}
 	if model.Search.Input.Value() != "a" {
 		t.Fatal("singleselect search value should be a")
+	}
+
+	// moving to beginning of viewport with home
+	model = &Model{
+		Search: &search.Search{
+			Active:   false,
+			Choices:  []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
+			Filtered: []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
+			Input:    textinput.New(),
+		},
+		Viewport: &viewport.Viewport{
+			Offset:  1,
+			Cursor:  6,
+			Visible: 5,
+		},
+	}
+	model.Update(tea.KeyMsg{Type: tea.KeyEnd})
+	if model.Viewport.Cursor != 5 {
+		t.Fatal("multi select cursor should be 6")
+	}
+
+	// moving to end of viewport with end
+	model = &Model{
+		Search: &search.Search{
+			Active:   false,
+			Choices:  []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
+			Filtered: []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
+			Input:    textinput.New(),
+		},
+		Viewport: &viewport.Viewport{
+			Offset:  0,
+			Cursor:  5,
+			Visible: 5,
+		},
+	}
+	model.Update(tea.KeyMsg{Type: tea.KeyHome})
+	if model.Viewport.Cursor != 0 {
+		t.Fatal("multi select cursor should be 0")
 	}
 }
