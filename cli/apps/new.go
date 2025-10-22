@@ -39,7 +39,7 @@ func New() *App {
 	tags := flag.StringP("tags", "", "", "sets build tags")
 	asme := flag.BoolP("assembly-explorer", "", false, "shows the assembly explorer")
 	mig := flag.BoolP("migrate", "", false, "migrates database schema")
-	mii := flag.Int64P("migrate-index", "", 0, "index to which to migrate database schema")
+	mii := flag.IntP("migrate-index", "", 0, "index to which to migrate database schema")
 
 	return &App{
 		Add:              add,

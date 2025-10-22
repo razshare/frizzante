@@ -73,16 +73,22 @@ func Migrate(options MigrateOptions) (err error) {
 	}
 
 	var names []string
-	if names, err = files.ReadDirectory(filepath.Join("lib", "database", "sqlite", "migrations")); err != nil {
+	if names, err = files.ReadDirectory(filepath.Join(baseDirectory, "migrations")); err != nil {
 		return
 	}
 
-	var migrationFileName string
+	count := len(names)
+	if count == 0 {
+		err = errors.New("no migration files found")
+		return
+	}
+
+	var migration string
 
 	index := options.Index
 
 	if index == 0 {
-		numbers := make([]int64, len(names))
+		numbers := make([]int, count)
 		for jndex, name := range names {
 			trimmed := strings.TrimSuffix(filepath.Base(name), ".sql")
 			parts := strings.SplitN(trimmed, "_", 2)
@@ -91,10 +97,13 @@ func Migrate(options MigrateOptions) (err error) {
 				return
 			}
 
-			var value int64
-			if value, err = strconv.ParseInt(parts[0], 10, 64); err != nil {
+			var value int
+			var parsed int64
+			if parsed, err = strconv.ParseInt(parts[0], 10, 64); err != nil {
 				return
 			}
+
+			value = int(parsed)
 
 			if slices.Contains(numbers, value) {
 				err = fmt.Errorf("duplicate migration index %s", parts[0])
@@ -105,27 +114,40 @@ func Migrate(options MigrateOptions) (err error) {
 
 			if index < value {
 				index = value
-				migrationFileName = name
+				migration = name
 			}
+		}
+
+		choices := make([]search.Choice, 0)
+		choices = append(choices, search.Choice{Id: migration, Description: fmt.Sprintf("%d (latest)", index)})
+		for jndex := count - 1; jndex >= 0; jndex-- {
+			if numbers[jndex] == index {
+				continue
+			}
+			choices = append(choices, search.Choice{Id: names[jndex], Description: fmt.Sprintf("%d", numbers[jndex])})
+		}
+
+		if migration, err = singleselect.Sendf(choices, "select a migration to execute"); err != nil {
+			return err
 		}
 	} else {
 		for _, name := range names {
 			if strings.HasPrefix(name, fmt.Sprintf("%d_", index)) {
-				migrationFileName = name
+				migration = name
 				break
 			}
 		}
 	}
 
-	if migrationFileName == "" {
+	if migration == "" {
 		err = errors.New("migration file name resolved to an empty string")
 		return
 	}
 
-	messages.Infof("migratind database schema using %s", migrationFileName)
+	messages.Infof("migratind database schema using %s", migration)
 
 	var data []byte
-	if data, err = os.ReadFile(migrationFileName); err != nil {
+	if data, err = os.ReadFile(migration); err != nil {
 		return
 	}
 

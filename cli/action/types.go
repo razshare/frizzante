@@ -132,9 +132,9 @@ type NpmOptions struct {
 }
 
 type MigrateOptions struct {
+	Index    int
 	Sqlc     string
 	SqlcYaml string
-	Index    int64
 	Platform platform.Platform
 	Auto     bool
 }

@@ -23,7 +23,7 @@ type App struct {
 	Build            *bool
 	Configure        *bool
 	Migrate          *bool
-	MigrateIndex     *int64
+	MigrateIndex     *int
 	Platform         *string
 	Yes              *bool
 	Go               *string
