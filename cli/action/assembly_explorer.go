@@ -14,11 +14,11 @@ import (
 	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/confirm"
+	"github.com/razshare/frizzante/tui/hexviewer"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
 	"github.com/razshare/frizzante/tui/spinner"
-	"github.com/razshare/frizzante/tui/textviewer"
 )
 
 func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
@@ -186,7 +186,7 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 			title = fmt.Sprintf("viewing %s (%dB)", functionName, function.BinarySize)
 		}
 
-		if err = textviewer.Send(title, function.AssemblyContent); err != nil {
+		if err = hexviewer.Send(title, function.AssemblyContent); err != nil {
 			if errors.Is(err, tea.ErrInterrupted) {
 				return
 			}

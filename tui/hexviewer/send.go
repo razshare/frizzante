@@ -1,4 +1,4 @@
-package textviewer
+package hexviewer
 
 import (
 	"strings"

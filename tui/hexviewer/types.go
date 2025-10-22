@@ -1,4 +1,4 @@
-package textviewer
+package hexviewer
 
 import (
 	"github.com/razshare/frizzante/tui/search"

@@ -62,6 +62,16 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			return model, nil
 		}
 
+		if assert.Type == tea.KeyPgDown {
+			navigate.Apply(model.Search, model.Viewport, model.Viewport.Visible)
+			return model, nil
+		}
+
+		if assert.Type == tea.KeyPgUp {
+			navigate.Apply(model.Search, model.Viewport, -model.Viewport.Visible)
+			return model, nil
+		}
+
 		// Handle search input
 		if len(assert.String()) == 1 || assert.Type == tea.KeyBackspace || assert.Type == tea.KeyCtrlH {
 			if !model.Search.Active {

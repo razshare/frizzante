@@ -1,4 +1,4 @@
-package textviewer
+package hexviewer
 
 import (
 	"fmt"
@@ -37,6 +37,16 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 
 		if assert.Type == tea.KeyDown || assert.Type == tea.KeyCtrlN || assert.Type == tea.KeyTab || assert.Type == tea.KeyCtrlPgDown {
 			navigate.Apply(model.Search, model.Viewport, 1)
+			return model, nil
+		}
+
+		if assert.Type == tea.KeyPgDown {
+			navigate.Apply(model.Search, model.Viewport, model.Viewport.Visible)
+			return model, nil
+		}
+
+		if assert.Type == tea.KeyPgUp {
+			navigate.Apply(model.Search, model.Viewport, -model.Viewport.Visible)
 			return model, nil
 		}
 
@@ -107,13 +117,17 @@ func (model *Model) View() string {
 		builder.WriteString("\n")
 	}
 
+	maxKeyWidth := len(fmt.Sprintf("%d.", height-1))
+
 	for index := model.Viewport.Offset; index < height; index++ {
+		key := fmt.Sprintf("%d.", index)
+		padding := maxKeyWidth - len(key) + 1
 		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("│"))
-		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render(fmt.Sprintf("%d.", index)))
+		builder.WriteString(config.Styles.Menu.PaddingRight(padding).Render(key))
 		if model.Viewport.Cursor == index {
-			builder.WriteString(config.Styles.Selected.PaddingRight(1).Render(model.Search.Filtered[index].Id))
+			builder.WriteString(config.Styles.Selected.Render(model.Search.Filtered[index].Id))
 		} else {
-			builder.WriteString(config.Styles.Item.PaddingRight(1).Render(model.Search.Filtered[index].Id))
+			builder.WriteString(config.Styles.Item.Render(model.Search.Filtered[index].Id))
 		}
 		builder.WriteString("\n")
 	}
