@@ -8,9 +8,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/razshare/frizzante/cli/assembly"
 	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/confirm"
@@ -22,44 +22,6 @@ import (
 )
 
 func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
-	var asm func(source *os.File, references map[string]map[string]string, online func(line string))
-	asm = func(source *os.File, references map[string]map[string]string, online func(line string)) {
-		var fileName string
-		var functionName string
-		scanner := bufio.NewScanner(source)
-		for scanner.Scan() {
-			line := scanner.Text()
-			online(line)
-			if strings.HasPrefix(line, "TEXT") {
-				parts := strings.SplitN(line, " ", 3)
-				count := len(parts)
-				if count > 1 {
-					functionName = parts[1]
-				}
-				if count > 2 {
-					fileName = parts[2]
-				}
-
-				functionsMap, exists := references[fileName]
-				if !exists {
-					functionsMap = map[string]string{}
-					references[fileName] = functionsMap
-				}
-			} else {
-				functionsMap, exists := references[fileName]
-				if fileName == "" || !exists {
-					continue
-				}
-
-				if _, exists = functionsMap[functionName]; !exists {
-					functionsMap[functionName] = ""
-				}
-
-				functionsMap[functionName] += line + "\n"
-			}
-		}
-	}
-
 	var name string
 	if runtime.GOOS == "windows" {
 		name = filepath.Join(".gen", "bin", "app.exe")
@@ -108,7 +70,7 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 		}
 	}
 
-	var references = map[string]map[string]string{}
+	var references = map[string]map[string]*assembly.FunctionInfo{}
 
 	if files.IsFile(filepath.Join(".gen", "bin", "app.s")) {
 		spin := spinner.Newf("using existing assembly code from %s", filepath.Join(".gen", "bin", "app.s"))
@@ -118,7 +80,7 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 			spinner.Stop(spin)
 			return
 		}
-		asm(file, references, func(_ string) {})
+		assembly.ParseFunctionsInFile(file, references, func(_ string) {})
 		spinner.Stop(spin)
 	} else {
 		spin := spinner.Newf("generating assembly code in %s", filepath.Join(".gen", "bin", "app.s"))
@@ -146,7 +108,7 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 			return
 		}
 
-		go asm(stdout, references, func(line string) {
+		go assembly.ParseFunctionsInFile(stdout, references, func(line string) {
 			if _, werr := assemblyFile.WriteString(line + "\n"); werr != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "\r%s%s\n\r", messages.Prefix, werr.Error())
 				return
@@ -170,8 +132,8 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 	filesChoices := make([]search.Choice, len(references))
 	for {
 		index := 0
-		for fileName, _ := range references {
-			filesChoices[index] = search.Choice{Id: fileName, Description: "explore file"}
+		for fileName, file := range references {
+			filesChoices[index] = search.Choice{Id: fileName, Description: fmt.Sprintf("explore file (%d functions)", len(file))}
 			index++
 		}
 
@@ -187,8 +149,16 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 		functionsChoices := make([]search.Choice, len(references[fileName]))
 
 		index = 0
-		for functionName, _ := range references[fileName] {
-			functionsChoices[index] = search.Choice{Id: functionName, Description: "explore function"}
+		for functionName, function := range references[fileName] {
+			var description string
+
+			if function.BinarySize > 1024 {
+				description = fmt.Sprintf("explore function (%dKB)", function.BinarySize/1024)
+			} else {
+				description = fmt.Sprintf("explore function (%dB)", function.BinarySize)
+			}
+
+			functionsChoices[index] = search.Choice{Id: functionName, Description: description}
 			index++
 		}
 
@@ -201,13 +171,22 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 			break
 		}
 
-		body, exists := references[fileName][functionName]
-		if !exists {
+		var exists bool
+		var function *assembly.FunctionInfo
+		if function, exists = references[fileName][functionName]; !exists {
 			err = fmt.Errorf("function %s not found in file %s", functionName, fileName)
 			return
 		}
 
-		if err = textviewer.Send(fmt.Sprintf("viewing %s", functionName), body); err != nil {
+		var title string
+
+		if function.BinarySize > 1024 {
+			title = fmt.Sprintf("viewing %s (%dKB)", functionName, function.BinarySize/1024)
+		} else {
+			title = fmt.Sprintf("viewing %s (%dB)", functionName, function.BinarySize)
+		}
+
+		if err = textviewer.Send(title, function.AssemblyContent); err != nil {
 			if errors.Is(err, tea.ErrInterrupted) {
 				return
 			}
