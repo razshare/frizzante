@@ -1,6 +1,7 @@
 package action
 
 import (
+	"database/sql"
 	"embed"
 
 	"github.com/razshare/frizzante/platform"
@@ -132,9 +133,10 @@ type NpmOptions struct {
 }
 
 type MigrateOptions struct {
-	Index    int
-	Sqlc     string
-	SqlcYaml string
-	Platform platform.Platform
-	Auto     bool
+	QueryString string
+	Sqlc        string
+	SqlcYaml    string
+	Database    *sql.DB
+	Platform    platform.Platform
+	Auto        bool
 }

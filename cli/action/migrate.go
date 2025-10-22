@@ -11,12 +11,13 @@ import (
 	"strconv"
 	"strings"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/multiselect"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
+	"github.com/razshare/frizzante/tui/spinner"
 )
 
 // Migrate runs the latest migration file against the given database.
@@ -47,7 +48,7 @@ func Migrate(options MigrateOptions) (err error) {
 			choices[index] = search.Choice{Id: name}
 		}
 
-		choices = append(choices, search.Choice{Id: "other", Description: "other"})
+		choices = append(choices, search.Choice{Id: "other", Description: "use a different file"})
 
 		if options.Auto {
 			yamlFileName = choices[0].Id
@@ -83,129 +84,200 @@ func Migrate(options MigrateOptions) (err error) {
 		return
 	}
 
-	var migration string
-
-	index := options.Index
-
-	if index == 0 {
-		numbers := make([]int, count)
-		for jndex, name := range names {
-			trimmed := strings.TrimSuffix(filepath.Base(name), ".sql")
-			parts := strings.SplitN(trimmed, "_", 2)
-			if len(parts) < 1 {
-				err = fmt.Errorf("invalid migration file name %s", name)
-				return
-			}
-
-			var value int
-			var parsed int64
-			if parsed, err = strconv.ParseInt(parts[0], 10, 64); err != nil {
-				return
-			}
-
-			value = int(parsed)
-
-			if slices.Contains(numbers, value) {
-				err = fmt.Errorf("duplicate migration index %s", parts[0])
-				return
-			}
-
-			numbers[jndex] = value
-
-			if index < value {
-				index = value
-				migration = name
-			}
+	mixed := map[int]string{}
+	for _, name := range names {
+		trimmed := strings.TrimSuffix(filepath.Base(name), ".sql")
+		parts := strings.SplitN(trimmed, "_", 2)
+		if len(parts) < 1 {
+			err = fmt.Errorf("invalid migration file name %s", name)
+			return
 		}
 
-		choices := make([]search.Choice, 0)
-		choices = append(choices, search.Choice{Id: migration, Description: fmt.Sprintf("%d (latest)", index)})
-		for jndex := count - 1; jndex >= 0; jndex-- {
-			if numbers[jndex] == index {
-				continue
-			}
-			choices = append(choices, search.Choice{Id: names[jndex], Description: fmt.Sprintf("%d", numbers[jndex])})
+		var parsed int64
+		if parsed, err = strconv.ParseInt(parts[0], 10, 64); err != nil {
+			return
 		}
 
-		if migration, err = singleselect.Sendf(choices, "select a migration to execute"); err != nil {
+		key := int(parsed)
+
+		if _, exists := mixed[key]; exists {
+			err = fmt.Errorf("duplicate migration key %d", key)
+			return
+		}
+
+		mixed[key] = name
+	}
+
+	keys := make([]int, 0)
+	for key := range mixed {
+		keys = append(keys, key)
+	}
+
+	slices.Sort(keys)
+
+	sorted := map[int]string{}
+	for _, key := range keys {
+		sorted[key] = mixed[key]
+	}
+
+	queryString := options.QueryString
+	migrations := make([]string, 0)
+
+	if queryString == "" {
+		choices := []search.Choice{
+			{Id: "latest", Description: "only latest"},
+			{Id: "all", Description: "in order from first to last"},
+			{Id: "after", Description: "in order from offest (exclusive) to latest (inclusive)"},
+			{Id: "before", Description: "in order from first (inclusive) to offset (exclusive)"},
+		}
+
+		if queryString, err = singleselect.Sendf(choices, "which migrations would you like to execute?"); err != nil {
 			return err
 		}
-	} else {
-		for _, name := range names {
-			if strings.HasPrefix(name, fmt.Sprintf("%d_", index)) {
-				migration = name
-				break
+
+		if queryString == "after" {
+			queryString = ">"
+		} else if queryString == "before" {
+			queryString = "<"
+		}
+	}
+
+	if queryString == "pick" {
+		choices := make([]search.Choice, 0)
+		for _, name := range sorted {
+			choices = append(choices, search.Choice{Id: name})
+		}
+		if migrations, err = multiselect.Sendf(choices, "select a migration to execute"); err != nil {
+			return err
+		}
+	} else if queryString == "*" || queryString == "all" {
+		for _, name := range sorted {
+			migrations = append(migrations, name)
+		}
+	} else if strings.HasPrefix(queryString, ">") {
+		if queryString == ">" {
+			offsets := make([]search.Choice, 0)
+			for _, name := range sorted {
+				offsets = append(offsets, search.Choice{Id: name})
+			}
+			if queryString, err = singleselect.Send(offsets, "pick an offset (exclusive)"); err != nil {
+				return err
+			}
+			queryString = ">" + strings.SplitN(filepath.Base(queryString), "_", 2)[0]
+		}
+
+		var value int64
+		if value, err = strconv.ParseInt(queryString[1:], 10, 64); err != nil {
+			return
+		}
+
+		for index, name := range sorted {
+			if index > int(value) {
+				migrations = append(migrations, name)
 			}
 		}
-	}
-
-	if migration == "" {
-		err = errors.New("migration file name resolved to an empty string")
-		return
-	}
-
-	messages.Infof("migrating database schema using %s", migration)
-
-	var data []byte
-	if data, err = os.ReadFile(migration); err != nil {
-		return
-	}
-
-	var up strings.Builder
-	var down strings.Builder
-	var tearingDown bool
-	for _, line := range strings.Split(string(data), "\n") {
-		if line == "-- migration: down" {
-			tearingDown = true
-			continue
-		} else if line == "-- migration: up" {
-			tearingDown = false
-			continue
+	} else if strings.HasPrefix(queryString, "<") {
+		if queryString == "<" {
+			offsets := make([]search.Choice, 0)
+			for _, name := range sorted {
+				offsets = append(offsets, search.Choice{Id: name})
+			}
+			if queryString, err = singleselect.Send(offsets, "pick an offset (exclusive)"); err != nil {
+				return err
+			}
+			queryString = "<" + strings.SplitN(filepath.Base(queryString), "_", 2)[0]
 		}
 
-		if tearingDown {
-			down.WriteString(line)
-			down.WriteString("\n")
-			continue
+		var value int64
+		if value, err = strconv.ParseInt(queryString[1:], 10, 64); err != nil {
+			return
 		}
 
-		up.WriteString(line)
-		up.WriteString("\n")
-	}
-
-	var database *sql.DB
-	if database, err = sql.Open("sqlite3", fmt.Sprintf("file:%s/source.sqlite?cache=shared", baseDirectory)); err != nil {
+		for index, name := range sorted {
+			if index < int(value) {
+				migrations = append(migrations, name)
+			}
+		}
+	} else if queryString == "latest" {
+		var value int
+		for key := range sorted {
+			if key > value {
+				value = key
+			}
+		}
+		migrations = append(migrations, sorted[value])
+	} else {
+		err = errors.New("unknown migrate query string")
 		return
 	}
 
 	var transaction *sql.Tx
-	if transaction, err = database.Begin(); err != nil {
+	if transaction, err = options.Database.Begin(); err != nil {
 		return
 	}
 
-	if query := down.String(); query != "" {
-		if _, err = transaction.Exec(query); err != nil {
-			if err = transaction.Rollback(); err != nil {
-				return
-			}
-			return
-		}
-	}
+	for _, migration := range migrations {
+		spin := spinner.Newf("migrating database schema using %s", migration)
+		go spinner.Start(spin)
 
-	if query := up.String(); query != "" {
-		if _, err = transaction.Exec(query); err != nil {
-			if err = transaction.Rollback(); err != nil {
-				return
-			}
+		var data []byte
+		if data, err = os.ReadFile(migration); err != nil {
+			spinner.Stop(spin)
 			return
 		}
+
+		var up strings.Builder
+		var down strings.Builder
+		var tearingDown bool
+		for _, line := range strings.Split(string(data), "\n") {
+			if line == "-- migration: down" {
+				tearingDown = true
+				continue
+			} else if line == "-- migration: up" {
+				tearingDown = false
+				continue
+			}
+
+			if tearingDown {
+				down.WriteString(line)
+				down.WriteString("\n")
+				continue
+			}
+
+			up.WriteString(line)
+			up.WriteString("\n")
+		}
+
+		if query := down.String(); query != "" {
+			if _, err = transaction.Exec(query); err != nil {
+				if err = transaction.Rollback(); err != nil {
+					spinner.Stop(spin)
+					return
+				}
+				spinner.Stop(spin)
+				return
+			}
+		}
+
+		if query := up.String(); query != "" {
+			if _, err = transaction.Exec(query); err != nil {
+				if err = transaction.Rollback(); err != nil {
+					spinner.Stop(spin)
+					return
+				}
+				spinner.Stop(spin)
+				return
+			}
+		}
+		spinner.Stop(spin)
+		messages.Successf("migration %s executed successfully", migration)
 	}
 
 	if err = transaction.Commit(); err != nil {
 		return
 	}
 
-	messages.Success("migration successful")
+	messages.Success("database schema migrated successfully")
 
 	return
 }
