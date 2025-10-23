@@ -5,6 +5,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"sync"
+	"time"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
@@ -40,6 +41,7 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 		)
 	})
 	group.Go(func() {
+		time.Sleep(time.Second)
 		messages.Command(
 			options.App,
 			append(os.Environ(), "DEV=1"),
