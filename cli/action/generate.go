@@ -192,6 +192,10 @@ func Generate(options GenerateOptions) (err error) {
 			}
 		}
 
+		if len(items) != 0 {
+			err = Generate(options)
+		}
+
 		return
 	}
 
