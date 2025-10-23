@@ -369,23 +369,6 @@ func TestNew(t *testing.T) {
 			continue
 		}
 
-		if item.Choice.Id == "migrate" {
-			i++
-			if item.Active() {
-				t.Fatal("migrate should not be active")
-			}
-			*a.Migrate = true
-			if !item.Active() {
-				t.Fatal("migrate should be active")
-			}
-			*a.Migrate = false
-			//err = item.Handler()
-			//if err != nil {
-			//	t.Fatal(err)
-			//}
-			continue
-		}
-
 		if item.Choice.Id == "assembly explorer" {
 			i++
 			if item.Active() {
