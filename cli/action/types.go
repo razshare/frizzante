@@ -31,6 +31,7 @@ type GenerateOptions struct {
 	Bun      string
 	Sqlc     string
 	SqlcYaml string
+	Database string
 	Tags     []string
 	Efs      embed.FS
 	Platform platform.Platform

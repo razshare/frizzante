@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"database/sql"
 	"embed"
 
 	"github.com/razshare/frizzante/platform"
@@ -77,9 +78,10 @@ type DatabaseOptions struct {
 	Auto     bool
 }
 
-type MigrationOptions struct {
+type SchemaOptions struct {
 	Sqlc     string
 	SqlcYaml string
+	Database *sql.DB
 	Platform platform.Platform
 	Auto     bool
 }

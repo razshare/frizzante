@@ -1,18 +1,23 @@
 package action
 
 import (
+	"database/sql"
 	"errors"
+	"fmt"
 	"slices"
 	"strings"
 
 	"github.com/razshare/frizzante/cli/generate"
 	tags_ "github.com/razshare/frizzante/cli/tags"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/tui/input"
 	"github.com/razshare/frizzante/tui/multiselect"
 	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/singleselect"
 )
 
 func Generate(options GenerateOptions) (err error) {
-	pick := func(gen string) error {
+	pick := func(gen string) (err error) {
 		if gen == "air" {
 			return generate.Air(generate.AirOptions{
 				Air:      options.Air,
@@ -67,12 +72,45 @@ func Generate(options GenerateOptions) (err error) {
 				Platform: options.Platform,
 				SqlcYaml: options.SqlcYaml,
 			})
-		} else if gen == "migration" {
-			return generate.Migration(generate.MigrationOptions{
+		} else if gen == "schema" {
+			var databaseString string
+			if options.Database == "" {
+				var names []string
+				if names, err = files.FindWithSuffix("lib", ".sqlite"); err != nil {
+					return
+				}
+
+				choices := make([]search.Choice, len(names))
+				for index, name := range names {
+					choices[index] = search.Choice{Id: name}
+				}
+
+				choices = append(choices, search.Choice{Id: "other", Description: "use a different file"})
+
+				if databaseString, err = singleselect.Sendf(choices, "where's your sqlite database located?"); err != nil {
+					return
+				}
+
+				if databaseString == "other" {
+					if databaseString, err = input.Send("where's the file located?"); err != nil {
+						return
+					}
+				}
+			} else {
+				databaseString = options.Database
+			}
+
+			var database *sql.DB
+			if database, err = sql.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared", databaseString)); err != nil {
+				return
+			}
+
+			return generate.Schema(generate.SchemaOptions{
 				Auto:     options.Auto,
 				Sqlc:     options.Sqlc,
 				Platform: options.Platform,
 				SqlcYaml: options.SqlcYaml,
+				Database: database,
 			})
 		} else if gen == "core" {
 			return generate.Core(generate.CoreOptions{
@@ -129,7 +167,7 @@ func Generate(options GenerateOptions) (err error) {
 				{Id: "sessions", Description: "features for managing user sessions"},
 				{Id: "database", Description: "full database setup"},
 				{Id: "queries", Description: "sql code to go code using sqlc"},
-				{Id: "migration", Description: "new migration file from the current schema"},
+				{Id: "schema", Description: "update the schema"},
 				{Id: "security", Description: "security and cryptographic functions"},
 				{Id: "types", Description: "type definitions using .d.ts files"},
 			},

@@ -1,7 +1,6 @@
 package menus
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 
@@ -11,8 +10,6 @@ import (
 	"github.com/razshare/frizzante/cli/path"
 	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/cli/user"
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/tui/input"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/singleselect"
 )
@@ -194,49 +191,6 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice: search.Choice{Id: "migrate", Description: "migrates database schema"},
-				Active: func() bool { return *app.Migrate },
-				Handler: func() (err error) {
-					var names []string
-					if names, err = files.FindWithSuffix("lib", ".sqlite"); err != nil {
-						return
-					}
-
-					choices := make([]search.Choice, len(names))
-					for index, name := range names {
-						choices[index] = search.Choice{Id: name}
-					}
-
-					choices = append(choices, search.Choice{Id: "other", Description: "use a different file"})
-
-					var name string
-					if name, err = singleselect.Sendf(choices, "where's your sqlite database located?"); err != nil {
-						return
-					}
-
-					if name == "other" {
-						if name, err = input.Send("where's the file located?"); err != nil {
-							return
-						}
-					}
-
-					var database *sql.DB
-					if database, err = sql.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared", name)); err != nil {
-						return
-					}
-
-					err = action.Migrate(action.MigrateOptions{
-						Auto:        *app.Yes,
-						Platform:    plat,
-						Sqlc:        sqlc,
-						SqlcYaml:    *app.SqlcYaml,
-						QueryString: *app.MigrateQueryString,
-						Database:    database,
-					})
-					return
-				},
-			},
-			{
 				Choice: search.Choice{Id: "assembly explorer", Description: "explores application assembly output"},
 				Active: func() bool { return *app.AssemblyExplorer },
 				Handler: func() (err error) {
@@ -284,6 +238,7 @@ func New(app *apps.App) (*Menu, error) {
 						Tags:     tags,
 						Active:   selected != "",
 						SqlcYaml: *app.SqlcYaml,
+						Database: *app.Database,
 					})
 
 					return
