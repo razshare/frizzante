@@ -139,9 +139,7 @@ func Generate(options GenerateOptions) (err error) {
 			})
 		} else if gen == "types" {
 			return generate.Types(generate.TypesOptions{
-				Auto: options.Auto,
-				Efs:  options.Efs,
-				Go:   options.Go,
+				Go: options.Go,
 			})
 		} else if gen == "security" {
 			return generate.Security(generate.SecurityOptions{

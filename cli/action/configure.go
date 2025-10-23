@@ -36,5 +36,13 @@ func Configure(options ConfigureOptions) (err error) {
 		return
 	}
 
+	if err = Package(PackageOptions{
+		App:  options.App,
+		Bun:  options.Bun,
+		Prod: true,
+	}); err != nil {
+		return
+	}
+
 	return
 }

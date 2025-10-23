@@ -13,7 +13,7 @@ func Types(options TypesOptions) (err error) {
 		return
 	}
 
-	messages.Success("types generated in .gen/types")
+	messages.Success("types generated")
 
 	return
 }

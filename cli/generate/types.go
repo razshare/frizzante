@@ -94,9 +94,7 @@ type QueriesOptions struct {
 }
 
 type TypesOptions struct {
-	Go   string
-	Efs  embed.FS
-	Auto bool
+	Go string
 }
 
 type DownloadOptions struct {
