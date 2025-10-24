@@ -22,6 +22,6 @@ jobs:
         id: tests
         run: |
           ./scripts/clean.sh
-          ./scripts/initialize.sh
+          ./scripts/setup.sh
           ./scripts/package.sh
           ./scripts/test.sh
