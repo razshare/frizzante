@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/razshare/frizzante/cli/actions"
@@ -225,12 +226,37 @@ func New(app *apps.App) (*Menu, error) {
 						return
 					}
 
+					var offset string
+					var target string
+
+					parts := strings.SplitN(*app.Value, ",", 2)
+
+					if len(parts) >= 1 {
+						offset = parts[0]
+					} else {
+						offset = ""
+					}
+
+					if len(parts) >= 2 {
+						target = parts[1]
+						if offset == "" {
+							offset = "first"
+						}
+
+						if target == "" {
+							target = "last"
+						}
+					} else {
+						target = ""
+					}
+
 					err = actions.Migrate(actions.MigrateOptions{
 						Auto:     *app.Yes,
 						Platform: plat,
 						Sqlc:     sqlc,
 						SqlcYaml: *app.SqlcYaml,
-						Target:   *app.Value,
+						Offset:   offset,
+						Target:   target,
 						Database: database,
 					})
 					return

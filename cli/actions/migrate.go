@@ -78,19 +78,19 @@ func Migrate(options MigrateOptions) (err error) {
 		}
 	}
 
-	var namess []string
-	if namess, err = files.ReadDirectory(filepath.Join(baseDirectory, "migrations")); err != nil {
+	var names []string
+	if names, err = files.ReadDirectory(filepath.Join(baseDirectory, "migrations")); err != nil {
 		return
 	}
 
-	count := len(namess)
+	count := len(names)
 	if count == 0 {
 		err = errors.New("no migration files found")
 		return
 	}
 
 	times := make([]time.Time, count)
-	for index, name := range namess {
+	for index, name := range names {
 		if times[index], err = time.Parse("2006-01-02T15:04:05Z07:00", strings.TrimSuffix(filepath.Base(name), ".sql")); err != nil {
 			return
 		}
@@ -113,12 +113,17 @@ func Migrate(options MigrateOptions) (err error) {
 			choices[index] = search.Choice{Id: time_.Format("2006-01-02T15:04:05Z07:00")}
 		}
 
-		if offset, err = select_one.Sendf(choices, "what's the offset migration?"); err != nil {
+		if offset, err = select_one.Sendf(choices, "what's the offset migration? (sorting desc)"); err != nil {
 			return err
 		}
-	}
-
-	if offsetTime, err = time.Parse("2006-01-02T15:04:05Z07:00", offset); err != nil {
+		if offsetTime, err = time.Parse("2006-01-02T15:04:05Z07:00", offset); err != nil {
+			return
+		}
+	} else if offset == "first" {
+		offsetTime = times[count-1]
+	} else if offset == "last" {
+		offsetTime = times[0]
+	} else if offsetTime, err = time.Parse("2006-01-02T15:04:05Z07:00", offset); err != nil {
 		return
 	}
 
@@ -131,16 +136,21 @@ func Migrate(options MigrateOptions) (err error) {
 			choices[index] = search.Choice{Id: time_.Format("2006-01-02T15:04:05Z07:00")}
 		}
 
-		if target, err = select_one.Sendf(choices, "what's the target?"); err != nil {
+		if target, err = select_one.Sendf(choices, "what's the target migration? (sorting desc)"); err != nil {
 			return err
 		}
-	}
-
-	if targetTime, err = time.Parse("2006-01-02T15:04:05Z07:00", target); err != nil {
+		if targetTime, err = time.Parse("2006-01-02T15:04:05Z07:00", target); err != nil {
+			return
+		}
+	} else if target == "first" {
+		targetTime = times[count-1]
+	} else if target == "last" {
+		targetTime = times[0]
+	} else if targetTime, err = time.Parse("2006-01-02T15:04:05Z07:00", target); err != nil {
 		return
 	}
 
-	forward := targetTime.After(offsetTime)
+	forward := !offsetTime.After(targetTime)
 	migrations := make([]string, 0)
 
 	// at this moment the times slices is inverted,
