@@ -28,21 +28,5 @@ func Configure(options ConfigureOptions) (err error) {
 		}
 	}
 
-	if err = Install(InstallOptions{
-		App: options.App,
-		Go:  options.Go,
-		Bun: options.Bun,
-	}); err != nil {
-		return
-	}
-
-	if err = Package(PackageOptions{
-		App:  options.App,
-		Bun:  options.Bun,
-		Prod: true,
-	}); err != nil {
-		return
-	}
-
 	return
 }

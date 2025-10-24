@@ -4,11 +4,11 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestQuery(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.URL = &url.URL{RawQuery: "key1=value1&key2=value2"}
 	if Query(client, "key1") != "value1" {
 		t.Fatal("key1 should be value1")

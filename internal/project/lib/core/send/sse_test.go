@@ -4,11 +4,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestSseUpgrade(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	SseUpgrade(client)
 	if client.EventName != "message" {
 		t.Fatal("event name should be message")
@@ -16,19 +16,19 @@ func TestSseUpgrade(t *testing.T) {
 }
 
 func TestEventContentWithoutUpgrade(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	EventContent(client, []byte("hello"))
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 	if string(writer.MockBytes) != strings.Join([]string{"id: 1", "event: ", "data: hello", "", ""}, "\r\n") {
 		t.Fatal("sse payload should contain data but not event name")
 	}
 }
 
 func TestEventContentWithUpgrade(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	SseUpgrade(client)
 	EventContent(client, []byte("hello"))
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 	if string(writer.MockBytes) != strings.Join([]string{"id: 1", "event: message", "data: hello", "", ""}, "\r\n") {
 		t.Fatal("sse payload should contain event name message and data hello")
 	}

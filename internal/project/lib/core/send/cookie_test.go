@@ -3,13 +3,13 @@ package send
 import (
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestCookie(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Cookie(client, "cookie", "monster")
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 	if writer.MockHeader.Get("Set-Cookie") != "cookie=monster; Path=/; HttpOnly" {
 		t.Fatal("cookie should be monster")
 	}

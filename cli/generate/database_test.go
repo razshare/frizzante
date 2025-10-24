@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/platform"
+	"github.com/razshare/frizzante/platforms"
 )
 
 //go:embed internal/additions/**
@@ -20,7 +20,7 @@ func TestDatabase(t *testing.T) {
 	defer func() { _ = os.RemoveAll("lib") }()
 
 	if err := Database(DatabaseOptions{
-		Platform: platform.LinuxAmd64,
+		Platform: platforms.LinuxAmd64,
 		Efs:      TestDatabaseEfs,
 		Auto:     true,
 		Go:       "go",

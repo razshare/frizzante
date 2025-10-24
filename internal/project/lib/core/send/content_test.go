@@ -4,13 +4,13 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestContent(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Content(client, []byte("hello"))
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if string(writer.MockBytes) != "hello" {
 		t.Fatal("content should be hello")
@@ -18,9 +18,9 @@ func TestContent(t *testing.T) {
 }
 
 func TestMessage(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Message(client, "hello")
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if string(writer.MockBytes) != "hello" {
 		t.Fatal("content should be hello")
@@ -28,9 +28,9 @@ func TestMessage(t *testing.T) {
 }
 
 func TestMessagef(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Messagef(client, "hello %s", "world")
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if string(writer.MockBytes) != "hello world" {
 		t.Fatal("content should be hello world")
@@ -38,9 +38,9 @@ func TestMessagef(t *testing.T) {
 }
 
 func TestNotFound(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	NotFound(client, "not found")
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if client.Status != 404 {
 		t.Fatal("status should be 404")
@@ -52,9 +52,9 @@ func TestNotFound(t *testing.T) {
 }
 
 func TestUnauthorized(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Unauthorized(client, "unauthorized")
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if client.Status != 401 {
 		t.Fatal("status should be 401")
@@ -66,9 +66,9 @@ func TestUnauthorized(t *testing.T) {
 }
 
 func TestBadRequest(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	BadRequest(client, "bad request")
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if client.Status != 400 {
 		t.Fatal("status should be 400")
@@ -80,9 +80,9 @@ func TestBadRequest(t *testing.T) {
 }
 
 func TestError(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Error(client, errors.New("error"))
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if client.Status != 500 {
 		t.Fatal("status should be 500")
@@ -94,9 +94,9 @@ func TestError(t *testing.T) {
 }
 
 func TestForbidden(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Forbidden(client, "forbidden")
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if client.Status != 403 {
 		t.Fatal("status should be 403")
@@ -108,9 +108,9 @@ func TestForbidden(t *testing.T) {
 }
 
 func TestTooManyRequests(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	TooManyRequests(client, "too many requests")
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if client.Status != 429 {
 		t.Fatal("status should be 429")

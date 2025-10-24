@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/platform"
+	"github.com/razshare/frizzante/platforms"
 )
 
 func TestSqlc(t *testing.T) {
@@ -18,7 +18,7 @@ func TestSqlc(t *testing.T) {
 	if err := Sqlc(SqlcOptions{
 		Auto:     true,
 		Sqlc:     filepath.Join(".gen", "sqlc", "sqlc"),
-		Platform: platform.LinuxAmd64,
+		Platform: platforms.LinuxAmd64,
 	}); err != nil {
 		t.Fatal(err)
 	}

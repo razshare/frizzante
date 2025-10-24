@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"embed"
 
-	"github.com/razshare/frizzante/platform"
+	"github.com/razshare/frizzante/platforms"
 )
 
 type State uint64
@@ -36,7 +36,7 @@ type Evict func() error
 
 type AirOptions struct {
 	Air      string
-	Platform platform.Platform
+	Platform platforms.Platform
 	Auto     bool
 }
 
@@ -47,13 +47,13 @@ type AirConfigOptions struct {
 
 type BunOptions struct {
 	Bun      string
-	Platform platform.Platform
+	Platform platforms.Platform
 	Auto     bool
 }
 
 type SqlcOptions struct {
 	Sqlc     string
-	Platform platform.Platform
+	Platform platforms.Platform
 	Auto     bool
 }
 
@@ -74,7 +74,7 @@ type DatabaseOptions struct {
 	Type     string
 	Sqlc     string
 	Efs      embed.FS
-	Platform platform.Platform
+	Platform platforms.Platform
 	Auto     bool
 }
 
@@ -82,14 +82,14 @@ type SchemaOptions struct {
 	Sqlc     string
 	SqlcYaml string
 	Database *sql.DB
-	Platform platform.Platform
+	Platform platforms.Platform
 	Auto     bool
 }
 
 type QueriesOptions struct {
 	Sqlc     string
 	SqlcYaml string
-	Platform platform.Platform
+	Platform platforms.Platform
 	Auto     bool
 }
 
@@ -100,7 +100,7 @@ type DefinitionsOptions struct {
 type MigrationOptions struct {
 	Sqlc     string
 	SqlcYaml string
-	Platform platform.Platform
+	Platform platforms.Platform
 	Auto     bool
 }
 

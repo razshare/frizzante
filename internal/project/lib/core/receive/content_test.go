@@ -4,12 +4,12 @@ import (
 	"io"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestMessage(t *testing.T) {
-	client := mock.NewClient()
-	body := client.Request.Body.(*mock.RequestBody)
+	client := mocks.NewClient()
+	body := client.Request.Body.(*mocks.RequestBody)
 	body.MockBuffer = []byte("hello")
 	data, err := io.ReadAll(client.Request.Body)
 	if err != nil {

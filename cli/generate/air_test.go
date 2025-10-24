@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/platform"
+	"github.com/razshare/frizzante/platforms"
 )
 
 func TestAir(t *testing.T) {
@@ -15,7 +15,7 @@ func TestAir(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll(filepath.Join(".gen")) }()
 
-	if err := Air(AirOptions{Platform: platform.LinuxAmd64, Auto: true, Air: filepath.Join(".gen", "air", "air")}); err != nil {
+	if err := Air(AirOptions{Platform: platforms.LinuxAmd64, Auto: true, Air: filepath.Join(".gen", "air", "air")}); err != nil {
 		t.Fatal(err)
 	}
 

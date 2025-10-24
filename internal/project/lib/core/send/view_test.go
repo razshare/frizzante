@@ -4,23 +4,23 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
 
 func TestViewWithLocation(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Header(client, "Location", "/about")
 	View(client, views.View{}) // This should be a noop.
 }
 
 func TestViewWithAcceptJson(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Accept", "application/json")
 
 	View(client, views.View{Name: "test", Props: map[string]any{"key": "value"}})
 
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if writer.MockHeader.Get("Cache-Control") != "no-store, no-cache, must-revalidate, max-age=0" {
 		t.Fatal("cache control should be disabled")
@@ -40,7 +40,7 @@ func TestViewWithAcceptJson(t *testing.T) {
 }
 
 func TestView(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 
 	client.Config.Render = func(view views.View) (html string, err error) {
 
@@ -49,7 +49,7 @@ func TestView(t *testing.T) {
 
 	View(client, views.View{Name: "test", Props: map[string]any{"key": "value"}})
 
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if string(writer.MockBytes) != "hello from test" {
 		t.Fatal("content should be hello from test")

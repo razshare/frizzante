@@ -3,11 +3,11 @@ package receive
 import (
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestPath(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.SetPathValue("key", "value")
 	if Path(client, "key") != "value" {
 		t.Fatal("key should be value")

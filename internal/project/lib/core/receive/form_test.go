@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestFormParsedValueString(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary := client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -33,9 +33,9 @@ func TestFormParsedValueString(t *testing.T) {
 }
 
 func TestFormParsedValueBool(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary := client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -56,9 +56,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be true")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -74,9 +74,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be true")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -92,9 +92,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be true")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -110,9 +110,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be true")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -128,9 +128,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be true")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -146,9 +146,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be true")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -165,9 +165,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be false")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -183,9 +183,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be false")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -201,9 +201,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be false")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -219,9 +219,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be false")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -237,9 +237,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be false")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -255,9 +255,9 @@ func TestFormParsedValueBool(t *testing.T) {
 		t.Fatal("key should be false")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -275,9 +275,9 @@ func TestFormParsedValueBool(t *testing.T) {
 }
 
 func TestFormParsedValueBools(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary := client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -320,9 +320,9 @@ func TestFormParsedValueBools(t *testing.T) {
 }
 
 func TestFormParsedValueFloat32(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary := client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -343,9 +343,9 @@ func TestFormParsedValueFloat32(t *testing.T) {
 		t.Fatal("key should be a valid float32 with value 3.14")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -361,9 +361,9 @@ func TestFormParsedValueFloat32(t *testing.T) {
 		t.Fatal("key should be a valid float32 with value -1.1")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -382,9 +382,9 @@ func TestFormParsedValueFloat32(t *testing.T) {
 }
 
 func TestFormParsedValueFloat64(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary := client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -405,9 +405,9 @@ func TestFormParsedValueFloat64(t *testing.T) {
 		t.Fatal("key should be a valid float64 with value 3.14")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -423,9 +423,9 @@ func TestFormParsedValueFloat64(t *testing.T) {
 		t.Fatal("key should be a valid float64 with value -1.1")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -444,9 +444,9 @@ func TestFormParsedValueFloat64(t *testing.T) {
 }
 
 func TestFormParsedValueInt(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary := client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -467,9 +467,9 @@ func TestFormParsedValueInt(t *testing.T) {
 		t.Fatal("key should be a valid int with value 5")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -485,9 +485,9 @@ func TestFormParsedValueInt(t *testing.T) {
 		t.Fatal("key should be a valid int with value -11")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -504,9 +504,9 @@ func TestFormParsedValueInt(t *testing.T) {
 		t.Fatal("key should not be a valid int")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -524,9 +524,9 @@ func TestFormParsedValueInt(t *testing.T) {
 }
 
 func TestFormParsedValueInt32(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary := client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -547,9 +547,9 @@ func TestFormParsedValueInt32(t *testing.T) {
 		t.Fatal("key should be a valid int32 with value 5")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -565,9 +565,9 @@ func TestFormParsedValueInt32(t *testing.T) {
 		t.Fatal("key should be a valid int32 with value -11")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -584,9 +584,9 @@ func TestFormParsedValueInt32(t *testing.T) {
 		t.Fatal("key should not be a valid int32")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -604,9 +604,9 @@ func TestFormParsedValueInt32(t *testing.T) {
 }
 
 func TestFormParsedValueInt64(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary := client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -627,9 +627,9 @@ func TestFormParsedValueInt64(t *testing.T) {
 		t.Fatal("key should be a valid int64 with value 5")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -645,9 +645,9 @@ func TestFormParsedValueInt64(t *testing.T) {
 		t.Fatal("key should be a valid int64 with value -11")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -664,9 +664,9 @@ func TestFormParsedValueInt64(t *testing.T) {
 		t.Fatal("key should not be a valid int64")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -684,9 +684,9 @@ func TestFormParsedValueInt64(t *testing.T) {
 }
 
 func TestFormParsedValueUint(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary := client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -707,9 +707,9 @@ func TestFormParsedValueUint(t *testing.T) {
 		t.Fatal("key should be a valid int with value 5")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -726,9 +726,9 @@ func TestFormParsedValueUint(t *testing.T) {
 		t.Fatal("key should not be a valid uint")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -744,9 +744,9 @@ func TestFormParsedValueUint(t *testing.T) {
 		t.Fatal("key should not be a valid uint")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -764,9 +764,9 @@ func TestFormParsedValueUint(t *testing.T) {
 }
 
 func TestFormParsedValueUint32(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary := client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -787,9 +787,9 @@ func TestFormParsedValueUint32(t *testing.T) {
 		t.Fatal("key should be a valid int32 with value 5")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -806,9 +806,9 @@ func TestFormParsedValueUint32(t *testing.T) {
 		t.Fatal("key should not be a valid uint32")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -824,9 +824,9 @@ func TestFormParsedValueUint32(t *testing.T) {
 		t.Fatal("key should not be a valid uint32")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -844,9 +844,9 @@ func TestFormParsedValueUint32(t *testing.T) {
 }
 
 func TestFormParsedValueUint64(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary := client.Request.Body.(*mock.RequestBody)
+	boundary := client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -867,9 +867,9 @@ func TestFormParsedValueUint64(t *testing.T) {
 		t.Fatal("key should be a valid int64 with value 5")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -886,9 +886,9 @@ func TestFormParsedValueUint64(t *testing.T) {
 		t.Fatal("key should not be a valid uint64")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),
@@ -905,9 +905,9 @@ func TestFormParsedValueUint64(t *testing.T) {
 		t.Fatal("key should not be a valid uint64")
 	}
 
-	client = mock.NewClient()
+	client = mocks.NewClient()
 	client.Request.Header.Set("Content-Type", "multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW")
-	boundary = client.Request.Body.(*mock.RequestBody)
+	boundary = client.Request.Body.(*mocks.RequestBody)
 	boundary.MockBuffer = bytes.Join(
 		[][]byte{
 			[]byte(`------WebKitFormBoundary7MA4YWxkTrZu0gW`),

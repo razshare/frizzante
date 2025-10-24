@@ -1,3 +1,3 @@
-package platform
+package platforms
 
 type Platform uint

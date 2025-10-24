@@ -3,15 +3,15 @@ package receive
 import (
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestJson(t *testing.T) {
 	type Payload struct {
 		Key string `json:"key"`
 	}
-	client := mock.NewClient()
-	body := client.Request.Body.(*mock.RequestBody)
+	client := mocks.NewClient()
+	body := client.Request.Body.(*mocks.RequestBody)
 	body.MockBuffer = []byte(`{"key":"value"}`)
 	var payload Payload
 	Json(client, &payload)

@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/cli/apps"
-	"github.com/razshare/frizzante/platform"
+	"github.com/razshare/frizzante/platforms"
 )
 
 func TestPlatformLinuxAmd64(t *testing.T) {
@@ -15,7 +15,7 @@ func TestPlatformLinuxAmd64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if plat != platform.LinuxAmd64 {
+	if plat != platforms.LinuxAmd64 {
 		t.Fatal("platform should be linux amd64")
 	}
 }
@@ -28,7 +28,7 @@ func TestPlatformLinuxArm64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if plat != platform.LinuxArm64 {
+	if plat != platforms.LinuxArm64 {
 		t.Fatal("platform should be linux arm64")
 	}
 }
@@ -41,7 +41,7 @@ func TestPlatformDarwinAmd64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if plat != platform.DarwinAmd64 {
+	if plat != platforms.DarwinAmd64 {
 		t.Fatal("platform should be darwin amd64")
 	}
 }
@@ -54,7 +54,7 @@ func TestPlatformDarwinArm64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if plat != platform.DarwinArm64 {
+	if plat != platforms.DarwinArm64 {
 		t.Fatal("platform should be darwin arm64")
 	}
 }
@@ -67,7 +67,7 @@ func TestPlatformWindowsAmd64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if plat != platform.WindowsAmd64 {
+	if plat != platforms.WindowsAmd64 {
 		t.Fatal("platform should be windows amd64")
 	}
 }
@@ -80,7 +80,7 @@ func TestPlatformWindowsArm64(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if plat != platform.WindowsArm64 {
+	if plat != platforms.WindowsArm64 {
 		t.Fatal("platform should be windows arm64")
 	}
 }

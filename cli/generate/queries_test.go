@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/platform"
+	"github.com/razshare/frizzante/platforms"
 )
 
 //go:embed internal/additions/**
@@ -24,7 +24,7 @@ func TestQueries(t *testing.T) {
 	defer func() { _ = os.RemoveAll("lib") }()
 
 	if err := Database(DatabaseOptions{
-		Platform: platform.LinuxAmd64,
+		Platform: platforms.LinuxAmd64,
 		Efs:      TestQueriesEfs,
 		Auto:     true,
 		Go:       "go",
@@ -37,7 +37,7 @@ func TestQueries(t *testing.T) {
 	if err := Queries(QueriesOptions{
 		Auto:     true,
 		Sqlc:     filepath.Join(".gen", "sqlc", "sqlc"),
-		Platform: platform.LinuxAmd64,
+		Platform: platforms.LinuxAmd64,
 	}); err != nil {
 		t.Fatal(err)
 	}

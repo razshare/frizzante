@@ -3,11 +3,11 @@ package receive
 import (
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestCookie(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Cookie", "cookie=monster;")
 	cookie := Cookie(client, "cookie")
 	if cookie != "monster" {
@@ -16,7 +16,7 @@ func TestCookie(t *testing.T) {
 }
 
 func TestCookieEmptyKey(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	cookie := Cookie(client, "")
 	if cookie != "" {
 		t.Fatal("cookie should be empty")
@@ -24,7 +24,7 @@ func TestCookieEmptyKey(t *testing.T) {
 }
 
 func TestCookieInvalidContent(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	client.Request.Header.Set("Cookie", "cookie=%monster;")
 	cookie := Cookie(client, "cookie")
 	if cookie != "" {

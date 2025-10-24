@@ -3,26 +3,26 @@ package send
 import (
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mock"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestHeader(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Header(client, "key", "value")
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 	if writer.MockHeader.Get("key") != "value" {
 		t.Fatal("key should be value")
 	}
 }
 
 func TestHeaders(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Headers(client, map[string]string{
 		"key1": "value1",
 		"key2": "value2",
 	})
 
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if writer.MockHeader.Get("key1") != "value1" {
 		t.Fatal("key1 should be value1")
@@ -34,9 +34,9 @@ func TestHeaders(t *testing.T) {
 }
 
 func TestRedirect(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Redirect(client, "/about", 303)
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if client.Status != 303 {
 		t.Fatal("status should be 303")
@@ -48,9 +48,9 @@ func TestRedirect(t *testing.T) {
 }
 
 func TestNavigate(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	Navigate(client, "/about")
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if client.Status != 302 {
 		t.Fatal("status should be 302")
@@ -62,9 +62,9 @@ func TestNavigate(t *testing.T) {
 }
 
 func TestContentType(t *testing.T) {
-	client := mock.NewClient()
+	client := mocks.NewClient()
 	ContentType(client, "text/html")
-	writer := client.Writer.(*mock.ResponseWriter)
+	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if writer.MockHeader.Get("Content-Type") != "text/html" {
 		t.Fatal("content type should be text/html")

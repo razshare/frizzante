@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"embed"
 
-	"github.com/razshare/frizzante/platform"
+	"github.com/razshare/frizzante/platforms"
 )
 
 type HelpOptions struct{}
@@ -34,7 +34,7 @@ type GenerateOptions struct {
 	Database string
 	Tags     []string
 	Efs      embed.FS
-	Platform platform.Platform
+	Platform platforms.Platform
 	Auto     bool
 	Active   bool
 }
@@ -103,7 +103,7 @@ type BuildOptions struct {
 	Go       string
 	Bun      string
 	Tags     []string
-	Platform platform.Platform
+	Platform platforms.Platform
 }
 
 type AssemblyExplorerOptions struct {
@@ -111,7 +111,7 @@ type AssemblyExplorerOptions struct {
 	Go       string
 	Bun      string
 	Tags     []string
-	Platform platform.Platform
+	Platform platforms.Platform
 	Auto     bool
 }
 
@@ -121,7 +121,7 @@ type ConfigureOptions struct {
 	Air      string
 	Bun      string
 	Efs      embed.FS
-	Platform platform.Platform
+	Platform platforms.Platform
 	Auto     bool
 }
 
@@ -139,6 +139,6 @@ type MigrateOptions struct {
 	Sqlc     string
 	SqlcYaml string
 	Database *sql.DB
-	Platform platform.Platform
+	Platform platforms.Platform
 	Auto     bool
 }
