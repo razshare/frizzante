@@ -11,8 +11,8 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/singleselect"
-	"github.com/razshare/frizzante/tui/spinner"
+	"github.com/razshare/frizzante/tui/select_one"
+	"github.com/razshare/frizzante/tui/spinners"
 )
 
 func Queries(options QueriesOptions) (err error) {
@@ -45,7 +45,7 @@ func Queries(options QueriesOptions) (err error) {
 		if options.Auto {
 			yamlFileName = choices[0].Id
 		} else {
-			yamlFileName, err = singleselect.Sendf(choices, "where is your sqlc.yaml file located?")
+			yamlFileName, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
 		}
 	}
 
@@ -74,15 +74,15 @@ func Queries(options QueriesOptions) (err error) {
 		sqlc = options.Sqlc
 	}
 
-	spin := spinner.New("generating queries")
+	spin := spinners.New("generating queries")
 
-	go spinner.Start(spin)
+	go spinners.Start(spin)
 	if !messages.Command(baseDirectory, os.Environ(), sqlc, "generate") {
-		spinner.Stop(spin)
+		spinners.Stop(spin)
 		err = errors.New("could not generate queries")
 		return
 	}
-	spinner.Stop(spin)
+	spinners.Stop(spin)
 
 	if err = FixImports(FixImportsOptions{Directory: baseDirectory}); err != nil {
 		return

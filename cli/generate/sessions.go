@@ -11,14 +11,14 @@ import (
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/singleselect"
+	"github.com/razshare/frizzante/tui/select_one"
 )
 
 func Sessions(options SessionsOptions) (err error) {
 	if options.Type == "" {
 		if options.Auto {
 			options.Type = "memory"
-		} else if options.Type, err = singleselect.Send([]search.Choice{{Id: "memory"}, {Id: "disk"}}, "type of sessions"); err != nil {
+		} else if options.Type, err = select_one.Send([]search.Choice{{Id: "memory"}, {Id: "disk"}}, "type of sessions"); err != nil {
 			return
 		}
 	}

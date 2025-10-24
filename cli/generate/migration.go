@@ -12,8 +12,8 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/singleselect"
-	"github.com/razshare/frizzante/tui/spinner"
+	"github.com/razshare/frizzante/tui/select_one"
+	"github.com/razshare/frizzante/tui/spinners"
 	"gopkg.in/yaml.v3"
 )
 
@@ -53,7 +53,7 @@ func Migration(options MigrationOptions) (err error) {
 		if options.Auto {
 			yamlFileName = choices[0].Id
 		} else {
-			yamlFileName, err = singleselect.Sendf(choices, "where is your sqlc.yaml file located?")
+			yamlFileName, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
 		}
 	}
 
@@ -82,27 +82,27 @@ func Migration(options MigrationOptions) (err error) {
 		sqlc = options.Sqlc
 	}
 
-	spin := spinner.New("checking sql code")
+	spin := spinners.New("checking sql code")
 
-	go spinner.Start(spin)
+	go spinners.Start(spin)
 	if !messages.Command(baseDirectory, os.Environ(), sqlc, "vet") {
-		spinner.Stop(spin)
+		spinners.Stop(spin)
 		err = errors.New("sql code check failed")
 		return
 	}
-	spinner.Stop(spin)
+	spinners.Stop(spin)
 	messages.Success("sql code check succeeded")
 
 	var migrationFileName string
 
-	spin = spinner.New("creating migration file")
-	go spinner.Start(spin)
+	spin = spinners.New("creating migration file")
+	go spinners.Start(spin)
 	defer func() {
 		if err == nil {
 			messages.Successf("migration generated at %s", migrationFileName)
 		}
 	}()
-	defer spinner.Stop(spin)
+	defer spinners.Stop(spin)
 
 	var data []byte
 	if data, err = os.ReadFile(yamlFileName); err != nil {

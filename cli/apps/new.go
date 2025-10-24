@@ -3,7 +3,7 @@ package apps
 import (
 	"path/filepath"
 
-	"github.com/razshare/frizzante/cli/extension"
+	"github.com/razshare/frizzante/cli/extensions"
 	flag "github.com/spf13/pflag"
 )
 
@@ -29,10 +29,10 @@ func New() *App {
 	cnf := flag.BoolP("configure", "", false, "configures project by installing required binaries and packages")
 	plt := flag.StringP("platform", "", "", "sets the platform, accepts \"linux/amd64\", \"linux/arm64\", \"darwin/arm64\", \"darwin/amd64\", \"windows/arm64\", \"windows/amd64\"")
 	yes := flag.BoolP("yes", "y", false, "confirms all binary prompts silently")
-	_go := flag.StringP("go", "", "go"+extension.Find(), "sets the go binary")
-	air := flag.StringP("air", "", filepath.Join(".gen", "air", "air"+extension.Find()), "sets the air binary")
-	bun := flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"+extension.Find()), "sets the bun binary")
-	sqc := flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"+extension.Find()), "sets the sqlc binary")
+	_go := flag.StringP("go", "", "go"+extensions.Find(), "sets the go binary")
+	air := flag.StringP("air", "", filepath.Join(".gen", "air", "air"+extensions.Find()), "sets the air binary")
+	bun := flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"+extensions.Find()), "sets the bun binary")
+	sqc := flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"+extensions.Find()), "sets the sqlc binary")
 	sqy := flag.StringP("sqlc-yaml", "", "", "sets the sqlc configuration file")
 	wel := flag.BoolP("welcome", "", false, "shows a welcome message")
 	clr := flag.BoolP("clear", "", false, "clears screen")

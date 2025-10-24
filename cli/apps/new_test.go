@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/razshare/frizzante/cli/extension"
+	"github.com/razshare/frizzante/cli/extensions"
 )
 
 func TestNew(t *testing.T) {
@@ -93,19 +93,19 @@ func TestNew(t *testing.T) {
 		t.Fatal("yes should be false")
 	}
 
-	if *a.Go != "go"+extension.Find() {
+	if *a.Go != "go"+extensions.Find() {
 		t.Fatal("go should be empty")
 	}
 
-	if *a.Air != filepath.Join(".gen", "air", "air"+extension.Find()) {
+	if *a.Air != filepath.Join(".gen", "air", "air"+extensions.Find()) {
 		t.Fatal("air should be empty")
 	}
 
-	if *a.Bun != filepath.Join(".gen", "bun", "bun"+extension.Find()) {
+	if *a.Bun != filepath.Join(".gen", "bun", "bun"+extensions.Find()) {
 		t.Fatal("bun should be empty")
 	}
 
-	if *a.Sqlc != filepath.Join(".gen", "sqlc", "sqlc"+extension.Find()) {
+	if *a.Sqlc != filepath.Join(".gen", "sqlc", "sqlc"+extensions.Find()) {
 		t.Fatal("sqlc should be empty")
 	}
 

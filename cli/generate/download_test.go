@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/razshare/frizzante/cli/user"
+	"github.com/razshare/frizzante/cli/detect"
 	"github.com/razshare/frizzante/internal/additions/lib/security"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 )
@@ -16,7 +16,7 @@ func TestDownload(t *testing.T) {
 	var err error
 
 	var cache string
-	if cache, err = user.FrizzanteCache(); err != nil {
+	if cache, err = detect.FrizzanteCache(); err != nil {
 		t.Fatal(err)
 	}
 

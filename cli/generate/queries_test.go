@@ -46,15 +46,15 @@ func TestQueries(t *testing.T) {
 		t.Fatal(".gen/sqlc/sqlc should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "sqlc", "db.go")) {
-		t.Fatal("lib/database/sqlite/sqlc/db.go should exist")
+	if !files.IsFile(filepath.Join("lib", "databases", "sqlite", "sqlc", "db.go")) {
+		t.Fatal("lib/databases/sqlite/sqlc/db.go should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "sqlc", "models.go")) {
-		t.Fatal("lib/database/sqlite/sqlc/models.go should exist")
+	if !files.IsFile(filepath.Join("lib", "databases", "sqlite", "sqlc", "models.go")) {
+		t.Fatal("lib/databases/sqlite/sqlc/models.go should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "sqlc", "queries.sql.go")) {
-		t.Fatal("lib/database/sqlite/sqlc/queries.sql.go should exist")
+	if !files.IsFile(filepath.Join("lib", "databases", "sqlite", "sqlc", "queries.sql.go")) {
+		t.Fatal("lib/databases/sqlite/sqlc/queries.sql.go should exist")
 	}
 }

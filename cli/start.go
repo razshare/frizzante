@@ -10,7 +10,7 @@ import (
 	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/singleselect"
+	"github.com/razshare/frizzante/tui/select_one"
 )
 
 func Start(app *apps.App) (err error) {
@@ -55,7 +55,7 @@ func Start(app *apps.App) (err error) {
 	// it means we need to show the TUI menu.
 	for {
 		var id string
-		if id, err = singleselect.Send(choices, "menu"); err != nil {
+		if id, err = select_one.Send(choices, "menu"); err != nil {
 			if errors.Is(err, tea.ErrInterrupted) {
 				return
 			}

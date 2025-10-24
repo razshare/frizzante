@@ -4,9 +4,9 @@ import (
 	"slices"
 
 	"github.com/razshare/frizzante/tui/confirm"
-	"github.com/razshare/frizzante/tui/input"
-	"github.com/razshare/frizzante/tui/multiselect"
+	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/select_many"
 )
 
 func Select(choices []search.Choice) (tags []string, err error) {
@@ -17,13 +17,13 @@ func Select(choices []search.Choice) (tags []string, err error) {
 	}
 
 	if yes {
-		if tags, err = multiselect.Send(choices, "select build tags"); err != nil {
+		if tags, err = select_many.Send(choices, "select build tags"); err != nil {
 			return
 		}
 
 		if slices.Contains(tags, "other") {
 			var answer string
-			if answer, err = input.Send("add your custom tags separated by comma"); err != nil {
+			if answer, err = inputs.Send("add your custom tags separated by comma"); err != nil {
 				return
 			}
 

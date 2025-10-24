@@ -30,19 +30,19 @@ func TestDatabase(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "example.txt")) {
-		t.Fatal("lib/database/sqlite/example.txt should exist")
+	if !files.IsFile(filepath.Join("lib", "databases", "sqlite", "example.txt")) {
+		t.Fatal("lib/databases/sqlite/example.txt should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "sqlc.yaml")) {
-		t.Fatal("lib/database/sqlite/sqlc.yaml should exist")
+	if !files.IsFile(filepath.Join("lib", "databases", "sqlite", "sqlc.yaml")) {
+		t.Fatal("lib/databases/sqlite/sqlc.yaml should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "queries.sql")) {
-		t.Fatal("lib/database/sqlite/queries.sql should exist")
+	if !files.IsFile(filepath.Join("lib", "databases", "sqlite", "queries.sql")) {
+		t.Fatal("lib/databases/sqlite/queries.sql should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "database", "sqlite", "schema.up.sql")) {
-		t.Fatal("lib/database/sqlite/schema.up.sql should exist")
+	if !files.IsFile(filepath.Join("lib", "databases", "sqlite", "schema.sql")) {
+		t.Fatal("lib/databases/sqlite/schema.sql should exist")
 	}
 }

@@ -12,8 +12,8 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/singleselect"
-	"github.com/razshare/frizzante/tui/spinner"
+	"github.com/razshare/frizzante/tui/select_one"
+	"github.com/razshare/frizzante/tui/spinners"
 	"gopkg.in/yaml.v3"
 )
 
@@ -47,7 +47,7 @@ func Schema(options SchemaOptions) (err error) {
 		if options.Auto {
 			yamlFileName = choices[0].Id
 		} else {
-			yamlFileName, err = singleselect.Sendf(choices, "where is your sqlc.yaml file located?")
+			yamlFileName, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
 		}
 	}
 
@@ -91,11 +91,11 @@ func Schema(options SchemaOptions) (err error) {
 
 	schema = config.Sql[0].Schema
 
-	spin := spinner.Newf("migrating database schema using %s", schema)
-	go spinner.Start(spin)
+	spin := spinners.Newf("migrating database schema using %s", schema)
+	go spinners.Start(spin)
 
 	if data, err = os.ReadFile(filepath.Join(baseDirectory, schema)); err != nil {
-		spinner.Stop(spin)
+		spinners.Stop(spin)
 		return
 	}
 
@@ -108,15 +108,15 @@ func Schema(options SchemaOptions) (err error) {
 		if _, err = transaction.Exec(query); err != nil {
 			if rerr := transaction.Rollback(); rerr != nil {
 				err = rerr
-				spinner.Stop(spin)
+				spinners.Stop(spin)
 				return
 			}
-			spinner.Stop(spin)
+			spinners.Stop(spin)
 			return
 		}
 	}
 
-	spinner.Stop(spin)
+	spinners.Stop(spin)
 
 	if err = transaction.Commit(); err != nil {
 		return

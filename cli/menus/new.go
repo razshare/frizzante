@@ -6,44 +6,44 @@ import (
 	"fmt"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/razshare/frizzante/cli/action"
+	"github.com/razshare/frizzante/cli/actions"
 	"github.com/razshare/frizzante/cli/apps"
-	"github.com/razshare/frizzante/cli/path"
+	"github.com/razshare/frizzante/cli/detect"
+	"github.com/razshare/frizzante/cli/paths"
 	tags_ "github.com/razshare/frizzante/cli/tags"
-	"github.com/razshare/frizzante/cli/user"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/tui/input"
+	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/singleselect"
+	"github.com/razshare/frizzante/tui/select_one"
 )
 
 func New(app *apps.App) (*Menu, error) {
-	cache, err := user.FrizzanteCache()
+	cache, err := detect.FrizzanteCache()
 	if err != nil {
 		return nil, err
 	}
 
-	plat, err := user.Platform(app)
+	plat, err := detect.Platform(app)
 	if err != nil {
 		return nil, err
 	}
 
-	_go, err := path.Go(*app.Go)
+	_go, err := paths.Go(*app.Go)
 	if err != nil {
 		return nil, err
 	}
 
-	air, err := path.Air(*app.Air)
+	air, err := paths.Air(*app.Air)
 	if err != nil {
 		return nil, err
 	}
 
-	bun, err := path.Bun(*app.Bun)
+	bun, err := paths.Bun(*app.Bun)
 	if err != nil {
 		return nil, err
 	}
 
-	sqlc, err := path.Sqlc(*app.Sqlc)
+	sqlc, err := paths.Sqlc(*app.Sqlc)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "configure", Description: "installs required binaries and packages"},
 				Active: func() bool { return *app.Configure },
 				Handler: func() error {
-					return action.Configure(action.ConfigureOptions{
+					return actions.Configure(actions.ConfigureOptions{
 						App:      *app.App,
 						Auto:     *app.Yes,
 						Platform: plat,
@@ -69,7 +69,7 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "create project", Description: "creates a new project"},
 				Active: func() bool { return *app.CreateProject != "" },
 				Handler: func() error {
-					return action.CreateProject(action.CreateProjectOptions{
+					return actions.CreateProject(actions.CreateProjectOptions{
 						Name: *app.CreateProject,
 						Go:   _go,
 						Efs:  app.Efs,
@@ -80,7 +80,7 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "install", Description: "installs go and js packages"},
 				Active: func() bool { return *app.Install },
 				Handler: func() error {
-					return action.Install(action.InstallOptions{
+					return actions.Install(actions.InstallOptions{
 						App: *app.App,
 						Go:  _go,
 						Bun: bun,
@@ -91,7 +91,7 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "update", Description: "updates go and js packages"},
 				Active: func() bool { return *app.Update },
 				Handler: func() error {
-					return action.Update(action.UpdateOptions{
+					return actions.Update(actions.UpdateOptions{
 						App: *app.App,
 						Go:  _go,
 						Bun: bun,
@@ -103,7 +103,7 @@ func New(app *apps.App) (*Menu, error) {
 				Active: func() bool { return *app.Add != "" },
 				Handler: func() error {
 					var packageType string
-					packageType, err = singleselect.Send(
+					packageType, err = select_one.Send(
 						[]search.Choice{
 							{Id: "js", Description: fmt.Sprintf("installs js packages in %s/node_modules", *app.App)},
 							//{Id: "go", Description: "installs go packages"},
@@ -116,7 +116,7 @@ func New(app *apps.App) (*Menu, error) {
 					}
 
 					if packageType == "js" {
-						return action.Npm(action.NpmOptions{
+						return actions.Npm(actions.NpmOptions{
 							App: *app.App,
 							Bun: bun,
 						})
@@ -150,7 +150,7 @@ func New(app *apps.App) (*Menu, error) {
 
 					tags = append(tags, "dev", "trace")
 
-					err = action.Dev(action.DevOptions{
+					err = actions.Dev(actions.DevOptions{
 						App:  *app.App,
 						Go:   _go,
 						Air:  air,
@@ -182,7 +182,7 @@ func New(app *apps.App) (*Menu, error) {
 						}
 					}
 
-					err = action.Build(action.BuildOptions{
+					err = actions.Build(actions.BuildOptions{
 						App:      *app.App,
 						Platform: plat,
 						Go:       _go,
@@ -210,12 +210,12 @@ func New(app *apps.App) (*Menu, error) {
 					choices = append(choices, search.Choice{Id: "other", Description: "use a different file"})
 
 					var name string
-					if name, err = singleselect.Sendf(choices, "where's your sqlite database located?"); err != nil {
+					if name, err = select_one.Sendf(choices, "where's your sqlite database located?"); err != nil {
 						return
 					}
 
 					if name == "other" {
-						if name, err = input.Send("where's the file located?"); err != nil {
+						if name, err = inputs.Send("where's the file located?"); err != nil {
 							return
 						}
 					}
@@ -225,7 +225,7 @@ func New(app *apps.App) (*Menu, error) {
 						return
 					}
 
-					err = action.Migrate(action.MigrateOptions{
+					err = actions.Migrate(actions.MigrateOptions{
 						Auto:     *app.Yes,
 						Platform: plat,
 						Sqlc:     sqlc,
@@ -245,7 +245,7 @@ func New(app *apps.App) (*Menu, error) {
 						return
 					}
 
-					err = action.AssemblyExplorer(action.AssemblyExplorerOptions{
+					err = actions.AssemblyExplorer(actions.AssemblyExplorerOptions{
 						App:      *app.App,
 						Platform: plat,
 						Go:       _go,
@@ -265,7 +265,7 @@ func New(app *apps.App) (*Menu, error) {
 					tags, err = tags_.Parse(*app.Tags)
 					tags = append(tags, "dev")
 
-					err = action.Generate(action.GenerateOptions{
+					err = actions.Generate(actions.GenerateOptions{
 						App:      *app.App,
 						Selected: *app.GenerateName,
 						Auto:     *app.Yes,
@@ -288,7 +288,7 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "package", Description: "builds app"},
 				Active: func() bool { return *app.Package },
 				Handler: func() error {
-					return action.Package(action.PackageOptions{
+					return actions.Package(actions.PackageOptions{
 						App: *app.App,
 						Bun: bun,
 					})
@@ -298,7 +298,7 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "package (watch)", Description: "builds app on change"},
 				Active: func() bool { return *app.PackageWatch },
 				Handler: func() error {
-					return action.PackageWatch(action.PackageWatchOptions{
+					return actions.PackageWatch(actions.PackageWatchOptions{
 						App: *app.App,
 						Bun: bun,
 					})
@@ -308,7 +308,7 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "check", Description: "checks for code errors"},
 				Active: func() bool { return *app.Check },
 				Handler: func() error {
-					return action.Check(action.CheckOptions{
+					return actions.Check(actions.CheckOptions{
 						App: *app.App,
 						Bun: bun,
 					})
@@ -318,7 +318,7 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "format", Description: "format code"},
 				Active: func() bool { return *app.Format },
 				Handler: func() error {
-					return action.Format(action.FormatOptions{
+					return actions.Format(actions.FormatOptions{
 						App: *app.App,
 						Go:  _go,
 						Bun: bun,
@@ -329,7 +329,7 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "touch", Description: "adds placeholders in app/dist"},
 				Active: func() bool { return *app.Touch },
 				Handler: func() error {
-					return action.Touch(action.TouchOptions{
+					return actions.Touch(actions.TouchOptions{
 						App: *app.App,
 					})
 				},
@@ -338,7 +338,7 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "clean project", Description: "deletes .gen, .vite, app/{dist,node_modules}"},
 				Active: func() bool { return *app.CleanProject },
 				Handler: func() error {
-					return action.CleanProject(action.CleanProjectOptions{
+					return actions.CleanProject(actions.CleanProjectOptions{
 						App: *app.App,
 						Go:  _go,
 					})
@@ -348,21 +348,21 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "reset", Description: "deletes " + cache},
 				Active: func() bool { return *app.Reset },
 				Handler: func() error {
-					return action.Reset(action.ResetOptions{})
+					return actions.Reset(actions.ResetOptions{})
 				},
 			},
 			{
 				Choice: search.Choice{Id: "clear", Description: "clears screen"},
 				Active: func() bool { return *app.Clear },
 				Handler: func() error {
-					return action.Clear(action.ClearOptions{})
+					return actions.Clear(actions.ClearOptions{})
 				},
 			},
 			{
 				Choice: search.Choice{Id: "test", Description: "runs tests"},
 				Active: func() bool { return *app.Test },
 				Handler: func() error {
-					return action.Test(action.TestOptions{
+					return actions.Test(actions.TestOptions{
 						App: *app.App,
 						Go:  _go,
 						Bun: bun,
@@ -374,7 +374,7 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "welcome", Description: "shows a welcome message"},
 				Active: func() bool { return *app.Welcome },
 				Handler: func() error {
-					return action.Welcome(action.WelcomeOptions{})
+					return actions.Welcome(actions.WelcomeOptions{})
 				},
 			},
 			{
@@ -382,14 +382,14 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "help", Description: "shows the help menu"},
 				Active: func() bool { return *app.Help },
 				Handler: func() error {
-					return action.Help(action.HelpOptions{})
+					return actions.Help(actions.HelpOptions{})
 				},
 			},
 			{
 				Choice: search.Choice{Id: "version", Description: "shows binary version"},
 				Active: func() bool { return *app.Version },
 				Handler: func() error {
-					return action.Version(action.VersionOptions{
+					return actions.Version(actions.VersionOptions{
 						Efs: app.Efs,
 					})
 				},

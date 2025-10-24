@@ -11,15 +11,15 @@ import (
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/singleselect"
-	"github.com/razshare/frizzante/tui/spinner"
+	"github.com/razshare/frizzante/tui/select_one"
+	"github.com/razshare/frizzante/tui/spinners"
 )
 
 func Database(options DatabaseOptions) (err error) {
 	if options.Type == "" {
 		if options.Auto {
 			options.Type = "sqlite"
-		} else if options.Type, err = singleselect.Send([]search.Choice{{Id: "sqlite"}}, "what type of database would you like to setup?"); err != nil {
+		} else if options.Type, err = select_one.Send([]search.Choice{{Id: "sqlite"}}, "what type of database would you like to setup?"); err != nil {
 			return
 		}
 	}
@@ -30,8 +30,8 @@ func Database(options DatabaseOptions) (err error) {
 	}
 
 	dbtype := strings.ToLower(options.Type)
-	from := "internal/additions/lib/database/" + dbtype
-	to := filepath.Join("lib", "database", dbtype)
+	from := "internal/additions/lib/databases/" + dbtype
+	to := filepath.Join("lib", "databases", dbtype)
 
 	if files.IsDirectory(to) {
 		if !options.Auto {
@@ -56,15 +56,15 @@ func Database(options DatabaseOptions) (err error) {
 	}
 
 	if dbtype == "sqlite" {
-		spin := spinner.New("adding github.com/mattn/go-sqlite3")
+		spin := spinners.New("adding github.com/mattn/go-sqlite3")
 
-		go spinner.Start(spin)
+		go spinners.Start(spin)
 		if !messages.Command(".", os.Environ(), options.Go, "get", "github.com/mattn/go-sqlite3") {
-			spinner.Stop(spin)
+			spinners.Stop(spin)
 			err = errors.New("could not add github.com/mattn/go-sqlite3")
 			return
 		}
-		spinner.Stop(spin)
+		spinners.Stop(spin)
 
 		messages.Success("sqlite database is ready")
 
@@ -99,7 +99,7 @@ func Database(options DatabaseOptions) (err error) {
 		}
 	}
 
-	err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "database")})
+	err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "databases")})
 
 	return
 }

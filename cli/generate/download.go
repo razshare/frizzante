@@ -5,17 +5,17 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/cli/user"
+	"github.com/razshare/frizzante/cli/detect"
 	"github.com/razshare/frizzante/internal/additions/lib/security"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
-	"github.com/razshare/frizzante/tui/spinner"
+	"github.com/razshare/frizzante/tui/spinners"
 )
 
 func Download(options DownloadOptions) (install Install, evict Evict, err error) {
 	var cache string
-	if cache, err = user.FrizzanteCache(); err != nil {
+	if cache, err = detect.FrizzanteCache(); err != nil {
 		return
 	}
 
@@ -30,9 +30,9 @@ func Download(options DownloadOptions) (install Install, evict Evict, err error)
 	global := filepath.Join(cache, hash+ext)
 
 	if !files.IsFile(global) {
-		spin := spinner.New(fmt.Sprintf("downloading %s", options.Url))
-		go spinner.Start(spin)
-		defer spinner.Stop(spin)
+		spin := spinners.New(fmt.Sprintf("downloading %s", options.Url))
+		go spinners.Start(spin)
+		defer spinners.Stop(spin)
 		if err = files.DownloadFile(options.Url, global); err != nil {
 			return
 		}
@@ -57,9 +57,9 @@ func Download(options DownloadOptions) (install Install, evict Evict, err error)
 			}
 		}
 
-		spin := spinner.New(fmt.Sprintf("installing %s", to))
-		go spinner.Start(spin)
-		defer spinner.Stop(spin)
+		spin := spinners.New(fmt.Sprintf("installing %s", to))
+		go spinners.Start(spin)
+		defer spinners.Stop(spin)
 
 		if ext == ".zip" {
 			if err = files.UnzipFile(global, to); err != nil {
