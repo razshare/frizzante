@@ -33,8 +33,12 @@ func TestNew(t *testing.T) {
 		t.Fatal("create project should be empty")
 	}
 
-	if *a.Generate != "" {
-		t.Fatal("generate should be empty")
+	if *a.Generate {
+		t.Fatal("generate should be false")
+	}
+
+	if *a.Value != "" {
+		t.Fatal("value should be empty")
 	}
 
 	if *a.Package {

@@ -153,11 +153,11 @@ func TestNew(t *testing.T) {
 			if item.Active() {
 				t.Fatal("generate should not be active")
 			}
-			*a.Generate = "core"
+			*a.Generate = true
 			if !item.Active() {
 				t.Fatal("generate should be active")
 			}
-			*a.Generate = ""
+			*a.Generate = false
 			//err = item.Handler()
 			//if err != nil {
 			//	t.Fatal(err)
@@ -379,6 +379,23 @@ func TestNew(t *testing.T) {
 				t.Fatal("assembly explorer should be active")
 			}
 			*a.AssemblyExplorer = false
+			//err = item.Handler()
+			//if err != nil {
+			//	t.Fatal(err)
+			//}
+			continue
+		}
+
+		if item.Choice.Id == "migrate" {
+			i++
+			if item.Active() {
+				t.Fatal("migrate should not be active")
+			}
+			*a.Migrate = true
+			if !item.Active() {
+				t.Fatal("migrate should be active")
+			}
+			*a.Migrate = false
 			//err = item.Handler()
 			//if err != nil {
 			//	t.Fatal(err)

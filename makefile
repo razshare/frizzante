@@ -1,21 +1,21 @@
-test: clean configure package
+test: clean initialize
 	./scripts/test.sh
 
-coverage: clean configure package
+coverage: clean initialize
 	./scripts/coverage.sh
 
 publish: test
 	./scripts/publish.sh
 
-configure:
-	./scripts/configure.sh
+initialize:
+	./scripts/initialize.sh
 
 clean:
 	./scripts/clean.sh
 
 install: clean
 	./scripts/install.sh
-	make configure
+	make initialize
 
 package:
 	./scripts/package.sh
