@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Generates types and checks code.
 pushd internal/project && \
-../../frizzante -gtypes && \
+../../frizzante -g:types && \
 ../../frizzante --check &&
 popd || exit 1
 
