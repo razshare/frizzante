@@ -72,9 +72,20 @@ func Database(options DatabaseOptions) (err error) {
 			return
 		}
 
-		queries := strings.Contains(strings.ToLower(options.Generate), "queries")
+		if migration := strings.Contains(strings.ToLower(options.Generate), "migration"); !migration {
+			if options.Auto {
+				migration = false
+			} else if migration, err = confirm.Send(true, "would you like to also generate your first migration?"); err != nil {
+				return
+			}
+			if migration {
+				if err = Migration(MigrationOptions{Auto: options.Auto, Sqlc: options.Sqlc, Platform: options.Platform}); err != nil {
+					return
+				}
+			}
+		}
 
-		if !queries {
+		if queries := strings.Contains(strings.ToLower(options.Generate), "queries"); !queries {
 			if options.Auto {
 				queries = false
 			} else if queries, err = confirm.Send(true, "would you like to also generate your queries?"); err != nil {
