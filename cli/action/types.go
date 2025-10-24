@@ -134,10 +134,11 @@ type NpmOptions struct {
 }
 
 type MigrateOptions struct {
-	QueryString string
-	Sqlc        string
-	SqlcYaml    string
-	Database    *sql.DB
-	Platform    platform.Platform
-	Auto        bool
+	Offset   string
+	Target   string
+	Sqlc     string
+	SqlcYaml string
+	Database *sql.DB
+	Platform platform.Platform
+	Auto     bool
 }

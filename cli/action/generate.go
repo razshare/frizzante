@@ -138,13 +138,20 @@ func Generate(options GenerateOptions) (err error) {
 				Efs:  options.Efs,
 			})
 		} else if gen == "types" {
-			return generate.Types(generate.TypesOptions{
+			return generate.Definitions(generate.DefinitionsOptions{
 				Go: options.Go,
 			})
 		} else if gen == "security" {
 			return generate.Security(generate.SecurityOptions{
 				Auto: options.Auto,
 				Efs:  options.Efs,
+			})
+		} else if gen == "migration" {
+			return generate.Migration(generate.MigrationOptions{
+				Auto:     options.Auto,
+				Sqlc:     options.Sqlc,
+				Platform: options.Platform,
+				SqlcYaml: options.SqlcYaml,
 			})
 		}
 
@@ -165,9 +172,10 @@ func Generate(options GenerateOptions) (err error) {
 				{Id: "sessions", Description: "features for managing user sessions"},
 				{Id: "database", Description: "full database setup"},
 				{Id: "queries", Description: "sql code to go code using sqlc"},
-				{Id: "schema", Description: "update the schema"},
+				{Id: "schema", Description: "database schema"},
 				{Id: "security", Description: "security and cryptographic functions"},
-				{Id: "types", Description: "type definitions using .d.ts files"},
+				{Id: "definitions", Description: "type definitions"},
+				{Id: "migration", Description: "migration file using current date"},
 			},
 			"generate",
 		)

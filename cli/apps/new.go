@@ -14,7 +14,7 @@ func New() *App {
 	ver := flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
 	res := flag.BoolP("reset", "", false, "deletes frizzante global directory")
 	crt := flag.StringP("create-project", "c", "", "creates a frizzante project")
-	gen := flag.StringP("generate", "g", "", "generates code and resources")
+	gen := flag.BoolP("generate", "g", false, "generates code and resources")
 	tst := flag.BoolP("test", "t", false, "runs tests")
 	pkg := flag.BoolP("package", "p", false, "packages app, result will be dropped in app/dist")
 	pkgw := flag.BoolP("package-watch", "", false, "watches and packages app, result will be dropped in app/dist")
@@ -39,6 +39,8 @@ func New() *App {
 	tags := flag.StringP("tags", "", "", "sets build tags")
 	asme := flag.BoolP("assembly-explorer", "", false, "shows the assembly explorer")
 	db := flag.StringP("database", "", "", "database string")
+	mig := flag.BoolP("migrate", "m", false, "migrates database schema")
+	val := flag.StringP("value", ":", "", "used to pass values to some options like -g: or -m:")
 
 	return &App{
 		Add:              add,
@@ -48,6 +50,7 @@ func New() *App {
 		Reset:            res,
 		CreateProject:    crt,
 		Generate:         gen,
+		GenerateName:     val,
 		Test:             tst,
 		Package:          pkg,
 		PackageWatch:     pkgw,
@@ -72,5 +75,7 @@ func New() *App {
 		AssemblyExplorer: asme,
 		Clear:            clr,
 		Database:         db,
+		Migrate:          mig,
+		Value:            val,
 	}
 }

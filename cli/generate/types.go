@@ -93,8 +93,15 @@ type QueriesOptions struct {
 	Auto     bool
 }
 
-type TypesOptions struct {
+type DefinitionsOptions struct {
 	Go string
+}
+
+type MigrationOptions struct {
+	Sqlc     string
+	SqlcYaml string
+	Platform platform.Platform
+	Auto     bool
 }
 
 type DownloadOptions struct {

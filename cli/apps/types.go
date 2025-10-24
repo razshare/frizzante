@@ -9,7 +9,8 @@ type App struct {
 	Version          *bool
 	Reset            *bool
 	CreateProject    *string
-	Generate         *string
+	Generate         *bool
+	GenerateName     *string
 	Test             *bool
 	Package          *bool
 	PackageWatch     *bool
@@ -31,8 +32,10 @@ type App struct {
 	SqlcYaml         *string
 	Welcome          *bool
 	Clear            *bool
+	Migrate          *bool
 	Tags             *string
 	Database         *string
+	Value            *string
 	AssemblyExplorer *bool
 	Efs              embed.FS
 }
