@@ -12,7 +12,7 @@ import (
 func Icons(options IconsOptions) (err error) {
 	if err = Copy(CopyOptions{
 		From: "internal/project/app/lib/components/icons",
-		To:   filepath.Join(options.App, "lib", "components", "icons"),
+		To:   filepath.Join("app", "lib", "components", "icons"),
 		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
@@ -21,14 +21,17 @@ func Icons(options IconsOptions) (err error) {
 
 	var bun string
 	if files.IsFile(options.Bun) {
-		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
+		if bun, err = filepath.Rel("app", options.Bun); err != nil {
 			return
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
 		bun = options.Bun
 	}
 
-	if err = npm.Install(bun, options.App, "@mdi/js"); err != nil {
+	if err = npm.Install(npm.InstallOptions{
+		Bun:      bun,
+		Packages: []string{"@mdi/js"},
+	}); err != nil {
 		return
 	}
 

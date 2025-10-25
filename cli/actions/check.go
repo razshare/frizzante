@@ -16,13 +16,13 @@ func Check(options CheckOptions) (err error) {
 	go spinners.Start(spin)
 	defer spinners.Stop(spin)
 
-	if err = Touch(TouchOptions{App: options.App}); err != nil {
+	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
 
 	var bun string
 	if files.IsFile(options.Bun) {
-		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
+		if bun, err = filepath.Rel("app", options.Bun); err != nil {
 			return
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
@@ -30,7 +30,7 @@ func Check(options CheckOptions) (err error) {
 	}
 
 	eslint := exec.Command(bun, "x", "eslint")
-	eslint.Dir = options.App
+	eslint.Dir = "app"
 	eslint.Env = os.Environ()
 	eslint.Stderr = os.Stderr
 	eslint.Stdout = os.Stdout
@@ -43,7 +43,7 @@ func Check(options CheckOptions) (err error) {
 	}
 
 	var data []byte
-	if data, err = os.ReadFile(filepath.Join(options.App, "package.json")); err != nil {
+	if data, err = os.ReadFile(filepath.Join("app", "package.json")); err != nil {
 		return err
 	}
 
@@ -62,7 +62,7 @@ func Check(options CheckOptions) (err error) {
 
 	if pkg.DevDependencies.SvelteCheck != "" {
 		svelteCheck := exec.Command(bun, "x", "svelte-check", "--tsconfig=./tsconfig.json")
-		svelteCheck.Dir = options.App
+		svelteCheck.Dir = "app"
 		svelteCheck.Env = os.Environ()
 		svelteCheck.Stderr = os.Stderr
 		svelteCheck.Stdout = os.Stdout

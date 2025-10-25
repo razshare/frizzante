@@ -10,7 +10,7 @@ import (
 )
 
 func Dev(options DevOptions) (err error) {
-	if err = Touch(TouchOptions{App: options.App}); err != nil {
+	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
 
@@ -27,7 +27,7 @@ func Dev(options DevOptions) (err error) {
 
 	var group sync.WaitGroup
 	group.Go(func() {
-		_ = PackageWatch(PackageWatchOptions{App: options.App, Bun: options.Bun})
+		_ = PackageWatch(PackageWatchOptions{Bun: options.Bun})
 	})
 	group.Go(func() {
 		messages.Command(".", os.Environ(), options.Air)

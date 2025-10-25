@@ -15,12 +15,12 @@ func Update(options UpdateOptions) (err error) {
 	go spinners.Start(spin)
 	defer spinners.Stop(spin)
 
-	if err = Touch(TouchOptions{App: options.App}); err != nil {
+	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
 	var bun string
 	if files.IsFile(options.Bun) {
-		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
+		if bun, err = filepath.Rel("app", options.Bun); err != nil {
 			return
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
@@ -31,7 +31,7 @@ func Update(options UpdateOptions) (err error) {
 		messages.Success("go packages updated")
 	}
 
-	if messages.Command(options.App, os.Environ(), bun, "update") {
+	if messages.Command("app", os.Environ(), bun, "update") {
 		messages.Success("js packages updated")
 	}
 

@@ -12,13 +12,13 @@ import (
 )
 
 func PackageWatch(options PackageWatchOptions) (err error) {
-	if err = Touch(TouchOptions{App: options.App}); err != nil {
+	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
 
 	var bun string
 	if files.IsFile(options.Bun) {
-		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
+		if bun, err = filepath.Rel("app", options.Bun); err != nil {
 			return
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
@@ -28,14 +28,14 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 	var group sync.WaitGroup
 	group.Go(func() {
 		messages.Command(
-			options.App,
+			"app",
 			append(os.Environ(), "DEV=1"),
 			bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch",
 		)
 	})
 	group.Go(func() {
 		messages.Command(
-			options.App,
+			"app",
 			os.Environ(),
 			bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=app.server.ts",
 		)
@@ -43,7 +43,7 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 	group.Go(func() {
 		time.Sleep(time.Second)
 		messages.Command(
-			options.App,
+			"app",
 			append(os.Environ(), "DEV=1"),
 			filepath.Join("node_modules", ".bin", "esbuild"),
 			"--bundle", "--watch", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js",

@@ -67,10 +67,7 @@ func Generate(options GenerateOptions) (err error) {
 			})
 		} else if gen == "queries" {
 			return generate.Queries(generate.QueriesOptions{
-				Auto:     options.Auto,
-				Sqlc:     options.Sqlc,
-				Platform: options.Platform,
-				SqlcYaml: options.SqlcYaml,
+				Go: options.Go,
 			})
 		} else if gen == "schema" {
 			var databaseString string
@@ -114,25 +111,21 @@ func Generate(options GenerateOptions) (err error) {
 			})
 		} else if gen == "core" {
 			return generate.Core(generate.CoreOptions{
-				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,
 			})
 		} else if gen == "forms" {
 			return generate.Forms(generate.FormsOptions{
-				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,
 			})
 		} else if gen == "links" {
 			return generate.Links(generate.LinksOptions{
-				App:  options.App,
 				Auto: options.Auto,
 				Efs:  options.Efs,
 			})
 		} else if gen == "icons" {
 			return generate.Icons(generate.IconsOptions{
-				App:  options.App,
 				Bun:  options.Bun,
 				Auto: options.Auto,
 				Efs:  options.Efs,

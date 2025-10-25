@@ -13,10 +13,6 @@ func TestNew(t *testing.T) {
 		t.Fatal("add should be empty")
 	}
 
-	if *a.App != "app" {
-		t.Fatal("add should be app")
-	}
-
 	if *a.Help {
 		t.Fatal("help should be false")
 	}

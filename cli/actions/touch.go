@@ -7,7 +7,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 )
 
-func Touch(options TouchOptions) (err error) {
+func Touch(_ TouchOptions) (err error) {
 	touch := func(name string) (err error) {
 		dir := filepath.Dir(name)
 
@@ -29,20 +29,20 @@ func Touch(options TouchOptions) (err error) {
 		return
 	}
 
-	if err = os.MkdirAll(filepath.Join(options.App, "dist"), os.ModePerm); err != nil {
+	if err = os.MkdirAll(filepath.Join("app", "dist"), os.ModePerm); err != nil {
 		return
 	}
 
-	if err = touch(filepath.Join(options.App, "dist", "app.server.cjs")); err != nil {
+	if err = touch(filepath.Join("app", "dist", "app.server.cjs")); err != nil {
 		return
 	}
 
-	if err = touch(filepath.Join(options.App, "dist", "client", "index.html")); err != nil {
+	if err = touch(filepath.Join("app", "dist", "client", "index.html")); err != nil {
 		return
 	}
 
 	if files.IsDirectory(filepath.Join("lib", "core", "views", "ssr")) && !files.IsDirectory(filepath.Join("lib", "core", "views", "ssr", "app")) {
-		if err = files.CopyDirectory(filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "views", "ssr", "app", "dist")); err != nil {
+		if err = files.CopyDirectory(filepath.Join("app", "dist"), filepath.Join("lib", "core", "views", "ssr", "app", "dist")); err != nil {
 			return
 		}
 	}

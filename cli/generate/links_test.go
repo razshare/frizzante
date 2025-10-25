@@ -18,7 +18,7 @@ func TestLinks(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll("app") }()
 
-	if err := Links(LinksOptions{Auto: true, Efs: TestLinksEfs, App: "app"}); err != nil {
+	if err := Links(LinksOptions{Auto: true, Efs: TestLinksEfs}); err != nil {
 		t.Fatal(err)
 	}
 

@@ -18,7 +18,7 @@ func TestIcons(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll("app") }()
 
-	if err := Icons(IconsOptions{Auto: true, Efs: TestIconsEfs, App: "app"}); err != nil {
+	if err := Icons(IconsOptions{Auto: true, Efs: TestIconsEfs}); err != nil {
 		t.Fatal(err)
 	}
 

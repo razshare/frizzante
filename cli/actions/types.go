@@ -24,7 +24,6 @@ type CreateProjectOptions struct {
 }
 
 type GenerateOptions struct {
-	App      string
 	Selected string
 	Go       string
 	Air      string
@@ -40,57 +39,47 @@ type GenerateOptions struct {
 }
 
 type TestOptions struct {
-	App string
 	Go  string
 	Bun string
 }
 
 type PackageOptions struct {
-	App  string
 	Bun  string
 	Prod bool
 }
 
 type PackageWatchOptions struct {
-	App      string
 	Bun      string
 	Callback func()
 }
 
 type CheckOptions struct {
-	App string
 	Bun string
 }
 
 type InstallOptions struct {
-	App string
 	Go  string
 	Bun string
 }
 
 type UpdateOptions struct {
-	App string
 	Go  string
 	Bun string
 }
 
 type FormatOptions struct {
-	App string
 	Go  string
 	Bun string
 }
 
 type TouchOptions struct {
-	App string
 }
 
 type CleanProjectOptions struct {
-	App string
-	Go  string
+	Go string
 }
 
 type DevOptions struct {
-	App  string
 	Go   string
 	Air  string
 	Bun  string
@@ -99,7 +88,6 @@ type DevOptions struct {
 }
 
 type BuildOptions struct {
-	App      string
 	Go       string
 	Bun      string
 	Tags     []string
@@ -107,7 +95,6 @@ type BuildOptions struct {
 }
 
 type AssemblyExplorerOptions struct {
-	App      string
 	Go       string
 	Bun      string
 	Tags     []string
@@ -116,7 +103,6 @@ type AssemblyExplorerOptions struct {
 }
 
 type ConfigureOptions struct {
-	App      string
 	Go       string
 	Air      string
 	Bun      string
@@ -128,7 +114,6 @@ type ConfigureOptions struct {
 type WelcomeOptions struct{}
 
 type NpmOptions struct {
-	App   string
 	Query string
 	Bun   string
 }

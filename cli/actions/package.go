@@ -12,17 +12,17 @@ import (
 )
 
 func Package(options PackageOptions) (err error) {
-	spin := spinners.New(fmt.Sprintf("packaging %s in %s/dist", options.App, options.App))
+	spin := spinners.New(fmt.Sprintf("packaging javascript application in app/dist"))
 	go spinners.Start(spin)
 	defer spinners.Stop(spin)
 
-	if err = Touch(TouchOptions{App: options.App}); err != nil {
+	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
 
 	var bun string
 	if files.IsFile(options.Bun) {
-		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
+		if bun, err = filepath.Rel("app", options.Bun); err != nil {
 			return
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
@@ -30,47 +30,47 @@ func Package(options PackageOptions) (err error) {
 	}
 
 	if !messages.Command(
-		options.App,
+		"app",
 		os.Environ(),
 		bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=app.server.ts") {
 		return
 	}
 
 	if !messages.Command(
-		options.App,
+		"app",
 		os.Environ(),
 		bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true") {
 		return
 	}
 
 	if !messages.Command(
-		options.App,
+		"app",
 		os.Environ(),
 		filepath.Join("node_modules", ".bin", "esbuild"),
 		"--bundle", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js") {
 		return
 	}
 
-	if err = os.RemoveAll(filepath.Join(options.App, "dist", "assets")); err != nil {
+	if err = os.RemoveAll(filepath.Join("app", "dist", "assets")); err != nil {
 		return
 	}
 
-	if err = os.RemoveAll(filepath.Join(options.App, "dist", "app.server.js")); err != nil {
+	if err = os.RemoveAll(filepath.Join("app", "dist", "app.server.js")); err != nil {
 		return
 	}
 
-	messages.Successf("%s generated", filepath.Join(options.App, "dist"))
+	messages.Success("app/dist generated")
 
 	if !options.Prod && files.IsDirectory(filepath.Join("lib", "core", "views", "render")) {
-		if files.IsDirectory(filepath.Join(options.App, "dist")) {
+		if files.IsDirectory(filepath.Join("app", "dist")) {
 			if err = files.CopyDirectory(
-				filepath.Join(options.App, "dist"),
+				filepath.Join("app", "dist"),
 				filepath.Join("lib", "core", "views", "render", "app", "dist"),
 			); err != nil {
 				return
 			}
 
-			messages.Successf("%s copied to %s", filepath.Join(options.App, "dist"), filepath.Join("lib", "core", "views", "render"))
+			messages.Success("app/dist copied to lib/core/views/render")
 		}
 	}
 

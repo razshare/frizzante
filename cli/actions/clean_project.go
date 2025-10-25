@@ -25,11 +25,11 @@ func CleanProject(options CleanProjectOptions) (err error) {
 		return
 	}
 
-	if err = os.RemoveAll(filepath.Join(options.App, "dist")); err != nil {
+	if err = os.RemoveAll(filepath.Join("dist")); err != nil {
 		return
 	}
 
-	if err = os.RemoveAll(filepath.Join(options.App, "node_modules")); err != nil {
+	if err = os.RemoveAll(filepath.Join("node_modules")); err != nil {
 		return
 	}
 
@@ -41,7 +41,7 @@ func CleanProject(options CleanProjectOptions) (err error) {
 		return
 	}
 
-	if err = Touch(TouchOptions{App: options.App}); err != nil {
+	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
 

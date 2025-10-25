@@ -22,7 +22,7 @@ func TestCore(t *testing.T) {
 	defer func() { _ = os.RemoveAll("lib") }()
 	defer func() { _ = os.RemoveAll("app") }()
 
-	if err := Core(CoreOptions{App: "app", Auto: true, Efs: TestCoreEfs}); err != nil {
+	if err := Core(CoreOptions{Auto: true, Efs: TestCoreEfs}); err != nil {
 		t.Fatal(err)
 	}
 

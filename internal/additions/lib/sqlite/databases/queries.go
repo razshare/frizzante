@@ -9,6 +9,9 @@ import (
 var Queries *sqlc.Queries
 
 func init() {
+	if err := Generate(); err != nil {
+		log.Fatal(err)
+	}
 	if database, err := Load(); err != nil {
 		log.Fatal(err)
 	} else {

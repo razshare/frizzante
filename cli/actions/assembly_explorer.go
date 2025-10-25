@@ -60,7 +60,6 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 		}
 
 		if err = Build(BuildOptions{
-			App:      options.App,
 			Go:       options.Go,
 			Bun:      options.Bun,
 			Tags:     tags,

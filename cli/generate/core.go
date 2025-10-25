@@ -14,7 +14,7 @@ func Core(options CoreOptions) (err error) {
 
 	if err = Copy(CopyOptions{
 		From: "internal/project/app/lib/scripts/core",
-		To:   filepath.Join(options.App, "lib", "scripts", "core"),
+		To:   filepath.Join("app", "lib", "scripts", "core"),
 		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
@@ -23,7 +23,7 @@ func Core(options CoreOptions) (err error) {
 
 	if err = Copy(CopyOptions{
 		From: "internal/project/app/lib/components/core",
-		To:   filepath.Join(options.App, "lib", "components", "core"),
+		To:   filepath.Join("app", "lib", "components", "core"),
 		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {

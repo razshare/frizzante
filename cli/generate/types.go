@@ -58,7 +58,6 @@ type SqlcOptions struct {
 }
 
 type CoreOptions struct {
-	App  string
 	Efs  embed.FS
 	Auto bool
 }
@@ -87,10 +86,7 @@ type SchemaOptions struct {
 }
 
 type QueriesOptions struct {
-	Sqlc     string
-	SqlcYaml string
-	Platform platforms.Platform
-	Auto     bool
+	Go string
 }
 
 type DefinitionsOptions struct {
@@ -135,20 +131,18 @@ type EmbeddedZipOptions struct {
 }
 
 type FormsOptions struct {
-	App  string
 	Efs  embed.FS
 	Auto bool
 }
 
 type IconsOptions struct {
-	Bun  string
-	App  string
+	Bun string
+
 	Efs  embed.FS
 	Auto bool
 }
 
 type LinksOptions struct {
-	App  string
 	Efs  embed.FS
 	Auto bool
 }

@@ -15,13 +15,13 @@ func Install(options InstallOptions) (err error) {
 	go spinners.Start(spin)
 	defer spinners.Stop(spin)
 
-	if err = Touch(TouchOptions{App: options.App}); err != nil {
+	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
 
 	var bun string
 	if files.IsFile(options.Bun) {
-		if bun, err = filepath.Rel(options.App, options.Bun); err != nil {
+		if bun, err = filepath.Rel("app", options.Bun); err != nil {
 			return err
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
@@ -32,7 +32,7 @@ func Install(options InstallOptions) (err error) {
 		messages.Success("go packages installed")
 	}
 
-	if messages.Command(options.App, os.Environ(), bun, "install") {
+	if messages.Command("app", os.Environ(), bun, "install") {
 		messages.Success("js packages installed")
 	}
 

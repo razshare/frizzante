@@ -9,7 +9,6 @@ import (
 
 func New() *App {
 	add := flag.StringP("add", "a", "", "adds packages")
-	app := flag.StringP("app", "", "app", "sets the app directory")
 	help := flag.BoolP("help", "h", false, "shows this help document")
 	ver := flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
 	res := flag.BoolP("reset", "", false, "deletes frizzante global directory")
@@ -44,7 +43,6 @@ func New() *App {
 
 	return &App{
 		Add:              add,
-		App:              app,
 		Help:             help,
 		Version:          ver,
 		Reset:            res,

@@ -1,5 +1,10 @@
 package npm
 
+type InstallOptions struct {
+	Bun      string
+	Packages []string
+}
+
 type PackageInfo struct {
 	Name        string `json:"name"`
 	Version     string `json:"version"`
