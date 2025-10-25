@@ -146,7 +146,7 @@ func New(app *apps.App) (*Menu, error) {
 						}
 					}
 
-					tags = append(tags, "dev", "trace")
+					tags = append(tags, "dev", "types", "trace")
 
 					err = actions.Dev(actions.DevOptions{
 						App:  *app.App,
