@@ -2,6 +2,7 @@ package generate
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"strings"
 
@@ -9,6 +10,11 @@ import (
 )
 
 func FixImports(options FixImportsOptions) (err error) {
+	if !files.IsDirectory(options.Directory) {
+		err = fmt.Errorf("directory %s not found", options.Directory)
+		return
+	}
+
 	befores := [][]byte{
 		[]byte("github.com/razshare/frizzante/internal/project"),
 		[]byte("github.com/razshare/frizzante/internal/additions"),

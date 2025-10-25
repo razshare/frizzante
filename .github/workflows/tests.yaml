@@ -23,5 +23,4 @@ jobs:
         run: |
           ./scripts/clean.sh
           ./scripts/setup.sh
-          ./scripts/package.sh
           ./scripts/test.sh

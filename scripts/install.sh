@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 message="please clean the project before installing"
 
-# Cleans additions
+# Checks cli
+test -d cli/generate/.gen && echo "$message" && exit 1
+
+# Checks additions
 test -d internal/additions/app/.vite && echo "$message" && exit 1
 test -d internal/additions/app/node_modules && echo "$message" && exit 1
 
-# Cleans project
+# Checks project
 test -d internal/project/.gen && echo "$message" && exit 1
 test -d internal/project/app/dist && echo "$message" && exit 1
 test -d internal/project/app/.vite && echo "$message" && exit 1

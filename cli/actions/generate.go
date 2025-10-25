@@ -153,6 +153,12 @@ func Generate(options GenerateOptions) (err error) {
 				Platform: options.Platform,
 				SqlcYaml: options.SqlcYaml,
 			})
+		} else if gen == "sqlc" {
+			return generate.Sqlc(generate.SqlcOptions{
+				Auto:     options.Auto,
+				Sqlc:     options.Sqlc,
+				Platform: options.Platform,
+			})
 		}
 
 		return errors.New("unknown generation")
@@ -171,6 +177,7 @@ func Generate(options GenerateOptions) (err error) {
 				{Id: "bun", Description: "fast js toolkit"},
 				{Id: "sessions", Description: "features for managing user sessions"},
 				{Id: "database", Description: "full database setup"},
+				{Id: "sqlc", Description: "sql compiler"},
 				{Id: "queries", Description: "sql code to go code using sqlc"},
 				{Id: "schema", Description: "database schema"},
 				{Id: "security", Description: "security and cryptographic functions"},

@@ -1,3 +1,5 @@
+//go:build !no_spinners
+
 package spinners
 
 func Start(spin *Spinner) {

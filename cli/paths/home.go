@@ -1,11 +1,11 @@
-package detect
+package paths
 
 import (
 	"os"
 	"path/filepath"
 )
 
-func FrizzanteHome() (home string, err error) {
+func Home() (home string, err error) {
 	home = os.Getenv("FRIZZANTE_HOME")
 
 	if home == "" {

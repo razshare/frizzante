@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
-# Generates types and checks code.
+# Checks code.
 pushd internal/project && \
-../../frizzante -g:types && \
-../../frizzante --check &&
+go run ../../main.go --check && \
 popd || exit 1
 
 # Tests cli and generate coverage profile

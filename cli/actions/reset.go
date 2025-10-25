@@ -3,14 +3,14 @@ package actions
 import (
 	"os"
 
-	"github.com/razshare/frizzante/cli/detect"
+	"github.com/razshare/frizzante/cli/paths"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 )
 
 func Reset(_ ResetOptions) (err error) {
 	var cache string
-	if cache, err = detect.FrizzanteCache(); err != nil {
+	if cache, err = paths.Cache(); err != nil {
 		return
 	}
 

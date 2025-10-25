@@ -1,8 +1,5 @@
 #!/usr/bin/env bash
-# Create a temporary binary of the cli
-test -f frizzante || go build -o frizzante
-
 # Generate type definitions
 pushd internal/project && \
-../../frizzante -gtypes && \
+go run ../../main.go -g:types -y && \
 popd || exit 1

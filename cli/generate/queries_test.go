@@ -23,6 +23,18 @@ func TestQueries(t *testing.T) {
 	defer func() { _ = os.RemoveAll(".gen") }()
 	defer func() { _ = os.RemoveAll("lib") }()
 
+	if err := Sqlc(SqlcOptions{
+		Auto:     true,
+		Sqlc:     filepath.Join(".gen", "sqlc", "sqlc"),
+		Platform: platforms.LinuxAmd64,
+	}); err != nil {
+		t.Fatal(err)
+	}
+
+	if !files.IsFile(filepath.Join(".gen", "sqlc", "sqlc")) {
+		t.Fatal(".gen/sqlc/sqlc should exist")
+	}
+
 	if err := Database(DatabaseOptions{
 		Platform: platforms.LinuxAmd64,
 		Efs:      TestQueriesEfs,
@@ -46,15 +58,15 @@ func TestQueries(t *testing.T) {
 		t.Fatal(".gen/sqlc/sqlc should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "databases", "sqlite", "sqlc", "db.go")) {
-		t.Fatal("lib/databases/sqlite/sqlc/db.go should exist")
+	if !files.IsFile(filepath.Join("lib", "sqlite", "databases", "sqlc", "db.go")) {
+		t.Fatal("lib/sqlite/databases/sqlc/db.go should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "databases", "sqlite", "sqlc", "models.go")) {
-		t.Fatal("lib/databases/sqlite/sqlc/models.go should exist")
+	if !files.IsFile(filepath.Join("lib", "sqlite", "databases", "sqlc", "models.go")) {
+		t.Fatal("lib/sqlite/databases/sqlc/models.go should exist")
 	}
 
-	if !files.IsFile(filepath.Join("lib", "databases", "sqlite", "sqlc", "queries.sql.go")) {
-		t.Fatal("lib/databases/sqlite/sqlc/queries.sql.go should exist")
+	if !files.IsFile(filepath.Join("lib", "sqlite", "databases", "sqlc", "queries.sql.go")) {
+		t.Fatal("lib/sqlite/databases/sqlc/queries.sql.go should exist")
 	}
 }

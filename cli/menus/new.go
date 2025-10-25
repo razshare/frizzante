@@ -9,25 +9,22 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/razshare/frizzante/cli/actions"
 	"github.com/razshare/frizzante/cli/apps"
-	"github.com/razshare/frizzante/cli/detect"
 	"github.com/razshare/frizzante/cli/paths"
 	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/platforms"
 	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/select_one"
 )
 
 func New(app *apps.App) (*Menu, error) {
-	cache, err := detect.FrizzanteCache()
+	cache, err := paths.Cache()
 	if err != nil {
 		return nil, err
 	}
 
-	plat, err := detect.Platform(app)
-	if err != nil {
-		return nil, err
-	}
+	platform := platforms.Detect()
 
 	_go, err := paths.Go(*app.Go)
 	if err != nil {
@@ -58,7 +55,7 @@ func New(app *apps.App) (*Menu, error) {
 					return actions.Configure(actions.ConfigureOptions{
 						App:      *app.App,
 						Auto:     *app.Yes,
-						Platform: plat,
+						Platform: platform,
 						Go:       _go,
 						Air:      air,
 						Bun:      bun,
@@ -185,7 +182,7 @@ func New(app *apps.App) (*Menu, error) {
 
 					err = actions.Build(actions.BuildOptions{
 						App:      *app.App,
-						Platform: plat,
+						Platform: platform,
 						Go:       _go,
 						Bun:      bun,
 						Tags:     tags,
@@ -252,7 +249,7 @@ func New(app *apps.App) (*Menu, error) {
 
 					err = actions.Migrate(actions.MigrateOptions{
 						Auto:     *app.Yes,
-						Platform: plat,
+						Platform: platform,
 						Sqlc:     sqlc,
 						SqlcYaml: *app.SqlcYaml,
 						Offset:   offset,
@@ -273,7 +270,7 @@ func New(app *apps.App) (*Menu, error) {
 
 					err = actions.AssemblyExplorer(actions.AssemblyExplorerOptions{
 						App:      *app.App,
-						Platform: plat,
+						Platform: platform,
 						Go:       _go,
 						Bun:      bun,
 						Tags:     tags,
@@ -296,7 +293,7 @@ func New(app *apps.App) (*Menu, error) {
 						Selected: *app.GenerateName,
 						Auto:     *app.Yes,
 						Efs:      app.Efs,
-						Platform: plat,
+						Platform: platform,
 						Go:       _go,
 						Air:      air,
 						Bun:      bun,

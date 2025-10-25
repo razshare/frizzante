@@ -30,8 +30,8 @@ func Database(options DatabaseOptions) (err error) {
 	}
 
 	dbtype := strings.ToLower(options.Type)
-	from := "internal/additions/lib/databases/" + dbtype
-	to := filepath.Join("lib", "databases", dbtype)
+	from := fmt.Sprintf("internal/additions/lib/%s/databases", dbtype)
+	to := filepath.Join("lib", dbtype, "databases")
 
 	if files.IsDirectory(to) {
 		if !options.Auto {
@@ -99,7 +99,7 @@ func Database(options DatabaseOptions) (err error) {
 		}
 	}
 
-	err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "databases")})
+	err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "sqlite")})
 
 	return
 }

@@ -3,7 +3,7 @@ package databases
 import (
 	"log"
 
-	"github.com/razshare/frizzante/internal/additions/lib/databases/sqlite/sqlc"
+	"github.com/razshare/frizzante/internal/additions/lib/sqlite/databases/sqlc"
 )
 
 var Queries *sqlc.Queries

@@ -17,9 +17,6 @@ install: clean
 	./scripts/install.sh
 	make setup
 
-package:
-	./scripts/package.sh
-
 dev:
 	./scripts/dev.sh
 

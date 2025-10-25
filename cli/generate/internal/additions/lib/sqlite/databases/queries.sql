@@ -1,2 +1,2 @@
 -- name: FindUsers :many
-select id from user
+select id from user;
