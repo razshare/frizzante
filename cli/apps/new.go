@@ -35,7 +35,7 @@ func New() *App {
 	sqy := flag.StringP("sqlc-yaml", "", "", "sets the sqlc configuration file")
 	wel := flag.BoolP("welcome", "", false, "shows a welcome message")
 	clr := flag.BoolP("clear", "", false, "clears screen")
-	tags := flag.StringP("tags", "", "", "sets build tags")
+	tgs := flag.StringP("tags", "", "", "sets build tags")
 	asme := flag.BoolP("assembly-explorer", "", false, "shows the assembly explorer")
 	db := flag.StringP("database", "", "", "database string")
 	mig := flag.BoolP("migrate", "m", false, "migrates database schema")
@@ -69,7 +69,7 @@ func New() *App {
 		Sqlc:             sqc,
 		SqlcYaml:         sqy,
 		Welcome:          wel,
-		Tags:             tags,
+		Tags:             tgs,
 		AssemblyExplorer: asme,
 		Clear:            clr,
 		Database:         db,

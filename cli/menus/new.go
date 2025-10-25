@@ -138,6 +138,7 @@ func New(app *apps.App) (*Menu, error) {
 
 					if !*app.Dev {
 						if tags, err = tags_.Select([]search.Choice{
+							{Id: "types", Description: "enables type generations"},
 							{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
 							{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
 							{Id: "other", Description: "adds custom tags"},
@@ -146,10 +147,9 @@ func New(app *apps.App) (*Menu, error) {
 						}
 					}
 
-					tags = append(tags, "dev", "types", "trace")
+					tags = append(tags, "dev", "trace")
 
 					err = actions.Dev(actions.DevOptions{
-
 						Go:   _go,
 						Air:  air,
 						Bun:  bun,
