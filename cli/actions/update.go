@@ -27,7 +27,7 @@ func Update(options UpdateOptions) (err error) {
 		bun = options.Bun
 	}
 
-	if messages.Command(".", os.Environ(), options.Go, "get", "-u", "./...") {
+	if messages.Command("", os.Environ(), options.Go, "get", "-u", "./...") {
 		messages.Success("go packages updated")
 	}
 

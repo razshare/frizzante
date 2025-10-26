@@ -8,15 +8,16 @@ import (
 )
 
 func New() *App {
-	add := flag.StringP("add", "a", "", "adds packages")
-	help := flag.BoolP("help", "h", false, "shows this help document")
+	add := flag.BoolP("add", "a", false, "adds packages")
+	hlp := flag.BoolP("help", "h", false, "shows this help document")
 	ver := flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
 	res := flag.BoolP("reset", "", false, "deletes frizzante global directory")
-	crt := flag.StringP("create-project", "c", "", "creates a frizzante project")
+	crt := flag.BoolP("create-project", "c", false, "creates a frizzante project")
 	gen := flag.BoolP("generate", "g", false, "generates code and resources")
+	mig := flag.BoolP("migrate", "m", false, "migrates database schema")
 	tst := flag.BoolP("test", "t", false, "runs tests")
 	pkg := flag.BoolP("package", "p", false, "packages app, result will be dropped in app/dist")
-	pkgw := flag.BoolP("package-watch", "", false, "watches and packages app, result will be dropped in app/dist")
+	pkw := flag.BoolP("package-watch", "", false, "watches and packages app, result will be dropped in app/dist")
 	chk := flag.BoolP("check", "", false, "checks source code for errors")
 	upd := flag.BoolP("update", "u", false, "updates go and js packages")
 	ins := flag.BoolP("install", "i", false, "installs go and js packages")
@@ -26,32 +27,31 @@ func New() *App {
 	dev := flag.BoolP("dev", "d", false, "starts dev mode")
 	bld := flag.BoolP("build", "b", false, "builds project")
 	cnf := flag.BoolP("configure", "", false, "configures project by installing required binaries and packages")
-	plt := flag.StringP("platform", "", "", "sets the platform, accepts \"linux/amd64\", \"linux/arm64\", \"darwin/arm64\", \"darwin/amd64\", \"windows/arm64\", \"windows/amd64\"")
 	yes := flag.BoolP("yes", "y", false, "confirms all binary prompts silently")
+	wel := flag.BoolP("welcome", "", false, "shows a welcome message")
+	clr := flag.BoolP("clear", "", false, "clears screen")
+	asm := flag.BoolP("assembly-explorer", "", false, "shows the assembly explorer")
+	plt := flag.StringP("platform", "", "", "sets the platform, accepts \"linux/amd64\", \"linux/arm64\", \"darwin/arm64\", \"darwin/amd64\", \"windows/arm64\", \"windows/amd64\"")
 	_go := flag.StringP("go", "", "go"+extensions.Find(), "sets the go binary")
 	air := flag.StringP("air", "", filepath.Join(".gen", "air", "air"+extensions.Find()), "sets the air binary")
 	bun := flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"+extensions.Find()), "sets the bun binary")
 	sqc := flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"+extensions.Find()), "sets the sqlc binary")
 	sqy := flag.StringP("sqlc-yaml", "", "", "sets the sqlc configuration file")
-	wel := flag.BoolP("welcome", "", false, "shows a welcome message")
-	clr := flag.BoolP("clear", "", false, "clears screen")
 	tgs := flag.StringP("tags", "", "", "sets build tags")
-	asme := flag.BoolP("assembly-explorer", "", false, "shows the assembly explorer")
 	db := flag.StringP("database", "", "", "database string")
-	mig := flag.BoolP("migrate", "m", false, "migrates database schema")
-	val := flag.StringP("value", ":", "", "used to pass values to some options like -g: or -m:")
+	val := flag.StringP("value", ":", "", "option value")
 
 	return &App{
 		Add:              add,
-		Help:             help,
+		Help:             hlp,
 		Version:          ver,
 		Reset:            res,
 		CreateProject:    crt,
 		Generate:         gen,
-		GenerateName:     val,
+		Migrate:          mig,
 		Test:             tst,
 		Package:          pkg,
-		PackageWatch:     pkgw,
+		PackageWatch:     pkw,
 		Check:            chk,
 		Update:           upd,
 		Install:          ins,
@@ -70,10 +70,9 @@ func New() *App {
 		SqlcYaml:         sqy,
 		Welcome:          wel,
 		Tags:             tgs,
-		AssemblyExplorer: asme,
+		AssemblyExplorer: asm,
 		Clear:            clr,
 		Database:         db,
-		Migrate:          mig,
 		Value:            val,
 	}
 }

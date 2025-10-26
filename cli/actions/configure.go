@@ -8,24 +8,28 @@ import (
 )
 
 func Configure(options ConfigureOptions) (err error) {
-	if _, err = exec.LookPath(options.Air); err != nil && !files.IsFile(options.Air) {
-		if err = generate.Air(generate.AirOptions{
+	if _, err = exec.LookPath(options.Air); err != nil || !files.IsFile(options.Air) {
+		if aerr := generate.Air(generate.AirOptions{
 			Air:      options.Air,
 			Auto:     options.Auto,
 			Platform: options.Platform,
-		}); err != nil {
+		}); aerr != nil {
+			err = aerr
 			return
 		}
+		err = nil
 	}
 
-	if _, err = exec.LookPath(options.Bun); err != nil && !files.IsFile(options.Bun) {
-		if err = generate.Bun(generate.BunOptions{
+	if _, err = exec.LookPath(options.Bun); err != nil || !files.IsFile(options.Bun) {
+		if berr := generate.Bun(generate.BunOptions{
 			Bun:      options.Bun,
 			Auto:     options.Auto,
 			Platform: options.Platform,
-		}); err != nil {
+		}); berr != nil {
+			err = berr
 			return
 		}
+		err = nil
 	}
 
 	return

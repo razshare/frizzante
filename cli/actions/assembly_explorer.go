@@ -89,7 +89,7 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 		var stderr *os.File
 
 		cmd := exec.Command(options.Go, "tool", "objdump", "-S", name)
-		cmd.Dir = "."
+		cmd.Dir = ""
 		cmd.Env = os.Environ()
 		cmd.Stdin = os.Stdin
 		stdout, cmd.Stdout, _ = os.Pipe()

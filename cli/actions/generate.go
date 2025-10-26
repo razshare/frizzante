@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/razshare/frizzante/cli/generate"
-	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/search"
@@ -25,25 +24,9 @@ func Generate(options GenerateOptions) (err error) {
 				Platform: options.Platform,
 			})
 		} else if gen == "air_config" {
-			tags := make([]string, 0)
-
-			if !options.Active {
-				if tags, err = tags_.Select([]search.Choice{
-					{Id: "trace", Description: "enables tracing with stack.Trace()"},
-					{Id: "types", Description: "enables type generations"},
-					{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
-					{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
-					{Id: "other", Description: "adds custom tags"},
-				}); err != nil {
-					return err
-				}
-			}
-
-			tags = append(tags, options.Tags...)
-
 			return generate.AirConfig(generate.AirConfigOptions{
 				Efs:  options.Efs,
-				Tags: tags,
+				Tags: options.Tags,
 			})
 		} else if gen == "bun" {
 			return generate.Bun(generate.BunOptions{
@@ -157,7 +140,7 @@ func Generate(options GenerateOptions) (err error) {
 		return errors.New("unknown generation")
 	}
 
-	if options.Selected == "" {
+	if options.Value == "" {
 		var items []string
 		items, err = select_many.Send(
 			[]search.Choice{
@@ -207,7 +190,7 @@ func Generate(options GenerateOptions) (err error) {
 		return
 	}
 
-	for _, item := range strings.Split(options.Selected, ",") {
+	for _, item := range strings.Split(options.Value, ",") {
 		if err = pick(strings.ToLower(item)); err != nil {
 			return
 		}

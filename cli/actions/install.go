@@ -28,7 +28,7 @@ func Install(options InstallOptions) (err error) {
 		bun = options.Bun
 	}
 
-	if messages.Command(".", os.Environ(), options.Go, "mod", "tidy") {
+	if messages.Command("", os.Environ(), options.Go, "mod", "tidy") {
 		messages.Success("go packages installed")
 	}
 

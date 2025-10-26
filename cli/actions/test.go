@@ -13,7 +13,7 @@ func Test(options TestOptions) (err error) {
 	go spinners.Start(spin)
 	defer spinners.Stop(spin)
 
-	if !messages.Command(".", os.Environ(), options.Go, "test", "./...") {
+	if !messages.Command("", os.Environ(), options.Go, "test", "./...") {
 		err = errors.New("tests failed")
 	}
 	return

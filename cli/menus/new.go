@@ -53,7 +53,6 @@ func New(app *apps.App) (*Menu, error) {
 				Active: func() bool { return *app.Configure },
 				Handler: func() error {
 					return actions.Configure(actions.ConfigureOptions{
-
 						Auto:     *app.Yes,
 						Platform: platform,
 						Go:       _go,
@@ -65,12 +64,14 @@ func New(app *apps.App) (*Menu, error) {
 			},
 			{
 				Choice: search.Choice{Id: "create project", Description: "creates a new project"},
-				Active: func() bool { return *app.CreateProject != "" },
+				Active: func() bool { return *app.CreateProject },
 				Handler: func() error {
 					return actions.CreateProject(actions.CreateProjectOptions{
-						Name: *app.CreateProject,
-						Go:   _go,
-						Efs:  app.Efs,
+						Value: *app.Value,
+						Go:    _go,
+						Efs:   app.Efs,
+						Air:   air,
+						Bun:   bun,
 					})
 				},
 			},
@@ -79,7 +80,6 @@ func New(app *apps.App) (*Menu, error) {
 				Active: func() bool { return *app.Install },
 				Handler: func() error {
 					return actions.Install(actions.InstallOptions{
-
 						Go:  _go,
 						Bun: bun,
 					})
@@ -90,7 +90,6 @@ func New(app *apps.App) (*Menu, error) {
 				Active: func() bool { return *app.Update },
 				Handler: func() error {
 					return actions.Update(actions.UpdateOptions{
-
 						Go:  _go,
 						Bun: bun,
 					})
@@ -98,7 +97,7 @@ func New(app *apps.App) (*Menu, error) {
 			},
 			{
 				Choice: search.Choice{Id: "add", Description: "adds packages"},
-				Active: func() bool { return *app.Add != "" },
+				Active: func() bool { return *app.Add },
 				Handler: func() error {
 					var packageType string
 					packageType, err = select_one.Send(
@@ -115,8 +114,8 @@ func New(app *apps.App) (*Menu, error) {
 
 					if packageType == "js" {
 						return actions.Npm(actions.NpmOptions{
-
-							Bun: bun,
+							Value: *app.Value,
+							Bun:   bun,
 						})
 					}
 
@@ -181,7 +180,6 @@ func New(app *apps.App) (*Menu, error) {
 					}
 
 					err = actions.Build(actions.BuildOptions{
-
 						Platform: platform,
 						Go:       _go,
 						Bun:      bun,
@@ -192,9 +190,78 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
+				Choice: search.Choice{Id: "assembly explorer", Description: "explores application assembly output"},
+				Active: func() bool { return *app.AssemblyExplorer },
+				Handler: func() (err error) {
+					var tags []string
+					if tags, err = tags_.Parse(*app.Tags); err != nil {
+						return
+					}
+
+					err = actions.AssemblyExplorer(actions.AssemblyExplorerOptions{
+						Platform: platform,
+						Go:       _go,
+						Bun:      bun,
+						Tags:     tags,
+						Auto:     *app.Yes,
+					})
+
+					return
+				},
+			},
+			{
+				Choice: search.Choice{Id: "generate", Description: "generates code and resources"},
+				Active: func() bool { return *app.Generate },
+				Handler: func() (err error) {
+					var tags []string
+					tags, err = tags_.Parse(*app.Tags)
+					tags = append(tags, "dev")
+
+					err = actions.Generate(actions.GenerateOptions{
+						Value:    *app.Value,
+						Auto:     *app.Yes,
+						Efs:      app.Efs,
+						Platform: platform,
+						Go:       _go,
+						Air:      air,
+						Bun:      bun,
+						Sqlc:     sqlc,
+						Tags:     tags,
+						SqlcYaml: *app.SqlcYaml,
+						Database: *app.Database,
+					})
+
+					return
+				},
+			},
+			{
 				Choice: search.Choice{Id: "migrate", Description: "migrates database schema"},
 				Active: func() bool { return *app.Migrate },
 				Handler: func() (err error) {
+					var offset string
+					var target string
+
+					parts := strings.SplitN(*app.Value, ",", 2)
+
+					if len(parts) >= 1 {
+						offset = parts[0]
+					} else {
+						offset = ""
+					}
+
+					if len(parts) >= 2 {
+						target = parts[1]
+						if offset == "" {
+							offset = "first"
+						}
+
+						if target == "" {
+							target = "last"
+						}
+					} else {
+						target = ""
+					}
+
 					var names []string
 					if names, err = files.FindWithSuffix("lib", ".sqlite"); err != nil {
 						return
@@ -223,30 +290,6 @@ func New(app *apps.App) (*Menu, error) {
 						return
 					}
 
-					var offset string
-					var target string
-
-					parts := strings.SplitN(*app.Value, ",", 2)
-
-					if len(parts) >= 1 {
-						offset = parts[0]
-					} else {
-						offset = ""
-					}
-
-					if len(parts) >= 2 {
-						target = parts[1]
-						if offset == "" {
-							offset = "first"
-						}
-
-						if target == "" {
-							target = "last"
-						}
-					} else {
-						target = ""
-					}
-
 					err = actions.Migrate(actions.MigrateOptions{
 						Auto:     *app.Yes,
 						Platform: platform,
@@ -260,59 +303,10 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice: search.Choice{Id: "assembly explorer", Description: "explores application assembly output"},
-				Active: func() bool { return *app.AssemblyExplorer },
-				Handler: func() (err error) {
-					var tags []string
-					if tags, err = tags_.Parse(*app.Tags); err != nil {
-						return
-					}
-
-					err = actions.AssemblyExplorer(actions.AssemblyExplorerOptions{
-
-						Platform: platform,
-						Go:       _go,
-						Bun:      bun,
-						Tags:     tags,
-						Auto:     *app.Yes,
-					})
-
-					return
-				},
-			},
-			{
-				Choice: search.Choice{Id: "generate", Description: "generates code and resources"},
-				Active: func() bool { return *app.Generate },
-				Handler: func() (err error) {
-					var tags []string
-					tags, err = tags_.Parse(*app.Tags)
-					tags = append(tags, "dev")
-
-					err = actions.Generate(actions.GenerateOptions{
-
-						Selected: *app.GenerateName,
-						Auto:     *app.Yes,
-						Efs:      app.Efs,
-						Platform: platform,
-						Go:       _go,
-						Air:      air,
-						Bun:      bun,
-						Sqlc:     sqlc,
-						Tags:     tags,
-						Active:   *app.GenerateName != "",
-						SqlcYaml: *app.SqlcYaml,
-						Database: *app.Database,
-					})
-
-					return
-				},
-			},
-			{
 				Choice: search.Choice{Id: "package", Description: "builds app"},
 				Active: func() bool { return *app.Package },
 				Handler: func() error {
 					return actions.Package(actions.PackageOptions{
-
 						Bun: bun,
 					})
 				},
@@ -322,7 +316,6 @@ func New(app *apps.App) (*Menu, error) {
 				Active: func() bool { return *app.PackageWatch },
 				Handler: func() error {
 					return actions.PackageWatch(actions.PackageWatchOptions{
-
 						Bun: bun,
 					})
 				},
@@ -332,7 +325,6 @@ func New(app *apps.App) (*Menu, error) {
 				Active: func() bool { return *app.Check },
 				Handler: func() error {
 					return actions.Check(actions.CheckOptions{
-
 						Bun: bun,
 					})
 				},
@@ -342,7 +334,6 @@ func New(app *apps.App) (*Menu, error) {
 				Active: func() bool { return *app.Format },
 				Handler: func() error {
 					return actions.Format(actions.FormatOptions{
-
 						Go:  _go,
 						Bun: bun,
 					})
@@ -360,7 +351,6 @@ func New(app *apps.App) (*Menu, error) {
 				Active: func() bool { return *app.CleanProject },
 				Handler: func() error {
 					return actions.CleanProject(actions.CleanProjectOptions{
-
 						Go: _go,
 					})
 				},
@@ -384,7 +374,6 @@ func New(app *apps.App) (*Menu, error) {
 				Active: func() bool { return *app.Test },
 				Handler: func() error {
 					return actions.Test(actions.TestOptions{
-
 						Go:  _go,
 						Bun: bun,
 					})

@@ -35,7 +35,7 @@ update:
 	frizzante --update
 
 types:
-	frizzante -g:types
+	frizzante -gtypes
 
 generate:
 	frizzante -g

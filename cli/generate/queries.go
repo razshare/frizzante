@@ -8,7 +8,7 @@ import (
 )
 
 func Queries(options QueriesOptions) (err error) {
-	if !messages.Command(".", append(os.Environ(), "DEV=1"), options.Go, "run", "-tags=dry,queries", ".") {
+	if !messages.Command("", append(os.Environ(), "DEV=1"), options.Go, "run", "-tags=dry,queries", ".") {
 		err = errors.New("could not generate queries")
 		return
 	}

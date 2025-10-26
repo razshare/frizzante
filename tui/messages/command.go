@@ -36,6 +36,7 @@ func Command(dir string, env []string, name string, args ...string) (ok bool) {
 	}()
 
 	if err := cmd.Run(); err != nil {
+		Error(err)
 		ok = false
 		return
 	}
