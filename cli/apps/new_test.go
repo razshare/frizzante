@@ -9,8 +9,8 @@ import (
 
 func TestNew(t *testing.T) {
 	a := New()
-	if *a.Add != "" {
-		t.Fatal("add should be empty")
+	if *a.Add {
+		t.Fatal("add should not be active")
 	}
 
 	if *a.Help {
@@ -25,8 +25,8 @@ func TestNew(t *testing.T) {
 		t.Fatal("reset should be false")
 	}
 
-	if *a.CreateProject != "" {
-		t.Fatal("create project should be empty")
+	if *a.CreateProject {
+		t.Fatal("create project should not be active")
 	}
 
 	if *a.Generate {

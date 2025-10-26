@@ -38,11 +38,11 @@ func TestNew(t *testing.T) {
 			if item.Active() {
 				t.Fatal("create project should not be active")
 			}
-			*a.CreateProject = "asd"
+			*a.CreateProject = true
 			if !item.Active() {
 				t.Fatal("create project should be active")
 			}
-			*a.CreateProject = ""
+			*a.CreateProject = false
 			//err = item.Handler()
 			//if err != nil {
 			//	t.Fatal(err)
@@ -102,11 +102,11 @@ func TestNew(t *testing.T) {
 			if item.Active() {
 				t.Fatal("add should not be active")
 			}
-			*a.Add = "test"
+			*a.Add = true
 			if !item.Active() {
 				t.Fatal("add should be active")
 			}
-			*a.Add = ""
+			*a.Add = false
 			//err = item.Handler()
 			//if err != nil {
 			//	t.Fatal(err)
