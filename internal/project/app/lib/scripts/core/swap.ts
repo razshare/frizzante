@@ -22,6 +22,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         const form = target as HTMLFormElement
         const data = new FormData(form)
         const params = new URLSearchParams()
+        const action = form.action.split("?")[0] ?? ""
         let query = ""
 
         form.reset()
@@ -37,15 +38,8 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         method = form.method.toUpperCase() as "GET" | "POST"
 
         if (method === "GET") {
-            query = `${params.toString()}`
-            if (query !== "") {
-                if (form.action.includes("?")) {
-                    query = "&" + query
-                } else {
-                    query = "?" + query
-                }
-            }
-            response = await fetch(`${form.action}${query}`, {
+            query = `?${params.toString()}`
+            response = await fetch(`${action}${query}`, {
                 headers: {
                     Accept: "application/json",
                 },
