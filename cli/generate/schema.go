@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
@@ -25,16 +24,9 @@ func Schema(options SchemaOptions) (err error) {
 	}
 
 	if yamlFileName == "" {
-		var items []string
-		if items, err = files.ReadDirectory("lib"); err != nil {
+		var names []string
+		if names, err = files.FindWithSuffix("lib", "sqlc.yaml"); err != nil {
 			return
-		}
-
-		names := make([]string, 0)
-		for _, item := range items {
-			if strings.HasSuffix(item, string(filepath.Separator)+"sqlc.yaml") {
-				names = append(names, item)
-			}
 		}
 
 		choices := make([]search.Choice, len(names))

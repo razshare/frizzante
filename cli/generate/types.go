@@ -86,7 +86,10 @@ type SchemaOptions struct {
 }
 
 type QueriesOptions struct {
-	Go string
+	Sqlc     string
+	SqlcYaml string
+	Platform platforms.Platform
+	Auto     bool
 }
 
 type DefinitionsOptions struct {

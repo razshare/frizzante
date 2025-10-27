@@ -20,9 +20,6 @@ func Load() (database *sql.DB, err error) {
 		}
 	}
 
-	if database, err = sql.Open("sqlite3", "file:source.sqlite?cache=shared"); err != nil {
-		return
-	}
-
+	database, err = sql.Open("sqlite3", "file:source.sqlite?cache=shared")
 	return
 }

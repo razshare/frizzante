@@ -50,7 +50,9 @@ func Generate(options GenerateOptions) (err error) {
 			})
 		} else if gen == "queries" {
 			return generate.Queries(generate.QueriesOptions{
-				Go: options.Go,
+				Auto:     options.Auto,
+				Sqlc:     options.Sqlc,
+				Platform: options.Platform,
 			})
 		} else if gen == "schema" {
 			var databaseString string

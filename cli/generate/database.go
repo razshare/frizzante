@@ -92,7 +92,11 @@ func Database(options DatabaseOptions) (err error) {
 				return
 			}
 			if queries {
-				if err = Queries(QueriesOptions{Go: options.Go}); err != nil {
+				if err = Queries(QueriesOptions{
+					Auto:     options.Auto,
+					Sqlc:     options.Sqlc,
+					Platform: options.Platform,
+				}); err != nil {
 					return
 				}
 			}
