@@ -8,6 +8,7 @@ import (
 
 	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/select_many"
@@ -16,6 +17,9 @@ import (
 
 func Generate(options GenerateOptions) (err error) {
 	pick := func(gen string) (err error) {
+		fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+		fmt.Println(config.Styles.Menu.Render(fmt.Sprintf("running ▷ generate (generates resources) ▷ %s", gen)))
+
 		if gen == "air" {
 			return generate.Air(generate.AirOptions{
 				Air:      options.Air,

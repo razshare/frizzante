@@ -13,6 +13,7 @@ import (
 	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/platforms"
+	"github.com/razshare/frizzante/tui/config"
 	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/select_one"
@@ -49,7 +50,7 @@ func New(app *apps.App) (*Menu, error) {
 	return &Menu{
 		Items: []Item{
 			{
-				Choice: search.Choice{Id: "configure", Description: "installs required binaries and packages"},
+				Choice: search.Choice{Id: "configure", Description: "generates bun and air binaries"},
 				Active: func() bool { return *app.Configure },
 				Handler: func() error {
 					return actions.Configure(actions.ConfigureOptions{
@@ -66,6 +67,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "create project", Description: "creates a new project"},
 				Active: func() bool { return *app.CreateProject != "" },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ create project (creates a new project)")))
 					return actions.CreateProject(actions.CreateProjectOptions{
 						Name: *app.CreateProject,
 						Go:   _go,
@@ -79,6 +82,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "install", Description: "installs go and js packages"},
 				Active: func() bool { return *app.Install },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ install (installs go and js packages)")))
 					return actions.Install(actions.InstallOptions{
 						Go:  _go,
 						Bun: bun,
@@ -89,6 +94,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "update", Description: "updates go and js packages"},
 				Active: func() bool { return *app.Update },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ update (updates go and js packages)")))
 					return actions.Update(actions.UpdateOptions{
 						Go:  _go,
 						Bun: bun,
@@ -99,6 +106,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "add", Description: "adds packages"},
 				Active: func() bool { return *app.Add != "" },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ add (adds packages)")))
 					var packageType string
 					packageType, err = select_one.Send(
 						[]search.Choice{
@@ -130,6 +139,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "dev", Description: "runs air and vite in parallel"},
 				Active: func() bool { return *app.Dev },
 				Handler: func() (err error) {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ dev (runs air and vite in parallel)")))
 					var tags []string
 					if tags, err = tags_.Parse(*app.Tags); err != nil {
 						return
@@ -163,6 +174,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "build", Description: "builds project"},
 				Active: func() bool { return *app.Build },
 				Handler: func() (err error) {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ build (builds project)")))
 					var tags []string
 					if tags, err = tags_.Parse(*app.Tags); err != nil {
 						return
@@ -193,6 +206,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "assembly explorer", Description: "explores application assembly output"},
 				Active: func() bool { return *app.AssemblyExplorer },
 				Handler: func() (err error) {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ assembly explorer (explores application assembly output)")))
 					var tags []string
 					if tags, err = tags_.Parse(*app.Tags); err != nil {
 						return
@@ -244,6 +259,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "migrate", Description: "migrates database schema"},
 				Active: func() bool { return *app.Migrate != "" },
 				Handler: func() (err error) {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ migrate (migrates database schema)")))
 					var offset string
 					var target string
 
@@ -312,15 +329,19 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "package", Description: "builds app"},
 				Active: func() bool { return *app.Package },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ package (builds app)")))
 					return actions.Package(actions.PackageOptions{
 						Bun: bun,
 					})
 				},
 			},
 			{
-				Choice: search.Choice{Id: "package (watch)", Description: "builds app on change"},
+				Choice: search.Choice{Id: "package watch", Description: "builds app on change"},
 				Active: func() bool { return *app.PackageWatch },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ package watch (builds app on change)")))
 					return actions.PackageWatch(actions.PackageWatchOptions{
 						Bun: bun,
 					})
@@ -330,6 +351,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "check", Description: "checks for code errors"},
 				Active: func() bool { return *app.Check },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ check (checks for code errors)")))
 					return actions.Check(actions.CheckOptions{
 						Bun: bun,
 					})
@@ -339,6 +362,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "format", Description: "format code"},
 				Active: func() bool { return *app.Format },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ format (format code)")))
 					return actions.Format(actions.FormatOptions{
 						Go:  _go,
 						Bun: bun,
@@ -349,6 +374,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "touch", Description: "adds placeholders in app/dist"},
 				Active: func() bool { return *app.Touch },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ touch (adds placeholders in app/dist)")))
 					return actions.Touch(actions.TouchOptions{})
 				},
 			},
@@ -356,6 +383,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "clean project", Description: "deletes .gen, .vite, app/{dist,node_modules}"},
 				Active: func() bool { return *app.CleanProject },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ clean project (deletes .gen, .vite, app/{dist,node_modules})")))
 					return actions.CleanProject(actions.CleanProjectOptions{
 						Go: _go,
 					})
@@ -365,6 +394,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "reset", Description: "deletes " + cache},
 				Active: func() bool { return *app.Reset },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprintf("running ▷ reset (deletes %s)", cache)))
 					return actions.Reset(actions.ResetOptions{})
 				},
 			},
@@ -372,6 +403,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "clear", Description: "clears screen"},
 				Active: func() bool { return *app.Clear },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ clear (clears screen)")))
 					return actions.Clear(actions.ClearOptions{})
 				},
 			},
@@ -379,6 +412,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "test", Description: "runs tests"},
 				Active: func() bool { return *app.Test },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ test (runs tests)")))
 					return actions.Test(actions.TestOptions{
 						Go:  _go,
 						Bun: bun,
@@ -390,6 +425,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "welcome", Description: "shows a welcome message"},
 				Active: func() bool { return *app.Welcome },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ welcome (shows a welcome message)")))
 					return actions.Welcome(actions.WelcomeOptions{})
 				},
 			},
@@ -398,6 +435,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "help", Description: "shows the help menu"},
 				Active: func() bool { return *app.Help },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ help (shows the help menu)")))
 					return actions.Help(actions.HelpOptions{})
 				},
 			},
@@ -405,6 +444,8 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "version", Description: "shows binary version"},
 				Active: func() bool { return *app.Version },
 				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ version (shows binary version)")))
 					return actions.Version(actions.VersionOptions{
 						Efs: app.Efs,
 					})

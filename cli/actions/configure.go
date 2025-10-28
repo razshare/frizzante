@@ -5,6 +5,7 @@ import (
 
 	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/tui/messages"
 )
 
 func Configure(options ConfigureOptions) (err error) {
@@ -31,6 +32,8 @@ func Configure(options ConfigureOptions) (err error) {
 		}
 		err = nil
 	}
+
+	messages.Success("project configured")
 
 	return
 }

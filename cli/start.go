@@ -2,7 +2,6 @@ package cli
 
 import (
 	"errors"
-	"fmt"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli/apps"
@@ -36,9 +35,6 @@ func Start(app *apps.App) (err error) {
 		if !item.Active() {
 			continue
 		}
-
-		fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
-		fmt.Println(config.Styles.Menu.Render(fmt.Sprintf("running ▷ %s (%s)", item.Choice.Id, item.Choice.Description)))
 
 		return item.Handler()
 	}

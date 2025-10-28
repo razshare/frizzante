@@ -32,9 +32,9 @@ func Update(options UpdateOptions) (err error) {
 		Name: options.Go,
 		Args: []string{"get", "-u", "./..."},
 	}) {
-		spinners.Stop(spin)
 		messages.Success("go packages updated")
 	}
+	spinners.Stop(spin)
 
 	spin = spinners.New("updating javascript packages")
 	go spinners.Start(spin)
@@ -44,9 +44,9 @@ func Update(options UpdateOptions) (err error) {
 		Name: bun,
 		Args: []string{"update"},
 	}) {
-		spinners.Stop(spin)
 		messages.Success("javascript packages updated")
 	}
+	spinners.Stop(spin)
 
 	return
 }

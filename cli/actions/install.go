@@ -23,6 +23,7 @@ func Install(options InstallOptions) (err error) {
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
 		bun = options.Bun
 	}
+
 	spin := spinners.New("installing go packages")
 	go spinners.Start(spin)
 	if messages.Command(messages.CommandOptions{

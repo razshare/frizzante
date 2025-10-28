@@ -69,6 +69,7 @@ func Database(options DatabaseOptions) (err error) {
 			err = errors.New("could not add github.com/mattn/go-sqlite3")
 			return
 		}
+
 		spinners.Stop(spin)
 
 		messages.Success("sqlite database is ready")
@@ -80,7 +81,7 @@ func Database(options DatabaseOptions) (err error) {
 		if migration := strings.Contains(strings.ToLower(options.Generate), "migration"); !migration {
 			if options.Auto {
 				migration = false
-			} else if migration, err = confirm.Send(true, "would you like to also generate your first migration?"); err != nil {
+			} else if migration, err = confirm.Send(true, "would you like to generate your first migration?"); err != nil {
 				return
 			}
 			if migration {
@@ -93,7 +94,7 @@ func Database(options DatabaseOptions) (err error) {
 		if queries := strings.Contains(strings.ToLower(options.Generate), "queries"); !queries {
 			if options.Auto {
 				queries = false
-			} else if queries, err = confirm.Send(true, "would you like to also generate your queries?"); err != nil {
+			} else if queries, err = confirm.Send(true, "would you like to generate your queries?"); err != nil {
 				return
 			}
 			if queries {
