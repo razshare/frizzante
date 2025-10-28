@@ -182,14 +182,14 @@ func TestNew(t *testing.T) {
 			continue
 		}
 
-		if item.Choice.Id == "package (watch)" {
+		if item.Choice.Id == "package watch" {
 			i++
 			if item.Active() {
-				t.Fatal("package (watch) should not be active")
+				t.Fatal("package watch should not be active")
 			}
 			*a.PackageWatch = true
 			if !item.Active() {
-				t.Fatal("package (watch) should be active")
+				t.Fatal("package watch should be active")
 			}
 			*a.PackageWatch = false
 			//err = item.Handler()
@@ -402,9 +402,23 @@ func TestNew(t *testing.T) {
 			//}
 			continue
 		}
-	}
 
-	if i != len(menu.Items) {
-		t.Fatal("some menu items were skipped")
+		if item.Choice.Id == "dev" {
+			i++
+			if item.Active() {
+				t.Fatal("dev should not be active")
+			}
+			*a.Dev = true
+			if !item.Active() {
+				t.Fatal("dev should be active")
+			}
+			*a.Dev = false
+			//err = item.Handler()
+			//if err != nil {
+			//	t.Fatal(err)
+			//}
+			continue
+		}
+		t.Fatalf("menu %s has been skipped", item.Choice.Id)
 	}
 }
