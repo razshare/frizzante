@@ -70,7 +70,12 @@ func Queries(options QueriesOptions) (err error) {
 	spin := spinners.New("generating queries")
 
 	go spinners.Start(spin)
-	if !messages.Command(baseDirectory, os.Environ(), sqlc, "generate") {
+	if !messages.Command(messages.CommandOptions{
+		Dir:  baseDirectory,
+		Env:  os.Environ(),
+		Name: sqlc,
+		Args: []string{"generate"},
+	}) {
 		spinners.Stop(spin)
 		err = errors.New("could not generate queries")
 		return

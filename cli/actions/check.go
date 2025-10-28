@@ -14,18 +14,20 @@ import (
 func Check(options CheckOptions) (err error) {
 	spin := spinners.New("checking code")
 	go spinners.Start(spin)
-	defer spinners.Stop(spin)
 
 	if err = Touch(TouchOptions{}); err != nil {
+		spinners.Stop(spin)
 		return
 	}
 
 	var bun string
 	if files.IsFile(options.Bun) {
 		if bun, err = filepath.Rel("app", options.Bun); err != nil {
+			spinners.Stop(spin)
 			return
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
+		spinners.Stop(spin)
 		bun = options.Bun
 	}
 
@@ -36,6 +38,7 @@ func Check(options CheckOptions) (err error) {
 	eslint.Stdout = os.Stdout
 	eslint.Stdin = os.Stdin
 	if err = eslint.Run(); err != nil {
+		spinners.Stop(spin)
 		if eslint.Err != nil {
 			messages.Error(eslint.Err.Error())
 		}
@@ -44,7 +47,8 @@ func Check(options CheckOptions) (err error) {
 
 	var data []byte
 	if data, err = os.ReadFile(filepath.Join("app", "package.json")); err != nil {
-		return err
+		spinners.Stop(spin)
+		return
 	}
 
 	type DevDependencies struct {
@@ -57,6 +61,7 @@ func Check(options CheckOptions) (err error) {
 
 	var pkg PackageJson
 	if err = json.Unmarshal(data, &pkg); err != nil {
+		spinners.Stop(spin)
 		return
 	}
 
@@ -69,9 +74,13 @@ func Check(options CheckOptions) (err error) {
 		svelteCheck.Stdin = os.Stdin
 		err = svelteCheck.Run()
 		if svelteCheck.Err != nil {
+			spinners.Stop(spin)
 			messages.Error(eslint.Err.Error())
+			return
 		}
 	}
+
+	spinners.Stop(spin)
 
 	return
 }

@@ -11,13 +11,10 @@ import (
 )
 
 func Update(options UpdateOptions) (err error) {
-	spin := spinners.New("updating packages")
-	go spinners.Start(spin)
-	defer spinners.Stop(spin)
-
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
+
 	var bun string
 	if files.IsFile(options.Bun) {
 		if bun, err = filepath.Rel("app", options.Bun); err != nil {
@@ -25,14 +22,30 @@ func Update(options UpdateOptions) (err error) {
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
 		bun = options.Bun
+		return
 	}
 
-	if messages.Command("", os.Environ(), options.Go, "get", "-u", "./...") {
+	spin := spinners.New("updating go packages")
+	go spinners.Start(spin)
+	if messages.Command(messages.CommandOptions{
+		Env:  os.Environ(),
+		Name: options.Go,
+		Args: []string{"get", "-u", "./..."},
+	}) {
+		spinners.Stop(spin)
 		messages.Success("go packages updated")
 	}
 
-	if messages.Command("app", os.Environ(), bun, "update") {
-		messages.Success("js packages updated")
+	spin = spinners.New("updating javascript packages")
+	go spinners.Start(spin)
+	if messages.Command(messages.CommandOptions{
+		Dir:  "app",
+		Env:  os.Environ(),
+		Name: bun,
+		Args: []string{"update"},
+	}) {
+		spinners.Stop(spin)
+		messages.Success("javascript packages updated")
 	}
 
 	return

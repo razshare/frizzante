@@ -11,10 +11,6 @@ import (
 )
 
 func Install(options InstallOptions) (err error) {
-	spin := spinners.New("installing packages")
-	go spinners.Start(spin)
-	defer spinners.Stop(spin)
-
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
@@ -22,19 +18,33 @@ func Install(options InstallOptions) (err error) {
 	var bun string
 	if files.IsFile(options.Bun) {
 		if bun, err = filepath.Rel("app", options.Bun); err != nil {
-			return err
+			return
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
 		bun = options.Bun
 	}
-
-	if messages.Command("", os.Environ(), options.Go, "mod", "tidy") {
+	spin := spinners.New("installing go packages")
+	go spinners.Start(spin)
+	if messages.Command(messages.CommandOptions{
+		Env:  os.Environ(),
+		Name: options.Go,
+		Args: []string{"mod", "tidy"},
+	}) {
 		messages.Success("go packages installed")
 	}
+	spinners.Stop(spin)
 
-	if messages.Command("app", os.Environ(), bun, "install") {
-		messages.Success("js packages installed")
+	spin = spinners.New("installing javascript packages")
+	go spinners.Start(spin)
+	if messages.Command(messages.CommandOptions{
+		Dir:  "app",
+		Env:  os.Environ(),
+		Name: bun,
+		Args: []string{"install"},
+	}) {
+		messages.Success("javascript packages installed")
 	}
+	spinners.Stop(spin)
 
 	return
 }

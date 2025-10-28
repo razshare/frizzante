@@ -32,10 +32,11 @@ func Download(options DownloadOptions) (install Install, evict Evict, err error)
 	if !files.IsFile(global) {
 		spin := spinners.New(fmt.Sprintf("downloading %s", options.Url))
 		go spinners.Start(spin)
-		defer spinners.Stop(spin)
 		if err = files.DownloadFile(options.Url, global); err != nil {
+			spinners.Stop(spin)
 			return
 		}
+		spinners.Stop(spin)
 	}
 
 	install = func(to string) (installed bool, err error) {
@@ -59,18 +60,21 @@ func Download(options DownloadOptions) (install Install, evict Evict, err error)
 
 		spin := spinners.New(fmt.Sprintf("installing %s", to))
 		go spinners.Start(spin)
-		defer spinners.Stop(spin)
 
 		if ext == ".zip" {
 			if err = files.UnzipFile(global, to); err != nil {
+				spinners.Stop(spin)
 				return
 			}
 		} else {
 			local := filepath.Join(to, filepath.Base(to)+ext)
 			if err = files.CopyFile(global, local); err != nil {
+				spinners.Stop(spin)
 				return
 			}
 		}
+
+		spinners.Stop(spin)
 
 		installed = true
 

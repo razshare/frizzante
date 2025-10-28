@@ -17,16 +17,28 @@ func Build(options BuildOptions) (err error) {
 	if len(options.Tags) > 0 {
 		spin := spinners.Newf("building binary with tags %s", strings.Join(options.Tags, ","))
 		go spinners.Start(spin)
-		defer spinners.Stop(spin)
-		if messages.Command("", os.Environ(), options.Go, "build", "-tags="+strings.Join(options.Tags, ","), "-o="+filepath.Join(".gen", "bin", "app"), ".") {
+		if messages.Command(messages.CommandOptions{
+			Env:  os.Environ(),
+			Name: options.Go,
+			Args: []string{"build", "-tags=" + strings.Join(options.Tags, ","), "-o=" + filepath.Join(".gen", "bin", "app"), "."},
+		}) {
+			spinners.Stop(spin)
 			messages.Success("project built into ", filepath.Join(".gen", "bin", "app"))
+		} else {
+			spinners.Stop(spin)
 		}
 	} else {
 		spin := spinners.New("building binary")
 		go spinners.Start(spin)
-		defer spinners.Stop(spin)
-		if messages.Command("", os.Environ(), options.Go, "build", "-o="+filepath.Join(".gen", "bin", "app"), ".") {
+		if messages.Command(messages.CommandOptions{
+			Env:  os.Environ(),
+			Name: options.Go,
+			Args: []string{"build", "-o=" + filepath.Join(".gen", "bin", "app"), "."},
+		}) {
+			spinners.Stop(spin)
 			messages.Success("project built into ", filepath.Join(".gen", "bin", "app"))
+		} else {
+			spinners.Stop(spin)
 		}
 	}
 

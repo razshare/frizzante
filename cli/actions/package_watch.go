@@ -27,27 +27,29 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 
 	var group sync.WaitGroup
 	group.Go(func() {
-		messages.Command(
-			"app",
-			append(os.Environ(), "DEV=1"),
-			bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch",
-		)
+		messages.Command(messages.CommandOptions{
+			Dir:  "app",
+			Env:  append(os.Environ(), "DEV=1"),
+			Name: bun,
+			Args: []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch"},
+		})
 	})
 	group.Go(func() {
-		messages.Command(
-			"app",
-			os.Environ(),
-			bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=app.server.ts",
-		)
+		messages.Command(messages.CommandOptions{
+			Dir:  "app",
+			Env:  os.Environ(),
+			Name: bun,
+			Args: []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=app.server.ts"},
+		})
 	})
 	group.Go(func() {
 		time.Sleep(time.Second)
-		messages.Command(
-			"app",
-			append(os.Environ(), "DEV=1"),
-			filepath.Join("node_modules", ".bin", "esbuild"),
-			"--bundle", "--watch", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js",
-		)
+		messages.Command(messages.CommandOptions{
+			Dir:  "app",
+			Env:  append(os.Environ(), "DEV=1"),
+			Name: filepath.Join("node_modules", ".bin", "esbuild"),
+			Args: []string{"--bundle", "--watch", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js"},
+		})
 	})
 	group.Wait()
 	return err

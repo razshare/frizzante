@@ -38,11 +38,11 @@ func TestNew(t *testing.T) {
 			if item.Active() {
 				t.Fatal("create project should not be active")
 			}
-			*a.CreateProject = true
+			*a.CreateProject = "test"
 			if !item.Active() {
 				t.Fatal("create project should be active")
 			}
-			*a.CreateProject = false
+			*a.CreateProject = ""
 			//err = item.Handler()
 			//if err != nil {
 			//	t.Fatal(err)
@@ -102,11 +102,11 @@ func TestNew(t *testing.T) {
 			if item.Active() {
 				t.Fatal("add should not be active")
 			}
-			*a.Add = true
+			*a.Add = "test"
 			if !item.Active() {
 				t.Fatal("add should be active")
 			}
-			*a.Add = false
+			*a.Add = ""
 			//err = item.Handler()
 			//if err != nil {
 			//	t.Fatal(err)
@@ -153,11 +153,11 @@ func TestNew(t *testing.T) {
 			if item.Active() {
 				t.Fatal("generate should not be active")
 			}
-			*a.Generate = true
+			*a.Generate = "test"
 			if !item.Active() {
 				t.Fatal("generate should be active")
 			}
-			*a.Generate = false
+			*a.Generate = ""
 			//err = item.Handler()
 			//if err != nil {
 			//	t.Fatal(err)
@@ -391,11 +391,11 @@ func TestNew(t *testing.T) {
 			if item.Active() {
 				t.Fatal("migrate should not be active")
 			}
-			*a.Migrate = true
+			*a.Migrate = "test"
 			if !item.Active() {
 				t.Fatal("migrate should be active")
 			}
-			*a.Migrate = false
+			*a.Migrate = ""
 			//err = item.Handler()
 			//if err != nil {
 			//	t.Fatal(err)

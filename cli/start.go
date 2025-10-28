@@ -37,8 +37,8 @@ func Start(app *apps.App) (err error) {
 			continue
 		}
 
-		print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
-		println(config.Styles.Menu.Render(fmt.Sprintf("running ▷ %s (%s)", item.Choice.Id, item.Choice.Description)))
+		fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+		fmt.Println(config.Styles.Menu.Render(fmt.Sprintf("running ▷ %s (%s)", item.Choice.Id, item.Choice.Description)))
 
 		return item.Handler()
 	}

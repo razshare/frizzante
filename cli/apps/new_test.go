@@ -9,7 +9,7 @@ import (
 
 func TestNew(t *testing.T) {
 	a := New()
-	if *a.Add {
+	if *a.Add != "" {
 		t.Fatal("add should not be active")
 	}
 
@@ -25,16 +25,12 @@ func TestNew(t *testing.T) {
 		t.Fatal("reset should be false")
 	}
 
-	if *a.CreateProject {
+	if *a.CreateProject != "" {
 		t.Fatal("create project should not be active")
 	}
 
-	if *a.Generate {
+	if *a.Generate != "" {
 		t.Fatal("generate should be false")
-	}
-
-	if *a.Value != "" {
-		t.Fatal("value should be empty")
 	}
 
 	if *a.Package {
@@ -79,10 +75,6 @@ func TestNew(t *testing.T) {
 
 	if *a.Configure {
 		t.Fatal("configure should be false")
-	}
-
-	if *a.Platform != "" {
-		t.Fatal("platform should be empty")
 	}
 
 	if *a.Yes {

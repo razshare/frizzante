@@ -30,7 +30,7 @@ func Dev(options DevOptions) (err error) {
 		_ = PackageWatch(PackageWatchOptions{Bun: options.Bun})
 	})
 	group.Go(func() {
-		messages.Command("", os.Environ(), options.Air)
+		messages.Command(messages.CommandOptions{Env: os.Environ(), Name: options.Air})
 	})
 	group.Wait()
 

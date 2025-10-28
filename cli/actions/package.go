@@ -1,21 +1,16 @@
 package actions
 
 import (
-	"fmt"
+	"errors"
 	"os"
 	"os/exec"
 	"path/filepath"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
-	"github.com/razshare/frizzante/tui/spinners"
 )
 
 func Package(options PackageOptions) (err error) {
-	spin := spinners.New(fmt.Sprintf("packaging javascript application in app/dist"))
-	go spinners.Start(spin)
-	defer spinners.Stop(spin)
-
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
@@ -26,28 +21,37 @@ func Package(options PackageOptions) (err error) {
 			return
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
+		err = nil // we dont' care, we fallback to options.Bun
 		bun = options.Bun
 	}
 
-	if !messages.Command(
-		"app",
-		os.Environ(),
-		bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=app.server.ts") {
+	if !messages.Command(messages.CommandOptions{
+		Env:  os.Environ(),
+		Dir:  "app",
+		Name: bun,
+		Args: []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=app.server.ts"},
+	}) {
+		err = errors.New("could not build server bundle")
 		return
 	}
 
-	if !messages.Command(
-		"app",
-		os.Environ(),
-		bun, "x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true") {
+	if !messages.Command(messages.CommandOptions{
+		Env:  os.Environ(),
+		Dir:  "app",
+		Name: filepath.Join("node_modules", ".bin", "esbuild"),
+		Args: []string{"--bundle", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js"},
+	}) {
+		err = errors.New("could not normalize server bundle")
 		return
 	}
 
-	if !messages.Command(
-		"app",
-		os.Environ(),
-		filepath.Join("node_modules", ".bin", "esbuild"),
-		"--bundle", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js") {
+	if !messages.Command(messages.CommandOptions{
+		Env:  os.Environ(),
+		Dir:  "app",
+		Name: bun,
+		Args: []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true"},
+	}) {
+		err = errors.New("could not build client bundles")
 		return
 	}
 

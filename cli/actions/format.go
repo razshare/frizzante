@@ -13,9 +13,9 @@ import (
 func Format(options FormatOptions) (err error) {
 	spin := spinners.New("formatting code")
 	go spinners.Start(spin)
-	defer spinners.Stop(spin)
 
 	if err = Touch(TouchOptions{}); err != nil {
+		spinners.Stop(spin)
 		return
 	}
 
@@ -25,6 +25,7 @@ func Format(options FormatOptions) (err error) {
 	gofmt.Stdout = os.Stdout
 	gofmt.Stdin = os.Stdin
 	if err = gofmt.Run(); err != nil {
+		spinners.Stop(spin)
 		if gofmt.Err != nil {
 			messages.Error(gofmt.Err.Error())
 		}
@@ -34,10 +35,13 @@ func Format(options FormatOptions) (err error) {
 	var bun string
 	if files.IsFile(options.Bun) {
 		if bun, err = filepath.Rel("app", options.Bun); err != nil {
+			spinners.Stop(spin)
 			return
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
+		spinners.Stop(spin)
 		bun = options.Bun
+		return
 	}
 
 	pretty := exec.Command(bun, "x", "prettier", "--write", ".")
@@ -47,11 +51,14 @@ func Format(options FormatOptions) (err error) {
 	pretty.Stdout = os.Stdout
 	pretty.Stdin = os.Stdin
 	if err = pretty.Run(); err != nil {
+		spinners.Stop(spin)
 		if pretty.Err != nil {
 			messages.Error(pretty.Err.Error())
 		}
 		return
 	}
+
+	spinners.Stop(spin)
 
 	messages.Success("project formatted")
 

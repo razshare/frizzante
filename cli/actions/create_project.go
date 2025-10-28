@@ -53,25 +53,5 @@ func CreateProject(options CreateProjectOptions) (err error) {
 		return
 	}
 
-	//var frizzante string
-	//if frizzante, err = os.Executable(); err != nil {
-	//	return
-	//}
-	//
-	//if !messages.Command("", os.Environ(), frizzante, "--configure") {
-	//	err = errors.New("could not configure project")
-	//	return
-	//}
-	//
-	//if !messages.Command("", os.Environ(), frizzante, "--install") {
-	//	err = errors.New("could not install packages")
-	//	return
-	//}
-	//
-	//if !messages.Command("", os.Environ(), frizzante, "--package") {
-	//	err = errors.New("could not package app")
-	//	return
-	//}
-
 	return
 }

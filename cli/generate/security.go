@@ -21,9 +21,9 @@ func Security(options SecurityOptions) (err error) {
 		return
 	}
 
-	messages.Command("", os.Environ(), "go", "get", "golang.org/x/crypto/bcrypt")
-	messages.Command("", os.Environ(), "go", "get", "golang.org/x/crypto/sha3")
-	messages.Command("", os.Environ(), "go", "get", "golang.org/x/text/unicode/norm")
+	messages.Command(messages.CommandOptions{Env: os.Environ(), Name: "go", Args: []string{"get", "golang.org/x/crypto/bcrypt"}})
+	messages.Command(messages.CommandOptions{Env: os.Environ(), Name: "go", Args: []string{"get", "golang.org/x/crypto/sha3"}})
+	messages.Command(messages.CommandOptions{Env: os.Environ(), Name: "go", Args: []string{"get", "golang.org/x/text/unicode/norm"}})
 
 	return
 }

@@ -24,10 +24,9 @@ func Status(label string, text string, labelBg string, labelFg string, color str
 	lines := strings.Split(text, "\n")
 	for i, line := range lines {
 		if i == 0 {
-			fmt.Print(Prefix + labelStyle.Render(label) + " " + textStyle.Render(line))
+			fmt.Println(Prefix + labelStyle.Render(label) + " " + textStyle.Render(line))
 		} else {
-			fmt.Print(Prefix + labelStyle.Render("") + " " + textStyle.Render(line))
+			fmt.Println(Prefix + labelStyle.Render("") + " " + textStyle.Render(line))
 		}
-		fmt.Print("\n\r")
 	}
 }

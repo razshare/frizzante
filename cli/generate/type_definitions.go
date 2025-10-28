@@ -8,12 +8,14 @@ import (
 )
 
 func TypeDefinitions(options TypeDefinitionsOptions) (err error) {
-	if !messages.Command("", append(os.Environ(), "DEV=1"), options.Go, "run", "-tags=dry,types", ".") {
+	if !messages.Command(messages.CommandOptions{
+		Env:  append(os.Environ(), "DEV=1"),
+		Name: options.Go,
+		Args: []string{"run", "-tags=dry,types", "."},
+	}) {
 		err = errors.New("could not generate types")
 		return
 	}
-
 	messages.Success("types generated")
-
 	return
 }

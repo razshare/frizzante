@@ -25,5 +25,5 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 }
 
 func (model *Model) View() string {
-	return fmt.Sprintf("%s %s", model.Spinner.View(), config.Styles.Menu.Render(model.Message))
+	return fmt.Sprintf("\r%s %s", model.Spinner.View(), config.Styles.Menu.Render(model.Message))
 }

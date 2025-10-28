@@ -11,10 +11,16 @@ import (
 func Test(options TestOptions) (err error) {
 	spin := spinners.New("testing code")
 	go spinners.Start(spin)
-	defer spinners.Stop(spin)
 
-	if !messages.Command("", os.Environ(), options.Go, "test", "./...") {
+	if !messages.Command(messages.CommandOptions{
+		Env:  os.Environ(),
+		Name: options.Go,
+		Args: []string{"test", "./..."},
+	}) {
+		spinners.Stop(spin)
 		err = errors.New("tests failed")
+		return
 	}
+	spinners.Stop(spin)
 	return
 }
