@@ -3,13 +3,13 @@ package apps
 import "embed"
 
 type App struct {
-	Add              *bool
+	Add              *string
 	Help             *bool
 	Version          *bool
 	Reset            *bool
-	CreateProject    *bool
-	Generate         *bool
-	Migrate          *bool
+	CreateProject    *string
+	Generate         *string
+	Migrate          *string
 	Test             *bool
 	Package          *bool
 	PackageWatch     *bool
@@ -26,7 +26,6 @@ type App struct {
 	Welcome          *bool
 	Clear            *bool
 	AssemblyExplorer *bool
-	Platform         *string
 	Go               *string
 	Air              *string
 	Bun              *string
@@ -34,6 +33,5 @@ type App struct {
 	SqlcYaml         *string
 	Tags             *string
 	Database         *string
-	Value            *string
 	Efs              embed.FS
 }

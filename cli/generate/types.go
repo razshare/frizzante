@@ -92,7 +92,7 @@ type QueriesOptions struct {
 	Auto     bool
 }
 
-type DefinitionsOptions struct {
+type TypeDefinitionsOptions struct {
 	Go string
 }
 

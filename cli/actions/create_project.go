@@ -9,22 +9,22 @@ import (
 )
 
 func CreateProject(options CreateProjectOptions) (err error) {
-	if options.Value == "" {
-		options.Value, err = inputs.Send("give the project a name")
+	if options.Name == "" {
+		options.Name, err = inputs.Send("give the project a name")
 		if err != nil {
 			return err
 		}
 	}
 
 	if err = generate.Project(generate.ProjectOptions{
-		Name: options.Value,
+		Name: options.Name,
 		Go:   options.Go,
 		Efs:  options.Efs,
 	}); err != nil {
 		return
 	}
 
-	if err = os.Chdir(options.Value); err != nil {
+	if err = os.Chdir(options.Name); err != nil {
 		return
 	}
 

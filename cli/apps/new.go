@@ -8,13 +8,13 @@ import (
 )
 
 func New() *App {
-	add := flag.BoolP("add", "a", false, "adds packages")
+	add := flag.StringP("add", "a", "", "adds packages")
 	hlp := flag.BoolP("help", "h", false, "shows this help document")
 	ver := flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
 	res := flag.BoolP("reset", "", false, "deletes frizzante global directory")
-	crt := flag.BoolP("create-project", "c", false, "creates a frizzante project")
-	gen := flag.BoolP("generate", "g", false, "generates code and resources")
-	mig := flag.BoolP("migrate", "m", false, "migrates database schema")
+	crt := flag.StringP("create-project", "c", "", "creates a frizzante project")
+	gen := flag.StringP("generate", "g", "", "generates code and resources")
+	mig := flag.StringP("migrate", "m", "", "migrates database schema")
 	tst := flag.BoolP("test", "t", false, "runs tests")
 	pkg := flag.BoolP("package", "p", false, "packages app, result will be dropped in app/dist")
 	pkw := flag.BoolP("package-watch", "", false, "watches and packages app, result will be dropped in app/dist")
@@ -31,7 +31,6 @@ func New() *App {
 	wel := flag.BoolP("welcome", "", false, "shows a welcome message")
 	clr := flag.BoolP("clear", "", false, "clears screen")
 	asm := flag.BoolP("assembly-explorer", "", false, "shows the assembly explorer")
-	plt := flag.StringP("platform", "", "", "sets the platform, accepts \"linux/amd64\", \"linux/arm64\", \"darwin/arm64\", \"darwin/amd64\", \"windows/arm64\", \"windows/amd64\"")
 	_go := flag.StringP("go", "", "go"+extensions.Find(), "sets the go binary")
 	air := flag.StringP("air", "", filepath.Join(".gen", "air", "air"+extensions.Find()), "sets the air binary")
 	bun := flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"+extensions.Find()), "sets the bun binary")
@@ -39,7 +38,6 @@ func New() *App {
 	sqy := flag.StringP("sqlc-yaml", "", "", "sets the sqlc configuration file")
 	tgs := flag.StringP("tags", "", "", "sets build tags")
 	db := flag.StringP("database", "", "", "database string")
-	val := flag.StringP("value", ":", "", "option value")
 
 	return &App{
 		Add:              add,
@@ -61,7 +59,6 @@ func New() *App {
 		Dev:              dev,
 		Build:            bld,
 		Configure:        cnf,
-		Platform:         plt,
 		Yes:              yes,
 		Go:               _go,
 		Air:              air,
@@ -73,6 +70,5 @@ func New() *App {
 		AssemblyExplorer: asm,
 		Clear:            clr,
 		Database:         db,
-		Value:            val,
 	}
 }

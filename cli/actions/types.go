@@ -18,25 +18,25 @@ type VersionOptions struct {
 }
 
 type CreateProjectOptions struct {
-	Value string
-	Go    string
-	Air   string
-	Bun   string
-	Efs   embed.FS
+	Name string
+	Go   string
+	Air  string
+	Bun  string
+	Efs  embed.FS
 }
 
 type GenerateOptions struct {
-	Value    string
-	Go       string
-	Air      string
-	Bun      string
-	Sqlc     string
-	SqlcYaml string
-	Database string
-	Tags     []string
-	Efs      embed.FS
-	Platform platforms.Platform
-	Auto     bool
+	Generation string
+	Go         string
+	Air        string
+	Bun        string
+	Sqlc       string
+	SqlcYaml   string
+	Database   string
+	Tags       []string
+	Efs        embed.FS
+	Platform   platforms.Platform
+	Auto       bool
 }
 
 type TestOptions struct {
@@ -115,7 +115,7 @@ type ConfigureOptions struct {
 type WelcomeOptions struct{}
 
 type NpmOptions struct {
-	Value string
+	Query string
 	Bun   string
 }
 

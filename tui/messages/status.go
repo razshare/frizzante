@@ -23,14 +23,11 @@ func Status(label string, text string, labelBg string, labelFg string, color str
 
 	lines := strings.Split(text, "\n")
 	for i, line := range lines {
-		if strings.TrimSpace(line) == "" {
-			continue
-		}
-
 		if i == 0 {
-			fmt.Println("\r" + Prefix + labelStyle.Render(label) + " " + textStyle.Render(line))
+			fmt.Print(Prefix + labelStyle.Render(label) + " " + textStyle.Render(line))
 		} else {
-			fmt.Println("\r" + Prefix + labelStyle.Render("") + " " + textStyle.Render(line))
+			fmt.Print(Prefix + labelStyle.Render("") + " " + textStyle.Render(line))
 		}
+		fmt.Print("\n\r")
 	}
 }

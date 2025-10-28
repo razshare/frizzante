@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"slices"
 	"strings"
 
 	"github.com/razshare/frizzante/cli/generate"
@@ -116,7 +115,7 @@ func Generate(options GenerateOptions) (err error) {
 				Efs:  options.Efs,
 			})
 		} else if gen == "types" {
-			return generate.Definitions(generate.DefinitionsOptions{
+			return generate.TypeDefinitions(generate.TypeDefinitionsOptions{
 				Go: options.Go,
 			})
 		} else if gen == "security" {
@@ -142,7 +141,7 @@ func Generate(options GenerateOptions) (err error) {
 		return errors.New("unknown generation")
 	}
 
-	if options.Value == "" {
+	if options.Generation == "" {
 		var items []string
 		items, err = select_many.Send(
 			[]search.Choice{
@@ -159,21 +158,11 @@ func Generate(options GenerateOptions) (err error) {
 				{Id: "queries", Description: "sql code to go code using sqlc"},
 				{Id: "schema", Description: "database schema"},
 				{Id: "security", Description: "security and cryptographic functions"},
-				{Id: "definitions", Description: "type definitions"},
+				{Id: "types", Description: "typescript type definitions using .d.ts files"},
 				{Id: "migration", Description: "migration file using current date"},
 			},
 			"generate",
 		)
-
-		if slices.Contains(items, "types:features") && slices.Contains(items, "types") {
-			typesFeaturesIndex := slices.Index(items, "types:features")
-			typesIndex := slices.Index(items, "types")
-
-			if typesIndex < typesFeaturesIndex {
-				items[typesIndex] = "types:features"
-				items[typesFeaturesIndex] = "types"
-			}
-		}
 
 		if err != nil {
 			return
@@ -192,7 +181,7 @@ func Generate(options GenerateOptions) (err error) {
 		return
 	}
 
-	for _, item := range strings.Split(options.Value, ",") {
+	for _, item := range strings.Split(options.Generation, ",") {
 		if err = pick(strings.ToLower(item)); err != nil {
 			return
 		}

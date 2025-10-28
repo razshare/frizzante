@@ -64,14 +64,14 @@ func New(app *apps.App) (*Menu, error) {
 			},
 			{
 				Choice: search.Choice{Id: "create project", Description: "creates a new project"},
-				Active: func() bool { return *app.CreateProject },
+				Active: func() bool { return *app.CreateProject != "" },
 				Handler: func() error {
 					return actions.CreateProject(actions.CreateProjectOptions{
-						Value: *app.Value,
-						Go:    _go,
-						Efs:   app.Efs,
-						Air:   air,
-						Bun:   bun,
+						Name: *app.CreateProject,
+						Go:   _go,
+						Efs:  app.Efs,
+						Air:  air,
+						Bun:  bun,
 					})
 				},
 			},
@@ -97,7 +97,7 @@ func New(app *apps.App) (*Menu, error) {
 			},
 			{
 				Choice: search.Choice{Id: "add", Description: "adds packages"},
-				Active: func() bool { return *app.Add },
+				Active: func() bool { return *app.Add != "" },
 				Handler: func() error {
 					var packageType string
 					packageType, err = select_one.Send(
@@ -114,7 +114,7 @@ func New(app *apps.App) (*Menu, error) {
 
 					if packageType == "js" {
 						return actions.Npm(actions.NpmOptions{
-							Value: *app.Value,
+							Query: *app.Add,
 							Bun:   bun,
 						})
 					}
@@ -211,24 +211,30 @@ func New(app *apps.App) (*Menu, error) {
 			},
 			{
 				Choice: search.Choice{Id: "generate", Description: "generates code and resources"},
-				Active: func() bool { return *app.Generate },
+				Active: func() bool { return *app.Generate != "" },
 				Handler: func() (err error) {
 					var tags []string
 					tags, err = tags_.Parse(*app.Tags)
 					tags = append(tags, "dev")
 
+					generation := *app.Generate
+
+					if generation == ":pick" {
+						generation = ""
+					}
+
 					err = actions.Generate(actions.GenerateOptions{
-						Value:    *app.Value,
-						Auto:     *app.Yes,
-						Efs:      app.Efs,
-						Platform: platform,
-						Go:       _go,
-						Air:      air,
-						Bun:      bun,
-						Sqlc:     sqlc,
-						Tags:     tags,
-						SqlcYaml: *app.SqlcYaml,
-						Database: *app.Database,
+						Generation: generation,
+						Auto:       *app.Yes,
+						Efs:        app.Efs,
+						Platform:   platform,
+						Go:         _go,
+						Air:        air,
+						Bun:        bun,
+						Sqlc:       sqlc,
+						Tags:       tags,
+						SqlcYaml:   *app.SqlcYaml,
+						Database:   *app.Database,
 					})
 
 					return
@@ -236,12 +242,12 @@ func New(app *apps.App) (*Menu, error) {
 			},
 			{
 				Choice: search.Choice{Id: "migrate", Description: "migrates database schema"},
-				Active: func() bool { return *app.Migrate },
+				Active: func() bool { return *app.Migrate != "" },
 				Handler: func() (err error) {
 					var offset string
 					var target string
 
-					parts := strings.SplitN(*app.Value, ",", 2)
+					parts := strings.SplitN(*app.Migrate, ",", 2)
 
 					if len(parts) >= 1 {
 						offset = parts[0]

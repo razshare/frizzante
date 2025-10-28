@@ -7,13 +7,13 @@ import (
 	"github.com/razshare/frizzante/tui/messages"
 )
 
-func Definitions(options DefinitionsOptions) (err error) {
+func TypeDefinitions(options TypeDefinitionsOptions) (err error) {
 	if !messages.Command("", append(os.Environ(), "DEV=1"), options.Go, "run", "-tags=dry,types", ".") {
-		err = errors.New("could not generate definitions")
+		err = errors.New("could not generate types")
 		return
 	}
 
-	messages.Success("definitions generated")
+	messages.Success("types generated")
 
 	return
 }

@@ -19,9 +19,9 @@ go mod tidy
 go get ./...
 pushd internal/project
   "$frizzante" --configure
-  "$frizzante" -g:sqlc -y
+  "$frizzante" -gsqlc -y
   "$frizzante" --install
-  "$frizzante" -g:types -y
+  "$frizzante" -gtypes -y
   "$frizzante" --package
   cropy app/node_modules ../additions/app/node_modules
   cropy .gen/sqlc/sqlc ../../cli/generate/.gen/sqlc/sqlc
