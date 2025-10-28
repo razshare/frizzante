@@ -60,7 +60,6 @@ func Database(options DatabaseOptions) (err error) {
 
 		go spinners.Start(spin)
 		if !messages.Command(messages.CommandOptions{
-			Dir:  "app",
 			Env:  os.Environ(),
 			Name: options.Go,
 			Args: []string{"get", "github.com/mattn/go-sqlite3"},
