@@ -10,6 +10,7 @@ import (
 func New() *App {
 	add := flag.StringP("add", "a", "", "adds packages")
 	hlp := flag.BoolP("help", "h", false, "shows this help document")
+	lck := flag.BoolP("lock-packages", "", false, "locks packages to the current version")
 	ver := flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
 	res := flag.BoolP("reset", "", false, "deletes frizzante global directory")
 	crt := flag.StringP("create-project", "c", "", "creates a frizzante project")
@@ -70,5 +71,6 @@ func New() *App {
 		AssemblyExplorer: asm,
 		Clear:            clr,
 		Database:         db,
+		LockPackages:     lck,
 	}
 }

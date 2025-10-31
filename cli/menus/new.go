@@ -409,6 +409,15 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
+				Choice: search.Choice{Id: "lock packages", Description: "locks packages to the current exact version"},
+				Active: func() bool { return *app.LockPackages },
+				Handler: func() error {
+					fmt.Print(config.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(config.Styles.Menu.Render(fmt.Sprint("running ▷ lock packages (locks packages to the current exact version)")))
+					return actions.LockPackages(actions.LockPackagesOptions{})
+				},
+			},
+			{
 				Choice: search.Choice{Id: "test", Description: "runs tests"},
 				Active: func() bool { return *app.Test },
 				Handler: func() error {

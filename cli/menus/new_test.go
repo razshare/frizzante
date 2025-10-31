@@ -419,6 +419,23 @@ func TestNew(t *testing.T) {
 			//}
 			continue
 		}
+
+		if item.Choice.Id == "lock packages" {
+			i++
+			if item.Active() {
+				t.Fatal("lock packages should not be active")
+			}
+			*a.LockPackages = true
+			if !item.Active() {
+				t.Fatal("lock packages should be active")
+			}
+			*a.LockPackages = false
+			//err = item.Handler()
+			//if err != nil {
+			//	t.Fatal(err)
+			//}
+			continue
+		}
 		t.Fatalf("menu %s has been skipped", item.Choice.Id)
 	}
 }

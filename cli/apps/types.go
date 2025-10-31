@@ -26,6 +26,7 @@ type App struct {
 	Welcome          *bool
 	Clear            *bool
 	AssemblyExplorer *bool
+	LockPackages     *bool
 	Go               *string
 	Air              *string
 	Bun              *string

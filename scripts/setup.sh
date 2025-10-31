@@ -19,6 +19,7 @@ go mod tidy
 go get ./...
 pushd internal/project
   "$frizzante" --configure
+  "$frizzante" --lock-packages
   "$frizzante" -gsqlc -y
   "$frizzante" --install
   "$frizzante" -gtypes -y

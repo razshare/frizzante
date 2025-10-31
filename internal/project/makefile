@@ -34,6 +34,9 @@ install:
 update:
 	frizzante --update
 
+lock-packages:
+	frizzante --lock-packages
+
 types:
 	frizzante -gtypes
 

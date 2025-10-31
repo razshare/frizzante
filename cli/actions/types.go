@@ -128,3 +128,6 @@ type MigrateOptions struct {
 	Platform platforms.Platform
 	Auto     bool
 }
+
+type LockPackagesOptions struct {
+}
