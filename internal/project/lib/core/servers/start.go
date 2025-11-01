@@ -35,7 +35,7 @@ func Start(server *Server) {
 				server.ErrorLog.Println(err)
 				return
 			}
-			con := &clients.Client{
+			client := &clients.Client{
 				Writer:  writer,
 				Request: request,
 				Config:  config,
@@ -44,7 +44,7 @@ func Start(server *Server) {
 			}
 			for _, guard := range route.Guards {
 				allow := false
-				guard.Handler(con, func() { allow = true })
+				guard.Handler(client, func() { allow = true })
 				if !allow {
 					if guard.Name == "" {
 						server.InfoLog.Printf("an unnamed guard blocked the request on route %s", route.Pattern)
@@ -54,7 +54,12 @@ func Start(server *Server) {
 					return
 				}
 			}
-			route.Handler(con)
+			defer func() {
+				for _, function := range client.Deferred {
+					function()
+				}
+			}()
+			route.Handler(client)
 		})
 	}
 	var exit bool

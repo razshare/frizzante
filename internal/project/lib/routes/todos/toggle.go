@@ -4,11 +4,11 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
-	"github.com/razshare/frizzante/internal/project/lib/sessions/memory"
+	"github.com/razshare/frizzante/internal/project/lib/memory/sessions"
 )
 
 func Toggle(client *clients.Client) {
-	session := sessions.Start(receive.SessionId(client))
+	session := sessions.Start(client)
 
 	var form ToggleForm
 	if !receive.Form(client, &form) {

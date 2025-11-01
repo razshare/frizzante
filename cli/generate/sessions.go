@@ -23,14 +23,14 @@ func Sessions(options SessionsOptions) (err error) {
 		}
 	}
 
-	stype := strings.ToLower(options.Type)
+	sessionType := strings.ToLower(options.Type)
 
-	if !slices.Contains([]string{"memory", "disk"}, stype) {
-		err = fmt.Errorf("sessions of type %s are not supported", stype)
+	if !slices.Contains([]string{"memory", "disk"}, sessionType) {
+		err = fmt.Errorf("sessions of type %s are not supported", sessionType)
 		return
 	}
 
-	baseDirectory := filepath.Join("lib", "sessions", stype)
+	baseDirectory := filepath.Join("lib", sessionType, "sessions")
 
 	if files.IsDirectory(baseDirectory) {
 		if !options.Auto {
@@ -51,7 +51,7 @@ func Sessions(options SessionsOptions) (err error) {
 	}
 
 	var from string
-	if stype == "memory" {
+	if sessionType == "memory" {
 		from = "internal/project/" + baseDirectory
 	} else {
 		from = "internal/additions/" + baseDirectory
@@ -70,7 +70,7 @@ func Sessions(options SessionsOptions) (err error) {
 		return
 	}
 
-	switch stype {
+	switch sessionType {
 	case "memory":
 		messages.Success(
 			"memory sessions generated.\n",
@@ -81,20 +81,19 @@ func Sessions(options SessionsOptions) (err error) {
 		messages.Tip(
 			"## usage example\n",
 			"func(client *clients.Client){\n",
-			"    session := sessions.Start(receive.SessionId(client))\n",
+			"    session := sessions.Start(client)\n",
 			"}\n",
 			"\n",
-			"## state shape\n",
-			"Your session state is defined by sessions.State,\n",
-			"which is located in "+baseDirectory+"/types.go.\n",
+			"## session shape\n",
+			"session shape is defined in "+baseDirectory+"/types.go.\n",
 			"\n",
 			"## initial state\n",
-			"Every new session is initialized with sessions.New(), \n",
+			"every new session is initialized with sessions.New(), \n",
 			"which is located in "+baseDirectory+"/new.go.\n",
 		)
 	case "disk":
 		messages.Success(
-			"disk sessions generated at session.*\n",
+			"disk sessions generated.\n",
 			baseDirectory+"/new.go\n",
 			baseDirectory+"/start.go\n",
 			baseDirectory+"/types.go\n",
@@ -102,16 +101,14 @@ func Sessions(options SessionsOptions) (err error) {
 		messages.Tip(
 			"## usage example\n",
 			"func(client *clients.Client){\n",
-			"    session := sessions.Start(receive.SessionId(client))\n",
-			"    defer sessions.Save(client, session)\n",
+			"    session := sessions.Start(client)\n",
 			"}\n",
 			"\n",
-			"## state shape\n",
-			"session state is defined by sessions.State,\n",
-			"which is located in "+baseDirectory+"/types.go.\n",
+			"## session shape\n",
+			"session shape is defined in "+baseDirectory+"/types.go.\n",
 			"\n",
 			"## initial state\n",
-			"ever new session is initialized with sessions.New(), \n",
+			"every new session is initialized with sessions.New(), \n",
 			"which is located in "+baseDirectory+"/new.go.\n",
 		)
 	}
