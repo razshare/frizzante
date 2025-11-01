@@ -102,6 +102,7 @@ func Sessions(options SessionsOptions) (err error) {
 			"## usage example\n",
 			"func(client *clients.Client){\n",
 			"    session := sessions.Start(client)\n",
+			"    defer sessions.Start(session, client)\n",
 			"}\n",
 			"\n",
 			"## session shape\n",

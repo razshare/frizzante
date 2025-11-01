@@ -54,11 +54,6 @@ func Start(server *Server) {
 					return
 				}
 			}
-			defer func() {
-				for _, function := range client.Deferred {
-					function()
-				}
-			}()
 			route.Handler(client)
 		})
 	}

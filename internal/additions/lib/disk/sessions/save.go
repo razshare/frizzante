@@ -12,7 +12,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-func Start(client *clients.Client) (session *Session) {
+func Save(session *Session, client *clients.Client) {
 	id := receive.SessionId(client)
 	fileName := filepath.Join(DirectoryName, id+".json")
 
@@ -26,21 +26,17 @@ func Start(client *clients.Client) (session *Session) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	if files.IsFile(fileName) {
-		session = &Session{}
-		if data, err := os.ReadFile(fileName); err != nil {
+	if !files.IsDirectory(DirectoryName) {
+		if err := os.MkdirAll(DirectoryName, os.ModePerm); err != nil {
 			client.Config.ErrorLog.Println(err, stack.Trace())
-			session = New()
-			return
-		} else if err = json.Unmarshal(data, session); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
-			session = New()
 			return
 		}
-	} else {
-		session = New()
 	}
-
-	Sessions[id] = session
-	return
+	if data, err := json.MarshalIndent(session, "", "    "); err != nil {
+		client.Config.ErrorLog.Println(err, stack.Trace())
+		return
+	} else if err = os.WriteFile(fileName, data, os.ModePerm); err != nil {
+		client.Config.ErrorLog.Println(err, stack.Trace())
+		return
+	}
 }
