@@ -27,8 +27,8 @@ func TestSession(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !files.IsFile(filepath.Join("lib", "sessions", "memory", "example.txt")) {
-		t.Fatal("lib/sessions/memory/example.txt should exist")
+	if !files.IsFile(filepath.Join("lib", "memory", "sessions", "example.txt")) {
+		t.Fatal("lib/memory/sessions/example.txt should exist")
 	}
 
 	if err := Sessions(SessionsOptions{
@@ -39,7 +39,7 @@ func TestSession(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if !files.IsFile(filepath.Join("lib", "sessions", "disk", "example.txt")) {
-		t.Fatal("lib/sessions/disk/example.txt should exist")
+	if !files.IsFile(filepath.Join("lib", "disk", "sessions", "example.txt")) {
+		t.Fatal("lib/disk/sessions/example.txt should exist")
 	}
 }
