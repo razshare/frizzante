@@ -14,7 +14,6 @@ const LogLevelDanger LogLevel = 2
 
 type Config struct {
 	Data     []byte
-	Format   string
 	App      string
 	Server   string
 	ErrorLog *log.Logger

@@ -42,5 +42,6 @@ func Start(client *clients.Client) (session *Session) {
 	}
 
 	Sessions[id] = session
+
 	return
 }

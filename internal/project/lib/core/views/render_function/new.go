@@ -88,11 +88,6 @@ func New(config Config) (render RenderFunction, err error) {
 		return
 	}
 
-	//var text string
-	//if text, err = js.Bundle(filepath.Join(config.App, "dist"), api.FormatCommonJS, string(config.Data)); err != nil {
-	//	return
-	//}
-
 	source := "const module={exports:{}};\n" + string(config.Data) + "\nfrizzante_set_render(render)"
 
 	var prog *goja.Program

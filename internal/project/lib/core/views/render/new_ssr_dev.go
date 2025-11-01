@@ -72,7 +72,6 @@ func New(config Config) Render {
 
 		render, err = render_function.New(render_function.Config{
 			Data:     data,
-			Format:   RenderFormat,
 			App:      app,
 			Server:   server,
 			ErrorLog: errorLog,

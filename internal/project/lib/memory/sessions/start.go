@@ -5,8 +5,6 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 )
 
-var Sessions = map[string]*Session{}
-
 func Start(client *clients.Client) (session *Session) {
 	id := receive.SessionId(client)
 	var exists bool

@@ -12,15 +12,20 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-func Save(session *Session, client *clients.Client) {
+func Save(client *clients.Client) {
 	id := receive.SessionId(client)
 	fileName := filepath.Join(DirectoryName, id+".json")
 
-	var mutex *sync.Mutex
 	var exists bool
+	var mutex *sync.Mutex
 	if mutex, exists = Mutexes[id]; !exists {
 		mutex = &sync.Mutex{}
 		Mutexes[id] = mutex
+	}
+
+	var session *Session
+	if session, exists = Sessions[id]; !exists {
+		session = New()
 	}
 
 	mutex.Lock()
