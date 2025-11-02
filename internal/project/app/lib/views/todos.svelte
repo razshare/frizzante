@@ -1,6 +1,6 @@
 <script lang="ts">
-    import Icon from "$lib/components/icons/Icon.svelte"
-    import Layout from "$lib/components/Layout.svelte"
+    import Icon from "$lib/components/icons/icon.svelte"
+    import Layout from "$lib/components/layout.svelte"
     import { action } from "$lib/scripts/core/action.ts"
     import { href } from "$lib/scripts/core/href.ts"
     import { mdiArrowLeft, mdiCheckCircleOutline, mdiCircleOutline, mdiClose, mdiPlus } from "@mdi/js"

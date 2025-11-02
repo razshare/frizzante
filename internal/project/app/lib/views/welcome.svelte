@@ -1,10 +1,10 @@
 <script lang="ts">
-    import Layout from "$lib/components/Layout.svelte"
+    import Layout from "$lib/components/layout.svelte"
     import { href } from "$lib/scripts/core/href.ts"
-    import Logo from "$lib/components/Logo.svelte"
+    import Logo from "$lib/components/logo.svelte"
     import { mdiArrowRight } from "@mdi/js"
-    import Icon from "$lib/components/icons/Icon.svelte"
-    import Sparkle from "$lib/components/Sparkle.svelte"
+    import Icon from "$lib/components/icons/icon.svelte"
+    import Sparkle from "$lib/components/sparkle.svelte"
     import { scale } from "svelte/transition"
 </script>
 
