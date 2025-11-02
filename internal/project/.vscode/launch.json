@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch",
+      "name": "debug main.go",
       "type": "go",
       "request": "launch",
       "mode": "auto",
