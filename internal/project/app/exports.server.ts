@@ -1,7 +1,7 @@
-import Welcome from "$lib/views/Welcome.svelte"
-import Todos from "$lib/views/Todos.svelte"
+import welcome from "$lib/views/welcome.svelte"
+import todos from "$lib/views/todos.svelte"
 
 export const views = {
-    Welcome: Welcome,
-    Todos: Todos,
+    welcome: welcome,
+    todos: todos,
 }

@@ -1,4 +1,4 @@
 export const views = {
-    Welcome: () => import("$lib/views/Welcome.svelte"),
-    Todos: () => import("$lib/views/Todos.svelte"),
+    welcome: () => import("$lib/views/welcome.svelte"),
+    todos: () => import("$lib/views/todos.svelte"),
 }
