@@ -9,7 +9,7 @@ import (
 )
 
 func View(client *clients.Client) {
-	session := sessions.New()
+	session := sessions.NewDefault()
 	receive.Session(client, &session)
 
 	send.View(client, views.View{Name: "Todos", Props: Props{

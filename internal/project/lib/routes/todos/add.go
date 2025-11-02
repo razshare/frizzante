@@ -8,7 +8,7 @@ import (
 )
 
 func Add(client *clients.Client) {
-	session := sessions.New()
+	session := sessions.NewDefault()
 	receive.Session(client, &session)
 
 	var form FormAdd

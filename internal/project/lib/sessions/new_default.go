@@ -1,6 +1,6 @@
 package sessions
 
-func New() *Session {
+func NewDefault() *Session {
 	return &Session{
 		Todos: []Todo{
 			{Checked: false, Description: "Pet the cat."},

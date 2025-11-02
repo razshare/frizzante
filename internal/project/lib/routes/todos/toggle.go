@@ -8,7 +8,7 @@ import (
 )
 
 func Toggle(client *clients.Client) {
-	session := sessions.New()
+	session := sessions.NewDefault()
 	receive.Session(client, &session)
 
 	var form FormToggle
