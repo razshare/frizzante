@@ -8,10 +8,8 @@ import (
 )
 
 func Remove(client *clients.Client) {
-	var session sessions.Session
-	if !receive.Session(client, &session) {
-		session = *sessions.NewDefault()
-	}
+	session := sessions.NewDefault()
+	receive.Session(client, &session)
 
 	var form FormRemove
 	if !receive.Form(client, &form) {
