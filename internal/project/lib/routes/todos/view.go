@@ -10,13 +10,12 @@ import (
 
 func View(client *clients.Client) {
 	var session sessions.Session
+	defer func() { session.Error = "" }()
 	if !receive.Session(client, &session) {
 		session = *sessions.NewDefault()
 	}
-
 	send.View(client, views.View{Name: "todos", Props: Props{
 		Error: session.Error,
 		Items: session.Todos,
 	}})
-	session.Error = ""
 }
