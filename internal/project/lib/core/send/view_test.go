@@ -53,7 +53,7 @@ func TestView(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	View(client, views.View{Name: "Welcome", Props: map[string]any{"key": "value"}})
+	View(client, views.View{Name: "welcome", Props: map[string]any{"key": "value"}})
 
 	writer := client.Writer.(*mocks.ResponseWriter)
 
