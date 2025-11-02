@@ -11,23 +11,15 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
-	"github.com/razshare/frizzante/internal/project/lib/core/views/render"
 )
 
 // Start starts a server from a configuration.
 func Start(server *Server) {
 	handler := server.Handler.(*http.ServeMux)
 	config := &clients.Config{
-		ErrorLog:   server.ErrorLog,
-		InfoLog:    server.InfoLog,
-		PublicRoot: server.PublicRoot,
-		Efs:        server.Efs,
-		Render: render.New(render.Config{
-			App:      server.App,
-			Efs:      server.Efs,
-			InfoLog:  server.InfoLog,
-			ErrorLog: server.ErrorLog,
-		}),
+		ErrorLog: server.ErrorLog,
+		InfoLog:  server.InfoLog,
+		Efs:      server.Efs,
 	}
 	for _, route := range server.Routes {
 		handler.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
@@ -54,6 +46,11 @@ func Start(server *Server) {
 					return
 				}
 			}
+			defer func() {
+				for _, function := range client.Sink {
+					function()
+				}
+			}()
 			route.Handler(client)
 		})
 	}

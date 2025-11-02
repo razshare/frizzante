@@ -55,10 +55,9 @@ func NewClient() *clients.Client {
 	srv := servers.New()
 
 	conf := &clients.Config{
-		ErrorLog:   srv.ErrorLog,
-		InfoLog:    srv.InfoLog,
-		PublicRoot: srv.PublicRoot,
-		Efs:        srv.Efs,
+		ErrorLog: srv.ErrorLog,
+		InfoLog:  srv.InfoLog,
+		Efs:      srv.Efs,
 	}
 
 	writer := &ResponseWriter{

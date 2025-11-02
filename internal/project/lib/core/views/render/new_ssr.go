@@ -19,94 +19,79 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views/render_function"
 )
 
-func New(config Config) Render {
-	var efs = config.Efs
-	var app = config.App
-	var limit = config.Limit
-	var errorLog = config.ErrorLog
-	var infoLog = config.InfoLog
+var Limit int
 
-	if errorLog == nil {
-		errorLog = log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
-	}
-
-	if infoLog == nil {
-		infoLog = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
-	}
-
-	if app == "" {
-		app = "app"
-	}
-
-	if limit <= 0 {
-		if limitString := os.Getenv("FRIZZANTE_JS_RUNTIME_LIMIT"); limitString != "" {
-			var err error
-			var limit64 int64
-			if limit64, err = strconv.ParseInt(limitString, 10, 64); err != nil {
-				errorLog.Printf("could not parse frizzante render limit value %s, falling back to limit 1", limitString)
-				limit = 1
-			} else {
-				limit = int(limit64)
-			}
+func init() {
+	if limitString := os.Getenv("FRIZZANTE_JS_RUNTIME_LIMIT"); limitString != "" {
+		var err error
+		var limit64 int64
+		if limit64, err = strconv.ParseInt(limitString, 10, 64); err != nil {
+			log.Fatal(err)
+			return
 		} else {
-			limit = 1
+			Limit = int(limit64)
 		}
+	} else {
+		Limit = 1
 	}
+}
 
+func New() Render {
 	var mut sync.Mutex
-	var server = filepath.Join(app, "dist", "app.server.cjs")
-	var index = filepath.Join(app, "dist", "client", "index.html")
+	var server = filepath.Join("app", "dist", "app.server.cjs")
+	var index = filepath.Join("app", "dist", "client", "index.html")
 	var renders = make(chan render_function.RenderFunction, 1)
 
 	server = strings.ReplaceAll(server, "\\", "/")
 	index = strings.ReplaceAll(index, "\\", "/")
 
-	var compile = func() (render render_function.RenderFunction, err error) {
-		if !embeds.IsFile(efs, server) {
+	var compile = func(options Options) (render render_function.RenderFunction, err error) {
+		if !embeds.IsFile(options.Efs, server) {
 			err = fmt.Errorf("file %s not found", server)
 			return
 		}
 
 		var data []byte
-		if data, err = efs.ReadFile(server); err != nil {
+		if data, err = options.Efs.ReadFile(server); err != nil {
 			return
 		}
 
 		render, err = render_function.New(render_function.Config{
 			Data:     data,
-			App:      app,
 			Server:   server,
-			ErrorLog: errorLog,
-			InfoLog:  infoLog,
+			InfoLog:  options.InfoLog,
+			ErrorLog: options.ErrorLog,
 		})
 		return
 	}
 
-	return func(view views.View) (document string, err error) {
-		if !embeds.IsFile(efs, index) {
+	return func(options Options) (document string, err error) {
+		if !embeds.IsFile(options.Efs, index) {
 			err = fmt.Errorf("file %s not found", index)
 			return
 		}
 
 		var indexData []byte
-		if indexData, err = efs.ReadFile(index); err != nil {
+		if indexData, err = options.Efs.ReadFile(index); err != nil {
 			return
 		}
 
 		document = string(indexData)
 
+		view := options.View
+
 		if view.RenderMode == views.RenderModeServer || view.RenderMode == views.RenderModeFull {
 			var render render_function.RenderFunction
-			if limit >= 0 {
+			if Limit >= 0 {
 				mut.Lock()
-				if limit >= 0 {
-					limit--
+				if Limit >= 0 {
+					Limit--
 				}
 				mut.Unlock()
 
-				if render, err = compile(); err != nil {
+				if render, err = compile(options); err != nil {
 					mut.Lock()
-					limit++
+					Limit++
 					mut.Unlock()
 					return
 				}

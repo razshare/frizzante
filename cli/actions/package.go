@@ -78,5 +78,18 @@ func Package(options PackageOptions) (err error) {
 		}
 	}
 
+	if !options.Prod && files.IsDirectory(filepath.Join("lib", "core", "send")) {
+		if files.IsDirectory(filepath.Join("app", "dist")) {
+			if err = files.CopyDirectory(
+				filepath.Join("app", "dist"),
+				filepath.Join("lib", "core", "send", "app", "dist"),
+			); err != nil {
+				return
+			}
+
+			messages.Success("app/dist copied to lib/core/send")
+		}
+	}
+
 	return
 }

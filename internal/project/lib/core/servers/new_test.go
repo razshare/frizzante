@@ -13,10 +13,6 @@ func TestNew(t *testing.T) {
 		t.Fatal("server should have an error log")
 	}
 
-	if server.PublicRoot == "" {
-		t.Fatal("server should have a public root")
-	}
-
 	if server.Channels.Stop == nil {
 		t.Fatal("server should have a stop channel")
 	}

@@ -31,9 +31,9 @@ func RequestedFile(client *clients.Client) bool {
 	var name string
 
 	if strings.HasPrefix(client.Request.RequestURI, "/") {
-		name = filepath.Join(client.Config.PublicRoot, client.Request.RequestURI[1:])
+		name = filepath.Join("app", "dist", "client", client.Request.RequestURI[1:])
 	} else {
-		name = filepath.Join(client.Config.PublicRoot, client.Request.RequestURI)
+		name = filepath.Join("app", "dist", "client", client.Request.RequestURI)
 	}
 
 	if files.IsFile(name) {

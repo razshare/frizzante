@@ -1,7 +1,8 @@
 package send
 
 import (
-	"fmt"
+	"embed"
+	"strings"
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
@@ -39,19 +40,18 @@ func TestViewWithAcceptJson(t *testing.T) {
 	}
 }
 
+//go:embed app/dist
+var TestViewEfs embed.FS
+
 func TestView(t *testing.T) {
 	client := mocks.NewClient()
+	client.Config.Efs = TestViewEfs
 
-	client.Config.Render = func(view views.View) (html string, err error) {
-
-		return fmt.Sprintf("hello from %s", view.Name), nil
-	}
-
-	View(client, views.View{Name: "test", Props: map[string]any{"key": "value"}})
+	View(client, views.View{Name: "Welcome", Props: map[string]any{"key": "value"}})
 
 	writer := client.Writer.(*mocks.ResponseWriter)
 
-	if string(writer.MockBytes) != "hello from test" {
-		t.Fatal("content should be hello from test")
+	if !strings.Contains(string(writer.MockBytes), "Modern Go + Svelte Framework") {
+		t.Fatal("view should contain Modern Go + Svelte Framework")
 	}
 }

@@ -6,13 +6,13 @@ import (
 	"net/http"
 
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
 
 type Client struct {
 	SessionId string
 	EventName string
 	EventId   int64
+	Sink      []func()
 	Status    int
 	Config    *Config
 	Request   *http.Request
@@ -23,9 +23,7 @@ type Client struct {
 }
 
 type Config struct {
-	PublicRoot string
-	Efs        embed.FS
-	ErrorLog   *log.Logger
-	InfoLog    *log.Logger
-	Render     func(view views.View) (html string, err error)
+	Efs      embed.FS
+	ErrorLog *log.Logger
+	InfoLog  *log.Logger
 }

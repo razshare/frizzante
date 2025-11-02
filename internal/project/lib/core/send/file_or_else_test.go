@@ -3,23 +3,20 @@ package send
 import (
 	"embed"
 	"net/url"
-	"os"
 	"strings"
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
-//go:embed test.txt
+//go:embed app
 var EfsTestFileOrElse embed.FS
 
 func TestFileOrElse(t *testing.T) {
-	_ = os.Rename("test.txt", "test.renamed.txt")
-	defer func() { _ = os.Rename("test.renamed.txt", "test.txt") }()
 	client := mocks.NewClient()
 	client.Config.Efs = EfsTestFileOrElse
-	client.Config.PublicRoot = ""
-	client.Request.RequestURI = "test.txt"
+	client.Request.RequestURI = "index.html"
+	client.Request.URL = &url.URL{Path: "index.html"}
 	var orElse bool
 	FileOrElse(client, func() { orElse = true })
 	writer := client.Writer.(*mocks.ResponseWriter)
@@ -28,16 +25,15 @@ func TestFileOrElse(t *testing.T) {
 		t.Fatal("else branch should not trigger")
 	}
 
-	if !strings.Contains(string(writer.MockBytes), "this is a test") {
-		t.Fatal("content should contain this is a test")
+	if !strings.Contains(string(writer.MockBytes), "<html") {
+		t.Fatal("index.html file should contain <html")
 	}
 }
 
 func TestFileOrElseFromFs(t *testing.T) {
 	client := mocks.NewClient()
-	client.Config.PublicRoot = ""
-	client.Request.RequestURI = "test.txt"
-	client.Request.URL = &url.URL{Path: "test.txt"}
+	client.Request.RequestURI = "index.html"
+	client.Request.URL = &url.URL{Path: "index.html"}
 	var orElse bool
 	FileOrElse(client, func() { orElse = true })
 	writer := client.Writer.(*mocks.ResponseWriter)
@@ -46,16 +42,16 @@ func TestFileOrElseFromFs(t *testing.T) {
 		t.Fatal("else branch should not trigger")
 	}
 
-	if !strings.Contains(string(writer.MockBytes), "this is a test") {
-		t.Fatal("content should contain this is a test")
+	if !strings.Contains(string(writer.MockBytes), "<html") {
+		t.Fatal("index.html file should contain <html")
 	}
 }
 
 func TestFileOrElseShouldFail(t *testing.T) {
 	client := mocks.NewClient()
 	client.Config.Efs = EfsTestFileOrElse
-	client.Config.PublicRoot = ""
 	client.Request.RequestURI = "some_file.go"
+	client.Request.URL = &url.URL{Path: "some_file.go"}
 	var orElse bool
 	FileOrElse(client, func() { orElse = true })
 	if !orElse {

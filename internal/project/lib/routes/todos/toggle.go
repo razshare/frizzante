@@ -4,13 +4,14 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
-	"github.com/razshare/frizzante/internal/project/lib/memory/sessions"
+	"github.com/razshare/frizzante/internal/project/lib/sessions"
 )
 
 func Toggle(client *clients.Client) {
-	session := sessions.Start(client)
+	session := sessions.New()
+	receive.Session(client, &session)
 
-	var form ToggleForm
+	var form FormToggle
 	if !receive.Form(client, &form) {
 		session.Error = "could not parse form"
 		send.Navigate(client, "/todos")

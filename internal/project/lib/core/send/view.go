@@ -6,7 +6,10 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
+	"github.com/razshare/frizzante/internal/project/lib/core/views/render"
 )
+
+var Render = render.New()
 
 // View sends a view.
 func View(client *clients.Client, view views.View) {
@@ -28,14 +31,9 @@ func View(client *clients.Client, view views.View) {
 		return
 	}
 
-	if client.Config.Render == nil {
-		client.Config.ErrorLog.Println("view render function is missing", stack.Trace())
-		return
-	}
-
 	var html string
 	var err error
-	if html, err = client.Config.Render(view); err != nil {
+	if html, err = Render(render.Options{Efs: client.Config.Efs, View: view}); err != nil {
 		client.Config.ErrorLog.Println(err, stack.Trace())
 	}
 

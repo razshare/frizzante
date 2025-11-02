@@ -13,19 +13,15 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
 
-func New(conf Config) Render {
-	var app = conf.App
+var Limit int
 
-	if app == "" {
-		app = "app"
-	}
-
-	var index = filepath.Join(app, "dist", "client", "index.html")
+func New() Render {
+	var index = filepath.Join("app", "dist", "client", "index.html")
 
 	index = strings.ReplaceAll(index, "/", string(filepath.Separator))
 	index = strings.ReplaceAll(index, "\\", string(filepath.Separator))
 
-	return func(view views.View) (document string, err error) {
+	return func(options Options) (document string, err error) {
 		var indexData []byte
 		if indexData, err = os.ReadFile(index); err != nil {
 			return
@@ -34,11 +30,11 @@ func New(conf Config) Render {
 		document = string(indexData)
 
 		var data []byte
-		if data, err = json.Marshal(views.NewData(view)); err != nil {
+		if data, err = json.Marshal(views.NewData(options.View)); err != nil {
 			return "", err
 		}
 
-		document = strings.Replace(document, "<!--app-head-->", fmt.Sprintf(HeadFormat, view.Title), 1)
+		document = strings.Replace(document, "<!--app-head-->", fmt.Sprintf(HeadFormat, options.View.Title), 1)
 		document = strings.Replace(document, "<!--app-body-->", fmt.Sprintf(BodyFormat, ""), 1)
 		document = strings.Replace(document, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
 

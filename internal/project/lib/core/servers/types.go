@@ -11,8 +11,6 @@ import (
 type Server struct {
 	*http.Server
 	Routes      []routes.Route
-	App         string
-	PublicRoot  string
 	SecureAddr  string
 	Certificate string
 	Key         string

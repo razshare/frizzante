@@ -37,11 +37,6 @@ func Generate(options GenerateOptions) (err error) {
 				Auto:     options.Auto,
 				Platform: options.Platform,
 			})
-		} else if gen == "sessions" {
-			return generate.Sessions(generate.SessionsOptions{
-				Auto: options.Auto,
-				Efs:  options.Efs,
-			})
 		} else if gen == "database" {
 			return generate.Database(generate.DatabaseOptions{
 				Generate: gen,
@@ -156,7 +151,6 @@ func Generate(options GenerateOptions) (err error) {
 				{Id: "air", Description: "live reload tool for go programs"},
 				{Id: "air_config", Description: "air configuration file .air.toml"},
 				{Id: "bun", Description: "fast js toolkit"},
-				{Id: "sessions", Description: "features for managing user sessions"},
 				{Id: "database", Description: "full database setup"},
 				{Id: "sqlc", Description: "sql compiler"},
 				{Id: "queries", Description: "sql code to go code using sqlc"},

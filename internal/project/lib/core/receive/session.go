@@ -1,44 +1,57 @@
 package receive
 
 import (
-	uuid "github.com/nu7hatch/gouuid"
+	"encoding/json"
+	"os"
+	"path/filepath"
+
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
-	"github.com/razshare/frizzante/internal/project/lib/core/send"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-// SessionId tries to find a session id among the user's cookies.
-// If no session id is found, it creates a new one and returns it.
-func SessionId(client *clients.Client) string {
-	if client.SessionId != "" {
-		return client.SessionId
+func Session(client *clients.Client, value any) bool {
+	baseDirectory := filepath.Join(".gen", "sessions")
+	var err error
+	if !files.IsDirectory(baseDirectory) {
+		if err = os.MkdirAll(baseDirectory, os.ModePerm); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
+			return false
+		}
 	}
 
-	var count uint
-	var id string
-
-	for _, cookie := range client.Request.CookiesNamed("session-id") {
-		id = cookie.Value
-		count++
+	fileName := filepath.Join(baseDirectory, SessionId(client)+".json")
+	var data []byte
+	if files.IsFile(fileName) {
+		if data, err = os.ReadFile(fileName); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
+			return false
+		}
+		if err = json.Unmarshal(data, value); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
+			return false
+		}
+	} else {
+		if data, err = json.MarshalIndent(value, "", "    "); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
+			return false
+		}
+		if err = os.WriteFile(fileName, data, os.ModePerm); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
+			return false
+		}
 	}
 
-	if count > 0 {
-		client.SessionId = id
-		return id
-	}
+	client.Sink = append(client.Sink, func() {
+		if data, err = json.MarshalIndent(value, "", "    "); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
+			return
+		}
+		if err = os.WriteFile(fileName, data, os.ModePerm); err != nil {
+			client.Config.ErrorLog.Println(err, stack.Trace())
+			return
+		}
+	})
 
-	// Create new session.
-	ido, err := uuid.NewV4()
-	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
-		return ""
-	}
-
-	id = ido.String()
-
-	send.Cookie(client, "session-id", id)
-
-	client.SessionId = id
-
-	return id
+	return true
 }
