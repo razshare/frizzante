@@ -3,8 +3,8 @@
 package spinners
 
 func Start(spin *Spinner) {
-	spin.Done = make(chan bool, 1)
+	spin.Done = make(chan struct{}, 1)
 	_, _ = spin.Program.Run()
-	spin.Done <- true
+	spin.Done <- struct{}{}
 	return
 }

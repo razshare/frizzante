@@ -13,7 +13,7 @@ import (
 func Json(client *clients.Client, value any) {
 	data, err := json.Marshal(value)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 

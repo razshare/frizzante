@@ -13,9 +13,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
 
-var Limit int
-
-func New() Render {
+func New() (Render, error) {
 	var index = filepath.Join("app", "dist", "client", "index.html")
 
 	index = strings.ReplaceAll(index, "/", string(filepath.Separator))
@@ -39,5 +37,5 @@ func New() Render {
 		document = strings.Replace(document, "<!--app-data-->", fmt.Sprintf(DataFormat, data), 1)
 
 		return document, nil
-	}
+	}, nil
 }

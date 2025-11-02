@@ -30,7 +30,7 @@ func SessionId(client *clients.Client) string {
 	// Create new session.
 	ido, err := uuid.NewV4()
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Println(err, stack.Trace())
 		return ""
 	}
 

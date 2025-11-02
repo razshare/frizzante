@@ -17,12 +17,12 @@ import (
 // Deprecated: use send.RequestedFile() instead.
 func FileOrElse(client *clients.Client, orElse func()) {
 	if client.WebSocket != nil {
-		client.Config.ErrorLog.Println("file_or_else does not support web sockets", stack.Trace())
+		client.Options.ErrorLog.Println("file_or_else does not support web sockets", stack.Trace())
 		return
 	}
 
 	if client.EventName != "" {
-		client.Config.ErrorLog.Println("file_or_else does not support server sent events", stack.Trace())
+		client.Options.ErrorLog.Println("file_or_else does not support server sent events", stack.Trace())
 		return
 	}
 
@@ -39,7 +39,7 @@ func FileOrElse(client *clients.Client, orElse func()) {
 			Header(client, "Content-Type", mime.Parse(name))
 		}
 
-		http.ServeFile(client.Writer, client.Request, name)
+		http.ServeFile(client.Writer, &client.Request, name)
 		return
 	}
 

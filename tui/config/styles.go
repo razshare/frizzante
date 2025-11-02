@@ -1,8 +1,11 @@
 package config
 
-import "github.com/charmbracelet/lipgloss"
+import (
+	"github.com/charmbracelet/lipgloss"
+	"github.com/razshare/frizzante/tui/themes"
+)
 
-var Styles = ThemeStyles{
+var Styles = themes.Styles{
 	Title: lipgloss.NewStyle().Bold(true),
 
 	Item: lipgloss.NewStyle(),

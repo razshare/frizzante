@@ -11,6 +11,7 @@ import (
 func View(client *clients.Client) {
 	session := sessions.New()
 	receive.Session(client, &session)
+
 	send.View(client, views.View{Name: "Todos", Props: Props{
 		Error: session.Error,
 		Items: session.Todos,

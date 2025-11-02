@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -19,28 +18,24 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views/render_function"
 )
 
-var Limit int
-
-func init() {
-	if limitString := os.Getenv("FRIZZANTE_JS_RUNTIME_LIMIT"); limitString != "" {
-		var err error
-		var limit64 int64
-		if limit64, err = strconv.ParseInt(limitString, 10, 64); err != nil {
-			log.Fatal(err)
-			return
-		} else {
-			Limit = int(limit64)
-		}
-	} else {
-		Limit = 1
-	}
-}
-
-func New() Render {
+func New() (Render, error) {
+	var limit int
 	var mut sync.Mutex
 	var server = filepath.Join("app", "dist", "app.server.cjs")
 	var index = filepath.Join("app", "dist", "client", "index.html")
 	var renders = make(chan render_function.RenderFunction, 1)
+
+	if limitString := os.Getenv("FRIZZANTE_JS_RUNTIME_LIMIT"); limitString != "" {
+		var err error
+		var limit64 int64
+		if limit64, err = strconv.ParseInt(limitString, 10, 64); err != nil {
+			return nil, err
+		} else {
+			limit = int(limit64)
+		}
+	} else {
+		limit = 1
+	}
 
 	server = strings.ReplaceAll(server, "\\", "/")
 	index = strings.ReplaceAll(index, "\\", "/")
@@ -56,7 +51,7 @@ func New() Render {
 			return
 		}
 
-		render, err = render_function.New(render_function.Config{
+		render, err = render_function.New(render_function.Options{
 			Data:     data,
 			Server:   server,
 			InfoLog:  options.InfoLog,
@@ -82,16 +77,16 @@ func New() Render {
 
 		if view.RenderMode == views.RenderModeServer || view.RenderMode == views.RenderModeFull {
 			var render render_function.RenderFunction
-			if Limit >= 0 {
+			if limit >= 0 {
 				mut.Lock()
-				if Limit >= 0 {
-					Limit--
+				if limit >= 0 {
+					limit--
 				}
 				mut.Unlock()
 
 				if render, err = compile(options); err != nil {
 					mut.Lock()
-					Limit++
+					limit++
 					mut.Unlock()
 					return
 				}
@@ -144,5 +139,5 @@ func New() Render {
 		err = errors.New("unknown render mode")
 
 		return
-	}
+	}, nil
 }

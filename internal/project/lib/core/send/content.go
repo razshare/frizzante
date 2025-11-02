@@ -20,7 +20,7 @@ func Content(client *clients.Client, data []byte) {
 
 	if client.WebSocket != nil {
 		if err := client.WebSocket.WriteMessage(websocket.TextMessage, data); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Println(err, stack.Trace())
 		}
 		return
 	}
@@ -31,7 +31,7 @@ func Content(client *clients.Client, data []byte) {
 	}
 
 	if _, err := client.Writer.Write(data); err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Println(err, stack.Trace())
 	}
 }
 

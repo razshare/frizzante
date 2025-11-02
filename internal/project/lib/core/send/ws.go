@@ -16,15 +16,15 @@ func WsUpgrade(client *clients.Client) {
 
 // WsUpgradeWithUpgrader upgrades to web sockets.
 func WsUpgradeWithUpgrader(client *clients.Client, upgrader websocket.Upgrader) {
-	conn, err := upgrader.Upgrade(client.Writer, client.Request, nil)
+	conn, err := upgrader.Upgrade(client.Writer, &client.Request, nil)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Println(err, stack.Trace())
 		return
 	}
 
 	defer func() {
-		if cerr := client.WebSocket.Close(); cerr != nil {
-			client.Config.ErrorLog.Println(cerr, stack.Trace())
+		if cerr := conn.Close(); cerr != nil {
+			client.Options.ErrorLog.Println(cerr, stack.Trace())
 		}
 	}()
 

@@ -11,26 +11,33 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/views/render"
 )
 
 // Start starts a server from a configuration.
 func Start(server *Server) {
-	handler := server.Handler.(*http.ServeMux)
-	config := &clients.Config{
-		ErrorLog: server.ErrorLog,
-		InfoLog:  server.InfoLog,
-		Efs:      server.Efs,
+	var err error
+	var render_ render.Render
+	if render_, err = render.New(); err != nil {
+		server.ErrorLog.Println(err)
+		return
 	}
+	handler := server.Handler.(*http.ServeMux)
 	for _, route := range server.Routes {
 		handler.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
-			if err := server.Cors.Check(request); err != nil {
+			if err = server.Cors.Check(request); err != nil {
 				server.ErrorLog.Println(err)
 				return
 			}
 			client := &clients.Client{
 				Writer:  writer,
-				Request: request,
-				Config:  config,
+				Request: *request,
+				Options: clients.Options{
+					ErrorLog: server.ErrorLog,
+					InfoLog:  server.InfoLog,
+					Efs:      server.Efs,
+					Render:   render_,
+				},
 				EventId: 1,
 				Status:  200,
 			}
@@ -46,12 +53,12 @@ func Start(server *Server) {
 					return
 				}
 			}
-			defer func() {
-				for _, function := range client.Sink {
-					function()
-				}
-			}()
+
 			route.Handler(client)
+
+			if client.Channels.Stop != nil {
+				client.Channels.Stop <- struct{}{}
+			}
 		})
 	}
 	var exit bool
@@ -62,7 +69,7 @@ func Start(server *Server) {
 			server.InfoLog.Println("cancelling server startup")
 			return
 		}
-		if err := server.ListenAndServe(); err != nil {
+		if err = server.ListenAndServe(); err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
 				server.InfoLog.Println("shutting down server")
 				return
@@ -79,7 +86,7 @@ func Start(server *Server) {
 				server.InfoLog.Println("cancelling server startup")
 				return
 			}
-			if err := server.ListenAndServeTLS(server.Certificate, server.Key); err != nil {
+			if err = server.ListenAndServeTLS(server.Certificate, server.Key); err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
 					server.InfoLog.Println("shutting down server")
 					return
@@ -91,7 +98,7 @@ func Start(server *Server) {
 	}()
 	<-server.Channels.Stop
 	exit = true
-	if err := server.Shutdown(context.Background()); err != nil {
+	if err = server.Shutdown(context.Background()); err != nil {
 		server.ErrorLog.Println(err)
 	}
 }

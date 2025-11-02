@@ -16,9 +16,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views/render_function"
 )
 
-var Limit int
-
-func New() Render {
+func New() (Render, error) {
 	var server = filepath.Join("app", "dist", "app.server.cjs")
 	var index = filepath.Join("app", "dist", "client", "index.html")
 
@@ -38,7 +36,7 @@ func New() Render {
 			return
 		}
 
-		render, err = render_function.New(render_function.Config{
+		render, err = render_function.New(render_function.Options{
 			Data:     data,
 			Server:   server,
 			InfoLog:  options.InfoLog,
@@ -110,5 +108,5 @@ func New() Render {
 		err = errors.New("unknown render mode")
 
 		return
-	}
+	}, nil
 }

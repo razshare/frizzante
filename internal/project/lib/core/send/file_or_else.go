@@ -22,12 +22,12 @@ import (
 // Deprecated: use send.RequestedFile() instead.
 func FileOrElse(client *clients.Client, orElse func()) {
 	if client.WebSocket != nil {
-		client.Config.ErrorLog.Println("file_or_else does not support web sockets", stack.Trace())
+		client.Options.ErrorLog.Println("file_or_else does not support web sockets", stack.Trace())
 		return
 	}
 
 	if client.EventName != "" {
-		client.Config.ErrorLog.Println("file_or_else does not support server sent events", stack.Trace())
+		client.Options.ErrorLog.Println("file_or_else does not support server sent events", stack.Trace())
 		return
 	}
 
@@ -44,21 +44,21 @@ func FileOrElse(client *clients.Client, orElse func()) {
 			Header(client, "Content-Type", mime.Parse(name))
 		}
 
-		http.ServeFile(client.Writer, client.Request, name)
+		http.ServeFile(client.Writer, &client.Request, name)
 		return
 	}
 
-	if embeds.IsFile(client.Config.Efs, name) {
+	if embeds.IsFile(client.Options.Efs, name) {
 		var file fs.File
 		var err error
-		if file, err = client.Config.Efs.Open(name); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+		if file, err = client.Options.Efs.Open(name); err != nil {
+			client.Options.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
 		var info os.FileInfo
 		if info, err = file.Stat(); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
@@ -72,11 +72,11 @@ func FileOrElse(client *clients.Client, orElse func()) {
 
 		buf := make([]byte, info.Size())
 		if _, err = file.Read(buf); err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 
-		http.ServeContent(client.Writer, client.Request, name, info.ModTime(), bytes.NewReader(buf))
+		http.ServeContent(client.Writer, &client.Request, name, info.ModTime(), bytes.NewReader(buf))
 		return
 	}
 

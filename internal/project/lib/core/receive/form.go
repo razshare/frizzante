@@ -19,7 +19,7 @@ var FormMetadataCacheMutex sync.Mutex
 // client and stores it in the value pointed to by value.
 func Form(client *clients.Client, value any) bool {
 	if client.WebSocket != nil {
-		client.Config.ErrorLog.Println("web socket connections cannot parse forms", stack.Trace())
+		client.Options.ErrorLog.Println("web socket connections cannot parse forms", stack.Trace())
 		return false
 	}
 
@@ -30,7 +30,7 @@ func Form(client *clients.Client, value any) bool {
 			if errors.Is(err, http.ErrNotMultipart) {
 				isMultipart = false
 			} else {
-				client.Config.ErrorLog.Println(err, stack.Trace())
+				client.Options.ErrorLog.Println(err, stack.Trace())
 				return false
 			}
 		}
@@ -39,7 +39,7 @@ func Form(client *clients.Client, value any) bool {
 	reflection := reflect.ValueOf(value)
 
 	if reflection.Kind() != reflect.Pointer {
-		client.Config.ErrorLog.Println("form value must be a pointer", stack.Trace())
+		client.Options.ErrorLog.Println("form value must be a pointer", stack.Trace())
 		return false
 	}
 
@@ -112,7 +112,7 @@ func Form(client *clients.Client, value any) bool {
 				continue
 			}
 			if pointer, err = strconv.ParseBool(text); err != nil {
-				client.Config.ErrorLog.Println("form value is not a valid bool", stack.Trace())
+				client.Options.ErrorLog.Println("form value is not a valid bool", stack.Trace())
 				return false
 			}
 
@@ -123,7 +123,7 @@ func Form(client *clients.Client, value any) bool {
 			for jndex, entry := range entries {
 				var parsed bool
 				if parsed, err = strconv.ParseBool(entry); err != nil {
-					client.Config.ErrorLog.Println("form value is not a valid bool", stack.Trace())
+					client.Options.ErrorLog.Println("form value is not a valid bool", stack.Trace())
 					return false
 				}
 				local[jndex] = parsed
@@ -137,7 +137,7 @@ func Form(client *clients.Client, value any) bool {
 			}
 			var tmp uint64
 			if tmp, err = strconv.ParseUint(text, 10, 64); err != nil {
-				client.Config.ErrorLog.Println("form value is not a valid uint", stack.Trace())
+				client.Options.ErrorLog.Println("form value is not a valid uint", stack.Trace())
 				return false
 			}
 			pointer = uint(tmp)
@@ -149,7 +149,7 @@ func Form(client *clients.Client, value any) bool {
 			for jndex, entry := range entries {
 				var tmp uint64
 				if tmp, err = strconv.ParseUint(entry, 10, 64); err != nil {
-					client.Config.ErrorLog.Println("form value is not a valid uint", stack.Trace())
+					client.Options.ErrorLog.Println("form value is not a valid uint", stack.Trace())
 					return false
 				}
 				local[jndex] = uint(tmp)
@@ -163,7 +163,7 @@ func Form(client *clients.Client, value any) bool {
 			}
 			var tmp uint64
 			if tmp, err = strconv.ParseUint(text, 10, 32); err != nil {
-				client.Config.ErrorLog.Println("form value is not a valid uint32", stack.Trace())
+				client.Options.ErrorLog.Println("form value is not a valid uint32", stack.Trace())
 				return false
 			}
 			pointer = uint32(tmp)
@@ -175,7 +175,7 @@ func Form(client *clients.Client, value any) bool {
 			for jndex, entry := range entries {
 				var tmp uint64
 				if tmp, err = strconv.ParseUint(entry, 10, 32); err != nil {
-					client.Config.ErrorLog.Println("form value is not a valid uint32", stack.Trace())
+					client.Options.ErrorLog.Println("form value is not a valid uint32", stack.Trace())
 					return false
 				}
 				local[jndex] = uint32(tmp)
@@ -188,7 +188,7 @@ func Form(client *clients.Client, value any) bool {
 				continue
 			}
 			if pointer, err = strconv.ParseUint(text, 10, 64); err != nil {
-				client.Config.ErrorLog.Println("form value is not a valid uint64", stack.Trace())
+				client.Options.ErrorLog.Println("form value is not a valid uint64", stack.Trace())
 				return false
 			}
 
@@ -199,7 +199,7 @@ func Form(client *clients.Client, value any) bool {
 			for jndex, entry := range entries {
 				var tmp uint64
 				if tmp, err = strconv.ParseUint(entry, 10, 64); err != nil {
-					client.Config.ErrorLog.Println("form value is not a valid uint64", stack.Trace())
+					client.Options.ErrorLog.Println("form value is not a valid uint64", stack.Trace())
 					return false
 				}
 				local[jndex] = tmp
@@ -213,7 +213,7 @@ func Form(client *clients.Client, value any) bool {
 			}
 			var tmp int64
 			if tmp, err = strconv.ParseInt(text, 10, 64); err != nil {
-				client.Config.ErrorLog.Println("form value is not a valid int", stack.Trace())
+				client.Options.ErrorLog.Println("form value is not a valid int", stack.Trace())
 				return false
 			}
 			pointer = int(tmp)
@@ -225,7 +225,7 @@ func Form(client *clients.Client, value any) bool {
 			for jndex, entry := range entries {
 				var tmp int64
 				if tmp, err = strconv.ParseInt(entry, 10, 64); err != nil {
-					client.Config.ErrorLog.Println("form value is not a valid int", stack.Trace())
+					client.Options.ErrorLog.Println("form value is not a valid int", stack.Trace())
 					return false
 				}
 				local[jndex] = int(tmp)
@@ -239,7 +239,7 @@ func Form(client *clients.Client, value any) bool {
 			}
 			var tmp int64
 			if tmp, err = strconv.ParseInt(text, 10, 32); err != nil {
-				client.Config.ErrorLog.Println("form value is not a valid int32", stack.Trace())
+				client.Options.ErrorLog.Println("form value is not a valid int32", stack.Trace())
 				return false
 			}
 			pointer = int32(tmp)
@@ -251,7 +251,7 @@ func Form(client *clients.Client, value any) bool {
 			for jndex, entry := range entries {
 				var tmp int64
 				if tmp, err = strconv.ParseInt(entry, 10, 32); err != nil {
-					client.Config.ErrorLog.Println("form value is not a valid int32", stack.Trace())
+					client.Options.ErrorLog.Println("form value is not a valid int32", stack.Trace())
 					return false
 				}
 				local[jndex] = int32(tmp)
@@ -264,7 +264,7 @@ func Form(client *clients.Client, value any) bool {
 				continue
 			}
 			if pointer, err = strconv.ParseInt(text, 10, 64); err != nil {
-				client.Config.ErrorLog.Println("form value is not a valid int64", stack.Trace())
+				client.Options.ErrorLog.Println("form value is not a valid int64", stack.Trace())
 				return false
 			}
 
@@ -275,7 +275,7 @@ func Form(client *clients.Client, value any) bool {
 			for jndex, entry := range entries {
 				var tmp int64
 				if tmp, err = strconv.ParseInt(entry, 10, 64); err != nil {
-					client.Config.ErrorLog.Println("form value is not a valid int64", stack.Trace())
+					client.Options.ErrorLog.Println("form value is not a valid int64", stack.Trace())
 					return false
 				}
 				local[jndex] = tmp
@@ -289,7 +289,7 @@ func Form(client *clients.Client, value any) bool {
 			}
 			var tmp float64
 			if tmp, err = strconv.ParseFloat(text, 32); err != nil {
-				client.Config.ErrorLog.Println("form value is not a valid float32", stack.Trace())
+				client.Options.ErrorLog.Println("form value is not a valid float32", stack.Trace())
 				return false
 			}
 			pointer = float32(tmp)
@@ -301,7 +301,7 @@ func Form(client *clients.Client, value any) bool {
 			for jndex, entry := range entries {
 				var tmp float64
 				if tmp, err = strconv.ParseFloat(entry, 32); err != nil {
-					client.Config.ErrorLog.Println("form value is not a valid float32", stack.Trace())
+					client.Options.ErrorLog.Println("form value is not a valid float32", stack.Trace())
 					return false
 				}
 				local[jndex] = float32(tmp)
@@ -314,7 +314,7 @@ func Form(client *clients.Client, value any) bool {
 				continue
 			}
 			if pointer, err = strconv.ParseFloat(text, 64); err != nil {
-				client.Config.ErrorLog.Println("form value is not a valid float64", stack.Trace())
+				client.Options.ErrorLog.Println("form value is not a valid float64", stack.Trace())
 				return false
 			}
 
@@ -325,7 +325,7 @@ func Form(client *clients.Client, value any) bool {
 			for jndex, entry := range entries {
 				var tmp float64
 				if tmp, err = strconv.ParseFloat(entry, 64); err != nil {
-					client.Config.ErrorLog.Println("form value is not a valid float64", stack.Trace())
+					client.Options.ErrorLog.Println("form value is not a valid float64", stack.Trace())
 					return false
 				}
 				local[jndex] = tmp
@@ -334,7 +334,7 @@ func Form(client *clients.Client, value any) bool {
 
 		case multipart.FileHeader:
 			if !isMultipart {
-				client.Config.ErrorLog.Println("could not parse file in form because it is not multipart")
+				client.Options.ErrorLog.Println("could not parse file in form because it is not multipart")
 				return false
 			}
 
@@ -344,7 +344,7 @@ func Form(client *clients.Client, value any) bool {
 
 		case []multipart.FileHeader:
 			if !isMultipart {
-				client.Config.ErrorLog.Println("could not parse file in form because it is not multipart")
+				client.Options.ErrorLog.Println("could not parse file in form because it is not multipart")
 				return false
 			}
 
@@ -357,7 +357,7 @@ func Form(client *clients.Client, value any) bool {
 			}
 
 		default:
-			client.Config.ErrorLog.Println("unknown form value type for key "+metadata.Key, stack.Trace())
+			client.Options.ErrorLog.Println("unknown form value type for key "+metadata.Key, stack.Trace())
 			return false
 
 		}

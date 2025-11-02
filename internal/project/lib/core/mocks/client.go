@@ -54,7 +54,7 @@ func (body *RequestBody) Close() error {
 func NewClient() *clients.Client {
 	srv := servers.New()
 
-	conf := &clients.Config{
+	conf := clients.Options{
 		ErrorLog: srv.ErrorLog,
 		InfoLog:  srv.InfoLog,
 		Efs:      srv.Efs,
@@ -65,7 +65,7 @@ func NewClient() *clients.Client {
 		MockBytes:  make([]byte, 0),
 	}
 
-	request := &http.Request{
+	request := http.Request{
 		Header: map[string][]string{},
 		Body: &RequestBody{
 			MockBuffer: make([]byte, 1024),
@@ -75,7 +75,7 @@ func NewClient() *clients.Client {
 	return &clients.Client{
 		Writer:  writer,
 		Request: request,
-		Config:  conf,
+		Options: conf,
 		EventId: 1,
 		Status:  200,
 	}

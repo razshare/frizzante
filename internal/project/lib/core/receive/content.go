@@ -14,7 +14,7 @@ func Message(client *clients.Client) string {
 	if client.WebSocket != nil {
 		_, data, err := client.WebSocket.ReadMessage()
 		if err != nil {
-			client.Config.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Println(err, stack.Trace())
 			return ""
 		}
 		return string(data)
@@ -22,7 +22,7 @@ func Message(client *clients.Client) string {
 
 	data, err := io.ReadAll(client.Request.Body)
 	if err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Println(err, stack.Trace())
 		return ""
 	}
 	return string(data)

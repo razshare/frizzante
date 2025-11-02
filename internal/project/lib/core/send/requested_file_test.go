@@ -14,7 +14,7 @@ var EfsRequestedFile embed.FS
 
 func TestRequestedFile(t *testing.T) {
 	client := mocks.NewClient()
-	client.Config.Efs = EfsRequestedFile
+	client.Options.Efs = EfsRequestedFile
 	client.Request.RequestURI = "index.html"
 	client.Request.URL = &url.URL{Path: "index.html"}
 	writer := client.Writer.(*mocks.ResponseWriter)
@@ -45,7 +45,7 @@ func TestRequestedFileFromFs(t *testing.T) {
 
 func TestRequestedFileShouldFail(t *testing.T) {
 	client := mocks.NewClient()
-	client.Config.Efs = EfsRequestedFile
+	client.Options.Efs = EfsRequestedFile
 	client.Request.RequestURI = "some_file.go"
 	client.Request.URL = &url.URL{Path: "some_file.go"}
 	if RequestedFile(client) {

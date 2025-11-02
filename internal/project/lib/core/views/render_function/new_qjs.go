@@ -15,7 +15,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
 
-func New(config Config) (render RenderFunction, err error) {
+func New(config Options) (render RenderFunction, err error) {
 	var runtime *qjs.Runtime
 	var builder strings.Builder
 

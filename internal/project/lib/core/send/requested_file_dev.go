@@ -19,12 +19,12 @@ import (
 // or the file was not found.
 func RequestedFile(client *clients.Client) bool {
 	if client.WebSocket != nil {
-		client.Config.ErrorLog.Println("send.RequestedFile() does not support web sockets", stack.Trace())
+		client.Options.ErrorLog.Println("send.RequestedFile() does not support web sockets", stack.Trace())
 		return false
 	}
 
 	if client.EventName != "" {
-		client.Config.ErrorLog.Println("send.RequestedFile() does not support server sent events", stack.Trace())
+		client.Options.ErrorLog.Println("send.RequestedFile() does not support server sent events", stack.Trace())
 		return false
 	}
 
@@ -41,7 +41,7 @@ func RequestedFile(client *clients.Client) bool {
 			Header(client, "Content-Type", mime.Parse(name))
 		}
 
-		http.ServeFile(client.Writer, client.Request, name)
+		http.ServeFile(client.Writer, &client.Request, name)
 		return true
 	}
 

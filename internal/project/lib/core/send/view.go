@@ -9,8 +9,6 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views/render"
 )
 
-var Render = render.New()
-
 // View sends a view.
 func View(client *clients.Client, view views.View) {
 	if client.Writer.Header().Get("Location") != "" {
@@ -31,10 +29,15 @@ func View(client *clients.Client, view views.View) {
 		return
 	}
 
+	if client.Options.Render == nil {
+		client.Options.ErrorLog.Println("no render function defined", stack.Trace())
+		return
+	}
+
 	var html string
 	var err error
-	if html, err = Render(render.Options{Efs: client.Config.Efs, View: view}); err != nil {
-		client.Config.ErrorLog.Println(err, stack.Trace())
+	if html, err = client.Options.Render(render.Options{Efs: client.Options.Efs, View: view}); err != nil {
+		client.Options.ErrorLog.Println(err, stack.Trace())
 	}
 
 	if client.Writer.Header().Get("Content-Type") == "" {

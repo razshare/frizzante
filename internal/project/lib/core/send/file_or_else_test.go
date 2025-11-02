@@ -14,7 +14,7 @@ var EfsTestFileOrElse embed.FS
 
 func TestFileOrElse(t *testing.T) {
 	client := mocks.NewClient()
-	client.Config.Efs = EfsTestFileOrElse
+	client.Options.Efs = EfsTestFileOrElse
 	client.Request.RequestURI = "index.html"
 	client.Request.URL = &url.URL{Path: "index.html"}
 	var orElse bool
@@ -49,7 +49,7 @@ func TestFileOrElseFromFs(t *testing.T) {
 
 func TestFileOrElseShouldFail(t *testing.T) {
 	client := mocks.NewClient()
-	client.Config.Efs = EfsTestFileOrElse
+	client.Options.Efs = EfsTestFileOrElse
 	client.Request.RequestURI = "some_file.go"
 	client.Request.URL = &url.URL{Path: "some_file.go"}
 	var orElse bool

@@ -7,6 +7,7 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
+	"github.com/razshare/frizzante/internal/project/lib/core/views/render"
 )
 
 func TestViewWithLocation(t *testing.T) {
@@ -45,7 +46,12 @@ var TestViewEfs embed.FS
 
 func TestView(t *testing.T) {
 	client := mocks.NewClient()
-	client.Config.Efs = TestViewEfs
+	client.Options.Efs = TestViewEfs
+
+	var err error
+	if client.Options.Render, err = render.New(); err != nil {
+		t.Fatal(err)
+	}
 
 	View(client, views.View{Name: "Welcome", Props: map[string]any{"key": "value"}})
 

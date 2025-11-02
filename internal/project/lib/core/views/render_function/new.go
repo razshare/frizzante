@@ -13,7 +13,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
 
-func New(config Config) (render RenderFunction, err error) {
+func New(options Options) (render RenderFunction, err error) {
 	var builder strings.Builder
 
 	runtime := goja.New()
@@ -23,9 +23,9 @@ func New(config Config) (render RenderFunction, err error) {
 
 		switch level {
 		case LogLevelDanger:
-			logger = config.ErrorLog
+			logger = options.ErrorLog
 		default:
-			logger = config.InfoLog
+			logger = options.InfoLog
 		}
 
 		return func(call goja.FunctionCall) goja.Value {
@@ -41,7 +41,7 @@ func New(config Config) (render RenderFunction, err error) {
 					object := argument.ToObject(runtime)
 					marshalData, err = object.MarshalJSON()
 					if err != nil {
-						config.ErrorLog.Println(err, stack.Trace())
+						options.ErrorLog.Println(err, stack.Trace())
 						return goja.Undefined()
 					}
 					builder.WriteString(string(marshalData))
@@ -88,7 +88,7 @@ func New(config Config) (render RenderFunction, err error) {
 		return
 	}
 
-	source := "const module={exports:{}};\n" + string(config.Data) + "\nfrizzante_set_render(render)"
+	source := "const module={exports:{}};\n" + string(options.Data) + "\nfrizzante_set_render(render)"
 
 	var prog *goja.Program
 	if prog, err = goja.Compile("app.server.cjs", source, false); err != nil {

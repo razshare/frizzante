@@ -1,6 +1,8 @@
 package config
 
-var Colors = ThemeColors{
+import "github.com/razshare/frizzante/tui/themes"
+
+var Colors = themes.Colors{
 	Primary:   "125",
 	Secondary: "99",
 	Success:   "148",
