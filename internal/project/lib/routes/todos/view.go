@@ -9,8 +9,10 @@ import (
 )
 
 func View(client *clients.Client) {
-	session := sessions.NewDefault()
-	receive.Session(client, &session)
+	var session sessions.Session
+	if !receive.Session(client, &session) {
+		session = *sessions.NewDefault()
+	}
 
 	send.View(client, views.View{Name: "todos", Props: Props{
 		Error: session.Error,
