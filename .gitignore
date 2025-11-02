@@ -40,6 +40,9 @@ node_modules
 # Dependency directories (remove the comment below to include it)
 # vendor/
 
+# Zed
+__debug*
+
 # env file
 .env
 

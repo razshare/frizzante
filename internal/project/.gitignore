@@ -45,6 +45,9 @@ node_modules
 go.work
 go.work.sum
 
+# Zed
+__debug*
+
 # env file
 .env
 
