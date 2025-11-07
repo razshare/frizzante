@@ -42,14 +42,14 @@
 {#snippet AddTodoForm()}
     <form method="POST" {...action("/add")} class="flex">
         <input
-                type="text"
-                name="description"
-                placeholder="Add a new task..."
-                class="input bg-base-100/ text-lg w-full"
+            type="text"
+            name="description"
+            placeholder="Add a new task..."
+            class="input bg-base-100/ text-lg w-full"
         />
         <div class="pt-4"></div>
         <button type="submit" class="btn btn-ghost text-lg">
-            <Icon path={mdiPlus} size="20" />
+            <Icon path={mdiPlus} />
             <span>Add</span>
         </button>
     </form>
@@ -90,12 +90,12 @@
         <input type="hidden" name="index" value={index} />
         <input type="hidden" name="value" {value} />
         <button
-                type="submit"
-                class="w-full flex cursor-pointer"
-                class:line-through={todo.checked}
-                class:text-base-content={todo.checked}
-                class:opacity-50={todo.checked}
-                aria-label={aria}
+            type="submit"
+            class="w-full flex cursor-pointer"
+            class:line-through={todo.checked}
+            class:text-base-content={todo.checked}
+            class:opacity-50={todo.checked}
+            aria-label={aria}
         >
             <Icon path={icon} />
             <div class="pr-4"></div>
@@ -108,11 +108,11 @@
     <form method="POST" {...action("/remove")}>
         <input type="hidden" name="index" value={index} />
         <button
-                type="submit"
-                class="btn btn-ghost btn-sm btn-square hover:text-error hover:bg-error/20 transition-colors"
-                aria-label="Delete"
+            type="submit"
+            class="btn btn-ghost btn-sm btn-square hover:text-error hover:bg-error/20 transition-colors"
+            aria-label="Delete"
         >
-            <Icon path={mdiClose} size="18" />
+            <Icon path={mdiClose} />
         </button>
     </form>
 {/snippet}
@@ -126,7 +126,7 @@
 {#snippet BackButton()}
     <div class="pt-4"></div>
     <a class="btn btn-neutral text-lg" {...href("/")}>
-        <Icon path={mdiArrowLeft} size="18" />
+        <Icon path={mdiArrowLeft} />
         <span>Back</span>
     </a>
 {/snippet}

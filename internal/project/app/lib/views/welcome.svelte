@@ -76,15 +76,15 @@
 {#snippet TodosButton()}
     <a class="btn btn-primary btn-lg" {...href("/todos")}>
         <span>Show Todos</span>
-        <Icon path={mdiArrowRight} size="18" />
+        <Icon path={mdiArrowRight} />
     </a>
 {/snippet}
 
 {#snippet DocumentationButton()}
     <a
-            class="btn btn-secondary btn-lg"
-            href="https://razshare.github.io/frizzante-docs/guides/get-started"
-            target="_blank"
+        class="btn btn-secondary btn-lg"
+        href="https://razshare.github.io/frizzante-docs/guides/get-started"
+        target="_blank"
     >
         <span>Documentation</span>
     </a>
