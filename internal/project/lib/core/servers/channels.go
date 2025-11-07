@@ -1,5 +1,5 @@
 package servers
 
 type Channels struct {
-	Stop chan struct{}
+	End chan struct{}
 }

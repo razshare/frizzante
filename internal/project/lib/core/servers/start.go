@@ -56,8 +56,8 @@ func Start(server *Server) {
 
 			route.Handler(client)
 
-			if client.Channels.Stop != nil {
-				client.Channels.Stop <- struct{}{}
+			if client.Channels.End != nil {
+				client.Channels.End <- struct{}{}
 			}
 		})
 	}
@@ -96,7 +96,7 @@ func Start(server *Server) {
 			}
 		}
 	}()
-	<-server.Channels.Stop
+	<-server.Channels.End
 	exit = true
 	if err = server.Shutdown(context.Background()); err != nil {
 		server.ErrorLog.Println(err)

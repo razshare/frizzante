@@ -1,26 +1,29 @@
 #!/usr/bin/env bash
 set -e
 
-# Cleans root
+# cleans root
 rm -fr .gen
 rm -fr frizzante
 
-# Cleans cli
+# cleans cli
 rm -fr cli/generate/.gen
 
-# Cleans additions
+# cleans additions
 rm -fr internal/additions/app/.vite
 rm -fr internal/additions/app/node_modules
 
-# Cleans internal project
+# cleans internal project
 rm -fr internal/project/.gen
 rm -fr internal/project/app/dist
 rm -fr internal/project/app/.vite
 rm -fr internal/project/app/node_modules
 rm -fr internal/project/lib/core/view/app
 
-# Cleans coverage
+# cleans coverage
 rm -fr cover.html
 rm -fr cover.out
 rm -fr internal/project/cover.html
 rm -fr internal/project/cover.out
+
+# cleans test cache
+go clean -testcache

@@ -20,16 +20,3 @@ func IsFile(efs embed.FS, name string) bool {
 	}
 	return !info.IsDir()
 }
-
-// IsDirectory checks if file exists and is a directory.
-func IsDirectory(efs embed.FS, n string) bool {
-	file, err := efs.Open(n)
-	if err != nil {
-		return false
-	}
-	stat, err := file.Stat()
-	if err != nil {
-		return false
-	}
-	return stat.IsDir()
-}

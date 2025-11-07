@@ -39,12 +39,12 @@ func Session(client *clients.Client, value any) bool {
 		}
 	}
 
-	if client.Channels.Stop == nil {
-		client.Channels.Stop = make(chan struct{}, 1)
+	if client.Channels.End == nil {
+		client.Channels.End = make(chan struct{}, 1)
 	}
 
 	go func() {
-		<-client.Channels.Stop
+		<-client.Channels.End
 		mutex.Lock()
 		defer mutex.Unlock()
 		var err error

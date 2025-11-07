@@ -13,7 +13,7 @@ func TestNew(t *testing.T) {
 		t.Fatal("server should have an error log")
 	}
 
-	if server.Channels.Stop == nil {
+	if server.Channels.End == nil {
 		t.Fatal("server should have a stop channel")
 	}
 
