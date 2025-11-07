@@ -7,5 +7,5 @@ import (
 )
 
 func View(client *clients.Client) {
-	send.View(client, views.View{Name: "welcome"})
+	send.View(client, views.View{Name: "Welcome"})
 }
