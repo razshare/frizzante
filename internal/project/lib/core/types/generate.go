@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"strings"
+	"unicode"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 )
@@ -73,7 +74,21 @@ func Generate[T any]() (err error) {
 		globalBuilder.WriteString("\n\n")
 	}
 
-	fname := filepath.Join(dname, type_.Name()+".d.ts")
+	var name string
+	for index, char := range type_.Name() {
+		if !unicode.IsUpper(char) {
+			name += string(char)
+			continue
+		}
+
+		if index != 0 {
+			name += "_"
+		}
+
+		name += strings.ToLower(string(char))
+	}
+
+	fname := filepath.Join(dname, name+".d.ts")
 	if err = os.WriteFile(fname, []byte(strings.TrimSpace(globalBuilder.String())), os.ModePerm); err != nil {
 		return
 	}
