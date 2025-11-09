@@ -86,7 +86,7 @@ func New(config Options) (render RenderFunction, err error) {
 	})
 
 	var text string
-	if text, err = js.Bundle(filepath.Join(config.App, "dist"), api.FormatCommonJS, string(config.Data)); err != nil {
+	if text, err = js.Bundle(filepath.Join("app", "dist"), api.FormatCommonJS, string(config.Data)); err != nil {
 		return
 	}
 
@@ -103,7 +103,7 @@ func New(config Options) (render RenderFunction, err error) {
 
 	render = func(view views.View) (head string, body string, err error) {
 		var propsObject *qjs.Value
-		if propsObject, err = qjs.ToJSValue(context, views.NewData(view)); err != nil {
+		if propsObject, err = qjs.ToJsValue(context, views.NewData(view)); err != nil {
 			return
 		}
 
