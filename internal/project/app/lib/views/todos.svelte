@@ -4,7 +4,7 @@
     import { action } from "$lib/scripts/core/action.ts"
     import { href } from "$lib/scripts/core/href.ts"
     import { mdiArrowLeft, mdiCheckCircleOutline, mdiCircleOutline, mdiClose, mdiPlus } from "@mdi/js"
-    import type { Props, sessions } from "$gen/types/main/lib/routes/todos/Props"
+    import type { Props, sessions } from "$gen/types/main/lib/routes/todos/props"
     import { slide } from "svelte/transition"
 
     let { items = [], error }: Props = $props()

@@ -6,10 +6,10 @@ import (
 )
 
 func init() {
-	_ = types.Generate[PropsForTodos]()
+	_ = types.Generate[Props]()
 }
 
-type PropsForTodos struct {
+type Props struct {
 	Error string          `json:"error"`
 	Items []sessions.Todo `json:"items"`
 }

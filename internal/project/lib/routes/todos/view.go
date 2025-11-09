@@ -12,7 +12,7 @@ func View(client *clients.Client) {
 	session := sessions.NewDefault()
 	receive.Session(client, &session)
 	defer func() { session.Error = "" }()
-	send.View(client, views.View{Name: "Todos", Props: PropsForTodos{
+	send.View(client, views.View{Name: "Todos", Props: Props{
 		Error: session.Error,
 		Items: session.Todos,
 	}})
