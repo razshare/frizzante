@@ -31,12 +31,6 @@ Create project.
 frizzante -cMyProject
 ```
 
-Configure project.
-
-```sh
-frizzante --configure
-```
-
 Start development.
 
 ```sh
