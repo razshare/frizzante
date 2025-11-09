@@ -152,7 +152,7 @@ func Migration(options MigrationOptions) (err error) {
 			return
 		}
 	} else {
-		data = []byte("-- migration: down\n\n--migration: up\n")
+		data = []byte("-- migration: down\n\n-- migration: up\n")
 	}
 
 	now := time.Now()
