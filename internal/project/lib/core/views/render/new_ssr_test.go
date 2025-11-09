@@ -20,7 +20,7 @@ func TestNew(t *testing.T) {
 	if render, err = New(); err != nil {
 		t.Fatal(err)
 	}
-	html, err := render(Options{Efs: TestNewEfs, View: views.View{Name: "welcome"}})
+	html, err := render(Options{Efs: TestNewEfs, View: views.View{Name: "Welcome"}})
 	if err != nil {
 		t.Fatal(err)
 	}
