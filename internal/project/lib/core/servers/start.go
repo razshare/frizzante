@@ -16,10 +16,19 @@ import (
 
 // Start starts a server from a configuration.
 func Start(server *Server) {
+	httpServer := &http.Server{
+		Addr:           server.Addr,
+		Handler:        server.Handler,
+		ReadTimeout:    server.ReadTimeout,
+		WriteTimeout:   server.WriteTimeout,
+		MaxHeaderBytes: server.MaxHeaderBytes,
+		ErrorLog:       server.ErrorLog,
+	}
+
 	var err error
 	var render_ render.Render
 	if render_, err = render.New(); err != nil {
-		server.ErrorLog.Println(err)
+		httpServer.ErrorLog.Println(err)
 		return
 	}
 	handler := server.Handler.(*http.ServeMux)
@@ -63,13 +72,13 @@ func Start(server *Server) {
 	}
 	var exit bool
 	go func() {
-		address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-		server.InfoLog.Printf("server bound to address %s; visit your application at http://%s", server.Addr, address)
+		address := strings.Replace(httpServer.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+		server.InfoLog.Printf("server bound to address %s; visit your application at http://%s", httpServer.Addr, address)
 		if exit {
 			server.InfoLog.Println("cancelling server startup")
 			return
 		}
-		if err = server.ListenAndServe(); err != nil {
+		if err = httpServer.ListenAndServe(); err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
 				server.InfoLog.Println("shutting down server")
 				return
@@ -86,19 +95,19 @@ func Start(server *Server) {
 				server.InfoLog.Println("cancelling server startup")
 				return
 			}
-			if err = server.ListenAndServeTLS(server.Certificate, server.Key); err != nil {
+			if err = httpServer.ListenAndServeTLS(server.Certificate, server.Key); err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
 					server.InfoLog.Println("shutting down server")
 					return
 				}
-				server.ErrorLog.Println(err, stack.Trace())
+				httpServer.ErrorLog.Println(err, stack.Trace())
 				os.Exit(1)
 			}
 		}
 	}()
 	<-server.Channels.End
 	exit = true
-	if err = server.Shutdown(context.Background()); err != nil {
-		server.ErrorLog.Println(err)
+	if err = httpServer.Shutdown(context.Background()); err != nil {
+		httpServer.ErrorLog.Println(err)
 	}
 }

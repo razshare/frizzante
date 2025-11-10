@@ -16,13 +16,11 @@ func New() (server *Server) {
 		Channels: Channels{
 			End: make(chan struct{}, 1),
 		},
-		Server: &http.Server{
-			Addr:           "0.0.0.0:8080",
-			Handler:        http.NewServeMux(),
-			ReadTimeout:    10 * time.Second,
-			WriteTimeout:   10 * time.Second,
-			MaxHeaderBytes: 2097152, // 2MB
-			ErrorLog:       log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime),
-		},
+		Addr:           "0.0.0.0:8080",
+		Handler:        http.NewServeMux(),
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 2097152, // 2MB
+		ErrorLog:       log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime),
 	}
 }
