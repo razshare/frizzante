@@ -5,52 +5,40 @@ import (
 	"embed"
 	"io/fs"
 	"net/http"
+	"net/http/httptest"
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/razshare/frizzante/cli/paths"
 	"github.com/razshare/frizzante/internal/additions/lib/security"
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/internal/project/lib/core/routes"
-	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 )
 
 //go:embed test.zip
 var TestDownloadEfs embed.FS
 
 func TestDownload(t *testing.T) {
-	server := servers.New()
-	server.Addr = "127.0.0.1:7676"
-	server.Routes = []routes.Route{
-		{Pattern: "GET /", Handler: func(client *clients.Client) {
-			var file fs.File
-			var err error
-			if file, err = TestDownloadEfs.Open("test.zip"); err != nil {
-				t.Fatal(err)
-			}
+	testServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		var file fs.File
+		var err error
+		if file, err = TestDownloadEfs.Open("test.zip"); err != nil {
+			t.Fatal(err)
+		}
 
-			var info os.FileInfo
-			if info, err = file.Stat(); err != nil {
-				t.Fatal(err)
-			}
+		var info os.FileInfo
+		if info, err = file.Stat(); err != nil {
+			t.Fatal(err)
+		}
 
-			buf := make([]byte, info.Size())
-			if _, err = file.Read(buf); err != nil {
-				t.Fatal(err)
-			}
+		buf := make([]byte, info.Size())
+		if _, err = file.Read(buf); err != nil {
+			t.Fatal(err)
+		}
 
-			http.ServeContent(client.Writer, &client.Request, "test_out.zip", info.ModTime(), bytes.NewReader(buf))
-		}},
-	}
-	go servers.Start(server)
-	defer func() { server.Channels.End <- struct{}{} }()
-
-	time.Sleep(time.Second)
-
-	url := "http://127.0.0.1:7676/test_out.zip"
+		http.ServeContent(writer, request, "test_out.zip", info.ModTime(), bytes.NewReader(buf))
+	}))
+	defer func() { testServer.Close() }()
 
 	var err error
 
@@ -59,9 +47,9 @@ func TestDownload(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	hash := security.Sha1(url)
+	hash := security.Sha1(testServer.URL)
 
-	cached := filepath.Join(cache, hash+".zip")
+	cached := filepath.Join(cache, hash)
 
 	if err = os.RemoveAll(cached); err != nil {
 		t.Fatal(err)
@@ -72,7 +60,7 @@ func TestDownload(t *testing.T) {
 	defer func() { _ = os.RemoveAll("test_out.zip") }()
 	defer func() { _ = os.RemoveAll(cached) }()
 
-	install, evict, err := Download(DownloadOptions{Auto: true, Url: url})
+	install, evict, err := Download(DownloadOptions{Auto: true, Url: testServer.URL})
 	if err != nil {
 		t.Fatal(err)
 	}
