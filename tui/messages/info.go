@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func Info(args ...any) {
@@ -13,7 +13,7 @@ func Info(args ...any) {
 	for i := 0; i < length; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	Status("INFO", strings.Join(entries, ""), config.Colors.Info, "17", config.Colors.Info)
+	Status("INFO", strings.Join(entries, ""), configs.Colors.Info, "17", configs.Colors.Info)
 }
 
 func Infof(format string, vars ...any) {

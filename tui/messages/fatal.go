@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func Fatal(args ...any) {
@@ -15,7 +15,7 @@ func Fatal(args ...any) {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
 
-	Status("ERROR", strings.Join(entries, ""), config.Colors.Error, "233", config.Colors.Error)
+	Status("ERROR", strings.Join(entries, ""), configs.Colors.Error, "233", configs.Colors.Error)
 	os.Exit(1)
 }
 

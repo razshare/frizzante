@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func Version(options VersionOptions) (err error) {
@@ -21,7 +21,7 @@ func Version(options VersionOptions) (err error) {
 		return
 	}
 
-	fmt.Println(config.Styles.Menu.PaddingRight(1).Render("│") + lines[0])
+	fmt.Println(configs.Styles.Menu.PaddingRight(1).Render("│") + lines[0])
 
 	return
 }

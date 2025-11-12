@@ -1,4 +1,4 @@
-package config
+package configs
 
 import (
 	"github.com/charmbracelet/lipgloss"
@@ -43,8 +43,7 @@ var Styles = themes.Styles{
 	Menu: lipgloss.NewStyle().
 		Foreground(lipgloss.Color(Colors.Secondary)),
 
-	UserInput: lipgloss.NewStyle().
-		Foreground(lipgloss.Color(Colors.Muted)),
+	UserInput: lipgloss.NewStyle(),
 
 	UserGuide: lipgloss.NewStyle().
 		Foreground(lipgloss.Color(Colors.Muted)),

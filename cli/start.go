@@ -6,14 +6,14 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli/apps"
 	"github.com/razshare/frizzante/cli/menus"
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/select_one"
 )
 
 func Start(app *apps.App) (err error) {
-	messages.Prefix = config.Styles.Menu.PaddingRight(1).Render("│")
+	messages.Prefix = configs.Styles.Menu.PaddingRight(1).Render("│")
 	var menu *menus.Menu
 	menu, err = menus.New(app)
 	if err != nil {

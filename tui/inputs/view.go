@@ -3,24 +3,31 @@ package inputs
 import (
 	"strings"
 
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func (model *Model) View() string {
 	var builder strings.Builder
-	builder.WriteString(config.Styles.Menu.Render("│"))
-	builder.WriteString(config.Styles.Menu.Render("⏣ " + model.Prompt))
+	builder.WriteString(configs.Styles.Menu.Render("│"))
+	builder.WriteString(configs.Styles.Menu.PaddingLeft(1).Render("⏣ " + model.Prompt))
 	builder.WriteString("\n")
-	builder.WriteString(config.Styles.Menu.Render("│"))
-	builder.WriteString(config.Styles.Title.Render(model.TextInput.View()))
-	builder.WriteString("\n")
-	builder.WriteString(config.Styles.Menu.Render("│"))
-	builder.WriteString(config.Styles.UserGuide.Render("enter submit"))
-	if model.TextInput.View() != "" {
-		builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+	builder.WriteString(configs.Styles.Menu.Render("│"))
+	builder.WriteString(configs.Styles.UserGuide.PaddingLeft(3).Render("⁋/> "))
+	if model.Value == "" && model.Prefix == "" {
+		builder.WriteString(configs.Styles.UserGuide.Render("type here"))
 	} else {
-		builder.WriteString(config.Styles.UserGuide.Render(" • esc back"))
+		if model.Prefix != "" {
+			builder.WriteString(configs.Styles.UserGuide.Render(model.Prefix))
+		}
+		builder.WriteString(configs.Styles.UserInput.Render(model.Value))
 	}
 	builder.WriteString("\n")
+	builder.WriteString(configs.Styles.Menu.Render("│"))
+	builder.WriteString(configs.Styles.UserGuide.Render("enter submit"))
+	if model.Value != "" {
+		builder.WriteString(configs.Styles.UserGuide.Render(" • esc clear"))
+	} else {
+		builder.WriteString(configs.Styles.UserGuide.Render(" • esc back"))
+	}
 	return builder.String()
 }

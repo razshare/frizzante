@@ -1,10 +1,25 @@
 package confirm
 
-import "github.com/razshare/frizzante/tui/config"
+import (
+	"strings"
+
+	"github.com/razshare/frizzante/tui/configs"
+)
 
 func (model *Model) View() string {
-	if model.DefaultValue {
-		return config.Styles.Menu.PaddingRight(1).Render("⎚") + config.Styles.Menu.Render(model.Prompt, "(Y/n)")
+	var builder strings.Builder
+	builder.WriteString(configs.Styles.Menu.Render("⎚"))
+	builder.WriteString(configs.Styles.Menu.PaddingLeft(1).PaddingRight(1).Render(model.Prompt))
+
+	if model.Confirmed {
+		builder.WriteString(configs.Styles.Menu.Render("● Yes"))
+		builder.WriteString(configs.Styles.UserGuide.PaddingLeft(1).PaddingRight(1).Render("/"))
+		builder.WriteString(configs.Styles.UserGuide.Render("○ No"))
+	} else {
+		builder.WriteString(configs.Styles.UserGuide.Render("○ Yes"))
+		builder.WriteString(configs.Styles.UserGuide.PaddingLeft(1).PaddingRight(1).Render("/"))
+		builder.WriteString(configs.Styles.Menu.Render("● No"))
 	}
-	return config.Styles.Menu.PaddingRight(1).Render("⎚") + config.Styles.Menu.Render(model.Prompt, "(y/N)")
+
+	return builder.String()
 }

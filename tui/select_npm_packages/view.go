@@ -5,36 +5,37 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func (model *Model) View() string {
 	var builder strings.Builder
 	builder.Grow(1024)
 
-	builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("⎚"))
-	builder.WriteString(config.Styles.Menu.Render(model.Prompt))
+	builder.WriteString(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+	builder.WriteString(configs.Styles.Menu.Render(model.Prompt))
 
+	builder.WriteString(configs.Styles.UserGuide.PaddingLeft(1).Render("⁋/> "))
 	if model.Search.Input.Value() != "" {
-		builder.WriteString(config.Styles.UserInput.Render(" ⁋/" + model.Search.Input.Value()))
+		builder.WriteString(configs.Styles.UserInput.Render(model.Search.Input.Value()))
 	} else {
-		builder.WriteString(config.Styles.UserGuide.Render(" ⁋/type to search"))
+		builder.WriteString(configs.Styles.UserGuide.Render("type to search"))
 	}
 
 	if model.Loading {
 		builder.WriteString("\n")
-		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  loading..."))
+		builder.WriteString(configs.Styles.UserGuide.Render("ⓘ  loading..."))
 		builder.WriteString("\n")
 		if model.Search.Active {
-			builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+			builder.WriteString(configs.Styles.UserGuide.Render(" • esc clear"))
 		}
 		return builder.String()
 	} else if model.Error != nil {
 		builder.WriteString("\n")
-		builder.WriteString(config.Styles.Status(config.Colors.Error).Render("✗  " + model.Error.Error()))
+		builder.WriteString(configs.Styles.Status(configs.Colors.Error).Render("✗  " + model.Error.Error()))
 		builder.WriteString("\n")
 		if model.Search.Active {
-			builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+			builder.WriteString(configs.Styles.UserGuide.Render(" • esc clear"))
 		}
 		return builder.String()
 	}
@@ -42,24 +43,24 @@ func (model *Model) View() string {
 	filtered := len(model.Search.Filtered)
 	if filtered == 0 {
 		builder.WriteString("\n")
-		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
-		builder.WriteString(config.Styles.UserGuide.Render("ⓘ  no matches found"))
+		builder.WriteString(configs.Styles.Menu.PaddingRight(2).Render("│"))
+		builder.WriteString(configs.Styles.UserGuide.Render("ⓘ  no matches found"))
 
 		builder.WriteString("\n")
 
-		builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("⎚"))
-		builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+		builder.WriteString(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+		builder.WriteString(configs.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
 
 		if model.Search.Active {
-			builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+			builder.WriteString(configs.Styles.UserGuide.Render(" • esc clear"))
 		} else {
-			builder.WriteString(config.Styles.UserGuide.Render(" • esc back"))
+			builder.WriteString(configs.Styles.UserGuide.Render(" • esc back"))
 		}
 
 		return builder.String()
 	} else {
 		if filtered > 0 {
-			builder.WriteString(config.Styles.UserInput.Render(fmt.Sprintf(" (%d)", filtered)))
+			builder.WriteString(configs.Styles.UserInput.Render(fmt.Sprintf(" (%d)", filtered)))
 		}
 		builder.WriteString("\n")
 	}
@@ -70,45 +71,45 @@ func (model *Model) View() string {
 	}
 
 	if model.Viewport.Offset > 0 {
-		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
-		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↑ more above"))
+		builder.WriteString(configs.Styles.Menu.PaddingRight(2).Render("│"))
+		builder.WriteString(configs.Styles.Status(configs.Colors.Muted).Render("↑ more above"))
 		builder.WriteString("\n")
 	}
 
 	for i := model.Viewport.Offset; i < height; i++ {
-		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
+		builder.WriteString(configs.Styles.Menu.PaddingRight(2).Render("│"))
 		if model.Viewport.Cursor == i {
 			if slices.Contains(model.Selected, model.Search.Filtered[i].Id) {
-				builder.WriteString(config.Styles.Selected.Render("● " + model.Search.Filtered[i].Id))
+				builder.WriteString(configs.Styles.Selected.Render("● " + model.Search.Filtered[i].Id))
 			} else {
-				builder.WriteString(config.Styles.Selected.Render("◉ " + model.Search.Filtered[i].Id))
+				builder.WriteString(configs.Styles.Selected.Render("◉ " + model.Search.Filtered[i].Id))
 			}
 
 			j := slices.Index(model.Search.Choices, model.Search.Filtered[i])
 			if j >= 0 && model.Search.Choices[j].Description != "" {
-				builder.WriteString(config.Styles.UserGuide.Render("  ⇢  " + model.Search.Choices[j].Description))
+				builder.WriteString(configs.Styles.UserGuide.Render("  ⇢  " + model.Search.Choices[j].Description))
 			}
 		} else if slices.Contains(model.Selected, model.Search.Filtered[i].Id) {
-			builder.WriteString(config.Styles.Item.Render("● " + model.Search.Filtered[i].Id))
+			builder.WriteString(configs.Styles.Item.Render("● " + model.Search.Filtered[i].Id))
 		} else {
-			builder.WriteString(config.Styles.Item.Render("○ " + model.Search.Filtered[i].Id))
+			builder.WriteString(configs.Styles.Item.Render("○ " + model.Search.Filtered[i].Id))
 		}
 		builder.WriteString("\n")
 	}
 
 	if height < filtered {
-		builder.WriteString(config.Styles.Menu.PaddingRight(2).Render("│"))
-		builder.WriteString(config.Styles.Status(config.Colors.Muted).Render("↓ more below"))
+		builder.WriteString(configs.Styles.Menu.PaddingRight(2).Render("│"))
+		builder.WriteString(configs.Styles.Status(configs.Colors.Muted).Render("↓ more below"))
 		builder.WriteString("\n")
 	}
 
-	builder.WriteString(config.Styles.Menu.PaddingRight(1).Render("⎚"))
-	builder.WriteString(config.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
+	builder.WriteString(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+	builder.WriteString(configs.Styles.UserGuide.Render("↑ up • ↓ down • space select • enter continue"))
 
 	if model.Search.Active {
-		builder.WriteString(config.Styles.UserGuide.Render(" • esc clear"))
+		builder.WriteString(configs.Styles.UserGuide.Render(" • esc clear"))
 	} else {
-		builder.WriteString(config.Styles.UserGuide.Render(" • esc back"))
+		builder.WriteString(configs.Styles.UserGuide.Render(" • esc back"))
 	}
 
 	return builder.String()

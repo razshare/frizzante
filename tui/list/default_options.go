@@ -2,7 +2,7 @@ package list
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func DefaultOptions() Options {
@@ -14,8 +14,8 @@ func DefaultOptions() Options {
 			Bold(true).
 			Foreground(lipgloss.Color("221")),
 		RowStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color(config.Colors.Primary)),
+			Foreground(lipgloss.Color(configs.Colors.Primary)),
 		AltRowStyle: lipgloss.NewStyle().
-			Foreground(lipgloss.Color(config.Colors.Secondary)),
+			Foreground(lipgloss.Color(configs.Colors.Secondary)),
 	}
 }

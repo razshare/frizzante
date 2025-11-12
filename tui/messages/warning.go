@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func Warning(args ...any) {
@@ -13,7 +13,7 @@ func Warning(args ...any) {
 	for i := 0; i < length; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	Status("WARNING", strings.Join(entries, ""), config.Colors.Warning, "17", config.Colors.Warning)
+	Status("WARNING", strings.Join(entries, ""), configs.Colors.Warning, "17", configs.Colors.Warning)
 }
 
 func Warningf(format string, vars ...any) {

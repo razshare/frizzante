@@ -1,7 +1,7 @@
 package apps
 
 import (
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func Logo(options *App) (logo string, err error) {
@@ -9,6 +9,6 @@ func Logo(options *App) (logo string, err error) {
 	if data, err = options.Efs.ReadFile("logo.txt"); err != nil {
 		return
 	}
-	logo = config.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data))
+	logo = configs.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data))
 	return
 }

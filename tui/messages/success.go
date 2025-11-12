@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func Success(args ...any) {
@@ -13,7 +13,7 @@ func Success(args ...any) {
 	for i := 0; i < length; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	Status("SUCCESS", strings.Join(entries, ""), config.Colors.Success, "17", config.Colors.Success)
+	Status("SUCCESS", strings.Join(entries, ""), configs.Colors.Success, "17", configs.Colors.Success)
 }
 
 func Successf(format string, vars ...any) {

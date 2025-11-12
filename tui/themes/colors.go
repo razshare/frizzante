@@ -8,5 +8,6 @@ type Colors struct {
 	Warning   string
 	Info      string
 	Tip       string
+	Input     string
 	Muted     string
 }

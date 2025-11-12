@@ -1,4 +1,4 @@
-package config
+package configs
 
 import "github.com/razshare/frizzante/tui/themes"
 
@@ -9,6 +9,5 @@ var Colors = themes.Colors{
 	Error:     "160",
 	Warning:   "166",
 	Info:      "33",
-	Tip:       "126",
-	Muted:     "245",
+	Muted:     "241",
 }

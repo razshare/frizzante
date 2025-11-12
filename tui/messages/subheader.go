@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func Subheader(args ...any) {
@@ -13,7 +13,7 @@ func Subheader(args ...any) {
 	for i := 0; i < length; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	fmt.Println(config.Styles.Subheader.Render(strings.Join(entries, "")))
+	fmt.Println(configs.Styles.Subheader.Render(strings.Join(entries, "")))
 }
 
 func Subheaderf(format string, vars ...any) {

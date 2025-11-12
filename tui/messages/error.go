@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func Error(args ...any) {
@@ -19,7 +19,7 @@ func Error(args ...any) {
 		entries[length] = "\n" + stack.Trace()
 	}
 
-	Status("ERROR", strings.Join(entries, ""), config.Colors.Error, "233", config.Colors.Error)
+	Status("ERROR", strings.Join(entries, ""), configs.Colors.Error, "233", configs.Colors.Error)
 }
 
 func Errorf(format string, vars ...any) {

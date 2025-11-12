@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/razshare/frizzante/tui/config"
+	"github.com/razshare/frizzante/tui/configs"
 )
 
 func Section(args ...any) {
@@ -13,7 +13,7 @@ func Section(args ...any) {
 	for i := 0; i < length; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	fmt.Println(config.Styles.Section.Render("## " + strings.Join(entries, "")))
+	fmt.Println(configs.Styles.Section.Render("## " + strings.Join(entries, "")))
 }
 
 func Sectionf(format string, vars ...any) {

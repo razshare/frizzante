@@ -3,22 +3,20 @@ package inputs
 import (
 	"testing"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 func TestInputEscapeBehavior(t *testing.T) {
 	t.Run("escape clears input when has value", func(t *testing.T) {
 		model := &Model{
-			Prompt:    "Enter name:",
-			TextInput: textinput.New(),
+			Prompt: "Enter name:",
 		}
-		model.TextInput.SetValue("test value")
+		model.Value = "test value"
 
 		_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 
-		if model.TextInput.Value() != "" {
-			t.Errorf("input value = %q, want empty", model.TextInput.Value())
+		if model.Value != "" {
+			t.Errorf("input value = %q, want empty", model.Value)
 		}
 
 		if cmd != nil {
@@ -28,8 +26,7 @@ func TestInputEscapeBehavior(t *testing.T) {
 
 	t.Run("escape quits when input empty", func(t *testing.T) {
 		model := &Model{
-			Prompt:    "Enter name:",
-			TextInput: textinput.New(),
+			Prompt: "Enter name:",
 		}
 
 		_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
@@ -41,17 +38,16 @@ func TestInputEscapeBehavior(t *testing.T) {
 
 	t.Run("escape clears then quits on second press", func(t *testing.T) {
 		model := &Model{
-			Prompt:    "Enter name:",
-			TextInput: textinput.New(),
+			Prompt: "Enter name:",
 		}
-		model.TextInput.SetValue("test")
+		model.Value = "test"
 
 		_, cmd1 := model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 		if cmd1 != nil {
 			t.Error("first escape should not quit")
 		}
 
-		if model.TextInput.Value() != "" {
+		if model.Value != "" {
 			t.Error("first escape should clear input")
 		}
 
@@ -77,10 +73,9 @@ func TestInputEnterBehavior(t *testing.T) {
 	for _, d := range data {
 		t.Run(d.name, func(t *testing.T) {
 			model := &Model{
-				Prompt:    "Enter value:",
-				TextInput: textinput.New(),
+				Prompt: "Enter value:",
 			}
-			model.TextInput.SetValue(d.inputValue)
+			model.Value = (d.inputValue)
 
 			_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyEnter})
 
@@ -88,8 +83,8 @@ func TestInputEnterBehavior(t *testing.T) {
 				t.Error("enter should always quit")
 			}
 
-			if model.TextInput.Value() != d.inputValue {
-				t.Errorf("value should be preserved, got %q, want %q", model.TextInput.Value(), d.inputValue)
+			if model.Value != d.inputValue {
+				t.Errorf("value should be preserved, got %q, want %q", model.Value, d.inputValue)
 			}
 		})
 	}
@@ -97,8 +92,7 @@ func TestInputEnterBehavior(t *testing.T) {
 
 func TestInputInterrupt(t *testing.T) {
 	model := &Model{
-		Prompt:    "Enter value:",
-		TextInput: textinput.New(),
+		Prompt: "Enter value:",
 	}
 
 	_, cmd := model.Update(tea.KeyMsg{Type: tea.KeyCtrlC})
@@ -110,10 +104,8 @@ func TestInputInterrupt(t *testing.T) {
 
 func TestInputTextEntry(t *testing.T) {
 	model := &Model{
-		Prompt:    "Enter name:",
-		TextInput: textinput.New(),
+		Prompt: "Enter name:",
 	}
-	model.TextInput.Focus()
 
 	inputs := []struct {
 		key      tea.KeyMsg
@@ -128,58 +120,35 @@ func TestInputTextEntry(t *testing.T) {
 
 	for _, input := range inputs {
 		model.Update(input.key)
-		if model.TextInput.Value() != input.expected {
-			t.Errorf("after input, value = %q, want %q", model.TextInput.Value(), input.expected)
+		if model.Value != input.expected {
+			t.Errorf("after input, value = %q, want %q", model.Value, input.expected)
 		}
 	}
 }
 
 func TestInputBackspace(t *testing.T) {
 	model := &Model{
-		Prompt:    "Enter value:",
-		TextInput: textinput.New(),
+		Prompt: "Enter value:",
 	}
-	model.TextInput.SetValue("hello")
-	model.TextInput.Focus()
+	model.Value = "hello"
 
 	model.Update(tea.KeyMsg{Type: tea.KeyBackspace})
 
-	if model.TextInput.Value() != "hell" {
-		t.Errorf("after backspace, value = %q, want 'hell'", model.TextInput.Value())
+	if model.Value != "hell" {
+		t.Errorf("after backspace, value = %q, want 'hell'", model.Value)
 	}
 }
 
 func TestInputStatePreservation(t *testing.T) {
 	model := &Model{
-		Prompt:    "Enter your name:",
-		TextInput: textinput.New(),
+		Prompt: "Enter your name:",
 	}
 	originalPrompt := model.Prompt
 
-	model.TextInput.SetValue("test")
+	model.Value = "test"
 	model.Update(tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune{'x'}})
 
 	if model.Prompt != originalPrompt {
 		t.Error("prompt should not change during input")
-	}
-}
-
-func TestInputResetFunctionality(t *testing.T) {
-	model := &Model{
-		Prompt:    "Enter value:",
-		TextInput: textinput.New(),
-	}
-
-	model.TextInput.SetValue("some text")
-	model.TextInput.SetCursor(5)
-
-	model.Update(tea.KeyMsg{Type: tea.KeyEsc})
-
-	if model.TextInput.Value() != "" {
-		t.Error("reset should clear value")
-	}
-
-	if model.TextInput.Position() != 0 {
-		t.Error("reset should reset cursor position")
 	}
 }
