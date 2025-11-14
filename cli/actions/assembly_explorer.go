@@ -185,7 +185,9 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 			title = fmt.Sprintf("viewing %s (%dB)", functionName, function.BinarySize)
 		}
 
-		if err = hexviewer.Send(title, function.AssemblyContent); err != nil {
+		formattedContent := assemblies.FormatAssemblyWithAlignment(function.AssemblyContent)
+
+		if err = hexviewer.Send(title, formattedContent); err != nil {
 			if errors.Is(err, tea.ErrInterrupted) {
 				return
 			}
