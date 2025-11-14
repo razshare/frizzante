@@ -33,27 +33,17 @@ func RequestedFile(client *clients.Client) bool {
 		return false
 	}
 
-	var name string
-
-	if strings.HasPrefix(client.Request.RequestURI, "/") {
-		name = filepath.Join("app", "dist", "client", client.Request.RequestURI[1:])
-	} else {
-		name = filepath.Join("app", "dist", "client", client.Request.RequestURI)
+	uri := client.Request.RequestURI
+	if strings.HasPrefix(uri, "/") {
+		uri = uri[1:]
 	}
 
-	if files.IsFile(name) {
-		if client.Writer.Header().Get("Content-Type") == "" {
-			Header(client, "Content-Type", mime.Parse(name))
-		}
+	embeddedFileName := strings.Join([]string{"app", "dist", "client", uri}, "/")
 
-		http.ServeFile(client.Writer, &client.Request, name)
-		return true
-	}
-
-	if embeds.IsFile(client.Options.Efs, name) {
+	if embeds.IsFile(client.Options.Efs, embeddedFileName) {
 		var file fs.File
 		var err error
-		if file, err = client.Options.Efs.Open(name); err != nil {
+		if file, err = client.Options.Efs.Open(embeddedFileName); err != nil {
 			client.Options.ErrorLog.Println(err, stack.Trace())
 			return false
 		}
@@ -65,7 +55,7 @@ func RequestedFile(client *clients.Client) bool {
 		}
 
 		if client.Writer.Header().Get("Content-Type") == "" {
-			Header(client, "Content-Type", mime.Parse(name))
+			Header(client, "Content-Type", mime.Parse(embeddedFileName))
 		}
 
 		if client.Writer.Header().Get("Content-Length") == "" {
@@ -78,7 +68,18 @@ func RequestedFile(client *clients.Client) bool {
 			return false
 		}
 
-		http.ServeContent(client.Writer, &client.Request, name, info.ModTime(), bytes.NewReader(buf))
+		http.ServeContent(client.Writer, &client.Request, embeddedFileName, info.ModTime(), bytes.NewReader(buf))
+		return true
+	}
+
+	fileName := filepath.Join("app", "dist", "client", strings.ReplaceAll(uri, "/", string(filepath.Separator)))
+
+	if files.IsFile(fileName) {
+		if client.Writer.Header().Get("Content-Type") == "" {
+			Header(client, "Content-Type", mime.Parse(fileName))
+		}
+
+		http.ServeFile(client.Writer, &client.Request, fileName)
 		return true
 	}
 
