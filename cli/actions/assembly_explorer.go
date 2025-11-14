@@ -79,7 +79,7 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 			spinners.Stop(spin)
 			return
 		}
-		assemblies.ParseFunctionsInFile(file, references, func(_ string) {})
+		assemblies.Parse(file, references, func(_ string) {})
 		spinners.Stop(spin)
 	} else {
 		spin := spinners.Newf("generating assembly code in %s", filepath.Join(".gen", "bin", "app.s"))
@@ -107,7 +107,7 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 			return
 		}
 
-		go assemblies.ParseFunctionsInFile(stdout, references, func(line string) {
+		go assemblies.Parse(stdout, references, func(line string) {
 			if _, werr := assemblyFile.WriteString(line + "\n"); werr != nil {
 				_, _ = fmt.Fprintf(os.Stderr, "\r%s%s\n\r", messages.Prefix, werr.Error())
 				return

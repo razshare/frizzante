@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func ParseFunctionsInFile(source *os.File, references map[string]map[string]*FunctionInfo, online func(line string)) {
+func Parse(source *os.File, references map[string]map[string]*FunctionInfo, online func(line string)) {
 	scanner := bufio.NewScanner(source)
 
 	var fileName string
