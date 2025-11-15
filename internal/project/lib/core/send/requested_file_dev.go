@@ -28,20 +28,20 @@ func RequestedFile(client *clients.Client) bool {
 		return false
 	}
 
-	var name string
+	uri := client.Request.RequestURI
 
-	if strings.HasPrefix(client.Request.RequestURI, "/") {
-		name = filepath.Join("app", "dist", "client", client.Request.RequestURI[1:])
-	} else {
-		name = filepath.Join("app", "dist", "client", client.Request.RequestURI)
+	if strings.HasPrefix(uri, "/") {
+		uri = uri[1:]
 	}
 
-	if files.IsFile(name) {
-		if "" == client.Writer.Header().Get("Content-Type") {
-			Header(client, "Content-Type", mime.Parse(name))
+	fileName := filepath.Join("app", "dist", "client", strings.ReplaceAll(uri, "/", string(filepath.Separator)))
+
+	if files.IsFile(fileName) {
+		if client.Writer.Header().Get("Content-Type") == "" {
+			Header(client, "Content-Type", mime.Parse(fileName))
 		}
 
-		http.ServeFile(client.Writer, &client.Request, name)
+		http.ServeFile(client.Writer, &client.Request, fileName)
 		return true
 	}
 

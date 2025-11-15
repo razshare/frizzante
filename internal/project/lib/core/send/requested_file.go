@@ -34,6 +34,7 @@ func RequestedFile(client *clients.Client) bool {
 	}
 
 	uri := client.Request.RequestURI
+
 	if strings.HasPrefix(uri, "/") {
 		uri = uri[1:]
 	}
