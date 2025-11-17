@@ -33,6 +33,20 @@ func Configure(options ConfigureOptions) (err error) {
 		err = nil
 	}
 
+	if err = Install(InstallOptions{
+		Go:  options.Go,
+		Bun: options.Bun,
+	}); err != nil {
+		return
+	}
+
+	if err = Package(PackageOptions{
+		Bun:  options.Bun,
+		Prod: false,
+	}); err != nil {
+		return
+	}
+
 	messages.Success("project configured")
 
 	return
