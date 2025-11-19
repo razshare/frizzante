@@ -5,11 +5,13 @@ import (
 	"github.com/razshare/frizzante/tui/inputs"
 )
 
-func CreateProject(options CreateProjectOptions) (err error) {
+func CreateProject(options CreateProjectOptions) (name string, err error) {
+	name = options.Name
 	if options.Name == "" {
 		options.Name, err = inputs.Send("give the project a name")
+		name = options.Name
 		if err != nil {
-			return err
+			return
 		}
 	}
 
