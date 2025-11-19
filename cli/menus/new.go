@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -69,13 +70,22 @@ func New(app *apps.App) (*Menu, error) {
 				Handler: func() error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ create project (creates a new project)")))
-					return actions.CreateProject(actions.CreateProjectOptions{
+					prjName, err := actions.CreateProject(actions.CreateProjectOptions{
 						Name: *app.CreateProject,
 						Go:   _go,
 						Efs:  app.Efs,
 						Air:  air,
 						Bun:  bun,
 					})
+
+					if err != nil {
+						return err
+					}
+
+					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(configs.Styles.Menu.Render(fmt.Sprintf("project %s created with success! get into project dir and start with frizzante --configure", prjName)))
+					os.Exit(0)
+					return nil
 				},
 			},
 			{
