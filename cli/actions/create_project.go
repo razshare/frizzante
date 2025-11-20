@@ -50,7 +50,7 @@ func CreateProject(options CreateProjectOptions) (err error) {
 	comment2 := fmt.Sprintf("%s#configures the project", padding2)
 	comment3 := fmt.Sprintf("%s#starts development mode", padding3)
 
-	messages.Tipf(strings.Join([]string{
+	messages.Tip(strings.Join([]string{
 		"## next steps",
 		fmt.Sprintf("%s %s", step1, comment1),
 		fmt.Sprintf("%s %s", step2, comment2),
