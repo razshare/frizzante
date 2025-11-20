@@ -26,7 +26,7 @@ func TestCopyFile(t *testing.T) {
 		t.Fatalf("test_copy_file_dir/copy_test.go should be a file")
 	}
 
-	err = CopyFile(TestCopyFileEfs, filepath.Join("dir", "test.txt"), filepath.Join("test_copy_file_dir", "copy_test.go"))
+	err = CopyFile(TestCopyFileEfs, "dir/test.txt", filepath.Join("test_copy_file_dir", "copy_test.go"))
 	if err != nil {
 		t.Fatal(err)
 	}

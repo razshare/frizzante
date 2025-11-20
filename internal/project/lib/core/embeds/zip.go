@@ -95,12 +95,12 @@ func ZipDirectory(efs embed.FS, from string, to string) (err error) {
 			return nil
 		}
 
-		file, err := efs.Open(name)
+		file, err := efs.Open(strings.ReplaceAll(name, "\\", "/"))
 		if err != nil {
 			return err
 		}
 
-		ioWriter, err := zipWriter.Create(strings.TrimPrefix(name, from+"/"))
+		ioWriter, err := zipWriter.Create(strings.TrimPrefix(name, from+string(filepath.Separator)))
 		if err != nil {
 			return err
 		}
