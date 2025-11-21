@@ -34,7 +34,13 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			return model, nil
 		}
 
-		model.Value += assert.String()
+		var content string
+		if content = assert.String(); len(content) > 1 {
+			// we only accept single characters
+			return model, nil
+		}
+
+		model.Value += content
 	}
 
 	return model, cmd

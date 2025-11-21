@@ -20,7 +20,11 @@ func Apply(search *Search, viewport *viewport.Viewport, message tea.KeyMsg) tea.
 			search.Value = search.Value[:length-1]
 		}
 	} else {
-		search.Value += message.String()
+		var content string
+		if content = message.String(); len(content) == 1 {
+			// we only accept single characters
+			search.Value += content
+		}
 	}
 
 	if current := search.Value; current != previous {
