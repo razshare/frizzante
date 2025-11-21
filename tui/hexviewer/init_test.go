@@ -4,7 +4,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/viewport"
@@ -16,7 +15,7 @@ func TestUpdate(t *testing.T) {
 
 	// ctrl+c
 	model = &Model{
-		Search:   &search.Search{Filtered: []search.Choice{{Id: "apple"}, {Id: "banana"}}, Input: textinput.New()},
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "apple"}, {Id: "banana"}}},
 		Viewport: &viewport.Viewport{Cursor: 0},
 	}
 	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyCtrlC})
@@ -30,16 +29,15 @@ func TestUpdate(t *testing.T) {
 			Active:   true,
 			Choices:  []search.Choice{{Id: "apple"}, {Id: "banana"}},
 			Filtered: []search.Choice{{Id: "apple"}},
-			Input:    textinput.New(),
 		},
 		Viewport: &viewport.Viewport{Cursor: 0},
 	}
-	model.Search.Input.SetValue("app")
+	model.Search.Value = "app"
 	model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 	if model.Search.Active {
 		t.Fatal("singleselect search be inactive")
 	}
-	if model.Search.Input.Value() != "" {
+	if model.Search.Value != "" {
 		t.Fatal("singleselect search should be empty")
 	}
 	if len(model.Search.Filtered) != len(model.Search.Choices) {
@@ -48,7 +46,7 @@ func TestUpdate(t *testing.T) {
 
 	// escape quits when search inactive
 	model = &Model{
-		Search:   &search.Search{Active: false, Input: textinput.New()},
+		Search:   &search.Search{Active: false},
 		Viewport: &viewport.Viewport{},
 	}
 
@@ -59,7 +57,7 @@ func TestUpdate(t *testing.T) {
 
 	// move down with arrow
 	model = &Model{
-		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
 		Viewport: &viewport.Viewport{Visible: 5, Cursor: 0},
 	}
 	model.Update(tea.KeyMsg{Type: tea.KeyDown})
@@ -69,7 +67,7 @@ func TestUpdate(t *testing.T) {
 
 	// move down with tab
 	model = &Model{
-		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
 		Viewport: &viewport.Viewport{Visible: 5, Cursor: 0},
 	}
 	model.Update(tea.KeyMsg{Type: tea.KeyTab})
@@ -79,7 +77,7 @@ func TestUpdate(t *testing.T) {
 
 	// move down with ctrl+pgdown
 	model = &Model{
-		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
 		Viewport: &viewport.Viewport{Visible: 5, Cursor: 0},
 	}
 	model.Update(tea.KeyMsg{Type: tea.KeyCtrlPgDown})
@@ -89,7 +87,7 @@ func TestUpdate(t *testing.T) {
 
 	// move up with arrow
 	model = &Model{
-		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
 		Viewport: &viewport.Viewport{Visible: 5, Cursor: 2},
 	}
 	model.Update(tea.KeyMsg{Type: tea.KeyUp})
@@ -99,7 +97,7 @@ func TestUpdate(t *testing.T) {
 
 	// move up with shift+tab
 	model = &Model{
-		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
 		Viewport: &viewport.Viewport{Visible: 5, Cursor: 2},
 	}
 	model.Update(tea.KeyMsg{Type: tea.KeyShiftTab})
@@ -109,7 +107,7 @@ func TestUpdate(t *testing.T) {
 
 	// move up with ctrl+pgup
 	model = &Model{
-		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
 		Viewport: &viewport.Viewport{Visible: 5, Cursor: 2},
 	}
 	model.Update(tea.KeyMsg{Type: tea.KeyCtrlPgUp})
@@ -119,7 +117,7 @@ func TestUpdate(t *testing.T) {
 
 	// move down and wrap
 	model = &Model{
-		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
 		Viewport: &viewport.Viewport{Visible: 5, Cursor: 4},
 	}
 	model.Update(tea.KeyMsg{Type: tea.KeyDown})
@@ -129,7 +127,7 @@ func TestUpdate(t *testing.T) {
 
 	// move up and wrap
 	model = &Model{
-		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}, Input: textinput.New()},
+		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
 		Viewport: &viewport.Viewport{Visible: 5, Cursor: 0},
 	}
 	model.Update(tea.KeyMsg{Type: tea.KeyUp})
@@ -143,7 +141,6 @@ func TestUpdate(t *testing.T) {
 			Active:   false,
 			Choices:  []search.Choice{{Id: "apple"}, {Id: "banana"}},
 			Filtered: []search.Choice{{Id: "apple"}, {Id: "banana"}},
-			Input:    textinput.New(),
 		},
 		Viewport: &viewport.Viewport{},
 	}
@@ -151,7 +148,7 @@ func TestUpdate(t *testing.T) {
 	if !model.Search.Active {
 		t.Fatal("singleselect search should be active")
 	}
-	if model.Search.Input.Value() != "a" {
+	if model.Search.Value != "a" {
 		t.Fatal("singleselect search value should be a")
 	}
 
@@ -161,7 +158,6 @@ func TestUpdate(t *testing.T) {
 			Active:   false,
 			Choices:  []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
 			Filtered: []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
-			Input:    textinput.New(),
 		},
 		Viewport: &viewport.Viewport{
 			Offset:  1,
@@ -180,7 +176,6 @@ func TestUpdate(t *testing.T) {
 			Active:   false,
 			Choices:  []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
 			Filtered: []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
-			Input:    textinput.New(),
 		},
 		Viewport: &viewport.Viewport{
 			Offset:  0,

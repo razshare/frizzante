@@ -3,7 +3,6 @@ package hexviewer
 import (
 	"strings"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/razshare/frizzante/tui/program"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/viewport"
@@ -20,15 +19,12 @@ func Send(title string, text string) (err error) {
 		}
 	}
 
-	input := textinput.New()
-	input.Width = 80
 	_, err = program.Run(&Model{
 		Prompt:   title,
 		Viewport: &viewport.Viewport{Visible: 12},
 		Search: &search.Search{
 			Choices:  choices,
 			Filtered: choices,
-			Input:    input,
 		},
 	})
 

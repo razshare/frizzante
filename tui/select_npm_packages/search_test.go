@@ -6,7 +6,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/viewport"
@@ -19,7 +18,7 @@ func TestSearch(t *testing.T) {
 	// debouncing
 	model = &Model{
 		Selected:  []string{},
-		Search:    &search.Search{Active: false, Input: textinput.New()},
+		Search:    &search.Search{Active: false},
 		Viewport:  &viewport.Viewport{},
 		Debouncer: time.NewTimer(100 * time.Millisecond),
 		Debounce:  100 * time.Millisecond,
@@ -29,7 +28,7 @@ func TestSearch(t *testing.T) {
 	if !model.Search.Active {
 		t.Fatal("search should be activated")
 	}
-	if model.Search.Input.Value() != "r" {
+	if model.Search.Value != "r" {
 		t.Fatal("search input should be r")
 	}
 	if model.LastQuery != "r" {
@@ -45,7 +44,6 @@ func TestSearch(t *testing.T) {
 				{Id: "vue@3.3.0"},
 				{Id: "angular@16.0.0"},
 			},
-			Input: textinput.New(),
 		},
 		Viewport: &viewport.Viewport{Cursor: 0},
 	}
@@ -70,7 +68,7 @@ func TestSearch(t *testing.T) {
 	// esc quits
 	model = &Model{
 		Selected: []string{"react@18.2.0"},
-		Search:   &search.Search{Input: textinput.New()},
+		Search:   &search.Search{},
 		Viewport: &viewport.Viewport{},
 	}
 	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyEsc})
@@ -84,7 +82,7 @@ func TestSearch(t *testing.T) {
 	// enter confirms
 	model = &Model{
 		Selected: []string{"react@18.2.0"},
-		Search:   &search.Search{Filtered: []search.Choice{}, Input: textinput.New()},
+		Search:   &search.Search{Filtered: []search.Choice{}},
 		Viewport: &viewport.Viewport{},
 	}
 	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyEnter})
@@ -98,7 +96,6 @@ func TestSearch(t *testing.T) {
 			Active:   false,
 			Choices:  []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
 			Filtered: []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
-			Input:    textinput.New(),
 		},
 		Viewport: &viewport.Viewport{
 			Offset:  1,
@@ -117,7 +114,6 @@ func TestSearch(t *testing.T) {
 			Active:   false,
 			Choices:  []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
 			Filtered: []search.Choice{{Id: "apple"}, {Id: "banana1"}, {Id: "banana2"}, {Id: "banana3"}, {Id: "banana4"}, {Id: "banana5"}},
-			Input:    textinput.New(),
 		},
 		Viewport: &viewport.Viewport{
 			Offset:  0,

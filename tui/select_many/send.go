@@ -3,16 +3,12 @@ package select_many
 import (
 	"fmt"
 
-	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/razshare/frizzante/tui/program"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/viewport"
 )
 
 func Send(choices []search.Choice, message string) (selected []string, err error) {
-	// Initialize the search input
-	input := textinput.New()
-	input.Width = 80
 	var model *Model
 	if model, err = program.Run(&Model{
 		Prompt:   message,
@@ -21,7 +17,6 @@ func Send(choices []search.Choice, message string) (selected []string, err error
 		Search: &search.Search{
 			Choices:  choices,
 			Filtered: choices,
-			Input:    input,
 		},
 	}); err != nil {
 		return

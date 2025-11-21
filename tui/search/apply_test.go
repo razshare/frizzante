@@ -3,14 +3,13 @@ package search
 import (
 	"testing"
 
-	"github.com/charmbracelet/bubbles/textinput"
-	_viewport "github.com/razshare/frizzante/tui/viewport"
+	viewport_ "github.com/razshare/frizzante/tui/viewport"
 )
 
 func TestApply(t *testing.T) {
 	var search *Search
 	var choices []Choice
-	var viewport *_viewport.Viewport
+	var viewport *viewport_.Viewport
 
 	// empty search returns all choices
 	choices = []Choice{
@@ -18,10 +17,9 @@ func TestApply(t *testing.T) {
 		{Id: "banana", Description: "Another fruit"},
 		{Id: "cherry", Description: "Small fruit"},
 	}
-	search = &Search{Choices: choices, Filtered: choices, Input: textinput.New()}
-	viewport = &_viewport.Viewport{}
-	search.Input.SetValue("")
-	search.Input.Focus()
+	search = &Search{Choices: choices, Filtered: choices}
+	viewport = &viewport_.Viewport{}
+	search.Value = ""
 	Filter(search, viewport)
 	if len(search.Filtered) != 3 {
 		t.Fatal("search filter should contain 3 items")
@@ -39,9 +37,9 @@ func TestApply(t *testing.T) {
 		{Id: "Banana", Description: "Another fruit"},
 		{Id: "Cherry", Description: "Small fruit"},
 	}
-	search = &Search{Choices: choices, Filtered: choices, Input: textinput.New()}
-	viewport = &_viewport.Viewport{}
-	search.Input.SetValue("APPLE")
+	search = &Search{Choices: choices, Filtered: choices}
+	viewport = &viewport_.Viewport{}
+	search.Value = "APPLE"
 	Filter(search, viewport)
 	if len(search.Filtered) != 1 {
 		t.Fatal("search filter should contain 1 item")
@@ -56,9 +54,9 @@ func TestApply(t *testing.T) {
 		{Id: "pineapple", Description: "Tropical fruit"},
 		{Id: "banana", Description: "Another fruit"},
 	}
-	search = &Search{Choices: choices, Filtered: choices, Input: textinput.New()}
-	viewport = &_viewport.Viewport{}
-	search.Input.SetValue("app")
+	search = &Search{Choices: choices, Filtered: choices}
+	viewport = &viewport_.Viewport{}
+	search.Value = "app"
 	Filter(search, viewport)
 	if len(search.Filtered) != 2 {
 		t.Fatal("search filter should contain 2 items")
@@ -72,9 +70,9 @@ func TestApply(t *testing.T) {
 		{Id: "apple", Description: "A fruit"},
 		{Id: "banana", Description: "Another fruit"},
 	}
-	search = &Search{Choices: choices, Filtered: choices, Input: textinput.New()}
-	viewport = &_viewport.Viewport{}
-	search.Input.SetValue("xyz")
+	search = &Search{Choices: choices, Filtered: choices}
+	viewport = &viewport_.Viewport{}
+	search.Value = "xyz"
 	Filter(search, viewport)
 	if len(search.Filtered) != 0 {
 		t.Fatal("search filter should be empty")
@@ -82,9 +80,9 @@ func TestApply(t *testing.T) {
 
 	// empty choices
 	choices = []Choice{}
-	search = &Search{Choices: choices, Filtered: choices, Input: textinput.New()}
-	viewport = &_viewport.Viewport{}
-	search.Input.SetValue("test")
+	search = &Search{Choices: choices, Filtered: choices}
+	viewport = &viewport_.Viewport{}
+	search.Value = "test"
 	Filter(search, viewport)
 	if len(search.Filtered) != 0 {
 		t.Fatal("search filter should be empty")
@@ -96,8 +94,8 @@ func TestApply(t *testing.T) {
 		{Id: "banana", Description: "Another fruit"},
 		{Id: "cherry", Description: "Small fruit"},
 	}
-	search = &Search{Choices: choices, Filtered: choices, Input: textinput.New()}
-	search.Input.SetValue("apple")
+	search = &Search{Choices: choices, Filtered: choices}
+	search.Value = "apple"
 	Filter(search, viewport)
 	if len(search.Filtered) != 1 {
 		t.Fatal("search filter should contain 1 item")
@@ -112,7 +110,7 @@ func TestApply(t *testing.T) {
 	if len(search.Filtered) != len(search.Choices) {
 		t.Fatal("search filter should empty")
 	}
-	if search.Input.Value() != "" {
+	if search.Value != "" {
 		t.Fatal("search input should empty")
 	}
 	if viewport.Cursor != 0 {

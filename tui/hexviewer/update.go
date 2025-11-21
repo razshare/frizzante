@@ -75,7 +75,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		if len(assert.String()) == 1 {
 			if !model.Search.Active {
 				model.Search.Active = true
-				model.Search.Input.Focus()
 			}
 			return model, search.Apply(model.Search, model.Viewport, assert)
 		}

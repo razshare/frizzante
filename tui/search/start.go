@@ -7,7 +7,7 @@ import (
 )
 
 func Filter(search *Search, viewport *viewport.Viewport) {
-	input := strings.ToLower(search.Input.Value())
+	input := strings.ToLower(search.Value)
 	if input == "" {
 		search.Filtered = search.Choices
 	} else {

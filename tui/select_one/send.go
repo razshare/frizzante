@@ -19,7 +19,6 @@ func Send(choices []search.Choice, message string) (selected string, err error) 
 		Search: &search.Search{
 			Choices:  choices,
 			Filtered: choices,
-			Input:    input,
 		},
 	}); err != nil {
 		return

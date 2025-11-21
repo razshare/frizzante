@@ -16,8 +16,8 @@ func (model *Model) View() string {
 	builder.WriteString(configs.Styles.Menu.Render(model.Prompt))
 
 	builder.WriteString(configs.Styles.UserGuide.PaddingLeft(1).Render("⁋/> "))
-	if model.Search.Input.Value() != "" {
-		builder.WriteString(configs.Styles.UserInput.Render(model.Search.Input.Value()))
+	if model.Search.Value != "" {
+		builder.WriteString(configs.Styles.UserInput.Render(model.Search.Value))
 	} else {
 		builder.WriteString(configs.Styles.UserGuide.Render("type to search"))
 	}

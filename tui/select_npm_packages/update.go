@@ -87,29 +87,22 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			return model, nil
 		}
 
-		// Handle search input
-		// vscode has a weird bug where it will send a "ctrl+w" whenever the user presses "backspace" in the integrated terminal,
-		// so we're including tea.KeyCtrlW to try to fix that for the user.
-		// https://stackoverflow.com/questions/52806758/visual-studio-code-ctrlbackspace-not-working-in-integrated-terminal
-		if len(assert.String()) == 1 || assert.Type == tea.KeyBackspace || assert.Type == tea.KeyCtrlH || assert.Type == tea.KeyCtrlW {
-			if !model.Search.Active {
-				model.Search.Active = true
-				model.Search.Input.Focus()
-			}
-
-			var cmd tea.Cmd
-			model.Debouncer.Reset(model.Debounce)
-			model.Search.Input, cmd = model.Search.Input.Update(assert)
-			model.LastQuery = model.Search.Input.Value()
-
-			return model, tea.Batch(cmd, func() tea.Msg {
-				<-model.Debouncer.C
-				return DebouncedSearchMsg{Query: model.Search.Input.Value()}
-			})
+		if !model.Search.Active {
+			model.Search.Active = true
 		}
 
+		model.Debouncer.Reset(model.Debounce)
+		search.Apply(model.Search, model.Viewport, assert)
+		model.LastQuery = model.Search.Value
+
+		var cmd tea.Cmd
+		return model, tea.Batch(cmd, func() tea.Msg {
+			<-model.Debouncer.C
+			return DebouncedSearchMsg{Query: model.Search.Value}
+		})
+
 	case DebouncedSearchMsg:
-		if assert.Query != "" && assert.Query == model.Search.Input.Value() {
+		if assert.Query != "" && assert.Query == model.Search.Value {
 			model.Loading = true
 			return model, Search(assert.Query)
 		}
