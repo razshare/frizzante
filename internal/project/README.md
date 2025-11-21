@@ -4,24 +4,22 @@ This is a todo list application
 
 # Get Started
 
-Configure project
+Configure project.
 
 ```sh
 frizzante --configure
 ```
 
-Start development mode with 
+Start development mode.
 
 ```sh
 frizzante --dev
 ```
 
-# Build
-
-Build for production with
+Build.
 
 ```sh
 frizzante --build
 ```
 
-This will create a standalone `.gen/bin/app` binary file.
+This will create a `.gen/bin/app` standalone executable.
