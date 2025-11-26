@@ -1,6 +1,8 @@
 package search
 
 import (
+	"strings"
+
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/tui/viewport"
 )
@@ -19,12 +21,12 @@ func Apply(search *Search, viewport *viewport.Viewport, message tea.KeyMsg) tea.
 		if length > 0 {
 			search.Value = search.Value[:length-1]
 		}
-	} else {
-		var content string
-		if content = message.String(); len(content) == 1 {
-			// we only accept single characters
-			search.Value += content
+	} else if message.Type == tea.KeyRunes {
+		value := message.String()
+		if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
+			value = value[1 : len(value)-1]
 		}
+		search.Value += value
 	}
 
 	if current := search.Value; current != previous {

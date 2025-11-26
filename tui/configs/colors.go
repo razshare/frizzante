@@ -11,4 +11,5 @@ var Colors = themes.Colors{
 	Info:      "33",
 	Muted:     "241",
 	Tip:       "125",
+	Input:     "245",
 }

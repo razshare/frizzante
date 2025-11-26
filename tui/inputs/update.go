@@ -1,13 +1,35 @@
 package inputs
 
-import tea "github.com/charmbracelet/bubbletea"
+import (
+	"strings"
+
+	"github.com/atotto/clipboard"
+	tea "github.com/charmbracelet/bubbletea"
+)
 
 func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
+	model.ClipboardError = nil
 	var cmd tea.Cmd
 	switch assert := message.(type) {
 	case tea.KeyMsg:
+		if assert.Type == tea.KeyRunes {
+			value := assert.String()
+			if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
+				value = value[1 : len(value)-1]
+			}
+			model.Value += value
+			return model, nil
+		}
+
 		if assert.Type == tea.KeyCtrlC {
 			return model, tea.Interrupt
+		}
+
+		if assert.Type == tea.KeyCtrlV {
+			var value string
+			value, model.ClipboardError = clipboard.ReadAll()
+			model.Value += value
+			return model, nil
 		}
 
 		if assert.Type == tea.KeyEsc {
@@ -33,14 +55,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return model, nil
 		}
-
-		var content string
-		if content = assert.String(); len(content) > 1 {
-			// we only accept single characters
-			return model, nil
-		}
-
-		model.Value += content
 	}
 
 	return model, cmd

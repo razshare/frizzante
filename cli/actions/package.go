@@ -26,30 +26,30 @@ func Package(options PackageOptions) (err error) {
 	}
 
 	if !messages.Command(messages.CommandOptions{
-		Env:  os.Environ(),
-		Dir:  "app",
-		Name: bun,
-		Args: []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=app.server.ts"},
+		Environment:   os.Environ(),
+		DirectoryName: "app",
+		Program:       bun,
+		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=app.server.ts"},
 	}) {
 		err = errors.New("could not build server bundle")
 		return
 	}
 
 	if !messages.Command(messages.CommandOptions{
-		Env:  os.Environ(),
-		Dir:  "app",
-		Name: filepath.Join("node_modules", ".bin", "esbuild"),
-		Args: []string{"--bundle", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js"},
+		Environment:   os.Environ(),
+		DirectoryName: "app",
+		Program:       filepath.Join("node_modules", ".bin", "esbuild"),
+		Args:          []string{"--bundle", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js"},
 	}) {
 		err = errors.New("could not normalize server bundle")
 		return
 	}
 
 	if !messages.Command(messages.CommandOptions{
-		Env:  os.Environ(),
-		Dir:  "app",
-		Name: bun,
-		Args: []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true"},
+		Environment:   os.Environ(),
+		DirectoryName: "app",
+		Program:       bun,
+		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true"},
 	}) {
 		err = errors.New("could not build client bundles")
 		return

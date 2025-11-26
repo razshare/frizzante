@@ -11,9 +11,9 @@ func Command(options CommandOptions) (ok bool) {
 	var done bool
 	defer func() { done = true }()
 
-	cmd := exec.Command(options.Name, options.Args...)
-	cmd.Dir = options.Dir
-	cmd.Env = options.Env
+	cmd := exec.Command(options.Program, options.Args...)
+	cmd.Dir = options.DirectoryName
+	cmd.Env = options.Environment
 
 	if !options.DisabledStdin {
 		cmd.Stdin = os.Stdin

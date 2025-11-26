@@ -27,9 +27,9 @@ func Install(options InstallOptions) (err error) {
 	spin := spinners.New("installing go packages")
 	go spinners.Start(spin)
 	if messages.Command(messages.CommandOptions{
-		Env:  os.Environ(),
-		Name: options.Go,
-		Args: []string{"mod", "tidy"},
+		Environment: os.Environ(),
+		Program:     options.Go,
+		Args:        []string{"mod", "tidy"},
 	}) {
 		messages.Success("go packages installed")
 	}
@@ -38,10 +38,10 @@ func Install(options InstallOptions) (err error) {
 	spin = spinners.New("installing javascript packages")
 	go spinners.Start(spin)
 	if messages.Command(messages.CommandOptions{
-		Dir:  "app",
-		Env:  os.Environ(),
-		Name: bun,
-		Args: []string{"install"},
+		DirectoryName: "app",
+		Environment:   os.Environ(),
+		Program:       bun,
+		Args:          []string{"install"},
 	}) {
 		messages.Success("javascript packages installed")
 	}

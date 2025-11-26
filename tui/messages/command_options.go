@@ -4,8 +4,8 @@ type CommandOptions struct {
 	DisabledStdin bool
 	DisableStdout bool
 	DisableStderr bool
-	Dir           string
-	Env           []string
-	Name          string
+	DirectoryName string
+	Environment   []string
+	Program       string
 	Args          []string
 }

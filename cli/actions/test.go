@@ -9,9 +9,9 @@ import (
 
 func Test(options TestOptions) (err error) {
 	if !messages.Command(messages.CommandOptions{
-		Env:  os.Environ(),
-		Name: options.Go,
-		Args: []string{"test", "./..."},
+		Environment: os.Environ(),
+		Program:     options.Go,
+		Args:        []string{"test", "./..."},
 	}) {
 		err = errors.New("tests failed")
 		return

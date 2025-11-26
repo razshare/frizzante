@@ -1,7 +1,8 @@
 package inputs
 
 type Model struct {
-	Prompt string
-	Value  string
-	Prefix string
+	Prompt         string
+	Value          string
+	Prefix         string
+	ClipboardError error
 }

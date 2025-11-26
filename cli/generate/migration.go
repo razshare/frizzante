@@ -86,10 +86,10 @@ func Migration(options MigrationOptions) (err error) {
 
 	go spinners.Start(spin)
 	if !messages.Command(messages.CommandOptions{
-		Dir:  baseDirectory,
-		Env:  os.Environ(),
-		Name: sqlc,
-		Args: []string{"vet"},
+		DirectoryName: baseDirectory,
+		Environment:   os.Environ(),
+		Program:       sqlc,
+		Args:          []string{"vet"},
 	}) {
 		spinners.Stop(spin)
 		err = errors.New("sql code check failed")

@@ -3,19 +3,25 @@ package themes
 import "github.com/charmbracelet/lipgloss"
 
 type Styles struct {
-	Title     lipgloss.Style
-	Popup     lipgloss.Style
-	Item      lipgloss.Style
-	Selected  lipgloss.Style
-	BigText   lipgloss.Style
-	Section   lipgloss.Style
-	Subheader lipgloss.Style
-	Menu      lipgloss.Style
-	UserGuide lipgloss.Style
-	UserInput lipgloss.Style
-	Spinner   lipgloss.Style
-	Flag      lipgloss.Style
-	Category  lipgloss.Style
-	Example   lipgloss.Style
-	Status    func(color string) lipgloss.Style
+	Title        lipgloss.Style
+	Popup        lipgloss.Style
+	Item         lipgloss.Style
+	Selected     lipgloss.Style
+	BigText      lipgloss.Style
+	Section      lipgloss.Style
+	Subheader    lipgloss.Style
+	Menu         lipgloss.Style
+	UserGuide    lipgloss.Style
+	UserInput    lipgloss.Style
+	Spinner      lipgloss.Style
+	Flag         lipgloss.Style
+	Category     lipgloss.Style
+	Example      lipgloss.Style
+	InfoLabel    lipgloss.Style
+	InfoText     lipgloss.Style
+	WarningLabel lipgloss.Style
+	WarningText  lipgloss.Style
+	ErrorLabel   lipgloss.Style
+	ErrorText    lipgloss.Style
+	Status       func(color string) lipgloss.Style
 }

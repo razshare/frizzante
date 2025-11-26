@@ -22,6 +22,14 @@ func (model *Model) View() string {
 		builder.WriteString(configs.Styles.UserInput.Render(model.Value))
 	}
 	builder.WriteString("\n")
+
+	if model.ClipboardError != nil {
+		builder.WriteString(configs.Styles.Menu.Render("│"))
+		builder.WriteString(configs.Styles.ErrorLabel.Render("  ERROR  "))
+		builder.WriteString(configs.Styles.ErrorText.Render(model.ClipboardError.Error()))
+		builder.WriteString("\n")
+	}
+
 	builder.WriteString(configs.Styles.Menu.Render("│"))
 	builder.WriteString(configs.Styles.UserGuide.Render("enter submit"))
 	if model.Value != "" {

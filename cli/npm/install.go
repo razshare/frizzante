@@ -21,10 +21,10 @@ func Install(options InstallOptions) error {
 	for _, pkg := range options.Packages {
 		messages.Infof("adding %s", pkg)
 		if !messages.Command(messages.CommandOptions{
-			Dir:  "app",
-			Env:  os.Environ(),
-			Name: options.Bun,
-			Args: []string{"add", "-D", pkg},
+			DirectoryName: "app",
+			Environment:   os.Environ(),
+			Program:       options.Bun,
+			Args:          []string{"add", "-D", pkg},
 		}) {
 			messages.Errorf("failed to add package %s", pkg)
 			continue

@@ -62,5 +62,32 @@ var Styles = themes.Styles{
 
 	Example: lipgloss.
 		NewStyle().
-		Foreground(lipgloss.Color(Colors.Muted)),
+		Foreground(lipgloss.Color(Colors.Input)),
+
+	InfoLabel: lipgloss.
+		NewStyle().
+		Background(lipgloss.Color(Colors.Info)).
+		Foreground(lipgloss.Color("17")),
+
+	InfoText: lipgloss.
+		NewStyle().
+		Foreground(lipgloss.Color(Colors.Info)),
+
+	WarningLabel: lipgloss.
+		NewStyle().
+		Background(lipgloss.Color(Colors.Warning)).
+		Foreground(lipgloss.Color("17")),
+
+	WarningText: lipgloss.
+		NewStyle().
+		Foreground(lipgloss.Color(Colors.Warning)),
+
+	ErrorLabel: lipgloss.
+		NewStyle().
+		Background(lipgloss.Color(Colors.Error)).
+		Foreground(lipgloss.Color("17")),
+
+	ErrorText: lipgloss.
+		NewStyle().
+		Foreground(lipgloss.Color(Colors.Error)),
 }

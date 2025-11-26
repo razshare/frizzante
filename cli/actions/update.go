@@ -28,9 +28,9 @@ func Update(options UpdateOptions) (err error) {
 	spin := spinners.New("updating go packages")
 	go spinners.Start(spin)
 	if messages.Command(messages.CommandOptions{
-		Env:  os.Environ(),
-		Name: options.Go,
-		Args: []string{"get", "-u", "./..."},
+		Environment: os.Environ(),
+		Program:     options.Go,
+		Args:        []string{"get", "-u", "./..."},
 	}) {
 		messages.Success("go packages updated")
 	}
@@ -39,10 +39,10 @@ func Update(options UpdateOptions) (err error) {
 	spin = spinners.New("updating javascript packages")
 	go spinners.Start(spin)
 	if messages.Command(messages.CommandOptions{
-		Dir:  "app",
-		Env:  os.Environ(),
-		Name: bun,
-		Args: []string{"update"},
+		DirectoryName: "app",
+		Environment:   os.Environ(),
+		Program:       bun,
+		Args:          []string{"update"},
 	}) {
 		messages.Success("javascript packages updated")
 	}

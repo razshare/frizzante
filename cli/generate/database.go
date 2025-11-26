@@ -60,9 +60,9 @@ func Database(options DatabaseOptions) (err error) {
 
 		go spinners.Start(spin)
 		if !messages.Command(messages.CommandOptions{
-			Env:  os.Environ(),
-			Name: options.Go,
-			Args: []string{"get", "github.com/mattn/go-sqlite3"},
+			Environment: os.Environ(),
+			Program:     options.Go,
+			Args:        []string{"get", "github.com/mattn/go-sqlite3"},
 		}) {
 			spinners.Stop(spin)
 			err = errors.New("could not add github.com/mattn/go-sqlite3")
