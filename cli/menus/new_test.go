@@ -436,6 +436,24 @@ func TestNew(t *testing.T) {
 			//}
 			continue
 		}
+
+		if item.Choice.Id == "snapshot" {
+			i++
+			if item.Active() {
+				t.Fatal("snapshot should not be active")
+			}
+			*a.Snapshot = true
+			if !item.Active() {
+				t.Fatal("snapshot should be active")
+			}
+			*a.Snapshot = false
+			//err = item.Handler()
+			//if err != nil {
+			//	t.Fatal(err)
+			//}
+			continue
+		}
+
 		t.Fatalf("menu %s has been skipped", item.Choice.Id)
 	}
 }
