@@ -15,7 +15,7 @@ func New() *App {
 	res := flag.BoolP("reset", "", false, "deletes frizzante global directory")
 	crt := flag.StringP("create-project", "c", "", "creates a frizzante project")
 	gen := flag.StringP("generate", "g", "", "generates code and resources")
-	mig := flag.StringP("migrate", "m", "", "migrates database schema")
+	mig := flag.StringP("migrate", "m", "", "migrates database schema, requires a database connection string or file")
 	tst := flag.BoolP("test", "t", false, "runs tests")
 	pkg := flag.BoolP("package", "p", false, "packages app, result will be dropped in app/dist")
 	pkw := flag.BoolP("package-watch", "", false, "watches and packages app, result will be dropped in app/dist")
@@ -38,7 +38,8 @@ func New() *App {
 	sqc := flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"+extensions.Find()), "sets the sqlc binary")
 	sqy := flag.StringP("sqlc-yaml", "", "", "sets the sqlc configuration file")
 	tgs := flag.StringP("tags", "", "", "sets build tags")
-	db := flag.StringP("database", "", "", "database string")
+	dbs := flag.StringP("database", "", "", "specifies the database connection string or file, used when migrating database schema")
+	snp := flag.BoolP("snapshot", "", false, "snapshots the server state and generates static web assets")
 
 	return &App{
 		Add:              add,
@@ -70,7 +71,8 @@ func New() *App {
 		Tags:             tgs,
 		AssemblyExplorer: asm,
 		Clear:            clr,
-		Database:         db,
+		Database:         dbs,
 		LockPackages:     lck,
+		Snapshot:         snp,
 	}
 }

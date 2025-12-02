@@ -418,6 +418,15 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
+				Choice: search.Choice{Id: "snapshot", Description: "snapshots the server state and generates static web assets"},
+				Active: func() bool { return *app.Snapshot },
+				Handler: func() error {
+					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ snapshot (snapshots the server state and generates static web assets)")))
+					return actions.LockPackages(actions.LockPackagesOptions{})
+				},
+			},
+			{
 				Choice: search.Choice{Id: "test", Description: "runs tests"},
 				Active: func() bool { return *app.Test },
 				Handler: func() error {
