@@ -20,9 +20,8 @@ func TestDatabase(t *testing.T) {
 	defer func() { _ = os.RemoveAll(".gen") }()
 
 	if err := Sqlc(SqlcOptions{
-		Auto:     true,
 		Sqlc:     filepath.Join(".gen", "sqlc", "sqlc"),
-		Platform: platforms.LinuxAmd64,
+		Platform: platforms.Detect(),
 	}); err != nil {
 		t.Fatal(err)
 	}
@@ -37,9 +36,8 @@ func TestDatabase(t *testing.T) {
 	defer func() { _ = os.RemoveAll("lib") }()
 
 	if err := Database(DatabaseOptions{
-		Platform: platforms.LinuxAmd64,
+		Platform: platforms.Detect(),
 		Efs:      TestDatabaseEfs,
-		Auto:     true,
 		Go:       "go",
 		Type:     "sqlite",
 		Sqlc:     filepath.Join(".gen", "sqlc", "sqlc"),

@@ -20,9 +20,9 @@ go get ./...
 pushd internal/project
   "$frizzante" --configure
   "$frizzante" --lock-packages
-  "$frizzante" -gsqlc -y
+  "$frizzante" -gsqlc
   "$frizzante" --install
-  "$frizzante" -gtypes -y
+  "$frizzante" -gtypes
   "$frizzante" --package
   cropy app/node_modules ../additions/app/node_modules
   cropy .gen/sqlc/sqlc ../../cli/generate/.gen/sqlc/sqlc

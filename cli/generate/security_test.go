@@ -22,8 +22,7 @@ func TestSecurity(t *testing.T) {
 	defer func() { _ = os.RemoveAll("lib") }()
 
 	if err = Security(SecurityOptions{
-		Efs:  TestSecurityEfs,
-		Auto: true,
+		Efs: TestSecurityEfs,
 	}); err != nil {
 		t.Fatal(err)
 	}

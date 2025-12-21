@@ -11,5 +11,4 @@ type SchemaOptions struct {
 	SqlcYaml string
 	Database *sql.DB
 	Platform platforms.Platform
-	Auto     bool
 }

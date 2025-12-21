@@ -18,7 +18,10 @@ func TestProject(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll("asd") }()
 
-	if err := Project(ProjectOptions{Auto: true, Efs: TestProjectEfs, Name: "asd"}); err != nil {
+	if err := Project(ProjectOptions{
+		Efs:  TestProjectEfs,
+		Name: "asd",
+	}); err != nil {
 		t.Fatal(err)
 	}
 

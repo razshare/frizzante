@@ -15,7 +15,10 @@ func TestBun(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll(".gen") }()
 
-	if err := Bun(BunOptions{Platform: platforms.LinuxAmd64, Auto: true, Bun: filepath.Join(".gen", "bun", "bun")}); err != nil {
+	if err := Bun(BunOptions{
+		Platform: platforms.Detect(),
+		Bun:      filepath.Join(".gen", "bun", "bun"),
+	}); err != nil {
 		t.Fatal(err)
 	}
 

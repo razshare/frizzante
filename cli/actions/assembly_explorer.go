@@ -22,27 +22,32 @@ import (
 )
 
 func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
-	var name string
+	var program string
 	if runtime.GOOS == "windows" {
-		name = filepath.Join(".gen", "bin", "app.exe")
+		program = filepath.Join(".gen", "bin", "app.exe")
 	} else {
-		name = filepath.Join(".gen", "bin", "app")
+		program = filepath.Join(".gen", "bin", "app")
 	}
 
-	build := true
+	var tags []string
+	if tags, err = tags_.Parse(options.Tags); err != nil {
+		return
+	}
 
-	if files.IsFile(name) {
-		if build, err = confirm.Sendf(options.Auto, "file %s already exists. Rebuild?", name); err != nil {
-			return
+	var build bool
+
+	if files.IsFile(program) {
+		if options.Interactive {
+			if build, err = confirm.Sendf(true, "file %s already exists. Rebuild?", program); err != nil {
+				return
+			}
+		} else {
+			build = true
 		}
 	}
 
-	tags := options.Tags
-
-	if !build {
-		messages.Info("skipping build")
-	} else {
-		if len(tags) == 0 {
+	if build {
+		if len(tags) == 0 && options.Interactive {
 			if tags, err = tags_.Select([]search.Choice{
 				{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
 				{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
@@ -55,18 +60,16 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 			}
 		}
 
-		if err = os.RemoveAll(filepath.Join(".gen", "bin", "app.s")); err != nil {
-			return
-		}
-
 		if err = Build(BuildOptions{
-			Go:       options.Go,
-			Bun:      options.Bun,
-			Tags:     tags,
-			Platform: options.Platform,
+			Go:          options.Go,
+			Bun:         options.Bun,
+			Tags:        options.Tags,
+			Interactive: options.Interactive,
 		}); err != nil {
 			return
 		}
+	} else {
+		messages.Info("skipping build")
 	}
 
 	var references = map[string]map[string]*assemblies.FunctionInfo{}
@@ -88,7 +91,7 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 		var stdout *os.File
 		var stderr *os.File
 
-		cmd := exec.Command(options.Go, "tool", "objdump", "-S", name)
+		cmd := exec.Command(options.Go, "tool", "objdump", "-S", program)
 		cmd.Dir = ""
 		cmd.Env = os.Environ()
 		cmd.Stdin = os.Stdin

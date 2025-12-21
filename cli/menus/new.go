@@ -4,17 +4,19 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os/exec"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/razshare/frizzante/cli/actions"
 	"github.com/razshare/frizzante/cli/apps"
+	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/cli/paths"
-	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/platforms"
 	"github.com/razshare/frizzante/tui/configs"
 	"github.com/razshare/frizzante/tui/inputs"
+	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/select_one"
 )
@@ -27,7 +29,7 @@ func New(app *apps.App) (*Menu, error) {
 
 	platform := platforms.Detect()
 
-	_go, err := paths.Go(*app.Go)
+	go_, err := paths.Go(*app.Go)
 	if err != nil {
 		return nil, err
 	}
@@ -52,30 +54,58 @@ func New(app *apps.App) (*Menu, error) {
 			{
 				Choice: search.Choice{Id: "configure", Description: "generates bun and air binaries"},
 				Active: func() bool { return *app.Configure },
-				Handler: func() error {
-					return actions.Configure(actions.ConfigureOptions{
-						Auto:     *app.Yes,
-						Platform: platform,
-						Go:       _go,
+				Handler: func() (err error) {
+					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ configure (generates bun and air binaries in .gen)")))
+
+					if _, err = exec.LookPath(air); err != nil || !files.IsFile(air) {
+						messages.Info(err)
+						if err = generate.Air(generate.AirOptions{Air: air, Platform: platform}); err != nil {
+							return
+						}
+					}
+
+					if _, err = exec.LookPath(bun); err != nil || !files.IsFile(bun) {
+						messages.Info(err)
+						if err = generate.Bun(generate.BunOptions{Bun: bun, Platform: platform}); err != nil {
+							return
+						}
+					}
+
+					err = actions.Configure(actions.ConfigureOptions{
+						Go:       go_,
 						Air:      air,
 						Bun:      bun,
 						Efs:      app.Efs,
+						Platform: platform,
 					})
+
+					return
 				},
 			},
 			{
 				Choice: search.Choice{Id: "create project", Description: "creates a new project"},
 				Active: func() bool { return *app.CreateProject != "" },
-				Handler: func() error {
+				Handler: func() (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ create project (creates a new project)")))
-					return actions.CreateProject(actions.CreateProjectOptions{
-						Name: *app.CreateProject,
-						Go:   _go,
+
+					var name string
+					if name = *app.CreateProject; name == "" {
+						name, err = inputs.Send("give the project a name")
+						if err != nil {
+							return
+						}
+					}
+
+					err = actions.CreateProject(actions.CreateProjectOptions{
+						Name: name,
+						Go:   go_,
 						Efs:  app.Efs,
 						Air:  air,
 						Bun:  bun,
 					})
+					return err
 				},
 			},
 			{
@@ -85,7 +115,7 @@ func New(app *apps.App) (*Menu, error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ install (installs go and js packages)")))
 					return actions.Install(actions.InstallOptions{
-						Go:  _go,
+						Go:  go_,
 						Bun: bun,
 					})
 				},
@@ -97,7 +127,7 @@ func New(app *apps.App) (*Menu, error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ update (updates go and js packages)")))
 					return actions.Update(actions.UpdateOptions{
-						Go:  _go,
+						Go:  go_,
 						Bun: bun,
 					})
 				},
@@ -141,32 +171,18 @@ func New(app *apps.App) (*Menu, error) {
 				Handler: func() (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ dev (runs air and vite in parallel)")))
-					var tags []string
-					if tags, err = tags_.Parse(*app.Tags); err != nil {
-						return
-					}
-
-					if !*app.Dev {
-						if tags, err = tags_.Select([]search.Choice{
-							{Id: "types", Description: "enables type generations"},
-							{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
-							{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
-							{Id: "other", Description: "adds custom tags"},
-						}); err != nil {
-							return
-						}
-					}
-
-					tags = append(tags, "dev", "trace")
-
+					// The "interactive" mode is enabled only when the menu option has been activated through the main menu.
+					// Whenever the menu handler is activated without going through the main menu, for example
+					// by inlining the flag directly, then we don't treat the program as "interactive".
+					interactive := !*app.Dev
 					err = actions.Dev(actions.DevOptions{
-						Go:   _go,
-						Air:  air,
-						Bun:  bun,
-						Tags: tags,
-						Efs:  app.Efs,
+						Go:          go_,
+						Air:         air,
+						Bun:         bun,
+						Tags:        *app.Tags,
+						Efs:         app.Efs,
+						Interactive: interactive,
 					})
-
 					return
 				},
 			},
@@ -176,29 +192,16 @@ func New(app *apps.App) (*Menu, error) {
 				Handler: func() (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ build (builds project)")))
-					var tags []string
-					if tags, err = tags_.Parse(*app.Tags); err != nil {
-						return
-					}
-
-					if !*app.Build {
-						if tags, err = tags_.Select([]search.Choice{
-							{Id: "trace", Description: "enables tracing with stack.Trace()"},
-							{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
-							{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
-							{Id: "other", Description: "adds custom tags"},
-						}); err != nil {
-							return
-						}
-					}
-
+					// The "interactive" mode is enabled only when the menu option has been activated through the main menu.
+					// Whenever the menu handler is activated without going through the main menu, for example
+					// by inlining the flag directly, then we don't treat the program as "interactive".
+					interactive := !*app.Build
 					err = actions.Build(actions.BuildOptions{
-						Platform: platform,
-						Go:       _go,
-						Bun:      bun,
-						Tags:     tags,
+						Go:          go_,
+						Bun:         bun,
+						Tags:        *app.Tags,
+						Interactive: interactive,
 					})
-
 					return
 				},
 			},
@@ -208,19 +211,16 @@ func New(app *apps.App) (*Menu, error) {
 				Handler: func() (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ assembly explorer (explores application assembly output)")))
-					var tags []string
-					if tags, err = tags_.Parse(*app.Tags); err != nil {
-						return
-					}
-
+					// The "interactive" mode is enabled only when the menu option has been activated through the main menu.
+					// Whenever the menu handler is activated without going through the main menu, for example
+					// by inlining the flag directly, then we don't treat the program as "interactive".
+					interactive := !*app.Dev
 					err = actions.AssemblyExplorer(actions.AssemblyExplorerOptions{
-						Platform: platform,
-						Go:       _go,
-						Bun:      bun,
-						Tags:     tags,
-						Auto:     *app.Yes,
+						Go:          go_,
+						Bun:         bun,
+						Tags:        *app.Tags,
+						Interactive: interactive,
 					})
-
 					return
 				},
 			},
@@ -228,28 +228,18 @@ func New(app *apps.App) (*Menu, error) {
 				Choice: search.Choice{Id: "generate", Description: "generates code and resources"},
 				Active: func() bool { return *app.Generate != "" },
 				Handler: func() (err error) {
-					var tags []string
-					tags, err = tags_.Parse(*app.Tags)
-					tags = append(tags, "dev")
-
-					generation := *app.Generate
-
-					if generation == ":pick" {
-						generation = ""
-					}
-
 					err = actions.Generate(actions.GenerateOptions{
-						Generation: generation,
-						Auto:       *app.Yes,
-						Efs:        app.Efs,
-						Platform:   platform,
-						Go:         _go,
-						Air:        air,
-						Bun:        bun,
-						Sqlc:       sqlc,
-						Tags:       tags,
-						SqlcYaml:   *app.SqlcYaml,
-						Database:   *app.Database,
+						Generation:   *app.Generate,
+						Efs:          app.Efs,
+						Go:           go_,
+						Air:          air,
+						Bun:          bun,
+						Sqlc:         sqlc,
+						Tags:         *app.Tags,
+						SqlcYaml:     *app.SqlcYaml,
+						Database:     *app.Database,
+						Platform:     platform,
+						DatabaseType: *app.DatabaseType,
 					})
 
 					return
@@ -261,19 +251,25 @@ func New(app *apps.App) (*Menu, error) {
 				Handler: func() (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ migrate (migrates database schema)")))
+
+					// The "interactive" mode is enabled only when the menu option has been activated through the main menu.
+					// Whenever the menu handler is activated without going through the main menu, for example
+					// by inlining the flag directly, then we don't treat the program as "interactive".
+					interactive := *app.Migrate != ""
+
 					var offset string
 					var target string
 
-					parts := strings.SplitN(*app.Migrate, ",", 2)
+					migrateRange := strings.SplitN(*app.Migrate, ",", 2)
 
-					if len(parts) >= 1 {
-						offset = parts[0]
+					if len(migrateRange) >= 1 {
+						offset = migrateRange[0]
 					} else {
 						offset = ""
 					}
 
-					if len(parts) >= 2 {
-						target = parts[1]
+					if len(migrateRange) >= 2 {
+						target = migrateRange[1]
 						if offset == "" {
 							offset = "first"
 						}
@@ -313,14 +309,23 @@ func New(app *apps.App) (*Menu, error) {
 						return
 					}
 
+					if _, err = exec.LookPath(sqlc); err != nil && !files.IsFile(sqlc) {
+						if err = generate.Sqlc(generate.SqlcOptions{
+							Sqlc:     sqlc,
+							Platform: platform,
+						}); err != nil {
+							return
+						}
+					}
+
 					err = actions.Migrate(actions.MigrateOptions{
-						Auto:     *app.Yes,
-						Platform: platform,
-						Sqlc:     sqlc,
-						SqlcYaml: *app.SqlcYaml,
-						Offset:   offset,
-						Target:   target,
-						Database: database,
+						Sqlc:        sqlc,
+						SqlcYaml:    *app.SqlcYaml,
+						Offset:      offset,
+						Target:      target,
+						Database:    database,
+						Platform:    platform,
+						Interactive: interactive,
 					})
 					return
 				},
@@ -365,7 +370,7 @@ func New(app *apps.App) (*Menu, error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ format (format code)")))
 					return actions.Format(actions.FormatOptions{
-						Go:  _go,
+						Go:  go_,
 						Bun: bun,
 					})
 				},
@@ -386,7 +391,7 @@ func New(app *apps.App) (*Menu, error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ clean project (deletes .gen, .vite, app/{dist,node_modules})")))
 					return actions.CleanProject(actions.CleanProjectOptions{
-						Go: _go,
+						Go: go_,
 					})
 				},
 			},
@@ -433,7 +438,7 @@ func New(app *apps.App) (*Menu, error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ test (runs tests)")))
 					return actions.Test(actions.TestOptions{
-						Go:  _go,
+						Go:  go_,
 						Bun: bun,
 					})
 				},

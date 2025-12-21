@@ -22,7 +22,6 @@ type App struct {
 	Dev              *bool
 	Build            *bool
 	Configure        *bool
-	Yes              *bool
 	Welcome          *bool
 	Clear            *bool
 	AssemblyExplorer *bool
@@ -35,5 +34,6 @@ type App struct {
 	SqlcYaml         *string
 	Tags             *string
 	Database         *string
+	DatabaseType     *string
 	Efs              embed.FS
 }

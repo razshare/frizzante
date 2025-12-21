@@ -7,30 +7,10 @@ import (
 	"strings"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
 )
 
 func Copy(options CopyOptions) (err error) {
-	if files.IsFile(options.To) || files.IsDirectory(options.To) {
-		if !options.Auto {
-			var yes bool
-			if yes, err = confirm.Sendf(true, "%s already exists. Overwrite?", options.To); err != nil {
-				return
-			}
-
-			if !yes {
-				messages.Infof("skipping %s", options.To)
-				return
-			}
-		}
-
-		if err = os.RemoveAll(options.To); err != nil {
-			return
-		}
-	}
-
 	if embeds.IsDirectory(options.Efs, options.From) {
 		var entries []string
 		if entries, err = embeds.ReadDirectory(options.Efs, options.From); err != nil {

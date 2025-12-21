@@ -5,13 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"slices"
 	"strings"
 	"time"
 
-	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
@@ -49,7 +47,7 @@ func Migrate(options MigrateOptions) (err error) {
 
 		choices = append(choices, search.Choice{Id: "other", Description: "use a different file"})
 
-		if options.Auto {
+		if !options.Interactive {
 			yamlFileName = choices[0].Id
 		} else {
 			yamlFileName, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
@@ -57,16 +55,6 @@ func Migrate(options MigrateOptions) (err error) {
 	}
 
 	baseDirectory := filepath.Dir(yamlFileName)
-
-	if _, err = exec.LookPath(options.Sqlc); err != nil && !files.IsFile(options.Sqlc) {
-		if err = generate.Sqlc(generate.SqlcOptions{
-			Sqlc:     options.Sqlc,
-			Platform: options.Platform,
-			Auto:     options.Auto,
-		}); err != nil {
-			return
-		}
-	}
 
 	if !files.IsFile(yamlFileName) {
 		return fmt.Errorf("%s not found", yamlFileName)

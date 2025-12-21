@@ -8,13 +8,15 @@ import (
 	"github.com/razshare/frizzante/tui/messages"
 )
 
-func Install(options InstallOptions) error {
+func Install(options InstallOptions) (err error) {
 	if len(options.Packages) == 0 {
-		return nil
+		messages.Infof("no packages to add")
+		return
 	}
 
 	if !files.IsDirectory("app") {
-		return fmt.Errorf("directory %s not found", "app")
+		err = fmt.Errorf("directory %s not found", "app")
+		return err
 	}
 
 	ok := 0
@@ -26,8 +28,8 @@ func Install(options InstallOptions) error {
 			Program:       options.Bun,
 			Args:          []string{"add", "-D", pkg},
 		}) {
-			messages.Errorf("failed to add package %s", pkg)
-			continue
+			err = fmt.Errorf("failed to add package %s", pkg)
+			return
 		}
 		messages.Successf("added %s packages to app/node_modules", pkg)
 		ok++

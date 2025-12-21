@@ -12,5 +12,4 @@ type ConfigureOptions struct {
 	Bun      string
 	Efs      embed.FS
 	Platform platforms.Platform
-	Auto     bool
 }

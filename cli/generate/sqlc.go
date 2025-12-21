@@ -3,6 +3,7 @@ package generate
 import (
 	"path/filepath"
 
+	"github.com/razshare/frizzante/cli/caches"
 	"github.com/razshare/frizzante/platforms"
 )
 
@@ -23,12 +24,17 @@ func Sqlc(options SqlcOptions) (err error) {
 		url = "https://github.com/sqlc-dev/sqlc/releases/download/v1.29.0/sqlc_1.29.0_windows_amd64.zip"
 	}
 
-	var install Install
-	if install, _, err = Download(DownloadOptions{Url: url, Auto: options.Auto}); err != nil {
+	var fileName string
+	if fileName, err = caches.DownloadFile(caches.DownloadFileOptions{
+		Url: url,
+	}); err != nil {
 		return
 	}
 
-	_, err = install(filepath.Dir(options.Sqlc))
+	err = caches.Install(caches.InstallOptions{
+		FromFileName:    fileName,
+		ToDirectoryName: filepath.Dir(options.Sqlc),
+	})
 
 	return
 }

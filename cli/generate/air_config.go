@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 )
@@ -29,12 +30,17 @@ func AirConfig(options AirConfigOptions) (err error) {
 		return
 	}
 
-	tags := strings.Join(options.Tags, ",")
+	var tags []string
+	if tags, err = tags_.Parse(options.Tags); err != nil {
+		return
+	}
+
+	tagsString := strings.Join(tags, ",")
 	build := conf["build"].(map[string]any)
 	build["bin"] = filepath.Join(".gen", "tmp", "main.exe")
 
-	if len(tags) > 0 {
-		build["cmd"] = fmt.Sprintf("go build -tags %s -o %s .", tags, build["bin"])
+	if len(tagsString) > 0 {
+		build["cmd"] = fmt.Sprintf("go build -tags %s -o %s .", tagsString, build["bin"])
 	} else {
 		build["cmd"] = fmt.Sprintf("go build -o %s .", build["bin"])
 	}

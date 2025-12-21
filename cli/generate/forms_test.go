@@ -18,7 +18,9 @@ func TestForms(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll("app") }()
 
-	if err := Forms(FormsOptions{Auto: true, Efs: TestFormsEfs}); err != nil {
+	if err := Forms(FormsOptions{
+		Efs: TestFormsEfs,
+	}); err != nil {
 		t.Fatal(err)
 	}
 

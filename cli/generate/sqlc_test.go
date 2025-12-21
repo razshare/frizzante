@@ -16,9 +16,8 @@ func TestSqlc(t *testing.T) {
 	defer func() { _ = os.RemoveAll(".gen") }()
 
 	if err := Sqlc(SqlcOptions{
-		Auto:     true,
 		Sqlc:     filepath.Join(".gen", "sqlc", "sqlc"),
-		Platform: platforms.LinuxAmd64,
+		Platform: platforms.Detect(),
 	}); err != nil {
 		t.Fatal(err)
 	}

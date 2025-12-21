@@ -6,7 +6,6 @@ func Core(options CoreOptions) (err error) {
 	if err = Copy(CopyOptions{
 		From: "internal/project/lib/core",
 		To:   filepath.Join("lib", "core"),
-		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
 		return
@@ -15,7 +14,6 @@ func Core(options CoreOptions) (err error) {
 	if err = Copy(CopyOptions{
 		From: "internal/project/app/lib/scripts/core",
 		To:   filepath.Join("app", "lib", "scripts", "core"),
-		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
 		return
@@ -24,7 +22,6 @@ func Core(options CoreOptions) (err error) {
 	if err = Copy(CopyOptions{
 		From: "internal/project/app/lib/components/core",
 		To:   filepath.Join("app", "lib", "components", "core"),
-		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
 		return

@@ -30,7 +30,6 @@ func TestMigration(t *testing.T) {
 		Sqlc:     sqlcFile,
 		SqlcYaml: sqlcYamlFile,
 		Platform: platforms.Detect(),
-		Auto:     true,
 	}
 
 	if err := Migration(options); err != nil {

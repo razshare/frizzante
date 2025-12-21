@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"github.com/razshare/frizzante/cli/caches"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/platforms"
 )
@@ -26,17 +27,15 @@ func Bun(options BunOptions) (err error) {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-windows-x64-baseline.zip"
 	}
 
-	var install Install
-	if install, _, err = Download(DownloadOptions{Url: url, Auto: options.Auto}); err != nil {
+	var fileName string
+	if fileName, err = caches.DownloadFile(caches.DownloadFileOptions{Url: url}); err != nil {
 		return
 	}
 
-	var installed bool
-	if installed, err = install(filepath.Dir(options.Bun)); err != nil {
-		return
-	}
-
-	if !installed {
+	if err = caches.Install(caches.InstallOptions{
+		FromFileName:    fileName,
+		ToDirectoryName: filepath.Dir(options.Bun),
+	}); err != nil {
 		return
 	}
 

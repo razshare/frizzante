@@ -11,7 +11,6 @@ func Security(options SecurityOptions) (err error) {
 	if err = Copy(CopyOptions{
 		From: "internal/additions/lib/security",
 		To:   filepath.Join("lib", "security"),
-		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
 		return

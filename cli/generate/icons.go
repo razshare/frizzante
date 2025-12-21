@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"errors"
 	"os/exec"
 	"path/filepath"
 
@@ -13,7 +14,6 @@ func Icons(options IconsOptions) (err error) {
 	if err = Copy(CopyOptions{
 		From: "internal/project/app/lib/components/icons",
 		To:   filepath.Join("app", "lib", "components", "icons"),
-		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
 		return
@@ -26,6 +26,11 @@ func Icons(options IconsOptions) (err error) {
 		}
 	} else if bun, err = exec.LookPath(options.Bun); err != nil {
 		bun = options.Bun
+	}
+
+	if bun == "" {
+		err = errors.New("bun not found")
+		return
 	}
 
 	if err = npm.Install(npm.InstallOptions{

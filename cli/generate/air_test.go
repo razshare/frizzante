@@ -15,7 +15,10 @@ func TestAir(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll(filepath.Join(".gen")) }()
 
-	if err := Air(AirOptions{Platform: platforms.LinuxAmd64, Auto: true, Air: filepath.Join(".gen", "air", "air")}); err != nil {
+	if err := Air(AirOptions{
+		Platform: platforms.Detect(),
+		Air:      filepath.Join(".gen", "air", "air"),
+	}); err != nil {
 		t.Fatal(err)
 	}
 

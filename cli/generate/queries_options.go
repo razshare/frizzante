@@ -6,5 +6,4 @@ type QueriesOptions struct {
 	Sqlc     string
 	SqlcYaml string
 	Platform platforms.Platform
-	Auto     bool
 }

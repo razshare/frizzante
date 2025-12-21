@@ -4,11 +4,14 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/configs"
+	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/select_many"
@@ -16,44 +19,201 @@ import (
 )
 
 func Generate(options GenerateOptions) (err error) {
+	generation := options.Generation
+	if generation == ":pick" {
+		generation = ""
+	}
+
 	pick := func(gen string) (err error) {
 		fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 		fmt.Println(configs.Styles.Menu.Render(fmt.Sprintf("running ▷ generate (generates resources) ▷ %s", gen)))
 
 		if gen == "air" {
+			directoryName := filepath.Dir(options.Air)
+			if files.IsDirectory(directoryName) {
+				var yesRemove bool
+				if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", directoryName); err != nil {
+					return
+				}
+
+				if !yesRemove {
+					err = errors.New("cannot continue generating air binaries because they already exist")
+				}
+
+				if err = os.RemoveAll(directoryName); err != nil {
+					return
+				}
+			}
+
 			return generate.Air(generate.AirOptions{
 				Air:      options.Air,
-				Auto:     options.Auto,
 				Platform: options.Platform,
 			})
 		} else if gen == "air_config" {
-			return generate.AirConfig(generate.AirConfigOptions{
+			if err = generate.AirConfig(generate.AirConfigOptions{
 				Efs:  options.Efs,
 				Tags: options.Tags,
-			})
+			}); err != nil {
+				return err
+			}
 		} else if gen == "bun" {
+			directoryName := filepath.Dir(options.Bun)
+			if files.IsDirectory(directoryName) {
+				var yesRemove bool
+				if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", directoryName); err != nil {
+					return
+				}
+
+				if !yesRemove {
+					err = errors.New("cannot continue generating bun binaries because they already exist")
+					return
+				}
+
+				if err = os.RemoveAll(directoryName); err != nil {
+					return
+				}
+			}
+
 			return generate.Bun(generate.BunOptions{
 				Bun:      options.Bun,
-				Auto:     options.Auto,
+				Platform: options.Platform,
+			})
+		} else if gen == "sqlc" {
+			directoryName := filepath.Dir(options.Sqlc)
+			if files.IsDirectory(directoryName) {
+				var yesRemove bool
+				if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", directoryName); err != nil {
+					return
+				}
+
+				if !yesRemove {
+					err = errors.New("cannot continue generating bun binaries because they already exist")
+					return
+				}
+
+				if err = os.RemoveAll(directoryName); err != nil {
+					return
+				}
+			}
+
+			return generate.Sqlc(generate.SqlcOptions{
+				Sqlc:     options.Sqlc,
 				Platform: options.Platform,
 			})
 		} else if gen == "database" {
+			databaseType := options.DatabaseType
+			if databaseType == "" {
+				if databaseType, err = select_one.Send(
+					[]search.Choice{{Id: "sqlite"}},
+					"what type of database would you like to setup?",
+				); err != nil {
+					return
+				}
+			}
+
+			directoryName := filepath.Join("lib", databaseType, "databases")
+			var yesRemove bool
+			if yesRemove, err = confirm.Sendf(true, "%s already exists. Overwrite?", directoryName); err != nil {
+				return
+			}
+
+			if !yesRemove {
+				err = errors.New("cannot continue generating database files because they already exist")
+				return nil
+			}
+
+			if err = os.RemoveAll(directoryName); err != nil {
+				return
+			}
+
 			return generate.Database(generate.DatabaseOptions{
 				Generate: gen,
-				Auto:     options.Auto,
 				Go:       options.Go,
 				Sqlc:     options.Sqlc,
 				Platform: options.Platform,
 				Efs:      options.Efs,
+				Type:     databaseType,
 			})
-		} else if gen == "queries" {
-			return generate.Queries(generate.QueriesOptions{
-				Auto:     options.Auto,
+		} else if gen == "migration" {
+			yamlFileName := options.SqlcYaml
+			if yamlFileName == "" {
+				var names []string
+				if names, err = files.FindWithSuffix("lib", "sqlc.yaml"); err != nil {
+					return
+				}
+
+				choices := make([]search.Choice, len(names))
+				for index, name := range names {
+					choices[index] = search.Choice{Id: name}
+				}
+
+				choices = append(choices, search.Choice{Id: "other", Description: "other"})
+
+				if len(choices) == 0 {
+					err = errors.New("cannot continue generating queries because no sqlc.yaml file has been provided")
+					return
+				}
+
+				yamlFileName, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
+			}
+
+			return generate.Migration(generate.MigrationOptions{
 				Sqlc:     options.Sqlc,
 				Platform: options.Platform,
+				SqlcYaml: yamlFileName,
+			})
+		} else if gen == "queries" {
+			yamlFileName := options.SqlcYaml
+			if yamlFileName == "" {
+				var names []string
+				if names, err = files.FindWithSuffix("lib", "sqlc.yaml"); err != nil {
+					return
+				}
+
+				choices := make([]search.Choice, len(names))
+				for index, name := range names {
+					choices[index] = search.Choice{Id: name}
+				}
+
+				choices = append(choices, search.Choice{Id: "other", Description: "other"})
+
+				if len(choices) == 0 {
+					err = errors.New("cannot continue generating queries because no sqlc.yaml file has been provided")
+					return
+				}
+
+				yamlFileName, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
+			}
+
+			return generate.Queries(generate.QueriesOptions{
+				Sqlc:     options.Sqlc,
+				Platform: options.Platform,
+				SqlcYaml: yamlFileName,
 			})
 		} else if gen == "schema" {
-			var databaseString string
+			yamlFileName := options.SqlcYaml
+			if yamlFileName == "" {
+				var names []string
+				if names, err = files.FindWithSuffix("lib", "sqlc.yaml"); err != nil {
+					return
+				}
+
+				choices := make([]search.Choice, len(names))
+				for index, name := range names {
+					choices[index] = search.Choice{Id: name}
+				}
+
+				choices = append(choices, search.Choice{Id: "other", Description: "other"})
+
+				if len(choices) == 0 {
+					err = errors.New("cannot continue generating queries because no sqlc.yaml file has been provided")
+					return
+				}
+
+				yamlFileName, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
+			}
+
+			databaseString := options.Database
 			if options.Database == "" {
 				var names []string
 				if names, err = files.FindWithSuffix("lib", ".sqlite"); err != nil {
@@ -86,61 +246,130 @@ func Generate(options GenerateOptions) (err error) {
 			}
 
 			return generate.Schema(generate.SchemaOptions{
-				Auto:     options.Auto,
 				Sqlc:     options.Sqlc,
 				Platform: options.Platform,
 				SqlcYaml: options.SqlcYaml,
 				Database: database,
 			})
 		} else if gen == "core" {
-			return generate.Core(generate.CoreOptions{
-				Auto: options.Auto,
-				Efs:  options.Efs,
-			})
+			libCoreDirectoryName := filepath.Join("lib", "core")
+			if files.IsDirectory(libCoreDirectoryName) {
+				var yesRemove bool
+				if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", libCoreDirectoryName); err != nil {
+					return err
+				}
+
+				if yesRemove {
+					if err = os.RemoveAll(libCoreDirectoryName); err != nil {
+						return
+					}
+				}
+			}
+
+			appLibCoreScriptsCoreDirectoryName := filepath.Join("app", "lib", "scripts", "core")
+			if files.IsDirectory(appLibCoreScriptsCoreDirectoryName) {
+				var yesRemove bool
+				if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", appLibCoreScriptsCoreDirectoryName); err != nil {
+					return err
+				}
+
+				if yesRemove {
+					if err = os.RemoveAll(appLibCoreScriptsCoreDirectoryName); err != nil {
+						return
+					}
+				}
+			}
+
+			appLibComponentsCoreDirectoryName := filepath.Join("app", "lib", "components", "core")
+			if files.IsDirectory(appLibComponentsCoreDirectoryName) {
+				var yesRemove bool
+				if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", appLibComponentsCoreDirectoryName); err != nil {
+					return err
+				}
+
+				if yesRemove {
+					if err = os.RemoveAll(appLibComponentsCoreDirectoryName); err != nil {
+						return
+					}
+				}
+			}
+
+			return generate.Core(generate.CoreOptions{Efs: options.Efs})
 		} else if gen == "forms" {
-			return generate.Forms(generate.FormsOptions{
-				Auto: options.Auto,
-				Efs:  options.Efs,
-			})
+			appLibComponentsFormsDirectoryName := filepath.Join("app", "lib", "components", "forms")
+			if files.IsDirectory(appLibComponentsFormsDirectoryName) {
+				var yesRemove bool
+				if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", appLibComponentsFormsDirectoryName); err != nil {
+					return err
+				}
+
+				if yesRemove {
+					if err = os.RemoveAll(appLibComponentsFormsDirectoryName); err != nil {
+						return
+					}
+				}
+			}
+			return generate.Forms(generate.FormsOptions{Efs: options.Efs})
 		} else if gen == "links" {
+			appLibComponentsLinksDirectoryName := filepath.Join("app", "lib", "components", "links")
+			if files.IsDirectory(appLibComponentsLinksDirectoryName) {
+				var yesRemove bool
+				if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", appLibComponentsLinksDirectoryName); err != nil {
+					return err
+				}
+
+				if yesRemove {
+					if err = os.RemoveAll(appLibComponentsLinksDirectoryName); err != nil {
+						return
+					}
+				}
+			}
 			return generate.Links(generate.LinksOptions{
-				Auto: options.Auto,
-				Efs:  options.Efs,
+				Efs: options.Efs,
 			})
 		} else if gen == "icons" {
+			appLibComponentsIconsDirectoryName := filepath.Join("app", "lib", "components", "icons")
+			if files.IsDirectory(appLibComponentsIconsDirectoryName) {
+				var yesRemove bool
+				if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", appLibComponentsIconsDirectoryName); err != nil {
+					return err
+				}
+
+				if yesRemove {
+					if err = os.RemoveAll(appLibComponentsIconsDirectoryName); err != nil {
+						return
+					}
+				}
+			}
 			return generate.Icons(generate.IconsOptions{
-				Bun:  options.Bun,
-				Auto: options.Auto,
-				Efs:  options.Efs,
+				Bun: options.Bun,
+				Efs: options.Efs,
 			})
+		} else if gen == "security" {
+			libSecurityDirectoryName := filepath.Join("lib", "security")
+			if files.IsDirectory(libSecurityDirectoryName) {
+				var yesRemove bool
+				if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", libSecurityDirectoryName); err != nil {
+					return err
+				}
+
+				if yesRemove {
+					if err = os.RemoveAll(libSecurityDirectoryName); err != nil {
+						return
+					}
+				}
+			}
+			return generate.Security(generate.SecurityOptions{Efs: options.Efs})
 		} else if gen == "types" {
 			return generate.TypeDefinitions(generate.TypeDefinitionsOptions{
 				Go: options.Go,
-			})
-		} else if gen == "security" {
-			return generate.Security(generate.SecurityOptions{
-				Auto: options.Auto,
-				Efs:  options.Efs,
-			})
-		} else if gen == "migration" {
-			return generate.Migration(generate.MigrationOptions{
-				Auto:     options.Auto,
-				Sqlc:     options.Sqlc,
-				Platform: options.Platform,
-				SqlcYaml: options.SqlcYaml,
-			})
-		} else if gen == "sqlc" {
-			return generate.Sqlc(generate.SqlcOptions{
-				Auto:     options.Auto,
-				Sqlc:     options.Sqlc,
-				Platform: options.Platform,
 			})
 		}
 
 		return errors.New("unknown generation")
 	}
 
-	if options.Generation == "" {
+	if generation == "" {
 		var items []string
 		items, err = select_many.Send(
 			[]search.Choice{
@@ -179,7 +408,7 @@ func Generate(options GenerateOptions) (err error) {
 		return
 	}
 
-	for _, item := range strings.Split(options.Generation, ",") {
+	for _, item := range strings.Split(generation, ",") {
 		if err = pick(strings.ToLower(item)); err != nil {
 			return
 		}

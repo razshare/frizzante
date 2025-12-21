@@ -77,10 +77,6 @@ func TestNew(t *testing.T) {
 		t.Fatal("configure should be false")
 	}
 
-	if *a.Yes {
-		t.Fatal("yes should be false")
-	}
-
 	if *a.Go != "go"+extensions.Find() {
 		t.Fatal("go should be empty")
 	}
@@ -103,5 +99,13 @@ func TestNew(t *testing.T) {
 
 	if *a.Clear {
 		t.Fatal("clear should be false")
+	}
+
+	if *a.Database != "" {
+		t.Fatal("database should be empty")
+	}
+
+	if *a.DatabaseType != "sqlc" {
+		t.Fatal("database type should be sqlc")
 	}
 }

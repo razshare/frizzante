@@ -1,4 +1,4 @@
-package generate
+package caches
 
 import (
 	"bytes"
@@ -16,13 +16,13 @@ import (
 )
 
 //go:embed test.zip
-var TestDownloadEfs embed.FS
+var TestDownloadFileEfs embed.FS
 
-func TestDownload(t *testing.T) {
+func TestDownloadFile(t *testing.T) {
 	testServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		var file fs.File
 		var err error
-		if file, err = TestDownloadEfs.Open("test.zip"); err != nil {
+		if file, err = TestDownloadFileEfs.Open("test.zip"); err != nil {
 			t.Fatal(err)
 		}
 
@@ -49,44 +49,37 @@ func TestDownload(t *testing.T) {
 
 	hash := security.Sha1(testServer.URL)
 
-	cached := filepath.Join(cache, hash)
+	cachedFileName := filepath.Join(cache, hash)
 
-	if err = os.RemoveAll(cached); err != nil {
+	if err = os.RemoveAll(cachedFileName); err != nil {
 		t.Fatal(err)
 	}
 	if err = os.RemoveAll("test_out.zip"); err != nil {
 		t.Fatal(err)
 	}
 	defer func() { _ = os.RemoveAll("test_out.zip") }()
-	defer func() { _ = os.RemoveAll(cached) }()
+	defer func() { _ = os.RemoveAll(cachedFileName) }()
 
-	install, evict, err := Download(DownloadOptions{Auto: true, Url: testServer.URL})
-	if err != nil {
+	if _, err = DownloadFile(DownloadFileOptions{
+		Url: testServer.URL,
+	}); err != nil {
 		t.Fatal(err)
 	}
 
-	if !files.IsFile(cached) {
+	if !files.IsFile(cachedFileName) {
 		t.Fatal("file should be cached")
 	}
-
-	installed, err := install(filepath.Join(".gen", "download"))
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if !installed {
-		t.Fatal("resource should be installed in .gen/download")
-	}
-
-	if !files.IsDirectory(".gen/download") {
-		t.Fatal(".gen/download should exist")
-	}
-
-	if err = evict(); err != nil {
-		t.Fatal(err)
-	}
-
-	if files.IsFile(cached) {
-		t.Fatal("file cache should be evicted")
-	}
+	//
+	//installed, err := install(filepath.Join(".gen", "download"))
+	//if err != nil {
+	//	t.Fatal(err)
+	//}
+	//
+	//if !installed {
+	//	t.Fatal("resource should be installed in .gen/download")
+	//}
+	//
+	//if !files.IsDirectory(".gen/download") {
+	//	t.Fatal(".gen/download should exist")
+	//}
 }

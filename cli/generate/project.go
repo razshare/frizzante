@@ -11,7 +11,6 @@ func Project(options ProjectOptions) (err error) {
 	if err = Copy(CopyOptions{
 		From: "internal/project",
 		To:   options.Name,
-		Auto: options.Auto,
 		Efs:  options.Efs,
 	}); err != nil {
 		return

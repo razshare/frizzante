@@ -7,5 +7,4 @@ type CopyOptions struct {
 	From   string
 	To     string
 	Efs    embed.FS
-	Auto   bool
 }

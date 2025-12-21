@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"syscall"
 
+	"github.com/razshare/frizzante/cli/caches"
 	"github.com/razshare/frizzante/platforms"
 )
 
@@ -24,12 +25,15 @@ func Air(options AirOptions) (err error) {
 		url = "https://github.com/air-verse/air/releases/download/v1.62.0/air_1.62.0_windows_amd64.exe"
 	}
 
-	var install Install
-	if install, _, err = Download(DownloadOptions{Url: url, Auto: options.Auto}); err != nil {
+	var fileName string
+	if fileName, err = caches.DownloadFile(caches.DownloadFileOptions{Url: url}); err != nil {
 		return
 	}
 
-	if _, err = install(filepath.Dir(options.Air)); err != nil {
+	if err = caches.Install(caches.InstallOptions{
+		FromFileName:    fileName,
+		ToDirectoryName: filepath.Dir(options.Air),
+	}); err != nil {
 		return
 	}
 

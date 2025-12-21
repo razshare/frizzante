@@ -9,53 +9,25 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
-	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/select_one"
 	"github.com/razshare/frizzante/tui/spinners"
 )
 
 func Queries(options QueriesOptions) (err error) {
-	yamlFileName := options.SqlcYaml
 
-	if yamlFileName != "" && !files.IsFile(yamlFileName) {
-		err = fmt.Errorf("%s not found", yamlFileName)
+	if !files.IsFile(options.SqlcYaml) {
+		err = fmt.Errorf("%s not found", options.SqlcYaml)
 		return
 	}
 
-	if yamlFileName == "" {
-		var names []string
-		if names, err = files.FindWithSuffix("lib", "sqlc.yaml"); err != nil {
-			return
-		}
-
-		choices := make([]search.Choice, len(names))
-		for index, name := range names {
-			choices[index] = search.Choice{Id: name}
-		}
-
-		choices = append(choices, search.Choice{Id: "other", Description: "other"})
-
-		if options.Auto {
-			yamlFileName = choices[0].Id
-		} else {
-			yamlFileName, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
-		}
-	}
-
-	baseDirectory := filepath.Dir(yamlFileName)
+	baseDirectory := filepath.Dir(options.SqlcYaml)
 
 	if _, err = exec.LookPath(options.Sqlc); err != nil && !files.IsFile(options.Sqlc) {
 		if err = Sqlc(SqlcOptions{
 			Sqlc:     options.Sqlc,
 			Platform: options.Platform,
-			Auto:     options.Auto,
 		}); err != nil {
 			return
 		}
-	}
-
-	if !files.IsFile(yamlFileName) {
-		return fmt.Errorf("%s not found", yamlFileName)
 	}
 
 	var sqlc string

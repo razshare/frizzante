@@ -3,7 +3,7 @@ package generate
 import "embed"
 
 type SessionsOptions struct {
-	Type string
-	Efs  embed.FS
-	Auto bool
+	Type        string
+	Efs         embed.FS
+	Interactive bool
 }

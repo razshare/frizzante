@@ -13,5 +13,4 @@ type DatabaseOptions struct {
 	Sqlc     string
 	Efs      embed.FS
 	Platform platforms.Platform
-	Auto     bool
 }

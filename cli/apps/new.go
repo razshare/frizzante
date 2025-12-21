@@ -9,70 +9,70 @@ import (
 
 func New() *App {
 	add := flag.StringP("add", "a", "", "adds packages")
-	hlp := flag.BoolP("help", "h", false, "shows this help document")
-	lck := flag.BoolP("lock-packages", "", false, "locks packages to the current version")
-	ver := flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
-	res := flag.BoolP("reset", "", false, "deletes frizzante global directory")
-	crt := flag.StringP("create-project", "c", "", "creates a frizzante project")
-	gen := flag.StringP("generate", "g", "", "generates code and resources")
-	mig := flag.StringP("migrate", "m", "", "migrates database schema, requires a database connection string or file")
-	tst := flag.BoolP("test", "t", false, "runs tests")
-	pkg := flag.BoolP("package", "p", false, "packages app, result will be dropped in app/dist")
-	pkw := flag.BoolP("package-watch", "", false, "watches and packages app, result will be dropped in app/dist")
-	chk := flag.BoolP("check", "", false, "checks source code for errors")
-	upd := flag.BoolP("update", "u", false, "updates go and js packages")
-	ins := flag.BoolP("install", "i", false, "installs go and js packages")
-	fmt := flag.BoolP("format", "f", false, "formats source code")
-	tch := flag.BoolP("touch", "", false, "creates placeholders in app/dist (useful for go:embed)")
-	cln := flag.BoolP("clean-project", "", false, "deletes .gen, .vite, app/{dist,node_modules}")
+	help := flag.BoolP("help", "h", false, "shows this help document")
+	lockPackages := flag.BoolP("lock-packages", "", false, "locks packages to the current version")
+	version := flag.BoolP("version", "v", false, "shows the frizzante version used by this binary")
+	reset := flag.BoolP("reset", "", false, "deletes frizzante global directory")
+	createProject := flag.StringP("create-project", "c", "", "creates a frizzante project")
+	generate := flag.StringP("generate", "g", "", "generates code and resources")
+	migrate := flag.StringP("migrate", "m", "", "migrates database schema, requires a database connection string or file")
+	test := flag.BoolP("test", "t", false, "runs tests")
+	packageApp := flag.BoolP("package", "p", false, "packages app, result will be dropped in app/dist")
+	packagesApPWatch := flag.BoolP("package-watch", "", false, "watches and packages app, result will be dropped in app/dist")
+	check := flag.BoolP("check", "", false, "checks source code for errors")
+	update := flag.BoolP("update", "u", false, "updates go and js packages")
+	install := flag.BoolP("install", "i", false, "installs go and js packages")
+	format := flag.BoolP("format", "f", false, "formats source code")
+	touch := flag.BoolP("touch", "", false, "creates placeholders in app/dist (useful for go:embed)")
+	cleanProject := flag.BoolP("clean-project", "", false, "deletes .gen, .vite, app/{dist,node_modules}")
 	dev := flag.BoolP("dev", "d", false, "starts dev mode")
-	bld := flag.BoolP("build", "b", false, "builds project")
-	cnf := flag.BoolP("configure", "", false, "configures project by installing required binaries and packages")
-	yes := flag.BoolP("yes", "y", false, "confirms all binary prompts silently")
-	wel := flag.BoolP("welcome", "", false, "shows a welcome message")
-	clr := flag.BoolP("clear", "", false, "clears screen")
-	asm := flag.BoolP("assembly-explorer", "", false, "shows the assembly explorer")
-	_go := flag.StringP("go", "", "go"+extensions.Find(), "sets the go binary")
+	build := flag.BoolP("build", "b", false, "builds project")
+	configure := flag.BoolP("configure", "", false, "configures project by installing required binaries and packages")
+	welcome := flag.BoolP("welcome", "", false, "shows a welcome message")
+	clearScreen := flag.BoolP("clear", "", false, "clears screen")
+	assemblyExplorer := flag.BoolP("assembly-explorer", "", false, "shows the assembly explorer")
+	goBinary := flag.StringP("go", "", "go"+extensions.Find(), "sets the go binary")
 	air := flag.StringP("air", "", filepath.Join(".gen", "air", "air"+extensions.Find()), "sets the air binary")
 	bun := flag.StringP("bun", "", filepath.Join(".gen", "bun", "bun"+extensions.Find()), "sets the bun binary")
 	sqc := flag.StringP("sqlc", "", filepath.Join(".gen", "sqlc", "sqlc"+extensions.Find()), "sets the sqlc binary")
-	sqy := flag.StringP("sqlc-yaml", "", "", "sets the sqlc configuration file")
-	tgs := flag.StringP("tags", "", "", "sets build tags")
-	dbs := flag.StringP("database", "", "", "specifies the database connection string or file, used when migrating database schema")
-	snp := flag.BoolP("snapshot", "", false, "snapshots the server state and generates static web assets")
+	sqlcYaml := flag.StringP("sqlc-yaml", "", "", "sets the sqlc configuration file")
+	tags := flag.StringP("tags", "", "", "sets build tags")
+	database := flag.StringP("database", "", "", "specifies the database connection string or file, used when migrating database schema")
+	databaseType := flag.StringP("database-type", "", "sqlc", "specifies the type of database (currently only sqlite is supported)")
+	snapshot := flag.BoolP("snapshot", "", false, "snapshots the server state and generates static web assets")
 
 	return &App{
 		Add:              add,
-		Help:             hlp,
-		Version:          ver,
-		Reset:            res,
-		CreateProject:    crt,
-		Generate:         gen,
-		Migrate:          mig,
-		Test:             tst,
-		Package:          pkg,
-		PackageWatch:     pkw,
-		Check:            chk,
-		Update:           upd,
-		Install:          ins,
-		Format:           fmt,
-		Touch:            tch,
-		CleanProject:     cln,
+		Help:             help,
+		Version:          version,
+		Reset:            reset,
+		CreateProject:    createProject,
+		Generate:         generate,
+		Migrate:          migrate,
+		Test:             test,
+		Package:          packageApp,
+		PackageWatch:     packagesApPWatch,
+		Check:            check,
+		Update:           update,
+		Install:          install,
+		Format:           format,
+		Touch:            touch,
+		CleanProject:     cleanProject,
 		Dev:              dev,
-		Build:            bld,
-		Configure:        cnf,
-		Yes:              yes,
-		Go:               _go,
+		Build:            build,
+		Configure:        configure,
+		Go:               goBinary,
 		Air:              air,
 		Bun:              bun,
 		Sqlc:             sqc,
-		SqlcYaml:         sqy,
-		Welcome:          wel,
-		Tags:             tgs,
-		AssemblyExplorer: asm,
-		Clear:            clr,
-		Database:         dbs,
-		LockPackages:     lck,
-		Snapshot:         snp,
+		SqlcYaml:         sqlcYaml,
+		Welcome:          welcome,
+		Tags:             tags,
+		AssemblyExplorer: assemblyExplorer,
+		Clear:            clearScreen,
+		Database:         database,
+		DatabaseType:     databaseType,
+		LockPackages:     lockPackages,
+		Snapshot:         snapshot,
 	}
 }
