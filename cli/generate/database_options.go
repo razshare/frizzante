@@ -7,7 +7,6 @@ import (
 )
 
 type DatabaseOptions struct {
-	Generate string
 	Go       string
 	Type     string
 	Sqlc     string

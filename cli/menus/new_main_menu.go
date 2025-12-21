@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -21,13 +22,18 @@ import (
 	"github.com/razshare/frizzante/tui/select_one"
 )
 
-func New(app *apps.App) (*Menu, error) {
+func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
+	app := options.App
+	efs := app.Efs
+	tags := *app.Tags
+	sqlcYaml := *app.SqlcYaml
+	persistent := options.Persistent
+	platform := platforms.Detect()
+
 	cache, err := paths.Cache()
 	if err != nil {
 		return nil, err
 	}
-
-	platform := platforms.Detect()
 
 	go_, err := paths.Go(*app.Go)
 	if err != nil {
@@ -49,14 +55,23 @@ func New(app *apps.App) (*Menu, error) {
 		return nil, err
 	}
 
+	var logo string
+	if logo, err = apps.Logo(&app); err != nil {
+		messages.Warning(err)
+		err = nil
+	}
+
 	return &Menu{
+		Title:      "main",
+		Logo:       logo,
+		Persistent: persistent,
 		Items: []Item{
 			{
+				Ids:    []string{"configure"},
 				Choice: search.Choice{Id: "configure", Description: "generates bun and air binaries"},
-				Active: func() bool { return *app.Configure },
-				Handler: func() (err error) {
+				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ configure (generates bun and air binaries in .gen)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ configure"))
 
 					if _, err = exec.LookPath(air); err != nil || !files.IsFile(air) {
 						messages.Info(err)
@@ -76,7 +91,7 @@ func New(app *apps.App) (*Menu, error) {
 						Go:       go_,
 						Air:      air,
 						Bun:      bun,
-						Efs:      app.Efs,
+						Efs:      efs,
 						Platform: platform,
 					})
 
@@ -84,14 +99,14 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
-				Choice: search.Choice{Id: "create project", Description: "creates a new project"},
-				Active: func() bool { return *app.CreateProject != "" },
-				Handler: func() (err error) {
+				Ids:    []string{"create", "new"},
+				Choice: search.Choice{Id: "create new project", Description: "creates a new project"},
+				Handler: func(value string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ create project (creates a new project)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ create project"))
 
 					var name string
-					if name = *app.CreateProject; name == "" {
+					if name = value; name == "" {
 						name, err = inputs.Send("give the project a name")
 						if err != nil {
 							return
@@ -101,7 +116,7 @@ func New(app *apps.App) (*Menu, error) {
 					err = actions.CreateProject(actions.CreateProjectOptions{
 						Name: name,
 						Go:   go_,
-						Efs:  app.Efs,
+						Efs:  efs,
 						Air:  air,
 						Bun:  bun,
 					})
@@ -109,11 +124,11 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
+				Ids:    []string{"install"},
 				Choice: search.Choice{Id: "install", Description: "installs go and js packages"},
-				Active: func() bool { return *app.Install },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ install (installs go and js packages)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ install"))
 					return actions.Install(actions.InstallOptions{
 						Go:  go_,
 						Bun: bun,
@@ -121,11 +136,11 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
+				Ids:    []string{"update"},
 				Choice: search.Choice{Id: "update", Description: "updates go and js packages"},
-				Active: func() bool { return *app.Update },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ update (updates go and js packages)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ update"))
 					return actions.Update(actions.UpdateOptions{
 						Go:  go_,
 						Bun: bun,
@@ -133,11 +148,11 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
+				Ids:    []string{"add"},
 				Choice: search.Choice{Id: "add", Description: "adds packages"},
-				Active: func() bool { return *app.Add != "" },
-				Handler: func() error {
+				Handler: func(value string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ add (adds packages)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ add"))
 					var packageType string
 					packageType, err = select_one.Send(
 						[]search.Choice{
@@ -153,7 +168,7 @@ func New(app *apps.App) (*Menu, error) {
 
 					if packageType == "js" {
 						return actions.Npm(actions.NpmOptions{
-							Query: *app.Add,
+							Query: value,
 							Bun:   bun,
 						})
 					}
@@ -166,101 +181,99 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
+				Ids:    []string{"dev"},
 				Choice: search.Choice{Id: "dev", Description: "runs air and vite in parallel"},
-				Active: func() bool { return *app.Dev },
-				Handler: func() (err error) {
+				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ dev (runs air and vite in parallel)")))
-					// The "interactive" mode is enabled only when the menu option has been activated through the main menu.
-					// Whenever the menu handler is activated without going through the main menu, for example
-					// by inlining the flag directly, then we don't treat the program as "interactive".
-					interactive := !*app.Dev
+					fmt.Println(configs.Styles.Menu.Render("running ▷ dev"))
 					err = actions.Dev(actions.DevOptions{
-						Go:          go_,
-						Air:         air,
-						Bun:         bun,
-						Tags:        *app.Tags,
-						Efs:         app.Efs,
-						Interactive: interactive,
+						Go:   go_,
+						Air:  air,
+						Bun:  bun,
+						Tags: tags,
+						Efs:  efs,
 					})
 					return
 				},
 			},
 			{
+				Ids:    []string{"build"},
 				Choice: search.Choice{Id: "build", Description: "builds project"},
-				Active: func() bool { return *app.Build },
-				Handler: func() (err error) {
+				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ build (builds project)")))
-					// The "interactive" mode is enabled only when the menu option has been activated through the main menu.
-					// Whenever the menu handler is activated without going through the main menu, for example
-					// by inlining the flag directly, then we don't treat the program as "interactive".
-					interactive := !*app.Build
+					fmt.Println(configs.Styles.Menu.Render("running ▷ build"))
 					err = actions.Build(actions.BuildOptions{
-						Go:          go_,
-						Bun:         bun,
-						Tags:        *app.Tags,
-						Interactive: interactive,
+						Go:   go_,
+						Bun:  bun,
+						Tags: tags,
 					})
 					return
 				},
 			},
 			{
+				Ids:    []string{"assembly-explorer"},
 				Choice: search.Choice{Id: "assembly explorer", Description: "explores application assembly output"},
-				Active: func() bool { return *app.AssemblyExplorer },
-				Handler: func() (err error) {
+				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ assembly explorer (explores application assembly output)")))
-					// The "interactive" mode is enabled only when the menu option has been activated through the main menu.
-					// Whenever the menu handler is activated without going through the main menu, for example
-					// by inlining the flag directly, then we don't treat the program as "interactive".
-					interactive := !*app.Dev
+					fmt.Println(configs.Styles.Menu.Render("running ▷ assembly explorer"))
 					err = actions.AssemblyExplorer(actions.AssemblyExplorerOptions{
-						Go:          go_,
-						Bun:         bun,
-						Tags:        *app.Tags,
-						Interactive: interactive,
+						Go:   go_,
+						Bun:  bun,
+						Tags: tags,
 					})
 					return
 				},
 			},
 			{
+				Ids:    []string{"generate"},
 				Choice: search.Choice{Id: "generate", Description: "generates code and resources"},
-				Active: func() bool { return *app.Generate != "" },
-				Handler: func() (err error) {
-					err = actions.Generate(actions.GenerateOptions{
-						Generation:   *app.Generate,
-						Efs:          app.Efs,
-						Go:           go_,
-						Air:          air,
-						Bun:          bun,
-						Sqlc:         sqlc,
-						Tags:         *app.Tags,
-						SqlcYaml:     *app.SqlcYaml,
-						Database:     *app.Database,
-						Platform:     platform,
-						DatabaseType: *app.DatabaseType,
-					})
+				Handler: func(value string) (err error) {
+					var menu *Menu
+					if menu, err = NewGenerateMenu(NewGenerateMenuOptions{
+						App:        app,
+						Persistent: persistent,
+					}); err != nil {
+						return
+					}
+
+					err = ParseQueryAndActivate(menu, value)
 
 					return
 				},
 			},
 			{
+				Ids:    []string{"migrate"},
 				Choice: search.Choice{Id: "migrate", Description: "migrates database schema"},
-				Active: func() bool { return *app.Migrate != "" },
-				Handler: func() (err error) {
+				Handler: func(value string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ migrate (migrates database schema)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ migrate"))
 
-					// The "interactive" mode is enabled only when the menu option has been activated through the main menu.
-					// Whenever the menu handler is activated without going through the main menu, for example
-					// by inlining the flag directly, then we don't treat the program as "interactive".
-					interactive := *app.Migrate != ""
+					if sqlcYaml == "" {
+						var items []string
+						if items, err = files.ReadDirectory("lib"); err != nil {
+							return
+						}
+
+						names := make([]string, 0)
+						for _, item := range items {
+							if strings.HasSuffix(item, string(filepath.Separator)+"sqlc.yaml") {
+								names = append(names, item)
+							}
+						}
+
+						choices := make([]search.Choice, len(names))
+						for index, name := range names {
+							choices[index] = search.Choice{Id: name}
+						}
+
+						choices = append(choices, search.Choice{Id: "other", Description: "use a different file"})
+						sqlcYaml, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
+					}
 
 					var offset string
 					var target string
 
-					migrateRange := strings.SplitN(*app.Migrate, ",", 2)
+					migrateRange := strings.SplitN(value, ",", 2)
 
 					if len(migrateRange) >= 1 {
 						offset = migrateRange[0]
@@ -319,56 +332,55 @@ func New(app *apps.App) (*Menu, error) {
 					}
 
 					err = actions.Migrate(actions.MigrateOptions{
-						Sqlc:        sqlc,
-						SqlcYaml:    *app.SqlcYaml,
-						Offset:      offset,
-						Target:      target,
-						Database:    database,
-						Platform:    platform,
-						Interactive: interactive,
+						Sqlc:     sqlc,
+						SqlcYaml: sqlcYaml,
+						Offset:   offset,
+						Target:   target,
+						Database: database,
+						Platform: platform,
 					})
 					return
 				},
 			},
 			{
+				Ids:    []string{"package"},
 				Choice: search.Choice{Id: "package", Description: "builds app"},
-				Active: func() bool { return *app.Package },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ package (builds app)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ package"))
 					return actions.Package(actions.PackageOptions{
 						Bun: bun,
 					})
 				},
 			},
 			{
+				Ids:    []string{"package-watch"},
 				Choice: search.Choice{Id: "package watch", Description: "builds app on change"},
-				Active: func() bool { return *app.PackageWatch },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ package watch (builds app on change)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ package watch"))
 					return actions.PackageWatch(actions.PackageWatchOptions{
 						Bun: bun,
 					})
 				},
 			},
 			{
+				Ids:    []string{"check"},
 				Choice: search.Choice{Id: "check", Description: "checks for code errors"},
-				Active: func() bool { return *app.Check },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ check (checks for code errors)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ check"))
 					return actions.Check(actions.CheckOptions{
 						Bun: bun,
 					})
 				},
 			},
 			{
+				Ids:    []string{"format"},
 				Choice: search.Choice{Id: "format", Description: "format code"},
-				Active: func() bool { return *app.Format },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ format (format code)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ format"))
 					return actions.Format(actions.FormatOptions{
 						Go:  go_,
 						Bun: bun,
@@ -376,67 +388,67 @@ func New(app *apps.App) (*Menu, error) {
 				},
 			},
 			{
+				Ids:    []string{"touch"},
 				Choice: search.Choice{Id: "touch", Description: "adds placeholders in app/dist"},
-				Active: func() bool { return *app.Touch },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ touch (adds placeholders in app/dist)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ touch"))
 					return actions.Touch(actions.TouchOptions{})
 				},
 			},
 			{
+				Ids:    []string{"clean"},
 				Choice: search.Choice{Id: "clean project", Description: "deletes .gen, .vite, app/{dist,node_modules}"},
-				Active: func() bool { return *app.CleanProject },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ clean project (deletes .gen, .vite, app/{dist,node_modules})")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ clean project"))
 					return actions.CleanProject(actions.CleanProjectOptions{
 						Go: go_,
 					})
 				},
 			},
 			{
+				Ids:    []string{"reset"},
 				Choice: search.Choice{Id: "reset", Description: "deletes " + cache},
-				Active: func() bool { return *app.Reset },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprintf("running ▷ reset (deletes %s)", cache)))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ reset"))
 					return actions.Reset(actions.ResetOptions{})
 				},
 			},
 			{
+				Ids:    []string{"clear"},
 				Choice: search.Choice{Id: "clear", Description: "clears screen"},
-				Active: func() bool { return *app.Clear },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ clear (clears screen)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ clear"))
 					return actions.Clear(actions.ClearOptions{})
 				},
 			},
 			{
+				Ids:    []string{"lock-packages"},
 				Choice: search.Choice{Id: "lock packages", Description: "locks packages to the current exact version"},
-				Active: func() bool { return *app.LockPackages },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ lock packages (locks packages to the current exact version)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ lock packages"))
 					return actions.LockPackages(actions.LockPackagesOptions{})
 				},
 			},
 			{
+				Ids:    []string{"snapshot"},
 				Choice: search.Choice{Id: "snapshot", Description: "snapshots the server state and generates static web assets"},
-				Active: func() bool { return *app.Snapshot },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ snapshot (snapshots the server state and generates static web assets)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ snapshot"))
 					return actions.LockPackages(actions.LockPackagesOptions{})
 				},
 			},
 			{
+				Ids:    []string{"test"},
 				Choice: search.Choice{Id: "test", Description: "runs tests"},
-				Active: func() bool { return *app.Test },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ test (runs tests)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ test"))
 					return actions.Test(actions.TestOptions{
 						Go:  go_,
 						Bun: bun,
@@ -445,32 +457,32 @@ func New(app *apps.App) (*Menu, error) {
 			},
 			{
 				Hidden: true,
+				Ids:    []string{"welcome"},
 				Choice: search.Choice{Id: "welcome", Description: "shows a welcome message"},
-				Active: func() bool { return *app.Welcome },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ welcome (shows a welcome message)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ welcome"))
 					return actions.Welcome(actions.WelcomeOptions{})
 				},
 			},
 			{
 				Hidden: true,
+				Ids:    []string{"help"},
 				Choice: search.Choice{Id: "help", Description: "shows the help menu"},
-				Active: func() bool { return *app.Help },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ help (shows the help menu)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ help"))
 					return actions.Help(actions.HelpOptions{})
 				},
 			},
 			{
+				Ids:    []string{"version"},
 				Choice: search.Choice{Id: "version", Description: "shows binary version"},
-				Active: func() bool { return *app.Version },
-				Handler: func() error {
+				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render(fmt.Sprint("running ▷ version (shows binary version)")))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ version"))
 					return actions.Version(actions.VersionOptions{
-						Efs: app.Efs,
+						Efs: efs,
 					})
 				},
 			},

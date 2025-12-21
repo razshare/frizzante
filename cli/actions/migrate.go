@@ -3,7 +3,6 @@ package actions
 import (
 	"database/sql"
 	"errors"
-	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -22,43 +21,7 @@ import (
 // Experimental: api is currently minimal and not stable.
 func Migrate(options MigrateOptions) (err error) {
 	yamlFileName := options.SqlcYaml
-
-	if yamlFileName != "" && !files.IsFile(yamlFileName) {
-		messages.Infof("%s not found", yamlFileName)
-	}
-
-	if yamlFileName == "" {
-		var items []string
-		if items, err = files.ReadDirectory("lib"); err != nil {
-			return
-		}
-
-		names := make([]string, 0)
-		for _, item := range items {
-			if strings.HasSuffix(item, string(filepath.Separator)+"sqlc.yaml") {
-				names = append(names, item)
-			}
-		}
-
-		choices := make([]search.Choice, len(names))
-		for index, name := range names {
-			choices[index] = search.Choice{Id: name}
-		}
-
-		choices = append(choices, search.Choice{Id: "other", Description: "use a different file"})
-
-		if !options.Interactive {
-			yamlFileName = choices[0].Id
-		} else {
-			yamlFileName, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
-		}
-	}
-
 	baseDirectory := filepath.Dir(yamlFileName)
-
-	if !files.IsFile(yamlFileName) {
-		return fmt.Errorf("%s not found", yamlFileName)
-	}
 
 	if !files.IsDirectory(filepath.Join(baseDirectory, "migrations")) {
 		if err = os.MkdirAll(filepath.Join(baseDirectory, "migrations"), os.ModePerm); err != nil {

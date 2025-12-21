@@ -1,5 +1,8 @@
 package menus
 
 type Menu struct {
-	Items []Item
+	Title      string
+	Logo       string
+	Persistent bool
+	Items      []Item
 }

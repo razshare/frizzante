@@ -4,7 +4,7 @@ import "github.com/razshare/frizzante/tui/search"
 
 type Item struct {
 	Choice  search.Choice
-	Active  func() bool // Active returns true if the user has typed the choice directly in the terminal.
-	Handler func() error
+	Ids     []string
+	Handler func(value string) error
 	Hidden  bool
 }

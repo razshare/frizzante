@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli/assemblies"
@@ -37,34 +38,29 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 	var build bool
 
 	if files.IsFile(program) {
-		if options.Interactive {
-			if build, err = confirm.Sendf(true, "file %s already exists. Rebuild?", program); err != nil {
-				return
-			}
-		} else {
-			build = true
+		if build, err = confirm.Sendf(true, "file %s already exists. Rebuild?", program); err != nil {
+			return
 		}
 	}
 
 	if build {
-		if len(tags) == 0 && options.Interactive {
-			if tags, err = tags_.Select([]search.Choice{
-				{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
-				{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
-				{Id: "trace", Description: "enables tracing with stack.Trace()"},
-				{Id: "dry", Description: "enables dry mode"},
-				{Id: "types", Description: "enables types generation"},
-				{Id: "other", Description: "adds custom tags"},
-			}); err != nil {
-				return
-			}
-		}
+		//if len(tags) == 0 && options.Interactive {
+		//	if tags, err = tags_.Select([]search.Choice{
+		//		{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
+		//		{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
+		//		{Id: "trace", Description: "enables tracing with stack.Trace()"},
+		//		{Id: "dry", Description: "enables dry mode"},
+		//		{Id: "types", Description: "enables types generation"},
+		//		{Id: "other", Description: "adds custom tags"},
+		//	}); err != nil {
+		//		return
+		//	}
+		//}
 
 		if err = Build(BuildOptions{
-			Go:          options.Go,
-			Bun:         options.Bun,
-			Tags:        options.Tags,
-			Interactive: options.Interactive,
+			Go:   options.Go,
+			Bun:  options.Bun,
+			Tags: strings.Join(tags, ","),
 		}); err != nil {
 			return
 		}

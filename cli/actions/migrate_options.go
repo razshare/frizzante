@@ -7,11 +7,10 @@ import (
 )
 
 type MigrateOptions struct {
-	Interactive bool
-	Database    *sql.DB
-	Offset      string
-	Target      string
-	Sqlc        string
-	SqlcYaml    string
-	Platform    platforms.Platform
+	Database *sql.DB
+	Offset   string
+	Target   string
+	Sqlc     string
+	SqlcYaml string
+	Platform platforms.Platform
 }

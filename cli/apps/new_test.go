@@ -8,104 +8,33 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	a := New()
-	if *a.Add != "" {
-		t.Fatal("add should not be active")
+	app := New()
+
+	if *app.Go != "go"+extensions.Find() {
+		t.Fatalf("go should be go%s", extensions.Find())
 	}
 
-	if *a.Help {
-		t.Fatal("help should be false")
+	if *app.Air != filepath.Join(".gen", "air", "air"+extensions.Find()) {
+		t.Fatalf("air should be .gen/air/air%s", extensions.Find())
 	}
 
-	if *a.Version {
-		t.Fatal("version should be false")
+	if *app.Bun != filepath.Join(".gen", "bun", "bun"+extensions.Find()) {
+		t.Fatalf("bun should be .gen/air/air%s", extensions.Find())
 	}
 
-	if *a.Reset {
-		t.Fatal("reset should be false")
+	if *app.Sqlc != filepath.Join(".gen", "sqlc", "sqlc"+extensions.Find()) {
+		t.Fatalf("sqlc should be ./gen/sqlc/sqlc%s", extensions.Find())
 	}
 
-	if *a.CreateProject != "" {
-		t.Fatal("create project should not be active")
+	if *app.Tags != "" {
+		t.Fatalf("tags should be empty")
 	}
 
-	if *a.Generate != "" {
-		t.Fatal("generate should be false")
-	}
-
-	if *a.Package {
-		t.Fatal("package should be false")
-	}
-
-	if *a.PackageWatch {
-		t.Fatal("package watch should be false")
-	}
-
-	if *a.Check {
-		t.Fatal("check should be false")
-	}
-
-	if *a.Update {
-		t.Fatal("update should be false")
-	}
-
-	if *a.Install {
-		t.Fatal("install should be false")
-	}
-
-	if *a.Format {
-		t.Fatal("format should be false")
-	}
-
-	if *a.Touch {
-		t.Fatal("touch should be false")
-	}
-
-	if *a.CleanProject {
-		t.Fatal("clean project should be false")
-	}
-
-	if *a.Dev {
-		t.Fatal("dev should be false")
-	}
-
-	if *a.Build {
-		t.Fatal("build should be false")
-	}
-
-	if *a.Configure {
-		t.Fatal("configure should be false")
-	}
-
-	if *a.Go != "go"+extensions.Find() {
-		t.Fatal("go should be empty")
-	}
-
-	if *a.Air != filepath.Join(".gen", "air", "air"+extensions.Find()) {
-		t.Fatal("air should be empty")
-	}
-
-	if *a.Bun != filepath.Join(".gen", "bun", "bun"+extensions.Find()) {
-		t.Fatal("bun should be empty")
-	}
-
-	if *a.Sqlc != filepath.Join(".gen", "sqlc", "sqlc"+extensions.Find()) {
-		t.Fatal("sqlc should be empty")
-	}
-
-	if *a.Welcome {
-		t.Fatal("welcome should be false")
-	}
-
-	if *a.Clear {
-		t.Fatal("clear should be false")
-	}
-
-	if *a.Database != "" {
+	if *app.DatabaseConnectionString != "" {
 		t.Fatal("database should be empty")
 	}
 
-	if *a.DatabaseType != "sqlc" {
+	if *app.DatabaseType != "sqlc" {
 		t.Fatal("database type should be sqlc")
 	}
 }

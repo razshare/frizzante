@@ -127,7 +127,6 @@ func Generate(options GenerateOptions) (err error) {
 			}
 
 			return generate.Database(generate.DatabaseOptions{
-				Generate: gen,
 				Go:       options.Go,
 				Sqlc:     options.Sqlc,
 				Platform: options.Platform,

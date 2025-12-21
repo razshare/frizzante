@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Checks code.
 pushd internal/project && \
-go run ../../main.go --check && \
+go run ../../main.go check && \
 popd || exit 1
 
 # Tests cli and generate coverage profile

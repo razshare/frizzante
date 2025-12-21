@@ -4,10 +4,12 @@ import (
 	"embed"
 	"errors"
 	"os"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli"
 	"github.com/razshare/frizzante/cli/apps"
+	"github.com/razshare/frizzante/tui/configs"
 	"github.com/razshare/frizzante/tui/messages"
 	flag "github.com/spf13/pflag"
 )
@@ -23,12 +25,17 @@ import (
 //go:embed internal/project/app/.prettierrc
 //go:embed internal/project/app/.prettierignore
 var efs embed.FS
-var frz = apps.New()
+var app = apps.New()
 
 func main() {
 	flag.Parse()
-	frz.Efs = efs
-	if err := cli.Start(frz); err != nil {
+	messages.Prefix = configs.Styles.Menu.PaddingRight(1).Render("│")
+	app.Efs = efs
+	query := strings.Join(flag.Args(), " ")
+	if err := cli.StartApp(cli.StartAppOptions{
+		App:   *app,
+		Query: query,
+	}); err != nil {
 		if !errors.Is(err, tea.ErrInterrupted) {
 			messages.Fatal(err)
 		}
