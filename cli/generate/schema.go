@@ -14,7 +14,7 @@ import (
 )
 
 func Schema(options SchemaOptions) (err error) {
-	baseDirectory := filepath.Dir(options.SqlcYaml)
+	directoryName := filepath.Dir(options.SqlcYaml)
 
 	if _, err = exec.LookPath(options.Sqlc); err != nil && !files.IsFile(options.Sqlc) {
 		if err = Sqlc(SqlcOptions{
@@ -52,7 +52,7 @@ func Schema(options SchemaOptions) (err error) {
 	spin := spinners.Newf("migrating database schema using %s", schema)
 	go spinners.Start(spin)
 
-	if data, err = os.ReadFile(filepath.Join(baseDirectory, schema)); err != nil {
+	if data, err = os.ReadFile(filepath.Join(directoryName, schema)); err != nil {
 		spinners.Stop(spin)
 		return
 	}

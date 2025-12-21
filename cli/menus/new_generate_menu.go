@@ -1,7 +1,6 @@
 package menus
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"os"
@@ -14,7 +13,6 @@ import (
 	"github.com/razshare/frizzante/platforms"
 	"github.com/razshare/frizzante/tui/configs"
 	"github.com/razshare/frizzante/tui/confirm"
-	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/select_one"
 )
@@ -25,7 +23,6 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 	tags := *modifiers.Tags
 	databaseType := *modifiers.DatabaseType
 	sqlcYaml := *modifiers.SqlcYaml
-	databaseConnectionString := *modifiers.DatabaseConnectionString
 	persistent := options.Persistent
 	platform := platforms.Detect()
 
@@ -233,40 +230,6 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				Active: NewActivationFunction("queries"),
 				Choice: search.Choice{Id: "queries", Description: "shows binary version"},
 				Handler: func(value string) (err error) {
-					yamlFileName := sqlcYaml
-					if yamlFileName == "" {
-						var names []string
-						if names, err = files.FindWithSuffix("lib", "sqlc.yaml"); err != nil {
-							return
-						}
-
-						choices := make([]search.Choice, len(names))
-						for index, name := range names {
-							choices[index] = search.Choice{Id: name}
-						}
-
-						choices = append(choices, search.Choice{Id: "other", Description: "other"})
-
-						if len(choices) == 0 {
-							err = errors.New("cannot continue generating queries because no sqlc.yaml file has been provided")
-							return
-						}
-
-						yamlFileName, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
-					}
-
-					err = generate.Queries(generate.QueriesOptions{
-						Sqlc:     sqlc,
-						Platform: platform,
-						SqlcYaml: yamlFileName,
-					})
-					return
-				},
-			},
-			{
-				Active: NewActivationFunction("schema"),
-				Choice: search.Choice{Id: "schema", Description: "shows binary version"},
-				Handler: func(value string) (err error) {
 					if sqlcYaml == "" {
 						var names []string
 						if names, err = files.FindWithSuffix("lib", "sqlc.yaml"); err != nil {
@@ -288,47 +251,17 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 						sqlcYaml, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
 					}
 
-					if databaseConnectionString == "" {
-						var names []string
-						if names, err = files.FindWithSuffix("lib", ".sqlite"); err != nil {
-							return
-						}
-
-						choices := make([]search.Choice, len(names))
-						for index, name := range names {
-							choices[index] = search.Choice{Id: name}
-						}
-
-						choices = append(choices, search.Choice{Id: "other", Description: "use a different file"})
-
-						if databaseConnectionString, err = select_one.Sendf(choices, "where's your sqlite database located?"); err != nil {
-							return
-						}
-
-						if databaseConnectionString == "other" {
-							if databaseConnectionString, err = inputs.Send("where's the file located?"); err != nil {
-								return
-							}
-						}
-					}
-
-					var database *sql.DB
-					if database, err = sql.Open("sqlite3", fmt.Sprintf("file:%s?cache=shared", databaseConnectionString)); err != nil {
-						return
-					}
-
-					err = generate.Schema(generate.SchemaOptions{
+					err = generate.Queries(generate.QueriesOptions{
 						Sqlc:     sqlc,
 						Platform: platform,
 						SqlcYaml: sqlcYaml,
-						Database: database,
 					})
 					return
 				},
 			},
 			{
 				Active: NewActivationFunction("core"),
-				Choice: search.Choice{Id: "core", Description: "shows binary version"},
+				Choice: search.Choice{Id: "core", Description: "core library"},
 				Handler: func(value string) (err error) {
 					libCoreDirectoryName := filepath.Join("lib", "core")
 					if files.IsDirectory(libCoreDirectoryName) {
@@ -378,7 +311,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 			},
 			{
 				Active: NewActivationFunction("forms"),
-				Choice: search.Choice{Id: "forms", Description: "shows binary version"},
+				Choice: search.Choice{Id: "forms", Description: "forms components with error and pending handlers"},
 				Handler: func(value string) (err error) {
 					appLibComponentsFormsDirectoryName := filepath.Join("app", "lib", "components", "forms")
 					if files.IsDirectory(appLibComponentsFormsDirectoryName) {
@@ -399,7 +332,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 			},
 			{
 				Active: NewActivationFunction("links"),
-				Choice: search.Choice{Id: "links", Description: "shows binary version"},
+				Choice: search.Choice{Id: "links", Description: "links components with error and pending handlers"},
 				Handler: func(value string) (err error) {
 					appLibComponentsLinksDirectoryName := filepath.Join("app", "lib", "components", "links")
 					if files.IsDirectory(appLibComponentsLinksDirectoryName) {
@@ -422,7 +355,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 			},
 			{
 				Active: NewActivationFunction("icons"),
-				Choice: search.Choice{Id: "icons", Description: "shows binary version"},
+				Choice: search.Choice{Id: "icons", Description: "icons components"},
 				Handler: func(value string) (err error) {
 					appLibComponentsIconsDirectoryName := filepath.Join("app", "lib", "components", "icons")
 					if files.IsDirectory(appLibComponentsIconsDirectoryName) {
@@ -446,7 +379,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 			},
 			{
 				Active: NewActivationFunction("security"),
-				Choice: search.Choice{Id: "security", Description: "shows binary version"},
+				Choice: search.Choice{Id: "security", Description: "security library"},
 				Handler: func(value string) (err error) {
 					libSecurityDirectoryName := filepath.Join("lib", "security")
 					if files.IsDirectory(libSecurityDirectoryName) {
@@ -467,7 +400,17 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 			},
 			{
 				Active: NewActivationFunction("types"),
-				Choice: search.Choice{Id: "types", Description: "shows binary version"},
+				Choice: search.Choice{Id: "types", Description: "typescript types"},
+				Handler: func(value string) (err error) {
+					err = generate.TypeDefinitions(generate.TypeDefinitionsOptions{
+						Go: go_,
+					})
+					return
+				},
+			},
+			{
+				Active: NewActivationFunction("snapshot"),
+				Choice: search.Choice{Id: "snapshot", Description: "static site"},
 				Handler: func(value string) (err error) {
 					err = generate.TypeDefinitions(generate.TypeDefinitionsOptions{
 						Go: go_,

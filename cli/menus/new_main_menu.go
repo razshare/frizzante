@@ -436,15 +436,6 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Active: NewActivationFunction("snapshot"),
-				Choice: search.Choice{Id: "snapshot", Description: "snapshots the server state and generates static web assets"},
-				Handler: func(_ string) error {
-					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-					fmt.Println(configs.Styles.Menu.Render("running ▷ snapshot"))
-					return actions.LockPackages(actions.LockPackagesOptions{})
-				},
-			},
-			{
 				Active: NewActivationFunction("test"),
 				Choice: search.Choice{Id: "test", Description: "runs tests"},
 				Handler: func(_ string) error {
