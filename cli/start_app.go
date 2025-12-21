@@ -6,12 +6,15 @@ import (
 
 func StartApp(options StartAppOptions) (err error) {
 	app := options.App
+	modifiers := app.Modifiers
+	efs := app.Efs
 	query := options.Query
 	persistent := query == ""
 
 	var menu *menus.Menu
 	if menu, err = menus.NewMainMenu(menus.NewMainMenuOptions{
-		App:        app,
+		Efs:        efs,
+		Modifiers:  modifiers,
 		Persistent: persistent,
 	}); err != nil {
 		return

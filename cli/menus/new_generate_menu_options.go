@@ -1,8 +1,13 @@
 package menus
 
-import "github.com/razshare/frizzante/cli/apps"
+import (
+	"embed"
+
+	"github.com/razshare/frizzante/cli/apps"
+)
 
 type NewGenerateMenuOptions struct {
-	App        apps.App
+	Efs        embed.FS
+	Modifiers  apps.Modifiers
 	Persistent bool
 }

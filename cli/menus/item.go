@@ -4,7 +4,7 @@ import "github.com/razshare/frizzante/tui/search"
 
 type Item struct {
 	Choice  search.Choice
-	Ids     []string
-	Handler func(value string) error
+	Active  ActivationFunction
+	Handler ActionFunction
 	Hidden  bool
 }

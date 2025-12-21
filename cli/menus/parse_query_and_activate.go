@@ -13,12 +13,9 @@ import (
 func ParseQueryAndActivate(menu *Menu, query string) (err error) {
 	if query != "" {
 		for _, item := range menu.Items {
-			for _, id := range item.Ids {
-				if strings.HasPrefix(query, id) {
-					value := strings.TrimSpace(strings.TrimPrefix(query, id))
-					err = item.Handler(value)
-					return
-				}
+			if value, active := item.Active(query); active {
+				err = item.Handler(strings.TrimSpace(value))
+				return
 			}
 		}
 	}

@@ -20,31 +20,31 @@ import (
 )
 
 func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
-	app := options.App
-	efs := app.Efs
-	tags := *app.Tags
-	databaseType := *app.DatabaseType
-	sqlcYaml := *app.SqlcYaml
-	databaseConnectionString := *app.DatabaseConnectionString
+	efs := options.Efs
+	modifiers := options.Modifiers
+	tags := *modifiers.Tags
+	databaseType := *modifiers.DatabaseType
+	sqlcYaml := *modifiers.SqlcYaml
+	databaseConnectionString := *modifiers.DatabaseConnectionString
 	persistent := options.Persistent
 	platform := platforms.Detect()
 
-	go_, err := paths.Go(*app.Go)
+	go_, err := paths.Go(*modifiers.Go)
 	if err != nil {
 		return nil, err
 	}
 
-	air, err := paths.Air(*app.Air)
+	air, err := paths.Air(*modifiers.Air)
 	if err != nil {
 		return nil, err
 	}
 
-	bun, err := paths.Bun(*app.Bun)
+	bun, err := paths.Bun(*modifiers.Bun)
 	if err != nil {
 		return nil, err
 	}
 
-	sqlc, err := paths.Sqlc(*app.Sqlc)
+	sqlc, err := paths.Sqlc(*modifiers.Sqlc)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 		Persistent: persistent,
 		Items: []Item{
 			{
-				Ids:    []string{"air"},
+				Active: NewActivationFunction("air"),
 				Choice: search.Choice{Id: "air", Description: "shows binary version"},
 				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -82,7 +82,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"air-config"},
+				Active: NewActivationFunction("air-config"),
 				Choice: search.Choice{Id: "air config", Description: "shows binary version"},
 				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -97,7 +97,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"bun"},
+				Active: NewActivationFunction("bun"),
 				Choice: search.Choice{Id: "bun", Description: "shows binary version"},
 				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -127,7 +127,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"sqlc"},
+				Active: NewActivationFunction("sqlc"),
 				Choice: search.Choice{Id: "sqlc", Description: "shows binary version"},
 				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -157,7 +157,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"database"},
+				Active: NewActivationFunction("database"),
 				Choice: search.Choice{Id: "database", Description: "shows binary version"},
 				Handler: func(value string) (err error) {
 					if databaseType == "" {
@@ -195,7 +195,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"migration"},
+				Active: NewActivationFunction("migration"),
 				Choice: search.Choice{Id: "migration", Description: "shows binary version"},
 				Handler: func(value string) (err error) {
 					yamlFileName := sqlcYaml
@@ -230,7 +230,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"queries"},
+				Active: NewActivationFunction("queries"),
 				Choice: search.Choice{Id: "queries", Description: "shows binary version"},
 				Handler: func(value string) (err error) {
 					yamlFileName := sqlcYaml
@@ -264,7 +264,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"schema"},
+				Active: NewActivationFunction("schema"),
 				Choice: search.Choice{Id: "schema", Description: "shows binary version"},
 				Handler: func(value string) (err error) {
 					if sqlcYaml == "" {
@@ -327,10 +327,9 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"core"},
+				Active: NewActivationFunction("core"),
 				Choice: search.Choice{Id: "core", Description: "shows binary version"},
 				Handler: func(value string) (err error) {
-
 					libCoreDirectoryName := filepath.Join("lib", "core")
 					if files.IsDirectory(libCoreDirectoryName) {
 						var yesRemove bool
@@ -378,7 +377,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"forms"},
+				Active: NewActivationFunction("forms"),
 				Choice: search.Choice{Id: "forms", Description: "shows binary version"},
 				Handler: func(value string) (err error) {
 					appLibComponentsFormsDirectoryName := filepath.Join("app", "lib", "components", "forms")
@@ -399,7 +398,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"links"},
+				Active: NewActivationFunction("links"),
 				Choice: search.Choice{Id: "links", Description: "shows binary version"},
 				Handler: func(value string) (err error) {
 					appLibComponentsLinksDirectoryName := filepath.Join("app", "lib", "components", "links")
@@ -422,7 +421,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"icons"},
+				Active: NewActivationFunction("icons"),
 				Choice: search.Choice{Id: "icons", Description: "shows binary version"},
 				Handler: func(value string) (err error) {
 					appLibComponentsIconsDirectoryName := filepath.Join("app", "lib", "components", "icons")
@@ -446,7 +445,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"security"},
+				Active: NewActivationFunction("security"),
 				Choice: search.Choice{Id: "security", Description: "shows binary version"},
 				Handler: func(value string) (err error) {
 					libSecurityDirectoryName := filepath.Join("lib", "security")
@@ -467,7 +466,7 @@ func NewGenerateMenu(options NewGenerateMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"types"},
+				Active: NewActivationFunction("types"),
 				Choice: search.Choice{Id: "types", Description: "shows binary version"},
 				Handler: func(value string) (err error) {
 					err = generate.TypeDefinitions(generate.TypeDefinitionsOptions{

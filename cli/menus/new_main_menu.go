@@ -10,7 +10,6 @@ import (
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/razshare/frizzante/cli/actions"
-	"github.com/razshare/frizzante/cli/apps"
 	"github.com/razshare/frizzante/cli/generate"
 	"github.com/razshare/frizzante/cli/paths"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
@@ -23,10 +22,10 @@ import (
 )
 
 func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
-	app := options.App
-	efs := app.Efs
-	tags := *app.Tags
-	sqlcYaml := *app.SqlcYaml
+	efs := options.Efs
+	modifiers := options.Modifiers
+	tags := *modifiers.Tags
+	sqlcYaml := *modifiers.SqlcYaml
 	persistent := options.Persistent
 	platform := platforms.Detect()
 
@@ -35,30 +34,32 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 		return nil, err
 	}
 
-	go_, err := paths.Go(*app.Go)
+	go_, err := paths.Go(*modifiers.Go)
 	if err != nil {
 		return nil, err
 	}
 
-	air, err := paths.Air(*app.Air)
+	air, err := paths.Air(*modifiers.Air)
 	if err != nil {
 		return nil, err
 	}
 
-	bun, err := paths.Bun(*app.Bun)
+	bun, err := paths.Bun(*modifiers.Bun)
 	if err != nil {
 		return nil, err
 	}
 
-	sqlc, err := paths.Sqlc(*app.Sqlc)
+	sqlc, err := paths.Sqlc(*modifiers.Sqlc)
 	if err != nil {
 		return nil, err
 	}
 
 	var logo string
-	if logo, err = apps.Logo(&app); err != nil {
+	var data []byte
+	if data, err = options.Efs.ReadFile("logo.txt"); err != nil {
 		messages.Warning(err)
-		err = nil
+	} else {
+		logo = configs.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data))
 	}
 
 	return &Menu{
@@ -67,7 +68,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 		Persistent: persistent,
 		Items: []Item{
 			{
-				Ids:    []string{"configure"},
+				Active: NewActivationFunction("configure"),
 				Choice: search.Choice{Id: "configure", Description: "generates bun and air binaries"},
 				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -99,7 +100,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"create", "new"},
+				Active: NewActivationFunction("create", "new"),
 				Choice: search.Choice{Id: "create new project", Description: "creates a new project"},
 				Handler: func(value string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -124,7 +125,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"install"},
+				Active: NewActivationFunction("install"),
 				Choice: search.Choice{Id: "install", Description: "installs go and js packages"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -136,7 +137,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"update"},
+				Active: NewActivationFunction("update"),
 				Choice: search.Choice{Id: "update", Description: "updates go and js packages"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -148,7 +149,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"add"},
+				Active: NewActivationFunction("add"),
 				Choice: search.Choice{Id: "add", Description: "adds packages"},
 				Handler: func(value string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -181,7 +182,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"dev"},
+				Active: NewActivationFunction("dev"),
 				Choice: search.Choice{Id: "dev", Description: "runs air and vite in parallel"},
 				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -197,7 +198,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"build"},
+				Active: NewActivationFunction("build"),
 				Choice: search.Choice{Id: "build", Description: "builds project"},
 				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -211,7 +212,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"assembly-explorer"},
+				Active: NewActivationFunction("assembly-explorer"),
 				Choice: search.Choice{Id: "assembly explorer", Description: "explores application assembly output"},
 				Handler: func(_ string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -225,12 +226,12 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"generate"},
+				Active: NewActivationFunction("generate"),
 				Choice: search.Choice{Id: "generate", Description: "generates code and resources"},
 				Handler: func(value string) (err error) {
 					var menu *Menu
 					if menu, err = NewGenerateMenu(NewGenerateMenuOptions{
-						App:        app,
+						Modifiers:  modifiers,
 						Persistent: persistent,
 					}); err != nil {
 						return
@@ -242,7 +243,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"migrate"},
+				Active: NewActivationFunction("migrate"),
 				Choice: search.Choice{Id: "migrate", Description: "migrates database schema"},
 				Handler: func(value string) (err error) {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -343,7 +344,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"package"},
+				Active: NewActivationFunction("package"),
 				Choice: search.Choice{Id: "package", Description: "builds app"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -354,7 +355,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"package-watch"},
+				Active: NewActivationFunction("package-watch"),
 				Choice: search.Choice{Id: "package watch", Description: "builds app on change"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -365,7 +366,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"check"},
+				Active: NewActivationFunction("check"),
 				Choice: search.Choice{Id: "check", Description: "checks for code errors"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -376,7 +377,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"format"},
+				Active: NewActivationFunction("format"),
 				Choice: search.Choice{Id: "format", Description: "format code"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -388,7 +389,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"touch"},
+				Active: NewActivationFunction("touch"),
 				Choice: search.Choice{Id: "touch", Description: "adds placeholders in app/dist"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -397,7 +398,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"clean"},
+				Active: NewActivationFunction("clean"),
 				Choice: search.Choice{Id: "clean project", Description: "deletes .gen, .vite, app/{dist,node_modules}"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -408,7 +409,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"reset"},
+				Active: NewActivationFunction("reset"),
 				Choice: search.Choice{Id: "reset", Description: "deletes " + cache},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -417,7 +418,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"clear"},
+				Active: NewActivationFunction("clear"),
 				Choice: search.Choice{Id: "clear", Description: "clears screen"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -426,7 +427,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"lock-packages"},
+				Active: NewActivationFunction("lock-packages"),
 				Choice: search.Choice{Id: "lock packages", Description: "locks packages to the current exact version"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -435,7 +436,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"snapshot"},
+				Active: NewActivationFunction("snapshot"),
 				Choice: search.Choice{Id: "snapshot", Description: "snapshots the server state and generates static web assets"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -444,7 +445,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"test"},
+				Active: NewActivationFunction("test"),
 				Choice: search.Choice{Id: "test", Description: "runs tests"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -456,8 +457,8 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
+				Active: NewActivationFunction("welcome"),
 				Hidden: true,
-				Ids:    []string{"welcome"},
 				Choice: search.Choice{Id: "welcome", Description: "shows a welcome message"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -466,8 +467,8 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
+				Active: NewActivationFunction("help"),
 				Hidden: true,
-				Ids:    []string{"help"},
 				Choice: search.Choice{Id: "help", Description: "shows the help menu"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
@@ -476,7 +477,7 @@ func NewMainMenu(options NewMainMenuOptions) (*Menu, error) {
 				},
 			},
 			{
-				Ids:    []string{"version"},
+				Active: NewActivationFunction("version"),
 				Choice: search.Choice{Id: "version", Description: "shows binary version"},
 				Handler: func(_ string) error {
 					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))

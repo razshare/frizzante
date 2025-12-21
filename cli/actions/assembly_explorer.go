@@ -41,21 +41,23 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 		if build, err = confirm.Sendf(true, "file %s already exists. Rebuild?", program); err != nil {
 			return
 		}
+	} else {
+		build = true
 	}
 
 	if build {
-		//if len(tags) == 0 && options.Interactive {
-		//	if tags, err = tags_.Select([]search.Choice{
-		//		{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
-		//		{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
-		//		{Id: "trace", Description: "enables tracing with stack.Trace()"},
-		//		{Id: "dry", Description: "enables dry mode"},
-		//		{Id: "types", Description: "enables types generation"},
-		//		{Id: "other", Description: "adds custom tags"},
-		//	}); err != nil {
-		//		return
-		//	}
-		//}
+		if len(tags) == 0 {
+			if tags, err = tags_.Select([]search.Choice{
+				{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
+				{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
+				{Id: "trace", Description: "enables tracing with stack.Trace()"},
+				{Id: "dry", Description: "enables dry mode"},
+				{Id: "types", Description: "enables types generation"},
+				{Id: "other", Description: "adds custom tags"},
+			}); err != nil {
+				return
+			}
+		}
 
 		if err = Build(BuildOptions{
 			Go:   options.Go,
