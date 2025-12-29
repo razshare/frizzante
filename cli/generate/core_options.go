@@ -3,5 +3,6 @@ package generate
 import "embed"
 
 type CoreOptions struct {
-	Efs embed.FS
+	Strict bool
+	Efs    embed.FS
 }

@@ -1,3 +1,7 @@
 package actions
 
-type HelpOptions struct{}
+import "github.com/razshare/frizzante/cli/apps"
+
+type HelpOptions struct {
+	App apps.App
+}

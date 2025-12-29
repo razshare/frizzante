@@ -11,19 +11,20 @@ import (
 )
 
 func Bun(options BunOptions) (err error) {
-	var url string
+	platform := platforms.Detect()
 
-	if options.Platform == platforms.DarwinArm64 {
+	var url string
+	if platform == platforms.DarwinArm64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-aarch64.zip"
-	} else if options.Platform == platforms.DarwinAmd64 {
+	} else if platform == platforms.DarwinAmd64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-x64.zip"
-	} else if options.Platform == platforms.LinuxArm64 {
+	} else if platform == platforms.LinuxArm64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-aarch64.zip"
-	} else if options.Platform == platforms.LinuxAmd64 {
+	} else if platform == platforms.LinuxAmd64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-x64.zip"
-	} else if options.Platform == platforms.WindowsArm64 {
+	} else if platform == platforms.WindowsArm64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-windows-x64-baseline.zip"
-	} else if options.Platform == platforms.WindowsAmd64 {
+	} else if platform == platforms.WindowsAmd64 {
 		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-windows-x64-baseline.zip"
 	}
 
@@ -39,17 +40,17 @@ func Bun(options BunOptions) (err error) {
 		return
 	}
 
-	if options.Platform == platforms.DarwinArm64 {
+	if platform == platforms.DarwinArm64 {
 		err = files.Move(filepath.Join(filepath.Dir(options.Bun), "bun-darwin-aarch64", "bun"), options.Bun)
-	} else if options.Platform == platforms.DarwinAmd64 {
+	} else if platform == platforms.DarwinAmd64 {
 		err = files.Move(filepath.Join(filepath.Dir(options.Bun), "bun-darwin-x64", "bun"), options.Bun)
-	} else if options.Platform == platforms.LinuxArm64 {
+	} else if platform == platforms.LinuxArm64 {
 		err = files.Move(filepath.Join(filepath.Dir(options.Bun), "bun-linux-aarch64", "bun"), options.Bun)
-	} else if options.Platform == platforms.LinuxAmd64 {
+	} else if platform == platforms.LinuxAmd64 {
 		err = files.Move(filepath.Join(filepath.Dir(options.Bun), "bun-linux-x64", "bun"), options.Bun)
-	} else if options.Platform == platforms.WindowsArm64 {
+	} else if platform == platforms.WindowsArm64 {
 		err = files.Move(filepath.Join(filepath.Dir(options.Bun), "bun-windows-x64-baseline", "bun.exe"), options.Bun)
-	} else if options.Platform == platforms.WindowsAmd64 {
+	} else if platform == platforms.WindowsAmd64 {
 		err = files.Move(filepath.Join(filepath.Dir(options.Bun), "bun-windows-x64-baseline", "bun.exe"), options.Bun)
 	}
 
@@ -57,17 +58,17 @@ func Bun(options BunOptions) (err error) {
 		return
 	}
 
-	if options.Platform == platforms.DarwinArm64 {
+	if platform == platforms.DarwinArm64 {
 		err = os.Remove(filepath.Join(filepath.Dir(options.Bun), "bun-darwin-aarch64"))
-	} else if options.Platform == platforms.DarwinAmd64 {
+	} else if platform == platforms.DarwinAmd64 {
 		err = os.Remove(filepath.Join(filepath.Dir(options.Bun), "bun-darwin-x64"))
-	} else if options.Platform == platforms.LinuxArm64 {
+	} else if platform == platforms.LinuxArm64 {
 		err = os.Remove(filepath.Join(filepath.Dir(options.Bun), "bun-linux-aarch64"))
-	} else if options.Platform == platforms.LinuxAmd64 {
+	} else if platform == platforms.LinuxAmd64 {
 		err = os.Remove(filepath.Join(filepath.Dir(options.Bun), "bun-linux-x64"))
-	} else if options.Platform == platforms.WindowsArm64 {
+	} else if platform == platforms.WindowsArm64 {
 		err = os.Remove(filepath.Join(filepath.Dir(options.Bun), "bun-windows-x64-baseline"))
-	} else if options.Platform == platforms.WindowsAmd64 {
+	} else if platform == platforms.WindowsAmd64 {
 		err = os.Remove(filepath.Join(filepath.Dir(options.Bun), "bun-windows-x64-baseline"))
 	}
 
@@ -75,7 +76,7 @@ func Bun(options BunOptions) (err error) {
 		return
 	}
 
-	if options.Platform != platforms.WindowsArm64 && options.Platform != platforms.WindowsAmd64 && filepath.Separator != '\\' {
+	if platform != platforms.WindowsArm64 && platform != platforms.WindowsAmd64 && filepath.Separator != '\\' {
 		err = syscall.Chmod(options.Bun, 0755)
 	}
 

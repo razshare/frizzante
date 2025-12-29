@@ -7,6 +7,7 @@ type Colors struct {
 	Error     string
 	Warning   string
 	Info      string
+	Debug     string
 	Tip       string
 	Input     string
 	Muted     string

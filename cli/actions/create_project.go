@@ -1,25 +1,37 @@
 package actions
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
 	"github.com/razshare/frizzante/cli/generate"
+	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/messages"
 )
 
 func CreateProject(options CreateProjectOptions) (err error) {
+	projectName := options.Name
+	if projectName == "" {
+		if options.Strict {
+			err = errors.New("project name is missing")
+			return
+		}
+		if projectName, err = inputs.Send("give the project a name"); err != nil {
+			return
+		}
+	}
+
 	if err = generate.Project(generate.ProjectOptions{
-		Name: options.Name,
-		Go:   options.Go,
+		Name: projectName,
 		Efs:  options.Efs,
 	}); err != nil {
 		return
 	}
 
-	messages.Successf("project %s created with success!", options.Name)
+	messages.Successf("project %s created with success!", projectName)
 
-	step1 := fmt.Sprintf("1. cd %s", options.Name)
+	step1 := fmt.Sprintf("1. cd %s", projectName)
 	step2 := fmt.Sprintf("2. frizzante --configure")
 	step3 := fmt.Sprintf("3. frizzante --dev")
 
@@ -37,7 +49,7 @@ func CreateProject(options CreateProjectOptions) (err error) {
 	padding2 := strings.Repeat(" ", width-length2)
 	padding3 := strings.Repeat(" ", width-length3)
 
-	comment1 := fmt.Sprintf("%s#changes directory to %s", padding1, options.Name)
+	comment1 := fmt.Sprintf("%s#changes directory to %s", padding1, projectName)
 	comment2 := fmt.Sprintf("%s#configures the project", padding2)
 	comment3 := fmt.Sprintf("%s#starts development mode", padding3)
 

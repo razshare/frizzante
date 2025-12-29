@@ -7,7 +7,6 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/platforms"
 )
 
 //go:embed internal/project/**
@@ -24,10 +23,7 @@ func TestIcons(t *testing.T) {
 	defer func() { _ = os.RemoveAll("app") }()
 	defer func() { _ = os.RemoveAll(".gen") }()
 
-	if err = Bun(BunOptions{
-		Bun:      filepath.Join(".gen", "bun", "bun"),
-		Platform: platforms.Detect(),
-	}); err != nil {
+	if err = Bun(BunOptions{Bun: filepath.Join(".gen", "bun", "bun")}); err != nil {
 		return
 	}
 

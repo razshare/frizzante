@@ -6,12 +6,11 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/platforms"
 )
 
 func TestMigration(t *testing.T) {
 	additionsDirectory := filepath.Join("internal", "additions")
-	databasesDirectory := filepath.Join(additionsDirectory, "lib", "sqlite", "databases")
+	databasesDirectory := filepath.Join(additionsDirectory, "lib", "databases", "sqlite")
 	migrationsDirectory := filepath.Join(databasesDirectory, "migrations")
 	sqlcYamlFile := filepath.Join(databasesDirectory, "sqlc.yaml")
 	sqlcFile := filepath.Join(additionsDirectory, ".gen", "sqlc", "sqlc")
@@ -26,13 +25,10 @@ func TestMigration(t *testing.T) {
 		}
 	}()
 
-	options := MigrationOptions{
+	if err := Migration(MigrationOptions{
 		Sqlc:     sqlcFile,
 		SqlcYaml: sqlcYamlFile,
-		Platform: platforms.Detect(),
-	}
-
-	if err := Migration(options); err != nil {
+	}); err != nil {
 		t.Fatal(err)
 	}
 

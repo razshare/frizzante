@@ -1,11 +1,8 @@
 package actions
 
 import (
-	"os"
-	"os/exec"
-	"path/filepath"
+	"errors"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinners"
 )
@@ -19,39 +16,19 @@ func Format(options FormatOptions) (err error) {
 		return
 	}
 
-	gofmt := exec.Command(options.Go, "fmt", "./...")
-	gofmt.Env = os.Environ()
-	gofmt.Stderr = os.Stderr
-	gofmt.Stdout = os.Stdout
-	gofmt.Stdin = os.Stdin
-	if err = gofmt.Run(); err != nil {
-		if gofmt.Err != nil {
-			messages.Error(gofmt.Err.Error())
-		}
+	if !messages.Command(messages.CommandOptions{
+		Program: options.Go,
+		Args:    []string{"fmt", "./..."},
+	}) {
+		err = errors.New("could not format go code")
 		return
 	}
 
-	var bun string
-	if files.IsFile(options.Bun) {
-		if bun, err = filepath.Rel("app", options.Bun); err != nil {
-			return
-		}
-	} else if bun, err = exec.LookPath(options.Bun); err != nil {
-		bun = options.Bun
-		return
-	}
-
-	pretty := exec.Command(bun, "x", "prettier", "--write", ".")
-	pretty.Dir = "app"
-	pretty.Env = os.Environ()
-	pretty.Stderr = os.Stderr
-	pretty.Stdout = os.Stdout
-	pretty.Stdin = os.Stdin
-	if err = pretty.Run(); err != nil {
-		spinners.Stop(spin)
-		if pretty.Err != nil {
-			messages.Error(pretty.Err.Error())
-		}
+	if !messages.Command(messages.CommandOptions{
+		Program: options.Bun,
+		Args:    []string{"x", "prettier", "--write", "."},
+	}) {
+		err = errors.New("could not format js code")
 		return
 	}
 

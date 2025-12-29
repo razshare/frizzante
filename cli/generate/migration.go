@@ -4,18 +4,42 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/select_one"
 	"github.com/razshare/frizzante/tui/spinners"
 	"gopkg.in/yaml.v3"
 )
 
 func Migration(options MigrationOptions) (err error) {
+	sqlcYaml := options.SqlcYaml
+	if sqlcYaml == "" {
+		if options.Strict {
+			err = errors.New("no sqlc.yaml file provided")
+			return
+		}
+		var names []string
+		if names, err = files.FindWithSuffix("lib", "sqlc.yaml"); err != nil {
+			return
+		}
+		choices := make([]search.Choice, len(names))
+		for index, name := range names {
+			choices[index] = search.Choice{Id: name}
+		}
+		sqlcYaml, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
+		if sqlcYaml == "other" {
+			if sqlcYaml, err = inputs.Send("where is your sqlc.yaml file located?"); err != nil {
+				return
+			}
+		}
+	}
+
 	type Configuration struct {
 		Sql []struct {
 			Schema string `yaml:"schema"`
@@ -24,31 +48,13 @@ func Migration(options MigrationOptions) (err error) {
 
 	baseDirectory := filepath.Dir(options.SqlcYaml)
 
-	if _, err = exec.LookPath(options.Sqlc); err != nil && !files.IsFile(options.Sqlc) {
-		if err = Sqlc(SqlcOptions{
-			Sqlc:     options.Sqlc,
-			Platform: options.Platform,
-		}); err != nil {
-			return
-		}
-	}
-
-	var sqlc string
-	if files.IsFile(options.Sqlc) {
-		if sqlc, err = filepath.Rel(baseDirectory, options.Sqlc); err != nil {
-			return err
-		}
-	} else if sqlc, err = exec.LookPath(options.Sqlc); err != nil {
-		sqlc = options.Sqlc
-	}
-
 	spin := spinners.New("checking sql code")
 
 	go spinners.Start(spin)
 	if !messages.Command(messages.CommandOptions{
 		DirectoryName: baseDirectory,
 		Environment:   os.Environ(),
-		Program:       sqlc,
+		Program:       options.Sqlc,
 		Args:          []string{"vet"},
 	}) {
 		spinners.Stop(spin)

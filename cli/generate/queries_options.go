@@ -1,9 +1,7 @@
 package generate
 
-import "github.com/razshare/frizzante/platforms"
-
 type QueriesOptions struct {
+	Strict   bool
 	Sqlc     string
 	SqlcYaml string
-	Platform platforms.Platform
 }

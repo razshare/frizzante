@@ -4,40 +4,61 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/tui/confirm"
+	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/tui/select_one"
 	"github.com/razshare/frizzante/tui/spinners"
 )
 
 func Queries(options QueriesOptions) (err error) {
-
-	if !files.IsFile(options.SqlcYaml) {
-		err = fmt.Errorf("%s not found", options.SqlcYaml)
-		return
+	sqlcYaml := options.SqlcYaml
+	if sqlcYaml == "" {
+		if options.Strict {
+			err = errors.New("no sqlc.yaml file provided")
+			return
+		}
+		var names []string
+		if names, err = files.FindWithSuffix("lib", "sqlc.yaml"); err != nil {
+			return
+		}
+		choices := make([]search.Choice, len(names))
+		for index, name := range names {
+			choices[index] = search.Choice{Id: name}
+		}
+		choices = append(choices, search.Choice{Id: "other", Description: "other"})
+		sqlcYaml, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
+		if sqlcYaml == "other" {
+			if sqlcYaml, err = inputs.Send("where is your sqlc.yaml file located?"); err != nil {
+				return
+			}
+		}
 	}
+	if !files.IsFile(options.Sqlc) {
+		if options.Strict {
+			err = fmt.Errorf("%s is missing", options.Sqlc)
+			return
+		}
 
-	baseDirectory := filepath.Dir(options.SqlcYaml)
+		var yesInstall bool
+		if yesInstall, err = confirm.Sendf(true, "%s is missing. Install?", options.Sqlc); err != nil {
+			return
+		}
 
-	if _, err = exec.LookPath(options.Sqlc); err != nil && !files.IsFile(options.Sqlc) {
-		if err = Sqlc(SqlcOptions{
-			Sqlc:     options.Sqlc,
-			Platform: options.Platform,
-		}); err != nil {
+		if !yesInstall {
+			err = errors.New("cannot continue generating queries because sqlc is missing")
+		}
+
+		if err = Sqlc(SqlcOptions{Sqlc: options.Sqlc}); err != nil {
 			return
 		}
 	}
 
-	var sqlc string
-	if files.IsFile(options.Sqlc) {
-		if sqlc, err = filepath.Rel(baseDirectory, options.Sqlc); err != nil {
-			return err
-		}
-	} else if sqlc, err = exec.LookPath(options.Sqlc); err != nil {
-		sqlc = options.Sqlc
-	}
+	baseDirectory := filepath.Dir(sqlcYaml)
 
 	spin := spinners.New("generating queries")
 
@@ -45,7 +66,7 @@ func Queries(options QueriesOptions) (err error) {
 	if !messages.Command(messages.CommandOptions{
 		DirectoryName: baseDirectory,
 		Environment:   os.Environ(),
-		Program:       sqlc,
+		Program:       options.Sqlc,
 		Args:          []string{"generate"},
 	}) {
 		spinners.Stop(spin)

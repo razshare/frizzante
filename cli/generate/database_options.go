@@ -1,15 +1,11 @@
 package generate
 
-import (
-	"embed"
+import "embed"
 
-	"github.com/razshare/frizzante/platforms"
-)
-
-type DatabaseOptions struct {
-	Go       string
-	Type     string
-	Sqlc     string
-	Efs      embed.FS
-	Platform platforms.Platform
+type DatabasesOptions struct {
+	Strict bool
+	Go     string
+	Type   string
+	Sqlc   string
+	Efs    embed.FS
 }

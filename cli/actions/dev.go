@@ -25,17 +25,6 @@ func Dev(options DevOptions) (err error) {
 		return
 	}
 
-	//if len(tags) == 0 {
-	//	if tags, err = tags_.Select([]search.Choice{
-	//		{Id: "types", Description: "enables type generations"},
-	//		{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
-	//		{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
-	//		{Id: "other", Description: "adds custom tags"},
-	//	}); err != nil {
-	//		return
-	//	}
-	//}
-
 	if err = generate.AirConfig(generate.AirConfigOptions{
 		Efs:  options.Efs,
 		Tags: strings.Join(append(tags, "dev", "trace"), ","),

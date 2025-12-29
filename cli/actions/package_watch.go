@@ -2,12 +2,10 @@ package actions
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"sync"
 	"time"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 )
 
@@ -16,21 +14,12 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 		return
 	}
 
-	var bun string
-	if files.IsFile(options.Bun) {
-		if bun, err = filepath.Rel("app", options.Bun); err != nil {
-			return
-		}
-	} else if bun, err = exec.LookPath(options.Bun); err != nil {
-		bun = options.Bun
-	}
-
 	var group sync.WaitGroup
 	group.Go(func() {
 		messages.Command(messages.CommandOptions{
 			DirectoryName: "app",
 			Environment:   append(os.Environ(), "DEV=1"),
-			Program:       bun,
+			Program:       options.Bun,
 			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch"},
 		})
 	})
@@ -38,7 +27,7 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 		messages.Command(messages.CommandOptions{
 			DirectoryName: "app",
 			Environment:   os.Environ(),
-			Program:       bun,
+			Program:       options.Bun,
 			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=app.server.ts"},
 		})
 	})
@@ -47,7 +36,7 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 		messages.Command(messages.CommandOptions{
 			DirectoryName: "app",
 			Environment:   append(os.Environ(), "DEV=1"),
-			Program:       filepath.Join("node_modules", ".bin", "esbuild"),
+			Program:       filepath.Join("app", "node_modules", ".bin", "esbuild"),
 			Args:          []string{"--bundle", "--watch", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js"},
 		})
 	})

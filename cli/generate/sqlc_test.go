@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/platforms"
 )
 
 func TestSqlc(t *testing.T) {
@@ -15,10 +14,7 @@ func TestSqlc(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll(".gen") }()
 
-	if err := Sqlc(SqlcOptions{
-		Sqlc:     filepath.Join(".gen", "sqlc", "sqlc"),
-		Platform: platforms.Detect(),
-	}); err != nil {
+	if err := Sqlc(SqlcOptions{Sqlc: filepath.Join(".gen", "sqlc", "sqlc")}); err != nil {
 		t.Fatal(err)
 	}
 

@@ -9,6 +9,7 @@ var Colors = themes.Colors{
 	Error:     "160",
 	Warning:   "166",
 	Info:      "33",
+	Debug:     "23",
 	Muted:     "241",
 	Tip:       "125",
 	Input:     "245",

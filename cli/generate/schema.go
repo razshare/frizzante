@@ -4,10 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"os"
-	"os/exec"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinners"
 	"gopkg.in/yaml.v3"
@@ -15,15 +13,6 @@ import (
 
 func Schema(options SchemaOptions) (err error) {
 	directoryName := filepath.Dir(options.SqlcYaml)
-
-	if _, err = exec.LookPath(options.Sqlc); err != nil && !files.IsFile(options.Sqlc) {
-		if err = Sqlc(SqlcOptions{
-			Sqlc:     options.Sqlc,
-			Platform: options.Platform,
-		}); err != nil {
-			return
-		}
-	}
 
 	var data []byte
 	if data, err = os.ReadFile(options.SqlcYaml); err != nil {

@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/platforms"
 )
 
 func TestBun(t *testing.T) {
@@ -15,10 +14,7 @@ func TestBun(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll(".gen") }()
 
-	if err := Bun(BunOptions{
-		Platform: platforms.Detect(),
-		Bun:      filepath.Join(".gen", "bun", "bun"),
-	}); err != nil {
+	if err := Bun(BunOptions{Bun: filepath.Join(".gen", "bun", "bun")}); err != nil {
 		t.Fatal(err)
 	}
 

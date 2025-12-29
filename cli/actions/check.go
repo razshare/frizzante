@@ -2,11 +2,10 @@ package actions
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
-	"os/exec"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinners"
 )
@@ -20,25 +19,13 @@ func Check(options CheckOptions) (err error) {
 		return
 	}
 
-	var bun string
-	if files.IsFile(options.Bun) {
-		if bun, err = filepath.Rel("app", options.Bun); err != nil {
-			return
-		}
-	} else if bun, err = exec.LookPath(options.Bun); err != nil {
-		bun = options.Bun
-	}
-
-	eslint := exec.Command(bun, "x", "eslint")
-	eslint.Dir = "app"
-	eslint.Env = os.Environ()
-	eslint.Stderr = os.Stderr
-	eslint.Stdout = os.Stdout
-	eslint.Stdin = os.Stdin
-	if err = eslint.Run(); err != nil {
-		if eslint.Err != nil {
-			messages.Error(eslint.Err.Error())
-		}
+	if !messages.Command(messages.CommandOptions{
+		DirectoryName: "app",
+		Environment:   os.Environ(),
+		Program:       options.Bun,
+		Args:          []string{"x", "eslint"},
+	}) {
+		err = errors.New("could not run eslint")
 		return
 	}
 
@@ -61,15 +48,13 @@ func Check(options CheckOptions) (err error) {
 	}
 
 	if pkg.DevDependencies.SvelteCheck != "" {
-		svelteCheck := exec.Command(bun, "x", "svelte-check", "--tsconfig=./tsconfig.json")
-		svelteCheck.Dir = "app"
-		svelteCheck.Env = os.Environ()
-		svelteCheck.Stderr = os.Stderr
-		svelteCheck.Stdout = os.Stdout
-		svelteCheck.Stdin = os.Stdin
-		err = svelteCheck.Run()
-		if svelteCheck.Err != nil {
-			messages.Error(eslint.Err.Error())
+		if !messages.Command(messages.CommandOptions{
+			DirectoryName: "app",
+			Environment:   os.Environ(),
+			Program:       options.Bun,
+			Args:          []string{"x", "svelte-check", "--tsconfig=./tsconfig.json"},
+		}) {
+			err = errors.New("could not run svelte-check")
 			return
 		}
 	}

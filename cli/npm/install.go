@@ -9,7 +9,7 @@ import (
 )
 
 func Install(options InstallOptions) (err error) {
-	if len(options.Packages) == 0 {
+	if len(options.PackageNames) == 0 {
 		messages.Infof("no packages to add")
 		return
 	}
@@ -20,18 +20,18 @@ func Install(options InstallOptions) (err error) {
 	}
 
 	ok := 0
-	for _, pkg := range options.Packages {
-		messages.Infof("adding %s", pkg)
+	for _, packageName := range options.PackageNames {
+		messages.Infof("adding %s", packageName)
 		if !messages.Command(messages.CommandOptions{
 			DirectoryName: "app",
 			Environment:   os.Environ(),
 			Program:       options.Bun,
-			Args:          []string{"add", "-D", pkg},
+			Args:          []string{"add", "-D", packageName},
 		}) {
-			err = fmt.Errorf("failed to add package %s", pkg)
+			err = fmt.Errorf("failed to add package %s", packageName)
 			return
 		}
-		messages.Successf("added %s packages to app/node_modules", pkg)
+		messages.Successf("added %s packages to app/node_modules", packageName)
 		ok++
 	}
 

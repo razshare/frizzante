@@ -5,13 +5,28 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 )
 
 func Command(options CommandOptions) (ok bool) {
+	var err error
+	var program string
+	if files.IsFile(options.Program) {
+		if program, err = filepath.Abs(options.Program); err != nil {
+			Error(err)
+			return
+		}
+	} else if program, err = exec.LookPath(options.Program); err != nil {
+		Error(err)
+		return
+	}
+
 	var done bool
 	defer func() { done = true }()
 
-	cmd := exec.Command(options.Program, options.Args...)
+	cmd := exec.Command(program, options.Args...)
 	cmd.Dir = options.DirectoryName
 	cmd.Env = options.Environment
 
@@ -41,7 +56,7 @@ func Command(options CommandOptions) (ok bool) {
 		}()
 	}
 
-	if err := cmd.Run(); err != nil {
+	if err = cmd.Run(); err != nil {
 		Error(err)
 		ok = false
 		return

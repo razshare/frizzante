@@ -1,10 +1,13 @@
 package menus
 
-import "github.com/razshare/frizzante/tui/search"
+import (
+	"github.com/razshare/frizzante/cli/apps"
+	"github.com/razshare/frizzante/tui/search"
+)
 
 type Item struct {
-	Choice  search.Choice
-	Active  ActivationFunction
-	Handler ActionFunction
-	Hidden  bool
+	Hidden bool
+	Choice search.Choice
+	Active func(menu *Menu, app apps.App) (active bool)
+	Handle func(menu *Menu, app apps.App) (err error)
 }

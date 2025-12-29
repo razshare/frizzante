@@ -1,6 +1,6 @@
 package npm
 
 type InstallOptions struct {
-	Bun      string
-	Packages []string
+	Bun          string
+	PackageNames []string
 }

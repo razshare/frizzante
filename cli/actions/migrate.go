@@ -3,6 +3,7 @@ package actions
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"slices"
@@ -10,6 +11,7 @@ import (
 	"time"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/select_one"
@@ -20,6 +22,87 @@ import (
 //
 // Experimental: api is currently minimal and not stable.
 func Migrate(options MigrateOptions) (err error) {
+	databaseConnectionString := options.Database
+	sqlcYaml := options.SqlcYaml
+	query := options.Query
+
+	if sqlcYaml == "" {
+		if options.Strict {
+			err = errors.New("no sqlc.yaml file provided")
+			return
+		}
+		var items []string
+		if items, err = files.ReadDirectory("lib"); err != nil {
+			return
+		}
+		names := make([]string, 0)
+		for _, item := range items {
+			if strings.HasSuffix(item, string(filepath.Separator)+"sqlc.yaml") {
+				names = append(names, item)
+			}
+		}
+		choices := make([]search.Choice, len(names))
+		for index, name := range names {
+			choices[index] = search.Choice{Id: name}
+		}
+		choices = append(choices, search.Choice{Id: "other", Description: "use a different file"})
+		sqlcYaml, err = select_one.Sendf(choices, "where is your sqlc.yaml file located?")
+		if sqlcYaml == "other" {
+			if sqlcYaml, err = inputs.Send("where is your sqlc.yaml file located?"); err != nil {
+				return
+			}
+		}
+	}
+
+	var offset string
+	var target string
+	migrateRange := strings.SplitN(query, ",", 2)
+	if len(migrateRange) >= 1 {
+		offset = migrateRange[0]
+	} else {
+		offset = ""
+	}
+	if len(migrateRange) >= 2 {
+		target = migrateRange[1]
+		if offset == "" {
+			offset = "first"
+		}
+		if target == "" {
+			target = "last"
+		}
+	} else {
+		target = ""
+	}
+	if databaseConnectionString == "" {
+		if options.Strict {
+			err = errors.New("database connection string not provided")
+			return
+		}
+		var names []string
+		if names, err = files.FindWithSuffix("lib", ".sqlite"); err != nil {
+			return
+		}
+		choices := make([]search.Choice, len(names))
+		for index, name := range names {
+			choices[index] = search.Choice{Id: name}
+		}
+		choices = append(choices, search.Choice{Id: "other", Description: "use a different file"})
+		var name string
+		if name, err = select_one.Sendf(choices, "where's your sqlite database located?"); err != nil {
+			return
+		}
+		if name == "other" {
+			if name, err = inputs.Send("where's the file located?"); err != nil {
+				return
+			}
+		}
+		databaseConnectionString = fmt.Sprintf("file:%s?cache=shared", name)
+	}
+	var databaseConnection *sql.DB
+	if databaseConnection, err = sql.Open("sqlite3", databaseConnectionString); err != nil {
+		return
+	}
+
 	yamlFileName := options.SqlcYaml
 	baseDirectory := filepath.Dir(yamlFileName)
 
@@ -56,7 +139,6 @@ func Migrate(options MigrateOptions) (err error) {
 	})
 
 	var offsetTime time.Time
-	offset := options.Offset
 	if offset == "" {
 		choices := make([]search.Choice, count)
 
@@ -79,7 +161,6 @@ func Migrate(options MigrateOptions) (err error) {
 	}
 
 	var targetTime time.Time
-	target := options.Target
 	if target == "" {
 		choices := make([]search.Choice, count)
 
@@ -135,7 +216,7 @@ func Migrate(options MigrateOptions) (err error) {
 	}
 
 	var transaction *sql.Tx
-	if transaction, err = options.Database.Begin(); err != nil {
+	if transaction, err = databaseConnection.Begin(); err != nil {
 		return
 	}
 

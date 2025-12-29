@@ -1,10 +1,6 @@
 package actions
 
-import (
-	"embed"
-
-	"github.com/razshare/frizzante/platforms"
-)
+import "embed"
 
 type GenerateOptions struct {
 	Generation   string
@@ -17,5 +13,4 @@ type GenerateOptions struct {
 	DatabaseType string
 	Tags         string
 	Efs          embed.FS
-	Platform     platforms.Platform
 }
