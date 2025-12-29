@@ -15,6 +15,12 @@ func TestMigration(t *testing.T) {
 	sqlcYamlFile := filepath.Join(databasesDirectory, "sqlc.yaml")
 	sqlcFile := filepath.Join(additionsDirectory, ".gen", "sqlc", "sqlc")
 
+	if !files.IsFile(sqlcFile) {
+		if err := Sqlc(SqlcOptions{Sqlc: sqlcFile}); err != nil {
+			t.Fatal(err)
+		}
+	}
+
 	if err := os.RemoveAll(migrationsDirectory); err != nil {
 		t.Fatal(err)
 	}

@@ -18,12 +18,12 @@ test -f "$frizzante" || build "$frizzante"
 go mod tidy
 go get ./...
 pushd internal/project
-  "$frizzante" --configure
-  "$frizzante" --lock-js-packages
-  "$frizzante" --generate="sqlc"
-  "$frizzante" --install
-  "$frizzante" --generate="types"
-  "$frizzante" --package
+  "$frizzante" --strict --configure
+  "$frizzante" --strict --lock-js-packages
+  "$frizzante" --strict --generate="sqlc"
+  "$frizzante" --strict --install
+  "$frizzante" --strict --generate="types"
+  "$frizzante" --strict --package
   cropy app/node_modules ../additions/app/node_modules
   cropy .gen/sqlc/sqlc ../../cli/generate/.gen/sqlc/sqlc
 popd
