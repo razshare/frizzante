@@ -66,9 +66,9 @@ var Generate = Menu{
 				err = generate.Databases(generate.DatabasesOptions{
 					Go:     *app.Go,
 					Sqlc:   *app.Sqlc,
-					Efs:    app.Efs,
 					Type:   *app.DatabaseType,
 					Strict: *app.Strict,
+					Efs:    app.Efs,
 				})
 				return
 			},

@@ -15,7 +15,6 @@ import (
 
 func Databases(options DatabasesOptions) (err error) {
 	databaseType := strings.ToLower(options.Type)
-	toDirectoryName := filepath.Join("lib", "databases", databaseType)
 
 	if databaseType == "" {
 		if options.Strict {
@@ -31,6 +30,8 @@ func Databases(options DatabasesOptions) (err error) {
 	}
 
 	fromDirectoryName := fmt.Sprintf("internal/additions/lib/databases/%s", databaseType)
+	toDirectoryName := filepath.Join("lib", "databases", databaseType)
+
 	if err = Copy(CopyOptions{
 		From: fromDirectoryName,
 		To:   toDirectoryName,

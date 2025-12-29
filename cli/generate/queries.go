@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/confirm"
@@ -80,6 +81,26 @@ func Queries(options QueriesOptions) (err error) {
 	}
 
 	messages.Success(filepath.Join(baseDirectory, "queries.go"))
+
+	step1 := "1. frizzante --install"
+	step2 := "2. sqlite.Queries.FindUsers(client.Request.Context())"
+
+	length1 := len(step1)
+	length2 := len(step2)
+
+	width := length2
+
+	padding1 := strings.Repeat(" ", width-length1)
+	padding2 := strings.Repeat(" ", width-length2)
+
+	comment1 := fmt.Sprintf("%s#gets functions compiled by sqlc", padding1)
+	comment2 := fmt.Sprintf("%s#invokes a function compiled by sqlc", padding2)
+
+	messages.Tip(strings.Join([]string{
+		"## next steps",
+		fmt.Sprintf("%s %s", step1, comment1),
+		fmt.Sprintf("%s %s", step2, comment2),
+	}, "\n"))
 
 	return
 }

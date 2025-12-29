@@ -23,8 +23,6 @@ func Configure(options ConfigureOptions) (err error) {
 	if err = Package(PackageOptions{Bun: options.Bun}); err != nil {
 		return
 	}
-
 	messages.Success("project configured")
-
 	return
 }

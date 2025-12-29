@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"errors"
 	"os"
 
 	"github.com/razshare/frizzante/tui/messages"
@@ -14,13 +15,23 @@ func Update(options UpdateOptions) (err error) {
 
 	spin := spinners.New("updating go packages")
 	go spinners.Start(spin)
-	if messages.Command(messages.CommandOptions{
+	if !messages.Command(messages.CommandOptions{
 		Environment: os.Environ(),
 		Program:     options.Go,
-		Args:        []string{"get", "-u", "./..."},
+		Args:        []string{"mod", "tidy"},
 	}) {
-		messages.Success("go packages updated")
+		err = errors.New("could not update go packages")
+		return
 	}
+	if !messages.Command(messages.CommandOptions{
+		Environment: os.Environ(),
+		Program:     options.Go,
+		Args:        []string{"get", "-U", "./..."},
+	}) {
+		err = errors.New("could not update go packages")
+		return
+	}
+	messages.Success("go packages updated")
 	spinners.Stop(spin)
 
 	spin = spinners.New("updating javascript packages")

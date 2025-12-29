@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"errors"
 	"os"
 
 	"github.com/razshare/frizzante/tui/messages"
@@ -14,13 +15,23 @@ func Install(options InstallOptions) (err error) {
 
 	spin := spinners.New("installing go packages")
 	go spinners.Start(spin)
-	if messages.Command(messages.CommandOptions{
+	if !messages.Command(messages.CommandOptions{
 		Environment: os.Environ(),
 		Program:     options.Go,
 		Args:        []string{"mod", "tidy"},
 	}) {
-		messages.Success("go packages installed")
+		err = errors.New("could not install go packages")
+		return
 	}
+	if !messages.Command(messages.CommandOptions{
+		Environment: os.Environ(),
+		Program:     options.Go,
+		Args:        []string{"get", "./..."},
+	}) {
+		err = errors.New("could not install go packages")
+		return
+	}
+	messages.Success("go packages installed")
 	spinners.Stop(spin)
 
 	spin = spinners.New("installing javascript packages")
