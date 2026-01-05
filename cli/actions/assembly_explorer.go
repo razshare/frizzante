@@ -51,7 +51,7 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 				{Id: "no_js_runtime", Description: "disables the server-side JavaScript runtime"},
 				{Id: "experimental_qjs_runtime", Description: "replaces goja with qjs"},
 				{Id: "trace", Description: "enables tracing with stack.Trace()"},
-				{Id: "dry", Description: "enables dry mode"},
+				{Id: "snapshots", Description: "enables snapshots"},
 				{Id: "types", Description: "enables types generation"},
 				{Id: "other", Description: "adds custom tags"},
 			}); err != nil {

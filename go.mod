@@ -12,7 +12,7 @@ require (
 	github.com/evanw/esbuild v0.27.0
 	github.com/fastschema/qjs v0.0.6
 	github.com/gorilla/websocket v1.5.3
-	github.com/mattn/go-sqlite3 v1.14.32
+	github.com/mattn/go-sqlite3 v1.14.33
 	github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d
 	github.com/spf13/pflag v1.0.10
 	golang.org/x/crypto v0.46.0

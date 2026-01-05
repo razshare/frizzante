@@ -7,15 +7,15 @@ import (
 	"github.com/razshare/frizzante/tui/messages"
 )
 
-func TypeDefinitions(options TypeDefinitionsOptions) (err error) {
+func Snapshots(options SnapshotsOptions) (err error) {
 	if !messages.Command(messages.CommandOptions{
 		Environment: append(os.Environ(), "DEV=1"),
 		Program:     options.Go,
-		Args:        []string{"run", "-tags=dry,types", "."},
+		Args:        []string{"run", "-tags=snapshots", "."},
 	}) {
-		err = errors.New("could not generate types")
+		err = errors.New("could not generate snapshots")
 		return
 	}
-	messages.Success("types generated")
+	messages.Success("snapshots generated")
 	return
 }

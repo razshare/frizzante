@@ -14,7 +14,8 @@ func New() (server *Server) {
 		SecureAddr: "0.0.0.0:8383",
 		Cors:       http.NewCrossOriginProtection(),
 		Channels: Channels{
-			End: make(chan struct{}, 1),
+			Start: make(chan struct{}, 1),
+			End:   make(chan struct{}, 1),
 		},
 		Addr:           "0.0.0.0:8080",
 		Handler:        http.NewServeMux(),

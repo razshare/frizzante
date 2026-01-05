@@ -1,5 +1,3 @@
-//go:build !dry
-
 package servers
 
 import (
@@ -8,7 +6,9 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 
+	"github.com/razshare/frizzante/internal/project/lib/core/channels"
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/render"
@@ -66,7 +66,7 @@ func Start(server *Server) {
 			route.Handler(client)
 
 			if client.Channels.End != nil {
-				client.Channels.End <- struct{}{}
+				client.Channels.End <- channels.Nothing
 			}
 		})
 	}
@@ -78,6 +78,12 @@ func Start(server *Server) {
 			server.InfoLog.Println("cancelling server startup")
 			return
 		}
+		go func() {
+			time.Sleep(10 * time.Millisecond)
+			if server.Channels.Start != nil {
+				server.Channels.Start <- channels.Nothing
+			}
+		}()
 		if err = httpServer.ListenAndServe(); err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
 				server.InfoLog.Println("shutting down server")
@@ -95,6 +101,12 @@ func Start(server *Server) {
 				server.InfoLog.Println("cancelling server startup")
 				return
 			}
+			go func() {
+				time.Sleep(10 * time.Millisecond)
+				if server.Channels.Start != nil {
+					server.Channels.Start <- channels.Nothing
+				}
+			}()
 			if err = httpServer.ListenAndServeTLS(server.Certificate, server.Key); err != nil {
 				if errors.Is(err, http.ErrServerClosed) {
 					server.InfoLog.Println("shutting down server")

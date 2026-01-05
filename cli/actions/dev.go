@@ -27,7 +27,7 @@ func Dev(options DevOptions) (err error) {
 
 	if err = generate.AirConfig(generate.AirConfigOptions{
 		Efs:  options.Efs,
-		Tags: strings.Join(append(tags, "dev", "trace"), ","),
+		Tags: strings.Join(append(tags, "dev", "types", "snapshots", "trace"), ","),
 	}); err != nil {
 		return
 	}

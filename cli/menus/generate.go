@@ -164,25 +164,6 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "types" },
-			Choice: search.Choice{Id: "types", Description: "generates typescript types from Go types"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ types"))
-				err = generate.TypeDefinitions(generate.TypeDefinitionsOptions{Go: *app.Go})
-				return
-			},
-		},
-		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "snapshot" },
-			Choice: search.Choice{Id: "snapshot", Description: "generates static assets"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ snapshot"))
-				return
-			},
-		},
-		{
 			Hidden: true,
 			Choice: search.Choice{Id: "render generate menu"},
 			Active: func(_ *Menu, app apps.App) bool { return true },
