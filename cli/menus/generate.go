@@ -74,6 +74,16 @@ var Generate = Menu{
 			},
 		},
 		{
+			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "types" },
+			Choice: search.Choice{Id: "types", Description: "generates typescript type definitions"},
+			Handle: func(menu *Menu, app apps.App) (err error) {
+				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+				fmt.Println(configs.Styles.Menu.Render("generate ▷ types"))
+				err = generate.TypeDefinitions(generate.TypeDefinitionsOptions{Go: *app.Go})
+				return
+			},
+		},
+		{
 			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "migration" },
 			Choice: search.Choice{Id: "migration", Description: "generates migration file named using the current date and time"},
 			Handle: func(menu *Menu, app apps.App) (err error) {

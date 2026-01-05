@@ -1,3 +1,5 @@
+//go:build !no_servers
+
 package servers
 
 import (
