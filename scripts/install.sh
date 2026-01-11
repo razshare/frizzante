@@ -2,7 +2,7 @@
 message="please clean the project before installing"
 
 # Checks cli
-test -d cli/generate/.gen && echo "$message" && exit 1
+test -d cli/generations/.gen && echo "$message" && exit 1
 
 # Checks additions
 test -d internal/additions/app/.vite && echo "$message" && exit 1

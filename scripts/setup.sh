@@ -25,5 +25,5 @@ pushd internal/project
   "$frizzante" --strict --install
   "$frizzante" --strict --package
   cropy app/node_modules ../additions/app/node_modules
-  cropy .gen/sqlc/sqlc ../../cli/generate/.gen/sqlc/sqlc
+  cropy .gen/sqlc/sqlc ../../cli/generations/.gen/sqlc/sqlc
 popd

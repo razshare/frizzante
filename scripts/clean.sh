@@ -6,7 +6,7 @@ rm -fr .gen
 rm -fr frizzante
 
 # cleans cli
-rm -fr cli/generate/.gen
+rm -fr cli/generations/.gen
 
 # cleans additions
 rm -fr internal/additions/app/.vite
