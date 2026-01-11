@@ -19,6 +19,7 @@ type App struct {
 	Generate       *string
 	Strict         *bool
 	Dev            *bool
+	Snapshot       *bool
 	Configure      *bool
 	Install        *bool
 	Update         *bool

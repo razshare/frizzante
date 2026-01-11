@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/razshare/frizzante/cli/generate"
+	"github.com/razshare/frizzante/cli/generations"
 	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/tui/messages"
 )
@@ -25,9 +25,9 @@ func Dev(options DevOptions) (err error) {
 		return
 	}
 
-	if err = generate.AirConfig(generate.AirConfigOptions{
+	if err = generations.AirConfig(generations.AirConfigOptions{
 		Efs:  options.Efs,
-		Tags: strings.Join(append(tags, "dev", "types", "snapshots", "trace"), ","),
+		Tags: strings.Join(append(tags, "dev", "types", "trace"), ","),
 	}); err != nil {
 		return
 	}

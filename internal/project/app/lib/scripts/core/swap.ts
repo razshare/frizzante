@@ -7,13 +7,20 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         lastUrl = location.toString()
     }
 
+    let requestUrl: string
     let response: Response
     let method: "GET" | "POST" = "GET"
     const body: Record<string, string> = {}
 
     if (target.nodeName === "A") {
         const anchor = target as HTMLAnchorElement
-        response = await fetch(anchor.href, {
+
+        requestUrl = anchor.href
+        if(view.isSnapshot) {
+            requestUrl = requestUrl.replace(/\/+$/, "") + "/data.json"
+        }
+
+        response = await fetch(requestUrl, {
             headers: {
                 Accept: "application/json",
             },
@@ -22,8 +29,12 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         const form = target as HTMLFormElement
         const data = new FormData(form)
         const params = new URLSearchParams()
-        const action = form.action.split("?")[0] ?? ""
         let query = ""
+
+        requestUrl = form.action.split("?")[0] ?? ""
+        if(view.isSnapshot) {
+            requestUrl = requestUrl.replace(/\/+$/,"") + "/data.json"
+        }
 
         form.reset()
 
@@ -39,13 +50,18 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
 
         if (method === "GET") {
             query = `?${params.toString()}`
-            response = await fetch(`${action}${query}`, {
+            response = await fetch(`${requestUrl}${query}`, {
                 headers: {
                     Accept: "application/json",
                 },
             })
         } else {
-            response = await fetch(form.action, {
+            requestUrl = form.action
+            if(view.isSnapshot) {
+                requestUrl += "/data.json"
+            }
+
+            response = await fetch(requestUrl, {
                 method,
                 body: data as unknown as BodyInit,
                 headers: {
@@ -57,7 +73,6 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         return function push() {}
     }
 
-    view.pending = true
     const text = await response.text()
 
     if (text === "") {
@@ -66,7 +81,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
 
     const remote = JSON.parse(text) as View<Record<string, unknown>>
 
-    await view.snapshot()
+    await view.pin()
     view.name = remote.name
     view.align = remote.align
     view.render = remote.render
@@ -86,10 +101,15 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
     } else {
         view.props = remote.props
     }
-    view.pending = false
 
-    const stationary = lastUrl === response.url
-    lastUrl = response.url
+    let fixedResponseUrl = response.url
+
+    if(view.isSnapshot) {
+        fixedResponseUrl = fixedResponseUrl.replace(/\/data\.json$/, "")
+    }
+
+    const stationary = lastUrl === fixedResponseUrl
+    lastUrl = fixedResponseUrl
 
     return function push() {
         if (stationary) {
@@ -99,10 +119,10 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         const entry: HistoryEntry = {
             nodeName: target.nodeName,
             method,
-            url: response.url,
+            url: fixedResponseUrl,
             body,
         }
 
-        window.history.pushState(JSON.stringify(entry), "", response.url)
+        window.history.pushState(JSON.stringify(entry), "", fixedResponseUrl)
     }
 }

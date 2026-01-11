@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/razshare/frizzante/cli/generate"
+	"github.com/razshare/frizzante/cli/generations"
 	"github.com/razshare/frizzante/tui/inputs"
 	"github.com/razshare/frizzante/tui/messages"
 )
@@ -22,7 +22,7 @@ func CreateProject(options CreateProjectOptions) (err error) {
 		}
 	}
 
-	if err = generate.Project(generate.ProjectOptions{
+	if err = generations.Project(generations.ProjectOptions{
 		Name: projectName,
 		Efs:  options.Efs,
 	}); err != nil {

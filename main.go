@@ -47,6 +47,7 @@ func main() {
 		Generate:       flag.StringP("generate", "g", "", "generates code and resources"),
 		Strict:         flag.BoolP("strict", "", false, "enables strict mode; program will stop if any flags are missing; used in ci/cd pipelines"),
 		Dev:            flag.BoolP("dev", "d", false, "runs air and vite in parallel"),
+		Snapshot:       flag.BoolP("snapshot", "s", false, "runs air (with tag snapshot_servers) and vite in parallel"),
 		Configure:      flag.BoolP("configure", "", false, "generates binaries, installs packages and creates app/dist"),
 		Install:        flag.BoolP("install", "i", false, "installs packages"),
 		Update:         flag.BoolP("updates", "u", false, "updates packages"),

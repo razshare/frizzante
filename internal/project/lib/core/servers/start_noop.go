@@ -1,4 +1,4 @@
-//go:build no_servers
+//go:build no_servers && !snapshot_servers
 
 package servers
 

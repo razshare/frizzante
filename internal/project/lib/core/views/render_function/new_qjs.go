@@ -10,7 +10,7 @@ import (
 
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/fastschema/qjs"
-	"github.com/razshare/frizzante/internal/project/lib/core/js"
+	"github.com/razshare/frizzante/internal/project/lib/core/javascript"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
@@ -86,7 +86,7 @@ func New(config Options) (render RenderFunction, err error) {
 	})
 
 	var text string
-	if text, err = js.Bundle(filepath.Join("app", "dist"), api.FormatCommonJS, string(config.Data)); err != nil {
+	if text, err = javascript.Bundle(filepath.Join("app", "dist"), api.FormatCommonJS, string(config.Data)); err != nil {
 		return
 	}
 

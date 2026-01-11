@@ -3,8 +3,8 @@ export type View<T> = {
     name: string
     align: number
     render: number
-    pending: boolean
-    snapshot: () => Promise<void>
+    isSnapshot: boolean
+    pin: () => Promise<void>
 }
 
 export type HistoryEntry = {
