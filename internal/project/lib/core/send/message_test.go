@@ -6,9 +6,9 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
-func TestContent(t *testing.T) {
+func TestMessage(t *testing.T) {
 	client := mocks.NewClient()
-	Content(client, []byte("hello"))
+	Message(client, "hello")
 	writer := client.Writer.(*mocks.ResponseWriter)
 
 	if string(writer.MockBytes) != "hello" {

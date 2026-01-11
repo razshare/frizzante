@@ -16,7 +16,6 @@ import (
 // The default event name is "message".
 func SseUpgrade(client *clients.Client) func(event string) {
 	Headers(client, map[string]string{
-		"Access-Control-Allow-Origin":   "*",
 		"Access-Control-Expose-Headers": "Content-Type",
 		"Content-Type":                  "text/event-stream",
 		"Cache-Control":                 "no-cache",

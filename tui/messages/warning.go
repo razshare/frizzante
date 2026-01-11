@@ -15,7 +15,3 @@ func Warning(args ...any) {
 	}
 	Status("WARNING", strings.Join(entries, ""), configs.Colors.Warning, "17", configs.Colors.Warning)
 }
-
-func Warningf(format string, vars ...any) {
-	Warning(fmt.Sprintf(format, vars...))
-}

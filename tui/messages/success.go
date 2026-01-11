@@ -15,7 +15,3 @@ func Success(args ...any) {
 	}
 	Status("SUCCESS", strings.Join(entries, ""), configs.Colors.Success, "17", configs.Colors.Success)
 }
-
-func Successf(format string, vars ...any) {
-	Success(fmt.Sprintf(format, vars...))
-}

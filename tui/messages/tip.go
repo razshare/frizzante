@@ -15,7 +15,3 @@ func Tip(args ...any) {
 	}
 	Status("TIP", strings.Join(entries, ""), configs.Colors.Tip, "17", configs.Colors.Tip)
 }
-
-func Tipf(format string, vars ...any) {
-	Tip(fmt.Sprintf(format, vars...))
-}

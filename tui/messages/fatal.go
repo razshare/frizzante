@@ -18,7 +18,3 @@ func Fatal(args ...any) {
 	Status("ERROR", strings.Join(entries, ""), configs.Colors.Error, "233", configs.Colors.Error)
 	os.Exit(1)
 }
-
-func Fatalf(format string, vars ...any) {
-	Fatal(fmt.Sprintf(format, vars...))
-}

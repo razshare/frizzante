@@ -15,7 +15,3 @@ func Debug(args ...any) {
 	}
 	Status("DEBUG", strings.Join(entries, ""), configs.Colors.Debug, "17", configs.Colors.Debug)
 }
-
-func Debugf(format string, vars ...any) {
-	Debug(fmt.Sprintf(format, vars...))
-}

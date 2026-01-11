@@ -21,7 +21,3 @@ func Error(args ...any) {
 
 	Status("ERROR", strings.Join(entries, ""), configs.Colors.Error, "233", configs.Colors.Error)
 }
-
-func Errorf(format string, vars ...any) {
-	Error(fmt.Sprintf(format, vars...))
-}

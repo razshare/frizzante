@@ -9,7 +9,7 @@ import (
 
 // Message reads the contents of the message and returns the value.
 //
-// Compatible with web sockets and server sent events.
+// Compatible with web sockets.
 func Message(client *clients.Client) string {
 	if client.WebSocket != nil {
 		_, data, err := client.WebSocket.ReadMessage()

@@ -6,12 +6,12 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
-func TestContent(t *testing.T) {
+func TestMessagef(t *testing.T) {
 	client := mocks.NewClient()
-	Content(client, []byte("hello"))
+	Messagef(client, "hello %s", "world")
 	writer := client.Writer.(*mocks.ResponseWriter)
 
-	if string(writer.MockBytes) != "hello" {
-		t.Fatal("content should be hello")
+	if string(writer.MockBytes) != "hello world" {
+		t.Fatal("content should be hello world")
 	}
 }

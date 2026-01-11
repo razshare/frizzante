@@ -15,7 +15,3 @@ func Info(args ...any) {
 	}
 	Status("INFO", strings.Join(entries, ""), configs.Colors.Info, "17", configs.Colors.Info)
 }
-
-func Infof(format string, vars ...any) {
-	Info(fmt.Sprintf(format, vars...))
-}

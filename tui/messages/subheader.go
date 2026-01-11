@@ -15,7 +15,3 @@ func Subheader(args ...any) {
 	}
 	fmt.Println(configs.Styles.Subheader.Render(strings.Join(entries, "")))
 }
-
-func Subheaderf(format string, vars ...any) {
-	Subheader(fmt.Sprintf(format, vars...))
-}

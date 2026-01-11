@@ -15,7 +15,3 @@ func Section(args ...any) {
 	}
 	fmt.Println(configs.Styles.Section.Render("## " + strings.Join(entries, "")))
 }
-
-func Sectionf(format string, vars ...any) {
-	Section(fmt.Sprintf(format, vars...))
-}
