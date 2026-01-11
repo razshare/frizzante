@@ -60,7 +60,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
     view.pending = true
     const text = await response.text()
 
-    if ("" === text) {
+    if (text === "") {
         return function push() {}
     }
 
