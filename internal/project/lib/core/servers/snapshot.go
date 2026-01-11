@@ -8,9 +8,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/channels"
 	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/values"
 )
 
 // Snapshot generates static pages from a server.
@@ -18,7 +18,7 @@ func Snapshot(server *Server) {
 	var err error
 	go Start(server)
 	<-server.Channels.Start
-	server.Channels.Start <- channels.Nothing
+	server.Channels.Start <- values.None
 
 	if err = os.RemoveAll(filepath.Join(".gen", "snapshot")); err != nil {
 		server.ErrorLog.Println(err, stack.Trace())
@@ -86,7 +86,7 @@ func Snapshot(server *Server) {
 		}
 	}
 
-	server.Channels.End <- channels.Nothing
+	server.Channels.End <- values.None
 
 	if err = embeds.CopyDirectory(server.Efs, "app/dist/client/assets", filepath.Join(".gen", "snapshot", "assets")); err != nil {
 		return

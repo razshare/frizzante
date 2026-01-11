@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/channels"
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/internal/project/lib/core/values"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/render"
 )
 
@@ -68,7 +68,7 @@ func Start(server *Server) {
 			route.Handler(client)
 
 			if client.Channels.End != nil {
-				client.Channels.End <- channels.Nothing
+				client.Channels.End <- values.None
 			}
 		})
 	}
@@ -83,7 +83,7 @@ func Start(server *Server) {
 		go func() {
 			time.Sleep(10 * time.Millisecond)
 			if server.Channels.Start != nil {
-				server.Channels.Start <- channels.Nothing
+				server.Channels.Start <- values.None
 			}
 		}()
 		if err = httpServer.ListenAndServe(); err != nil {
@@ -106,7 +106,7 @@ func Start(server *Server) {
 			go func() {
 				time.Sleep(10 * time.Millisecond)
 				if server.Channels.Start != nil {
-					server.Channels.Start <- channels.Nothing
+					server.Channels.Start <- values.None
 				}
 			}()
 			if err = httpServer.ListenAndServeTLS(server.Certificate, server.Key); err != nil {
