@@ -23,7 +23,7 @@ check:
 	frizzante --check
 
 clean:
-	frizzante --clean-project
+	frizzante --clean
 
 format:
 	frizzante --format
