@@ -1,7 +1,6 @@
 package servers
 
 import (
-	"context"
 	"errors"
 	"net/http"
 	"strings"
@@ -12,14 +11,6 @@ import (
 
 // Start starts a server from a configuration.
 func Start(server *Server) (err error) {
-	httpServer := &http.Server{
-		Addr:           server.Addr,
-		Handler:        server.Handler,
-		ReadTimeout:    server.ReadTimeout,
-		WriteTimeout:   server.WriteTimeout,
-		MaxHeaderBytes: server.MaxHeaderBytes,
-		ErrorLog:       server.ErrorLog,
-	}
 	render := server.Render
 	if render == nil {
 		err = errors.New("no render function found")
@@ -63,41 +54,28 @@ func Start(server *Server) (err error) {
 		})
 	}
 	if server.Certificate != "" && server.Key != "" {
-		go func() {
-			address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-			server.InfoLog.Printf("server bound to address %s; visit your application at https://%s", server.Addr, address)
-			if server.Channels.Started != nil {
-				server.Channels.Started <- values.None
-			}
-			if err = httpServer.ListenAndServeTLS(server.Certificate, server.Key); err != nil {
-				if errors.Is(err, http.ErrServerClosed) {
-					err = nil
-					server.InfoLog.Println("shutting down server")
-					return
-				}
+		address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+		server.InfoLog.Printf("server bound to address %s; visit your application at https://%s", server.Addr, address)
+		if err = server.ListenAndServeTLS(server.Certificate, server.Key); err != nil {
+
+			if errors.Is(err, http.ErrServerClosed) {
+				err = nil
+				server.InfoLog.Println("shutting down server")
 				return
 			}
-		}()
+			return
+		}
 	} else {
-		go func() {
-			address := strings.Replace(httpServer.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-			server.InfoLog.Printf("server bound to address %s; visit your application at http://%s", httpServer.Addr, address)
-			if server.Channels.Started != nil {
-				server.Channels.Started <- values.None
-			}
-			if err = httpServer.ListenAndServe(); err != nil {
-				if errors.Is(err, http.ErrServerClosed) {
-					err = nil
-					server.InfoLog.Println("shutting down server")
-					return
-				}
+		address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
+		server.InfoLog.Printf("server bound to address %s; visit your application at http://%s", server.Addr, address)
+		if err = server.ListenAndServe(); err != nil {
+			if errors.Is(err, http.ErrServerClosed) {
+				err = nil
+				server.InfoLog.Println("shutting down server")
 				return
 			}
-		}()
-	}
-	<-server.Channels.Ended
-	if err = httpServer.Shutdown(context.Background()); err != nil {
-		return
+			return
+		}
 	}
 	return
 }

@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 	"github.com/razshare/frizzante/internal/project/lib/core/ssr"
 )
 
@@ -52,7 +53,7 @@ func (body *RequestBody) Close() error {
 }
 
 func NewClient() *clients.Client {
-	srv := ssr.NewServer()
+	srv := servers.New(ssr.NewFunction(1))
 
 	conf := clients.Options{
 		ErrorLog: srv.ErrorLog,

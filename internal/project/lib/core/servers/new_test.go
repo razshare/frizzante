@@ -1,9 +1,13 @@
-package ssr
+package servers
 
-import "testing"
+import (
+	"testing"
 
-func TestNewServer(t *testing.T) {
-	server := NewServer()
+	"github.com/razshare/frizzante/internal/project/lib/core/csr"
+)
+
+func TestNew(t *testing.T) {
+	server := New(csr.NewFunction())
 
 	if server.InfoLog == nil {
 		t.Fatal("server should have an info log")

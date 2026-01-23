@@ -19,7 +19,7 @@ import (
 var efs embed.FS
 
 func main() {
-	server := ssr.NewServer()
+	server := servers.New(ssr.NewFunction(1))
 	server.Efs = efs
 	server.Routes = []routes.Route{
 		{Pattern: "GET /", Handler: fallback.View},
