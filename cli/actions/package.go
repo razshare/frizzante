@@ -54,11 +54,11 @@ func Package(options PackageOptions) (err error) {
 
 	messages.Success("app/dist generated")
 
-	if !options.Production && files.IsDirectory(filepath.Join("lib", "core", "views", "render")) {
+	if !options.Production && files.IsDirectory(filepath.Join("lib", "core", "ssr")) {
 		if files.IsDirectory(filepath.Join("app", "dist")) {
 			if err = files.CopyDirectory(
 				filepath.Join("app", "dist"),
-				filepath.Join("lib", "core", "views", "render", "app", "dist"),
+				filepath.Join("lib", "core", "ssr", "app", "dist"),
 			); err != nil {
 				return
 			}
