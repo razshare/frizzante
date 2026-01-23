@@ -7,7 +7,9 @@ import (
 
 	"github.com/razshare/frizzante/cli/extensions"
 	tags_ "github.com/razshare/frizzante/cli/tags"
+	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/spinners"
 )
 
@@ -15,18 +17,30 @@ func Build(options BuildOptions) (err error) {
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
-
 	var tags []string
 	if tags, err = tags_.Parse(options.Tags); err != nil {
 		return
 	}
-
+	if !options.Strict {
+		var yesBuildWithTags bool
+		if yesBuildWithTags, err = confirm.Send(false, "build with tags?"); err != nil {
+			return
+		}
+		if yesBuildWithTags {
+			var selectedTags []string
+			if selectedTags, err = tags_.Select([]search.Choice{
+				{Id: "trace", Description: "enables tracing"},
+				{Id: "other", Description: "prompts for custom tags"},
+			}); err != nil {
+				return
+			}
+			tags = append(tags, selectedTags...)
+		}
+	}
 	if err = Package(PackageOptions{Bun: options.Bun, Production: true}); err != nil {
 		return
 	}
-
 	extension := extensions.Find()
-
 	if len(options.Tags) > 0 {
 		spin := spinners.Newf("building binary with tags %s", strings.Join(tags, ","))
 		go spinners.Start(spin)
@@ -54,6 +68,5 @@ func Build(options BuildOptions) (err error) {
 			spinners.Stop(spin)
 		}
 	}
-
 	return
 }

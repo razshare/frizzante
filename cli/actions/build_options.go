@@ -1,7 +1,8 @@
 package actions
 
 type BuildOptions struct {
-	Go   string
-	Bun  string
-	Tags string
+	Go     string
+	Bun    string
+	Tags   string
+	Strict bool
 }

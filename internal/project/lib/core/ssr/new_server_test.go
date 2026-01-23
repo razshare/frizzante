@@ -1,9 +1,9 @@
-package servers
+package ssr
 
 import "testing"
 
-func TestNew(t *testing.T) {
-	server := New()
+func TestNewServer(t *testing.T) {
+	server := NewServer()
 
 	if server.InfoLog == nil {
 		t.Fatal("server should have an info log")
@@ -11,10 +11,6 @@ func TestNew(t *testing.T) {
 
 	if server.ErrorLog == nil {
 		t.Fatal("server should have an error log")
-	}
-
-	if server.Channels.End == nil {
-		t.Fatal("server should have a stop channel")
 	}
 
 	if server.Addr == "" {

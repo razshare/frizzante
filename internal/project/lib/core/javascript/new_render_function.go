@@ -1,6 +1,4 @@
-//go:build !experimental_qjs_runtime
-
-package render_function
+package javascript
 
 import (
 	"errors"
@@ -13,7 +11,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
 
-func New(options Options) (render RenderFunction, err error) {
+func NewRenderFunction(options NewRenderFunctionOptions) (render RenderFunction, err error) {
 	var builder strings.Builder
 
 	runtime := goja.New()
@@ -106,9 +104,9 @@ func New(options Options) (render RenderFunction, err error) {
 		return
 	}
 
-	render = func(view views.View) (head string, body string, err error) {
+	render = func(options RenderFunctionOptions) (head string, body string, err error) {
 		var props map[string]any
-		if props, err = types.EncodeInterface(views.NewData(view)); err != nil {
+		if props, err = types.EncodeInterface(views.NewData(options.View)); err != nil {
 			return
 		}
 

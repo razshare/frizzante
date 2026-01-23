@@ -1,4 +1,4 @@
-package render
+package ssr
 
 import (
 	"embed"
@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
+	render_ "github.com/razshare/frizzante/internal/project/lib/core/views/render"
 )
 
 //go:generate rm -fr ./app
@@ -14,13 +15,10 @@ import (
 //go:embed app
 var TestNewEfs embed.FS
 
-func TestNew(t *testing.T) {
+func TestNewFunction(t *testing.T) {
 	var err error
-	var render Render
-	if render, err = New(); err != nil {
-		t.Fatal(err)
-	}
-	html, err := render(Options{Efs: TestNewEfs, View: views.View{Name: "Welcome"}})
+	render := NewFunction(1)
+	html, err := render(render_.FunctionOptions{Efs: TestNewEfs, View: views.View{Name: "Welcome"}})
 	if err != nil {
 		t.Fatal(err)
 	}

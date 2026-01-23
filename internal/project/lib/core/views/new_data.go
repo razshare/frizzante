@@ -1,5 +1,3 @@
-//go:build !snapshot_servers
-
 package views
 
 func NewData(view View) Data {

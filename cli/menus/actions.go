@@ -35,25 +35,12 @@ var Main = Menu{
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ dev"))
 				err = actions.Dev(actions.DevOptions{
-					Go:   *app.Go,
-					Air:  *app.Air,
-					Bun:  *app.Bun,
-					Tags: *app.Tags,
-					Efs:  app.Efs,
-				})
-				return
-			},
-		},
-		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Snapshot },
-			Choice: search.Choice{Id: "snapshot", Description: "runs air (with tag snapshot_servers) and vite in parallel"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("running ▷ snapshot"))
-				err = actions.Snapshot(actions.SnapshotOptions{
-					Go:   *app.Go,
-					Tags: *app.Tags,
-					Bun:  *app.Bun,
+					Go:     *app.Go,
+					Air:    *app.Air,
+					Bun:    *app.Bun,
+					Tags:   *app.Tags,
+					Efs:    app.Efs,
+					Strict: *app.Strict,
 				})
 				return
 			},
@@ -119,9 +106,10 @@ var Main = Menu{
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ build"))
 				err = actions.Build(actions.BuildOptions{
-					Go:   *app.Go,
-					Bun:  *app.Bun,
-					Tags: *app.Tags,
+					Go:     *app.Go,
+					Bun:    *app.Bun,
+					Tags:   *app.Tags,
+					Strict: *app.Strict,
 				})
 				return
 			},

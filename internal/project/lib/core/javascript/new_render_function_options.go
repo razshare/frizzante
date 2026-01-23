@@ -1,8 +1,8 @@
-package render_function
+package javascript
 
 import "log"
 
-type Options struct {
+type NewRenderFunctionOptions struct {
 	Data     []byte
 	Server   string
 	ErrorLog *log.Logger

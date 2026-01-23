@@ -9,7 +9,7 @@ import (
 
 type Options struct {
 	Efs      embed.FS
-	Render   render.Render
+	Render   render.Function
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 }

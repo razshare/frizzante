@@ -7,7 +7,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
 
-type Options struct {
+type FunctionOptions struct {
 	View     views.View
 	Efs      embed.FS
 	InfoLog  *log.Logger

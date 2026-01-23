@@ -7,10 +7,12 @@ import (
 	"time"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
+	"github.com/razshare/frizzante/internal/project/lib/core/views/render"
 )
 
 type Server struct {
 	Routes         []routes.Route
+	Channels       Channels
 	Addr           string
 	SecureAddr     string
 	Certificate    string
@@ -22,6 +24,6 @@ type Server struct {
 	InfoLog        *log.Logger
 	ErrorLog       *log.Logger
 	Cors           *http.CrossOriginProtection
-	Channels       Channels
 	Efs            embed.FS
+	Render         render.Function
 }

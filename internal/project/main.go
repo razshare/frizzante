@@ -2,9 +2,11 @@ package main
 
 import (
 	"embed"
+	"log"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/internal/project/lib/core/servers"
+	"github.com/razshare/frizzante/internal/project/lib/core/ssr"
 	"github.com/razshare/frizzante/internal/project/lib/routes/fallback"
 	"github.com/razshare/frizzante/internal/project/lib/routes/todos"
 	"github.com/razshare/frizzante/internal/project/lib/routes/welcome"
@@ -15,10 +17,9 @@ import (
 //go:generate make types
 //go:embed app/dist
 var efs embed.FS
-var server = servers.New()
 
 func main() {
-	defer servers.Start(server)
+	server := ssr.NewServer()
 	server.Efs = efs
 	server.Routes = []routes.Route{
 		{Pattern: "GET /", Handler: fallback.View},
@@ -27,5 +28,9 @@ func main() {
 		{Pattern: "POST /toggle", Handler: todos.Toggle},
 		{Pattern: "POST /add", Handler: todos.Add},
 		{Pattern: "POST /remove", Handler: todos.Remove},
+	}
+	if err := servers.Start(server); err != nil {
+		log.Fatal(err)
+		return
 	}
 }

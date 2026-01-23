@@ -1,6 +1,6 @@
 package servers
 
 type Channels struct {
-	Start chan struct{}
-	End   chan struct{}
+	Started chan struct{}
+	Ended   chan struct{}
 }

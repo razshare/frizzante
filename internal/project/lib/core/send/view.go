@@ -36,7 +36,7 @@ func View(client *clients.Client, view views.View) {
 
 	var html string
 	var err error
-	if html, err = client.Options.Render(render.Options{Efs: client.Options.Efs, View: view}); err != nil {
+	if html, err = client.Options.Render(render.FunctionOptions{Efs: client.Options.Efs, View: view}); err != nil {
 		client.Options.ErrorLog.Println(err, stack.Trace())
 	}
 

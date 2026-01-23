@@ -4,6 +4,7 @@
     "adapter": "Delve",
     "program": "$ZED_WORKTREE_ROOT/main.go",
     "request": "launch",
-    "mode": "debug"
+    "mode": "debug",
+    "buildFlags": ["dev", "trace"]
   }
 ]

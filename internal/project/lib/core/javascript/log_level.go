@@ -1,4 +1,4 @@
-package render_function
+package javascript
 
 type LogLevel uint8
 

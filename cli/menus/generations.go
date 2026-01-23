@@ -58,6 +58,16 @@ var Generate = Menu{
 			},
 		},
 		{
+			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "types" },
+			Choice: search.Choice{Id: "types", Description: "generates types"},
+			Handle: func(menu *Menu, app apps.App) (err error) {
+				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+				fmt.Println(configs.Styles.Menu.Render("generate ▷ types"))
+				err = generations.Types(generations.TypesOptions{Go: *app.Go})
+				return
+			},
+		},
+		{
 			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "databases" },
 			Choice: search.Choice{Id: "databases", Description: "generates databases package"},
 			Handle: func(menu *Menu, app apps.App) (err error) {
@@ -70,16 +80,6 @@ var Generate = Menu{
 					Strict: *app.Strict,
 					Efs:    app.Efs,
 				})
-				return
-			},
-		},
-		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "types" },
-			Choice: search.Choice{Id: "types", Description: "generates typescript type definitions"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ types"))
-				err = generations.TypeDefinitions(generations.TypeDefinitionsOptions{Go: *app.Go})
 				return
 			},
 		},

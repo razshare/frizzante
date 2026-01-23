@@ -8,4 +8,5 @@ type CommandOptions struct {
 	Environment   []string
 	Program       string
 	Args          []string
+	Channels      CommandChannels
 }
