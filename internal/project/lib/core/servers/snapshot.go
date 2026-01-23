@@ -13,8 +13,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 )
 
-func Snapshot(server *Server) (err error) {
-	directory := filepath.Join(".gen", "snapshot")
+func Snapshot(server *Server, directory string) (err error) {
 	statics := make([]string, 0)
 	for _, route := range server.Routes {
 		if parts := strings.SplitN(route.Pattern, " ", 2); len(parts) >= 2 {
