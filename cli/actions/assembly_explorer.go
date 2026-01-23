@@ -8,11 +8,9 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/razshare/frizzante/cli/assemblies"
-	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/confirm"
 	"github.com/razshare/frizzante/tui/hexviewer"
@@ -29,10 +27,6 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 	} else {
 		program = filepath.Join(".gen", "bin", "app")
 	}
-	var tags []string
-	if tags, err = tags_.Parse(options.Tags); err != nil {
-		return
-	}
 	var build bool
 	if files.IsFile(program) {
 		if build, err = confirm.Sendf(true, "file %s already exists. Rebuild?", program); err != nil {
@@ -42,21 +36,10 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 		build = true
 	}
 	if build {
-		if len(tags) == 0 {
-			if tags, err = tags_.Select([]search.Choice{
-				{Id: "nojs", Description: "disables the server-side JavaScript runtime"},
-				{Id: "trace", Description: "enables tracing with stack.Trace()"},
-				{Id: "snapshots", Description: "enables snapshots"},
-				{Id: "types", Description: "enables types generation"},
-				{Id: "other", Description: "adds custom tags"},
-			}); err != nil {
-				return
-			}
-		}
 		if err = Build(BuildOptions{
 			Go:   options.Go,
 			Bun:  options.Bun,
-			Tags: strings.Join(tags, ","),
+			Tags: options.Tags,
 		}); err != nil {
 			return
 		}

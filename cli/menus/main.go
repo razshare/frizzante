@@ -3,35 +3,71 @@ package menus
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
+	"slices"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/razshare/frizzante/cli/actions"
 	"github.com/razshare/frizzante/cli/apps"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/tui/configs"
+	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 )
+
+func init() {
+	if err := LoadPlugins(&Main, filepath.Join("plugins", "main")); err != nil {
+		messages.Fatal(err, stack.Trace())
+		return
+	}
+	Main.Items = append(Main.Items, Item{
+		Hidden: true,
+		Choice: search.Choice{Id: "render main menu"},
+		Active: func(menu *Menu, app apps.App, value string, query []string) bool { return true },
+		Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
+			if *app.Strict {
+				err = actions.Help(actions.HelpOptions{})
+				return
+			}
+			var data []byte
+			if data, err = app.Efs.ReadFile("logo.txt"); err != nil {
+				return
+			}
+			fmt.Print(configs.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data)))
+			for {
+				if _, err = Render(menu, app, value, query); err != nil {
+					return
+				}
+			}
+		},
+	})
+}
 
 var Main = Menu{
 	Title: "main",
 	Items: []Item{
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Create != "" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"create", "c"}, value)
+			},
 			Choice: search.Choice{Id: "create project", Description: "creates a new project"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ create project"))
 				err = actions.CreateProject(actions.CreateProjectOptions{
 					Strict: *app.Strict,
-					Name:   *app.Create,
 					Efs:    app.Efs,
+					Name:   value,
 				})
 				return err
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Dev },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"dev", "d"}, value)
+			},
 			Choice: search.Choice{Id: "dev", Description: "runs air and vite in parallel"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ dev"))
 				err = actions.Dev(actions.DevOptions{
@@ -46,9 +82,9 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Configure },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "configure" },
 			Choice: search.Choice{Id: "configure", Description: "generates binaries, installs packages and creates app/dist"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ configure"))
 				err = actions.Configure(actions.ConfigureOptions{
@@ -60,9 +96,11 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Install },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"install", "i"}, value)
+			},
 			Choice: search.Choice{Id: "install", Description: "installs packages"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ install"))
 				err = actions.Install(actions.InstallOptions{
@@ -73,9 +111,11 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Update },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"update", "u"}, value)
+			},
 			Choice: search.Choice{Id: "update", Description: "updates packages"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ update"))
 				err = actions.Update(actions.UpdateOptions{
@@ -86,9 +126,9 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Add != "" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "add" },
 			Choice: search.Choice{Id: "add", Description: "adds packages"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ add"))
 				if *app.Strict {
@@ -100,9 +140,11 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Build },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"build", "b"}, value)
+			},
 			Choice: search.Choice{Id: "build", Description: "builds project"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ build"))
 				err = actions.Build(actions.BuildOptions{
@@ -115,17 +157,19 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate != "" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"generate", "g"}, value)
+			},
 			Choice: search.Choice{Id: "generate", Description: "generates code and resources"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
-				_, err = Activate(&Generate, app)
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
+				_, err = Activate(&Generate, app, append([]string{value}, query...))
 				return
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Asm },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "asm" },
 			Choice: search.Choice{Id: "assembly explorer", Description: "starts the assembly explorer"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ assembly explorer"))
 				err = actions.AssemblyExplorer(actions.AssemblyExplorerOptions{
@@ -137,24 +181,24 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Migrate != "" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "migrate" },
 			Choice: search.Choice{Id: "migrate", Description: "migrates database schema"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ migrate"))
 				err = actions.Migrate(actions.MigrateOptions{
+					Query:    value,
 					Strict:   *app.Strict,
 					SqlcYaml: *app.SqlcYaml,
-					Query:    *app.Migrate,
 					Database: *app.Database,
 				})
 				return
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Package },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "package" },
 			Choice: search.Choice{Id: "package", Description: "packages the svelte application into app/dist"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ package"))
 				err = actions.Package(actions.PackageOptions{Bun: *app.Bun})
@@ -162,9 +206,9 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.PackageWatch },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "package-watch" },
 			Choice: search.Choice{Id: "package-watch", Description: "packages the svelte application when source code changes"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ package watch"))
 				err = actions.PackageWatch(actions.PackageWatchOptions{Bun: *app.Bun})
@@ -172,9 +216,9 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Check },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "check" },
 			Choice: search.Choice{Id: "check", Description: "checks for code errors"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ check"))
 				err = actions.Check(actions.CheckOptions{Bun: *app.Bun})
@@ -182,9 +226,11 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Format },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"format", "f"}, value)
+			},
 			Choice: search.Choice{Id: "format", Description: "formats svelte and go code"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ format"))
 				return actions.Format(actions.FormatOptions{
@@ -194,18 +240,18 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Touch },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "touch" },
 			Choice: search.Choice{Id: "touch", Description: "adds placeholders in app/dist"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ touch"))
 				return actions.Touch(actions.TouchOptions{})
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Clean },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "clean" },
 			Choice: search.Choice{Id: "clean", Description: "deletes .gen, .vite, app/{dist,node_modules}"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ clean project"))
 				err = actions.CleanProject(actions.CleanProjectOptions{Go: *app.Go})
@@ -213,9 +259,9 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Reset },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "reset" },
 			Choice: search.Choice{Id: "reset", Description: "deletes global cache"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ reset"))
 				err = actions.Reset(actions.ResetOptions{})
@@ -223,9 +269,9 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Clear },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "clear" },
 			Choice: search.Choice{Id: "clear", Description: "clears terminal screen"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ clear"))
 				err = actions.Clear(actions.ClearOptions{})
@@ -233,9 +279,9 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.LockJsPackages },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "lock-packages" },
 			Choice: search.Choice{Id: "lock packages", Description: "locks js packages to the current exact version"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ lock packages"))
 				err = actions.LockPackages(actions.LockPackagesOptions{})
@@ -243,9 +289,9 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Test },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "test" },
 			Choice: search.Choice{Id: "test", Description: "runts tests"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ test"))
 				err = actions.Test(actions.TestOptions{
@@ -257,9 +303,9 @@ var Main = Menu{
 		},
 		{
 			Hidden: true,
-			Active: func(menu *Menu, app apps.App) bool { return *app.Welcome },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "welcome" },
 			Choice: search.Choice{Id: "welcome", Description: "shows a welcome message and yields without killing the process"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ welcome"))
 				err = actions.Welcome(actions.WelcomeOptions{})
@@ -267,45 +313,15 @@ var Main = Menu{
 			},
 		},
 		{
-			Hidden: true,
-			Active: func(menu *Menu, app apps.App) bool { return *app.Help },
-			Choice: search.Choice{Id: "help", Description: "shows the help menu"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("running ▷ help"))
-				err = actions.Help(actions.HelpOptions{App: app})
-				return
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"version", "v"}, value)
 			},
-		},
-		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Version },
 			Choice: search.Choice{Id: "version", Description: "shows binary version"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ version"))
 				err = actions.Version(actions.VersionOptions{Efs: app.Efs})
 				return
-			},
-		},
-		{
-			Hidden: true,
-			Choice: search.Choice{Id: "render main menu"},
-			Active: func(menu *Menu, app apps.App) bool { return true },
-			Handle: func(menu *Menu, app apps.App) (err error) {
-				if *app.Strict {
-					err = actions.Help(actions.HelpOptions{})
-					return
-				}
-				var data []byte
-				if data, err = app.Efs.ReadFile("logo.txt"); err != nil {
-					return
-				}
-				fmt.Print(configs.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data)))
-				for {
-					if _, err = Render(menu, app); err != nil {
-						return
-					}
-				}
 			},
 		},
 	},

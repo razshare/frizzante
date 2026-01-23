@@ -6,7 +6,7 @@ import (
 	"github.com/razshare/frizzante/tui/select_one"
 )
 
-func Render(menu *Menu, app apps.App) (id string, err error) {
+func Render(menu *Menu, app apps.App, value string, query []string) (id string, err error) {
 	choices := make([]search.Choice, 0)
 	for _, item := range menu.Items {
 		if item.Hidden {
@@ -24,7 +24,7 @@ func Render(menu *Menu, app apps.App) (id string, err error) {
 			continue
 		}
 
-		err = item.Handle(menu, app)
+		err = item.Handle(menu, app, value, query)
 		break
 	}
 

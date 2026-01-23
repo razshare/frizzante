@@ -8,6 +8,6 @@ import (
 type Item struct {
 	Hidden bool
 	Choice search.Choice
-	Active func(menu *Menu, app apps.App) (active bool)
-	Handle func(menu *Menu, app apps.App) (err error)
+	Active func(menu *Menu, app apps.App, value string, query []string) (active bool)
+	Handle func(menu *Menu, app apps.App, value string, query []string) (err error)
 }

@@ -1,31 +1,62 @@
 package menus
 
 import (
+	"errors"
 	"fmt"
+	"path/filepath"
 
-	"github.com/razshare/frizzante/cli/actions"
 	"github.com/razshare/frizzante/cli/apps"
 	"github.com/razshare/frizzante/cli/generations"
+	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/tui/configs"
+	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 )
+
+func init() {
+	if err := LoadPlugins(&Generate, filepath.Join("plugins", "generate")); err != nil {
+		messages.Fatal(err, stack.Trace())
+		return
+	}
+	Generate.Items = append(Generate.Items, Item{
+		Hidden: true,
+		Choice: search.Choice{Id: "render generate menu"},
+		Active: func(menu *Menu, app apps.App, value string, query []string) bool { return true },
+		Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
+			if *app.Strict {
+				err = errors.New("unknown cli query")
+				return
+			}
+			for {
+				var id string
+				if id, err = Render(menu, app, value, query); err != nil {
+					return
+				}
+
+				if id == "" {
+					return
+				}
+			}
+		},
+	})
+}
 
 var Generate = Menu{
 	Title: "generate",
 	Items: []Item{
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "air" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "air" },
 			Choice: search.Choice{Id: "air", Description: "generates air binaries, a live reload program for Go apps"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ air"))
 				return generations.Air(generations.AirOptions{Air: *app.Air})
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "air.toml" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "air.toml" },
 			Choice: search.Choice{Id: "air config", Description: "generates air configuration file air.toml"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ air config"))
 				if err = generations.AirConfig(generations.AirConfigOptions{
@@ -38,9 +69,9 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "bun" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "bun" },
 			Choice: search.Choice{Id: "bun", Description: "generates bun binaries, a fast javascript all-in-one toolkit"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ bun"))
 				err = generations.Bun(generations.BunOptions{Bun: *app.Bun})
@@ -48,9 +79,9 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "sqlc" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "sqlc" },
 			Choice: search.Choice{Id: "sqlc", Description: "generates sqlc binaries, a sql compiler written in go"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ sqlc"))
 				err = generations.Sqlc(generations.SqlcOptions{Sqlc: *app.Sqlc})
@@ -58,19 +89,9 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "types" },
-			Choice: search.Choice{Id: "types", Description: "generates types"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ types"))
-				err = generations.Types(generations.TypesOptions{Go: *app.Go})
-				return
-			},
-		},
-		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "databases" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "databases" },
 			Choice: search.Choice{Id: "databases", Description: "generates databases package"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ databases"))
 				err = generations.Databases(generations.DatabasesOptions{
@@ -84,9 +105,9 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "migration" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "migration" },
 			Choice: search.Choice{Id: "migration", Description: "generates migration file named using the current date and time"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ migration"))
 				err = generations.Migration(generations.MigrationOptions{
@@ -98,9 +119,9 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "queries" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "queries" },
 			Choice: search.Choice{Id: "queries", Description: "generates go functions from your query file using sqlc"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ queries"))
 				err = generations.Queries(generations.QueriesOptions{
@@ -112,9 +133,9 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "core" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "core" },
 			Choice: search.Choice{Id: "core", Description: "generates core package"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ core"))
 				err = generations.Core(generations.CoreOptions{Efs: app.Efs})
@@ -122,9 +143,9 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "forms" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "forms" },
 			Choice: search.Choice{Id: "forms", Description: "generates forms components with error and pending handlers"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ forms"))
 				err = generations.Forms(generations.FormsOptions{
@@ -134,9 +155,9 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "links" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "links" },
 			Choice: search.Choice{Id: "links", Description: "generates links components with error and pending handlers"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ links"))
 				err = generations.Links(generations.LinksOptions{
@@ -147,9 +168,9 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "icons" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "icons" },
 			Choice: search.Choice{Id: "icons", Description: "generates icons components"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ icons"))
 				err = generations.Icons(generations.IconsOptions{
@@ -161,9 +182,9 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App) bool { return *app.Generate == "security" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "security" },
 			Choice: search.Choice{Id: "security", Description: "generates security package"},
-			Handle: func(menu *Menu, app apps.App) (err error) {
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ security"))
 				err = generations.Security(generations.SecurityOptions{
@@ -171,27 +192,6 @@ var Generate = Menu{
 					Efs:    app.Efs,
 				})
 				return
-			},
-		},
-		{
-			Hidden: true,
-			Choice: search.Choice{Id: "render generate menu"},
-			Active: func(_ *Menu, app apps.App) bool { return true },
-			Handle: func(menu *Menu, app apps.App) (err error) {
-				if *app.Strict {
-					err = actions.Help(actions.HelpOptions{})
-					return
-				}
-				for {
-					var id string
-					if id, err = Render(menu, app); err != nil {
-						return
-					}
-
-					if id == "" {
-						return
-					}
-				}
 			},
 		},
 	},
