@@ -61,7 +61,7 @@ func main() {
 		Clean:          flag.BoolP("clean", "", false, "deletes .gen, .vite, app/{dist,node_modules}"),
 		Reset:          flag.BoolP("reset", "", false, "deletes global cache"),
 		Clear:          flag.BoolP("clear", "", false, "clears terminal screen"),
-		LockJsPackages: flag.BoolP("lock-js-packages", "", false, "locks js packages to the current exact version"),
+		LockJsPackages: flag.BoolP("lock-packages", "", false, "locks packages to the current exact version"),
 		Test:           flag.BoolP("test", "t", false, "runts tests"),
 		Welcome:        flag.BoolP("welcome", "", false, "shows a welcome message and yields without killing the process"),
 		Help:           flag.BoolP("help", "h", false, "shows the help menu"),

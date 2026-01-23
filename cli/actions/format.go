@@ -25,8 +25,9 @@ func Format(options FormatOptions) (err error) {
 	}
 
 	if !messages.Command(messages.CommandOptions{
-		Program: options.Bun,
-		Args:    []string{"x", "prettier", "--write", "."},
+		DirectoryName: "app",
+		Program:       options.Bun,
+		Args:          []string{"x", "prettier", "--write", "."},
 	}) {
 		err = errors.New("could not format js code")
 		return

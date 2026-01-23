@@ -20,7 +20,7 @@ go get ./...
 pushd internal/project
   "$frizzante" --strict --configure
   "$frizzante" --strict --generate="types"
-  "$frizzante" --strict --lock-js-packages
+  "$frizzante" --strict --lock-packages
   "$frizzante" --strict --generate="sqlc"
   "$frizzante" --strict --install
   "$frizzante" --strict --package

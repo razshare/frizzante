@@ -40,8 +40,5 @@ lock-packages:
 types:
 	frizzante -gtypes
 
-snapshot:
-	frizzante -gsnapshot
-
 generate:
-	frizzante -g
+	frizzante -g:pick
