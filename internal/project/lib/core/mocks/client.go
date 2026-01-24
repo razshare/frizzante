@@ -53,30 +53,27 @@ func (body *RequestBody) Close() error {
 }
 
 func NewClient() *clients.Client {
-	srv := servers.New(ssr.New(1))
-
-	conf := clients.Options{
-		ErrorLog: srv.ErrorLog,
-		InfoLog:  srv.InfoLog,
-		Efs:      srv.Efs,
+	server := servers.New()
+	server.Render = ssr.New(1)
+	options := clients.Options{
+		ErrorLog: server.ErrorLog,
+		InfoLog:  server.InfoLog,
+		Efs:      server.Efs,
 	}
-
 	writer := &ResponseWriter{
 		MockHeader: map[string][]string{},
 		MockBytes:  make([]byte, 0),
 	}
-
 	request := http.Request{
 		Header: map[string][]string{},
 		Body: &RequestBody{
 			MockBuffer: make([]byte, 1024),
 		},
 	}
-
 	return &clients.Client{
 		Writer:  writer,
 		Request: request,
-		Options: conf,
+		Options: options,
 		EventId: 1,
 		Status:  200,
 	}
