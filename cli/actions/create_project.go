@@ -32,8 +32,8 @@ func CreateProject(options CreateProjectOptions) (err error) {
 	messages.Successf("project %s created with success!", projectName)
 
 	step1 := fmt.Sprintf("1. cd %s", projectName)
-	step2 := fmt.Sprintf("2. frizzante --configure")
-	step3 := fmt.Sprintf("3. frizzante --dev")
+	step2 := fmt.Sprintf("2. frizzante configure")
+	step3 := fmt.Sprintf("3. frizzante dev")
 
 	length1 := len(step1)
 	length2 := len(step2)

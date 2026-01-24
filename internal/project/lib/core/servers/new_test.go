@@ -7,7 +7,8 @@ import (
 )
 
 func TestNew(t *testing.T) {
-	server := New(csr.NewFunction())
+	server := New()
+	server.Render = csr.New()
 
 	if server.InfoLog == nil {
 		t.Fatal("server should have an info log")

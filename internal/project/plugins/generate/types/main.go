@@ -4,14 +4,15 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/types"
+	"github.com/razshare/frizzante/internal/project/lib/dev/types"
 	"github.com/razshare/frizzante/internal/project/lib/routes/todos"
 )
 
-var directory = filepath.Join(".gen", "types")
+var directoryName = filepath.Join(".gen", "types")
 
 func main() {
-	if err := types.Generate[todos.Props](directory); err != nil {
+	if err := types.Generate[todos.Props](directoryName); err != nil {
 		log.Fatal(err)
+		return
 	}
 }

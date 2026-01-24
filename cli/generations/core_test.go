@@ -21,21 +21,15 @@ func TestCore(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll("lib") }()
 	defer func() { _ = os.RemoveAll("app") }()
-
-	if err := Core(CoreOptions{
-		Efs: TestCoreEfs,
-	}); err != nil {
+	if err := Core(CoreOptions{Efs: TestCoreEfs}); err != nil {
 		t.Fatal(err)
 	}
-
 	if !files.IsFile(filepath.Join("lib", "core", "server", "example.txt")) {
 		t.Fatal("lib/core/server/example.txt should exist")
 	}
-
 	if !files.IsFile(filepath.Join("app", "lib", "scripts", "core", "example.txt")) {
 		t.Fatal("app/lib/scripts/core/example.txt should exist")
 	}
-
 	if !files.IsFile(filepath.Join("app", "lib", "components", "core", "example.txt")) {
 		t.Fatal("app/lib/scripts/components/example.txt should exist")
 	}

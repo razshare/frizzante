@@ -4,12 +4,12 @@ import (
 	"embed"
 	"log"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/views/render"
+	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
 type Options struct {
 	Efs      embed.FS
-	Render   render.Function
+	Render   renders.Render
 	ErrorLog *log.Logger
 	InfoLog  *log.Logger
 }

@@ -3,45 +3,14 @@ package menus
 import (
 	"errors"
 	"fmt"
-	"path/filepath"
 	"slices"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/razshare/frizzante/cli/actions"
 	"github.com/razshare/frizzante/cli/apps"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/tui/configs"
-	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 )
-
-func init() {
-	if err := LoadPlugins(&Main, filepath.Join("plugins", "main")); err != nil {
-		messages.Fatal(err, stack.Trace())
-		return
-	}
-	Main.Items = append(Main.Items, Item{
-		Hidden: true,
-		Choice: search.Choice{Id: "render main menu"},
-		Active: func(menu *Menu, app apps.App, value string, query []string) bool { return true },
-		Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
-			if *app.Strict {
-				err = actions.Help(actions.HelpOptions{})
-				return
-			}
-			var data []byte
-			if data, err = app.Efs.ReadFile("logo.txt"); err != nil {
-				return
-			}
-			fmt.Print(configs.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data)))
-			for {
-				if _, err = Render(menu, app, value, query); err != nil {
-					return
-				}
-			}
-		},
-	})
-}
 
 var Main = Menu{
 	Title: "main",
@@ -59,7 +28,7 @@ var Main = Menu{
 					Efs:    app.Efs,
 					Name:   value,
 				})
-				return err
+				return
 			},
 		},
 		{
@@ -322,6 +291,27 @@ var Main = Menu{
 				fmt.Println(configs.Styles.Menu.Render("running ▷ version"))
 				err = actions.Version(actions.VersionOptions{Efs: app.Efs})
 				return
+			},
+		},
+		{
+			Hidden: true,
+			Choice: search.Choice{Id: "render main menu"},
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return true },
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
+				if *app.Strict {
+					err = actions.Help(actions.HelpOptions{})
+					return
+				}
+				var data []byte
+				if data, err = app.Efs.ReadFile("logo.txt"); err != nil {
+					return
+				}
+				fmt.Print(configs.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data)))
+				for {
+					if _, err = Render(menu, app, value, query); err != nil {
+						return
+					}
+				}
 			},
 		},
 	},

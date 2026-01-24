@@ -7,12 +7,13 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/values"
+	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
 // Start starts a server from a configuration.
 func Start(server *Server) (err error) {
-	render := server.Render
-	if render == nil {
+	var render renders.Render
+	if render = server.Render; render == nil {
 		err = errors.New("no render function found")
 		return
 	}

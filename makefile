@@ -21,4 +21,4 @@ dev:
 	./scripts/dev.sh
 
 types:
-	./scripts/types.sh
+	go run dev/types

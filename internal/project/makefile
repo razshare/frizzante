@@ -2,43 +2,47 @@ frizzante:
 	frizzante
 
 configure:
-	frizzante --configure
+	frizzante configure
 
 test:
-	frizzante --test
+	frizzante test
 
 build:
-	frizzante --build
+	frizzante build
 
 dev:
-	frizzante --dev
+	frizzante dev
 
 package-watch:
-	frizzante --package-watch
+	frizzante package-watch
 
 package:
-	frizzante --package
+	frizzante package
 
 check:
-	frizzante --check
+	frizzante check
 
 clean:
-	frizzante --clean
+	frizzante clean
 
 format:
-	frizzante --format
+	frizzante format
 
 install:
-	frizzante --install
+	frizzante install
 
 update:
-	frizzante --update
+	frizzante update
 
 lock-packages:
-	frizzante --lock-packages
+	frizzante lock-packages
 
 types:
-	frizzante -gtypes
+	frizzante generate types
+
+snapshot:
+	frizzante generate snapshot http://127.0.0.1:8080/@statics .gen/snapshot
 
 generate:
-	frizzante -g:pick
+	frizzante generate
+

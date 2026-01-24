@@ -82,7 +82,7 @@ func Queries(options QueriesOptions) (err error) {
 
 	messages.Success(filepath.Join(baseDirectory, "queries.go"))
 
-	step1 := "1. frizzante --install"
+	step1 := "1. frizzante install"
 	step2 := "2. sqlite.Queries.FindUsers(client.Request.Context())"
 
 	length1 := len(step1)

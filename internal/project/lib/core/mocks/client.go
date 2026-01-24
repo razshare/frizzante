@@ -53,7 +53,7 @@ func (body *RequestBody) Close() error {
 }
 
 func NewClient() *clients.Client {
-	srv := servers.New(ssr.NewFunction(1))
+	srv := servers.New(ssr.New(1))
 
 	conf := clients.Options{
 		ErrorLog: srv.ErrorLog,

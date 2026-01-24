@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
-	"github.com/razshare/frizzante/internal/project/lib/core/views/render"
+	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
 type Server struct {
@@ -18,5 +18,5 @@ type Server struct {
 	InfoLog     *log.Logger
 	Cors        *http.CrossOriginProtection
 	Efs         embed.FS
-	Render      render.Function
+	Render      renders.Render
 }

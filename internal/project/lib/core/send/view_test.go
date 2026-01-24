@@ -41,7 +41,7 @@ var TestViewEfs embed.FS
 func TestView(t *testing.T) {
 	client := mocks.NewClient()
 	client.Options.Efs = TestViewEfs
-	client.Options.Render = ssr.NewFunction(1)
+	client.Options.Render = ssr.New(1)
 	View(client, views.View{Name: "Welcome", Props: map[string]any{"key": "value"}})
 	writer := client.Writer.(*mocks.ResponseWriter)
 	if !strings.Contains(string(writer.MockBytes), "Modern Go + Svelte Framework") {

@@ -30,6 +30,7 @@ func Build(options BuildOptions) (err error) {
 			var selectedTags []string
 			if selectedTags, err = tags_.Select([]search.Choice{
 				{Id: "trace", Description: "enables tracing"},
+				{Id: "dev", Description: "enables dev mode"},
 				{Id: "other", Description: "prompts for custom tags"},
 			}); err != nil {
 				return

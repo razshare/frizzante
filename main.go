@@ -39,7 +39,7 @@ func main() {
 		Database:     flag.StringP("database", "", "", "sets the database connection string; used for running migrations and snapshots"),
 		DatabaseType: flag.StringP("database-type", "", "", "sets the type of database to use; currently only sqlite is supported"),
 		Context:      flag.StringP("context", "", "js", "sets the context; used with --add; currently only \"js\" context is supported"),
-		Strict:       flag.BoolP("strict", "", false, "enables strict mode; program will stop if any flags are missing; used in ci/cd pipelines"),
+		Strict:       flag.BoolP("strict", "s", false, "enables strict mode; program will stop if any required arguments or flags are missing; useful in ci/cd pipelines"),
 	}
 	flag.Parse()
 	if _, err := menus.Activate(&menus.Main, app, flag.Args()); err != nil {

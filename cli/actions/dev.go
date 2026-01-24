@@ -29,9 +29,6 @@ func Dev(options DevOptions) (err error) {
 	if slices.Contains(tags, "trace") {
 		tags = append(tags, "trace")
 	}
-	if slices.Contains(tags, "types") {
-		tags = append(tags, "types")
-	}
 	if err = generations.AirConfig(generations.AirConfigOptions{
 		Efs:  options.Efs,
 		Tags: strings.Join(tags, ","),
