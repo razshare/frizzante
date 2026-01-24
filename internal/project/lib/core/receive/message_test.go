@@ -4,7 +4,7 @@ import (
 	"io"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
+	"github.com/razshare/frizzante/internal/project/lib/dev/mocks"
 )
 
 func TestMessage(t *testing.T) {

@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
+	"github.com/razshare/frizzante/internal/project/lib/dev/mocks"
 )
 
 func TestEventContentWithoutUpgrade(t *testing.T) {

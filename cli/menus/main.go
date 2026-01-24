@@ -306,7 +306,7 @@ var Main = Menu{
 				if data, err = app.Efs.ReadFile("logo.txt"); err != nil {
 					return
 				}
-				fmt.Print(configs.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data)))
+				fmt.Println(configs.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data)))
 				for {
 					if _, err = Render(menu, app, value, query); err != nil {
 						return

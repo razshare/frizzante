@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
+	"github.com/razshare/frizzante/internal/project/lib/dev/mocks"
 )
 
 func TestError(t *testing.T) {

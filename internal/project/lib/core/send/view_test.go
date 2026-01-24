@@ -5,9 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 	"github.com/razshare/frizzante/internal/project/lib/core/ssr"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
+	"github.com/razshare/frizzante/internal/project/lib/dev/mocks"
 )
 
 func TestViewWithLocation(t *testing.T) {
