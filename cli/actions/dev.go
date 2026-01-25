@@ -23,10 +23,10 @@ func Dev(options DevOptions) (err error) {
 	if tags, err = tags_.Parse(options.Tags); err != nil {
 		return
 	}
-	if slices.Contains(tags, "dev") {
+	if !slices.Contains(tags, "dev") {
 		tags = append(tags, "dev")
 	}
-	if slices.Contains(tags, "trace") {
+	if !slices.Contains(tags, "trace") {
 		tags = append(tags, "trace")
 	}
 	if err = generations.AirConfig(generations.AirConfigOptions{
