@@ -19,6 +19,7 @@ import (
 //go:embed version
 //go:embed internal/additions/**
 //go:embed internal/project/**
+//go:embed internal/project/.air.toml
 //go:embed internal/project/.zed/debug.json
 //go:embed internal/project/.vscode/launch.json
 //go:embed internal/project/lib/core/ssr/.gitignore

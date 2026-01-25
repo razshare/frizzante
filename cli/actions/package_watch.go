@@ -13,11 +13,14 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
+	if err = os.RemoveAll(filepath.Join("app", "dist")); err != nil {
+		return
+	}
 	var group sync.WaitGroup
 	group.Go(func() {
 		messages.Command(messages.CommandOptions{
 			DirectoryName: "app",
-			Environment:   append(os.Environ(), "DEV=1"),
+			Environment:   os.Environ(),
 			Program:       options.Bun,
 			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch"},
 		})

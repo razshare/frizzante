@@ -13,11 +13,14 @@ func Package(options PackageOptions) (err error) {
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
+	if err = os.RemoveAll(filepath.Join("app", "dist")); err != nil {
+		return
+	}
 	if !messages.Command(messages.CommandOptions{
 		Environment:   os.Environ(),
 		DirectoryName: "app",
 		Program:       options.Bun,
-		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=true", "--ssr=app.server.ts"},
+		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--ssr=app.server.ts"},
 	}) {
 		err = errors.New("could not build server bundle")
 		return
@@ -35,7 +38,7 @@ func Package(options PackageOptions) (err error) {
 		Environment:   os.Environ(),
 		DirectoryName: "app",
 		Program:       options.Bun,
-		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true"},
+		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false"},
 	}) {
 		err = errors.New("could not build client bundles")
 		return

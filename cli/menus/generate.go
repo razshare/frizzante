@@ -53,17 +53,8 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "air" },
-			Choice: search.Choice{Id: "air", Description: "air binaries, a live reload program for Go apps"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ air"))
-				return generations.Air(generations.AirOptions{Air: *app.Air})
-			},
-		},
-		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "air.toml" },
-			Choice: search.Choice{Id: "air config", Description: "air configuration file air.toml"},
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "air-config" },
+			Choice: search.Choice{Id: "air-config", Description: "air configuration file air.toml"},
 			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ air config"))

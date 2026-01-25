@@ -15,7 +15,8 @@ import (
 func AirConfig(options AirConfigOptions) (err error) {
 	var data []byte
 	var conf map[string]any
-	if files.IsFile(".air.toml") {
+	airTomlExists := files.IsFile(".air.toml")
+	if airTomlExists {
 		if data, err = os.ReadFile(".air.toml"); err != nil {
 			return
 		}
@@ -24,7 +25,8 @@ func AirConfig(options AirConfigOptions) (err error) {
 			return
 		}
 	}
-	if _, err = toml.Decode(string(data), &conf); err != nil {
+	content := string(data)
+	if _, err = toml.Decode(content, &conf); err != nil {
 		return
 	}
 	var tags []string
@@ -33,14 +35,15 @@ func AirConfig(options AirConfigOptions) (err error) {
 	}
 	tagsString := strings.Join(tags, ",")
 	build := conf["build"].(map[string]any)
-	build["bin"] = filepath.Join(".gen", "tmp", "main.exe")
 	if len(tagsString) > 0 {
 		build["cmd"] = fmt.Sprintf("go build -tags %s -o %s .", tagsString, build["bin"])
 	} else {
 		build["cmd"] = fmt.Sprintf("go build -o %s .", build["bin"])
 	}
-	if err = os.Remove(".air.toml"); err != nil {
-		return
+	if airTomlExists {
+		if err = os.Remove(".air.toml"); err != nil {
+			return
+		}
 	}
 	var file *os.File
 	if file, err = os.Create(filepath.Join(".air.toml")); err != nil {
