@@ -13,12 +13,10 @@ func Install(options InstallOptions) (err error) {
 		messages.Infof("no packages to add")
 		return
 	}
-
 	if !files.IsDirectory("app") {
 		err = fmt.Errorf("directory %s not found", "app")
 		return err
 	}
-
 	ok := 0
 	for _, packageName := range options.PackageNames {
 		messages.Infof("adding %s", packageName)
@@ -34,10 +32,8 @@ func Install(options InstallOptions) (err error) {
 		messages.Successf("added %s packages to app/node_modules", packageName)
 		ok++
 	}
-
 	if ok > 0 {
 		messages.Successf("successfully installed %d package(s) to app/node_modules", ok)
 	}
-
-	return nil
+	return
 }

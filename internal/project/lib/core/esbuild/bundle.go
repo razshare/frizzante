@@ -17,10 +17,8 @@ func Bundle(root string, format api.Format, source string) (string, error) {
 			ResolveDir: root,
 		},
 	})
-
 	for _, err := range result.Errors {
 		return "", fmt.Errorf("%s in %s:%d:%d", err.Text, err.Location.File, err.Location.Line, err.Location.Column)
 	}
-
 	return string(result.OutputFiles[0].Contents), nil
 }

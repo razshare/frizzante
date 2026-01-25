@@ -12,7 +12,6 @@ func Apply(search *Search, viewport *viewport.Viewport, message tea.KeyMsg) tea.
 	viewport.Cursor = 0
 	previous := search.Value
 	var cmd tea.Cmd
-
 	// vscode has a weird bug where it will send a "ctrl+w" whenever the user presses "backspace" in the integrated terminal,
 	// so we're including tea.KeyCtrlW to try to fix that for the user.
 	// https://stackoverflow.com/questions/52806758/visual-studio-code-ctrlbackspace-not-working-in-integrated-terminal
@@ -28,7 +27,6 @@ func Apply(search *Search, viewport *viewport.Viewport, message tea.KeyMsg) tea.
 		}
 		search.Value += value
 	}
-
 	if current := search.Value; current != previous {
 		if current == "" {
 			Reset(search, viewport)
@@ -36,6 +34,5 @@ func Apply(search *Search, viewport *viewport.Viewport, message tea.KeyMsg) tea.
 			Filter(search, viewport)
 		}
 	}
-
 	return cmd
 }

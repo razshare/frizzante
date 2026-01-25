@@ -20,16 +20,13 @@ func Json(client *clients.Client, value any) bool {
 		}
 		return true
 	}
-
 	data, err := io.ReadAll(client.Request.Body)
 	if err != nil {
 		client.Options.ErrorLog.Println(err, stack.Trace())
 		return false
 	}
-
 	if err = json.Unmarshal(data, &value); err != nil {
 		client.Options.ErrorLog.Println(err, stack.Trace())
 	}
-
 	return true
 }

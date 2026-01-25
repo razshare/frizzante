@@ -14,7 +14,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		if assert.Type == tea.KeyCtrlC {
 			return model, tea.Interrupt
 		}
-
 		if assert.Type == tea.KeyEnter {
 			if len(model.Selected) == 0 && len(model.Search.Filtered) > 0 {
 				value := model.Search.Filtered[model.Viewport.Cursor].Id
@@ -24,7 +23,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return model, tea.Quit
 		}
-
 		if assert.Type == tea.KeySpace {
 			if len(model.Search.Filtered) > 0 {
 				value := model.Search.Filtered[model.Viewport.Cursor].Id
@@ -38,37 +36,30 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyEsc {
 			if model.Search.Active {
 				search.Reset(model.Search, model.Viewport)
 				return model, nil
 			}
-
 			model.Selected = make([]string, 0)
 			return model, tea.Quit
 		}
-
 		if assert.Type == tea.KeyUp || assert.Type == tea.KeyCtrlP || assert.Type == tea.KeyShiftTab || assert.Type == tea.KeyCtrlPgUp {
 			navigate.Apply(model.Search, model.Viewport, -1)
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyDown || assert.Type == tea.KeyCtrlN || assert.Type == tea.KeyTab || assert.Type == tea.KeyCtrlPgDown {
 			navigate.Apply(model.Search, model.Viewport, 1)
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyPgUp {
 			navigate.Apply(model.Search, model.Viewport, -model.Viewport.Visible)
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyPgDown {
 			navigate.Apply(model.Search, model.Viewport, model.Viewport.Visible)
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyHome {
 			home := model.Viewport.Offset
 			if model.Viewport.Cursor == home {
@@ -79,7 +70,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyEnd {
 			end := model.Viewport.Offset + model.Viewport.Visible - 1
 			if model.Viewport.Cursor == end {
@@ -90,7 +80,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return model, nil
 		}
-
 		return model, search.Apply(model.Search, model.Viewport, assert)
 	}
 	return model, nil

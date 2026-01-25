@@ -16,7 +16,6 @@ func Trace() string {
 	ptrs := make([]uintptr, TraceSize)
 	runtime.Callers(2, ptrs)
 	frames := runtime.CallersFrames(ptrs)
-
 	for {
 		frame, more := frames.Next()
 		builder.WriteString(fmt.Sprintf("%s:%d\n", frame.File, frame.Line))
@@ -24,6 +23,5 @@ func Trace() string {
 			break
 		}
 	}
-
 	return builder.String()
 }

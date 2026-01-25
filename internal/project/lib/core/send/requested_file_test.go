@@ -18,11 +18,9 @@ func TestRequestedFile(t *testing.T) {
 	client.Request.RequestURI = "index.html"
 	client.Request.URL = &url.URL{Path: "index.html"}
 	writer := client.Writer.(*mocks.ResponseWriter)
-
 	if !RequestedFile(client) {
 		t.Fatal("sending file should succeed")
 	}
-
 	if !strings.Contains(string(writer.MockBytes), "<html") {
 		t.Fatal("index.html file should contain <html")
 	}
@@ -33,11 +31,9 @@ func TestRequestedFileFromFs(t *testing.T) {
 	client.Request.RequestURI = "index.html"
 	client.Request.URL = &url.URL{Path: "index.html"}
 	writer := client.Writer.(*mocks.ResponseWriter)
-
 	if !RequestedFile(client) {
 		t.Fatal("sending file should fail succeed")
 	}
-
 	if !strings.Contains(string(writer.MockBytes), "<html") {
 		t.Fatal("index.html file should contain <html")
 	}

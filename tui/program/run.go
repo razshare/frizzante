@@ -9,10 +9,8 @@ func Run[T tea.Model](model T) (T, error) {
 	if err != nil {
 		return model, err
 	}
-
 	if cast, ok := prog.(T); ok {
 		return cast, nil
 	}
-
 	return model, nil
 }

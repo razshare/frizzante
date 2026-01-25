@@ -10,11 +10,9 @@ func Npm(options NpmOptions) (err error) {
 	if packages, err = select_npm_packages.Send(); err != nil {
 		return
 	}
-
 	if len(packages) == 0 {
 		return nil
 	}
-
 	return npm.Install(npm.InstallOptions{
 		Bun:          options.Bun,
 		PackageNames: packages,

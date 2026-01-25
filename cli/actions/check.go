@@ -14,11 +14,9 @@ func Check(options CheckOptions) (err error) {
 	spin := spinners.New("checking code")
 	go spinners.Start(spin)
 	defer spinners.Stop(spin)
-
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
-
 	if !messages.Command(messages.CommandOptions{
 		DirectoryName: "app",
 		Environment:   os.Environ(),
@@ -28,25 +26,20 @@ func Check(options CheckOptions) (err error) {
 		err = errors.New("could not run eslint")
 		return
 	}
-
 	var data []byte
 	if data, err = os.ReadFile(filepath.Join("app", "package.json")); err != nil {
 		return
 	}
-
 	type DevDependencies struct {
 		SvelteCheck string `json:"svelte-check"`
 	}
-
 	type PackageJson struct {
 		DevDependencies DevDependencies `json:"devDependencies"`
 	}
-
 	var pkg PackageJson
 	if err = json.Unmarshal(data, &pkg); err != nil {
 		return
 	}
-
 	if pkg.DevDependencies.SvelteCheck != "" {
 		if !messages.Command(messages.CommandOptions{
 			DirectoryName: "app",
@@ -58,6 +51,5 @@ func Check(options CheckOptions) (err error) {
 			return
 		}
 	}
-
 	return
 }

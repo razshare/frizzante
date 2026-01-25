@@ -10,7 +10,6 @@ func TestApply(t *testing.T) {
 	var search *Search
 	var choices []Choice
 	var viewport *viewport_.Viewport
-
 	// empty search returns all choices
 	choices = []Choice{
 		{Id: "apple", Description: "A fruit"},
@@ -30,7 +29,6 @@ func TestApply(t *testing.T) {
 	if viewport.Offset != 0 {
 		t.Fatal("search offset should be 0")
 	}
-
 	// case-insensitive search
 	choices = []Choice{
 		{Id: "Apple", Description: "A fruit"},
@@ -47,7 +45,6 @@ func TestApply(t *testing.T) {
 	if search.Filtered[0].Id != "Apple" {
 		t.Fatal("search filter should contain Apple")
 	}
-
 	// partial match
 	choices = []Choice{
 		{Id: "apple", Description: "A fruit"},
@@ -64,7 +61,6 @@ func TestApply(t *testing.T) {
 	if search.Filtered[0].Id != "apple" || search.Filtered[1].Id != "pineapple" {
 		t.Fatal("search filter should contain apple (1st) and pineapple (2nd)")
 	}
-
 	// no matches
 	choices = []Choice{
 		{Id: "apple", Description: "A fruit"},
@@ -77,7 +73,6 @@ func TestApply(t *testing.T) {
 	if len(search.Filtered) != 0 {
 		t.Fatal("search filter should be empty")
 	}
-
 	// empty choices
 	choices = []Choice{}
 	search = &Search{Choices: choices, Filtered: choices}
@@ -87,7 +82,6 @@ func TestApply(t *testing.T) {
 	if len(search.Filtered) != 0 {
 		t.Fatal("search filter should be empty")
 	}
-
 	// reset then reset
 	choices = []Choice{
 		{Id: "apple", Description: "A fruit"},

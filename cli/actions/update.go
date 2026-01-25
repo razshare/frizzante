@@ -12,7 +12,6 @@ func Update(options UpdateOptions) (err error) {
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
-
 	spin := spinners.New("updating go packages")
 	go spinners.Start(spin)
 	if !messages.Command(messages.CommandOptions{
@@ -33,7 +32,6 @@ func Update(options UpdateOptions) (err error) {
 	}
 	messages.Success("go packages updated")
 	spinners.Stop(spin)
-
 	spin = spinners.New("updating javascript packages")
 	go spinners.Start(spin)
 	if messages.Command(messages.CommandOptions{
@@ -45,6 +43,5 @@ func Update(options UpdateOptions) (err error) {
 		messages.Success("javascript packages updated")
 	}
 	spinners.Stop(spin)
-
 	return
 }

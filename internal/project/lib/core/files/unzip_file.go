@@ -21,9 +21,7 @@ func UnzipFile(from string, to string) (err error) {
 			err = cerr
 		}
 	}()
-
 	flags := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
-
 	for _, file := range reader.File {
 		name := filepath.Join(to, file.Name)
 		if file.FileInfo().IsDir() && !IsDirectory(name) {
@@ -32,24 +30,19 @@ func UnzipFile(from string, to string) (err error) {
 			}
 			continue
 		}
-
 		dir := filepath.Dir(name)
-
 		if dir == "." {
 			continue
 		}
-
 		if !IsDirectory(dir) {
 			if err = os.MkdirAll(dir, os.ModePerm); err != nil {
 				return
 			}
 		}
-
 		var zipFile *os.File
 		if zipFile, err = os.OpenFile(name, flags, file.Mode()); err != nil {
 			return
 		}
-
 		var zipReader io.ReadCloser
 		if zipReader, err = file.Open(); err != nil {
 			if err = zipFile.Close(); err != nil {
@@ -57,26 +50,21 @@ func UnzipFile(from string, to string) (err error) {
 			}
 			return
 		}
-
 		if _, err = io.Copy(zipFile, zipReader); err != nil {
 			if err = zipFile.Close(); err != nil {
 				return
 			}
-
 			if err = zipReader.Close(); err != nil {
 				return
 			}
 			return
 		}
-
 		if err = zipFile.Close(); err != nil {
 			return
 		}
-
 		if err = zipReader.Close(); err != nil {
 			return
 		}
 	}
-
-	return nil
+	return
 }

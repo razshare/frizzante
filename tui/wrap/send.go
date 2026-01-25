@@ -6,26 +6,21 @@ func Send(text string, width int) []string {
 	if width <= 0 {
 		return strings.Split(text, "\n")
 	}
-
 	lines := strings.Split(text, "\n")
 	result := make([]string, 0)
-
 	for _, line := range lines {
 		if line == "" {
 			continue
 		}
-
 		if len(line) <= width {
 			result = append(result, line)
 			continue
 		}
-
 		words := strings.Fields(line)
 		if len(words) == 0 {
 			result = append(result, line)
 			continue
 		}
-
 		cline := ""
 		for _, word := range words {
 			if cline == "" {
@@ -41,6 +36,5 @@ func Send(text string, width int) []string {
 			result = append(result, cline)
 		}
 	}
-
 	return result
 }

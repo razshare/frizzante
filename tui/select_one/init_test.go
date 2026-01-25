@@ -12,7 +12,6 @@ import (
 func TestUpdate(t *testing.T) {
 	var model *Model
 	var cmd tea.Cmd
-
 	// select first item
 	model = &Model{
 		Selected: "",
@@ -26,7 +25,6 @@ func TestUpdate(t *testing.T) {
 	if _, ok := reflect.TypeAssert[tea.QuitMsg](reflect.ValueOf(cmd())); !ok {
 		t.Fatal("singleselect should quit")
 	}
-
 	// move down then select
 	model = &Model{
 		Selected: "",
@@ -41,7 +39,6 @@ func TestUpdate(t *testing.T) {
 	if _, ok := reflect.TypeAssert[tea.QuitMsg](reflect.ValueOf(cmd())); !ok {
 		t.Fatal("singleselect should quit")
 	}
-
 	// ctrl+c
 	model = &Model{
 		Selected: "",
@@ -55,7 +52,6 @@ func TestUpdate(t *testing.T) {
 	if _, ok := reflect.TypeAssert[tea.InterruptMsg](reflect.ValueOf(cmd())); !ok {
 		t.Fatal("singleselect should interrupt")
 	}
-
 	// escape clears search when active
 	model = &Model{
 		Selected: "",
@@ -77,14 +73,12 @@ func TestUpdate(t *testing.T) {
 	if len(model.Search.Filtered) != len(model.Search.Choices) {
 		t.Fatal("singleselect choices should be the same as filtered choices")
 	}
-
 	// escape quits when search inactive
 	model = &Model{
 		Selected: "apple",
 		Search:   &search.Search{Active: false},
 		Viewport: &viewport.Viewport{},
 	}
-
 	_, cmd = model.Update(tea.KeyMsg{Type: tea.KeyEsc})
 	if len(model.Selected) != 0 {
 		t.Fatal("singleselect should be empty")
@@ -92,7 +86,6 @@ func TestUpdate(t *testing.T) {
 	if _, ok := reflect.TypeAssert[tea.QuitMsg](reflect.ValueOf(cmd())); !ok {
 		t.Fatal("singleselect should quit")
 	}
-
 	// move down with arrow
 	model = &Model{
 		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
@@ -102,7 +95,6 @@ func TestUpdate(t *testing.T) {
 	if model.Viewport.Cursor != 1 {
 		t.Fatal("multi select cursor should be 1")
 	}
-
 	// move down with tab
 	model = &Model{
 		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
@@ -112,7 +104,6 @@ func TestUpdate(t *testing.T) {
 	if model.Viewport.Cursor != 1 {
 		t.Fatal("multi select cursor should be 1")
 	}
-
 	// move down with ctrl+pgdown
 	model = &Model{
 		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
@@ -122,7 +113,6 @@ func TestUpdate(t *testing.T) {
 	if model.Viewport.Cursor != 1 {
 		t.Fatal("multi select cursor should be 1")
 	}
-
 	// move down with arrow
 	model = &Model{
 		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
@@ -132,7 +122,6 @@ func TestUpdate(t *testing.T) {
 	if model.Viewport.Cursor != 1 {
 		t.Fatal("multi select cursor should be 1")
 	}
-
 	// move down with tab
 	model = &Model{
 		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
@@ -142,7 +131,6 @@ func TestUpdate(t *testing.T) {
 	if model.Viewport.Cursor != 1 {
 		t.Fatal("multi select cursor should be 1")
 	}
-
 	// move down with ctrl+pgdown
 	model = &Model{
 		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
@@ -152,7 +140,6 @@ func TestUpdate(t *testing.T) {
 	if model.Viewport.Cursor != 1 {
 		t.Fatal("multi select cursor should be 1")
 	}
-
 	// move down and wrap
 	model = &Model{
 		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
@@ -162,7 +149,6 @@ func TestUpdate(t *testing.T) {
 	if model.Viewport.Cursor != 0 {
 		t.Fatal("multi select cursor should be 0")
 	}
-
 	// move up and wrap
 	model = &Model{
 		Search:   &search.Search{Filtered: []search.Choice{{Id: "1"}, {Id: "2"}, {Id: "3"}, {Id: "4"}, {Id: "5"}}},
@@ -172,7 +158,6 @@ func TestUpdate(t *testing.T) {
 	if model.Viewport.Cursor != 4 {
 		t.Fatal("multi select cursor should be 4")
 	}
-
 	// activate search when typing
 	model = &Model{
 		Search: &search.Search{
@@ -189,7 +174,6 @@ func TestUpdate(t *testing.T) {
 	if model.Search.Value != "a" {
 		t.Fatal("singleselect search value should be a")
 	}
-
 	// moving to beginning of viewport with home
 	model = &Model{
 		Search: &search.Search{
@@ -207,7 +191,6 @@ func TestUpdate(t *testing.T) {
 	if model.Viewport.Cursor != 5 {
 		t.Fatal("multi select cursor should be 6")
 	}
-
 	// moving to end of viewport with end
 	model = &Model{
 		Search: &search.Search{

@@ -25,32 +25,24 @@ func TestDownloadFile(t *testing.T) {
 		if file, err = TestDownloadFileEfs.Open("test.zip"); err != nil {
 			t.Fatal(err)
 		}
-
 		var info os.FileInfo
 		if info, err = file.Stat(); err != nil {
 			t.Fatal(err)
 		}
-
 		buf := make([]byte, info.Size())
 		if _, err = file.Read(buf); err != nil {
 			t.Fatal(err)
 		}
-
 		http.ServeContent(writer, request, "test_out.zip", info.ModTime(), bytes.NewReader(buf))
 	}))
 	defer func() { testServer.Close() }()
-
 	var err error
-
 	var cache string
 	if cache, err = paths.Cache(); err != nil {
 		t.Fatal(err)
 	}
-
 	hash := security.Sha1(testServer.URL)
-
 	cachedFileName := filepath.Join(cache, hash)
-
 	if err = os.RemoveAll(cachedFileName); err != nil {
 		t.Fatal(err)
 	}
@@ -59,27 +51,12 @@ func TestDownloadFile(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll("test_out.zip") }()
 	defer func() { _ = os.RemoveAll(cachedFileName) }()
-
 	if _, err = DownloadFile(DownloadFileOptions{
 		Url: testServer.URL,
 	}); err != nil {
 		t.Fatal(err)
 	}
-
 	if !files.IsFile(cachedFileName) {
 		t.Fatal("file should be cached")
 	}
-	//
-	//installed, err := install(filepath.Join(".gen", "download"))
-	//if err != nil {
-	//	t.Fatal(err)
-	//}
-	//
-	//if !installed {
-	//	t.Fatal("resource should be installed in .gen/download")
-	//}
-	//
-	//if !files.IsDirectory(".gen/download") {
-	//	t.Fatal(".gen/download should exist")
-	//}
 }

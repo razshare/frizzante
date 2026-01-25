@@ -14,7 +14,6 @@ func TestInstall(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-
 	if !files.IsDirectory(".gen/download") {
 		t.Fatal(".gen/download should exist")
 	}

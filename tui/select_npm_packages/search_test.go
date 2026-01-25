@@ -14,7 +14,6 @@ import (
 func TestSearch(t *testing.T) {
 	var model *Model
 	var cmd tea.Cmd
-
 	// debouncing
 	model = &Model{
 		Selected:  []string{},
@@ -34,7 +33,6 @@ func TestSearch(t *testing.T) {
 	if model.LastQuery != "r" {
 		t.Fatal("search input last query should be r")
 	}
-
 	// space selects
 	model = &Model{
 		Selected: []string{},
@@ -64,7 +62,6 @@ func TestSearch(t *testing.T) {
 	if slices.Contains(model.Selected, "react@18.2.0") {
 		t.Fatal("search should not select react@18.2.0")
 	}
-
 	// esc quits
 	model = &Model{
 		Selected: []string{"react@18.2.0"},
@@ -78,7 +75,6 @@ func TestSearch(t *testing.T) {
 	if len(model.Selected) != 0 {
 		t.Fatal("search should not select anything")
 	}
-
 	// enter confirms
 	model = &Model{
 		Selected: []string{"react@18.2.0"},
@@ -89,7 +85,6 @@ func TestSearch(t *testing.T) {
 	if _, ok := reflect.TypeAssert[tea.QuitMsg](reflect.ValueOf(cmd())); !ok || !model.Confirmed {
 		t.Fatal("search should confirm")
 	}
-
 	// moving to beginning of viewport with home
 	model = &Model{
 		Search: &search.Search{
@@ -107,7 +102,6 @@ func TestSearch(t *testing.T) {
 	if model.Viewport.Cursor != 5 {
 		t.Fatal("multi select cursor should be 6")
 	}
-
 	// moving to end of viewport with end
 	model = &Model{
 		Search: &search.Search{

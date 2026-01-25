@@ -14,19 +14,15 @@ func Render(menu *Menu, app apps.App, value string, query []string) (id string, 
 		}
 		choices = append(choices, item.Choice)
 	}
-
 	if id, err = select_one.Send(choices, menu.Title); err != nil {
 		return
 	}
-
 	for _, item := range menu.Items {
 		if item.Choice.Id != id {
 			continue
 		}
-
 		err = item.Handle(menu, app, value, query)
 		break
 	}
-
 	return
 }

@@ -28,7 +28,6 @@ func Icons(options IconsOptions) (err error) {
 			}
 		}
 	}
-
 	if err = Copy(CopyOptions{
 		From: "internal/project/app/lib/components/icons",
 		To:   filepath.Join("app", "lib", "components", "icons"),
@@ -36,14 +35,12 @@ func Icons(options IconsOptions) (err error) {
 	}); err != nil {
 		return
 	}
-
 	if err = npm.Install(npm.InstallOptions{
 		Bun:          options.Bun,
 		PackageNames: []string{"@mdi/js"},
 	}); err != nil {
 		return
 	}
-
 	messages.Tip(
 		"## usage example\n",
 		"<script lang=\"ts\">\n",
@@ -53,6 +50,5 @@ func Icons(options IconsOptions) (err error) {
 		"\n",
 		"<Icon path={mdiClose}/>",
 	)
-
 	return
 }

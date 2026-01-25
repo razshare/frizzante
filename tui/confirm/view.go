@@ -10,7 +10,6 @@ func (model *Model) View() string {
 	var builder strings.Builder
 	builder.WriteString(configs.Styles.Menu.Render("⎚"))
 	builder.WriteString(configs.Styles.Menu.PaddingLeft(1).PaddingRight(1).Render(model.Prompt))
-
 	if model.Confirmed {
 		builder.WriteString(configs.Styles.Menu.Render("● Yes"))
 		builder.WriteString(configs.Styles.UserGuide.PaddingLeft(1).PaddingRight(1).Render("/"))
@@ -20,6 +19,5 @@ func (model *Model) View() string {
 		builder.WriteString(configs.Styles.UserGuide.PaddingLeft(1).PaddingRight(1).Render("/"))
 		builder.WriteString(configs.Styles.Menu.Render("● No"))
 	}
-
 	return builder.String()
 }

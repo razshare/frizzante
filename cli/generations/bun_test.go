@@ -13,11 +13,9 @@ func TestBun(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() { _ = os.RemoveAll(".gen") }()
-
 	if err := Bun(BunOptions{Bun: filepath.Join(".gen", "bun", "bun")}); err != nil {
 		t.Fatal(err)
 	}
-
 	if !files.IsFile(filepath.Join(".gen", "bun", "bun")) {
 		t.Fatal(".gen/bun/bun should exist")
 	}

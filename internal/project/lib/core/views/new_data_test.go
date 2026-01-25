@@ -10,7 +10,6 @@ func TestData(t *testing.T) {
 			"key": "value",
 		},
 	})
-
 	if data.Props.(map[string]any)["key"] != "value" {
 		t.Fatal("key should be value")
 	}

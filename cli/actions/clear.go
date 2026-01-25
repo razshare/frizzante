@@ -16,7 +16,6 @@ func Clear(_ ClearOptions) (err error) {
 		err = cmd.Run()
 		return
 	}
-
 	if runtime.GOOS == "linux" {
 		cmd := exec.Command("clear")
 		cmd.Stdout = os.Stdout
@@ -25,7 +24,6 @@ func Clear(_ ClearOptions) (err error) {
 		err = cmd.Run()
 		return
 	}
-
 	if runtime.GOOS == "darwin" {
 		cmd := exec.Command("clear")
 		cmd.Stdout = os.Stdout
@@ -34,7 +32,6 @@ func Clear(_ ClearOptions) (err error) {
 		err = cmd.Run()
 		return
 	}
-
 	fmt.Print("\033[H\033[2J")
 	return
 }

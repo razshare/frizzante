@@ -10,7 +10,6 @@ func Parse(text string) (tags []string, err error) {
 		tags = make([]string, 0)
 		return
 	}
-
 	var table = "Aa_B_bC_cD_dE_eF_fG_gH_hI_iJ_jK_kL_lM_mN_nO_oP_pQ_qR_rS_sT_tU_uV_vW_wX_xY_yZ_z_0123456789 "
 	for _, tag := range strings.Split(text, ",") {
 		if strings.Contains(tag, " ") {

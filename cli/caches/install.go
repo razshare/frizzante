@@ -13,7 +13,6 @@ func Install(options InstallOptions) (err error) {
 	ext := filepath.Ext(options.FromFileName)
 	spin := spinners.New(fmt.Sprintf("installing %s", options.ToDirectoryName))
 	go spinners.Start(spin)
-
 	if ext == ".zip" {
 		if err = files.UnzipFile(options.FromFileName, options.ToDirectoryName); err != nil {
 			spinners.Stop(spin)
@@ -26,10 +25,7 @@ func Install(options InstallOptions) (err error) {
 			return
 		}
 	}
-
 	spinners.Stop(spin)
-
 	messages.Successf("%s installed", options.ToDirectoryName)
-
 	return
 }

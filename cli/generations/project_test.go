@@ -24,23 +24,18 @@ func TestProject(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-
 	if !files.IsFile(filepath.Join("asd", "lib", "core", "server", "example.txt")) {
 		t.Fatal("asd/lib/core/server/example.txt should exist")
 	}
-
 	if files.IsFile(filepath.Join("asd", "lib", "sqlite", "databases", "example.txt")) {
 		t.Fatal("asd/lib/sqlite/databases/example.txt should not exist")
 	}
-
 	if !files.IsFile(filepath.Join("asd", "app", "lib", "scripts", "core", "example.txt")) {
 		t.Fatal("asd/app/lib/scripts/core/example.txt should exist")
 	}
-
 	if files.IsFile(filepath.Join("asd", "app", "lib", "components", "links", "example.txt")) {
 		t.Fatal("asd/app/lib/components/links/example.txt should not exist")
 	}
-
 	if files.IsFile(filepath.Join("asd", "app", "lib", "components", "forms", "example.txt")) {
 		t.Fatal("asd/app/lib/components/forms/example.txt should not exist")
 	}

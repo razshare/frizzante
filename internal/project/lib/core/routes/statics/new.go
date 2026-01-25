@@ -10,6 +10,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 )
 
+// New creates a route that lists all available GET routes of a given server.
 func New(pattern string, server *servers.Server) routes.Route {
 	return routes.Route{Pattern: pattern, Handler: func(client *clients.Client) {
 		if accepts := receive.Accept(client); accepts != "" && accepts != "application/json" {

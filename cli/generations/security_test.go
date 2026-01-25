@@ -26,16 +26,13 @@ func TestSecurity(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-
 	if !files.IsFile(filepath.Join("lib", "security", "example.go")) {
 		t.Fatal("lib/security/example.go should exist")
 	}
-
 	var data []byte
 	if data, err = os.ReadFile(filepath.Join("lib", "security", "example.go")); err != nil {
 		t.Fatal(err)
 	}
-
 	if !strings.Contains(string(data), "main/lib/core/files") {
 		t.Fatal("example.go should contain main/lib/core/files")
 	}

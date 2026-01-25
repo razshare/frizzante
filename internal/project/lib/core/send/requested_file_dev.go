@@ -22,28 +22,21 @@ func RequestedFile(client *clients.Client) bool {
 		client.Options.ErrorLog.Println("send.RequestedFile() does not support web sockets", stack.Trace())
 		return false
 	}
-
 	if client.EventName != "" {
 		client.Options.ErrorLog.Println("send.RequestedFile() does not support server sent events", stack.Trace())
 		return false
 	}
-
 	uri := client.Request.RequestURI
-
 	if strings.HasPrefix(uri, "/") {
 		uri = uri[1:]
 	}
-
 	fileName := filepath.Join("app", "dist", "client", strings.ReplaceAll(uri, "/", string(filepath.Separator)))
-
 	if files.IsFile(fileName) {
 		if client.Writer.Header().Get("Content-Type") == "" {
 			Header(client, "Content-Type", mime.Parse(fileName))
 		}
-
 		http.ServeFile(client.Writer, &client.Request, fileName)
 		return true
 	}
-
 	return false
 }

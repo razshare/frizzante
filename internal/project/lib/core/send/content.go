@@ -14,19 +14,16 @@ func Content(client *clients.Client, data []byte) {
 		client.Writer.WriteHeader(client.Status)
 		client.Locked = true
 	}
-
 	if client.WebSocket != nil {
 		if err := client.WebSocket.WriteMessage(websocket.TextMessage, data); err != nil {
 			client.Options.ErrorLog.Println(err, stack.Trace())
 		}
 		return
 	}
-
 	if client.EventName != "" {
 		EventContent(client, data)
 		return
 	}
-
 	if _, err := client.Writer.Write(data); err != nil {
 		client.Options.ErrorLog.Println(err, stack.Trace())
 	}

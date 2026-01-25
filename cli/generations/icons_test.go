@@ -22,18 +22,15 @@ func TestIcons(t *testing.T) {
 	}
 	defer func() { _ = os.RemoveAll("app") }()
 	defer func() { _ = os.RemoveAll(".gen") }()
-
 	if err = Bun(BunOptions{Bun: filepath.Join(".gen", "bun", "bun")}); err != nil {
 		return
 	}
-
 	if err = Icons(IconsOptions{
 		Efs: TestIconsEfs,
 		Bun: filepath.Join(".gen", "bun", "bun"),
 	}); err != nil {
 		t.Fatal(err)
 	}
-
 	if !files.IsFile(filepath.Join("app", "lib", "components", "icons", "example.txt")) {
 		t.Fatal("app/lib/components/icons/example.txt should exist")
 	}

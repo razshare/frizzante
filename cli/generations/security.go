@@ -19,7 +19,7 @@ func Security(options SecurityOptions) (err error) {
 		}
 		var yesRemove bool
 		if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", directoryName); err != nil {
-			return err
+			return
 		}
 		if yesRemove {
 			if err = os.RemoveAll(directoryName); err != nil {
@@ -27,7 +27,6 @@ func Security(options SecurityOptions) (err error) {
 			}
 		}
 	}
-
 	if err = Copy(CopyOptions{
 		From: "internal/additions/lib/security",
 		To:   filepath.Join("lib", "security"),
@@ -35,14 +34,11 @@ func Security(options SecurityOptions) (err error) {
 	}); err != nil {
 		return
 	}
-
 	if err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "security")}); err != nil {
 		return
 	}
-
 	messages.Command(messages.CommandOptions{Environment: os.Environ(), Program: "go", Args: []string{"get", "golang.org/x/crypto/bcrypt"}})
 	messages.Command(messages.CommandOptions{Environment: os.Environ(), Program: "go", Args: []string{"get", "golang.org/x/crypto/sha3"}})
 	messages.Command(messages.CommandOptions{Environment: os.Environ(), Program: "go", Args: []string{"get", "golang.org/x/text/unicode/norm"}})
-
 	return
 }

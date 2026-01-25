@@ -17,7 +17,6 @@ func TestCopy(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() { _ = os.RemoveAll(".gen") }()
-
 	if err := Copy(CopyOptions{
 		From: "air.go",
 		To:   filepath.Join(".gen", "air.go.txt"),
@@ -25,7 +24,6 @@ func TestCopy(t *testing.T) {
 	}); err != nil {
 		t.Fatal(err)
 	}
-
 	if !files.IsFile(filepath.Join(".gen", "air.go.txt")) {
 		t.Fatal(".gen/air.go.txt should exist")
 	}

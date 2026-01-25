@@ -12,7 +12,6 @@ func Install(options InstallOptions) (err error) {
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
-
 	spin := spinners.New("installing go packages")
 	go spinners.Start(spin)
 	if !messages.Command(messages.CommandOptions{
@@ -33,7 +32,6 @@ func Install(options InstallOptions) (err error) {
 	}
 	messages.Success("go packages installed")
 	spinners.Stop(spin)
-
 	spin = spinners.New("installing javascript packages")
 	go spinners.Start(spin)
 	if messages.Command(messages.CommandOptions{
@@ -45,6 +43,5 @@ func Install(options InstallOptions) (err error) {
 		messages.Success("javascript packages installed")
 	}
 	spinners.Stop(spin)
-
 	return
 }

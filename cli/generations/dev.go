@@ -36,8 +36,6 @@ func Dev(options DevOptions) (err error) {
 	}); err != nil {
 		return
 	}
-	if err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "dev")}); err != nil {
-		return
-	}
+	err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "dev")})
 	return
 }

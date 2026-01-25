@@ -15,8 +15,6 @@ func SseUpgrade(client *clients.Client) func(event string) {
 		"Cache-Control":                 "no-cache",
 		"Client":                        "keep-alive",
 	})
-
 	client.EventName = "message"
-
 	return func(event string) { client.EventName = event }
 }

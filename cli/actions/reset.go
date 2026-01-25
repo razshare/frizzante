@@ -13,18 +13,13 @@ func Reset(_ ResetOptions) (err error) {
 	if cache, err = paths.Cache(); err != nil {
 		return
 	}
-
 	if files.IsDirectory(cache) {
 		if err = os.RemoveAll(cache); err != nil {
 			return
 		}
-
 		messages.Successf("%s deleted", cache)
-
 		return
 	}
-
 	messages.Infof("%s not found", cache)
-
 	return
 }

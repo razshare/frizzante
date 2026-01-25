@@ -13,22 +13,18 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			model.Confirmed = false
 			return model, tea.Quit
 		}
-
 		if assert.Type == tea.KeyCtrlC {
 			model.Confirmed = false
 			return model, tea.Interrupt
 		}
-
 		if strings.ToLower(assert.String()) == "y" {
 			model.Confirmed = true
 			return model, tea.Quit
 		}
-
 		if strings.ToLower(assert.String()) == "n" {
 			model.Confirmed = false
 			return model, tea.Quit
 		}
-
 		if assert.Type == tea.KeyLeft ||
 			assert.Type == tea.KeyCtrlLeft ||
 			assert.Type == tea.KeyRight ||
@@ -37,7 +33,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			model.Confirmed = !model.Confirmed
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyEnter {
 			return model, tea.Quit
 		}

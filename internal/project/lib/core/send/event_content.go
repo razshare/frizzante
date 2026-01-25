@@ -23,36 +23,29 @@ func EventContent(client *clients.Client, data []byte) {
 		client.Options.ErrorLog.Println(err, stack.Trace())
 		return
 	}
-
 	for _, line := range bytes.Split(data, []byte("\r\n")) {
 		if _, err := client.Writer.Write([]byte("data: ")); err != nil {
 			client.Options.ErrorLog.Println(err, stack.Trace())
 			return
 		}
-
 		if _, err := client.Writer.Write(line); err != nil {
 			client.Options.ErrorLog.Println(err, stack.Trace())
 			return
 		}
-
 		if _, err := client.Writer.Write([]byte("\r\n")); err != nil {
 			client.Options.ErrorLog.Println(err, stack.Trace())
 			return
 		}
 	}
-
 	if _, err := client.Writer.Write([]byte("\r\n")); err != nil {
 		client.Options.ErrorLog.Println(err, stack.Trace())
 		return
 	}
-
 	writer, ok := client.Writer.(http.Flusher)
 	if !ok {
 		client.Options.ErrorLog.Println(errors.New("could not retrieve flusher"), stack.Trace())
 		return
 	}
-
 	writer.Flush()
-
 	client.EventId++
 }

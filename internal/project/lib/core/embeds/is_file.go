@@ -13,7 +13,6 @@ func IsFile(efs embed.FS, name string) bool {
 	if file, err = efs.Open(name); err != nil {
 		return false
 	}
-
 	var info os.FileInfo
 	if info, err = file.Stat(); err != nil {
 		return false

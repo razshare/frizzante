@@ -14,18 +14,15 @@ func FixImports(options FixImportsOptions) (err error) {
 		err = fmt.Errorf("directory %s not found", options.Directory)
 		return
 	}
-
 	befores := [][]byte{
 		[]byte("github.com/razshare/frizzante/internal/project"),
 		[]byte("github.com/razshare/frizzante/internal/additions"),
 	}
 	after := []byte("main")
-
 	var entries []string
 	if entries, err = files.ReadDirectory(options.Directory); err != nil {
 		return
 	}
-
 	for _, entry := range entries {
 		if !strings.HasSuffix(entry, ".go") &&
 			!strings.HasSuffix(entry, ".svelte") &&
@@ -33,20 +30,16 @@ func FixImports(options FixImportsOptions) (err error) {
 			!strings.HasSuffix(entry, ".ts") {
 			continue
 		}
-
 		var data []byte
 		if data, err = os.ReadFile(entry); err != nil {
 			return
 		}
-
 		for _, before := range befores {
 			data = bytes.ReplaceAll(data, before, after)
 		}
-
 		if err = os.WriteFile(entry, data, os.ModePerm); err != nil {
 			return
 		}
 	}
-
 	return
 }

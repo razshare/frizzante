@@ -12,10 +12,6 @@ func Move(from string, to string) (err error) {
 			return
 		}
 	}
-
-	if err = os.RemoveAll(from); err != nil {
-		return
-	}
-
-	return nil
+	err = os.RemoveAll(from)
+	return
 }

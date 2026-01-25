@@ -13,7 +13,6 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
-
 	var group sync.WaitGroup
 	group.Go(func() {
 		messages.Command(messages.CommandOptions{

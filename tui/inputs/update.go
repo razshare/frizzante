@@ -20,31 +20,25 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			model.Value += value
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyCtrlC {
 			return model, tea.Interrupt
 		}
-
 		if assert.Type == tea.KeyCtrlV {
 			var value string
 			value, model.ClipboardError = clipboard.ReadAll()
 			model.Value += value
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyEsc {
 			if model.Value != "" {
 				model.Value = ""
 				return model, nil
 			}
-
 			return model, tea.Quit
 		}
-
 		if assert.Type == tea.KeyEnter {
 			return model, tea.Quit
 		}
-
 		// vscode has a weird bug where it will send a "ctrl+w" whenever the user presses "backspace" in the integrated terminal,
 		// so we're including tea.KeyCtrlW to try to fix that for the user.
 		// https://stackoverflow.com/questions/52806758/visual-studio-code-ctrlbackspace-not-working-in-integrated-terminal
@@ -56,6 +50,5 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			return model, nil
 		}
 	}
-
 	return model, cmd
 }

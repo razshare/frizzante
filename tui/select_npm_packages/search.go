@@ -13,51 +13,57 @@ import (
 )
 
 func Search(query string) tea.Cmd {
-	return func() tea.Msg {
+	return func() (message tea.Msg) {
 		if query == "" {
-			return SearchResultMsg{Packages: []npm.PackageInfo{}}
+			message = SearchResultMsg{Packages: []npm.PackageInfo{}}
+			return
 		}
-
 		encodedQuery := url.QueryEscape(query)
 		apiUrl := fmt.Sprintf("https://registry.npmjs.org/-/v1/search?text=%s&size=20", encodedQuery)
-
 		client := &http.Client{
 			Timeout: 5 * time.Second,
 		}
-
-		req, err := http.NewRequest("GET", apiUrl, nil)
+		request, err := http.NewRequest("GET", apiUrl, nil)
 		if err != nil {
-			return SearchResultMsg{Error: err}
+			message = SearchResultMsg{Error: err}
+			return
 		}
-
-		req.Header.Set("Accept", "application/json")
-
-		resp, err := client.Do(req)
+		request.Header.Set("Accept", "application/json")
+		response, err := client.Do(request)
 		if err != nil {
-			return SearchResultMsg{Error: err}
+			message = SearchResultMsg{Error: err}
+			return
 		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != http.StatusOK {
-			return SearchResultMsg{Error: fmt.Errorf("npm registry returned status %d", resp.StatusCode)}
+		if response.Body != nil {
+			defer func() {
+				if cerr := response.Body.Close(); cerr != nil {
+					if message == nil {
+						message = SearchResultMsg{Error: cerr}
+						return
+					}
+				}
+			}()
 		}
-
-		body, err := io.ReadAll(resp.Body)
+		if response.StatusCode != http.StatusOK {
+			message = SearchResultMsg{Error: fmt.Errorf("npm registry returned status %d", response.StatusCode)}
+			return
+		}
+		body, err := io.ReadAll(response.Body)
 		if err != nil {
-			return SearchResultMsg{Error: err}
+			message = SearchResultMsg{Error: err}
+			return
 		}
-
 		var searchResult npm.SearchResponse
 		err = json.Unmarshal(body, &searchResult)
 		if err != nil {
-			return SearchResultMsg{Error: err}
+			message = SearchResultMsg{Error: err}
+			return
 		}
-
 		packages := make([]npm.PackageInfo, 0, len(searchResult.Objects))
 		for _, obj := range searchResult.Objects {
 			packages = append(packages, obj.Package)
 		}
-
-		return SearchResultMsg{Packages: packages}
+		message = SearchResultMsg{Packages: packages}
+		return
 	}
 }

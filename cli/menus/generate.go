@@ -32,7 +32,6 @@ func init() {
 				if id, err = Render(menu, app, value, query); err != nil {
 					return
 				}
-
 				if id == "" {
 					return
 				}

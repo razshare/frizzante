@@ -17,6 +17,5 @@ func Status(client *clients.Client, status int) {
 		client.Options.ErrorLog.Println("status is locked", stack.Trace())
 		return
 	}
-
 	client.Status = status
 }

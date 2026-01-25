@@ -11,14 +11,12 @@ import (
 func Send(title string, text string) (err error) {
 	lines := strings.Split(text, "\n")
 	choices := make([]search.Choice, len(lines))
-
 	for index, line := range lines {
 		choices[index] = search.Choice{
 			Id:          line,
 			Description: line,
 		}
 	}
-
 	_, err = program.Run(&Model{
 		Prompt:   title,
 		Viewport: &viewport.Viewport{Visible: 12},
@@ -27,6 +25,5 @@ func Send(title string, text string) (err error) {
 			Filtered: choices,
 		},
 	})
-
 	return
 }

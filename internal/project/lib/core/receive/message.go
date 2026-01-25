@@ -19,7 +19,6 @@ func Message(client *clients.Client) string {
 		}
 		return string(data)
 	}
-
 	data, err := io.ReadAll(client.Request.Body)
 	if err != nil {
 		client.Options.ErrorLog.Println(err, stack.Trace())

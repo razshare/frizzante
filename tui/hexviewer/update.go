@@ -12,7 +12,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 		if assert.Type == tea.KeyCtrlC {
 			return model, tea.Interrupt
 		}
-
 		if assert.Type == tea.KeyEsc {
 			if model.Search.Active {
 				search.Reset(model.Search, model.Viewport)
@@ -20,27 +19,22 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return model, tea.Quit
 		}
-
 		if assert.Type == tea.KeyUp || assert.Type == tea.KeyCtrlP || assert.Type == tea.KeyShiftTab || assert.Type == tea.KeyCtrlPgUp {
 			navigate.Apply(model.Search, model.Viewport, -1)
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyDown || assert.Type == tea.KeyCtrlN || assert.Type == tea.KeyTab || assert.Type == tea.KeyCtrlPgDown {
 			navigate.Apply(model.Search, model.Viewport, 1)
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyPgUp {
 			navigate.Apply(model.Search, model.Viewport, -model.Viewport.Visible)
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyPgDown {
 			navigate.Apply(model.Search, model.Viewport, model.Viewport.Visible)
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyHome {
 			home := model.Viewport.Offset
 			if model.Viewport.Cursor == home {
@@ -51,7 +45,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return model, nil
 		}
-
 		if assert.Type == tea.KeyEnd {
 			end := model.Viewport.Offset + model.Viewport.Visible - 1
 			if model.Viewport.Cursor == end {
@@ -62,7 +55,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return model, nil
 		}
-
 		// vscode has a weird bug where it will send a "ctrl+w" whenever the user presses "backspace" in the integrated terminal,
 		// so we're including tea.KeyCtrlW to try to fix that for the user.
 		// https://stackoverflow.com/questions/52806758/visual-studio-code-ctrlbackspace-not-working-in-integrated-terminal
@@ -71,7 +63,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 				return model, search.Apply(model.Search, model.Viewport, assert)
 			}
 		}
-
 		if len(assert.String()) == 1 {
 			if !model.Search.Active {
 				model.Search.Active = true
@@ -79,6 +70,5 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			return model, search.Apply(model.Search, model.Viewport, assert)
 		}
 	}
-
 	return model, nil
 }

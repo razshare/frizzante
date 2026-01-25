@@ -23,8 +23,6 @@ func Send() (selected []string, err error) {
 	}); err != nil {
 		return
 	}
-
 	selected = model.Selected
-
 	return
 }

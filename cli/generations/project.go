@@ -15,7 +15,6 @@ func Project(options ProjectOptions) (err error) {
 	}); err != nil {
 		return
 	}
-
 	if !files.IsFile(filepath.Join(options.Name, "go.mod")) {
 		if err = os.WriteFile(
 			filepath.Join(options.Name, "go.mod"),
@@ -25,10 +24,6 @@ func Project(options ProjectOptions) (err error) {
 			return
 		}
 	}
-
-	if err = FixImports(FixImportsOptions{Directory: options.Name}); err != nil {
-		return
-	}
-
+	err = FixImports(FixImportsOptions{Directory: options.Name})
 	return
 }

@@ -11,11 +11,9 @@ func Format(options FormatOptions) (err error) {
 	spin := spinners.New("formatting code")
 	go spinners.Start(spin)
 	defer spinners.Stop(spin)
-
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
-
 	if !messages.Command(messages.CommandOptions{
 		Program: options.Go,
 		Args:    []string{"fmt", "./..."},
@@ -23,7 +21,6 @@ func Format(options FormatOptions) (err error) {
 		err = errors.New("could not format go code")
 		return
 	}
-
 	if !messages.Command(messages.CommandOptions{
 		DirectoryName: "app",
 		Program:       options.Bun,
@@ -32,8 +29,6 @@ func Format(options FormatOptions) (err error) {
 		err = errors.New("could not format js code")
 		return
 	}
-
 	messages.Success("project formatted")
-
 	return
 }

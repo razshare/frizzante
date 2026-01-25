@@ -11,7 +11,6 @@ var AssemblyLinePattern = regexp.MustCompile(`^(\s+)(0x[0-9a-f]+)(\s+)([0-9a-f]+
 // It preserves Go source code lines (non-assembly lines) without modification.
 func FormatAssemblyWithAlignment(content string) string {
 	lines := strings.Split(content, "\n")
-
 	maxHexWidth := 0
 	for _, line := range lines {
 		matches := AssemblyLinePattern.FindStringSubmatch(line)
@@ -23,7 +22,6 @@ func FormatAssemblyWithAlignment(content string) string {
 			}
 		}
 	}
-
 	var builder strings.Builder
 	for i, line := range lines {
 		matches := AssemblyLinePattern.FindStringSubmatch(line)
@@ -32,9 +30,7 @@ func FormatAssemblyWithAlignment(content string) string {
 			address := matches[2]
 			hexBytes := matches[4]
 			instruction := matches[6]
-
 			paddedHexBytes := hexBytes + strings.Repeat(" ", maxHexWidth-len(hexBytes))
-
 			builder.WriteString(leadingSpace)
 			builder.WriteString(address)
 			builder.WriteString("      ")
@@ -45,11 +41,9 @@ func FormatAssemblyWithAlignment(content string) string {
 			// Non-assembly line (Go source code reference), keep as-is
 			builder.WriteString(line)
 		}
-
 		if i < len(lines)-1 || line != "" {
 			builder.WriteString("\n")
 		}
 	}
-
 	return builder.String()
 }

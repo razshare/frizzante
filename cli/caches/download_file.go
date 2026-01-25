@@ -11,7 +11,6 @@ func DownloadFile(options DownloadFileOptions) (fileName string, err error) {
 	if fileName, err = CreateFileName(CreateFileNameOptions{Value: options.Url}); err != nil {
 		return
 	}
-
 	if !files.IsFile(fileName) {
 		spin := spinners.New(fmt.Sprintf("downloading %s", options.Url))
 		go spinners.Start(spin)
@@ -21,6 +20,5 @@ func DownloadFile(options DownloadFileOptions) (fileName string, err error) {
 		}
 		spinners.Stop(spin)
 	}
-
 	return
 }

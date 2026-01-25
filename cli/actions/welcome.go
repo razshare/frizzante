@@ -8,7 +8,6 @@ import (
 
 func Welcome(_ WelcomeOptions) error {
 	dock := os.Getenv("FRIZZANTE_USING_DOCKER")
-
 	end := make(chan string, 1)
 	if dock != "" {
 		println("")
@@ -29,7 +28,6 @@ func Welcome(_ WelcomeOptions) error {
 		messages.Info("For more info: https://razshare.github.io/frizzante-docs/guides/get-started/")
 	}
 	<-end
-
 	messages.Success("Bye!")
 	return nil
 }

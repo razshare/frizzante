@@ -9,7 +9,6 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 			return model, tea.Interrupt
 		}
 	}
-
 	var cmd tea.Cmd
 	model.Spinner, cmd = model.Spinner.Update(message)
 	return model, cmd

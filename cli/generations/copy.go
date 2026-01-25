@@ -18,33 +18,27 @@ func Copy(options CopyOptions) (err error) {
 			err = fmt.Errorf("%s already exists", options.To)
 			return
 		}
-
 		var yesRemove bool
 		if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", options.To); err != nil {
 			return
 		}
-
 		if !yesRemove {
 			err = fmt.Errorf("%s already exists", options.To)
 			return
 		}
-
 		if err = os.RemoveAll(options.To); err != nil {
 			return
 		}
 	}
-
 	if embeds.IsDirectory(options.Efs, options.From) {
 		var entries []string
 		if entries, err = embeds.ReadDirectory(options.Efs, options.From); err != nil {
 			return
 		}
-
 		for _, entry := range entries {
 			if os.Getenv("DEBUG") == "1" {
 				messages.Infof("embedded file: %s", entry)
 			}
-
 			if options.Ignore != nil {
 				var ignored bool
 				for _, ignore := range options.Ignore {
@@ -53,12 +47,10 @@ func Copy(options CopyOptions) (err error) {
 						break
 					}
 				}
-
 				if ignored {
 					continue
 				}
 			}
-
 			name := filepath.Join(
 				options.To,
 				strings.ReplaceAll(
@@ -67,13 +59,11 @@ func Copy(options CopyOptions) (err error) {
 					string(filepath.Separator),
 				),
 			)
-
 			if strings.HasSuffix(name, "go.mod.txt") {
 				name = strings.TrimSuffix(name, ".txt")
 			} else if strings.HasSuffix(name, "go.sum.txt") {
 				name = strings.TrimSuffix(name, ".txt")
 			}
-
 			if err = embeds.CopyFile(options.Efs, entry, name); err != nil {
 				return
 			}
@@ -86,8 +76,6 @@ func Copy(options CopyOptions) (err error) {
 		err = fmt.Errorf("%s not found", options.From)
 		return
 	}
-
 	messages.Successf("%s created", options.To)
-
 	return
 }

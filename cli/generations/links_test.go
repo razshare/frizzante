@@ -17,13 +17,11 @@ func TestLinks(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() { _ = os.RemoveAll("app") }()
-
 	if err := Links(LinksOptions{
 		Efs: TestLinksEfs,
 	}); err != nil {
 		t.Fatal(err)
 	}
-
 	if !files.IsFile(filepath.Join("app", "lib", "components", "links", "example.txt")) {
 		t.Fatal("app/lib/components/links/example.txt should exist")
 	}

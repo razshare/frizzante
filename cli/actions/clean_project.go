@@ -13,32 +13,24 @@ func CleanProject(options CleanProjectOptions) (err error) {
 		err = errors.New("could not clean Go project")
 		return
 	}
-
 	if err = os.RemoveAll(".gen"); err != nil {
 		return
 	}
-
 	if err = os.RemoveAll(filepath.Join("dist")); err != nil {
 		return
 	}
-
 	if err = os.RemoveAll(filepath.Join("node_modules")); err != nil {
 		return
 	}
-
 	if err = os.RemoveAll(filepath.Join(".vite")); err != nil {
 		return
 	}
-
 	if err = os.RemoveAll(filepath.Join("lib", "core", "views", "ssr", "app")); err != nil {
 		return
 	}
-
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
-
 	messages.Success("project cleaned")
-
 	return
 }

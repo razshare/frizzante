@@ -71,14 +71,12 @@ func TestParse(t *testing.T) {
 		"my.file.odt":   "application/vnd.oasis.opendocument.text",
 		"my.file.ogx":   "application/ogg",
 	}
-
 	// Positives.
 	for key, expected := range items {
 		if mime := Parse(key); mime != expected {
 			t.Fatalf("file %s was expected to resolve into mime %s, received %s instead", key, expected, mime)
 		}
 	}
-
 	// Negative.
 	n := "my.file.qwerty123"
 	ac := Parse(n)

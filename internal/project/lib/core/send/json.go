@@ -16,12 +16,10 @@ func Json(client *clients.Client, value any) {
 		client.Options.ErrorLog.Println(err, stack.Trace())
 		return
 	}
-
 	if client.WebSocket == nil {
 		if client.Writer.Header().Get("Content-Type") == "" {
 			client.Writer.Header().Set("Content-Type", "application/json")
 		}
 	}
-
 	Content(client, data)
 }

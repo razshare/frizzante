@@ -13,7 +13,6 @@ func Package(options PackageOptions) (err error) {
 	if err = Touch(TouchOptions{}); err != nil {
 		return
 	}
-
 	if !messages.Command(messages.CommandOptions{
 		Environment:   os.Environ(),
 		DirectoryName: "app",
@@ -23,7 +22,6 @@ func Package(options PackageOptions) (err error) {
 		err = errors.New("could not build server bundle")
 		return
 	}
-
 	if !messages.Command(messages.CommandOptions{
 		Environment:   os.Environ(),
 		DirectoryName: "app",
@@ -33,7 +31,6 @@ func Package(options PackageOptions) (err error) {
 		err = errors.New("could not normalize server bundle")
 		return
 	}
-
 	if !messages.Command(messages.CommandOptions{
 		Environment:   os.Environ(),
 		DirectoryName: "app",
@@ -43,17 +40,13 @@ func Package(options PackageOptions) (err error) {
 		err = errors.New("could not build client bundles")
 		return
 	}
-
 	if err = os.RemoveAll(filepath.Join("app", "dist", "assets")); err != nil {
 		return
 	}
-
 	if err = os.RemoveAll(filepath.Join("app", "dist", "app.server.js")); err != nil {
 		return
 	}
-
 	messages.Success("app/dist generated")
-
 	if !options.Production && files.IsDirectory(filepath.Join("lib", "core", "ssr")) {
 		if files.IsDirectory(filepath.Join("app", "dist")) {
 			if err = files.CopyDirectory(
@@ -62,11 +55,9 @@ func Package(options PackageOptions) (err error) {
 			); err != nil {
 				return
 			}
-
 			messages.Success("app/dist copied to lib/core/views/render")
 		}
 	}
-
 	if !options.Production && files.IsDirectory(filepath.Join("lib", "core", "send")) {
 		if files.IsDirectory(filepath.Join("app", "dist")) {
 			if err = files.CopyDirectory(
@@ -75,10 +66,8 @@ func Package(options PackageOptions) (err error) {
 			); err != nil {
 				return
 			}
-
 			messages.Success("app/dist copied to lib/core/send")
 		}
 	}
-
 	return
 }
