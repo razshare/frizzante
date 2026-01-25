@@ -4,7 +4,7 @@ tmp_dir = ".gen/tmp"
 
 [build]
   args_bin = []
-  bin = "frizzante generate types && .gen/tmp/main.exe"
+  bin = ".gen/tmp/main.exe"
   cmd = "go build -tags dev,trace -o .gen/tmp/main.exe ."
   delay = 50
   exclude_dir = ["app", ".gen", ".git", ".github", "lib/core/view/ssr/app"]
@@ -21,7 +21,7 @@ tmp_dir = ".gen/tmp"
   poll = false
   poll_interval = 0
   post_cmd = []
-  pre_cmd = []
+  pre_cmd = ["frizzante generate types"]
   rerun = false
   rerun_delay = 50
   send_interrupt = true
