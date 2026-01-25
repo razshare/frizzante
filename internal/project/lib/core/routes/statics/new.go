@@ -1,4 +1,4 @@
-package servers
+package statics
 
 import (
 	"strings"
@@ -7,9 +7,10 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
+	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 )
 
-func Statics(server *Server, pattern string) routes.Route {
+func New(pattern string, server *servers.Server) routes.Route {
 	return routes.Route{Pattern: pattern, Handler: func(client *clients.Client) {
 		if accepts := receive.Accept(client); accepts != "" && accepts != "application/json" {
 			send.BadRequestf(client, "only application/json can be produced; requested %s", accepts)

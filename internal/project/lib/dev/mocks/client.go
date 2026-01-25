@@ -6,7 +6,6 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/servers"
-	"github.com/razshare/frizzante/internal/project/lib/core/ssr"
 )
 
 type ResponseWriter struct {
@@ -54,7 +53,7 @@ func (body *RequestBody) Close() error {
 
 func NewClient() *clients.Client {
 	server := servers.New()
-	server.Render = ssr.New(1)
+	// server.Render = ssr.New(1)
 	options := clients.Options{
 		ErrorLog: server.ErrorLog,
 		InfoLog:  server.InfoLog,
