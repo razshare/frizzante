@@ -14,9 +14,6 @@ import (
 )
 
 func Build(options BuildOptions) (err error) {
-	if err = Touch(TouchOptions{}); err != nil {
-		return
-	}
 	var tags []string
 	if tags, err = tags_.Parse(options.Tags); err != nil {
 		return

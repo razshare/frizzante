@@ -10,27 +10,21 @@ import (
 )
 
 func PackageWatch(options PackageWatchOptions) (err error) {
-	if err = Touch(TouchOptions{}); err != nil {
-		return
-	}
-	if err = os.RemoveAll(filepath.Join("app", "dist")); err != nil {
-		return
-	}
 	var group sync.WaitGroup
 	group.Go(func() {
 		messages.Command(messages.CommandOptions{
 			DirectoryName: "app",
 			Environment:   os.Environ(),
 			Program:       options.Bun,
-			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch"},
+			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true", "--watch"},
 		})
 	})
 	group.Go(func() {
 		messages.Command(messages.CommandOptions{
 			DirectoryName: "app",
-			Environment:   os.Environ(),
+			Environment:   append(os.Environ(), "DEV=1"),
 			Program:       options.Bun,
-			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--watch", "--ssr=app.server.ts"},
+			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/server", "--emptyOutDir=true", "--watch", "--ssr=app.server.ts"},
 		})
 	})
 	group.Go(func() {
@@ -39,9 +33,9 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 			DirectoryName: "app",
 			Environment:   append(os.Environ(), "DEV=1"),
 			Program:       filepath.Join("app", "node_modules", ".bin", "esbuild"),
-			Args:          []string{"--bundle", "--watch", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js"},
+			Args:          []string{"--bundle", "--watch", "--outfile=dist/server/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/server/app.server.js"},
 		})
 	})
 	group.Wait()
-	return err
+	return
 }

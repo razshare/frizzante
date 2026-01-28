@@ -25,10 +25,10 @@ func CleanProject(options CleanProjectOptions) (err error) {
 	if err = os.RemoveAll(filepath.Join(".vite")); err != nil {
 		return
 	}
-	if err = os.RemoveAll(filepath.Join("lib", "core", "views", "ssr", "app")); err != nil {
+	if err = os.RemoveAll(filepath.Join("lib", "core", "ssr", "app")); err != nil {
 		return
 	}
-	if err = Touch(TouchOptions{}); err != nil {
+	if err = os.MkdirAll(filepath.Join("app", "dist"), os.ModePerm); err != nil {
 		return
 	}
 	messages.Success("project cleaned")

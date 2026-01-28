@@ -9,9 +9,6 @@ import (
 )
 
 func Install(options InstallOptions) (err error) {
-	if err = Touch(TouchOptions{}); err != nil {
-		return
-	}
 	spin := spinners.New("installing go packages")
 	go spinners.Start(spin)
 	if !messages.Command(messages.CommandOptions{

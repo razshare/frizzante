@@ -10,17 +10,17 @@ import (
 )
 
 func Package(options PackageOptions) (err error) {
-	if err = Touch(TouchOptions{}); err != nil {
+	if err = os.RemoveAll(filepath.Join("app", "dist")); err != nil {
 		return
 	}
-	if err = os.RemoveAll(filepath.Join("app", "dist")); err != nil {
+	if err = os.MkdirAll(filepath.Join("app", "dist"), os.ModePerm); err != nil {
 		return
 	}
 	if !messages.Command(messages.CommandOptions{
 		Environment:   os.Environ(),
 		DirectoryName: "app",
 		Program:       options.Bun,
-		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist", "--emptyOutDir=false", "--ssr=app.server.ts"},
+		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/server", "--emptyOutDir=true", "--ssr=app.server.ts"},
 	}) {
 		err = errors.New("could not build server bundle")
 		return
@@ -29,7 +29,7 @@ func Package(options PackageOptions) (err error) {
 		Environment:   os.Environ(),
 		DirectoryName: "app",
 		Program:       filepath.Join("app", "node_modules", ".bin", "esbuild"),
-		Args:          []string{"--bundle", "--outfile=dist/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/app.server.js"},
+		Args:          []string{"--bundle", "--outfile=dist/server/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/server/app.server.js"},
 	}) {
 		err = errors.New("could not normalize server bundle")
 		return
@@ -46,7 +46,7 @@ func Package(options PackageOptions) (err error) {
 	if err = os.RemoveAll(filepath.Join("app", "dist", "assets")); err != nil {
 		return
 	}
-	if err = os.RemoveAll(filepath.Join("app", "dist", "app.server.js")); err != nil {
+	if err = os.RemoveAll(filepath.Join("app", "dist", "server", "app.server.js")); err != nil {
 		return
 	}
 	messages.Success("app/dist generated")

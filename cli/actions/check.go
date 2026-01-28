@@ -14,9 +14,6 @@ func Check(options CheckOptions) (err error) {
 	spin := spinners.New("checking code")
 	go spinners.Start(spin)
 	defer spinners.Stop(spin)
-	if err = Touch(TouchOptions{}); err != nil {
-		return
-	}
 	if !messages.Command(messages.CommandOptions{
 		DirectoryName: "app",
 		Environment:   os.Environ(),

@@ -9,9 +9,6 @@ import (
 )
 
 func Update(options UpdateOptions) (err error) {
-	if err = Touch(TouchOptions{}); err != nil {
-		return
-	}
 	spin := spinners.New("updating go packages")
 	go spinners.Start(spin)
 	if !messages.Command(messages.CommandOptions{

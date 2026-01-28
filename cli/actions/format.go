@@ -11,9 +11,6 @@ func Format(options FormatOptions) (err error) {
 	spin := spinners.New("formatting code")
 	go spinners.Start(spin)
 	defer spinners.Stop(spin)
-	if err = Touch(TouchOptions{}); err != nil {
-		return
-	}
 	if !messages.Command(messages.CommandOptions{
 		Program: options.Go,
 		Args:    []string{"fmt", "./..."},

@@ -13,7 +13,7 @@ import (
 )
 
 func Dev(options DevOptions) (err error) {
-	if err = Touch(TouchOptions{}); err != nil {
+	if err = os.MkdirAll(filepath.Join("app", "dist"), os.ModePerm); err != nil {
 		return
 	}
 	if err = os.MkdirAll(filepath.Join(".gen", "tmp"), os.ModePerm); err != nil {

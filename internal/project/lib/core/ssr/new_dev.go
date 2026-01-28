@@ -18,7 +18,7 @@ import (
 )
 
 func New(_ int64) renders.Render {
-	var server = filepath.Join("app", "dist", "app.server.cjs")
+	var server = filepath.Join("app", "dist", "server", "app.server.cjs")
 	var index = filepath.Join("app", "dist", "client", "index.html")
 	server = strings.ReplaceAll(server, "/", string(filepath.Separator))
 	server = strings.ReplaceAll(server, "\\", string(filepath.Separator))

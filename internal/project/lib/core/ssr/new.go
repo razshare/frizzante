@@ -19,7 +19,7 @@ import (
 
 func New(limit int64) renders.Render {
 	var mut sync.Mutex
-	var server = filepath.Join("app", "dist", "app.server.cjs")
+	var server = filepath.Join("app", "dist", "server", "app.server.cjs")
 	var index = filepath.Join("app", "dist", "client", "index.html")
 	var jsRenders = make(chan javascript.Render, 1)
 	server = strings.ReplaceAll(server, "\\", "/")

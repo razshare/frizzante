@@ -209,15 +209,6 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "touch" },
-			Choice: search.Choice{Id: "touch", Description: "adds placeholders in app/dist"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("running ▷ touch"))
-				return actions.Touch(actions.TouchOptions{})
-			},
-		},
-		{
 			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "clean" },
 			Choice: search.Choice{Id: "clean", Description: "deletes .gen, .vite, app/{dist,node_modules}"},
 			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
