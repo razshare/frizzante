@@ -2,6 +2,7 @@ package actions
 
 import (
 	"errors"
+	"os"
 
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinners"
@@ -12,14 +13,16 @@ func Format(options FormatOptions) (err error) {
 	go spinners.Start(spin)
 	defer spinners.Stop(spin)
 	if !messages.Command(messages.CommandOptions{
-		Program: options.Go,
-		Args:    []string{"fmt", "./..."},
+		Program:     options.Go,
+		Environment: os.Environ(),
+		Args:        []string{"fmt", "./..."},
 	}) {
 		err = errors.New("could not format go code")
 		return
 	}
 	if !messages.Command(messages.CommandOptions{
 		DirectoryName: "app",
+		Environment:   os.Environ(),
 		Program:       options.Bun,
 		Args:          []string{"x", "prettier", "--write", "."},
 	}) {

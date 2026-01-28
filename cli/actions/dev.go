@@ -37,10 +37,19 @@ func Dev(options DevOptions) (err error) {
 	}
 	var group sync.WaitGroup
 	group.Go(func() {
-		_ = PackageWatch(PackageWatchOptions{Bun: options.Bun})
+		if perr := PackageWatch(PackageWatchOptions{
+			Bun: options.Bun,
+		}); perr != nil {
+			messages.Error(perr)
+		}
 	})
 	group.Go(func() {
-		messages.Command(messages.CommandOptions{Environment: os.Environ(), Program: options.Air})
+		if !messages.Command(messages.CommandOptions{
+			Environment: os.Environ(),
+			Program:     options.Air,
+		}) {
+			messages.Error("air failed")
+		}
 	})
 	group.Wait()
 	return
