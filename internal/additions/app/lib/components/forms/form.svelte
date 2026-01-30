@@ -7,7 +7,6 @@
 <script lang="ts">
     import type { Snippet } from "svelte"
     import { action } from "$lib/scripts/core/action.ts"
-
     type Props = {
         method?: "GET" | "POST"
         enctype?:
@@ -31,7 +30,6 @@
     let error: false | Error = $state(false)
     let options = $derived.by(function run() {
         const out = action(actionPath)
-
         return {
             action: out.action,
             onsubmit(event: Event) {
