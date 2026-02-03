@@ -16,19 +16,25 @@ func CleanProject(options CleanProjectOptions) (err error) {
 	if err = os.RemoveAll(".gen"); err != nil {
 		return
 	}
-	if err = os.RemoveAll(filepath.Join("dist")); err != nil {
+	if err = os.RemoveAll(filepath.Join("app", "dist")); err != nil {
+		return
+	}
+	if err = os.RemoveAll(filepath.Join("app", ".vite")); err != nil {
 		return
 	}
 	if err = os.RemoveAll(filepath.Join("node_modules")); err != nil {
 		return
 	}
-	if err = os.RemoveAll(filepath.Join(".vite")); err != nil {
+	if err = os.RemoveAll(filepath.Join("lib", "core", "views", "renders", "app")); err != nil {
 		return
 	}
-	if err = os.RemoveAll(filepath.Join("lib", "core", "ssr", "app")); err != nil {
+	if err = os.RemoveAll(filepath.Join("lib", "core", "send", "app")); err != nil {
 		return
 	}
-	if err = os.MkdirAll(filepath.Join("app", "dist"), os.ModePerm); err != nil {
+	if err = os.RemoveAll("cover.html"); err != nil {
+		return
+	}
+	if err = os.RemoveAll("cover.out"); err != nil {
 		return
 	}
 	messages.Success("project cleaned")
