@@ -131,6 +131,9 @@ func Snapshot(options SnapshotOptions) (err error) {
 			return
 		}
 	}
+	if err = os.WriteFile(filepath.Join(directoryName, "snapshot.txt"), []byte("this is a snapshot"), os.ModePerm); err != nil {
+		return
+	}
 	err = files.CopyDirectory(filepath.Join("app", "dist", "client", "assets"), filepath.Join(directoryName, "assets"))
 	return
 }

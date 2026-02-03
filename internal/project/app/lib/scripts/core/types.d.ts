@@ -3,7 +3,6 @@ export type View<T> = {
     name: string
     align: number
     render: number
-    isSnapshot: boolean
     pin: () => Promise<void>
 }
 

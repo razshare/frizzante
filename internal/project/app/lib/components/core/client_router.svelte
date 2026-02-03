@@ -2,21 +2,19 @@
     import { setContext, type SvelteComponent } from "svelte"
     import { views } from "$exports.client"
     import type { View } from "$lib/scripts/core/types.js"
-    let { name, props, render, align, isSnapshot }: View<Record<string, unknown>> = $props()
+    let { name, props, render, align }: View<Record<string, unknown>> = $props()
     const components = views as unknown as Record<string, () => Promise<SvelteComponent>>
     const view: View<Record<string, unknown>> = $state({
         name,
         props,
         render,
         align,
-        isSnapshot,
         async pin() {
             pending.component = await components[view.name]()
             pending.props = $state.snapshot(view.props)
         },
     })
     setContext("view", view)
-
     const pending = {
         component: false as false | SvelteComponent,
         props: {} as Record<string, unknown>,

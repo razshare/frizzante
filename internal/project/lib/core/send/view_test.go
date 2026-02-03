@@ -30,7 +30,7 @@ func TestViewWithAcceptJson(t *testing.T) {
 	if writer.MockHeader.Get("Content-Type") != "application/json" {
 		t.Fatal("content type should be json")
 	}
-	if string(writer.MockBytes) != `{"isSnapshot":false,"name":"test","render":0,"align":0,"props":{"key":"value"}}` {
+	if string(writer.MockBytes) != `{"name":"test","render":0,"align":0,"props":{"key":"value"}}` {
 		t.Fatal("content should be view as json")
 	}
 }

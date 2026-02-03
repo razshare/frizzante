@@ -2,14 +2,13 @@
     import { setContext, type Component } from "svelte"
     import { views } from "$exports.server"
     import type { View } from "$lib/scripts/core/types.js"
-    let { name, props, render, align, isSnapshot }: View<Record<string, unknown>> = $props()
+    let { name, props, render, align }: View<Record<string, unknown>> = $props()
     const components = views as unknown as Record<string, Component>
     const view: View<Record<string, unknown>> = $state({
         name,
         props,
         render,
         align,
-        isSnapshot,
         async pin() {},
     })
     setContext("view", view)
