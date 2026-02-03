@@ -9,13 +9,19 @@ import (
 )
 
 func PackageWatch(options PackageWatchOptions) (err error) {
+	if err = os.RemoveAll(filepath.Join("app", "dist", "client")); err != nil {
+		return
+	}
+	if err = os.RemoveAll(filepath.Join("app", "dist", "server")); err != nil {
+		return
+	}
 	var group sync.WaitGroup
 	group.Go(func() {
 		if !messages.Command(messages.CommandOptions{
 			DirectoryName: "app",
 			Environment:   append(os.Environ(), "DEV=1"),
 			Program:       options.Bun,
-			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true", "--watch"},
+			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch"},
 		}) {
 			messages.Error("vite failed to generate dist/client/*")
 		}
@@ -25,7 +31,7 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 			DirectoryName: "app",
 			Environment:   append(os.Environ(), "DEV=1"),
 			Program:       options.Bun,
-			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/server", "--emptyOutDir=true", "--watch", "--ssr=app.server.ts"},
+			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/server", "--emptyOutDir=false", "--watch", "--ssr=app.server.ts"},
 		}) {
 			messages.Error("vite failed to generate dist/server/app.server.js")
 		}
