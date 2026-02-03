@@ -25,7 +25,7 @@ func CleanProject(options CleanProjectOptions) (err error) {
 	if err = os.RemoveAll(filepath.Join("node_modules")); err != nil {
 		return
 	}
-	if err = os.RemoveAll(filepath.Join("lib", "core", "views", "renders", "app")); err != nil {
+	if err = os.RemoveAll(filepath.Join("lib", "core", "ssr", "app")); err != nil {
 		return
 	}
 	if err = os.RemoveAll(filepath.Join("lib", "core", "send", "app")); err != nil {

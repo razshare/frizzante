@@ -1,10 +1,14 @@
 import type { HistoryEntry, View } from "$lib/scripts/core/types"
+import { IS_BROWSER } from "./is_browser"
 let lastUrl: false | string = false
 let snapshot = false
-fetch("/snapshot.txt").then(async function ready(response: Response){
-    const text = await response.text()
-    snapshot = text === "this is a snapshot"
-})
+if (IS_BROWSER) {
+    fetch("./snapshot.txt").then(async function ready(response: Response) {
+        const text = await response.text()
+        snapshot = text === "this is a snapshot"
+        console.log({ snapshot })
+    })
+}
 export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: View<unknown>): Promise<() => void> {
     if (lastUrl === false) {
         lastUrl = location.toString()
