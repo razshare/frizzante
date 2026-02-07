@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/views"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
@@ -23,7 +22,7 @@ func New() renders.Render {
 		}
 		document = string(indexData)
 		var data []byte
-		if data, err = json.Marshal(views.NewData(options.View)); err != nil {
+		if data, err = json.Marshal(options.Data); err != nil {
 			return "", err
 		}
 		document = strings.Replace(document, "<!--app-head-->", fmt.Sprintf(renders.HeadFormat, options.View.Title), 1)

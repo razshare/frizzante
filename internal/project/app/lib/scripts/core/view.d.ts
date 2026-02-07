@@ -4,11 +4,5 @@ export type View<T> = {
     align: number
     render: number
     pin: () => Promise<void>
-}
-
-export type HistoryEntry = {
-    nodeName: string
-    method: string
-    url: string
-    body: Record<string, string>
+    type: "" | "default" | "snapshot"
 }

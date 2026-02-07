@@ -43,7 +43,6 @@ var Main = Menu{
 					Go:     *app.Go,
 					Air:    *app.Air,
 					Bun:    *app.Bun,
-					Tags:   *app.Tags,
 					Efs:    app.Efs,
 					Strict: *app.Strict,
 				})
@@ -171,16 +170,6 @@ var Main = Menu{
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ package"))
 				err = actions.Package(actions.PackageOptions{Bun: *app.Bun})
-				return
-			},
-		},
-		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "package-watch" },
-			Choice: search.Choice{Id: "package-watch", Description: "packages the svelte application when source code changes"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("running ▷ package watch"))
-				err = actions.PackageWatch(actions.PackageWatchOptions{Bun: *app.Bun})
 				return
 			},
 		},

@@ -35,9 +35,8 @@ export default defineConfig({
         copyPublicDir: false,
         sourcemap,
         rollupOptions: {
-            input: {
-                index: "./index.html",
-            },
+            input: { index: "./index.html" },
+            external: /\.\/dist\/\.*/,
         },
     },
 })

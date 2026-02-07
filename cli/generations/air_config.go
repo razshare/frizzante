@@ -1,13 +1,10 @@
 package generations
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/BurntSushi/toml"
-	tags_ "github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 )
@@ -28,17 +25,6 @@ func AirConfig(options AirConfigOptions) (err error) {
 	content := string(data)
 	if _, err = toml.Decode(content, &conf); err != nil {
 		return
-	}
-	var tags []string
-	if tags, err = tags_.Parse(options.Tags); err != nil {
-		return
-	}
-	tagsString := strings.Join(tags, ",")
-	build := conf["build"].(map[string]any)
-	if len(tagsString) > 0 {
-		build["cmd"] = fmt.Sprintf("go build -tags %s -o %s .", tagsString, build["bin"])
-	} else {
-		build["cmd"] = fmt.Sprintf("go build -o %s .", build["bin"])
 	}
 	if airTomlExists {
 		if err = os.Remove(".air.toml"); err != nil {

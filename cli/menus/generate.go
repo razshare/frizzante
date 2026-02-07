@@ -59,8 +59,7 @@ var Generate = Menu{
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ air config"))
 				if err = generations.AirConfig(generations.AirConfigOptions{
-					Efs:  app.Efs,
-					Tags: *app.Tags,
+					Efs: app.Efs,
 				}); err != nil {
 					return
 				}

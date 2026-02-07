@@ -1,14 +1,6 @@
-import type { HistoryEntry, View } from "$lib/scripts/core/types"
-import { IS_BROWSER } from "./is_browser"
+import type { View } from "$lib/scripts/core/view"
+import type { HistoryEntry } from "$lib/scripts/core/history_entry"
 let lastUrl: false | string = false
-let snapshot = false
-if (IS_BROWSER) {
-    fetch("./snapshot.txt").then(async function ready(response: Response) {
-        const text = await response.text()
-        snapshot = text === "this is a snapshot"
-        console.log({ snapshot })
-    })
-}
 export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: View<unknown>): Promise<() => void> {
     if (lastUrl === false) {
         lastUrl = location.toString()
@@ -20,7 +12,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
     if (target.nodeName === "A") {
         const anchor = target as HTMLAnchorElement
         requestUrl = anchor.href
-        if(snapshot) {
+        if (view.type === "snapshot") {
             requestUrl = requestUrl.replace(/\/+$/, "") + "/data.json"
         }
         response = await fetch(requestUrl, {
@@ -34,8 +26,8 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         const params = new URLSearchParams()
         let query = ""
         requestUrl = form.action.split("?")[0] ?? ""
-        if(snapshot) {
-            requestUrl = requestUrl.replace(/\/+$/,"") + "/data.json"
+        if (view.type === "snapshot") {
+            requestUrl = requestUrl.replace(/\/+$/, "") + "/data.json"
         }
         form.reset()
         data.forEach(function each(value, key) {
@@ -55,7 +47,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
             })
         } else {
             requestUrl = form.action
-            if(snapshot) {
+            if (view.type === "snapshot") {
                 requestUrl += "/data.json"
             }
             response = await fetch(requestUrl, {
@@ -95,7 +87,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         view.props = remote.props
     }
     let fixedResponseUrl = response.url
-    if(snapshot) {
+    if (view.type === "snapshot") {
         fixedResponseUrl = fixedResponseUrl.replace(/\/data\.json$/, "")
     }
     const stationary = lastUrl === fixedResponseUrl

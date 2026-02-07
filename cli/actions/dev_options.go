@@ -9,6 +9,5 @@ type DevOptions struct {
 	Go     string
 	Air    string
 	Bun    string
-	Tags   string
 	Strict bool
 }

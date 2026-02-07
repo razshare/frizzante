@@ -1,6 +1,5 @@
 import { type Readable, readable } from "svelte/store"
 import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
-
 export function source(path: string) {
     if (!IS_BROWSER) {
         return {
@@ -14,9 +13,7 @@ export function source(path: string) {
             },
         }
     }
-
     const source = new EventSource(path)
-
     return {
         select(event: string = "message"): Readable<string> {
             return readable<string>("", set => {

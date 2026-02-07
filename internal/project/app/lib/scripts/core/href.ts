@@ -1,9 +1,8 @@
 import { getContext } from "svelte"
-import type { View } from "$lib/scripts/core/types"
+import type { View } from "$lib/scripts/core/view"
 import { route } from "$lib/scripts/core/route.ts"
 import { swap } from "$lib/scripts/core/swap.ts"
 import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
-
 export function href(path = ""): {
     href: string
     onclick: (event: MouseEvent) => Promise<boolean>
@@ -16,7 +15,6 @@ export function href(path = ""): {
             },
         }
     }
-
     const anchor = document.createElement("a")
     anchor.href = path
     const view = getContext("view") as View<never>

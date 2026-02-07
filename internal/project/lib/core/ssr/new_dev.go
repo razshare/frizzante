@@ -69,7 +69,7 @@ func New(_ int64) renders.Render {
 				document = strings.Replace(document, "<!--app-data-->", "", 1)
 			} else {
 				var data []byte
-				if data, err = json.Marshal(views.NewData(view)); err != nil {
+				if data, err = json.Marshal(options.Data); err != nil {
 					return
 				}
 				document = strings.Replace(document, "<!--app-data-->", fmt.Sprintf(renders.DataFormat, data), 1)
@@ -80,7 +80,7 @@ func New(_ int64) renders.Render {
 		}
 		if view.RenderMode == views.RenderModeClient {
 			var data []byte
-			if data, err = json.Marshal(views.NewData(view)); err != nil {
+			if data, err = json.Marshal(options.Data); err != nil {
 				return
 			}
 			document = strings.Replace(document, "<!--app-body-->", fmt.Sprintf(renders.BodyFormat, ""), 1)

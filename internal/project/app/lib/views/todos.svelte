@@ -6,9 +6,7 @@
     import { mdiArrowLeft, mdiCheckCircleOutline, mdiCircleOutline, mdiClose, mdiPlus } from "@mdi/js"
     import type { Props, sessions } from "$gen/types/main/lib/routes/todos/props"
     import { slide } from "svelte/transition"
-
     let { items = [], error }: Props = $props()
-
     let unchecked = $derived.by(function count(): number {
         let value = 0
         for (const todo of items) {
