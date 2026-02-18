@@ -1,42 +1,38 @@
+import { getContext } from "svelte"
 import type { View } from "$lib/scripts/core/view"
-import type { HistoryEntry } from "$lib/scripts/core/history_entry"
-import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
+import { route } from "$lib/scripts/core/route.ts"
 import { swap } from "$lib/scripts/core/swap.ts"
-import { swapping } from "./swapping"
-let started = false
-export function route(view: View<never>): void {
-    if (!IS_BROWSER || started) {
-        return
+import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
+import { swapping } from "$lib/scripts/core/swapping.ts"
+export function href(path = ""): {
+    href: string
+    onclick: (event: MouseEvent) => Promise<boolean>
+} {
+    if (!IS_BROWSER) {
+        return {
+            href: path,
+            async onclick() {
+                return true
+            },
+        }
     }
-    const form = document.createElement("form")
     const anchor = document.createElement("a")
-    const listener = async function pop(e: PopStateEvent) {
-        // we don't want to interfere with popstate events
-        // that are not triggered by href() and action().
-        if (!swapping.active) {
-            return
-        }
-        e.preventDefault()
-        const serialized = (e.state ?? "") as string
-        if (serialized !== "") {
-            const entry = JSON.parse(serialized) as HistoryEntry
-            if (entry.method === "GET") {
-                anchor.href = entry.url
-                await swap(anchor, view)
+    anchor.href = path
+    const view = getContext("view") as View<never>
+    route(view)
+    return {
+        href: path,
+        async onclick(event: MouseEvent) {
+            swapping.active = true
+            event.preventDefault()
+            try {
+                const record = await swap(anchor, view)
+                record()
+            } catch (error) {
+                console.error("swapping failed", error)
             }
-            form.innerHTML = ""
-            for (const key in entry.body) {
-                const value = entry.body[key]
-                const input = document.createElement("input")
-                input.value = value
-                form.appendChild(input)
-            }
-            await swap(form, view)
-            return
-        }
-        anchor.href = "/"
-        await swap(anchor, view)
+            swapping.active = false
+            return false
+        },
     }
-    window.addEventListener("popstate", listener)
-    started = true
 }
