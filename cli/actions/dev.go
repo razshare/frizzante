@@ -17,7 +17,7 @@ func Dev(options DevOptions) (err error) {
 		}
 	}
 	if !messages.Command(messages.CommandOptions{
-		Environment: os.Environ(),
+		Environment: append(os.Environ(), "DEV=1"),
 		Program:     options.Air,
 	}) {
 		messages.Error("air failed")
