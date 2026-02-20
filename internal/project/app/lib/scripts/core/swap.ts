@@ -24,7 +24,6 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         const form = target as HTMLFormElement
         const data = new FormData(form)
         const params = new URLSearchParams()
-        let query = ""
         requestUrl = form.action.split("?")[0] ?? ""
         if (view.type === "snapshot") {
             requestUrl = requestUrl.replace(/\/+$/, "") + "/data.json"
@@ -39,7 +38,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         })
         method = form.method.toUpperCase() as "GET" | "POST"
         if (method === "GET") {
-            query = `?${params.toString()}`
+            const query = `?${params.toString()}`
             response = await fetch(`${requestUrl}${query}`, {
                 headers: {
                     Accept: "application/json",
