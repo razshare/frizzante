@@ -1,7 +1,7 @@
 {
     "devDependencies": {
         "@eslint/compat": "2.0.2",
-        "@eslint/js": "^10.0.1",
+        "@eslint/js": "10.0.1",
         "@mdi/js": "7.4.47",
         "@sveltejs/vite-plugin-svelte": "6.2.4",
         "@tailwindcss/vite": "4.2.0",
@@ -14,7 +14,7 @@
         "eslint-plugin-svelte": "3.15.0",
         "prettier": "3.8.1",
         "prettier-plugin-svelte": "3.5.0",
-        "svelte": "5.53.0",
+        "svelte": "5.45.10",
         "svelte-check": "4.4.3",
         "tailwindcss": "4.2.0",
         "typescript": "5.9.3",
