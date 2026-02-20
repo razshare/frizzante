@@ -43,6 +43,7 @@ func main() {
 		DatabaseType: flag.StringP("database-type", "", "", "sets the type of database to use; currently only sqlite is supported"),
 		Context:      flag.StringP("context", "", "js", "sets the context; used with <frizzante add>; currently only \"js\" context is supported"),
 		Strict:       flag.BoolP("strict", "s", false, "enables strict mode; program will stop if any required arguments or flags are missing; useful in ci/cd pipelines"),
+		Incremental:  flag.BoolP("incremental", "", false, "enables incremental mode for svelte-check"),
 	}
 	flag.Parse()
 	if _, err := menus.Activate(&menus.Main, app, flag.Args()); err != nil {

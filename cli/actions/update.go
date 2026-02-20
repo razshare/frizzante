@@ -14,15 +14,15 @@ func Update(options UpdateOptions) (err error) {
 	if !messages.Command(messages.CommandOptions{
 		Environment: os.Environ(),
 		Program:     options.Go,
-		Args:        []string{"mod", "tidy"},
+		Args:        []string{"get", "./..."},
 	}) {
-		err = errors.New("could not update go packages")
+		err = errors.New("could not download go packages")
 		return
 	}
 	if !messages.Command(messages.CommandOptions{
 		Environment: os.Environ(),
 		Program:     options.Go,
-		Args:        []string{"get", "-U", "./..."},
+		Args:        []string{"mod", "tidy"},
 	}) {
 		err = errors.New("could not update go packages")
 		return

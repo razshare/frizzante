@@ -179,7 +179,10 @@ var Main = Menu{
 			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ check"))
-				err = actions.Check(actions.CheckOptions{Bun: *app.Bun})
+				err = actions.Check(actions.CheckOptions{
+					Bun:         *app.Bun,
+					Incremental: *app.Incremental,
+				})
 				return
 			},
 		},

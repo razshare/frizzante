@@ -37,12 +37,16 @@ func Check(options CheckOptions) (err error) {
 	if err = json.Unmarshal(data, &pkg); err != nil {
 		return
 	}
+	args := []string{"x", "svelte-check", "--tsconfig=./tsconfig.json"}
+	if options.Incremental {
+		args = append(args, "--incremental")
+	}
 	if pkg.DevDependencies.SvelteCheck != "" {
 		if !messages.Command(messages.CommandOptions{
 			DirectoryName: "app",
 			Environment:   os.Environ(),
 			Program:       options.Bun,
-			Args:          []string{"x", "svelte-check", "--tsconfig=./tsconfig.json"},
+			Args:          args,
 		}) {
 			err = errors.New("could not run svelte-check")
 			return
