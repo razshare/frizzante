@@ -19,7 +19,7 @@ import (
 
 func New(limit int64) renders.Render {
 	var mut sync.Mutex
-	var server = filepath.Join("app", "dist", "server", "app.server.cjs")
+	var server = filepath.Join("app", "dist", "server", "app.server.js")
 	var index = filepath.Join("app", "dist", "client", "index.html")
 	var jsRenders = make(chan javascript.Render, 1)
 	server = strings.ReplaceAll(server, "\\", "/")
@@ -33,8 +33,12 @@ func New(limit int64) renders.Render {
 		if data, err = options.Efs.ReadFile(server); err != nil {
 			return
 		}
+		var source string
+		if source, err = esbuild.Bundle("app", api.FormatCommonJS, string(data)); err != nil {
+			return
+		}
 		jsRender, err = javascript.NewRender(javascript.NewRenderOptions{
-			Data:     data,
+			Data:     []byte(source),
 			Server:   server,
 			InfoLog:  options.InfoLog,
 			ErrorLog: options.ErrorLog,

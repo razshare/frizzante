@@ -78,7 +78,7 @@ func NewRender(options NewRenderOptions) (render Render, err error) {
 	}
 	source := "const module={exports:{}};\n" + string(options.Data) + "\nfrizzante_set_render(render)"
 	var prog *goja.Program
-	if prog, err = goja.Compile("app.server.cjs", source, false); err != nil {
+	if prog, err = goja.Compile("app.server.js", source, false); err != nil {
 		return
 	}
 	if _, err = runtime.RunProgram(prog); err != nil {

@@ -5,27 +5,23 @@ tmp_dir = ".gen/tmp"
 [build]
 args_bin = []
 bin = ".gen/tmp/main.exe"
-cmd = "go build -tags dev,trace -o .gen/tmp/main.exe ."
+cmd = "go build -tags=dev,trace -o .gen/tmp/main.exe ."
 delay = 50
-exclude_dir = ["app/dist", "app/node_modules", ".gen", ".git", ".github", "lib/core/ssr/app"]
+exclude_dir = ["app", ".gen", ".git", ".github", "lib/core/ssr/app"]
 exclude_file = []
 exclude_regex = ["_test.go"]
 exclude_unchanged = false
 follow_symlink = false
 full_bin = ""
 include_dir = []
-include_ext = ["go", "svelte", "js", "ts", "json"]
+include_ext = ["go"]
 include_file = []
 kill_delay = "0s"
 log = "build-errors.log"
 poll = false
 poll_interval = 0
 post_cmd = []
-pre_cmd = [
-  "cd app && ../.gen/bun/bun x vite build --logLevel=info --outDir=dist/client --emptyOutDir=true",
-  "cd app && ../.gen/bun/bun x vite build --logLevel=info --outDir=dist/server --emptyOutDir=true --ssr=app.server.ts",
-  "cd app && ./node_modules/.bin/esbuild --bundle --outfile=dist/server/app.server.cjs --format=cjs --allow-overwrite dist/server/app.server.js",
-]
+pre_cmd = []
 rerun = false
 rerun_delay = 50
 send_interrupt = true

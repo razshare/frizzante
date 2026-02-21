@@ -36,17 +36,21 @@ func Package(options PackageOptions) (err error) {
 			}
 			return
 		}
+		if err = os.Rename(filepath.Join("app", "dist", "server", "app.server.js"), filepath.Join("app", "dist", "server", "app.server.1.js")); err != nil {
+			return
+		}
 		if !messages.Command(messages.CommandOptions{
 			Environment:   os.Environ(),
 			DirectoryName: "app",
 			Program:       filepath.Join("app", "node_modules", ".bin", "esbuild"),
-			Args:          []string{"--bundle", "--outfile=dist/server/app.server.cjs", "--format=cjs", "--allow-overwrite", "dist/server/app.server.js"},
+			Args:          []string{"--bundle", "--outfile=dist/server/app.server.js", "--format=cjs", "--allow-overwrite", "dist/server/app.server.1.js"},
 		}) {
 			if err == nil {
 				err = errors.New("could not normalize server bundle")
 			}
 			return
 		}
+		err = os.RemoveAll(filepath.Join("app", "dist", "server", "app.server.js"))
 	})
 	group.Wait()
 	messages.Success("app/dist generated")

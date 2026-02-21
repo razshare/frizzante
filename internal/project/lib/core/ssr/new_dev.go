@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/evanw/esbuild/pkg/api"
+	"github.com/razshare/frizzante/internal/project/lib/core/esbuild"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/javascript"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
@@ -18,7 +20,7 @@ import (
 )
 
 func New(_ int64) renders.Render {
-	var server = filepath.Join("app", "dist", "server", "app.server.cjs")
+	var server = filepath.Join("app", "dist", "server", "app.server.js")
 	var index = filepath.Join("app", "dist", "client", "index.html")
 	server = strings.ReplaceAll(server, "/", string(filepath.Separator))
 	server = strings.ReplaceAll(server, "\\", string(filepath.Separator))
@@ -33,8 +35,12 @@ func New(_ int64) renders.Render {
 		if data, err = os.ReadFile(server); err != nil {
 			return
 		}
+		var source string
+		if source, err = esbuild.Bundle("app", api.FormatCommonJS, string(data)); err != nil {
+			return
+		}
 		jsRender, err = javascript.NewRender(javascript.NewRenderOptions{
-			Data:     data,
+			Data:     []byte(source),
 			Server:   server,
 			InfoLog:  options.InfoLog,
 			ErrorLog: options.ErrorLog,
