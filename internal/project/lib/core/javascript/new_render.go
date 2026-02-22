@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/dop251/goja"
-	"github.com/razshare/frizzante/internal/additions/lib/security"
+	"github.com/razshare/frizzante/internal/project/lib/core/security"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 	"github.com/razshare/frizzante/internal/project/lib/dev/types"
 )

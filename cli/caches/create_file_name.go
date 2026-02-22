@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 
 	"github.com/razshare/frizzante/cli/paths"
-	"github.com/razshare/frizzante/internal/additions/lib/security"
+	"github.com/razshare/frizzante/internal/project/lib/core/security"
 )
 
 func CreateFileName(options CreateFileNameOptions) (fileName string, err error) {

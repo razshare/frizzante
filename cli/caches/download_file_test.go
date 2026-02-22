@@ -11,8 +11,8 @@ import (
 	"testing"
 
 	"github.com/razshare/frizzante/cli/paths"
-	"github.com/razshare/frizzante/internal/additions/lib/security"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/security"
 )
 
 //go:embed test.zip

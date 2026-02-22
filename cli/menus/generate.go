@@ -208,18 +208,5 @@ var Generate = Menu{
 				return
 			},
 		},
-		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "security" },
-			Choice: search.Choice{Id: "security", Description: "security package"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ security"))
-				err = generations.Security(generations.SecurityOptions{
-					Strict: *app.Strict,
-					Efs:    app.Efs,
-				})
-				return
-			},
-		},
 	},
 }
