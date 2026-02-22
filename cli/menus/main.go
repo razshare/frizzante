@@ -116,11 +116,25 @@ var Main = Menu{
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ build"))
 				err = actions.Build(actions.BuildOptions{
-					Go:     *app.Go,
-					Bun:    *app.Bun,
-					Tags:   *app.Tags,
-					Strict: *app.Strict,
-					Efs:    app.Efs,
+					Go:   *app.Go,
+					Bun:  *app.Bun,
+					Tags: *app.Tags,
+				})
+				return
+			},
+		},
+		{
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"package", "p"}, value)
+			},
+			Choice: search.Choice{Id: "package", Description: "package app"},
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
+				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+				fmt.Println(configs.Styles.Menu.Render("running ▷ package"))
+				err = actions.Package(actions.PackageOptions{
+					Go:   *app.Go,
+					Bun:  *app.Bun,
+					Tags: *app.Tags,
 				})
 				return
 			},
