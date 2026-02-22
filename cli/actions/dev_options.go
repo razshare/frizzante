@@ -5,9 +5,8 @@ import (
 )
 
 type DevOptions struct {
-	Efs    embed.FS
-	Go     string
-	Air    string
-	Bun    string
-	Strict bool
+	Efs embed.FS
+	Go  string
+	Air string
+	Bun string
 }

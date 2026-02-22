@@ -1,13 +1,14 @@
 {
-  "version": "0.2.0",
-  "configurations": [
+  "version": "2.0.0",
+  "tasks": [
     {
-      "name": "debug main.go",
-      "type": "go",
-      "request": "launch",
-      "mode": "auto",
-      "program": "${workspaceFolder}/main.go",
-      "buildFlags": ["dev", "trace"]
+      "label": "package",
+      "type": "shell",
+      "command": "frizzante",
+      "args": ["package"],
+      "options": {
+        "env": { "DEV": "1" }
+      }
     }
   ]
 }

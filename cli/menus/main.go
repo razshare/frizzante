@@ -40,11 +40,10 @@ var Main = Menu{
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ dev"))
 				err = actions.Dev(actions.DevOptions{
-					Go:     *app.Go,
-					Air:    *app.Air,
-					Bun:    *app.Bun,
-					Efs:    app.Efs,
-					Strict: *app.Strict,
+					Go:  *app.Go,
+					Air: *app.Air,
+					Bun: *app.Bun,
+					Efs: app.Efs,
 				})
 				return
 			},
@@ -124,10 +123,8 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
-				return slices.Contains([]string{"package", "p"}, value)
-			},
-			Choice: search.Choice{Id: "package", Description: "package app"},
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "package" },
+			Choice: search.Choice{Id: "package", Description: "packages app"},
 			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ package"))
@@ -136,6 +133,16 @@ var Main = Menu{
 					Bun:  *app.Bun,
 					Tags: *app.Tags,
 				})
+				return
+			},
+		},
+		{
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "package-watch" },
+			Choice: search.Choice{Id: "package-watch", Description: "watches app and packages it"},
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
+				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+				fmt.Println(configs.Styles.Menu.Render("running ▷ package-watch"))
+				err = actions.PackageWatch(actions.PackageWatchOptions{Bun: *app.Bun})
 				return
 			},
 		},

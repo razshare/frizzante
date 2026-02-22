@@ -5,6 +5,11 @@
     "program": "$ZED_WORKTREE_ROOT/main.go",
     "request": "launch",
     "mode": "debug",
-    "buildFlags": ["dev", "trace"]
+    "buildFlags": "-tags=dev,trace",
+    "build": {
+      "env": { "DEV": "1" },
+      "command": "frizzante",
+      "args": ["package"]
+    }
   }
 ]
