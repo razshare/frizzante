@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/dop251/goja"
+	"github.com/razshare/frizzante/internal/additions/lib/security"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 	"github.com/razshare/frizzante/internal/project/lib/dev/types"
 )
@@ -63,18 +64,19 @@ func NewRender(options NewRenderOptions) (render Render, err error) {
 	}); err != nil {
 		return
 	}
+	if err = runtime.Set("hash_256_627f0c8d3f2158f776f550ab47b35de9", func(call goja.FunctionCall) goja.Value {
+		text := call.Arguments[1].String()
+		return runtime.ToValue(security.Sha256(text))
+	}); err != nil {
+		return
+	}
 	var source string
 	if source, err = options.FindSource(); err != nil {
 		return
 	}
 	const bootstrap = `
 		const module={exports:{}};
-		function import_627f0c8d3f2158f776f550ab47b35de9(module_name) {
-			if(module_name === "node:crypto") {
-				return { webcrypto: crypto }
-			}
-			return undefined;
-		}
+		const globalThis={crypto:{subtle:{digest:hash_256_627f0c8d3f2158f776f550ab47b35de9}}};
 	`
 	script := fmt.Sprintf("%s\n%s\nfrizzante_set_render(render)", strings.TrimSpace(bootstrap), source)
 	var prog *goja.Program
