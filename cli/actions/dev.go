@@ -21,7 +21,7 @@ func Dev(options DevOptions) (err error) {
 	var group sync.WaitGroup
 	group.Go(func() {
 		if !messages.Command(messages.CommandOptions{
-			Environment:   os.Environ(),
+			Environment:   append(os.Environ(), "DEV=1"),
 			DirectoryName: "app",
 			Program:       options.Bun,
 			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch"},

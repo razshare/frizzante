@@ -13,12 +13,6 @@ build:
 dev:
 	frizzante dev
 
-package-watch:
-	frizzante package-watch
-
-package:
-	frizzante package
-
 check:
 	frizzante check
 

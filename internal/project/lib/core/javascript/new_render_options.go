@@ -3,8 +3,8 @@ package javascript
 import "log"
 
 type NewRenderOptions struct {
-	Data     []byte
-	Server   string
-	ErrorLog *log.Logger
-	InfoLog  *log.Logger
+	FindSource func() (source string, err error)
+	Server     string
+	ErrorLog   *log.Logger
+	InfoLog    *log.Logger
 }

@@ -3,68 +3,77 @@ package actions
 import (
 	"os"
 	"path/filepath"
-	"strings"
 
+	"github.com/evanw/esbuild/pkg/api"
 	"github.com/razshare/frizzante/cli/extensions"
-	tags_ "github.com/razshare/frizzante/cli/tags"
-	"github.com/razshare/frizzante/tui/confirm"
+	"github.com/razshare/frizzante/cli/generations"
+	"github.com/razshare/frizzante/internal/project/lib/core/esbuild"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
-	"github.com/razshare/frizzante/tui/search"
 	"github.com/razshare/frizzante/tui/spinners"
 )
 
 func Build(options BuildOptions) (err error) {
-	var tags []string
-	if tags, err = tags_.Parse(options.Tags); err != nil {
-		return
-	}
-	if !options.Strict {
-		var yesBuildWithTags bool
-		if yesBuildWithTags, err = confirm.Send(false, "build with tags?"); err != nil {
+	if !files.IsFile(".air.toml") {
+		if err = generations.AirConfig(generations.AirConfigOptions{
+			Efs: options.Efs,
+		}); err != nil {
 			return
 		}
-		if yesBuildWithTags {
-			var selectedTags []string
-			if selectedTags, err = tags_.Select([]search.Choice{
-				{Id: "trace", Description: "enables tracing"},
-				{Id: "dev", Description: "enables dev mode"},
-				{Id: "other", Description: "prompts for custom tags"},
-			}); err != nil {
-				return
-			}
-			tags = append(tags, selectedTags...)
-		}
 	}
-	if err = Package(PackageOptions{Bun: options.Bun, Production: true}); err != nil {
+	if !messages.Command(messages.CommandOptions{
+		Environment:   os.Environ(),
+		DirectoryName: "app",
+		Program:       options.Bun,
+		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false"},
+	}) {
+		messages.Error("could not build client bundles")
+		return
+	}
+	if !messages.Command(messages.CommandOptions{
+		Environment:   os.Environ(),
+		DirectoryName: "app",
+		Program:       options.Bun,
+		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/server", "--emptyOutDir=true", "--ssr=app.server.ts"},
+	}) {
+		messages.Error("could not build server bundle")
+		return
+	}
+	// Vite build will convert app.server.ts into a new file "app.server.js",
+	// however this new file could contain "import" statements and "require" calls.
+	//
+	// We need app.server.js be self-contained, meaning we
+	// cannot allow it to have any "import" statements or "require" calls
+	// because Goja does not implement a "require()" function.
+	//
+	// To solve this issue we need to run the app.server.js
+	// through Esbuild, which will give us a self-container js script.
+	var sourceData []byte
+	if sourceData, err = os.ReadFile(filepath.Join("app", "dist", "server", "app.server.js")); err != nil {
+		return
+	}
+	var sourceStringBundled string
+	if sourceStringBundled, err = esbuild.Bundle("app", api.FormatCommonJS, string(sourceData)); err != nil {
+		return
+	}
+	if err = os.RemoveAll(filepath.Join("app", "dist", "server", "app.server.js")); err != nil {
+		return
+	}
+	if err = os.WriteFile(filepath.Join("app", "dist", "server", "app.server.js"), []byte(sourceStringBundled), os.ModePerm); err != nil {
 		return
 	}
 	extension := extensions.Find()
-	if len(options.Tags) > 0 {
-		spin := spinners.Newf("building binary with tags %s", strings.Join(tags, ","))
-		go spinners.Start(spin)
-		if messages.Command(messages.CommandOptions{
-			Environment: os.Environ(),
-			Program:     options.Go,
-			Args:        []string{"build", "-tags=" + strings.Join(tags, ","), "-o=" + filepath.Join(".gen", "bin", "app"+extension), "."},
-		}) {
-			spinners.Stop(spin)
-			messages.Success("project built into ", filepath.Join(".gen", "bin", "app"+extension))
-		} else {
-			spinners.Stop(spin)
-		}
-	} else {
-		spin := spinners.New("building binary")
-		go spinners.Start(spin)
-		if messages.Command(messages.CommandOptions{
-			Environment: os.Environ(),
-			Program:     options.Go,
-			Args:        []string{"build", "-o=" + filepath.Join(".gen", "bin", "app"+extension), "."},
-		}) {
-			spinners.Stop(spin)
-			messages.Success("project built into ", filepath.Join(".gen", "bin", "app"+extension))
-		} else {
-			spinners.Stop(spin)
-		}
+	spin := spinners.New("building binary")
+	go spinners.Start(spin)
+	if !messages.Command(messages.CommandOptions{
+		Environment: os.Environ(),
+		Program:     options.Go,
+		Args:        []string{"build", "-o=" + filepath.Join(".gen", "bin", "app"+extension), "."},
+	}) {
+		messages.Error("could not build go source code")
+		return
 	}
+	spinners.Stop(spin)
+	messages.Success("project built into ", filepath.Join(".gen", "bin", "app"+extension))
 	return
 }

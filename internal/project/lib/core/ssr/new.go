@@ -29,19 +29,15 @@ func New(limit int64) renders.Render {
 			err = fmt.Errorf("file %s not found", server)
 			return
 		}
-		var data []byte
-		if data, err = options.Efs.ReadFile(server); err != nil {
-			return
-		}
-		var source string
-		if source, err = esbuild.Bundle("app", api.FormatCommonJS, string(data)); err != nil {
+		var sourceData []byte
+		if sourceData, err = options.Efs.ReadFile(server); err != nil {
 			return
 		}
 		jsRender, err = javascript.NewRender(javascript.NewRenderOptions{
-			Data:     []byte(source),
-			Server:   server,
-			InfoLog:  options.InfoLog,
-			ErrorLog: options.ErrorLog,
+			Server:     server,
+			InfoLog:    options.InfoLog,
+			ErrorLog:   options.ErrorLog,
+			FindSource: func() (string, error) { return string(sourceData), nil },
 		})
 		return
 	}

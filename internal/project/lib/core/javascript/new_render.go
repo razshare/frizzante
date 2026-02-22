@@ -2,6 +2,7 @@ package javascript
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"strings"
 
@@ -76,9 +77,13 @@ func NewRender(options NewRenderOptions) (render Render, err error) {
 	}); err != nil {
 		return
 	}
-	source := "const module={exports:{}};\n" + string(options.Data) + "\nfrizzante_set_render(render)"
+	var source string
+	if source, err = options.FindSource(); err != nil {
+		return
+	}
+	script := fmt.Sprintf("const module={exports:{}};\n%s\nfrizzante_set_render(render)", source)
 	var prog *goja.Program
-	if prog, err = goja.Compile("app.server.js", source, false); err != nil {
+	if prog, err = goja.Compile("app.server.js", script, false); err != nil {
 		return
 	}
 	if _, err = runtime.RunProgram(prog); err != nil {

@@ -31,19 +31,20 @@ func New(_ int64) renders.Render {
 			err = fmt.Errorf("file %s not found", server)
 			return
 		}
-		var data []byte
-		if data, err = os.ReadFile(server); err != nil {
-			return
-		}
-		var source string
-		if source, err = esbuild.Bundle("app", api.FormatCommonJS, string(data)); err != nil {
-			return
-		}
 		jsRender, err = javascript.NewRender(javascript.NewRenderOptions{
-			Data:     []byte(source),
 			Server:   server,
 			InfoLog:  options.InfoLog,
 			ErrorLog: options.ErrorLog,
+			FindSource: func() (sourceStringBundled string, err error) {
+				var sourceData []byte
+				if sourceData, err = os.ReadFile(server); err != nil {
+					return
+				}
+				if sourceStringBundled, err = esbuild.Bundle("app", api.FormatCommonJS, string(sourceData)); err != nil {
+					return
+				}
+				return
+			},
 		})
 		return
 	}

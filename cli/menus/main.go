@@ -120,6 +120,7 @@ var Main = Menu{
 					Bun:    *app.Bun,
 					Tags:   *app.Tags,
 					Strict: *app.Strict,
+					Efs:    app.Efs,
 				})
 				return
 			},
@@ -160,16 +161,6 @@ var Main = Menu{
 					SqlcYaml: *app.SqlcYaml,
 					Database: *app.Database,
 				})
-				return
-			},
-		},
-		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "package" },
-			Choice: search.Choice{Id: "package", Description: "packages the svelte application into app/dist"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("running ▷ package"))
-				err = actions.Package(actions.PackageOptions{Bun: *app.Bun})
 				return
 			},
 		},
