@@ -3,68 +3,53 @@ package javascript
 import (
 	"errors"
 	"fmt"
-	"log"
-	"strings"
 
 	"github.com/dop251/goja"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 	"github.com/razshare/frizzante/internal/project/lib/dev/types"
 )
 
 func NewRender(options NewRenderOptions) (render Render, err error) {
-	var builder strings.Builder
 	runtime := goja.New()
 	console := runtime.NewObject()
-	createLogger := func(level LogLevel) func(call goja.FunctionCall) goja.Value {
-		var logger *log.Logger
-		switch level {
-		case LogLevelDanger:
-			logger = options.ErrorLog
-		default:
-			logger = options.InfoLog
-		}
-		return func(call goja.FunctionCall) goja.Value {
-			builder.Reset()
-			i := 0
-			for _, argument := range call.Arguments {
-				if i > 0 {
-					builder.WriteString(" ")
-				}
-				switch argument.(type) {
-				case *goja.Object:
-					var marshalData []byte
-					object := argument.ToObject(runtime)
-					marshalData, err = object.MarshalJSON()
-					if err != nil {
-						options.ErrorLog.Println(err, stack.Trace())
-						return goja.Undefined()
-					}
-					builder.WriteString(string(marshalData))
-				default:
-					value := argument.String()
-					if value == "https://svelte.dev/e/experimental_async_ssr" {
-						// Skipping experimental async ssr warnings.
-						return goja.Undefined()
-					}
-					builder.WriteString(value)
-				}
-				i++
-			}
-			logger.Println(builder.String())
-			return goja.Undefined()
-		}
-	}
-	if err = console.Set("log", createLogger(LogLevelBase)); err != nil {
+	if err = console.Set("log", CreateLogger(CreateLoggerOptions{
+		Level:    LogLevelBase,
+		Runtime:  runtime,
+		ErrorLog: options.ErrorLog,
+		InfoLog:  options.InfoLog,
+	})); err != nil {
 		return
 	}
-	if err = console.Set("info", createLogger(LogLevelBase)); err != nil {
+	if err = console.Set("info", CreateLogger(CreateLoggerOptions{
+		Level:    LogLevelBase,
+		Runtime:  runtime,
+		ErrorLog: options.ErrorLog,
+		InfoLog:  options.InfoLog,
+	})); err != nil {
 		return
 	}
-	if err = console.Set("warn", createLogger(LogLevelWarning)); err != nil {
+	if err = console.Set("warn", CreateLogger(CreateLoggerOptions{
+		Level:    LogLevelWarning,
+		Runtime:  runtime,
+		ErrorLog: options.ErrorLog,
+		InfoLog:  options.InfoLog,
+	})); err != nil {
 		return
 	}
-	if err = console.Set("error", createLogger(LogLevelDanger)); err != nil {
+	if err = console.Set("error", CreateLogger(CreateLoggerOptions{
+		Level:    LogLevelDanger,
+		Runtime:  runtime,
+		ErrorLog: options.ErrorLog,
+		InfoLog:  options.InfoLog,
+	})); err != nil {
+		return
+	}
+	if err = console.Set("error", CreateLogger(CreateLoggerOptions{
+		Level:    LogLevelDanger,
+		Runtime:  runtime,
+		ErrorLog: options.ErrorLog,
+		InfoLog:  options.InfoLog,
+	})); err != nil {
 		return
 	}
 	if err = runtime.Set("console", console); err != nil {
@@ -73,6 +58,16 @@ func NewRender(options NewRenderOptions) (render Render, err error) {
 	var renderValue goja.Value
 	if err = runtime.Set("frizzante_set_render", func(call goja.FunctionCall) goja.Value {
 		renderValue = call.Arguments[0]
+		return goja.Undefined()
+	}); err != nil {
+		return
+	}
+	// currently svelte imports `node:crypto`, which will break our runtime,
+	// so we need to strip it off from the bundle.
+	// see issues #17762 and #17771:
+	// https://github.com/sveltejs/svelte/issues/17762
+	// https://github.com/sveltejs/svelte/issues/17771
+	if err = runtime.Set("import_627f0c8d3f2158f776f550ab47b35de9", func(call goja.FunctionCall) goja.Value {
 		return goja.Undefined()
 	}); err != nil {
 		return

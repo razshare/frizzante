@@ -35,12 +35,26 @@ func New(_ int64) renders.Render {
 			Server:   server,
 			InfoLog:  options.InfoLog,
 			ErrorLog: options.ErrorLog,
-			FindSource: func() (sourceStringBundled string, err error) {
-				var sourceData []byte
-				if sourceData, err = os.ReadFile(server); err != nil {
+			FindSource: func() (serverStringBundled string, err error) {
+				var serverData []byte
+				if serverData, err = os.ReadFile(server); err != nil {
 					return
 				}
-				if sourceStringBundled, err = esbuild.Bundle("app", api.FormatCommonJS, string(sourceData)); err != nil {
+				if serverStringBundled, err = esbuild.Bundle("app", api.FormatCommonJS, string(serverData)); err != nil {
+					return
+				}
+				// currently svelte imports `node:crypto`, which will break our runtime,
+				// so we need to strip it off from the bundle.
+				// see issues #17762 and #17771:
+				// https://github.com/sveltejs/svelte/issues/17762
+				// https://github.com/sveltejs/svelte/issues/17771
+				serverStringBundled = strings.Replace(
+					serverStringBundled,
+					`import(`,
+					"import_627f0c8d3f2158f776f550ab47b35de9(",
+					1,
+				)
+				if err = os.WriteFile("source.js", []byte(serverStringBundled), os.ModePerm); err != nil {
 					return
 				}
 				return
