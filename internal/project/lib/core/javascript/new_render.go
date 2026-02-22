@@ -3,6 +3,7 @@ package javascript
 import (
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/dop251/goja"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
@@ -62,21 +63,20 @@ func NewRender(options NewRenderOptions) (render Render, err error) {
 	}); err != nil {
 		return
 	}
-	// currently svelte imports `node:crypto`, which will break our runtime,
-	// so we need to strip it off from the bundle.
-	// see issues #17762 and #17771:
-	// https://github.com/sveltejs/svelte/issues/17762
-	// https://github.com/sveltejs/svelte/issues/17771
-	if err = runtime.Set("import_627f0c8d3f2158f776f550ab47b35de9", func(call goja.FunctionCall) goja.Value {
-		return goja.Undefined()
-	}); err != nil {
-		return
-	}
 	var source string
 	if source, err = options.FindSource(); err != nil {
 		return
 	}
-	script := fmt.Sprintf("const module={exports:{}};\n%s\nfrizzante_set_render(render)", source)
+	const bootstrap = `
+		const module={exports:{}};
+		function import_627f0c8d3f2158f776f550ab47b35de9(module_name) {
+			if(module_name === "node:crypto") {
+				return { webcrypto: crypto }
+			}
+			return undefined;
+		}
+	`
+	script := fmt.Sprintf("%s\n%s\nfrizzante_set_render(render)", strings.TrimSpace(bootstrap), source)
 	var prog *goja.Program
 	if prog, err = goja.Compile("app.server.js", script, false); err != nil {
 		return
