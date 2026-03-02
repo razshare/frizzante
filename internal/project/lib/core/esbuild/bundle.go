@@ -7,11 +7,12 @@ import (
 )
 
 // Bundle bundles JavaScript source code into a specific format given a root directory containing node_modules.
-func Bundle(root string, format api.Format, source string) (string, error) {
+func Bundle(root string, format api.Format, source string, alias map[string]string) (string, error) {
 	result := api.Build(api.BuildOptions{
 		Bundle: true,
 		Format: format,
 		Write:  false,
+		Alias:  alias,
 		Stdin: &api.StdinOptions{
 			Contents:   source,
 			ResolveDir: root,

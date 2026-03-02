@@ -31,6 +31,7 @@ func New(_ int64) renders.Render {
 			err = fmt.Errorf("file %s not found", server)
 			return
 		}
+		emptyTsFileName := fmt.Sprintf(".%s%s", string(os.PathSeparator), filepath.Join(".gen", "empty.ts"))
 		jsRender, err = javascript.NewRender(javascript.NewRenderOptions{
 			Server:   server,
 			InfoLog:  options.InfoLog,
@@ -40,7 +41,19 @@ func New(_ int64) renders.Render {
 				if serverData, err = os.ReadFile(server); err != nil {
 					return
 				}
-				if serverStringBundled, err = esbuild.Bundle("app", api.FormatCommonJS, string(serverData)); err != nil {
+				if !files.IsFile(emptyTsFileName) {
+					if err = os.WriteFile(emptyTsFileName, []byte("export default {}"), os.ModePerm); err != nil {
+						return
+					}
+				}
+				if serverStringBundled, err = esbuild.Bundle(
+					"app",
+					api.FormatCommonJS,
+					string(serverData),
+					map[string]string{
+						"node:crypto": strings.ReplaceAll(emptyTsFileName, string(os.PathSeparator), "/"),
+					},
+				); err != nil {
 					return
 				}
 				// currently svelte imports `node:crypto`, which will break our runtime,
@@ -50,8 +63,8 @@ func New(_ int64) renders.Render {
 				// https://github.com/sveltejs/svelte/issues/17771
 				serverStringBundled = strings.Replace(
 					serverStringBundled,
-					`import(`,
-					"import_627f0c8d3f2158f776f550ab47b35de9(",
+					`obfuscated_import(`,
+					"import(",
 					1,
 				)
 				if err = os.WriteFile("source.js", []byte(serverStringBundled), os.ModePerm); err != nil {

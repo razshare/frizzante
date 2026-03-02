@@ -1,11 +1,14 @@
 package actions
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/evanw/esbuild/pkg/api"
 	"github.com/razshare/frizzante/internal/project/lib/core/esbuild"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
 )
 
@@ -41,8 +44,24 @@ func Package(options PackageOptions) (err error) {
 	if sourceData, err = os.ReadFile(filepath.Join("app", "dist", "server", "app.server.js")); err != nil {
 		return
 	}
+	emptyTsFileName := fmt.Sprintf(".%s%s", string(os.PathSeparator), filepath.Join(".gen", "empty.ts"))
+	if !files.IsFile(emptyTsFileName) {
+		if err = os.WriteFile(emptyTsFileName, []byte("export default {}"), os.ModePerm); err != nil {
+			return
+		}
+	}
 	var sourceStringBundled string
-	if sourceStringBundled, err = esbuild.Bundle("app", api.FormatCommonJS, string(sourceData)); err != nil {
+	if sourceStringBundled, err = esbuild.Bundle(
+		"app",
+		api.FormatCommonJS,
+		string(sourceData),
+		map[string]string{
+			"node:crypto": strings.ReplaceAll(emptyTsFileName, string(os.PathSeparator), "/"),
+		},
+	); err != nil {
+		return
+	}
+	if err = os.RemoveAll(emptyTsFileName); err != nil {
 		return
 	}
 	if err = os.RemoveAll(filepath.Join("app", "dist", "server", "app.server.js")); err != nil {
