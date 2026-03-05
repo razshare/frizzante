@@ -63,8 +63,8 @@ func New(_ int64) renders.Render {
 				// https://github.com/sveltejs/svelte/issues/17771
 				serverStringBundled = strings.Replace(
 					serverStringBundled,
-					`obfuscated_import(`,
-					"import(",
+					`await obfuscated_import(`,
+					"await import(",
 					1,
 				)
 				if err = os.WriteFile("source.js", []byte(serverStringBundled), os.ModePerm); err != nil {

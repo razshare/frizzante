@@ -40,8 +40,8 @@ func New(limit int64) renders.Render {
 		// https://github.com/sveltejs/svelte/issues/17771
 		serverStringStrippedOfNodeCrypto := strings.Replace(
 			string(serverData),
-			`obfuscated_import(`,
-			"import(",
+			`await obfuscated_import(`,
+			"await import(",
 			1,
 		)
 		jsRender, err = javascript.NewRender(javascript.NewRenderOptions{
