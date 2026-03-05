@@ -13,7 +13,12 @@ import (
 func Json(client *clients.Client, value any) {
 	data, err := json.Marshal(value)
 	if err != nil {
-		client.Options.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"send.Json: failed to marshal value (type=%T) to JSON: %v\n%s",
+			value,
+			err,
+			stack.Trace(),
+		)
 		return
 	}
 	if client.WebSocket == nil {
