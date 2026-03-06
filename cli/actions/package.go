@@ -40,10 +40,16 @@ func Package(options PackageOptions) (err error) {
 	//
 	// To solve this issue we need to run the app.server.js
 	// through Esbuild, which will give us a self-container js script.
-	var sourceData []byte
-	if sourceData, err = os.ReadFile(filepath.Join("app", "dist", "server", "app.server.js")); err != nil {
+	var data []byte
+	if data, err = os.ReadFile(filepath.Join("app", "dist", "server", "app.server.js")); err != nil {
 		return
 	}
+	// currently svelte imports `node:crypto`, which will break our runtime,
+	// so we need to strip it off from the bundle.
+	// see issues #17762 and #17771:
+	// https://github.com/sveltejs/svelte/issues/17762
+	// https://github.com/sveltejs/svelte/issues/17771
+	source := strings.Replace(string(data), `await obfuscated_import(`, "await import(", 1)
 	emptyTsFileName := fmt.Sprintf(".%s%s", string(os.PathSeparator), filepath.Join(".gen", "empty.ts"))
 	if !files.IsFile(emptyTsFileName) {
 		if err = os.WriteFile(emptyTsFileName, []byte("export default {}"), os.ModePerm); err != nil {
@@ -51,14 +57,9 @@ func Package(options PackageOptions) (err error) {
 		}
 	}
 	var sourceStringBundled string
-	if sourceStringBundled, err = esbuild.Bundle(
-		"app",
-		api.FormatCommonJS,
-		string(sourceData),
-		map[string]string{
-			"node:crypto": strings.ReplaceAll(emptyTsFileName, string(os.PathSeparator), "/"),
-		},
-	); err != nil {
+	if sourceStringBundled, err = esbuild.Bundle("app", api.FormatCommonJS, source, map[string]string{
+		"node:crypto": strings.ReplaceAll(emptyTsFileName, string(os.PathSeparator), "/"),
+	}); err != nil {
 		return
 	}
 	if err = os.RemoveAll(emptyTsFileName); err != nil {

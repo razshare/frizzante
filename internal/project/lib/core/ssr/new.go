@@ -29,26 +29,16 @@ func New(limit int64) renders.Render {
 			err = fmt.Errorf("file %s not found", server)
 			return
 		}
-		var serverData []byte
-		if serverData, err = options.Efs.ReadFile(server); err != nil {
+		var data []byte
+		if data, err = options.Efs.ReadFile(server); err != nil {
 			return
 		}
-		// currently svelte imports `node:crypto`, which will break our runtime,
-		// so we need to strip it off from the bundle.
-		// see issues #17762 and #17771:
-		// https://github.com/sveltejs/svelte/issues/17762
-		// https://github.com/sveltejs/svelte/issues/17771
-		serverStringStrippedOfNodeCrypto := strings.Replace(
-			string(serverData),
-			`await obfuscated_import(`,
-			"await import(",
-			1,
-		)
+		source := string(data)
 		jsRender, err = javascript.NewRender(javascript.NewRenderOptions{
 			Server:     server,
 			InfoLog:    options.InfoLog,
 			ErrorLog:   options.ErrorLog,
-			FindSource: func() (string, error) { return serverStringStrippedOfNodeCrypto, nil },
+			FindSource: func() (string, error) { return source, nil },
 		})
 		return
 	}
