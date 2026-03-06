@@ -14,14 +14,22 @@ func Message(client *clients.Client) string {
 	if client.WebSocket != nil {
 		_, data, err := client.WebSocket.ReadMessage()
 		if err != nil {
-			client.Options.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Printf(
+				"receive.Message: failed to read WebSocket message: %v\n%s",
+				err,
+				stack.Trace(),
+			)
 			return ""
 		}
 		return string(data)
 	}
 	data, err := io.ReadAll(client.Request.Body)
 	if err != nil {
-		client.Options.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"receive.Message: failed to read request body: %v\n%s",
+			err,
+			stack.Trace(),
+		)
 		return ""
 	}
 	return string(data)
