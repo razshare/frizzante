@@ -1,9 +1,12 @@
 package servers
 
 import (
+	"context"
 	"errors"
 	"net/http"
+	"os/signal"
 	"strings"
+	"syscall"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/values"
@@ -17,6 +20,19 @@ func Start(server *Server) (err error) {
 		err = errors.New("no render function found")
 		return
 	}
+	background := context.Background()
+	signalContext, stop := signal.NotifyContext(background, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+	defer stop()
+	go func() {
+		<-signalContext.Done()
+		server.InfoLog.Println("shutting server down gracefully...")
+		if cerr := server.Shutdown(background); cerr != nil {
+			if err == nil {
+				err = cerr
+			}
+			return
+		}
+	}()
 	handler := server.Handler.(*http.ServeMux)
 	for _, route := range server.Routes {
 		handler.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
