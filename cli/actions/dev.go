@@ -17,7 +17,7 @@ func Dev(options DevOptions) (err error) {
 			Environment:   append(os.Environ(), "DEV=1"),
 			DirectoryName: "app",
 			Program:       options.Bun,
-			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch"},
+			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true", "--watch"},
 		}) {
 			if err == nil {
 				err = errors.New("could not build client bundles")

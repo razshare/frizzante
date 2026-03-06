@@ -17,7 +17,7 @@ func Package(options PackageOptions) (err error) {
 		Environment:   os.Environ(),
 		DirectoryName: "app",
 		Program:       options.Bun,
-		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false"},
+		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true"},
 	}) {
 		messages.Error("could not build client bundles")
 		return
