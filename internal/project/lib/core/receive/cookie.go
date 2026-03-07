@@ -11,13 +11,23 @@ import (
 func Cookie(client *clients.Client, key string) string {
 	cookie, err := client.Request.Cookie(key)
 	if err != nil {
-		client.Options.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"receive.Cookie: failed to read cookie %q: %v\n%s",
+			key,
+			err,
+			stack.Trace(),
+		)
 		return ""
 	}
 
 	data, err := url.QueryUnescape(cookie.Value)
 	if err != nil {
-		client.Options.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"receive.Cookie: failed to unescape cookie %q value: %v\n%s",
+			key,
+			err,
+			stack.Trace(),
+		)
 		return ""
 	}
 
