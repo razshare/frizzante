@@ -123,7 +123,9 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "package" },
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"package", "p"}, value)
+			},
 			Choice: search.Choice{Id: "package", Description: "packages app"},
 			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
