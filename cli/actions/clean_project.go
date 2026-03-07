@@ -22,13 +22,7 @@ func CleanProject(options CleanProjectOptions) (err error) {
 	if err = os.RemoveAll(filepath.Join("app", ".vite")); err != nil {
 		return
 	}
-	if err = os.RemoveAll(filepath.Join("node_modules")); err != nil {
-		return
-	}
-	if err = os.RemoveAll(filepath.Join("lib", "core", "ssr", "app")); err != nil {
-		return
-	}
-	if err = os.RemoveAll(filepath.Join("lib", "core", "send", "app")); err != nil {
+	if err = os.RemoveAll(filepath.Join("app", "node_modules")); err != nil {
 		return
 	}
 	if err = os.RemoveAll("cover.html"); err != nil {

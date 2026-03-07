@@ -13,7 +13,6 @@ test -d internal/project/.gen && echo "$message" && exit 1
 test -d internal/project/app/dist && echo "$message" && exit 1
 test -d internal/project/app/.vite && echo "$message" && exit 1
 test -d internal/project/app/node_modules && echo "$message" && exit 1
-test -d internal/project/lib/core/view/app && echo "$message" && exit 1
 
 # Installs project
 go install .
