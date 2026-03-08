@@ -1,6 +1,8 @@
 <style>
     form {
         display: inline-block;
+        position: relative;
+        width: 100%;
     }
 </style>
 
