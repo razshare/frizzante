@@ -26,7 +26,11 @@ func SessionId(client *clients.Client) string {
 	// Create new session.
 	ido, err := uuid.NewV4()
 	if err != nil {
-		client.Options.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"receive.SessionId: failed to create new session id: %v\n%s",
+			err,
+			stack.Trace(),
+		)
 		return ""
 	}
 	id = ido.String()
