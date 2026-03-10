@@ -18,11 +18,19 @@ func Session(client *clients.Client, value any) bool {
 		var err error
 		var data []byte
 		if data, err = os.ReadFile(fileName); err != nil {
-			client.Options.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Printf(
+				"receive.Session: failed to read session file: %v\n%s",
+				err,
+				stack.Trace(),
+			)
 			return false
 		}
 		if err = json.Unmarshal(data, value); err != nil {
-			client.Options.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Printf(
+				"receive.Session: failed to unmarshal session data: %v\n%s",
+				err,
+				stack.Trace(),
+			)
 			return false
 		}
 	}
@@ -35,16 +43,28 @@ func Session(client *clients.Client, value any) bool {
 		var data []byte
 		if !files.IsDirectory(baseDirectory) {
 			if err = os.MkdirAll(baseDirectory, os.ModePerm); err != nil {
-				client.Options.ErrorLog.Println(err, stack.Trace())
+				client.Options.ErrorLog.Printf(
+					"receive.Session: failed to create sessions directory: %v\n%s",
+					err,
+					stack.Trace(),
+				)
 				return
 			}
 		}
 		if data, err = json.MarshalIndent(value, "", "    "); err != nil {
-			client.Options.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Printf(
+				"receive.Session: failed to marshal session data: %v\n%s",
+				err,
+				stack.Trace(),
+			)
 			return
 		}
 		if err = os.WriteFile(fileName, data, os.ModePerm); err != nil {
-			client.Options.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Printf(
+				"receive.Session: failed to write session file: %v\n%s",
+				err,
+				stack.Trace(),
+			)
 			return
 		}
 	}()
