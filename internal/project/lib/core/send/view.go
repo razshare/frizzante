@@ -31,7 +31,10 @@ func View(client *clients.Client, view views.View) {
 		return
 	}
 	if client.Options.Render == nil {
-		client.Options.ErrorLog.Println("no render function defined", stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"send.View: no render function defined\n%s",
+			stack.Trace(),
+		)
 		return
 	}
 	data := views.NewData(view)
@@ -43,7 +46,11 @@ func View(client *clients.Client, view views.View) {
 		View: view,
 		Data: data,
 	}); err != nil {
-		client.Options.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"send.View: failed to render view: %v\n%s",
+			err,
+			stack.Trace(),
+		)
 	}
 	if client.Writer.Header().Get("Content-Type") == "" {
 		Header(client, "Content-Type", "text/html")
