@@ -2,7 +2,6 @@ import type { View } from "$lib/scripts/core/view"
 import type { HistoryEntry } from "$lib/scripts/core/history_entry"
 import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
 import { swap } from "$lib/scripts/core/swap.ts"
-import { swapping } from "./swapping"
 let started = false
 export function route(view: View<never>): void {
     if (!IS_BROWSER || started) {
@@ -11,14 +10,17 @@ export function route(view: View<never>): void {
     const form = document.createElement("form")
     const anchor = document.createElement("a")
     const listener = async function pop(e: PopStateEvent) {
+        // console.log("popping")
+        // debugger
         // we don't want to interfere with popstate events
         // that are not triggered by href() and action().
-        if (!swapping.active) {
-            return
-        }
-        e.preventDefault()
+        // if (!swapping.active) {
+        //     return
+        // }
+        // debugger
         const serialized = (e.state ?? "") as string
         if (serialized !== "") {
+            e.preventDefault()
             const entry = JSON.parse(serialized) as HistoryEntry
             if (entry.method === "GET") {
                 anchor.href = entry.url
@@ -34,7 +36,11 @@ export function route(view: View<never>): void {
             await swap(form, view)
             return
         }
-        anchor.href = "/"
+        if (window.location.hash !== "" || `${window.location}`.endsWith("#")) {
+            window.location.hash = window.location.hash
+            return
+        }
+        anchor.href = `${window.location}`
         await swap(anchor, view)
     }
     window.addEventListener("popstate", listener)
