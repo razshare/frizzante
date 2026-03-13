@@ -37,7 +37,7 @@ export function route(view: View<never>): void {
             return
         }
         if (window.location.hash !== "" || `${window.location}`.endsWith("#")) {
-            window.location.hash = window.location.hash
+            window.location.hash = `${window.location.hash}`
             return
         }
         anchor.href = `${window.location}`
