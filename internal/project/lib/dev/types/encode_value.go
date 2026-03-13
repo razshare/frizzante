@@ -8,7 +8,7 @@ import "reflect"
 //
 // Interfaces, structs and maps are encoded as maps. Complex types within the resulting maps are also encoded.
 //
-// Pointers are unwrapper.
+// Pointers are unwrapped.
 func EncodeValue(value reflect.Value) (out any, err error) {
 	kind := value.Kind()
 	switch kind {
