@@ -24,11 +24,17 @@ import (
 // or the file was not found.
 func RequestedFile(client *clients.Client) bool {
 	if client.WebSocket != nil {
-		client.Options.ErrorLog.Println("send.RequestedFile() does not support web sockets", stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"send.RequestedFile: web sockets are not supported\n%s",
+			stack.Trace(),
+		)
 		return false
 	}
 	if client.EventName != "" {
-		client.Options.ErrorLog.Println("send.RequestedFile() does not support server sent events", stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"send.RequestedFile: server sent events are not supported\n%s",
+			stack.Trace(),
+		)
 		return false
 	}
 	uri := client.Request.RequestURI
@@ -40,12 +46,20 @@ func RequestedFile(client *clients.Client) bool {
 		var file fs.File
 		var err error
 		if file, err = client.Options.Efs.Open(embeddedFileName); err != nil {
-			client.Options.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Printf(
+				"send.RequestedFile: failed to open embedded file: %v\n%s",
+				err,
+				stack.Trace(),
+			)
 			return false
 		}
 		var info os.FileInfo
 		if info, err = file.Stat(); err != nil {
-			client.Options.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Printf(
+				"send.RequestedFile: failed to stat embedded file: %v\n%s",
+				err,
+				stack.Trace(),
+			)
 			return false
 		}
 		if client.Writer.Header().Get("Content-Type") == "" {
@@ -56,7 +70,11 @@ func RequestedFile(client *clients.Client) bool {
 		}
 		buf := make([]byte, info.Size())
 		if _, err = file.Read(buf); err != nil {
-			client.Options.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Printf(
+				"send.RequestedFile: failed to read embedded file: %v\n%s",
+				err,
+				stack.Trace(),
+			)
 			return false
 		}
 		http.ServeContent(client.Writer, &client.Request, embeddedFileName, info.ModTime(), bytes.NewReader(buf))
