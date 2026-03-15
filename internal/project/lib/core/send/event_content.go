@@ -2,7 +2,6 @@ package send
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"net/http"
 
@@ -20,30 +19,53 @@ import (
 func EventContent(client *clients.Client, data []byte) {
 	meta := fmt.Sprintf("id: %d\r\nevent: %s\r\n", client.EventId, client.EventName)
 	if _, err := client.Writer.Write([]byte(meta)); err != nil {
-		client.Options.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"send.EventContent: failed to write event meta: %v\n%s",
+			err,
+			stack.Trace(),
+		)
 		return
 	}
 	for _, line := range bytes.Split(data, []byte("\r\n")) {
 		if _, err := client.Writer.Write([]byte("data: ")); err != nil {
-			client.Options.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Printf(
+				"send.EventContent: failed to write data prefix: %v\n%s",
+				err,
+				stack.Trace(),
+			)
 			return
 		}
 		if _, err := client.Writer.Write(line); err != nil {
-			client.Options.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Printf(
+				"send.EventContent: failed to write data line: %v\n%s",
+				err,
+				stack.Trace(),
+			)
 			return
 		}
 		if _, err := client.Writer.Write([]byte("\r\n")); err != nil {
-			client.Options.ErrorLog.Println(err, stack.Trace())
+			client.Options.ErrorLog.Printf(
+				"send.EventContent: failed to write line ending: %v\n%s",
+				err,
+				stack.Trace(),
+			)
 			return
 		}
 	}
 	if _, err := client.Writer.Write([]byte("\r\n")); err != nil {
-		client.Options.ErrorLog.Println(err, stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"send.EventContent: failed to write event ending: %v\n%s",
+			err,
+			stack.Trace(),
+		)
 		return
 	}
 	writer, ok := client.Writer.(http.Flusher)
 	if !ok {
-		client.Options.ErrorLog.Println(errors.New("could not retrieve flusher"), stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"send.EventContent: could not retrieve flusher\n%s",
+			stack.Trace(),
+		)
 		return
 	}
 	writer.Flush()
