@@ -26,16 +26,7 @@ func Snapshot(options SnapshotOptions) (err error) {
 			return
 		}
 	}
-	var directoryName string
-	if directoryName = options.DirectoryName; directoryName == "" {
-		if options.Strict {
-			err = errors.New("directory name is empty")
-			return
-		}
-		if directoryName, err = inputs.Send("directory name url"); err != nil {
-			return
-		}
-	}
+	directoryName := filepath.Join(".gen", "snapshot")
 	client := http.Client{}
 	var staticsResponse *http.Response
 	if staticsResponse, err = client.Get(staticsUrl); err != nil {

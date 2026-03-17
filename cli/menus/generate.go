@@ -136,15 +136,9 @@ var Generate = Menu{
 			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ snapshot"))
-				staticsUrl := value
-				var directoryName string
-				if len(query) > 0 {
-					directoryName = query[0]
-				}
 				err = generations.Snapshot(generations.SnapshotOptions{
-					StaticsUrl:    staticsUrl,
-					DirectoryName: directoryName,
-					Strict:        *app.Strict,
+					StaticsUrl: value,
+					Strict:     *app.Strict,
 				})
 				return
 			},
