@@ -49,6 +49,9 @@ func Snapshot(options SnapshotOptions) (err error) {
 	if err = json.Unmarshal(staticsData, &staticPaths); err != nil {
 		return
 	}
+	if err = os.RemoveAll(directoryName); err != nil {
+		return
+	}
 	generate := func(staticPath string) (err error) {
 		url := fmt.Sprintf("http://127.0.0.1:8080%s", staticPath)
 		var path string
