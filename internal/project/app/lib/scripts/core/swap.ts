@@ -106,10 +106,6 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
             url: fixedResponseUrl,
             body,
         }
-        if (hash !== "") {
-            window.history.pushState(JSON.stringify(entry), "", `${fixedResponseUrl}#${hash}`)
-        } else {
-            window.history.pushState(JSON.stringify(entry), "", fixedResponseUrl)
-        }
+        window.history.pushState(JSON.stringify(entry), "", `${fixedResponseUrl}${hash}`)
     }
 }
