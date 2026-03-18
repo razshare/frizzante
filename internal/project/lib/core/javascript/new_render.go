@@ -46,14 +46,6 @@ func NewRender(options NewRenderOptions) (render Render, err error) {
 	})); err != nil {
 		return
 	}
-	if err = console.Set("error", CreateLogger(CreateLoggerOptions{
-		Level:    LogLevelDanger,
-		Runtime:  runtime,
-		ErrorLog: options.ErrorLog,
-		InfoLog:  options.InfoLog,
-	})); err != nil {
-		return
-	}
 	if err = runtime.Set("console", console); err != nil {
 		return
 	}

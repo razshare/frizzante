@@ -42,9 +42,11 @@ func View(client *clients.Client, view views.View) {
 	var html string
 	var err error
 	if html, err = client.Options.Render(renders.RenderOptions{
-		Efs:  client.Options.Efs,
-		View: view,
-		Data: data,
+		Efs:      client.Options.Efs,
+		View:     view,
+		Data:     data,
+		ErrorLog: client.Options.ErrorLog,
+		InfoLog:  client.Options.InfoLog,
 	}); err != nil {
 		client.Options.ErrorLog.Printf(
 			"send.View: failed to render view: %v\n%s",
