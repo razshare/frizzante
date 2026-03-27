@@ -19,7 +19,10 @@ var FormMetadataCacheMutex sync.Mutex
 // client and stores it in the value pointed to by value.
 func Form(client *clients.Client, value any) bool {
 	if client.WebSocket != nil {
-		client.Options.ErrorLog.Println("web socket connections cannot parse forms", stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"receive.Form: web socket connections cannot parse forms\n%s",
+			stack.Trace(),
+		)
 		return false
 	}
 	isMultipart := true
@@ -28,14 +31,21 @@ func Form(client *clients.Client, value any) bool {
 			if errors.Is(err, http.ErrNotMultipart) {
 				isMultipart = false
 			} else {
-				client.Options.ErrorLog.Println(err, stack.Trace())
+				client.Options.ErrorLog.Printf(
+					"receive.Form: failed to parse multipart form: %v\n%s",
+					err,
+					stack.Trace(),
+				)
 				return false
 			}
 		}
 	}
 	reflection := reflect.ValueOf(value)
 	if reflection.Kind() != reflect.Pointer {
-		client.Options.ErrorLog.Println("form value must be a pointer", stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"receive.Form: form value must be a pointer\n%s",
+			stack.Trace(),
+		)
 		return false
 	}
 	reflection = reflection.Elem()
