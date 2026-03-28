@@ -37,7 +37,10 @@ func Start(server *Server) (err error) {
 	for _, route := range server.Routes {
 		handler.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 			if errLocal := server.Cors.Check(request); errLocal != nil {
-				server.ErrorLog.Println(errLocal)
+				server.ErrorLog.Printf(
+				"servers.Start: CORS check failed: %v",
+				errLocal,
+			)
 				return
 			}
 			client := &clients.Client{
