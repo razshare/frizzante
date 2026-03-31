@@ -8,7 +8,10 @@ import (
 // Headers sends header fields.
 func Headers(client *clients.Client, fields map[string]string) {
 	if client.Locked {
-		client.Options.ErrorLog.Println("header is locked", stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"send.Headers: headers are locked, cannot set headers\n%s",
+			stack.Trace(),
+		)
 		return
 	}
 	for key, value := range fields {
