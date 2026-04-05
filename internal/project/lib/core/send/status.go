@@ -14,7 +14,10 @@ import (
 // All errors are sent to the server notifier.
 func Status(client *clients.Client, status int) {
 	if client.Locked {
-		client.Options.ErrorLog.Println("status is locked", stack.Trace())
+		client.Options.ErrorLog.Printf(
+			"send.Status: status is locked, cannot set status\n%s",
+			stack.Trace(),
+		)
 		return
 	}
 	client.Status = status
