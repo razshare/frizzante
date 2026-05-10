@@ -14,17 +14,17 @@ func Bun(options BunOptions) (err error) {
 	platform := platforms.Detect()
 	var url string
 	if platform == platforms.DarwinArm64 {
-		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-aarch64.zip"
+		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.13/bun-darwin-aarch64.zip"
 	} else if platform == platforms.DarwinAmd64 {
-		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-darwin-x64.zip"
+		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.13/bun-darwin-x64.zip"
 	} else if platform == platforms.LinuxArm64 {
-		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-aarch64.zip"
+		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.13/bun-linux-aarch64.zip"
 	} else if platform == platforms.LinuxAmd64 {
-		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-linux-x64.zip"
+		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.13/bun-linux-x64.zip"
 	} else if platform == platforms.WindowsArm64 {
-		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-windows-x64-baseline.zip"
+		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.13/bun-windows-x64-baseline.zip"
 	} else if platform == platforms.WindowsAmd64 {
-		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.2.19/bun-windows-x64-baseline.zip"
+		url = "https://github.com/oven-sh/bun/releases/download/bun-v1.3.13/bun-windows-x64-baseline.zip"
 	}
 	var fileName string
 	if fileName, err = caches.DownloadFile(caches.DownloadFileOptions{Url: url}); err != nil {
