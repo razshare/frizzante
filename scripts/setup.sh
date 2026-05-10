@@ -18,8 +18,8 @@ test -f "$frizzante" || build "$frizzante"
 go mod tidy
 go get ./...
 pushd internal/project
-  "$frizzante" --strict configure
   "$frizzante" --strict lock-packages
+  "$frizzante" --strict configure
   "$frizzante" --strict generate sqlc
   "$frizzante" --strict install
   "$frizzante" --strict package
