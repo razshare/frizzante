@@ -1,6 +1,9 @@
 <style>
     pre {
+        line-height:1.1em;
         font-size: calc(0.5vw + 0.2rem);
+        color: var(--pico-primary-background);
+        overflow: hidden;
     }
     @media (width <= 720px) {
         pre {
@@ -9,7 +12,7 @@
     }
 </style>
 
-<pre class="text-primary" style="line-height:1.1em">
+<pre>
 ███████╗██████╗░██╗███████╗███████╗░█████╗░███╗░░██╗████████╗███████╗
 ██╔════╝██╔══██╗██║╚════██║╚════██║██╔══██╗████╗░██║╚══██╔══╝██╔════╝
 █████╗░░██████╔╝██║░░███╔═╝░░███╔═╝███████║██╔██╗██║░░░██║░░░█████╗░░

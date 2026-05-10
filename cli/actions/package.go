@@ -14,7 +14,7 @@ import (
 
 func Package(options PackageOptions) (err error) {
 	if !messages.Command(messages.CommandOptions{
-		Environment:   os.Environ(),
+		Environment:   append(os.Environ(), "PROD=1"),
 		DirectoryName: "app",
 		Program:       options.Bun,
 		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true"},
@@ -23,7 +23,7 @@ func Package(options PackageOptions) (err error) {
 		return
 	}
 	if !messages.Command(messages.CommandOptions{
-		Environment:   os.Environ(),
+		Environment:   append(os.Environ(), "PROD=1"),
 		DirectoryName: "app",
 		Program:       options.Bun,
 		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/server", "--emptyOutDir=true", "--ssr=app.server.ts"},
@@ -44,8 +44,8 @@ func Package(options PackageOptions) (err error) {
 	if data, err = os.ReadFile(filepath.Join("app", "dist", "server", "app.server.js")); err != nil {
 		return
 	}
-	// currently svelte imports `node:crypto`, which will break our runtime,
-	// so we need to strip it off from the bundle.
+	// currently svelte imports `node:crypto` and `node:async_hooks`, which will break our runtime,
+	// so we need to strip them off from the bundle.
 	// see issues #17762 and #17771:
 	// https://github.com/sveltejs/svelte/issues/17762
 	// https://github.com/sveltejs/svelte/issues/17771
@@ -58,7 +58,8 @@ func Package(options PackageOptions) (err error) {
 	}
 	var sourceStringBundled string
 	if sourceStringBundled, err = esbuild.Bundle("app", api.FormatCommonJS, source, map[string]string{
-		"node:crypto": strings.ReplaceAll(emptyTsFileName, string(os.PathSeparator), "/"),
+		"node:crypto":      strings.ReplaceAll(emptyTsFileName, string(os.PathSeparator), "/"),
+		"node:async_hooks": strings.ReplaceAll(emptyTsFileName, string(os.PathSeparator), "/"),
 	}); err != nil {
 		return
 	}

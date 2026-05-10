@@ -20,7 +20,7 @@ func Build(options BuildOptions) (err error) {
 	spin := spinners.New("building binary")
 	go spinners.Start(spin)
 	if !messages.Command(messages.CommandOptions{
-		Environment: os.Environ(),
+		Environment: append(os.Environ(), "PROD=1"),
 		Program:     options.Go,
 		Args:        []string{"build", "-o=" + filepath.Join(".gen", "bin", "app"+extension), "."},
 	}) {

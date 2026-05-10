@@ -7,7 +7,7 @@
       "request": "launch",
       "mode": "auto",
       "program": "${workspaceFolder}/main.go",
-      "buildFlags": "-tags=dev,trace",
+      "buildFlags": "-tags=trace",
       "env": { "DEV": "1" },
       "preLaunchTask": "package"
     }
