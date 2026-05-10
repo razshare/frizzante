@@ -14,7 +14,6 @@ import (
 
 //go:generate frizzante clean
 //go:generate frizzante configure
-//go:generate frizzante generate types
 //go:generate frizzante package
 //go:embed app/dist
 var efs embed.FS

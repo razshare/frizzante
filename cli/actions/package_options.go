@@ -1,7 +1,6 @@
 package actions
 
 type PackageOptions struct {
-	Go   string
-	Bun  string
-	Tags string
+	Go  string
+	Bun string
 }

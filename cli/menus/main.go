@@ -131,9 +131,8 @@ var Main = Menu{
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ package"))
 				err = actions.Package(actions.PackageOptions{
-					Go:   *app.Go,
-					Bun:  *app.Bun,
-					Tags: *app.Tags,
+					Go:  *app.Go,
+					Bun: *app.Bun,
 				})
 				return
 			},

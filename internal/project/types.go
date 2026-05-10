@@ -1,3 +1,5 @@
+//go:build !prod
+
 package main
 
 import (
@@ -8,9 +10,8 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/routes/todos"
 )
 
-var directoryName = filepath.Join(".gen", "types")
-
-func main() {
+func init() {
+	directoryName := filepath.Join(".gen", "types")
 	if err := types.Generate[todos.Props](directoryName); err != nil {
 		log.Fatal(err)
 		return

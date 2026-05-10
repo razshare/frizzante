@@ -1,44 +1,13 @@
 package menus
 
 import (
-	"errors"
 	"fmt"
-	"path/filepath"
 
 	"github.com/razshare/frizzante/cli/apps"
 	"github.com/razshare/frizzante/cli/generations"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/tui/configs"
-	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/search"
 )
-
-func init() {
-	if err := LoadPlugins(&Generate, filepath.Join("plugins", "generate")); err != nil {
-		messages.Fatal(err, stack.Trace())
-		return
-	}
-	Generate.Items = append(Generate.Items, Item{
-		Hidden: true,
-		Choice: search.Choice{Id: "render generate menu"},
-		Active: func(menu *Menu, app apps.App, value string, query []string) bool { return true },
-		Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
-			if *app.Strict {
-				err = errors.New("unknown cli query")
-				return
-			}
-			for {
-				var id string
-				if id, err = Render(menu, app, value, query); err != nil {
-					return
-				}
-				if id == "" {
-					return
-				}
-			}
-		},
-	})
-}
 
 var Generate = Menu{
 	Title: "generate",

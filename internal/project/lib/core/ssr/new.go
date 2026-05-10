@@ -46,14 +46,15 @@ func New(_ int64) renders.Render {
 						return
 					}
 				}
-				// currently svelte imports `node:crypto`, which will break our runtime,
-				// so we need to strip it off from the bundle.
+				// currently svelte imports `node:crypto` and `node:async_hooks`, which will break our runtime,
+				// so we need to strip them off from the bundle.
 				// see issues #17762 and #17771:
 				// https://github.com/sveltejs/svelte/issues/17762
 				// https://github.com/sveltejs/svelte/issues/17771
 				source = strings.Replace(string(data), `await obfuscated_import(`, "await import(", 1)
 				if source, err = esbuild.Bundle("app", api.FormatCommonJS, source, map[string]string{
-					"node:crypto": strings.ReplaceAll(emptyTsFileName, string(os.PathSeparator), "/"),
+					"node:crypto":      strings.ReplaceAll(emptyTsFileName, string(os.PathSeparator), "/"),
+					"node:async_hooks": strings.ReplaceAll(emptyTsFileName, string(os.PathSeparator), "/"),
 				}); err != nil {
 					return
 				}

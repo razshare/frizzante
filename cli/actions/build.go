@@ -11,9 +11,8 @@ import (
 
 func Build(options BuildOptions) (err error) {
 	if err = Package(PackageOptions{
-		Go:   options.Go,
-		Bun:  options.Bun,
-		Tags: options.Tags,
+		Go:  options.Go,
+		Bun: options.Bun,
 	}); err != nil {
 		return
 	}
