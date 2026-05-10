@@ -1,4 +1,4 @@
-//go:build !dev
+//go:build !prod
 
 package csr
 
@@ -6,6 +6,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -14,10 +15,11 @@ import (
 
 func New() renders.Render {
 	var index = filepath.Join("app", "dist", "client", "index.html")
-	index = strings.ReplaceAll(index, "\\", "/")
+	index = strings.ReplaceAll(index, "/", string(filepath.Separator))
+	index = strings.ReplaceAll(index, "\\", string(filepath.Separator))
 	return func(options renders.RenderOptions) (document string, err error) {
 		var indexData []byte
-		if indexData, err = options.Efs.ReadFile(index); err != nil {
+		if indexData, err = os.ReadFile(index); err != nil {
 			return
 		}
 		document = string(indexData)

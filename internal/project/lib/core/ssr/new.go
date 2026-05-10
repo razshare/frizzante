@@ -1,4 +1,4 @@
-//go:build !dev
+//go:build !prod
 
 package ssr
 
@@ -7,74 +7,80 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
+	"github.com/evanw/esbuild/pkg/api"
+	"github.com/razshare/frizzante/internal/project/lib/core/esbuild"
+	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/javascript"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
-func New(limit int64) renders.Render {
-	var mut sync.Mutex
+func New(_ int64) renders.Render {
 	var server = filepath.Join("app", "dist", "server", "app.server.js")
 	var index = filepath.Join("app", "dist", "client", "index.html")
-	var jsRenders = make(chan javascript.Render, 1)
-	server = strings.ReplaceAll(server, "\\", "/")
-	index = strings.ReplaceAll(index, "\\", "/")
+	server = strings.ReplaceAll(server, "/", string(filepath.Separator))
+	server = strings.ReplaceAll(server, "\\", string(filepath.Separator))
+	index = strings.ReplaceAll(index, "/", string(filepath.Separator))
+	index = strings.ReplaceAll(index, "\\", string(filepath.Separator))
 	var goRender = func(options renders.RenderOptions) (jsRender javascript.Render, err error) {
-		if !embeds.IsFile(options.Efs, server) {
+		if !files.IsFile(server) {
 			err = fmt.Errorf("file %s not found", server)
 			return
 		}
-		var data []byte
-		if data, err = options.Efs.ReadFile(server); err != nil {
-			return
-		}
-		source := string(data)
+		emptyTsFileName := fmt.Sprintf(".%s%s", string(os.PathSeparator), filepath.Join(".gen", "empty.ts"))
 		jsRender, err = javascript.NewRender(javascript.NewRenderOptions{
-			Server:     server,
-			InfoLog:    options.InfoLog,
-			ErrorLog:   options.ErrorLog,
-			FindSource: func() (string, error) { return source, nil },
+			Server:   server,
+			InfoLog:  options.InfoLog,
+			ErrorLog: options.ErrorLog,
+			FindSource: func() (source string, err error) {
+				var data []byte
+				if data, err = os.ReadFile(server); err != nil {
+					return
+				}
+				if !files.IsFile(emptyTsFileName) {
+					if err = os.WriteFile(emptyTsFileName, []byte("export default {}"), os.ModePerm); err != nil {
+						return
+					}
+				}
+				// currently svelte imports `node:crypto`, which will break our runtime,
+				// so we need to strip it off from the bundle.
+				// see issues #17762 and #17771:
+				// https://github.com/sveltejs/svelte/issues/17762
+				// https://github.com/sveltejs/svelte/issues/17771
+				source = strings.Replace(string(data), `await obfuscated_import(`, "await import(", 1)
+				if source, err = esbuild.Bundle("app", api.FormatCommonJS, source, map[string]string{
+					"node:crypto": strings.ReplaceAll(emptyTsFileName, string(os.PathSeparator), "/"),
+				}); err != nil {
+					return
+				}
+				return
+			},
 		})
 		return
 	}
 	return func(options renders.RenderOptions) (document string, err error) {
-		if !embeds.IsFile(options.Efs, index) {
+		if !files.IsFile(index) {
 			err = fmt.Errorf("file %s not found", index)
 			return
 		}
 		var indexData []byte
-		if indexData, err = options.Efs.ReadFile(index); err != nil {
+		if indexData, err = os.ReadFile(index); err != nil {
 			return
 		}
 		document = string(indexData)
 		view := options.View
 		if view.RenderMode == views.RenderModeServer || view.RenderMode == views.RenderModeFull {
-			var jsRender javascript.Render
-			if limit >= 0 {
-				mut.Lock()
-				if limit >= 0 {
-					limit--
-				}
-				mut.Unlock()
-				if jsRender, err = goRender(options); err != nil {
-					mut.Lock()
-					limit++
-					mut.Unlock()
-					return
-				}
-				defer func() { go func() { jsRenders <- jsRender }() }()
-			} else {
-				jsRender = <-jsRenders
-				defer func() { go func() { jsRenders <- jsRender }() }()
+			var render javascript.Render
+			if render, err = goRender(options); err != nil {
+				return
 			}
 			var head string
 			var body string
-			if head, body, err = jsRender(javascript.RenderOptions{View: view}); err != nil {
+			if head, body, err = render(javascript.RenderOptions{View: view}); err != nil {
 				return
 			}
 			if view.RenderMode == views.RenderModeServer {
@@ -93,7 +99,6 @@ func New(limit int64) renders.Render {
 			document = strings.Replace(document, "<!--app-body-->", fmt.Sprintf(renders.BodyFormat, body), 1)
 			return
 		}
-
 		if view.RenderMode == views.RenderModeClient {
 			var data []byte
 			if data, err = json.Marshal(options.Data); err != nil {
