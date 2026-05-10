@@ -30,9 +30,9 @@
 {/snippet}
 
 {#snippet DocumentationButton()}
-    <a 
-        href="https://razshare.github.io/frizzante-docs/guides/get-started"
-        target="_blank"
+    <a
+            href="https://razshare.github.io/frizzante-docs/guides/get-started"
+            target="_blank"
     >
         <button>Documentation</button>
     </a>

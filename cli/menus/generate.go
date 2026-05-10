@@ -3,6 +3,7 @@ package menus
 import (
 	"fmt"
 
+	"github.com/razshare/frizzante/cli/actions"
 	"github.com/razshare/frizzante/cli/apps"
 	"github.com/razshare/frizzante/cli/generations"
 	"github.com/razshare/frizzante/tui/configs"
@@ -133,31 +134,6 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "forms" },
-			Choice: search.Choice{Id: "forms", Description: "forms components with error and pending handlers"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ forms"))
-				err = generations.Forms(generations.FormsOptions{
-					Strict: *app.Strict,
-					Efs:    app.Efs})
-				return
-			},
-		},
-		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "links" },
-			Choice: search.Choice{Id: "links", Description: "links components with error and pending handlers"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ links"))
-				err = generations.Links(generations.LinksOptions{
-					Strict: *app.Strict,
-					Efs:    app.Efs,
-				})
-				return
-			},
-		},
-		{
 			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "icons" },
 			Choice: search.Choice{Id: "icons", Description: "icons components"},
 			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
@@ -169,6 +145,22 @@ var Generate = Menu{
 					Efs:    app.Efs,
 				})
 				return
+			},
+		},
+		{
+			Hidden: true,
+			Choice: search.Choice{Id: "render generate menu"},
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return true },
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
+				if *app.Strict {
+					err = actions.Help(actions.HelpOptions{})
+					return
+				}
+				for {
+					if _, err = Render(menu, app, value, query); err != nil {
+						return
+					}
+				}
 			},
 		},
 	},

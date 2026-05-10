@@ -27,7 +27,7 @@ func Databases(options DatabasesOptions) (err error) {
 			return
 		}
 	}
-	fromDirectoryName := fmt.Sprintf("internal/additions/lib/databases/%s", databaseType)
+	fromDirectoryName := fmt.Sprintf("internal/project/additions/lib/databases/%s", databaseType)
 	toDirectoryName := filepath.Join("lib", "databases", databaseType)
 	if err = Copy(CopyOptions{
 		From: fromDirectoryName,

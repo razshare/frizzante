@@ -12,6 +12,10 @@ func Project(options ProjectOptions) (err error) {
 		From: "internal/project",
 		To:   options.Name,
 		Efs:  options.Efs,
+		Ignore: []string{
+			"internal/project/additions",
+			"internal/project/app/additions",
+		},
 	}); err != nil {
 		return
 	}

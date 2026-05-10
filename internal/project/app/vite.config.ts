@@ -1,5 +1,4 @@
 import { svelte } from "@sveltejs/vite-plugin-svelte"
-import tailwindcss from "@tailwindcss/vite"
 import path from "path"
 import { fileURLToPath } from "url"
 import { defineConfig } from "vite"
@@ -16,7 +15,6 @@ if (!prod) {
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [
-        tailwindcss(),
         svelte({
             compilerOptions: {
                 css: "injected",

@@ -17,8 +17,8 @@ import (
 
 //go:embed logo.txt
 //go:embed version
-//go:embed internal/additions/**
 //go:embed internal/project/**
+//go:embed internal/project/additions/**
 //go:embed internal/project/.air.toml
 //go:embed internal/project/.zed/debug.json
 //go:embed internal/project/.vscode/launch.json

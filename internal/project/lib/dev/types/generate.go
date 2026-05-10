@@ -25,8 +25,8 @@ func Generate[T any](directoryName string) (err error) {
 		}
 	}
 	befores := []string{
+		"github.com/razshare/frizzante/internal/project/additions",
 		"github.com/razshare/frizzante/internal/project",
-		"github.com/razshare/frizzante/internal/additions",
 	}
 	after := "main"
 	packagePath := type_.PkgPath()

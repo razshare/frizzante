@@ -9,7 +9,7 @@ import (
 )
 
 func TestMigration(t *testing.T) {
-	additionsDirectory := filepath.Join("internal", "additions")
+	additionsDirectory := filepath.Join("internal", "project", "additions")
 	databasesDirectory := filepath.Join(additionsDirectory, "lib", "databases", "sqlite")
 	migrationsDirectory := filepath.Join(databasesDirectory, "migrations")
 	sqlcYamlFile := filepath.Join(databasesDirectory, "sqlc.yaml")

@@ -10,10 +10,6 @@ rm -fr cover.out
 # cleans cli
 rm -fr cli/generations/.gen
 
-# cleans additions
-rm -fr internal/additions/app/.vite
-rm -fr internal/additions/app/node_modules
-
 # cleans internal project
 rm -fr internal/project/.gen
 rm -fr internal/project/app/dist

@@ -1,10 +1,14 @@
-import { getContext } from "svelte"
-import type { View } from "$lib/scripts/core/view"
-import { route } from "$lib/scripts/core/route.ts"
-import { swap } from "$lib/scripts/core/swap.ts"
+import type { HrefOptions } from "$lib/scripts/core/href_options"
 import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
+import { route } from "$lib/scripts/core/route.ts"
+import { swap } from "$lib/scripts/core/swap"
 import { swapping } from "$lib/scripts/core/swapping.ts"
-export function href(path = ""): {
+import type { View } from "$lib/scripts/core/view"
+import { getContext } from "svelte"
+export function href(
+    path = "",
+    options: HrefOptions = {},
+): {
     href: string
     onclick: (event: MouseEvent) => Promise<boolean>
 } {
@@ -24,12 +28,26 @@ export function href(path = ""): {
         href: path,
         async onclick(event: MouseEvent) {
             swapping.active = true
+            let error: Error | undefined
+            if (options.onpending) {
+                options.onpending()
+            }
             event.preventDefault()
             try {
                 const record = await swap(anchor, view)
                 record()
-            } catch (error) {
-                console.error("swapping failed", error)
+            } catch (errorLocal) {
+                console.error("swapping failed", errorLocal)
+                error = errorLocal as Error
+            }
+            if (error) {
+                if (options.onerror) {
+                    options.onerror(error as Error)
+                }
+            } else {
+                if (options.ondone) {
+                    options.ondone()
+                }
             }
             swapping.active = false
             return false

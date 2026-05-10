@@ -1,22 +1,22 @@
 <style lang="scss">
-    .todo-list {
-        padding: 1rem;
-        max-height: 300px;
-        overflow-y: auto;
-        .item {
-            width: 100%;
-            display: grid;
-            grid-template-columns: 1fr auto;
-            form {
-                text-align: start;
-                label {
-                    button {
-                        display: none;
-                    }
-                }
-            }
+  .todo-list {
+    padding: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    .item {
+      width: 100%;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      form {
+        text-align: start;
+        label {
+          button {
+            display: none;
+          }
         }
+      }
     }
+  }
 </style>
 
 <script lang="ts">
@@ -98,22 +98,22 @@
         <input type="hidden" name="index" value={index} />
         <input type="hidden" name="value" {value} />
         <label
-            // type="submit"
-            // class="w-full flex cursor-pointer"
-            // class:line-through={todo.checked}
-            // class:text-base-content={todo.checked}
-            // class:opacity-50={todo.checked}
-            aria-label={aria}
+        // type="submit"
+        // class="w-full flex cursor-pointer"
+        // class:line-through={todo.checked}
+        // class:text-base-content={todo.checked}
+        // class:opacity-50={todo.checked}
+        aria-label={aria}
         >
-            <Icon path={icon} />
-            {#if todo.checked}
-                <strike>
-                    <span>{todo.description}</span>
-                </strike>
-            {:else}
+        <Icon path={icon} />
+        {#if todo.checked}
+            <strike>
                 <span>{todo.description}</span>
-            {/if}
-            <button aria-label="toggle"></button>
+            </strike>
+        {:else}
+            <span>{todo.description}</span>
+        {/if}
+        <button aria-label="toggle"></button>
         </label>
     </form>
 {/snippet}

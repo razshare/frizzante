@@ -4,10 +4,6 @@ message="please clean the project before installing"
 # Checks cli
 test -d cli/generations/.gen && echo "$message" && exit 1
 
-# Checks additions
-test -d internal/additions/app/.vite && echo "$message" && exit 1
-test -d internal/additions/app/node_modules && echo "$message" && exit 1
-
 # Checks project
 test -d internal/project/.gen && echo "$message" && exit 1
 test -d internal/project/app/dist && echo "$message" && exit 1
