@@ -1,14 +1,15 @@
 {
-  "version": "2.0.0",
-  "tasks": [
+  "version": "0.2.0",
+  "configurations": [
     {
-      "label": "package",
-      "type": "shell",
-      "command": "frizzante",
-      "args": ["package"],
-      "options": {
-        "env": { "DEV": "1" }
-      }
+      "name": "debug main.go",
+      "type": "go",
+      "request": "launch",
+      "mode": "auto",
+      "program": "${workspaceFolder}/main.go",
+      "buildFlags": "-tags=dev,trace",
+      "env": { "DEV": "1" },
+      "preLaunchTask": "package"
     }
   ]
 }
