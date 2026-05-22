@@ -17,7 +17,7 @@ import (
 
 //go:embed logo.txt
 //go:embed version
-//go:embed internal/project/**
+//go:embed internal/project
 //go:embed internal/project/additions/**
 //go:embed internal/project/.air.toml
 //go:embed internal/project/.zed/debug.json
