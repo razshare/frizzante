@@ -1,4 +1,4 @@
-configure: clean
+configure:
 	frizzante configure
 
 test:
