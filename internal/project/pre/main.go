@@ -2,16 +2,14 @@ package main
 
 import (
 	"log"
-	"path/filepath"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/types"
 	"github.com/razshare/frizzante/internal/project/lib/routes/todos"
 )
 
-var directoryName = filepath.Join(".gen", "types")
 var errors = []error{
 	// add your shared types here
-	types.Generate[todos.Props](directoryName),
+	types.Generate[todos.Props](),
 }
 
 func main() {
@@ -20,5 +18,5 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-	log.Printf("types generates in %s", directoryName)
+	log.Println("types generates in .gen/types")
 }

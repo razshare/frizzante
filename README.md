@@ -1,6 +1,6 @@
 # Frizzante
 
-<img alt="frizzante logo" src="https://raw.githubusercontent.com/razshare/frizzante/refs/heads/main/assets/frizz-octo-header.webp" width="308" />
+<img alt="frizzante logo" src="https://raw.githubusercontent.com/razshare/frizzante/refs/heads/main/assets/logo.png" width="308" />
 
 <a href="https://github.com/razshare/frizzante/releases"><img src="https://img.shields.io/github/release/razshare/frizzante" alt="Latest Release"></a>
 <a href="https://github.com/razshare/frizzante/actions"><img src="https://github.com/razshare/frizzante/actions/workflows/tests.yaml/badge.svg?branch=main" alt="Tests Status"></a>
@@ -28,29 +28,25 @@ go install github.com/razshare/frizzante@latest
 
 Create project.
 ```sh
-frizzante -cMyProject
+frizzante create MyProject
 ```
 
 Configure project.
 
 ```sh
-frizzante --configure
+frizzante configure
 ```
 
 Start development.
 
 ```sh
-frizzante --dev
+frizzante dev
 ```
 
 Build.
 
 ```sh
-frizzante --build
+frizzante build
 ```
 
 This will create a `.gen/bin/app` standalone executable.
-
-# Thanks
-
-Thanks to [cmjoseph07](https://github.com/cmjoseph07) for the octo mascot!
