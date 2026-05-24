@@ -1,0 +1,11 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "package",
+      "type": "shell",
+      "command": "frizzante",
+      "args": ["package"]
+    }
+  ]
+}
