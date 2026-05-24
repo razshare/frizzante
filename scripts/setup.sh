@@ -23,5 +23,6 @@ pushd internal/project
   "$frizzante" --strict generate sqlc
   "$frizzante" --strict install
   "$frizzante" --strict package
+  "$frizzante" --strict prebuild
   cropy .gen/sqlc/sqlc ../../cli/generations/.gen/sqlc/sqlc
 popd

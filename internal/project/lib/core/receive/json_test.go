@@ -3,7 +3,7 @@ package receive
 import (
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/dev/mocks"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestJson(t *testing.T) {

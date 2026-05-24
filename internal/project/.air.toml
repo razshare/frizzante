@@ -5,7 +5,7 @@ tmp_dir = ".gen/tmp"
 [build]
 args_bin = []
 bin = ".gen/tmp/main.exe"
-cmd = "go build -tags=trace -o .gen/tmp/main.exe ."
+cmd = "go build -tags=dev,trace -o .gen/tmp/main.exe ."
 delay = 50
 exclude_dir = ["app", ".gen", ".git", ".github", "lib/core/ssr/app"]
 exclude_file = []
@@ -20,8 +20,8 @@ kill_delay = "0s"
 log = "build-errors.log"
 poll = false
 poll_interval = 0
-post_cmd = []
-pre_cmd = []
+post_cmd = ["go run -tags=dev,trace ./post"]
+pre_cmd = ["go run -tags=dev,trace ./pre"]
 rerun = false
 rerun_delay = 50
 send_interrupt = true

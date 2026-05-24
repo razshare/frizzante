@@ -14,7 +14,7 @@ func Dev(options DevOptions) (err error) {
 	var group sync.WaitGroup
 	group.Go(func() {
 		if !messages.Command(messages.CommandOptions{
-			Environment:   os.Environ(),
+			Environment:   append(os.Environ(), "DEV=1"),
 			DirectoryName: "app",
 			Program:       options.Bun,
 			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true", "--watch"},
@@ -27,7 +27,7 @@ func Dev(options DevOptions) (err error) {
 	})
 	group.Go(func() {
 		if !messages.Command(messages.CommandOptions{
-			Environment:   os.Environ(),
+			Environment:   append(os.Environ(), "DEV=1"),
 			DirectoryName: "app",
 			Program:       options.Bun,
 			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/server", "--emptyOutDir=true", "--ssr=app.server.ts", "--watch"},
@@ -42,7 +42,7 @@ func Dev(options DevOptions) (err error) {
 	}
 	group.Go(func() {
 		if !messages.Command(messages.CommandOptions{
-			Environment: os.Environ(),
+			Environment: append(os.Environ(), "DEV=1"),
 			Program:     options.Air,
 		}) {
 			messages.Error("air failed")

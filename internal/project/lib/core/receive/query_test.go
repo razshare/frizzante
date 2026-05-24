@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/dev/mocks"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestQuery(t *testing.T) {

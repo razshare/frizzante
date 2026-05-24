@@ -19,6 +19,3 @@ install: clean
 
 dev:
 	./scripts/dev.sh
-
-types:
-	go run dev/types

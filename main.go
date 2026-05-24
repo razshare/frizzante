@@ -22,6 +22,7 @@ import (
 //go:embed internal/project/.air.toml
 //go:embed internal/project/.zed/debug.json
 //go:embed internal/project/.vscode/launch.json
+//go:embed internal/project/.vscode/tasks.json
 //go:embed internal/project/app/.gitignore
 //go:embed internal/project/app/.npmrc
 //go:embed internal/project/app/.prettierrc

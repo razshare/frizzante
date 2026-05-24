@@ -12,7 +12,7 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 	var group sync.WaitGroup
 	group.Go(func() {
 		if !messages.Command(messages.CommandOptions{
-			Environment:   os.Environ(),
+			Environment:   append(os.Environ(), "DEV=1"),
 			DirectoryName: "app",
 			Program:       options.Bun,
 			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=false", "--watch"},
@@ -25,7 +25,7 @@ func PackageWatch(options PackageWatchOptions) (err error) {
 	})
 	group.Go(func() {
 		if !messages.Command(messages.CommandOptions{
-			Environment:   os.Environ(),
+			Environment:   append(os.Environ(), "DEV=1"),
 			DirectoryName: "app",
 			Program:       options.Bun,
 			Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/server", "--emptyOutDir=true", "--ssr=app.server.ts", "--watch"},

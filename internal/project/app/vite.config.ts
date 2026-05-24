@@ -5,10 +5,10 @@ import { defineConfig } from "vite"
 
 const file = fileURLToPath(import.meta.url)
 const dir = path.dirname(file).replace(/\\+/, "/")
-const prod = (process.env.PROD ?? "0") === "1"
+const dev = (process.env.DEV ?? "0") === "1"
 
 let sourcemap: "inline" | boolean = false
-if (!prod) {
+if (dev) {
     sourcemap = "inline"
 }
 

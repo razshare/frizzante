@@ -1,6 +1,8 @@
 package configs
 
-import "github.com/razshare/frizzante/tui/themes"
+import (
+	"github.com/razshare/frizzante/tui/themes"
+)
 
 var Colors = themes.Colors{
 	Primary:   "125",

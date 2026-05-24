@@ -124,6 +124,38 @@ var Main = Menu{
 		},
 		{
 			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"prebuild"}, value)
+			},
+			Choice: search.Choice{Id: "prebuild", Description: "executes the ./pre project"},
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
+				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+				fmt.Println(configs.Styles.Menu.Render("running ▷ prebuild"))
+				err = actions.PreBuild(actions.PreBuildOptions{
+					Go:   *app.Go,
+					Bun:  *app.Bun,
+					Tags: *app.Tags,
+				})
+				return
+			},
+		},
+		{
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"postbuild"}, value)
+			},
+			Choice: search.Choice{Id: "postbuild", Description: "executes the ./post project"},
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
+				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+				fmt.Println(configs.Styles.Menu.Render("running ▷ postbuild"))
+				err = actions.PostBuild(actions.PostBuildOptions{
+					Go:   *app.Go,
+					Bun:  *app.Bun,
+					Tags: *app.Tags,
+				})
+				return
+			},
+		},
+		{
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
 				return slices.Contains([]string{"package", "p"}, value)
 			},
 			Choice: search.Choice{Id: "package", Description: "packages app"},

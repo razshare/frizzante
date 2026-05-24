@@ -1,6 +1,8 @@
 package confirm
 
-import "github.com/razshare/frizzante/tui/program"
+import (
+	"github.com/razshare/frizzante/tui/program"
+)
 
 func Send(defaultValue bool, message string) (yes bool, err error) {
 	var model *Model

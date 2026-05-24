@@ -1,5 +1,3 @@
-//go:build !ci
-
 package main
 
 import (
@@ -16,12 +14,11 @@ import (
 
 //go:generate frizzante clean
 //go:generate frizzante configure
-//go:generate frizzante package
 //go:embed app/dist
 var efs embed.FS
-var server = servers.New()
 
 func main() {
+	server := servers.New()
 	server.Efs = efs
 	server.Render = ssr.New(1)
 	server.Routes = []routes.Route{

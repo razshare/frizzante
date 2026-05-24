@@ -7,8 +7,8 @@ import (
 
 	"github.com/dop251/goja"
 	"github.com/razshare/frizzante/internal/project/lib/core/security"
+	"github.com/razshare/frizzante/internal/project/lib/core/types"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
-	"github.com/razshare/frizzante/internal/project/lib/dev/types"
 )
 
 func NewRender(options NewRenderOptions) (render Render, err error) {

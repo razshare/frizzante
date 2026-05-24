@@ -14,7 +14,7 @@ import (
 
 func Package(options PackageOptions) (err error) {
 	if !messages.Command(messages.CommandOptions{
-		Environment:   append(os.Environ(), "PROD=1"),
+		Environment:   append(os.Environ(), "DEV=0"),
 		DirectoryName: "app",
 		Program:       options.Bun,
 		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/client", "--emptyOutDir=true"},
@@ -23,7 +23,7 @@ func Package(options PackageOptions) (err error) {
 		return
 	}
 	if !messages.Command(messages.CommandOptions{
-		Environment:   append(os.Environ(), "PROD=1"),
+		Environment:   append(os.Environ(), "DEV=0"),
 		DirectoryName: "app",
 		Program:       options.Bun,
 		Args:          []string{"x", "vite", "build", "--logLevel=info", "--outDir=dist/server", "--emptyOutDir=true", "--ssr=app.server.ts"},

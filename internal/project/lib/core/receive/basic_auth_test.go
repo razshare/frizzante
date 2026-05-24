@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/dev/mocks"
+	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
 )
 
 func TestBasicAuth(t *testing.T) {

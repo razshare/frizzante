@@ -19,6 +19,9 @@ func Build(options BuildOptions) (err error) {
 	}); err != nil {
 		return
 	}
+	if err = PreBuild(PreBuildOptions(options)); err != nil {
+		return
+	}
 	extension := extensions.Find()
 	spin := spinners.New("building binary")
 	args := []string{"build", fmt.Sprintf("-o=%s", filepath.Join(".gen", "bin", "app"+extension))}
@@ -36,11 +39,14 @@ func Build(options BuildOptions) (err error) {
 	args = append(args, ".")
 	go spinners.Start(spin)
 	if !messages.Command(messages.CommandOptions{
-		Environment: append(os.Environ(), "PROD=1"),
+		Environment: os.Environ(),
 		Program:     options.Go,
 		Args:        args,
 	}) {
 		messages.Error("could not build go source code")
+		return
+	}
+	if err = PostBuild(PostBuildOptions(options)); err != nil {
 		return
 	}
 	spinners.Stop(spin)
