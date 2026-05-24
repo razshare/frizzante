@@ -45,3 +45,6 @@ types:
 
 snapshot:
 	frizzante generate snapshot http://127.0.0.1:8080/@statics
+
+generate:
+	frizzante generate
