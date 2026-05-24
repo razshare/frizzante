@@ -5,8 +5,8 @@ import (
 )
 
 var Colors = themes.Colors{
-	Primary:   "202",
-	Secondary: "208",
+	Primary:   "31",
+	Secondary: "24",
 	Success:   "148",
 	Error:     "160",
 	Warning:   "166",
