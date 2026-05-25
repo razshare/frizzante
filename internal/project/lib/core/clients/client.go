@@ -10,7 +10,6 @@ type Client struct {
 	Request   http.Request
 	Options   Options
 	Writer    http.ResponseWriter
-	Channels  Channels
 	SessionId string
 	EventName string
 	EventId   int64

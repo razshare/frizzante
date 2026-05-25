@@ -10,7 +10,6 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
-	"github.com/razshare/frizzante/internal/project/lib/core/values"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
@@ -77,9 +76,6 @@ func Start(server *Server) (err error) {
 						stack.Trace(),
 					)
 				}
-			}
-			if client.Channels.End != nil {
-				client.Channels.End <- values.None
 			}
 		})
 	}

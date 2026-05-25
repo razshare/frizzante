@@ -34,11 +34,8 @@ func Session(client *clients.Client, value any) bool {
 			return false
 		}
 	}
-	if client.Channels.End == nil {
-		client.Channels.End = make(chan struct{}, 1)
-	}
 	go func() {
-		<-client.Channels.End
+		<-client.Request.Context().Done()
 		var err error
 		var data []byte
 		if !files.IsDirectory(baseDirectory) {
