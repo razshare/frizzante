@@ -1,5 +1,3 @@
-# Frizzante
-
 <img alt="frizzante logo" src="https://raw.githubusercontent.com/razshare/frizzante/refs/heads/main/assets/logo.png" width="308" />
 
 <a href="https://github.com/razshare/frizzante/releases"><img src="https://img.shields.io/github/release/razshare/frizzante" alt="Latest Release"></a>
