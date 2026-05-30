@@ -30,7 +30,6 @@ export default defineConfig({
         },
     },
     build: {
-        copyPublicDir: false,
         sourcemap,
         rollupOptions: {
             input: { index: "./index.html" },

@@ -22,7 +22,7 @@ export function href(
     }
     const anchor = document.createElement("a")
     anchor.href = path
-    const view = getContext("view") as View<never>
+    const view = getContext("view") as View
     route(view)
     return {
         href: path,

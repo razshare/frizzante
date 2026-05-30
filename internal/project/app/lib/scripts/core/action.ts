@@ -15,7 +15,7 @@ export function action(
     if (!IS_BROWSER) {
         return { action: path, async onsubmit() {} }
     }
-    const view = getContext("view") as View<never>
+    const view = getContext("view") as View
     route(view)
     return {
         action: path,
@@ -38,6 +38,8 @@ export function action(
             if (error) {
                 if (options.onerror) {
                     options.onerror(error as Error)
+                } else {
+                    console.error("something went wrong while submitting the form", event.target, error)
                 }
             } else {
                 if (options.ondone) {

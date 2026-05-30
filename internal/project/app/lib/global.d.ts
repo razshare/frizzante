@@ -1,0 +1,6 @@
+declare module "*.png?url"
+declare module "*.svg?url"
+declare module "*.webp?url"
+declare module "*.png"
+declare module "*.svg"
+declare module "*.webp"

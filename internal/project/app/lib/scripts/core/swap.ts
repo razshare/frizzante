@@ -1,7 +1,7 @@
 import type { HistoryEntry } from "$lib/scripts/core/history_entry"
 import type { View } from "$lib/scripts/core/view"
 let lastUrl: false | string = false
-export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: View<unknown>): Promise<() => void> {
+export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: View): Promise<() => void> {
     if (lastUrl === false) {
         lastUrl = location.toString()
     }
@@ -34,13 +34,15 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
             requestUrl = requestUrl.replace(/\/+$/, "") + "/data.json"
         }
         form.reset()
-        data.forEach(function each(value, key) {
+        for (const key of data.keys()) {
+            const value = data.get(key)
             if (value instanceof File) {
-                return
+                continue
             }
             body[key] = `${value}`
             params.append(key, `${value}`)
-        })
+        }
+
         method = form.method.toUpperCase() as "GET" | "POST"
         if (method === "GET") {
             const query = `?${params.toString()}`
@@ -69,8 +71,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
     if (text === "") {
         return function push(): void {}
     }
-    const remote = JSON.parse(text) as View<Record<string, unknown>>
-    await view.pin()
+    const remote = JSON.parse(text) as View
     view.name = remote.name
     view.align = remote.align
     view.render = remote.render

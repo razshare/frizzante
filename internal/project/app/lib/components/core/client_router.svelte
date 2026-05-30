@@ -1,32 +1,35 @@
 <script lang="ts">
-    import { setContext, type SvelteComponent } from "svelte"
     import { views } from "$exports.client"
     import type { View } from "$lib/scripts/core/view.d.ts"
-    let { name, props, render, align, type }: View<Record<string, unknown>> = $props()
-    const components = views as unknown as Record<string, () => Promise<SvelteComponent>>
+    import { setContext, type SvelteComponent } from "svelte"
+    let { name, props, render, align, type }: View = $props()
+    let ClientComponent = $state(false) as false | SvelteComponent
     // svelte-ignore state_referenced_locally
-    const viewStateValue = { name, props, render, align, type, pin }
-    const view: View<Record<string, unknown>> = $state(viewStateValue)
+    let view = $state({ name, props, render, align, type })
+    let counter = 0
     setContext("view", view)
-    const pending = {
-        component: false as false | SvelteComponent,
-        props: {} as Record<string, unknown>,
-    }
-    async function pin() {
-        pending.component = await components[view.name]()
-        pending.props = $state.snapshot(view.props)
+    $effect(route)
+    function route() {
+        const id = ++counter
+        const promise = views[view.name]()
+        promise
+            .then(function resolved(component) {
+                // there's a chance the user has clicked a new link
+                // and swapped views again while the component was loading [...]
+                if (counter != id) {
+                    // [...] when that happens we need to bail out,
+                    // because most likely the new request asks for a different component,
+                    // and we don't want to present the old component view
+                    return
+                }
+                ClientComponent = component as unknown as SvelteComponent
+            })
+            .catch(function failed(error) {
+                console.error(error)
+            })
     }
 </script>
 
-{#each Object.keys(components) as key (key)}
-    {#if key === view.name}
-        {#await components[key]()}
-            {#if pending.component}
-                {@const Component = pending.component}
-                <Component.default {...pending.props} />
-            {/if}
-        {:then Component}
-            <Component.default {...view.props} />
-        {/await}
-    {/if}
-{/each}
+{#if ClientComponent}
+    <ClientComponent.default {...view.props} />
+{/if}
