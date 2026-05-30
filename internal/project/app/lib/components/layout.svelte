@@ -25,7 +25,7 @@
         children: Snippet
     }
 
-    const view = getContext("view") as View<unknown>
+    const view = getContext("view") as View
 
     let { title = view.name, children }: Props = $props()
 </script>
