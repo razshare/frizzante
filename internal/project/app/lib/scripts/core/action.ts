@@ -21,7 +21,7 @@ export function action(
         action: path,
         async onsubmit(event: Event) {
             swapping.active = true
-            let pending = setTimeout(function start() {
+            const pending = setTimeout(function start() {
                 if (!swapping.active) {
                     return
                 }

@@ -29,7 +29,7 @@ export function href(
         async onclick(event: MouseEvent) {
             swapping.active = true
             let error: Error | undefined
-            let pending = setTimeout(function start() {
+            const pending = setTimeout(function start() {
                 if (!swapping.active) {
                     return
                 }
