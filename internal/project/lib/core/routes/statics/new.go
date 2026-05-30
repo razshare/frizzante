@@ -10,9 +10,9 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 )
 
-// New creates a route that lists all static routes of a given server.
-func New(pattern string, server *servers.Server) routes.Route {
-	return routes.Route{Pattern: pattern, Handler: func(client *clients.Client) {
+// NewRouteHandler creates a route handler that lists all static routes of a given server.
+func NewRouteHandler(server *servers.Server) routes.Handler {
+	return func(client *clients.Client) {
 		if accepts := receive.Accept(client); accepts != "" && accepts != "application/json" {
 			send.BadRequestf(client, "only application/json can be produced; requested %s", accepts)
 			return
@@ -24,5 +24,5 @@ func New(pattern string, server *servers.Server) routes.Route {
 			}
 		}
 		send.Json(client, statics)
-	}}
+	}
 }
