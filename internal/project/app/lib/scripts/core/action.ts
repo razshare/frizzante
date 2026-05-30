@@ -21,10 +21,15 @@ export function action(
         action: path,
         async onsubmit(event: Event) {
             swapping.active = true
+            let pending = setTimeout(function start() {
+                if (!swapping.active) {
+                    return
+                }
+                if (options.onpending) {
+                    options.onpending()
+                }
+            }, options.pendingDelay ?? 100)
             let error: Error | undefined
-            if (options.onpending) {
-                options.onpending()
-            }
             event.preventDefault()
             try {
                 const form = event.target as HTMLFormElement
@@ -46,6 +51,7 @@ export function action(
                     options.ondone()
                 }
             }
+            clearTimeout(pending)
             swapping.active = false
         },
     }

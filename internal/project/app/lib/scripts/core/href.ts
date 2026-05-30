@@ -29,9 +29,14 @@ export function href(
         async onclick(event: MouseEvent) {
             swapping.active = true
             let error: Error | undefined
-            if (options.onpending) {
-                options.onpending()
-            }
+            let pending = setTimeout(function start() {
+                if (!swapping.active) {
+                    return
+                }
+                if (options.onpending) {
+                    options.onpending()
+                }
+            }, options.pendingDelay ?? 100)
             event.preventDefault()
             try {
                 const record = await swap(anchor, view)
@@ -49,6 +54,7 @@ export function href(
                     options.ondone()
                 }
             }
+            clearTimeout(pending)
             swapping.active = false
             return false
         },
