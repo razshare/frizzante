@@ -1,6 +1,6 @@
 import type { HrefOptions } from "$lib/scripts/core/href_options"
 import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
-import { route } from "$lib/scripts/core/route.ts"
+import { navigate } from "$lib/scripts/core/navigate.ts"
 import { swap } from "$lib/scripts/core/swap"
 import { swapping } from "$lib/scripts/core/swapping.ts"
 import type { View } from "$lib/scripts/core/view"
@@ -22,17 +22,14 @@ export function href(
     }
     const anchor = document.createElement("a")
     anchor.href = path
-    const view = getContext("view") as View
-    route(view)
+    const view: View = getContext("view")
+    navigate(view)
     return {
         href: path,
         async onclick(event: MouseEvent) {
             swapping.active = true
             let error: Error | undefined
             const pending = setTimeout(function start() {
-                if (!swapping.active) {
-                    return
-                }
                 if (options.onpending) {
                     options.onpending()
                 }
@@ -45,16 +42,16 @@ export function href(
                 console.error("swapping failed", errorLocal)
                 error = errorLocal as Error
             }
+            clearTimeout(pending)
             if (error) {
                 if (options.onerror) {
-                    options.onerror(error as Error)
+                    options.onerror(error)
                 }
             } else {
                 if (options.ondone) {
                     options.ondone()
                 }
             }
-            clearTimeout(pending)
             swapping.active = false
             return false
         },

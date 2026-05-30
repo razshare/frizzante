@@ -95,12 +95,8 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
     if (view.type === "snapshot") {
         fixedResponseUrl = fixedResponseUrl.replace(/\/data\.json$/, "")
     }
-    const stationary = lastUrl === fixedResponseUrl
     lastUrl = fixedResponseUrl
     return function push() {
-        if (stationary) {
-            return
-        }
         const entry: HistoryEntry = {
             nodeName: target.nodeName,
             method,

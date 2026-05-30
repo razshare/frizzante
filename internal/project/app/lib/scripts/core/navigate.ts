@@ -3,17 +3,17 @@ import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
 import { swap } from "$lib/scripts/core/swap"
 import type { View } from "$lib/scripts/core/view"
 let started = false
-export function route(view: View): void {
+export function navigate(view: View): void {
     if (!IS_BROWSER || started) {
         return
     }
     const form = document.createElement("form")
     const anchor = document.createElement("a")
-    const listener = async function pop(e: PopStateEvent) {
-        const serialized = (e.state ?? "") as string
+    const listener = async function pop(event: PopStateEvent) {
+        const serialized: string = event.state ?? ""
         if (serialized !== "") {
-            e.preventDefault()
-            const entry = JSON.parse(serialized) as HistoryEntry
+            event.preventDefault()
+            const entry: HistoryEntry = JSON.parse(serialized)
             if (entry.method === "GET") {
                 anchor.href = entry.url
                 await swap(anchor, view)

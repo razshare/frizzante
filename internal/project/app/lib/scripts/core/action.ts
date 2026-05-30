@@ -1,5 +1,5 @@
 import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
-import { route } from "$lib/scripts/core/route.ts"
+import { navigate } from "$lib/scripts/core/navigate.ts"
 import { swap } from "$lib/scripts/core/swap"
 import { swapping } from "$lib/scripts/core/swapping.ts"
 import type { View } from "$lib/scripts/core/view"
@@ -15,16 +15,13 @@ export function action(
     if (!IS_BROWSER) {
         return { action: path, async onsubmit() {} }
     }
-    const view = getContext("view") as View
-    route(view)
+    const view: View = getContext("view")
+    navigate(view)
     return {
         action: path,
         async onsubmit(event: Event) {
             swapping.active = true
             const pending = setTimeout(function start() {
-                if (!swapping.active) {
-                    return
-                }
                 if (options.onpending) {
                     options.onpending()
                 }
@@ -40,9 +37,10 @@ export function action(
                 console.error("swapping failed", errorLocal)
                 error = errorLocal as Error
             }
+            clearTimeout(pending)
             if (error) {
                 if (options.onerror) {
-                    options.onerror(error as Error)
+                    options.onerror(error)
                 } else {
                     console.error("something went wrong while submitting the form", event.target, error)
                 }
@@ -51,7 +49,6 @@ export function action(
                     options.ondone()
                 }
             }
-            clearTimeout(pending)
             swapping.active = false
         },
     }
