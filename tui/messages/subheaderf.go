@@ -2,6 +2,6 @@ package messages
 
 import "fmt"
 
-func Subheaderf(format string, vars ...any) {
-	Subheader(fmt.Sprintf(format, vars...))
+func Subheaderf(format string, args ...any) {
+	Subheader(fmt.Sprintf(format, args...))
 }

@@ -39,7 +39,6 @@ export function href(
                 const record = await swap(anchor, view)
                 record()
             } catch (errorLocal) {
-                console.error("swapping failed", errorLocal)
                 error = errorLocal as Error
             }
             clearTimeout(pending)

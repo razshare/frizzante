@@ -18,11 +18,12 @@ test -f "$frizzante" || build "$frizzante"
 go mod tidy
 go get ./...
 pushd internal/project
+  "$frizzante" --strict generate sqlc
   "$frizzante" --strict lock-packages
   "$frizzante" --strict configure
-  "$frizzante" --strict generate sqlc
   "$frizzante" --strict install
   "$frizzante" --strict package
+  "$frizzante" --strict generate types
   "$frizzante" --strict prebuild
   cropy .gen/sqlc/sqlc ../../cli/generations/.gen/sqlc/sqlc
 popd

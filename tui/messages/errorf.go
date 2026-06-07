@@ -2,6 +2,6 @@ package messages
 
 import "fmt"
 
-func Errorf(format string, vars ...any) {
-	Error(fmt.Sprintf(format, vars...))
+func Errorf(format string, args ...any) {
+	Error(fmt.Sprintf(format, args...))
 }

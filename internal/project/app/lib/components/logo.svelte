@@ -1,6 +1,6 @@
 <style>
     pre {
-        line-height:1.1em;
+        line-height: 1.1em;
         font-size: calc(0.5vw + 0.2rem);
         color: var(--pico-primary-background);
         overflow: hidden;

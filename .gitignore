@@ -68,3 +68,4 @@ __debug*
 /lib
 /cover.*
 /asd
+/*.sqlite

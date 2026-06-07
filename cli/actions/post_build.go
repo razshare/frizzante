@@ -1,6 +1,7 @@
 package actions
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -31,11 +32,14 @@ func PostBuild(options PostBuildOptions) (err error) {
 					args = append(args, fmt.Sprintf("-tags=%s", strings.Join(tagsLocal, ",")))
 				}
 				args = append(args, "./post")
-				messages.Command(messages.CommandOptions{
+				if !messages.Command(messages.CommandOptions{
 					Environment: os.Environ(),
 					Program:     options.Go,
 					Args:        args,
-				})
+				}) {
+					err = errors.New("something went wrong while running postbuild")
+					return
+				}
 				break
 			}
 		}

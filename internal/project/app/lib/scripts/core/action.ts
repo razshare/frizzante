@@ -34,7 +34,6 @@ export function action(
                     record()
                 })
             } catch (errorLocal) {
-                console.error("swapping failed", errorLocal)
                 error = errorLocal as Error
             }
             clearTimeout(pending)

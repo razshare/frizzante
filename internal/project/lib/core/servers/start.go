@@ -9,6 +9,7 @@ import (
 	"syscall"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
@@ -70,7 +71,8 @@ func Start(server *Server) (err error) {
 			route.Handler(client)
 			if client.WebSocket != nil {
 				if cerr := client.WebSocket.Close(); cerr != nil {
-					client.Options.ErrorLog.Printf(
+					logs.Errorf(
+						client,
 						"send.WsUpgradeWithUpgrader: failed to close WebSocket connection: %v\n%s",
 						cerr,
 						stack.Trace(),

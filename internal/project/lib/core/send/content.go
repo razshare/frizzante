@@ -3,6 +3,7 @@ package send
 import (
 	"github.com/gorilla/websocket"
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
@@ -16,7 +17,8 @@ func Content(client *clients.Client, data []byte) {
 	}
 	if client.WebSocket != nil {
 		if err := client.WebSocket.WriteMessage(websocket.TextMessage, data); err != nil {
-			client.Options.ErrorLog.Printf(
+			logs.Errorf(
+				client,
 				"send.Content: failed to write websocket message: %v\n%s",
 				err,
 				stack.Trace(),
@@ -29,7 +31,8 @@ func Content(client *clients.Client, data []byte) {
 		return
 	}
 	if _, err := client.Writer.Write(data); err != nil {
-		client.Options.ErrorLog.Printf(
+		logs.Errorf(
+			client,
 			"send.Content: failed to write response content: %v\n%s",
 			err,
 			stack.Trace(),

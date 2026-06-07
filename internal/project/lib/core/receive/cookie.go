@@ -4,6 +4,7 @@ import (
 	"net/url"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
@@ -11,7 +12,8 @@ import (
 func Cookie(client *clients.Client, key string) string {
 	cookie, err := client.Request.Cookie(key)
 	if err != nil {
-		client.Options.ErrorLog.Printf(
+		logs.Errorf(
+			client,
 			"receive.Cookie: failed to read cookie %q: %v\n%s",
 			key,
 			err,
@@ -22,7 +24,8 @@ func Cookie(client *clients.Client, key string) string {
 
 	data, err := url.QueryUnescape(cookie.Value)
 	if err != nil {
-		client.Options.ErrorLog.Printf(
+		logs.Errorf(
+			client,
 			"receive.Cookie: failed to unescape cookie %q value: %v\n%s",
 			key,
 			err,

@@ -2,28 +2,38 @@ package todos
 
 import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases/sqlc"
+	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
-	"github.com/razshare/frizzante/internal/project/lib/sessions"
 )
 
 func Remove(client *clients.Client) {
-	session := sessions.NewDefault()
+	var session sqlc.Session
+	defer send.Navigate(client, "/todos")
+	defer func() {
+		if err := databases.Queries.ModifySessionById(client.Request.Context(), sqlc.ModifySessionByIdParams{
+			ID:    session.ID,
+			Error: session.Error,
+		}); err != nil {
+			logs.Error(client, err)
+		}
+	}()
 	receive.Session(client, &session)
-	var form FormRemove
+	var form struct {
+		Id string `form:"id"`
+	}
 	if !receive.Form(client, &form) {
 		session.Error = "could not parse form"
-		send.Navigate(client, "/todos")
 		return
 	}
-	if count := len(session.Todos); form.Index >= count || form.Index < 0 {
-		session.Error = "index out of bounds"
-		send.Navigate(client, "/todos")
+	context := client.Request.Context()
+	if err := databases.Queries.RemoveTodosByIdAndSessionId(context, sqlc.RemoveTodosByIdAndSessionIdParams{
+		ID:        form.Id,
+		SessionID: session.ID,
+	}); err != nil {
+		session.Error = err.Error()
 		return
 	}
-	session.Todos = append(
-		session.Todos[:form.Index],
-		session.Todos[form.Index+1:]...,
-	)
-	send.Navigate(client, "/todos")
 }

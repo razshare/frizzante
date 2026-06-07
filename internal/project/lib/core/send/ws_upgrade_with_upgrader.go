@@ -3,6 +3,7 @@ package send
 import (
 	"github.com/gorilla/websocket"
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
@@ -10,7 +11,8 @@ import (
 func WsUpgradeWithUpgrader(client *clients.Client, upgrader websocket.Upgrader) {
 	conn, err := upgrader.Upgrade(client.Writer, &client.Request, nil)
 	if err != nil {
-		client.Options.ErrorLog.Printf(
+		logs.Errorf(
+			client,
 			"send.WsUpgradeWithUpgrader: failed to upgrade to WebSocket: %v\n%s",
 			err,
 			stack.Trace(),

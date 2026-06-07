@@ -15,7 +15,6 @@ func FixImports(options FixImportsOptions) (err error) {
 		return
 	}
 	befores := [][]byte{
-		[]byte("github.com/razshare/frizzante/internal/project/additions"),
 		[]byte("github.com/razshare/frizzante/internal/project"),
 	}
 	after := []byte("main")

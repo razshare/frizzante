@@ -2,6 +2,6 @@ package messages
 
 import "fmt"
 
-func Fatalf(format string, vars ...any) {
-	Fatal(fmt.Sprintf(format, vars...))
+func Fatalf(format string, args ...any) {
+	Fatal(fmt.Sprintf(format, args...))
 }

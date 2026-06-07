@@ -7,6 +7,7 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
@@ -19,7 +20,8 @@ func SessionActions(client *clients.Client) (load func(value any) bool, save fun
 			var err error
 			var data []byte
 			if data, err = os.ReadFile(fileName); err != nil {
-				client.Options.ErrorLog.Printf(
+				logs.Errorf(
+					client,
 					"receive.SessionActions: failed to read session file: %v\n%s",
 					err,
 					stack.Trace(),
@@ -27,7 +29,8 @@ func SessionActions(client *clients.Client) (load func(value any) bool, save fun
 				return false
 			}
 			if err = json.Unmarshal(data, value); err != nil {
-				client.Options.ErrorLog.Printf(
+				logs.Errorf(
+					client,
 					"receive.SessionActions: failed to unmarshal session data: %v\n%s",
 					err,
 					stack.Trace(),
@@ -42,7 +45,8 @@ func SessionActions(client *clients.Client) (load func(value any) bool, save fun
 		var data []byte
 		if !files.IsDirectory(baseDirectory) {
 			if err = os.MkdirAll(baseDirectory, os.ModePerm); err != nil {
-				client.Options.ErrorLog.Printf(
+				logs.Errorf(
+					client,
 					"receive.SessionActions: failed to create sessions directory: %v\n%s",
 					err,
 					stack.Trace(),
@@ -51,7 +55,8 @@ func SessionActions(client *clients.Client) (load func(value any) bool, save fun
 			}
 		}
 		if data, err = json.MarshalIndent(value, "", "    "); err != nil {
-			client.Options.ErrorLog.Printf(
+			logs.Errorf(
+				client,
 				"receive.SessionActions: failed to marshal session data: %v\n%s",
 				err,
 				stack.Trace(),
@@ -59,7 +64,8 @@ func SessionActions(client *clients.Client) (load func(value any) bool, save fun
 			return false
 		}
 		if err = os.WriteFile(fileName, data, os.ModePerm); err != nil {
-			client.Options.ErrorLog.Printf(
+			logs.Errorf(
+				client,
 				"receive.SessionActions: failed to write session file: %v\n%s",
 				err,
 				stack.Trace(),

@@ -2,6 +2,6 @@ package messages
 
 import "fmt"
 
-func Tipf(format string, vars ...any) {
-	Tip(fmt.Sprintf(format, vars...))
+func Tipf(format string, args ...any) {
+	Tip(fmt.Sprintf(format, args...))
 }

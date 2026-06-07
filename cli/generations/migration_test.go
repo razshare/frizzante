@@ -9,11 +9,11 @@ import (
 )
 
 func TestMigration(t *testing.T) {
-	additionsDirectory := filepath.Join("internal", "project", "additions")
-	databasesDirectory := filepath.Join(additionsDirectory, "lib", "databases", "sqlite")
+	internalProject := filepath.Join("internal", "project")
+	databasesDirectory := filepath.Join(internalProject, "lib", "core", "databases")
 	migrationsDirectory := filepath.Join(databasesDirectory, "migrations")
 	sqlcYamlFile := filepath.Join(databasesDirectory, "sqlc.yaml")
-	sqlcFile := filepath.Join(additionsDirectory, ".gen", "sqlc", "sqlc")
+	sqlcFile := filepath.Join(internalProject, ".gen", "sqlc", "sqlc")
 	if !files.IsFile(sqlcFile) {
 		if err := Sqlc(SqlcOptions{Sqlc: sqlcFile}); err != nil {
 			t.Fatal(err)

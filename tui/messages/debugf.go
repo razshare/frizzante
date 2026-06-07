@@ -2,6 +2,6 @@ package messages
 
 import "fmt"
 
-func Debugf(format string, vars ...any) {
-	Debug(fmt.Sprintf(format, vars...))
+func Debugf(format string, args ...any) {
+	Debug(fmt.Sprintf(format, args...))
 }

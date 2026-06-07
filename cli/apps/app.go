@@ -13,6 +13,7 @@ type App struct {
 	Database     *string
 	DatabaseType *string
 	Context      *string
-	Incremental  *bool
+	Output       *string
 	Strict       *bool
+	Incremental  *bool
 }

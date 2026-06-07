@@ -3,6 +3,7 @@ package receive
 import (
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
@@ -26,7 +27,8 @@ func SessionId(client *clients.Client) string {
 	// Create new session.
 	ido, err := uuid.NewV4()
 	if err != nil {
-		client.Options.ErrorLog.Printf(
+		logs.Errorf(
+			client,
 			"receive.SessionId: failed to create new session id: %v\n%s",
 			err,
 			stack.Trace(),

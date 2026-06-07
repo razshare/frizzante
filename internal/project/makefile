@@ -40,8 +40,11 @@ update:
 lock-packages:
 	frizzante lock-packages
 
-types:
+type_definitions:
 	frizzante generate types
+
+queries:
+	frizzante generate queries
 
 snapshot:
 	frizzante generate snapshot http://127.0.0.1:8080/@statics

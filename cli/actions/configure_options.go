@@ -1,7 +1,8 @@
 package actions
 
 type ConfigureOptions struct {
-	Go  string
-	Air string
-	Bun string
+	Go   string
+	Air  string
+	Bun  string
+	Tags string
 }

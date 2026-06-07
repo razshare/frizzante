@@ -57,22 +57,6 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "databases" },
-			Choice: search.Choice{Id: "databases", Description: "databases package"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ databases"))
-				err = generations.Databases(generations.DatabasesOptions{
-					Go:     *app.Go,
-					Sqlc:   *app.Sqlc,
-					Type:   *app.DatabaseType,
-					Strict: *app.Strict,
-					Efs:    app.Efs,
-				})
-				return
-			},
-		},
-		{
 			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "migration" },
 			Choice: search.Choice{Id: "migration", Description: "migration file named using the current date and time"},
 			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
@@ -82,6 +66,19 @@ var Generate = Menu{
 					Sqlc:     *app.Sqlc,
 					Strict:   *app.Strict,
 					SqlcYaml: *app.SqlcYaml,
+				})
+				return
+			},
+		},
+		{
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "types" },
+			Choice: search.Choice{Id: "types", Description: "typescript type definitions from go types"},
+			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
+				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+				fmt.Println(configs.Styles.Menu.Render("generate ▷ types"))
+				err = generations.Types(generations.TypesOptions{
+					Go:   *app.Go,
+					Tags: *app.Tags,
 				})
 				return
 			},
@@ -119,17 +116,10 @@ var Generate = Menu{
 			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("generate ▷ core"))
-				err = generations.Core(generations.CoreOptions{Efs: app.Efs})
-				return
-			},
-		},
-		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "dev" },
-			Choice: search.Choice{Id: "dev", Description: "dev package"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ dev"))
-				err = generations.Dev(generations.DevOptions{Efs: app.Efs})
+				err = generations.Core(generations.CoreOptions{
+					Efs:    app.Efs,
+					Strict: *app.Strict,
+				})
 				return
 			},
 		},

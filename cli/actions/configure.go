@@ -20,10 +20,13 @@ func Configure(options ConfigureOptions) (err error) {
 	if err = Install(InstallOptions{Go: options.Go, Bun: options.Bun}); err != nil {
 		return
 	}
+	if err = generations.Types(generations.TypesOptions{Go: options.Go, Tags: options.Tags}); err != nil {
+		return
+	}
 	if err = Package(PackageOptions{Go: options.Go, Bun: options.Bun}); err != nil {
 		return
 	}
-	if err = PreBuild(PreBuildOptions{Go: options.Go, Bun: options.Bun}); err != nil {
+	if err = PreBuild(PreBuildOptions{Go: options.Go, Tags: options.Tags}); err != nil {
 		return
 	}
 	messages.Success("project configured")

@@ -2,18 +2,33 @@ package todos
 
 import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases/sqlc"
+	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
-	"github.com/razshare/frizzante/internal/project/lib/sessions"
 )
 
 func View(client *clients.Client) {
-	session := sessions.NewDefault()
+	var session sqlc.Session
+	defer func() {
+		if err := databases.Queries.ModifySessionById(client.Request.Context(), sqlc.ModifySessionByIdParams{
+			ID: session.ID,
+		}); err != nil {
+			logs.Error(client, err)
+		}
+	}()
 	receive.Session(client, &session)
-	defer func() { session.Error = "" }()
+	context := client.Request.Context()
+	var err error
+	var todos []sqlc.Todo
+	if todos, err = databases.Queries.FindTodosBySessionId(context, session.ID); err != nil {
+		session.Error = err.Error()
+		return
+	}
 	send.View(client, views.View{Name: "Todos", Props: Props{
 		Error: session.Error,
-		Items: session.Todos,
+		Items: todos,
 	}})
 }

@@ -2,6 +2,6 @@ package messages
 
 import "fmt"
 
-func Successf(format string, vars ...any) {
-	Success(fmt.Sprintf(format, vars...))
+func Successf(format string, args ...any) {
+	Success(fmt.Sprintf(format, args...))
 }

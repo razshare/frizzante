@@ -1,29 +1,51 @@
 package todos
 
 import (
+	uuid "github.com/nu7hatch/gouuid"
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases/sqlc"
+	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
-	"github.com/razshare/frizzante/internal/project/lib/sessions"
 )
 
 func Add(client *clients.Client) {
-	session := sessions.NewDefault()
+	var session sqlc.Session
+	defer send.Navigate(client, "/todos")
+	defer func() {
+		if err := databases.Queries.ModifySessionById(client.Request.Context(), sqlc.ModifySessionByIdParams{
+			ID:    session.ID,
+			Error: session.Error,
+		}); err != nil {
+			logs.Error(client, err)
+		}
+	}()
 	receive.Session(client, &session)
-	var form FormAdd
+	var form struct {
+		Description string `form:"description"`
+	}
 	if !receive.Form(client, &form) {
 		session.Error = "could not parse form"
-		send.Navigate(client, "/todos")
 		return
 	}
 	if form.Description == "" {
 		session.Error = "description cannot be empty"
-		send.Navigate(client, "/todos")
 		return
 	}
-	session.Todos = append(session.Todos, sessions.Todo{
-		Checked:     false,
+	ido, err := uuid.NewV4()
+	if err != nil {
+		session.Error = err.Error()
+		return
+	}
+	id := ido.String()
+	context := client.Request.Context()
+	if err = databases.Queries.AddTodoWithIdAndSessionId(context, sqlc.AddTodoWithIdAndSessionIdParams{
+		ID:          id,
+		SessionID:   session.ID,
 		Description: form.Description,
-	})
-	send.Navigate(client, "/todos")
+	}); err != nil {
+		session.Error = err.Error()
+		return
+	}
 }

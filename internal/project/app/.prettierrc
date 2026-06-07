@@ -7,7 +7,6 @@
     "plugins": ["prettier-plugin-svelte"],
     "semi": false,
     "svelteSortOrder": "options-styles-scripts-markup",
-    "svelteStrictMode": false,
     "svelteIndentScriptAndStyle": true,
     "useTabs": false,
     "overrides": [{ "files": "*.svelte", "options": { "parser": "svelte" } }],

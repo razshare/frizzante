@@ -4,6 +4,7 @@ set -e
 # cleans root
 rm -fr .gen
 rm -fr frizzante
+rm -fr source.sqlite
 rm -fr cover.html
 rm -fr cover.out
 
@@ -11,6 +12,7 @@ rm -fr cover.out
 rm -fr cli/generations/.gen
 
 # cleans internal project
+rm -fr internal/project/source.sqlite
 rm -fr internal/project/.gen
 rm -fr internal/project/app/dist
 rm -fr internal/project/app/.vite

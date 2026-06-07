@@ -4,8 +4,8 @@ tmp_dir = ".gen/tmp"
 
 [build]
 args_bin = []
-bin = ".gen/tmp/main.exe"
-cmd = "go build -tags=dev,trace -o .gen/tmp/main.exe ."
+bin = ".gen/bin/app.exe"
+cmd = "go build -tags=use_disk,trace -o .gen/bin/app.exe ."
 delay = 50
 exclude_dir = ["app", ".gen", ".git", ".github", "lib/core/ssr/app"]
 exclude_file = []
@@ -20,8 +20,8 @@ kill_delay = "0s"
 log = "build-errors.log"
 poll = false
 poll_interval = 0
-post_cmd = ["frizzante postbuild"]
 pre_cmd = ["frizzante prebuild"]
+post_cmd = ["frizzante postbuild"]
 rerun = false
 rerun_delay = 50
 send_interrupt = true

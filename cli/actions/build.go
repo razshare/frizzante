@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/cli/extensions"
 	"github.com/razshare/frizzante/cli/tags"
 	"github.com/razshare/frizzante/tui/messages"
 	"github.com/razshare/frizzante/tui/spinners"
@@ -19,12 +18,15 @@ func Build(options BuildOptions) (err error) {
 	}); err != nil {
 		return
 	}
-	if err = PreBuild(PreBuildOptions(options)); err != nil {
+	if err = PreBuild(PreBuildOptions{
+		Go:   options.Go,
+		Tags: options.Tags,
+	}); err != nil {
 		return
 	}
-	extension := extensions.Find()
+	output := strings.ReplaceAll(options.Output, "/", string(filepath.Separator))
 	spin := spinners.New("building binary")
-	args := []string{"build", fmt.Sprintf("-o=%s", filepath.Join(".gen", "bin", "app"+extension))}
+	args := []string{"build", fmt.Sprintf("-o=%s", output)}
 	if len(options.Tags) > 0 {
 		var parsedTags []string
 		if parsedTags, err = tags.Parse(options.Tags); err != nil {
@@ -46,10 +48,13 @@ func Build(options BuildOptions) (err error) {
 		messages.Error("could not build go source code")
 		return
 	}
-	if err = PostBuild(PostBuildOptions(options)); err != nil {
+	if err = PostBuild(PostBuildOptions{
+		Go:   options.Go,
+		Tags: options.Tags,
+	}); err != nil {
 		return
 	}
 	spinners.Stop(spin)
-	messages.Success("project built into ", filepath.Join(".gen", "bin", "app"+extension))
+	messages.Success("project built into ", output)
 	return
 }
