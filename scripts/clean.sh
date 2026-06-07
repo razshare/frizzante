@@ -13,6 +13,7 @@ rm -fr cli/generations/.gen
 
 # cleans internal project
 rm -fr internal/project/source.sqlite
+rm -fr internal/project/lib/core/receive/source.sqlite
 rm -fr internal/project/.gen
 rm -fr internal/project/app/dist
 rm -fr internal/project/app/.vite
