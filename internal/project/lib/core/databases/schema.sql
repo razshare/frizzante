@@ -1,13 +1,11 @@
 drop table if exists sessions;
 drop table if exists todos;
-
 create table sessions(
     id varchar(36) primary key,
     created_at datetime not null,
     updated_at datetime not null,
     error text not null default ''
 );
-
 create table todos(
     id varchar(36) primary key,
     session_id varchar(36) not null,

@@ -9,7 +9,6 @@ create table sessions(
     updated_at datetime not null,
     error text not null default ''
 );
-
 create table todos(
     id varchar(36) primary key,
     session_id varchar(36) not null,
