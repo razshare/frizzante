@@ -1,4 +1,4 @@
-import type { HistoryEntry } from "$lib/scripts/core/history_entry"
+import type { HistoryEntry } from "$lib/types/core/history_entry"
 import type { View } from "$lib/scripts/core/view"
 let lastUrl: false | string = false
 export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: View): Promise<() => void> {

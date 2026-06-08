@@ -3,12 +3,12 @@ package receive
 import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/databases"
-	"github.com/razshare/frizzante/internal/project/lib/core/databases/sqlc"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-func Session(client *clients.Client, session *sqlc.Session) bool {
+func Session(client *clients.Client, session *schema.Session) bool {
 	id := SessionId(client)
 	context := client.Request.Context()
 	var err error

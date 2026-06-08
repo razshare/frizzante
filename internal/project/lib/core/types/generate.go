@@ -12,7 +12,7 @@ import (
 )
 
 func Generate[T any]() (err error) {
-	typesDirectoryName := filepath.Join(".gen", "types")
+	typesDirectoryName := filepath.Join("app", "lib", "types", "server")
 	var value T
 	type_ := reflect.TypeOf(value)
 	var packages = map[string][]string{}

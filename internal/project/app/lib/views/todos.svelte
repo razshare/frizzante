@@ -20,7 +20,7 @@
 </style>
 
 <script lang="ts">
-    import type { Props, sqlc } from "$gen/types/main/lib/routes/todos/props"
+    import type { Props, schema } from "$lib/types/server/main/lib/routes/todos/props"
     import Icon from "$lib/components/icons/icon.svelte"
     import Layout from "$lib/components/layout.svelte"
     import { action } from "$lib/scripts/core/action.ts"
@@ -68,7 +68,7 @@
     {/if}
 {/snippet}
 
-{#snippet TodoList(items: sqlc.Todo[])}
+{#snippet TodoList(items: schema.Todo[])}
     {#if items.length > 0}
         <div class="todo-list">
             {#each items as todo (todo.id)}
@@ -90,7 +90,7 @@
     <span>No tasks yet. Add one above to get started!</span>
 {/snippet}
 
-{#snippet ToggleTodoButton(todo: sqlc.Todo, id: string)}
+{#snippet ToggleTodoButton(todo: schema.Todo, id: string)}
     {@const aria = todo.checked > 0 ? "Uncheck" : "Check"}
     {@const nextValue = todo.checked > 0 ? 0 : 1}
     {@const icon = todo.checked ? mdiCheckCircleOutline : mdiCircleOutline}

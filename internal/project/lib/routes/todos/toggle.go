@@ -3,17 +3,17 @@ package todos
 import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/databases"
-	"github.com/razshare/frizzante/internal/project/lib/core/databases/sqlc"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 )
 
 func Toggle(client *clients.Client) {
-	var session sqlc.Session
+	var session schema.Session
 	defer send.Navigate(client, "/todos")
 	defer func() {
-		if err := databases.Queries.ModifySessionById(client.Request.Context(), sqlc.ModifySessionByIdParams{
+		if err := databases.Queries.ModifySessionById(client.Request.Context(), schema.ModifySessionByIdParams{
 			ID:    session.ID,
 			Error: session.Error,
 		}); err != nil {
@@ -29,7 +29,7 @@ func Toggle(client *clients.Client) {
 		session.Error = "could not parse form"
 		return
 	}
-	if err := databases.Queries.ToggleTodosByIdAndSessionId(client.Request.Context(), sqlc.ToggleTodosByIdAndSessionIdParams{
+	if err := databases.Queries.ToggleTodosByIdAndSessionId(client.Request.Context(), schema.ToggleTodosByIdAndSessionIdParams{
 		ID:        form.Id,
 		SessionID: session.ID,
 		Checked:   form.Value,

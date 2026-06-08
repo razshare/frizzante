@@ -1,5 +1,5 @@
 package databases
 
-import "github.com/razshare/frizzante/internal/project/lib/core/databases/sqlc"
+import "github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 
-var Queries sqlc.Queries
+var Queries schema.Queries

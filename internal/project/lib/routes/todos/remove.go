@@ -3,17 +3,17 @@ package todos
 import (
 	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/databases"
-	"github.com/razshare/frizzante/internal/project/lib/core/databases/sqlc"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 )
 
 func Remove(client *clients.Client) {
-	var session sqlc.Session
+	var session schema.Session
 	defer send.Navigate(client, "/todos")
 	defer func() {
-		if err := databases.Queries.ModifySessionById(client.Request.Context(), sqlc.ModifySessionByIdParams{
+		if err := databases.Queries.ModifySessionById(client.Request.Context(), schema.ModifySessionByIdParams{
 			ID:    session.ID,
 			Error: session.Error,
 		}); err != nil {
@@ -29,7 +29,7 @@ func Remove(client *clients.Client) {
 		return
 	}
 	context := client.Request.Context()
-	if err := databases.Queries.RemoveTodosByIdAndSessionId(context, sqlc.RemoveTodosByIdAndSessionIdParams{
+	if err := databases.Queries.RemoveTodosByIdAndSessionId(context, schema.RemoveTodosByIdAndSessionIdParams{
 		ID:        form.Id,
 		SessionID: session.ID,
 	}); err != nil {

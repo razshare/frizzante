@@ -1,4 +1,4 @@
-import type { HistoryEntry } from "$lib/scripts/core/history_entry"
+import type { HistoryEntry } from "$lib/types/core/history_entry"
 import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
 import { swap } from "$lib/scripts/core/swap"
 import type { View } from "$lib/scripts/core/view"

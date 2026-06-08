@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/databases/sqlc"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 )
 
 func init() {
@@ -13,8 +13,8 @@ func init() {
 	if database, err = Load(); err != nil {
 		log.Fatal(err)
 	}
-	var queriesLocal *sqlc.Queries
-	if queriesLocal = sqlc.New(database); queriesLocal == nil {
+	var queriesLocal *schema.Queries
+	if queriesLocal = schema.New(database); queriesLocal == nil {
 		log.Fatal("could not construct database queries object")
 	}
 	Queries = *queriesLocal

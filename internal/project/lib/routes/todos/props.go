@@ -1,10 +1,10 @@
 package todos
 
 import (
-	"github.com/razshare/frizzante/internal/project/lib/core/databases/sqlc"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 )
 
 type Props struct {
-	Items []sqlc.Todo `json:"items"`
-	Error string      `json:"error"`
+	Items []schema.Todo `json:"items"`
+	Error string        `json:"error"`
 }

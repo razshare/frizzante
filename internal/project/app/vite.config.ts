@@ -24,7 +24,6 @@ export default defineConfig({
     resolve: {
         alias: {
             "$lib": `${path.resolve(dir, "./lib")}`,
-            "$gen": `${path.resolve(dir, "../.gen")}`,
             "$exports.client": `${path.resolve(dir, "./exports.client.ts")}`,
             "$exports.server": `${path.resolve(dir, "./exports.server.ts")}`,
         },

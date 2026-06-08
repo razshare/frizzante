@@ -1,4 +1,4 @@
-import type { HrefOptions } from "$lib/scripts/core/href_options"
+import type { HrefOptions } from "$lib/types/core/href_options"
 import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
 import { navigate } from "$lib/scripts/core/navigate.ts"
 import { swap } from "$lib/scripts/core/swap"
