@@ -2,7 +2,7 @@ package menus
 
 import "github.com/razshare/frizzante/cli/apps"
 
-func Activate(menu *Menu, app apps.App, args []string) (id string, err error) {
+func Activate(menu *Menu, app apps.App, args []string, depth int) (id string, err error) {
 	argsLength := len(args)
 	var value string
 	var query []string
@@ -32,7 +32,7 @@ func Activate(menu *Menu, app apps.App, args []string) (id string, err error) {
 			valueLocal = query[0]
 			queryLocal = query[1:]
 		}
-		err = item.Handle(menu, app, valueLocal, queryLocal)
+		err = item.Handle(menu, app, valueLocal, queryLocal, depth)
 		break
 	}
 	return

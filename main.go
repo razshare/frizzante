@@ -45,7 +45,7 @@ func main() {
 		Incremental:  flag.BoolP("incremental", "", false, "enables incremental mode for svelte-check"),
 	}
 	flag.Parse()
-	if _, err := menus.Activate(&menus.Main, app, flag.Args()); err != nil {
+	if _, err := menus.Activate(&menus.Main, app, flag.Args(), 0); err != nil {
 		if !errors.Is(err, tea.ErrInterrupted) {
 			messages.Fatal(err)
 		}

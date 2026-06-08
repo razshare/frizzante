@@ -53,7 +53,8 @@ func Migration(options MigrationOptions) (err error) {
 	}
 	data := []byte("-- migration: down\n\n-- migration: up\n")
 	now := time.Now()
-	migrationFileName := filepath.Join(baseDirectory, "migrations", fmt.Sprintf("%s.sql", now.Format("2006-01-02T15:04:05Z07:00")))
+	format := now.Format("2006_01_02T15_04_05Z07_00")
+	migrationFileName := filepath.Join(baseDirectory, "migrations", fmt.Sprintf("%s.sql", format))
 	if err = os.WriteFile(migrationFileName, data, os.ModePerm); err != nil {
 		spinners.Stop(spin)
 		return

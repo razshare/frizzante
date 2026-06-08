@@ -37,9 +37,10 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 	}
 	if build {
 		if err = Build(BuildOptions{
-			Go:   options.Go,
-			Bun:  options.Bun,
-			Tags: options.Tags,
+			Go:     options.Go,
+			Bun:    options.Bun,
+			Tags:   options.Tags,
+			Output: program,
 		}); err != nil {
 			return
 		}
