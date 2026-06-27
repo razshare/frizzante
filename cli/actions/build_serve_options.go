@@ -1,8 +1,7 @@
 package actions
 
-type ConfigureOptions struct {
+type BuildServeOptions struct {
 	Go     string
-	Air    string
 	Bun    string
 	Tags   string
 	Output string

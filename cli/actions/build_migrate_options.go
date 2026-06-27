@@ -1,8 +1,7 @@
 package actions
 
-type BuildOptions struct {
+type BuildMigrateOptions struct {
 	Go     string
-	Bun    string
 	Tags   string
 	Output string
 }

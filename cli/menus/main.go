@@ -55,10 +55,11 @@ var Main = Menu{
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ configure"))
 				err = actions.Configure(actions.ConfigureOptions{
-					Go:   *app.Go,
-					Air:  *app.Air,
-					Bun:  *app.Bun,
-					Tags: *app.Tags,
+					Go:     *app.Go,
+					Air:    *app.Air,
+					Bun:    *app.Bun,
+					Tags:   *app.Tags,
+					Output: *app.Output,
 				})
 				return
 			},
@@ -115,7 +116,7 @@ var Main = Menu{
 			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ build"))
-				err = actions.Build(actions.BuildOptions{
+				err = actions.BuildServe(actions.BuildServeOptions{
 					Go:     *app.Go,
 					Bun:    *app.Bun,
 					Tags:   *app.Tags,
@@ -204,21 +205,6 @@ var Main = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "migrate" },
-			Choice: search.Choice{Id: "migrate", Description: "migrates database schema"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("running ▷ migrate"))
-				err = actions.Migrate(actions.MigrateOptions{
-					Query:    value,
-					Strict:   *app.Strict,
-					SqlcYaml: *app.SqlcYaml,
-					Database: *app.Database,
-				})
-				return
-			},
-		},
-		{
 			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "check" },
 			Choice: search.Choice{Id: "check", Description: "checks for code errors"},
 			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
@@ -295,17 +281,6 @@ var Main = Menu{
 					Go:  *app.Go,
 					Bun: *app.Bun,
 				})
-				return
-			},
-		},
-		{
-			Hidden: true,
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "welcome" },
-			Choice: search.Choice{Id: "welcome", Description: "shows a welcome message and yields without killing the process"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("running ▷ welcome"))
-				err = actions.Welcome(actions.WelcomeOptions{})
 				return
 			},
 		},

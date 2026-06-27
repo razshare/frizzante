@@ -1,9 +1,14 @@
 package actions
 
 import (
+	"errors"
+	"os"
+	"path/filepath"
+
 	"github.com/razshare/frizzante/cli/generations"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/tui/spinners"
 )
 
 func Configure(options ConfigureOptions) (err error) {
@@ -28,6 +33,24 @@ func Configure(options ConfigureOptions) (err error) {
 	}
 	if err = PreBuild(PreBuildOptions{Go: options.Go, Tags: options.Tags}); err != nil {
 		return
+	}
+	if err = BuildMigrate(BuildMigrateOptions{Go: options.Go, Tags: options.Tags, Output: options.Output}); err != nil {
+		return
+	}
+	if !files.IsFile("source.sqlite") {
+		messages.Info("database ./source.sqlite not found")
+		spinner := spinners.New("migrating database")
+		go spinners.Start(spinner)
+		if !messages.Command(messages.CommandOptions{
+			Environment: os.Environ(),
+			Program:     filepath.Join(".gen", "bin", "migrate"),
+		}) {
+			spinners.Stop(spinner)
+			err = errors.New("could not configure source.sqlite")
+			return
+		}
+		spinners.Stop(spinner)
+		messages.Success("database created and migrated into ./source.sqlite")
 	}
 	messages.Success("project configured")
 	return

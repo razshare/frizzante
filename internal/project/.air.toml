@@ -4,8 +4,8 @@ tmp_dir = ".gen/tmp"
 
 [build]
 args_bin = []
-bin = ".gen/bin/app.exe"
-cmd = "go build -tags=use_disk,trace -o .gen/bin/app.exe ."
+bin = ".gen/bin/serve.exe"
+cmd = "go build -tags=use_disk,trace -o .gen/bin/serve.exe ."
 delay = 50
 exclude_dir = ["app", ".gen", ".git", ".github", "lib/core/ssr/app"]
 exclude_file = []
