@@ -7,17 +7,9 @@ import (
 )
 
 func TestSessionId(t *testing.T) {
-	http := mocks.NewScope()
-	http.Request.Header.Set("Cookie", "session-id=value;")
-	if SessionId(http) != "value" {
-		t.Fatal("session id should be value")
-	}
-}
-
-func TestSessionIdCached(t *testing.T) {
-	http := mocks.NewScope()
-	http.SessionId = "value"
-	if SessionId(http) != "value" {
+	request, writer := mocks.NewExchange()
+	request.Header.Set("Cookie", "session-id=value;")
+	if value, err := SessionId(request, writer); err != nil || value != "value" {
 		t.Fatal("session id should be value")
 	}
 }

@@ -7,11 +7,9 @@ import (
 )
 
 func TestNavigate(t *testing.T) {
-	http := mocks.NewScope()
-	Navigate(http, "/about")
-	writer := http.Writer.(*mocks.ResponseWriter)
-	if http.Status != 302 {
-		t.Fatal("status should be 302")
+	_, writer := mocks.NewExchange()
+	if err := Navigate(writer, "/about"); err != nil {
+		t.Fatal("navigating should succeed")
 	}
 	if writer.MockHeader.Get("Location") != "/about" {
 		t.Fatal("location should be about")

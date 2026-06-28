@@ -1,14 +1,25 @@
 package welcome
 
 import (
+	"embed"
+	"log"
+	"net/http"
+
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
-	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
+	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
-func View() routes.Handler {
-	return func(http *scopes.Http) {
-		send.View(http, views.View{Name: "Welcome"})
+func View(
+	render renders.Render,
+	efs embed.FS,
+	logerr *log.Logger,
+	loginf *log.Logger,
+) routes.Handler {
+	return func(request *http.Request, writer http.ResponseWriter) {
+		_ = send.View(writer, request, render, efs, logerr, loginf, views.View{
+			Name: "Welcome",
+		})
 	}
 }

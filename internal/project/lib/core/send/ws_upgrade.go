@@ -1,13 +1,14 @@
 package send
 
 import (
+	"net/http"
+
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 )
 
 // WsUpgrade upgrades to web sockets.
-func WsUpgrade(http *scopes.Http) {
-	WsUpgradeWithUpgrader(http, websocket.Upgrader{
+func WsUpgrade(writer *http.ResponseWriter, request *http.Request) error {
+	return WsUpgradeWithUpgrader(writer, request, websocket.Upgrader{
 		ReadBufferSize:  10240, // 10KB
 		WriteBufferSize: 10240, // 10KB
 	})

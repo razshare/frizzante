@@ -1,5 +1,7 @@
 package guards
 
-import "github.com/razshare/frizzante/internal/project/lib/core/scopes"
+import (
+	"net/http"
+)
 
-type Handler = func(http *scopes.Http, allow func())
+type Handler = func(request *http.Request, writer http.ResponseWriter, allow func())

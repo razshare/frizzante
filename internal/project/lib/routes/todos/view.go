@@ -1,37 +1,39 @@
 package todos
 
 import (
+	"embed"
+	"log"
+	"net/http"
+
 	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
-	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
-	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/sessions"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
+	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
-func View() routes.Handler {
-	return func(http *scopes.Http) {
+func View(
+	queries *schema.Queries,
+	render renders.Render,
+	efs embed.FS,
+	logerr *log.Logger,
+	loginf *log.Logger,
+) routes.Handler {
+	return func(request *http.Request, writer http.ResponseWriter) {
 		var session schema.Session
-		sessions.Start(http, http.Queries, &session)
-		defer func() {
-			if err := http.Queries.ModifySessionById(http.Request.Context(), schema.ModifySessionByIdParams{
-				ID: session.ID,
-			}); err != nil {
-				logs.Error(http, err)
-			}
-		}()
-		context := http.Request.Context()
-		var err error
-		var todos []schema.Todo
-		if todos, err = http.Queries.FindTodosBySessionId(context, session.ID); err != nil {
-			session.Error = err.Error()
-			return
-		}
-		send.View(http, views.View{Name: "Todos", Props: Props{
-			Error: session.Error,
-			Items: todos,
-		}})
+		_ = sessions.Start(request, writer, queries, &session)
+		todos, _ := queries.FindTodosBySessionId(request.Context(), session.ID)
+		_ = queries.ModifySessionById(request.Context(), schema.ModifySessionByIdParams{
+			ID: session.ID,
+		})
+		_ = send.View(writer, request, render, efs, logerr, loginf, views.View{
+			Name: "Todos",
+			Props: Props{
+				Error: session.Error,
+				Items: todos,
+			},
+		})
 	}
 
 }

@@ -7,9 +7,8 @@ import (
 )
 
 func TestCookie(t *testing.T) {
-	http := mocks.NewScope()
-	Cookie(http, "cookie", "monster")
-	writer := http.Writer.(*mocks.ResponseWriter)
+	_, writer := mocks.NewExchange()
+	Cookie(writer, "cookie", "monster")
 	if writer.MockHeader.Get("Set-Cookie") != "cookie=monster; Path=/; HttpOnly" {
 		t.Fatal("cookie should be monster")
 	}

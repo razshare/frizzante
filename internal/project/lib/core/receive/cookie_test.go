@@ -7,27 +7,25 @@ import (
 )
 
 func TestCookie(t *testing.T) {
-	http := mocks.NewScope()
-	http.Request.Header.Set("Cookie", "cookie=monster;")
-	cookie := Cookie(http, "cookie")
-	if cookie != "monster" {
+	request, _ := mocks.NewExchange()
+	request.Header.Set("Cookie", "cookie=monster;")
+
+	if cookie, err := Cookie(request, "cookie"); err != nil || cookie != "monster" {
 		t.Fatal("cookie should be monster")
 	}
 }
 
 func TestCookieEmptyKey(t *testing.T) {
-	http := mocks.NewScope()
-	cookie := Cookie(http, "")
-	if cookie != "" {
+	request, _ := mocks.NewExchange()
+	if cookie, err := Cookie(request, ""); err == nil || cookie != "" {
 		t.Fatal("cookie should be empty")
 	}
 }
 
 func TestCookieInvalidContent(t *testing.T) {
-	http := mocks.NewScope()
-	http.Request.Header.Set("Cookie", "cookie=%monster;")
-	cookie := Cookie(http, "cookie")
-	if cookie != "" {
+	request, _ := mocks.NewExchange()
+	request.Header.Set("Cookie", "cookie=%monster;")
+	if cookie, err := Cookie(request, "cookie"); err == nil || cookie != "" {
 		t.Fatal("cookie should be empty")
 	}
 }

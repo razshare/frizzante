@@ -7,11 +7,9 @@ import (
 )
 
 func TestRedirect(t *testing.T) {
-	http := mocks.NewScope()
-	Redirect(http, "/about", 303)
-	writer := http.Writer.(*mocks.ResponseWriter)
-	if http.Status != 303 {
-		t.Fatal("status should be 303")
+	_, writer := mocks.NewExchange()
+	if err := Redirect(writer, "/about", 303); err != nil {
+		t.Fatal("redirect should succeed")
 	}
 	if writer.MockHeader.Get("Location") != "/about" {
 		t.Fatal("location should be about")

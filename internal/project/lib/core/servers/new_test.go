@@ -1,17 +1,16 @@
 package servers
 
 import (
+	"log"
+	"os"
 	"testing"
-
-	"github.com/razshare/frizzante/internal/project/lib/core/csr"
 )
 
 func TestNew(t *testing.T) {
-	server := New()
-	server.Render = csr.New()
-	if server.InfoLog == nil {
-		t.Fatal("server should have an info log")
-	}
+	server := New(
+		log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime),
+		log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
+	)
 	if server.ErrorLog == nil {
 		t.Fatal("server should have an error log")
 	}

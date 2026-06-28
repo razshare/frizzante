@@ -8,14 +8,13 @@ import (
 )
 
 func TestMessage(t *testing.T) {
-	http := mocks.NewScope()
-	body := http.Request.Body.(*mocks.RequestBody)
+	request, _ := mocks.NewExchange()
+	body := request.Body.(*mocks.RequestBody)
 	body.MockBuffer = []byte("hello")
-	data, err := io.ReadAll(http.Request.Body)
+	data, err := io.ReadAll(request.Body)
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	if string(data) != "hello" {
 		t.Fatal("request body should be hello")
 	}

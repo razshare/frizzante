@@ -1,20 +1,21 @@
 package statics
 
 import (
+	"fmt"
+	"net/http"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
-	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 )
 
 // NewRouteHandler creates a route handler that lists all static routes of a given server.
 func NewRouteHandler(server *servers.Server) routes.Handler {
-	return func(http *scopes.Http) {
-		if accepts := receive.Accept(http); accepts != "" && accepts != "application/json" {
-			send.BadRequestf(http, "only application/json can be produced; requested %s", accepts)
+	return func(request *http.Request, writer http.ResponseWriter) {
+		if accepts := request.Header.Get("Accept"); accepts != "" && accepts != "application/json" {
+			writer.WriteHeader(http.StatusBadRequest)
+			_ = send.Message(writer, fmt.Sprintf("only application/json can be produced; requested %s", accepts))
 			return
 		}
 		statics := make([]string, 0)
@@ -23,6 +24,6 @@ func NewRouteHandler(server *servers.Server) routes.Handler {
 				statics = append(statics, parts[1])
 			}
 		}
-		send.Json(http, statics)
+		_ = send.Json(writer, statics)
 	}
 }

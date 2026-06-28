@@ -1,5 +1,7 @@
 package routes
 
-import "github.com/razshare/frizzante/internal/project/lib/core/scopes"
+import (
+	"net/http"
+)
 
-type Handler = func(http *scopes.Http)
+type Handler = func(request *http.Request, writer http.ResponseWriter)

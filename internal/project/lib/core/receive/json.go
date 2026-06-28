@@ -3,46 +3,20 @@ package receive
 import (
 	"encoding/json"
 	"io"
-
-	"github.com/razshare/frizzante/internal/project/lib/core/logs"
-	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"net/http"
 )
 
 // Json reads the next JSON-encoded message from the
 // client and stores it in the value pointed to by value.
 //
 // Compatible with web sockets and server sent events.
-func Json(http *scopes.Http, value any) bool {
-	if http.WebSocket != nil {
-		if err := http.WebSocket.ReadJSON(&value); err != nil {
-			logs.Errorf(
-				http,
-				"receive.Json: failed to read WebSocket JSON message: %v\n%s",
-				err,
-				stack.Trace(),
-			)
-			return false
-		}
-		return true
-	}
-	data, err := io.ReadAll(http.Request.Body)
-	if err != nil {
-		logs.Errorf(
-			http,
-			"receive.Json: failed to read request body: %v\n%s",
-			err,
-			stack.Trace(),
-		)
-		return false
+func Json(request *http.Request, value any) (err error) {
+	var data []byte
+	if data, err = io.ReadAll(request.Body); err != nil {
+		return
 	}
 	if err = json.Unmarshal(data, &value); err != nil {
-		logs.Errorf(
-			http,
-			"receive.Json: failed to unmarshal JSON: %v\n%s",
-			err,
-			stack.Trace(),
-		)
+		return
 	}
-	return true
+	return
 }

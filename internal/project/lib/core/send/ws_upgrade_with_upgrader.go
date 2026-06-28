@@ -1,24 +1,28 @@
 package send
 
 import (
+	"net/http"
+
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/internal/project/lib/core/logs"
-	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // WsUpgradeWithUpgrader upgrades to web sockets.
-func WsUpgradeWithUpgrader(http *scopes.Http, upgrader websocket.Upgrader) {
-	conn, err := upgrader.Upgrade(http.Writer, &http.Request, nil)
-	if err != nil {
-		logs.Errorf(
-			http,
-			"send.WsUpgradeWithUpgrader: failed to upgrade to WebSocket: %v\n%s",
-			err,
-			stack.Trace(),
-		)
+func WsUpgradeWithUpgrader(
+	writer *http.ResponseWriter,
+	request *http.Request,
+	upgrader websocket.Upgrader,
+) (err error) {
+	var webSocketConnection *websocket.Conn
+	if webSocketConnection, err = upgrader.Upgrade(*writer, request, nil); err != nil {
 		return
 	}
-	http.WebSocket = conn
-	http.Locked = true
+	converted := http.ResponseWriter(&WsUpgradeResponseWriter{
+		ResponseWriter:      *writer,
+		WebSocketConnection: webSocketConnection,
+	})
+	request.Body = &WsUpgradeBodyReaderCloser{
+		WebSocketConnection: webSocketConnection,
+	}
+	writer = &converted
+	return
 }

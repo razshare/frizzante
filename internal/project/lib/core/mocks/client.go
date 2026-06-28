@@ -3,12 +3,10 @@ package mocks
 import (
 	"io"
 	"net/http"
-
-	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
-	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 )
 
 type ResponseWriter struct {
+	http.ResponseWriter
 	MockHeader     http.Header
 	MockStatusCode int
 	MockBytes      []byte
@@ -51,25 +49,16 @@ func (body *RequestBody) Close() error {
 	return nil
 }
 
-func NewScope() *scopes.Http {
-	server := servers.New()
-	writer := &ResponseWriter{
-		MockHeader: map[string][]string{},
-		MockBytes:  make([]byte, 0),
-	}
-	request := http.Request{
+func NewExchange() (request *http.Request, writer *ResponseWriter) {
+	request = &http.Request{
 		Header: map[string][]string{},
 		Body: &RequestBody{
 			MockBuffer: make([]byte, 1024),
 		},
 	}
-	return &scopes.Http{
-		Writer:   writer,
-		Request:  request,
-		ErrorLog: server.ErrorLog,
-		InfoLog:  server.InfoLog,
-		Efs:      server.Efs,
-		EventId:  1,
-		Status:   200,
+	writer = &ResponseWriter{
+		MockHeader: map[string][]string{},
+		MockBytes:  make([]byte, 0),
 	}
+	return
 }
