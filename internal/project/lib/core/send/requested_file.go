@@ -22,10 +22,7 @@ import (
 // Returns false if connection is web sockets, server sent events
 // or the file was not found.
 func RequestedFile(writer http.ResponseWriter, request *http.Request, efs embed.FS, root string) (found bool, err error) {
-	uri := strings.ReplaceAll(filepath.Join(root, request.RequestURI), "/", string(filepath.Separator))
-	if strings.HasPrefix(uri, "/") {
-		uri = uri[1:]
-	}
+	uri := strings.TrimPrefix(strings.ReplaceAll(filepath.Join(root, request.RequestURI), "/", string(filepath.Separator)), "/")
 	embeddedFileName := strings.Join([]string{"app", "dist", "client", uri}, "/")
 	if embeds.IsFile(efs, embeddedFileName) {
 		var file fs.File
