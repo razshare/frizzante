@@ -5,7 +5,6 @@ package csr
 import (
 	_ "embed"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"path/filepath"
 	"strings"
@@ -20,7 +19,6 @@ func New(options Options) renders.Render {
 	index = strings.ReplaceAll(index, "\\", "/")
 	return func(options renders.Options) (document string, err error) {
 		if options.View.RenderMode == views.RenderModeServer {
-			err = errors.New("exclusive server rendering is not allowed using a csr function")
 			return
 		}
 		var indexData []byte
