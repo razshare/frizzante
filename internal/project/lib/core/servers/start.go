@@ -10,7 +10,7 @@ import (
 )
 
 // Start starts a server from a configuration.
-func Start(server *Server, register func(handler *http.ServeMux)) (err error) {
+func Start(server *Server) (err error) {
 	background := context.Background()
 	sigctx, stop := signal.NotifyContext(background, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
@@ -25,7 +25,6 @@ func Start(server *Server, register func(handler *http.ServeMux)) (err error) {
 		}
 	}()
 	handler := server.Handler.(*http.ServeMux)
-	register(handler)
 	for _, route := range server.Routes {
 		handler.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 			if errLocal := server.Cors.Check(request); errLocal != nil {
