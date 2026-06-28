@@ -53,11 +53,6 @@ func (body *RequestBody) Close() error {
 
 func NewScope() *scopes.Http {
 	server := servers.New()
-	options := scopes.Options{
-		ErrorLog: server.ErrorLog,
-		InfoLog:  server.InfoLog,
-		Efs:      server.Efs,
-	}
 	writer := &ResponseWriter{
 		MockHeader: map[string][]string{},
 		MockBytes:  make([]byte, 0),
@@ -69,10 +64,12 @@ func NewScope() *scopes.Http {
 		},
 	}
 	return &scopes.Http{
-		Writer:  writer,
-		Request: request,
-		Options: options,
-		EventId: 1,
-		Status:  200,
+		Writer:   writer,
+		Request:  request,
+		ErrorLog: server.ErrorLog,
+		InfoLog:  server.InfoLog,
+		Efs:      server.Efs,
+		EventId:  1,
+		Status:   200,
 	}
 }
