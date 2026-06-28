@@ -1,8 +1,6 @@
 package todos
 
 import (
-	"embed"
-	"log"
 	"net/http"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
@@ -16,9 +14,6 @@ import (
 func View(
 	queries *schema.Queries,
 	render renders.Render,
-	efs embed.FS,
-	logerr *log.Logger,
-	loginf *log.Logger,
 ) routes.Handler {
 	return func(request *http.Request, writer http.ResponseWriter) {
 		var session schema.Session
@@ -27,7 +22,7 @@ func View(
 		_ = queries.ModifySessionById(request.Context(), schema.ModifySessionByIdParams{
 			ID: session.ID,
 		})
-		_ = send.View(writer, request, render, efs, logerr, loginf, views.View{
+		_ = send.View(writer, request, render, views.View{
 			Name: "Todos",
 			Props: Props{
 				Error: session.Error,

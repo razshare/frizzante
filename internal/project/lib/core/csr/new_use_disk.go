@@ -13,11 +13,11 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
-func New() renders.Render {
+func New(_ Options) renders.Render {
 	var index = filepath.Join("app", "dist", "client", "index.html")
 	index = strings.ReplaceAll(index, "/", string(filepath.Separator))
 	index = strings.ReplaceAll(index, "\\", string(filepath.Separator))
-	return func(options renders.RenderOptions) (document string, err error) {
+	return func(options renders.Options) (document string, err error) {
 		var indexData []byte
 		if indexData, err = os.ReadFile(index); err != nil {
 			return

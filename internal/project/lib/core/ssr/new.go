@@ -17,38 +17,46 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
-func New(limit int64) renders.Render {
+func New(options Options) renders.Render {
+	efs := options.Efs
+	limit := options.Limit
+	errorLog := options.ErrorLog
+	infoLog := options.InfoLog
+	if limit < 0 {
+		infoLog.Printf("ssr limit is set to %d, which is not allowed; defaulting to 1", limit)
+		limit = 1
+	}
 	var mut sync.Mutex
 	var server = filepath.Join("app", "dist", "server", "app.server.js")
 	var index = filepath.Join("app", "dist", "client", "index.html")
 	var jsRenders = make(chan javascript.Render, 1)
 	server = strings.ReplaceAll(server, "\\", "/")
 	index = strings.ReplaceAll(index, "\\", "/")
-	var goRender = func(options renders.RenderOptions) (jsRender javascript.Render, err error) {
-		if !embeds.IsFile(options.Efs, server) {
+	var goRender = func(options renders.Options) (jsRender javascript.Render, err error) {
+		if !embeds.IsFile(efs, server) {
 			err = fmt.Errorf("file %s not found", server)
 			return
 		}
 		var data []byte
-		if data, err = options.Efs.ReadFile(server); err != nil {
+		if data, err = efs.ReadFile(server); err != nil {
 			return
 		}
 		source := string(data)
 		jsRender, err = javascript.NewRender(javascript.NewRenderOptions{
 			Server:     server,
-			InfoLog:    options.InfoLog,
-			ErrorLog:   options.ErrorLog,
+			InfoLog:    infoLog,
+			ErrorLog:   errorLog,
 			FindSource: func() (string, error) { return source, nil },
 		})
 		return
 	}
-	return func(options renders.RenderOptions) (document string, err error) {
-		if !embeds.IsFile(options.Efs, index) {
+	return func(options renders.Options) (document string, err error) {
+		if !embeds.IsFile(efs, index) {
 			err = fmt.Errorf("file %s not found", index)
 			return
 		}
 		var indexData []byte
-		if indexData, err = options.Efs.ReadFile(index); err != nil {
+		if indexData, err = efs.ReadFile(index); err != nil {
 			return
 		}
 		document = string(indexData)

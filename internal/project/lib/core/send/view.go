@@ -1,8 +1,6 @@
 package send
 
 import (
-	"embed"
-	"log"
 	"net/http"
 	"strings"
 
@@ -15,9 +13,6 @@ func View(
 	writer http.ResponseWriter,
 	request *http.Request,
 	render renders.Render,
-	efs embed.FS,
-	errorLog *log.Logger,
-	infoLog *log.Logger,
 	view views.View,
 ) (err error) {
 	header := writer.Header()
@@ -44,12 +39,9 @@ func View(
 	data := views.NewData(view)
 	data.Type = request.Header.Get("X-FrizzanteViewType")
 	var html string
-	if html, err = render(renders.RenderOptions{
-		Efs:      efs,
-		View:     view,
-		Data:     data,
-		ErrorLog: errorLog,
-		InfoLog:  infoLog,
+	if html, err = render(renders.Options{
+		View: view,
+		Data: data,
 	}); err != nil {
 		return
 	}

@@ -19,14 +19,16 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
-func New(_ int64) renders.Render {
+func New(options Options) renders.Render {
+	errorLog := options.ErrorLog
+	infoLog := options.InfoLog
 	var server = filepath.Join("app", "dist", "server", "app.server.js")
 	var index = filepath.Join("app", "dist", "client", "index.html")
 	server = strings.ReplaceAll(server, "/", string(filepath.Separator))
 	server = strings.ReplaceAll(server, "\\", string(filepath.Separator))
 	index = strings.ReplaceAll(index, "/", string(filepath.Separator))
 	index = strings.ReplaceAll(index, "\\", string(filepath.Separator))
-	var goRender = func(options renders.RenderOptions) (jsRender javascript.Render, err error) {
+	var goRender = func(options renders.Options) (jsRender javascript.Render, err error) {
 		if !files.IsFile(server) {
 			err = fmt.Errorf("file %s not found", server)
 			return
@@ -34,8 +36,8 @@ func New(_ int64) renders.Render {
 		emptyTsFileName := fmt.Sprintf(".%s%s", string(os.PathSeparator), filepath.Join(".gen", "empty.ts"))
 		jsRender, err = javascript.NewRender(javascript.NewRenderOptions{
 			Server:   server,
-			InfoLog:  options.InfoLog,
-			ErrorLog: options.ErrorLog,
+			InfoLog:  infoLog,
+			ErrorLog: errorLog,
 			FindSource: func() (source string, err error) {
 				var data []byte
 				if data, err = os.ReadFile(server); err != nil {
@@ -63,7 +65,7 @@ func New(_ int64) renders.Render {
 		})
 		return
 	}
-	return func(options renders.RenderOptions) (document string, err error) {
+	return func(options renders.Options) (document string, err error) {
 		if !files.IsFile(index) {
 			err = fmt.Errorf("file %s not found", index)
 			return
