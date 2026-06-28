@@ -16,7 +16,7 @@ func View(
 ) routes.Handler {
 	view := welcome.View(render)
 	return func(request *http.Request, writer http.ResponseWriter) {
-		if found, _ := send.RequestedFile(writer, request, efs); !found {
+		if found, _ := send.RequestedFile(writer, request, efs, "/"); !found {
 			view(request, writer)
 		}
 	}
