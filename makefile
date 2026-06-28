@@ -16,6 +16,3 @@ clean:
 install: clean
 	./scripts/install.sh
 	make setup
-
-dev:
-	./scripts/dev.sh

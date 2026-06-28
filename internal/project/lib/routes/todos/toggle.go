@@ -6,7 +6,6 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
-	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/sessions"
 )
 
@@ -28,6 +27,7 @@ func Toggle(queries *schema.Queries) routes.Handler {
 			ID:    session.ID,
 			Error: session.Error,
 		})
-		_ = send.Navigate(writer, "/todos")
+		writer.Header().Set("Location", "/todos")
+		writer.WriteHeader(302)
 	}
 }
