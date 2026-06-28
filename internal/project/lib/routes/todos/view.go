@@ -17,7 +17,7 @@ func View(
 ) routes.Handler {
 	return func(request *http.Request, writer http.ResponseWriter) {
 		var session schema.Session
-		_ = sessions.Start(request, writer, queries, &session)
+		_ = sessions.Start(writer, request, queries, &session)
 		todos, _ := queries.FindTodosBySessionId(request.Context(), session.ID)
 		_ = queries.ModifySessionById(request.Context(), schema.ModifySessionByIdParams{
 			ID: session.ID,

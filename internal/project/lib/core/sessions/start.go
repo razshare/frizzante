@@ -7,8 +7,8 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/negotiate"
 )
 
-func Start(request *http.Request, writer http.ResponseWriter, queries *schema.Queries, session *schema.Session) (err error) {
-	id, _ := negotiate.SessionId(request, writer)
+func Start(writer http.ResponseWriter, request *http.Request, queries *schema.Queries, session *schema.Session) (err error) {
+	id, _ := negotiate.SessionId(writer, request)
 	context := request.Context()
 	if *session, err = queries.FindSessionById(context, id); err != nil {
 		if err = queries.AddSessionWithId(context, id); err != nil {

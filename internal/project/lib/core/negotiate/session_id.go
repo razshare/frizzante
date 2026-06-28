@@ -9,7 +9,7 @@ import (
 
 // SessionId tries to find a session id among the user's cookies.
 // If no session id is found, it creates a new one and returns it.
-func SessionId(request *http.Request, writer http.ResponseWriter) (value string, err error) {
+func SessionId(writer http.ResponseWriter, request *http.Request) (value string, err error) {
 	var cookie *http.Cookie
 	if cookie, err = request.Cookie("session-id"); err != nil {
 		return
