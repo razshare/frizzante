@@ -1,8 +1,8 @@
 package receive
 
-import "github.com/razshare/frizzante/internal/project/lib/core/clients"
+import "github.com/razshare/frizzante/internal/project/lib/core/scopes"
 
 // QueryExists checks if a query field exists.
-func QueryExists(client *clients.Client, key string) bool {
-	return client.Request.URL.Query().Has(key)
+func QueryExists(http *scopes.Http, key string) bool {
+	return http.Request.URL.Query().Has(key)
 }

@@ -7,9 +7,9 @@ import (
 )
 
 func TestAccept(t *testing.T) {
-	client := mocks.NewClient()
-	client.Request.Header.Set("Accept", "text/html")
-	if Accept(client) != "text/html" {
+	http := mocks.NewScope()
+	http.Request.Header.Set("Accept", "text/html")
+	if Accept(http) != "text/html" {
 		t.Fatal("accept should be text/html")
 	}
 }

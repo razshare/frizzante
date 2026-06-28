@@ -7,10 +7,10 @@ import (
 )
 
 func TestNotFoundf(t *testing.T) {
-	client := mocks.NewClient()
-	NotFoundf(client, "not %s", "found")
-	writer := client.Writer.(*mocks.ResponseWriter)
-	if client.Status != 404 {
+	http := mocks.NewScope()
+	NotFoundf(http, "not %s", "found")
+	writer := http.Writer.(*mocks.ResponseWriter)
+	if http.Status != 404 {
 		t.Fatal("status should be 404")
 	}
 	if string(writer.MockBytes) != "not found" {

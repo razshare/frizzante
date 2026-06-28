@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
@@ -19,4 +20,5 @@ type Server struct {
 	Cors        *http.CrossOriginProtection
 	Efs         embed.FS
 	Render      renders.Render
+	Queries     *schema.Queries
 }

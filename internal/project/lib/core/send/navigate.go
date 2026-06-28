@@ -1,9 +1,9 @@
 package send
 
-import "github.com/razshare/frizzante/internal/project/lib/core/clients"
+import "github.com/razshare/frizzante/internal/project/lib/core/scopes"
 
 // Navigate redirects the request to a location with status 302.
-func Navigate(client *clients.Client, location string) {
-	Redirect(client, location, 302)
-	Message(client, "")
+func Navigate(http *scopes.Http, location string) {
+	Redirect(http, location, 302)
+	Message(http, "")
 }

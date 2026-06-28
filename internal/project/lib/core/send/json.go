@@ -3,19 +3,19 @@ package send
 import (
 	"encoding/json"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/logs"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Json sends json content.
 //
 // Compatible with web sockets and server sent events.
-func Json(client *clients.Client, value any) {
+func Json(http *scopes.Http, value any) {
 	data, err := json.Marshal(value)
 	if err != nil {
 		logs.Errorf(
-			client,
+			http,
 			"send.Json: failed to marshal value (type=%T) to JSON: %v\n%s",
 			value,
 			err,
@@ -23,10 +23,10 @@ func Json(client *clients.Client, value any) {
 		)
 		return
 	}
-	if client.WebSocket == nil {
-		if client.Writer.Header().Get("Content-Type") == "" {
-			client.Writer.Header().Set("Content-Type", "application/json")
+	if http.WebSocket == nil {
+		if http.Writer.Header().Get("Content-Type") == "" {
+			http.Writer.Header().Set("Content-Type", "application/json")
 		}
 	}
-	Content(client, data)
+	Content(http, data)
 }

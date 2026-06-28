@@ -1,4 +1,4 @@
-package receive
+package negotiate
 
 import (
 	"testing"
@@ -7,17 +7,17 @@ import (
 )
 
 func TestSessionId(t *testing.T) {
-	client := mocks.NewClient()
-	client.Request.Header.Set("Cookie", "session-id=value;")
-	if SessionId(client) != "value" {
+	http := mocks.NewScope()
+	http.Request.Header.Set("Cookie", "session-id=value;")
+	if SessionId(http) != "value" {
 		t.Fatal("session id should be value")
 	}
 }
 
 func TestSessionIdCached(t *testing.T) {
-	client := mocks.NewClient()
-	client.SessionId = "value"
-	if SessionId(client) != "value" {
+	http := mocks.NewScope()
+	http.SessionId = "value"
+	if SessionId(http) != "value" {
 		t.Fatal("session id should be value")
 	}
 }

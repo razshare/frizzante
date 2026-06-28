@@ -3,17 +3,17 @@ package receive
 import (
 	"net/url"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/logs"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Cookie reads the contents of a cookie from the message and returns the value.
-func Cookie(client *clients.Client, key string) string {
-	cookie, err := client.Request.Cookie(key)
+func Cookie(http *scopes.Http, key string) string {
+	cookie, err := http.Request.Cookie(key)
 	if err != nil {
 		logs.Errorf(
-			client,
+			http,
 			"receive.Cookie: failed to read cookie %q: %v\n%s",
 			key,
 			err,
@@ -25,7 +25,7 @@ func Cookie(client *clients.Client, key string) string {
 	data, err := url.QueryUnescape(cookie.Value)
 	if err != nil {
 		logs.Errorf(
-			client,
+			http,
 			"receive.Cookie: failed to unescape cookie %q value: %v\n%s",
 			key,
 			err,

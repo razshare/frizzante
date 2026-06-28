@@ -29,13 +29,14 @@ func main() {
 	server := servers.New()
 	server.Efs = efs
 	server.Render = ssr.New(1)
+	server.Queries = queries
 	server.Routes = []routes.Route{
 		{Pattern: "GET /", Handler: fallback.View()},
 		{Pattern: "GET /welcome", Handler: welcome.View()},
-		{Pattern: "GET /todos", Handler: todos.View(queries)},
-		{Pattern: "POST /toggle", Handler: todos.Toggle(queries)},
-		{Pattern: "POST /add", Handler: todos.Add(queries)},
-		{Pattern: "POST /remove", Handler: todos.Remove(queries)},
+		{Pattern: "GET /todos", Handler: todos.View()},
+		{Pattern: "POST /toggle", Handler: todos.Toggle()},
+		{Pattern: "POST /add", Handler: todos.Add()},
+		{Pattern: "POST /remove", Handler: todos.Remove()},
 	}
 	if err = servers.Start(server); err != nil {
 		log.Fatal(err)

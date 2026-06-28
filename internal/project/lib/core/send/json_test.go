@@ -10,9 +10,9 @@ func TestJson(t *testing.T) {
 	type Payload struct {
 		Key string `json:"key"`
 	}
-	client := mocks.NewClient()
-	Json(client, Payload{Key: "value"})
-	writer := client.Writer.(*mocks.ResponseWriter)
+	http := mocks.NewScope()
+	Json(http, Payload{Key: "value"})
+	writer := http.Writer.(*mocks.ResponseWriter)
 	if string(writer.MockBytes) != `{"key":"value"}` {
 		t.Fatal("content should be json")
 	}

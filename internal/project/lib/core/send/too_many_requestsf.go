@@ -1,13 +1,13 @@
 package send
 
 import (
-	"net/http"
+	http_ "net/http"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 )
 
 // TooManyRequestsf sends a message with status 403 Forbidden.
-func TooManyRequestsf(client *clients.Client, message string, vars ...any) {
-	Status(client, http.StatusTooManyRequests)
-	Messagef(client, message, vars...)
+func TooManyRequestsf(http *scopes.Http, message string, vars ...any) {
+	Status(http, http_.StatusTooManyRequests)
+	Messagef(http, message, vars...)
 }

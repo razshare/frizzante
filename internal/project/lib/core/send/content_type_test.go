@@ -7,9 +7,9 @@ import (
 )
 
 func TestContentType(t *testing.T) {
-	client := mocks.NewClient()
-	ContentType(client, "text/html")
-	writer := client.Writer.(*mocks.ResponseWriter)
+	http := mocks.NewScope()
+	ContentType(http, "text/html")
+	writer := http.Writer.(*mocks.ResponseWriter)
 	if writer.MockHeader.Get("Content-Type") != "text/html" {
 		t.Fatal("content type should be text/html")
 	}

@@ -8,12 +8,10 @@ import (
 )
 
 func TestBasicAuth(t *testing.T) {
-	client := mocks.NewClient()
+	http := mocks.NewScope()
 	token := base64.URLEncoding.EncodeToString([]byte("test:123"))
-	client.Request.Header.Set("Authorization", "Basic "+token)
-
-	username, password := BasicAuth(client)
-
+	http.Request.Header.Set("Authorization", "Basic "+token)
+	username, password := BasicAuth(http)
 	if username != "test" {
 		t.Fatal("user should be test")
 	}

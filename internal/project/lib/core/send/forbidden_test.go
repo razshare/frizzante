@@ -7,10 +7,10 @@ import (
 )
 
 func TestForbidden(t *testing.T) {
-	client := mocks.NewClient()
-	Forbidden(client, "forbidden")
-	writer := client.Writer.(*mocks.ResponseWriter)
-	if client.Status != 403 {
+	http := mocks.NewScope()
+	Forbidden(http, "forbidden")
+	writer := http.Writer.(*mocks.ResponseWriter)
+	if http.Status != 403 {
 		t.Fatal("status should be 403")
 	}
 	if string(writer.MockBytes) != "forbidden" {

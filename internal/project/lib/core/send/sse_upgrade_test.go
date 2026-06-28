@@ -7,9 +7,9 @@ import (
 )
 
 func TestSseUpgrade(t *testing.T) {
-	client := mocks.NewClient()
-	SseUpgrade(client)
-	if client.EventName != "message" {
+	http := mocks.NewScope()
+	SseUpgrade(http)
+	if http.EventName != "message" {
 		t.Fatal("event name should be message")
 	}
 }

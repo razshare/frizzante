@@ -7,10 +7,10 @@ import (
 )
 
 func TestUnauthorizedf(t *testing.T) {
-	client := mocks.NewClient()
-	Unauthorizedf(client, "%s", "unauthorized")
-	writer := client.Writer.(*mocks.ResponseWriter)
-	if client.Status != 401 {
+	http := mocks.NewScope()
+	Unauthorizedf(http, "%s", "unauthorized")
+	writer := http.Writer.(*mocks.ResponseWriter)
+	if http.Status != 401 {
 		t.Fatal("status should be 401")
 	}
 	if string(writer.MockBytes) != "unauthorized" {

@@ -7,10 +7,10 @@ import (
 )
 
 func TestTooManyRequestsf(t *testing.T) {
-	client := mocks.NewClient()
-	TooManyRequestsf(client, "too many %s", "requests")
-	writer := client.Writer.(*mocks.ResponseWriter)
-	if client.Status != 429 {
+	http := mocks.NewScope()
+	TooManyRequestsf(http, "too many %s", "requests")
+	writer := http.Writer.(*mocks.ResponseWriter)
+	if http.Status != 429 {
 		t.Fatal("status should be 429")
 	}
 	if string(writer.MockBytes) != "too many requests" {

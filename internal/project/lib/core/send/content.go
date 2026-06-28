@@ -2,23 +2,23 @@ package send
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/logs"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
 // Content sends binary safe content.
 //
 // Compatible with web sockets and server sent events.
-func Content(client *clients.Client, data []byte) {
-	if !client.Locked {
-		client.Writer.WriteHeader(client.Status)
-		client.Locked = true
+func Content(http *scopes.Http, data []byte) {
+	if !http.Locked {
+		http.Writer.WriteHeader(http.Status)
+		http.Locked = true
 	}
-	if client.WebSocket != nil {
-		if err := client.WebSocket.WriteMessage(websocket.TextMessage, data); err != nil {
+	if http.WebSocket != nil {
+		if err := http.WebSocket.WriteMessage(websocket.TextMessage, data); err != nil {
 			logs.Errorf(
-				client,
+				http,
 				"send.Content: failed to write websocket message: %v\n%s",
 				err,
 				stack.Trace(),
@@ -26,13 +26,13 @@ func Content(client *clients.Client, data []byte) {
 		}
 		return
 	}
-	if client.EventName != "" {
-		EventContent(client, data)
+	if http.EventName != "" {
+		EventContent(http, data)
 		return
 	}
-	if _, err := client.Writer.Write(data); err != nil {
+	if _, err := http.Writer.Write(data); err != nil {
 		logs.Errorf(
-			client,
+			http,
 			"send.Content: failed to write response content: %v\n%s",
 			err,
 			stack.Trace(),

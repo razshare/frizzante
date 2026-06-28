@@ -1,10 +1,10 @@
 package send
 
-import "github.com/razshare/frizzante/internal/project/lib/core/clients"
+import "github.com/razshare/frizzante/internal/project/lib/core/scopes"
 
 // Flush send an empty message.
 //
 // Compatible with web sockets and server sent events.
-func Flush(client *clients.Client) {
-	Message(client, "")
+func Flush(http *scopes.Http) {
+	Message(http, "")
 }

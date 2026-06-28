@@ -7,10 +7,10 @@ import (
 )
 
 func TestNavigatef(t *testing.T) {
-	client := mocks.NewClient()
-	Navigatef(client, "/%s", "about")
-	writer := client.Writer.(*mocks.ResponseWriter)
-	if client.Status != 302 {
+	http := mocks.NewScope()
+	Navigatef(http, "/%s", "about")
+	writer := http.Writer.(*mocks.ResponseWriter)
+	if http.Status != 302 {
 		t.Fatal("status should be 302")
 	}
 	if writer.MockHeader.Get("Location") != "/about" {

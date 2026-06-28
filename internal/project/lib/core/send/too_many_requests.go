@@ -1,13 +1,13 @@
 package send
 
 import (
-	"net/http"
+	http_ "net/http"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 )
 
 // TooManyRequests sends a message with status 429 Too Many Requests.
-func TooManyRequests(client *clients.Client, message string) {
-	Status(client, http.StatusTooManyRequests)
-	Message(client, message)
+func TooManyRequests(http *scopes.Http, message string) {
+	Status(http, http_.StatusTooManyRequests)
+	Message(http, message)
 }

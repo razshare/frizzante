@@ -1,8 +1,8 @@
 package send
 
 import (
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/logs"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
@@ -13,14 +13,14 @@ import (
 // function it will fail with an error.
 //
 // All errors are sent to the server notifier.
-func Status(client *clients.Client, status int) {
-	if client.Locked {
+func Status(http *scopes.Http, status int) {
+	if http.Locked {
 		logs.Errorf(
-			client,
+			http,
 			"send.Status: status is locked, cannot set status\n%s",
 			stack.Trace(),
 		)
 		return
 	}
-	client.Status = status
+	http.Status = status
 }

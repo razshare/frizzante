@@ -7,10 +7,10 @@ import (
 )
 
 func TestBadRequest(t *testing.T) {
-	client := mocks.NewClient()
-	BadRequest(client, "bad request")
-	writer := client.Writer.(*mocks.ResponseWriter)
-	if client.Status != 400 {
+	http := mocks.NewScope()
+	BadRequest(http, "bad request")
+	writer := http.Writer.(*mocks.ResponseWriter)
+	if http.Status != 400 {
 		t.Fatal("status should be 400")
 	}
 	if string(writer.MockBytes) != "bad request" {

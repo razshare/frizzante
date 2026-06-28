@@ -1,13 +1,13 @@
 package send
 
 import (
-	"net/http"
+	http_ "net/http"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 )
 
 // BadRequest sends a message with status 400 Bad Request.
-func BadRequest(client *clients.Client, message string) {
-	Status(client, http.StatusBadRequest)
-	Message(client, message)
+func BadRequest(http *scopes.Http, message string) {
+	Status(http, http_.StatusBadRequest)
+	Message(http, message)
 }

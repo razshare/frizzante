@@ -1,8 +1,8 @@
 package receive
 
-import "github.com/razshare/frizzante/internal/project/lib/core/clients"
+import "github.com/razshare/frizzante/internal/project/lib/core/scopes"
 
 // Header reads a header field and returns the value.
-func Header(client *clients.Client, key string) string {
-	return client.Request.Header.Get(key)
+func Header(http *scopes.Http, key string) string {
+	return http.Request.Header.Get(key)
 }

@@ -4,7 +4,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 )
 
@@ -51,10 +51,9 @@ func (body *RequestBody) Close() error {
 	return nil
 }
 
-func NewClient() *clients.Client {
+func NewScope() *scopes.Http {
 	server := servers.New()
-	// server.Render = ssr.New(1)
-	options := clients.Options{
+	options := scopes.Options{
 		ErrorLog: server.ErrorLog,
 		InfoLog:  server.InfoLog,
 		Efs:      server.Efs,
@@ -69,7 +68,7 @@ func NewClient() *clients.Client {
 			MockBuffer: make([]byte, 1024),
 		},
 	}
-	return &clients.Client{
+	return &scopes.Http{
 		Writer:  writer,
 		Request: request,
 		Options: options,

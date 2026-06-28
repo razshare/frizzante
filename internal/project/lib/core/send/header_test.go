@@ -7,9 +7,9 @@ import (
 )
 
 func TestHeader(t *testing.T) {
-	client := mocks.NewClient()
-	Header(client, "key", "value")
-	writer := client.Writer.(*mocks.ResponseWriter)
+	http := mocks.NewScope()
+	Header(http, "key", "value")
+	writer := http.Writer.(*mocks.ResponseWriter)
 	if writer.MockHeader.Get("key") != "value" {
 		t.Fatal("key should be value")
 	}

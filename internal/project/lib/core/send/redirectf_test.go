@@ -7,10 +7,10 @@ import (
 )
 
 func TestRedirectf(t *testing.T) {
-	client := mocks.NewClient()
-	Redirectf(client, 303, "/%s", "about")
-	writer := client.Writer.(*mocks.ResponseWriter)
-	if client.Status != 303 {
+	http := mocks.NewScope()
+	Redirectf(http, 303, "/%s", "about")
+	writer := http.Writer.(*mocks.ResponseWriter)
+	if http.Status != 303 {
 		t.Fatal("status should be 303")
 	}
 	if writer.MockHeader.Get("Location") != "/about" {

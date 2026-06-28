@@ -1,8 +1,8 @@
 package receive
 
-import "github.com/razshare/frizzante/internal/project/lib/core/clients"
+import "github.com/razshare/frizzante/internal/project/lib/core/scopes"
 
 // Cancellation returns a channel that closes when the request gets cancelled.
-func Cancellation(client *clients.Client) <-chan struct{} {
-	return client.Request.Context().Done()
+func Cancellation(http *scopes.Http) <-chan struct{} {
+	return http.Request.Context().Done()
 }

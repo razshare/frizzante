@@ -8,10 +8,10 @@ import (
 )
 
 func TestMessage(t *testing.T) {
-	client := mocks.NewClient()
-	body := client.Request.Body.(*mocks.RequestBody)
+	http := mocks.NewScope()
+	body := http.Request.Body.(*mocks.RequestBody)
 	body.MockBuffer = []byte("hello")
-	data, err := io.ReadAll(client.Request.Body)
+	data, err := io.ReadAll(http.Request.Body)
 	if err != nil {
 		t.Fatal(err)
 	}

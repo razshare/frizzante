@@ -1,34 +1,34 @@
 package todos
 
 import (
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/logs"
-	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
+	"github.com/razshare/frizzante/internal/project/lib/core/sessions"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 )
 
-func View(queries *schema.Queries) routes.Handler {
-	return func(client *clients.Client) {
+func View() routes.Handler {
+	return func(http *scopes.Http) {
 		var session schema.Session
-		receive.Session(client, queries, &session)
+		sessions.Start(http, http.Queries, &session)
 		defer func() {
-			if err := queries.ModifySessionById(client.Request.Context(), schema.ModifySessionByIdParams{
+			if err := http.Queries.ModifySessionById(http.Request.Context(), schema.ModifySessionByIdParams{
 				ID: session.ID,
 			}); err != nil {
-				logs.Error(client, err)
+				logs.Error(http, err)
 			}
 		}()
-		context := client.Request.Context()
+		context := http.Request.Context()
 		var err error
 		var todos []schema.Todo
-		if todos, err = queries.FindTodosBySessionId(context, session.ID); err != nil {
+		if todos, err = http.Queries.FindTodosBySessionId(context, session.ID); err != nil {
 			session.Error = err.Error()
 			return
 		}
-		send.View(client, views.View{Name: "Todos", Props: Props{
+		send.View(http, views.View{Name: "Todos", Props: Props{
 			Error: session.Error,
 			Items: todos,
 		}})

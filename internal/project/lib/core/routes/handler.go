@@ -1,5 +1,5 @@
 package routes
 
-import "github.com/razshare/frizzante/internal/project/lib/core/clients"
+import "github.com/razshare/frizzante/internal/project/lib/core/scopes"
 
-type Handler = func(client *clients.Client)
+type Handler = func(http *scopes.Http)

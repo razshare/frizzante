@@ -7,12 +7,12 @@ import (
 )
 
 func TestHeaders(t *testing.T) {
-	client := mocks.NewClient()
-	Headers(client, map[string]string{
+	http := mocks.NewScope()
+	Headers(http, map[string]string{
 		"key1": "value1",
 		"key2": "value2",
 	})
-	writer := client.Writer.(*mocks.ResponseWriter)
+	writer := http.Writer.(*mocks.ResponseWriter)
 	if writer.MockHeader.Get("key1") != "value1" {
 		t.Fatal("key1 should be value1")
 	}

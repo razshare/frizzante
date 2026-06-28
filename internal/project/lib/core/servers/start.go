@@ -8,8 +8,8 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/logs"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
@@ -44,21 +44,20 @@ func Start(server *Server) (err error) {
 				)
 				return
 			}
-			client := &clients.Client{
-				Writer:  writer,
-				Request: *request,
-				Options: clients.Options{
-					ErrorLog: server.ErrorLog,
-					InfoLog:  server.InfoLog,
-					Efs:      server.Efs,
-					Render:   render,
-				},
-				EventId: 1,
-				Status:  200,
+			scope := &scopes.Http{
+				Writer:   writer,
+				Request:  *request,
+				ErrorLog: server.ErrorLog,
+				InfoLog:  server.InfoLog,
+				Efs:      server.Efs,
+				Queries:  server.Queries,
+				Render:   render,
+				EventId:  1,
+				Status:   200,
 			}
 			for _, guard := range route.Guards {
 				allow := false
-				guard.Handler(client, func() { allow = true })
+				guard.Handler(scope, func() { allow = true })
 				if !allow {
 					if guard.Name == "" {
 						server.InfoLog.Printf("an unnamed guard blocked the request on route %s", route.Pattern)
@@ -68,11 +67,11 @@ func Start(server *Server) (err error) {
 					return
 				}
 			}
-			route.Handler(client)
-			if client.WebSocket != nil {
-				if cerr := client.WebSocket.Close(); cerr != nil {
+			route.Handler(scope)
+			if scope.WebSocket != nil {
+				if cerr := scope.WebSocket.Close(); cerr != nil {
 					logs.Errorf(
-						client,
+						scope,
 						"send.WsUpgradeWithUpgrader: failed to close WebSocket connection: %v\n%s",
 						cerr,
 						stack.Trace(),

@@ -3,62 +3,62 @@ package send
 import (
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/logs"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
 // View sends a view.
-func View(client *clients.Client, view views.View) {
-	header := client.Writer.Header()
+func View(http *scopes.Http, view views.View) {
+	header := http.Writer.Header()
 	if header.Get("Location") != "" {
 		return
 	}
-	if strings.Contains(client.Request.Header.Get("Accept"), "application/json") {
+	if strings.Contains(http.Request.Header.Get("Accept"), "application/json") {
 		if header.Get("Cache-Control") == "" {
-			Header(client, "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
+			Header(http, "Cache-Control", "no-store, no-cache, must-revalidate, max-age=0")
 		}
 		if header.Get("Pragma") == "" {
-			Header(client, "Pragma", "no-cache")
+			Header(http, "Pragma", "no-cache")
 		}
 		if view.Props == nil {
 			view.Props = map[string]string{}
 		}
 		data := views.NewData(view)
-		data.Type = client.Request.Header.Get("X-FrizzanteViewType")
-		Json(client, data)
+		data.Type = http.Request.Header.Get("X-FrizzanteViewType")
+		Json(http, data)
 		return
 	}
-	if client.Options.Render == nil {
+	if http.Render == nil {
 		logs.Errorf(
-			client,
+			http,
 			"send.View: no render function defined\n%s",
 			stack.Trace(),
 		)
 		return
 	}
 	data := views.NewData(view)
-	data.Type = client.Request.Header.Get("X-FrizzanteViewType")
+	data.Type = http.Request.Header.Get("X-FrizzanteViewType")
 	var html string
 	var err error
-	if html, err = client.Options.Render(renders.RenderOptions{
-		Efs:      client.Options.Efs,
+	if html, err = http.Render(renders.RenderOptions{
+		Efs:      http.Efs,
 		View:     view,
 		Data:     data,
-		ErrorLog: client.Options.ErrorLog,
-		InfoLog:  client.Options.InfoLog,
+		ErrorLog: http.ErrorLog,
+		InfoLog:  http.InfoLog,
 	}); err != nil {
 		logs.Errorf(
-			client,
+			http,
 			"send.View: failed to render view: %v\n%s",
 			err,
 			stack.Trace(),
 		)
 	}
-	if client.Writer.Header().Get("Content-Type") == "" {
-		Header(client, "Content-Type", "text/html")
+	if http.Writer.Header().Get("Content-Type") == "" {
+		Header(http, "Content-Type", "text/html")
 	}
-	Message(client, html)
+	Message(http, html)
 }

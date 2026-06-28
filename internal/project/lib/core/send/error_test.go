@@ -8,10 +8,10 @@ import (
 )
 
 func TestError(t *testing.T) {
-	client := mocks.NewClient()
-	Error(client, errors.New("error"))
-	writer := client.Writer.(*mocks.ResponseWriter)
-	if client.Status != 500 {
+	http := mocks.NewScope()
+	Error(http, errors.New("error"))
+	writer := http.Writer.(*mocks.ResponseWriter)
+	if http.Status != 500 {
 		t.Fatal("status should be 500")
 	}
 	if string(writer.MockBytes) != "error" {

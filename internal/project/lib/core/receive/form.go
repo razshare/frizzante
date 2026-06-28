@@ -3,13 +3,13 @@ package receive
 import (
 	"errors"
 	"mime/multipart"
-	"net/http"
+	http_ "net/http"
 	"reflect"
 	"strconv"
 	"sync"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
-	logs2 "github.com/razshare/frizzante/internal/project/lib/core/logs"
+	"github.com/razshare/frizzante/internal/project/lib/core/logs"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
@@ -18,23 +18,23 @@ var FormMetadataCacheMutex sync.Mutex
 
 // Form reads the next multipart form or url encoded form message from the
 // client and stores it in the value pointed to by value.
-func Form(client *clients.Client, value any) bool {
-	if client.WebSocket != nil {
-		logs2.Errorf(
-			client,
+func Form(http *scopes.Http, value any) bool {
+	if http.WebSocket != nil {
+		logs.Errorf(
+			http,
 			"receive.Form: web socket connections cannot parse forms\n%s",
 			stack.Trace(),
 		)
 		return false
 	}
 	isMultipart := true
-	if client.Request.Form == nil && client.Request.MultipartForm == nil {
-		if err := client.Request.ParseMultipartForm(MaxFormSize); err != nil {
-			if errors.Is(err, http.ErrNotMultipart) {
+	if http.Request.Form == nil && http.Request.MultipartForm == nil {
+		if err := http.Request.ParseMultipartForm(FormMaxSzie); err != nil {
+			if errors.Is(err, http_.ErrNotMultipart) {
 				isMultipart = false
 			} else {
-				logs2.Errorf(
-					client,
+				logs.Errorf(
+					http,
 					"receive.Form: failed to parse multipart form: %v\n%s",
 					err,
 					stack.Trace(),
@@ -45,8 +45,8 @@ func Form(client *clients.Client, value any) bool {
 	}
 	reflection := reflect.ValueOf(value)
 	if reflection.Kind() != reflect.Pointer {
-		logs2.Errorf(
-			client,
+		logs.Errorf(
+			http,
 			"receive.Form: form value must be a pointer\n%s",
 			stack.Trace(),
 		)
@@ -104,25 +104,25 @@ func Form(client *clients.Client, value any) bool {
 		var pointer any
 		switch metadata.Reference.(type) {
 		case string:
-			pointer = client.Request.Form.Get(metadata.Key)
+			pointer = http.Request.Form.Get(metadata.Key)
 		case []byte:
-			pointer = []byte(client.Request.Form.Get(metadata.Key))
+			pointer = []byte(http.Request.Form.Get(metadata.Key))
 		case bool:
-			text := client.Request.Form.Get(metadata.Key)
+			text := http.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
 			if pointer, err = strconv.ParseBool(text); err != nil {
-				logs2.Errorf(client, "form value is not a valid bool\n%s", stack.Trace())
+				logs.Errorf(http, "form value is not a valid bool\n%s", stack.Trace())
 				return false
 			}
 		case []bool:
-			entries := client.Request.Form[metadata.Key]
+			entries := http.Request.Form[metadata.Key]
 			local := make([]bool, len(entries))
 			for jndex, entry := range entries {
 				var parsed bool
 				if parsed, err = strconv.ParseBool(entry); err != nil {
-					logs2.Errorf(client, "form value is not a valid bool\n%s", stack.Trace())
+					logs.Errorf(http, "form value is not a valid bool\n%s", stack.Trace())
 					return false
 				}
 				local[jndex] = parsed
@@ -130,181 +130,181 @@ func Form(client *clients.Client, value any) bool {
 			pointer = local
 
 		case uint:
-			text := client.Request.Form.Get(metadata.Key)
+			text := http.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
 			var tmp uint64
 			if tmp, err = strconv.ParseUint(text, 10, 64); err != nil {
-				logs2.Errorf(client, "form value is not a valid uint\n%s", stack.Trace())
+				logs.Errorf(http, "form value is not a valid uint\n%s", stack.Trace())
 				return false
 			}
 			pointer = uint(tmp)
 		case []uint:
-			entries := client.Request.Form[metadata.Key]
+			entries := http.Request.Form[metadata.Key]
 			local := make([]uint, len(entries))
 
 			for jndex, entry := range entries {
 				var tmp uint64
 				if tmp, err = strconv.ParseUint(entry, 10, 64); err != nil {
-					logs2.Errorf(client, "form value is not a valid uint\n%s", stack.Trace())
+					logs.Errorf(http, "form value is not a valid uint\n%s", stack.Trace())
 					return false
 				}
 				local[jndex] = uint(tmp)
 			}
 			pointer = local
 		case uint32:
-			text := client.Request.Form.Get(metadata.Key)
+			text := http.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
 			var tmp uint64
 			if tmp, err = strconv.ParseUint(text, 10, 32); err != nil {
-				logs2.Errorf(client, "form value is not a valid uint32\n%s", stack.Trace())
+				logs.Errorf(http, "form value is not a valid uint32\n%s", stack.Trace())
 				return false
 			}
 			pointer = uint32(tmp)
 		case []uint32:
-			entries := client.Request.Form[metadata.Key]
+			entries := http.Request.Form[metadata.Key]
 			local := make([]uint32, len(entries))
 			for jndex, entry := range entries {
 				var tmp uint64
 				if tmp, err = strconv.ParseUint(entry, 10, 32); err != nil {
-					logs2.Errorf(client, "form value is not a valid uint32\n%s", stack.Trace())
+					logs.Errorf(http, "form value is not a valid uint32\n%s", stack.Trace())
 					return false
 				}
 				local[jndex] = uint32(tmp)
 			}
 			pointer = local
 		case uint64:
-			text := client.Request.Form.Get(metadata.Key)
+			text := http.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
 			if pointer, err = strconv.ParseUint(text, 10, 64); err != nil {
-				logs2.Errorf(client, "form value is not a valid uint64\n%s", stack.Trace())
+				logs.Errorf(http, "form value is not a valid uint64\n%s", stack.Trace())
 				return false
 			}
 		case []uint64:
-			entries := client.Request.Form[metadata.Key]
+			entries := http.Request.Form[metadata.Key]
 			local := make([]uint64, len(entries))
 			for jndex, entry := range entries {
 				var tmp uint64
 				if tmp, err = strconv.ParseUint(entry, 10, 64); err != nil {
-					logs2.Errorf(client, "form value is not a valid uint64\n%s", stack.Trace())
+					logs.Errorf(http, "form value is not a valid uint64\n%s", stack.Trace())
 					return false
 				}
 				local[jndex] = tmp
 			}
 			pointer = local
 		case int:
-			text := client.Request.Form.Get(metadata.Key)
+			text := http.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
 			var tmp int64
 			if tmp, err = strconv.ParseInt(text, 10, 64); err != nil {
-				logs2.Errorf(client, "form value is not a valid int\n%s", stack.Trace())
+				logs.Errorf(http, "form value is not a valid int\n%s", stack.Trace())
 				return false
 			}
 			pointer = int(tmp)
 		case []int:
-			entries := client.Request.Form[metadata.Key]
+			entries := http.Request.Form[metadata.Key]
 			local := make([]int, len(entries))
 			for jndex, entry := range entries {
 				var tmp int64
 				if tmp, err = strconv.ParseInt(entry, 10, 64); err != nil {
-					logs2.Errorf(client, "form value is not a valid int\n%s", stack.Trace())
+					logs.Errorf(http, "form value is not a valid int\n%s", stack.Trace())
 					return false
 				}
 				local[jndex] = int(tmp)
 			}
 			pointer = local
 		case int32:
-			text := client.Request.Form.Get(metadata.Key)
+			text := http.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
 			var tmp int64
 			if tmp, err = strconv.ParseInt(text, 10, 32); err != nil {
-				logs2.Errorf(client, "form value is not a valid int32\n%s", stack.Trace())
+				logs.Errorf(http, "form value is not a valid int32\n%s", stack.Trace())
 				return false
 			}
 			pointer = int32(tmp)
 		case []int32:
-			entries := client.Request.Form[metadata.Key]
+			entries := http.Request.Form[metadata.Key]
 			local := make([]int32, len(entries))
 
 			for jndex, entry := range entries {
 				var tmp int64
 				if tmp, err = strconv.ParseInt(entry, 10, 32); err != nil {
-					logs2.Errorf(client, "form value is not a valid int32\n%s", stack.Trace())
+					logs.Errorf(http, "form value is not a valid int32\n%s", stack.Trace())
 					return false
 				}
 				local[jndex] = int32(tmp)
 			}
 			pointer = local
 		case int64:
-			text := client.Request.Form.Get(metadata.Key)
+			text := http.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
 			if pointer, err = strconv.ParseInt(text, 10, 64); err != nil {
-				logs2.Errorf(client, "form value is not a valid int64\n%s", stack.Trace())
+				logs.Errorf(http, "form value is not a valid int64\n%s", stack.Trace())
 				return false
 			}
 		case []int64:
-			entries := client.Request.Form[metadata.Key]
+			entries := http.Request.Form[metadata.Key]
 			local := make([]int64, len(entries))
 
 			for jndex, entry := range entries {
 				var tmp int64
 				if tmp, err = strconv.ParseInt(entry, 10, 64); err != nil {
-					logs2.Errorf(client, "form value is not a valid int64\n%s", stack.Trace())
+					logs.Errorf(http, "form value is not a valid int64\n%s", stack.Trace())
 					return false
 				}
 				local[jndex] = tmp
 			}
 			pointer = local
 		case float32:
-			text := client.Request.Form.Get(metadata.Key)
+			text := http.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
 			var tmp float64
 			if tmp, err = strconv.ParseFloat(text, 32); err != nil {
-				logs2.Errorf(client, "form value is not a valid float32\n%s", stack.Trace())
+				logs.Errorf(http, "form value is not a valid float32\n%s", stack.Trace())
 				return false
 			}
 			pointer = float32(tmp)
 		case []float32:
-			entries := client.Request.Form[metadata.Key]
+			entries := http.Request.Form[metadata.Key]
 			local := make([]float32, len(entries))
 			for jndex, entry := range entries {
 				var tmp float64
 				if tmp, err = strconv.ParseFloat(entry, 32); err != nil {
-					logs2.Errorf(client, "form value is not a valid float32\n%s", stack.Trace())
+					logs.Errorf(http, "form value is not a valid float32\n%s", stack.Trace())
 					return false
 				}
 				local[jndex] = float32(tmp)
 			}
 			pointer = local
 		case float64:
-			text := client.Request.Form.Get(metadata.Key)
+			text := http.Request.Form.Get(metadata.Key)
 			if text == "" {
 				continue
 			}
 			if pointer, err = strconv.ParseFloat(text, 64); err != nil {
-				logs2.Errorf(client, "form value is not a valid float64\n%s", stack.Trace())
+				logs.Errorf(http, "form value is not a valid float64\n%s", stack.Trace())
 				return false
 			}
 		case []float64:
-			entries := client.Request.Form[metadata.Key]
+			entries := http.Request.Form[metadata.Key]
 			local := make([]float64, len(entries))
 			for jndex, entry := range entries {
 				var tmp float64
 				if tmp, err = strconv.ParseFloat(entry, 64); err != nil {
-					logs2.Errorf(client, "form value is not a valid float64\n%s", stack.Trace())
+					logs.Errorf(http, "form value is not a valid float64\n%s", stack.Trace())
 					return false
 				}
 				local[jndex] = tmp
@@ -312,18 +312,18 @@ func Form(client *clients.Client, value any) bool {
 			pointer = local
 		case multipart.FileHeader:
 			if !isMultipart {
-				logs2.Error(client, "could not parse file in form because it is not multipart")
+				logs.Error(http, "could not parse file in form because it is not multipart")
 				return false
 			}
-			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
+			if headers := http.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
 				pointer = *headers[0]
 			}
 		case []multipart.FileHeader:
 			if !isMultipart {
-				logs2.Error(client, "could not parse file in form because it is not multipart")
+				logs.Error(http, "could not parse file in form because it is not multipart")
 				return false
 			}
-			if headers := client.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
+			if headers := http.Request.MultipartForm.File[metadata.Key]; len(headers) > 0 {
 				locals := make([]multipart.FileHeader, len(headers))
 				for jndex, header := range headers {
 					locals[jndex] = *header
@@ -331,7 +331,7 @@ func Form(client *clients.Client, value any) bool {
 				pointer = locals
 			}
 		default:
-			logs2.Errorf(client, "unknown form value type for key %s\n%s", metadata.Key, stack.Trace())
+			logs.Errorf(http, "unknown form value type for key %s\n%s", metadata.Key, stack.Trace())
 			return false
 		}
 		if pointer != nil {

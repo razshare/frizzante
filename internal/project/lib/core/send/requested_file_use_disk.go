@@ -3,40 +3,40 @@
 package send
 
 import (
-	"net/http"
+	http_ "net/http"
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/internal/project/lib/core/logs"
 	"github.com/razshare/frizzante/internal/project/lib/core/mime"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/stack"
 )
 
-// RequestedFile sends the file requested by the client.
+// RequestedFile sends the file requested by the http.
 //
 // Returns false if connection is web sockets, server sent events
 // or the file was not found.
-func RequestedFile(client *clients.Client) bool {
-	if client.WebSocket != nil {
-		logs.Errorf(client, "send.RequestedFile() does not support web sockets\n%s", stack.Trace())
+func RequestedFile(http *scopes.Http) bool {
+	if http.WebSocket != nil {
+		logs.Errorf(http, "send.RequestedFile() does not support web sockets\n%s", stack.Trace())
 		return false
 	}
-	if client.EventName != "" {
-		logs.Errorf(client, "send.RequestedFile() does not support server sent events\n%s", stack.Trace())
+	if http.EventName != "" {
+		logs.Errorf(http, "send.RequestedFile() does not support server sent events\n%s", stack.Trace())
 		return false
 	}
-	uri := client.Request.RequestURI
+	uri := http.Request.RequestURI
 	if strings.HasPrefix(uri, "/") {
 		uri = uri[1:]
 	}
 	fileName := filepath.Join("app", "dist", "client", strings.ReplaceAll(uri, "/", string(filepath.Separator)))
 	if files.IsFile(fileName) {
-		if client.Writer.Header().Get("Content-Type") == "" {
-			Header(client, "Content-Type", mime.Parse(fileName))
+		if http.Writer.Header().Get("Content-Type") == "" {
+			Header(http, "Content-Type", mime.Parse(fileName))
 		}
-		http.ServeFile(client.Writer, &client.Request, fileName)
+		http_.ServeFile(http.Writer, &http.Request, fileName)
 		return true
 	}
 	return false

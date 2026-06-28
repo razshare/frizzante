@@ -1,13 +1,13 @@
 package send
 
 import (
-	"net/http"
+	http_ "net/http"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 )
 
 // NotFound sends a message with status 404 Not Found.
-func NotFound(client *clients.Client, message string) {
-	Status(client, http.StatusNotFound)
-	Message(client, message)
+func NotFound(http *scopes.Http, message string) {
+	Status(http, http_.StatusNotFound)
+	Message(http, message)
 }

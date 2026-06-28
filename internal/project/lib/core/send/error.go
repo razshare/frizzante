@@ -1,16 +1,16 @@
 package send
 
 import (
-	"net/http"
+	http_ "net/http"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/clients"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 )
 
 // Error sends a message with status 500 Internal Server Error.
-func Error(client *clients.Client, err error) {
+func Error(http *scopes.Http, err error) {
 	type ServerError struct {
 		Error string
 	}
-	Status(client, http.StatusInternalServerError)
-	Message(client, err.Error())
+	Status(http, http_.StatusInternalServerError)
+	Message(http, err.Error())
 }

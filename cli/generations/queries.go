@@ -74,7 +74,7 @@ func Queries(options QueriesOptions) (err error) {
 	messages.Success("queries generated")
 	messages.Tip(
 		"## usage example\n",
-		"databases.Queries.FindTodosBySessionId(client.Request.Context(), \"some-session-id-123-...\")",
+		"databases.Queries.FindTodosBySessionId(http.Request.Context(), \"some-session-id-123-...\")",
 	)
 	return
 }

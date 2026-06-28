@@ -7,9 +7,9 @@ import (
 )
 
 func TestContent(t *testing.T) {
-	client := mocks.NewClient()
-	Content(client, []byte("hello"))
-	writer := client.Writer.(*mocks.ResponseWriter)
+	http := mocks.NewScope()
+	Content(http, []byte("hello"))
+	writer := http.Writer.(*mocks.ResponseWriter)
 	if string(writer.MockBytes) != "hello" {
 		t.Fatal("content should be hello")
 	}

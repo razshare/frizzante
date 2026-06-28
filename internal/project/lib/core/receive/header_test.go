@@ -7,9 +7,9 @@ import (
 )
 
 func TestHeader(t *testing.T) {
-	client := mocks.NewClient()
-	client.Request.Header.Set("X-Header", "value")
-	if Header(client, "X-Header") != "value" {
+	http := mocks.NewScope()
+	http.Request.Header.Set("X-Header", "value")
+	if Header(http, "X-Header") != "value" {
 		t.Fatal("header should be value")
 	}
 }

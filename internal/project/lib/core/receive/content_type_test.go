@@ -7,9 +7,9 @@ import (
 )
 
 func TestContentType(t *testing.T) {
-	client := mocks.NewClient()
-	client.Request.Header.Set("Content-Type", "text/html")
-	if ContentType(client) != "text/html" {
+	http := mocks.NewScope()
+	http.Request.Header.Set("Content-Type", "text/html")
+	if ContentType(http) != "text/html" {
 		t.Fatal("content type should be text/html")
 	}
 }
