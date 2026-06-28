@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
@@ -17,6 +16,9 @@ import (
 
 func New(_ Options) renders.Render {
 	var index = filepath.Join("app", "dist", "client", "index.html")
+	var baseDocument string
+	baseDocument = strings.Replace(baseDocument, "<!--app-body-->", fmt.Sprintf(renders.BodyFormat, ""), 1)
+	baseDocument = strings.Replace(baseDocument, "<!--app-head-->", fmt.Sprintf(renders.HeadFormat, ""), 1)
 	index = strings.ReplaceAll(index, "/", string(filepath.Separator))
 	index = strings.ReplaceAll(index, "\\", string(filepath.Separator))
 	return func(options renders.Options) (document string, err error) {
@@ -24,16 +26,15 @@ func New(_ Options) renders.Render {
 			err = errors.New("exclusive server rendering is not allowed using a csr function")
 			return
 		}
+		var data []byte
+		if data, err = json.Marshal(options.Data); err != nil {
+			return
+		}
 		var indexData []byte
 		if indexData, err = os.ReadFile(index); err != nil {
 			return
 		}
-		document = string(indexData)
-		var data []byte
-		if data, err = json.Marshal(options.Data); err != nil {
-			return "", err
-		}
-		document = strings.Replace(document, "<!--app-head-->", fmt.Sprintf(renders.HeadFormat, options.View.Title), 1)
+		document = strings.Replace(string(indexData), "<!--app-head-->", fmt.Sprintf(renders.HeadFormat, ""), 1)
 		document = strings.Replace(document, "<!--app-body-->", fmt.Sprintf(renders.BodyFormat, ""), 1)
 		document = strings.Replace(document, "<!--app-data-->", fmt.Sprintf(renders.DataFormat, data), 1)
 		return document, nil

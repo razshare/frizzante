@@ -115,7 +115,7 @@ func New(options Options) renders.Render {
 				return
 			}
 			document = strings.Replace(document, "<!--app-body-->", fmt.Sprintf(renders.BodyFormat, ""), 1)
-			document = strings.Replace(document, "<!--app-head-->", fmt.Sprintf(renders.HeadFormat, view.Title), 1)
+			document = strings.Replace(document, "<!--app-head-->", fmt.Sprintf(renders.HeadFormat, ""), 1)
 			document = strings.Replace(document, "<!--app-data-->", fmt.Sprintf(renders.DataFormat, data), 1)
 			return
 		}

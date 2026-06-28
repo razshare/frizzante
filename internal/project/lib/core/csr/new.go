@@ -32,7 +32,7 @@ func New(options Options) renders.Render {
 		if data, err = json.Marshal(options.Data); err != nil {
 			return "", err
 		}
-		document = strings.Replace(document, "<!--app-head-->", fmt.Sprintf(renders.HeadFormat, options.View.Title), 1)
+		document = strings.Replace(document, "<!--app-head-->", fmt.Sprintf(renders.HeadFormat, ""), 1)
 		document = strings.Replace(document, "<!--app-body-->", fmt.Sprintf(renders.BodyFormat, ""), 1)
 		document = strings.Replace(document, "<!--app-data-->", fmt.Sprintf(renders.DataFormat, data), 1)
 		return document, nil
