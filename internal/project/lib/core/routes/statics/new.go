@@ -14,7 +14,7 @@ func NewRouteHandler(appRoutes []routes.Route) routes.Handler {
 	return func(request *http.Request, writer http.ResponseWriter) {
 		if accepts := request.Header.Get("Accept"); accepts != "" && accepts != "application/json" {
 			writer.WriteHeader(http.StatusBadRequest)
-			_ = send.Message(writer, fmt.Sprintf("only application/json can be produced; requested %s", accepts))
+			_, _ = writer.Write([]byte(fmt.Sprintf("only application/json can be produced; requested %s", accepts)))
 			return
 		}
 		statics := make([]string, 0)

@@ -48,6 +48,6 @@ func View(
 	if header.Get("Content-Type") == "" {
 		header.Set("Content-Type", "text/html")
 	}
-	err = Message(writer, html)
+	_, err = writer.Write([]byte(html))
 	return
 }
