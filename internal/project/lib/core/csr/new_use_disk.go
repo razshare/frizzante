@@ -5,11 +5,13 @@ package csr
 import (
 	_ "embed"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 
+	"github.com/razshare/frizzante/internal/project/lib/core/views"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 )
 
@@ -18,6 +20,10 @@ func New(_ Options) renders.Render {
 	index = strings.ReplaceAll(index, "/", string(filepath.Separator))
 	index = strings.ReplaceAll(index, "\\", string(filepath.Separator))
 	return func(options renders.Options) (document string, err error) {
+		if options.View.RenderMode == views.RenderModeServer {
+			err = errors.New("exclusive server rendering is not allowed using a csr function")
+			return
+		}
 		var indexData []byte
 		if indexData, err = os.ReadFile(index); err != nil {
 			return
