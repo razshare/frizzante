@@ -7,11 +7,10 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
-	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 )
 
 // NewRouteHandler creates a route handler that lists all static routes of a given server.
-func NewRouteHandler(server *servers.Server) routes.Handler {
+func NewRouteHandler(appRoutes []routes.Route) routes.Handler {
 	return func(request *http.Request, writer http.ResponseWriter) {
 		if accepts := request.Header.Get("Accept"); accepts != "" && accepts != "application/json" {
 			writer.WriteHeader(http.StatusBadRequest)
@@ -19,7 +18,7 @@ func NewRouteHandler(server *servers.Server) routes.Handler {
 			return
 		}
 		statics := make([]string, 0)
-		for _, route := range server.Routes {
+		for _, route := range appRoutes {
 			if parts := strings.SplitN(route.Pattern, " ", 2); len(parts) >= 2 && parts[0] == "GET" {
 				statics = append(statics, parts[1])
 			}

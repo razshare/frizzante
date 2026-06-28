@@ -28,17 +28,18 @@ var render = ssr.New(ssr.Options{
 	InfoLog:  infoLog,
 	Limit:    1,
 })
+var appRoutes = []routes.Route{
+	{Pattern: "GET /", Handler: fallback.View(render, efs)},
+	{Pattern: "GET /welcome", Handler: welcome.View(render)},
+	{Pattern: "GET /todos", Handler: todos.View(queries, render)},
+	{Pattern: "POST /toggle", Handler: todos.Toggle(queries)},
+	{Pattern: "POST /add", Handler: todos.Add(queries)},
+	{Pattern: "POST /remove", Handler: todos.Remove(queries)},
+}
 var srverr = servers.Start(servers.StartOptions{
 	ErrorLog: errorLog,
 	InfoLog:  infoLog,
-	Routes: []routes.Route{
-		{Pattern: "GET /", Handler: fallback.View(render, efs)},
-		{Pattern: "GET /welcome", Handler: welcome.View(render)},
-		{Pattern: "GET /todos", Handler: todos.View(queries, render)},
-		{Pattern: "POST /toggle", Handler: todos.Toggle(queries)},
-		{Pattern: "POST /add", Handler: todos.Add(queries)},
-		{Pattern: "POST /remove", Handler: todos.Remove(queries)},
-	},
+	Routes:   appRoutes,
 })
 
 func main() {
