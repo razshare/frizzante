@@ -4,8 +4,7 @@ import "testing"
 
 func TestData(t *testing.T) {
 	data := NewData(View{
-		Name:  "name",
-		Title: "title",
+		Name: "name",
 		Props: map[string]any{
 			"key": "value",
 		},
