@@ -4,20 +4,20 @@ import (
 	"net/http"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
+	"github.com/razshare/frizzante/internal/project/lib/core/negotiate"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
-	"github.com/razshare/frizzante/internal/project/lib/core/sessions"
 )
 
 func Remove(queries *schema.Queries) routes.Handler {
 	return func(request *http.Request, writer http.ResponseWriter) {
-		var session schema.Session
-		_ = sessions.Start(writer, request, queries, &session)
 		var form struct {
 			Id string `form:"id"`
 		}
-		_ = receive.Form(request, &form)
 		context := request.Context()
+		sessionId, _ := negotiate.SessionId(writer, request)
+		session, _ := queries.FindSessionById(context, sessionId)
+		_ = receive.Form(request, &form)
 		_ = queries.RemoveTodosByIdAndSessionId(context, schema.RemoveTodosByIdAndSessionIdParams{
 			ID:        form.Id,
 			SessionID: session.ID,

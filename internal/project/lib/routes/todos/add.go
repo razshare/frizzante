@@ -5,25 +5,25 @@ import (
 
 	uuid "github.com/nu7hatch/gouuid"
 	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
+	"github.com/razshare/frizzante/internal/project/lib/core/negotiate"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
-	"github.com/razshare/frizzante/internal/project/lib/core/sessions"
 )
 
 func Add(queries *schema.Queries) routes.Handler {
 	return func(request *http.Request, writer http.ResponseWriter) {
-		var session schema.Session
-		_ = sessions.Start(writer, request, queries, &session)
 		var form struct {
 			Description string `form:"description"`
 		}
+		context := request.Context()
+		sessionId, _ := negotiate.SessionId(writer, request)
+		session, _ := queries.FindSessionById(context, sessionId)
 		_ = receive.Form(request, &form)
 		if form.Description == "" {
 			session.Error = "description cannot be empty"
 			return
 		}
 		todoId, _ := uuid.NewV4()
-		context := request.Context()
 		_ = queries.AddTodoWithIdAndSessionId(context, schema.AddTodoWithIdAndSessionIdParams{
 			ID:          todoId.String(),
 			SessionID:   session.ID,
