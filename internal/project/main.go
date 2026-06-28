@@ -3,13 +3,11 @@ package main
 import (
 	"embed"
 	"log"
-	"net/http"
 	"os"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/databases"
 	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
-	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 	"github.com/razshare/frizzante/internal/project/lib/core/ssr"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
@@ -44,10 +42,6 @@ func main() {
 		{Pattern: "POST /toggle", Handler: todos.Toggle(queries)},
 		{Pattern: "POST /add", Handler: todos.Add(queries)},
 		{Pattern: "POST /remove", Handler: todos.Remove(queries)},
-		{Pattern: "GET /sse", Handler: func(request *http.Request, writer http.ResponseWriter) {
-			_ = send.SseUpgrade(&writer)
-			_ = send.Message(writer, "hello")
-		}},
 	}
 	if err = servers.Start(server); err != nil {
 		log.Fatal(err)
