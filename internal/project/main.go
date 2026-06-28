@@ -49,9 +49,7 @@ func main() {
 			_ = send.Message(writer, "hello")
 		}},
 	}
-	if err = servers.Start(server, func(handler *http.ServeMux) {
-
-	}); err != nil {
+	if err = servers.Start(server); err != nil {
 		log.Fatal(err)
 	}
 }
