@@ -9,7 +9,7 @@ import (
 func TestSessionId(t *testing.T) {
 	request, writer := mocks.NewExchange()
 	request.Header.Set("Cookie", "session-id=value;")
-	if value, err := SessionId(request, writer); err != nil || value != "value" {
+	if value, err := SessionId(writer, request); err != nil || value != "value" {
 		t.Fatal("session id should be value")
 	}
 }
