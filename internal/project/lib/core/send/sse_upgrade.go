@@ -20,7 +20,7 @@ func SseUpgrade(writer *http.ResponseWriter) func(event string) {
 		EventId:        1,
 	}
 	converted := http.ResponseWriter(upgrade)
-	writer = &converted
+	*writer = converted
 	return func(event string) {
 		upgrade.EventName = event
 	}

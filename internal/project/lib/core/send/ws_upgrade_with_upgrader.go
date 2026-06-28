@@ -16,13 +16,17 @@ func WsUpgradeWithUpgrader(
 	if webSocketConnection, err = upgrader.Upgrade(*writer, request, nil); err != nil {
 		return
 	}
-	converted := http.ResponseWriter(&WsUpgradeResponseWriter{
+	converted := &WsUpgradeResponseWriter{
 		ResponseWriter:      *writer,
 		WebSocketConnection: webSocketConnection,
-	})
+	}
 	request.Body = &WsUpgradeBodyReaderCloser{
 		WebSocketConnection: webSocketConnection,
 	}
-	writer = &converted
+	*writer = converted
+	go func() {
+		<-request.Context().Done()
+		_ = webSocketConnection.Close()
+	}()
 	return
 }

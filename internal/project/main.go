@@ -3,11 +3,13 @@ package main
 import (
 	"embed"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/databases"
 	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
+	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 	"github.com/razshare/frizzante/internal/project/lib/core/ssr"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
@@ -20,8 +22,8 @@ import (
 //go:generate frizzante configure
 //go:embed app/dist
 var efs embed.FS
-var logerr = log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
-var loginf = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
+var errorLog = log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
+var infoLog = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
 var queries *schema.Queries
 var server *servers.Server
 var render renders.Render
@@ -32,16 +34,24 @@ func main() {
 		log.Fatal(err)
 	}
 	render = ssr.New(1)
-	server = servers.New(logerr, loginf)
+	server = servers.New()
+	server.InfoLog = infoLog
+	server.ErrorLog = errorLog
 	server.Routes = []routes.Route{
-		{Pattern: "GET /", Handler: fallback.View(render, efs, logerr, loginf)},
-		{Pattern: "GET /welcome", Handler: welcome.View(render, efs, logerr, loginf)},
-		{Pattern: "GET /todos", Handler: todos.View(queries, render, efs, logerr, loginf)},
+		{Pattern: "GET /", Handler: fallback.View(render, efs, errorLog, infoLog)},
+		{Pattern: "GET /welcome", Handler: welcome.View(render, efs, errorLog, infoLog)},
+		{Pattern: "GET /todos", Handler: todos.View(queries, render, efs, errorLog, infoLog)},
 		{Pattern: "POST /toggle", Handler: todos.Toggle(queries)},
 		{Pattern: "POST /add", Handler: todos.Add(queries)},
 		{Pattern: "POST /remove", Handler: todos.Remove(queries)},
+		{Pattern: "GET /sse", Handler: func(request *http.Request, writer http.ResponseWriter) {
+			_ = send.SseUpgrade(&writer)
+			_ = send.Message(writer, "hello")
+		}},
 	}
-	if err = servers.Start(server); err != nil {
+	if err = servers.Start(server, func(handler *http.ServeMux) {
+
+	}); err != nil {
 		log.Fatal(err)
 	}
 }

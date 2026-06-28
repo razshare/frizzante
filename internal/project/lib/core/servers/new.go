@@ -3,12 +3,13 @@ package servers
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 )
 
-func New(errorLog *log.Logger, infoLog *log.Logger) *Server {
+func New() *Server {
 	return &Server{
-		InfoLog:    infoLog,
+		InfoLog:    log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime),
 		SecureAddr: "0.0.0.0:8383",
 		Cors:       http.NewCrossOriginProtection(),
 		Server: http.Server{
@@ -17,7 +18,7 @@ func New(errorLog *log.Logger, infoLog *log.Logger) *Server {
 			ReadTimeout:    10 * time.Second,
 			WriteTimeout:   10 * time.Second,
 			MaxHeaderBytes: 2097152, // 2MB,
-			ErrorLog:       errorLog,
+			ErrorLog:       log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime),
 		},
 	}
 }
