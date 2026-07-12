@@ -7,20 +7,8 @@ test:
 build:
 	frizzante build
 
-prebuild:
-	frizzante prebuild
-
-postbuild:
-	frizzante postbuild
-
 dev:
 	frizzante dev
-
-package:
-	frizzante package
-
-package-watch:
-	frizzante package-watch
 
 check:
 	frizzante check
@@ -36,21 +24,3 @@ install:
 
 update:
 	frizzante update
-
-lock-packages:
-	frizzante lock-packages
-
-type_definitions:
-	frizzante generate types
-
-queries:
-	frizzante generate queries
-
-snapshot:
-	frizzante generate snapshot http://127.0.0.1:8080/@statics
-
-migration:
-	frizzante generate migration
-
-migrate:
-	frizzante migrate

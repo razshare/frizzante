@@ -96,6 +96,7 @@ func Migrate(database *sql.DB, offset string, target string) (err error) {
 	}
 
 	for _, migration := range migrations {
+		fmt.Printf("executing migration file %s... ", migration)
 		var data []byte
 		if data, err = Efs.ReadFile(migration); err != nil {
 			return
@@ -103,7 +104,7 @@ func Migrate(database *sql.DB, offset string, target string) (err error) {
 		if forward {
 			var valid bool
 			var builder strings.Builder
-			for _, line := range strings.Split(string(data), "\n") {
+			for line := range strings.SplitSeq(string(data), "\n") {
 				if line == "-- migration: up" {
 					valid = true
 					continue
@@ -151,6 +152,7 @@ func Migrate(database *sql.DB, offset string, target string) (err error) {
 				}
 			}
 		}
+		fmt.Printf("done!\n")
 	}
 	if err = transaction.Commit(); err != nil {
 		if terr := transaction.Rollback(); terr != nil {

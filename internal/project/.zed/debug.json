@@ -11,5 +11,13 @@
       "command": "frizzante",
       "args": ["package"]
     }
+  },
+  {
+    "label": "debug migrate",
+    "adapter": "Delve",
+    "program": "$ZED_WORKTREE_ROOT/migrate",
+    "request": "launch",
+    "mode": "debug",
+    "buildFlags": "-tags=trace"
   }
 ]

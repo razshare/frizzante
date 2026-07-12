@@ -110,6 +110,21 @@ var Main = Menu{
 		},
 		{
 			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+				return slices.Contains([]string{"migrate", "m"}, value)
+			},
+			Choice: search.Choice{Id: "migrate", Description: "migrate project database"},
+			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
+				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+				fmt.Println(configs.Styles.Menu.Render("running ▷ migrate"))
+				err = actions.Migrate(actions.MigrateOptions{
+					Go:   *app.Go,
+					Tags: *app.Tags,
+				})
+				return
+			},
+		},
+		{
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
 				return slices.Contains([]string{"build", "b"}, value)
 			},
 			Choice: search.Choice{Id: "build", Description: "builds project"},
