@@ -6,18 +6,15 @@ import (
 
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
-	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
-	"github.com/razshare/frizzante/internal/project/lib/routes/welcome"
 )
 
 func View(
-	render renders.Render,
 	efs embed.FS,
 ) routes.Handler {
-	view := welcome.View(render)
-	return func(id uint64, request *http.Request, writer http.ResponseWriter) {
+	return func(scope routes.Scope, request *http.Request, writer http.ResponseWriter) {
 		if found, _ := send.RequestedFile(writer, request, efs, "/"); !found {
-			view(id, request, writer)
+			writer.Header().Add("Location", "/welcome")
+			writer.WriteHeader(http.StatusPermanentRedirect)
 		}
 	}
 }

@@ -8,16 +8,16 @@ import (
 	"os"
 	"os/signal"
 	"strings"
-	"sync/atomic"
 	"syscall"
 	"time"
+
+	"github.com/razshare/frizzante/internal/project/lib/core/routes"
 )
 
 // Start starts a server.
 func Start(options StartOptions) (err error) {
 	cors := options.Cors
-	routes := options.Routes
-	guards := options.Guards
+	serverRoutes := options.Routes
 	errorLog := options.ErrorLog
 	certificate := options.Certificate
 	key := options.Key
@@ -50,9 +50,8 @@ func Start(options StartOptions) (err error) {
 		}
 	}()
 	handler := server.Handler.(*http.ServeMux)
-	var ids atomic.Uint64
-	for _, route := range routes {
-		id := ids.Add(1)
+	for _, route := range serverRoutes {
+		scope := routes.Scope{}
 		handler.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 			if errLocal := cors.Check(request); errLocal != nil {
 				server.ErrorLog.Printf(
@@ -61,9 +60,9 @@ func Start(options StartOptions) (err error) {
 				)
 				return
 			}
-			for _, guard := range guards {
+			for _, guard := range route.Guards {
 				var allow bool
-				if guard.Handler(id, request, writer, func() { allow = true }); !allow {
+				if guard.Handler(scope, request, writer, func() { allow = true }); !allow {
 					if guard.Name == "" {
 						infoLog.Printf("an unnamed guard blocked the request on route %s", route.Pattern)
 					} else {
@@ -72,7 +71,7 @@ func Start(options StartOptions) (err error) {
 					return
 				}
 			}
-			route.Handler(id, request, writer)
+			route.Handler(scope, request, writer)
 		})
 	}
 	if certificate != "" && key != "" {

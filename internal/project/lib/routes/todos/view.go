@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
-	"github.com/razshare/frizzante/internal/project/lib/core/negotiate"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
@@ -15,10 +14,9 @@ func View(
 	queries *schema.Queries,
 	render renders.Render,
 ) routes.Handler {
-	return func(id uint64, request *http.Request, writer http.ResponseWriter) {
+	return func(scope routes.Scope, request *http.Request, writer http.ResponseWriter) {
 		context := request.Context()
-		sessionId, _ := negotiate.SessionId(writer, request)
-		session, _ := queries.FindSessionById(context, sessionId)
+		session := scope["session"].(schema.Session)
 		todos, _ := queries.FindTodosBySessionId(context, session.ID)
 		_ = queries.ModifySessionById(context, schema.ModifySessionByIdParams{
 			ID: session.ID,

@@ -4,9 +4,12 @@ import (
 	"embed"
 	"errors"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/databases"
+	"github.com/razshare/frizzante/internal/project/lib/core/guards"
+	"github.com/razshare/frizzante/internal/project/lib/core/negotiate"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 	"github.com/razshare/frizzante/internal/project/lib/core/ssr"
@@ -28,13 +31,22 @@ var render = ssr.New(ssr.Options{
 	InfoLog:  infoLog,
 	Limit:    1,
 })
+var session = guards.Guard{
+	Name: "session",
+	Handler: func(scope guards.Scope, request *http.Request, writer http.ResponseWriter, allow func()) {
+		sessionId, _ := negotiate.SessionId(writer, request)
+		session, _ := queries.FindSessionById(request.Context(), sessionId)
+		scope["session"] = session
+		allow()
+	},
+}
 var appRoutes = []routes.Route{
-	{Pattern: "GET /", Handler: fallback.View(render, efs)},
+	{Pattern: "GET /", Handler: fallback.View(efs)},
 	{Pattern: "GET /welcome", Handler: welcome.View(render)},
-	{Pattern: "GET /todos", Handler: todos.View(queries, render)},
-	{Pattern: "POST /toggle", Handler: todos.Toggle(queries)},
-	{Pattern: "POST /add", Handler: todos.Add(queries)},
-	{Pattern: "POST /remove", Handler: todos.Remove(queries)},
+	{Pattern: "GET /todos", Handler: todos.View(queries, render), Guards: []guards.Guard{session}},
+	{Pattern: "POST /toggle", Handler: todos.Toggle(queries), Guards: []guards.Guard{session}},
+	{Pattern: "POST /add", Handler: todos.Add(queries), Guards: []guards.Guard{session}},
+	{Pattern: "POST /remove", Handler: todos.Remove(queries), Guards: []guards.Guard{session}},
 }
 var startError = servers.Start(servers.StartOptions{
 	ErrorLog: errorLog,
