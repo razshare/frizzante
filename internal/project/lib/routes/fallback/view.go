@@ -8,9 +8,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 )
 
-func View(
-	efs embed.FS,
-) routes.Handler {
+func View(efs embed.FS) routes.Handler {
 	return func(scope routes.Scope, request *http.Request, writer http.ResponseWriter) {
 		if found, _ := send.RequestedFile(writer, request, efs, "/"); !found {
 			writer.Header().Add("Location", "/welcome")

@@ -1,8 +1,8 @@
 -- name: FindSessionById :one
 select * from sessions where id = :id;
 
--- name: AddSessionWithId :exec
-insert into sessions(id, created_at, updated_at) values (:id, datetime(), datetime());
+-- name: AddSessionWithIdAndRoles :exec
+insert into sessions(id, created_at, updated_at, roles) values (:id, datetime(), datetime(), :roles);
 
 -- name: ModifySessionById :exec
 update sessions set error = :error where id = :id;

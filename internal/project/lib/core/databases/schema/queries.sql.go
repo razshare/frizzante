@@ -9,12 +9,17 @@ import (
 	"context"
 )
 
-const addSessionWithId = `-- name: AddSessionWithId :exec
-insert into sessions(id, created_at, updated_at) values (?1, datetime(), datetime())
+const addSessionWithIdAndRoles = `-- name: AddSessionWithIdAndRoles :exec
+insert into sessions(id, created_at, updated_at, roles) values (?1, datetime(), datetime(), ?2)
 `
 
-func (q *Queries) AddSessionWithId(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, addSessionWithId, id)
+type AddSessionWithIdAndRolesParams struct {
+	ID    string `json:"id"`
+	Roles string `json:"roles"`
+}
+
+func (q *Queries) AddSessionWithIdAndRoles(ctx context.Context, arg AddSessionWithIdAndRolesParams) error {
+	_, err := q.db.ExecContext(ctx, addSessionWithIdAndRoles, arg.ID, arg.Roles)
 	return err
 }
 
@@ -40,7 +45,7 @@ func (q *Queries) AddTodoWithIdAndSessionId(ctx context.Context, arg AddTodoWith
 }
 
 const findSessionById = `-- name: FindSessionById :one
-select id, created_at, updated_at, error from sessions where id = ?1
+select id, created_at, updated_at, roles, error from sessions where id = ?1
 `
 
 func (q *Queries) FindSessionById(ctx context.Context, id string) (Session, error) {
@@ -50,6 +55,7 @@ func (q *Queries) FindSessionById(ctx context.Context, id string) (Session, erro
 		&i.ID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.Roles,
 		&i.Error,
 	)
 	return i, err

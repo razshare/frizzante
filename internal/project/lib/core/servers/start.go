@@ -28,8 +28,11 @@ func Start(options StartOptions) (err error) {
 	if infoLog == nil {
 		infoLog = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
 	}
+	if options.Address == "" {
+		options.Address = "0.0.0.0:8080"
+	}
 	server := &http.Server{
-		Addr:           "0.0.0.0:8080",
+		Addr:           options.Address,
 		Handler:        http.NewServeMux(),
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,

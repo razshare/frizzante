@@ -3,11 +3,14 @@ package main
 import (
 	"embed"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/databases"
+	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/guards"
 	"github.com/razshare/frizzante/internal/project/lib/core/negotiate"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
@@ -36,6 +39,20 @@ var session = guards.Guard{
 	Handler: func(scope guards.Scope, request *http.Request, writer http.ResponseWriter, allow func()) {
 		sessionId, _ := negotiate.SessionId(writer, request)
 		session, _ := queries.FindSessionById(request.Context(), sessionId)
+		if session.ID == "" {
+			err := queries.AddSessionWithIdAndRoles(request.Context(), schema.AddSessionWithIdAndRolesParams{
+				ID:    sessionId,
+				Roles: "user",
+			})
+			if err != nil {
+				fmt.Printf("error:%v", err)
+			}
+			session, _ = queries.FindSessionById(request.Context(), sessionId)
+		}
+		if !strings.Contains(session.Roles, "user") {
+			writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 		scope["session"] = session
 		allow()
 	},

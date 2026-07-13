@@ -8,7 +8,7 @@ import (
 )
 
 type StartOptions struct {
-	SecureAddr  string
+	Address     string
 	Certificate string
 	Key         string
 	ErrorLog    *log.Logger

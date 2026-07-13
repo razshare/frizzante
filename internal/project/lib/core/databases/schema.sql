@@ -2,6 +2,7 @@ create table if not exists sessions(
     id varchar(36) primary key,
     created_at datetime not null,
     updated_at datetime not null,
+    roles varchar(256) not null default 'user',
     error text not null default ''
 );
 create table if not exists todos(
