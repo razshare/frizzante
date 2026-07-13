@@ -49,6 +49,10 @@ var session = guards.Guard{
 			}
 			session, _ = queries.FindSessionById(request.Context(), sessionId)
 		}
+		if session.Username != "guest" {
+			writer.WriteHeader(http.StatusUnauthorized)
+			return
+		}
 		if !strings.Contains(session.Roles, "user") {
 			writer.WriteHeader(http.StatusUnauthorized)
 			return
