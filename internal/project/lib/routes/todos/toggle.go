@@ -10,7 +10,7 @@ import (
 )
 
 func Toggle(queries *schema.Queries) routes.Handler {
-	return func(request *http.Request, writer http.ResponseWriter) {
+	return func(id uint64, request *http.Request, writer http.ResponseWriter) {
 		var form struct {
 			Id    string `form:"id"`
 			Value int64  `form:"value"`

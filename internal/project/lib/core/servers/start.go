@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync/atomic"
 	"syscall"
 	"time"
 )
@@ -49,7 +50,9 @@ func Start(options StartOptions) (err error) {
 		}
 	}()
 	handler := server.Handler.(*http.ServeMux)
+	var ids atomic.Uint64
 	for _, route := range routes {
+		id := ids.Add(1)
 		handler.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 			if errLocal := cors.Check(request); errLocal != nil {
 				server.ErrorLog.Printf(
@@ -60,7 +63,7 @@ func Start(options StartOptions) (err error) {
 			}
 			for _, guard := range guards {
 				var allow bool
-				if guard.Handler(request, writer, func() { allow = true }); !allow {
+				if guard.Handler(id, request, writer, func() { allow = true }); !allow {
 					if guard.Name == "" {
 						infoLog.Printf("an unnamed guard blocked the request on route %s", route.Pattern)
 					} else {
@@ -69,7 +72,7 @@ func Start(options StartOptions) (err error) {
 					return
 				}
 			}
-			route.Handler(request, writer)
+			route.Handler(id, request, writer)
 		})
 	}
 	if certificate != "" && key != "" {

@@ -10,7 +10,7 @@ import (
 )
 
 func View(render renders.Render) routes.Handler {
-	return func(request *http.Request, writer http.ResponseWriter) {
+	return func(id uint64, request *http.Request, writer http.ResponseWriter) {
 		_ = send.View(writer, request, render, views.View{
 			Name: "Welcome",
 		})

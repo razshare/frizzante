@@ -15,7 +15,7 @@ func View(
 	queries *schema.Queries,
 	render renders.Render,
 ) routes.Handler {
-	return func(request *http.Request, writer http.ResponseWriter) {
+	return func(id uint64, request *http.Request, writer http.ResponseWriter) {
 		context := request.Context()
 		sessionId, _ := negotiate.SessionId(writer, request)
 		session, _ := queries.FindSessionById(context, sessionId)

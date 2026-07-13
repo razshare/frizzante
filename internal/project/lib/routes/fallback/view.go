@@ -15,9 +15,9 @@ func View(
 	efs embed.FS,
 ) routes.Handler {
 	view := welcome.View(render)
-	return func(request *http.Request, writer http.ResponseWriter) {
+	return func(id uint64, request *http.Request, writer http.ResponseWriter) {
 		if found, _ := send.RequestedFile(writer, request, efs, "/"); !found {
-			view(request, writer)
+			view(id, request, writer)
 		}
 	}
 }

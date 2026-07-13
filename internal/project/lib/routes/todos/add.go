@@ -11,7 +11,7 @@ import (
 )
 
 func Add(queries *schema.Queries) routes.Handler {
-	return func(request *http.Request, writer http.ResponseWriter) {
+	return func(id uint64, request *http.Request, writer http.ResponseWriter) {
 		var form struct {
 			Description string `form:"description"`
 		}

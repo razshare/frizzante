@@ -21,7 +21,7 @@ import (
 var efs embed.FS
 var errorLog = log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
 var infoLog = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
-var _, queries, dberr = databases.Connect()
+var _, queries, databaseError = databases.Connect()
 var render = ssr.New(ssr.Options{
 	Efs:      efs,
 	ErrorLog: errorLog,
@@ -36,14 +36,14 @@ var appRoutes = []routes.Route{
 	{Pattern: "POST /add", Handler: todos.Add(queries)},
 	{Pattern: "POST /remove", Handler: todos.Remove(queries)},
 }
-var srverr = servers.Start(servers.StartOptions{
+var startError = servers.Start(servers.StartOptions{
 	ErrorLog: errorLog,
 	InfoLog:  infoLog,
 	Routes:   appRoutes,
 })
 
 func main() {
-	if err := errors.Join(dberr, srverr); err != nil {
+	if err := errors.Join(databaseError, startError); err != nil {
 		log.Fatal(err)
 	}
 }
