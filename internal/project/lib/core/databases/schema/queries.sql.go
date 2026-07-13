@@ -45,7 +45,7 @@ func (q *Queries) AddTodoWithIdAndSessionId(ctx context.Context, arg AddTodoWith
 }
 
 const findSessionById = `-- name: FindSessionById :one
-select id, created_at, updated_at, roles, username, error from sessions where id = ?1
+select id, created_at, updated_at, roles, user_id, error from sessions where id = ?1
 `
 
 func (q *Queries) FindSessionById(ctx context.Context, id string) (Session, error) {
@@ -56,7 +56,7 @@ func (q *Queries) FindSessionById(ctx context.Context, id string) (Session, erro
 		&i.CreatedAt,
 		&i.UpdatedAt,
 		&i.Roles,
-		&i.Username,
+		&i.UserID,
 		&i.Error,
 	)
 	return i, err
