@@ -49,13 +49,13 @@ func Start(options StartOptions) (err error) {
 			if err == nil {
 				err = cerr
 			}
-			if options.AfterServerEnd != nil {
-				options.AfterServerEnd(server)
+			if options.AfterStop != nil {
+				options.AfterStop(server)
 			}
 			return
 		}
-		if options.AfterServerEnd != nil {
-			options.AfterServerEnd(server)
+		if options.AfterStop != nil {
+			options.AfterStop(server)
 		}
 	}()
 	handler := server.Handler.(*http.ServeMux)
@@ -86,15 +86,15 @@ func Start(options StartOptions) (err error) {
 	if certificate != "" && key != "" {
 		address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
 		infoLog.Printf("server bound to address %s; visit your application at https://%s", server.Addr, address)
-		if options.BeforeServerStart != nil {
-			options.BeforeServerStart(server)
+		if options.BeforeStart != nil {
+			options.BeforeStart(server)
 		}
 		if err = server.ListenAndServeTLS(certificate, key); err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
 				err = nil
 				infoLog.Println("shutting down server")
-				if options.AfterServerEnd != nil {
-					options.AfterServerEnd(server)
+				if options.AfterStop != nil {
+					options.AfterStop(server)
 				}
 				return
 			}
@@ -103,15 +103,15 @@ func Start(options StartOptions) (err error) {
 	} else {
 		address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
 		infoLog.Printf("server bound to address %s; visit your application at http://%s", server.Addr, address)
-		if options.BeforeServerStart != nil {
-			options.BeforeServerStart(server)
+		if options.BeforeStart != nil {
+			options.BeforeStart(server)
 		}
 		if err = server.ListenAndServe(); err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
 				err = nil
 				infoLog.Println("shutting down server")
-				if options.AfterServerEnd != nil {
-					options.AfterServerEnd(server)
+				if options.AfterStop != nil {
+					options.AfterStop(server)
 				}
 				return
 			}
