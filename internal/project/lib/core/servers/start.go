@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"strings"
+	"sync"
 	"syscall"
 	"time"
 
@@ -39,22 +40,28 @@ func Start(options StartOptions) (err error) {
 		MaxHeaderBytes: 2097152, // 2MB,
 		ErrorLog:       errorLog,
 	}
+	shutdownLock := sync.Mutex{}
+	shutdownListenersCalled := false
 	background := context.Background()
 	sigctx, stop := signal.NotifyContext(background, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
 	go func() {
 		<-sigctx.Done()
+		shutdownLock.Lock()
+		defer shutdownLock.Unlock()
 		infoLog.Println("shutting server down gracefully...")
-		if cerr := server.Shutdown(background); cerr != nil {
+		if cerr := server.Close(); cerr != nil {
 			if err == nil {
 				err = cerr
 			}
 			if options.AfterStop != nil {
+				shutdownListenersCalled = true
 				options.AfterStop(server)
 			}
 			return
 		}
 		if options.AfterStop != nil {
+			shutdownListenersCalled = true
 			options.AfterStop(server)
 		}
 	}()
@@ -93,6 +100,11 @@ func Start(options StartOptions) (err error) {
 			if errors.Is(err, http.ErrServerClosed) {
 				err = nil
 				infoLog.Println("shutting down server")
+				shutdownLock.Lock()
+				defer shutdownLock.Unlock()
+				if shutdownListenersCalled {
+					return
+				}
 				if options.AfterStop != nil {
 					options.AfterStop(server)
 				}
@@ -110,6 +122,11 @@ func Start(options StartOptions) (err error) {
 			if errors.Is(err, http.ErrServerClosed) {
 				err = nil
 				infoLog.Println("shutting down server")
+				shutdownLock.Lock()
+				defer shutdownLock.Unlock()
+				if shutdownListenersCalled {
+					return
+				}
 				if options.AfterStop != nil {
 					options.AfterStop(server)
 				}
