@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/signal"
 	"strings"
-	"sync"
 	"syscall"
 	"time"
 
@@ -40,29 +39,17 @@ func Start(options StartOptions) (err error) {
 		MaxHeaderBytes: 2097152, // 2MB,
 		ErrorLog:       errorLog,
 	}
-	shutdownLock := sync.Mutex{}
-	shutdownListenersCalled := false
 	background := context.Background()
 	sigctx, stop := signal.NotifyContext(background, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	defer stop()
 	go func() {
 		<-sigctx.Done()
-		shutdownLock.Lock()
-		defer shutdownLock.Unlock()
 		infoLog.Println("shutting server down gracefully...")
 		if cerr := server.Close(); cerr != nil {
 			if err == nil {
 				err = cerr
 			}
-			if options.AfterStop != nil {
-				shutdownListenersCalled = true
-				options.AfterStop(server)
-			}
 			return
-		}
-		if options.AfterStop != nil {
-			shutdownListenersCalled = true
-			options.AfterStop(server)
 		}
 	}()
 	handler := server.Handler.(*http.ServeMux)
@@ -93,21 +80,10 @@ func Start(options StartOptions) (err error) {
 	if certificate != "" && key != "" {
 		address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
 		infoLog.Printf("server bound to address %s; visit your application at https://%s", server.Addr, address)
-		if options.BeforeStart != nil {
-			options.BeforeStart(server)
-		}
 		if err = server.ListenAndServeTLS(certificate, key); err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
 				err = nil
 				infoLog.Println("shutting down server")
-				shutdownLock.Lock()
-				defer shutdownLock.Unlock()
-				if shutdownListenersCalled {
-					return
-				}
-				if options.AfterStop != nil {
-					options.AfterStop(server)
-				}
 				return
 			}
 			return
@@ -115,21 +91,10 @@ func Start(options StartOptions) (err error) {
 	} else {
 		address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
 		infoLog.Printf("server bound to address %s; visit your application at http://%s", server.Addr, address)
-		if options.BeforeStart != nil {
-			options.BeforeStart(server)
-		}
 		if err = server.ListenAndServe(); err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
 				err = nil
 				infoLog.Println("shutting down server")
-				shutdownLock.Lock()
-				defer shutdownLock.Unlock()
-				if shutdownListenersCalled {
-					return
-				}
-				if options.AfterStop != nil {
-					options.AfterStop(server)
-				}
 				return
 			}
 			return

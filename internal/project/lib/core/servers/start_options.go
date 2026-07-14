@@ -15,6 +15,4 @@ type StartOptions struct {
 	InfoLog     *log.Logger
 	Routes      []routes.Route
 	Cors        *http.CrossOriginProtection
-	BeforeStart func(server *http.Server)
-	AfterStop   func(server *http.Server)
 }
