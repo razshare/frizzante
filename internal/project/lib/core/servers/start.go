@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/routes"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 )
 
 // Start starts a server.
@@ -54,7 +54,7 @@ func Start(options StartOptions) (err error) {
 	}()
 	handler := server.Handler.(*http.ServeMux)
 	for _, route := range serverRoutes {
-		scope := routes.Scope{}
+		scope := scopes.Scope{}
 		handler.HandleFunc(route.Pattern, func(writer http.ResponseWriter, request *http.Request) {
 			if errLocal := cors.Check(request); errLocal != nil {
 				server.ErrorLog.Printf(
