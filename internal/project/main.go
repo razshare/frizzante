@@ -14,8 +14,10 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/guards"
 	"github.com/razshare/frizzante/internal/project/lib/core/negotiate"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
+	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 	"github.com/razshare/frizzante/internal/project/lib/core/ssr"
+	"github.com/razshare/frizzante/internal/project/lib/keys"
 	"github.com/razshare/frizzante/internal/project/lib/routes/fallback"
 	"github.com/razshare/frizzante/internal/project/lib/routes/todos"
 	"github.com/razshare/frizzante/internal/project/lib/routes/welcome"
@@ -36,7 +38,7 @@ var render = ssr.New(ssr.Options{
 })
 var session = guards.Guard{
 	Name: "session",
-	Handler: func(scope guards.Scope, request *http.Request, writer http.ResponseWriter, allow func()) {
+	Handler: func(scope scopes.Scope, request *http.Request, writer http.ResponseWriter, allow func()) {
 		sessionId, _ := negotiate.SessionId(writer, request)
 		session, _ := queries.FindSessionById(request.Context(), sessionId)
 		if session.ID == "" {
@@ -57,7 +59,7 @@ var session = guards.Guard{
 			writer.WriteHeader(http.StatusUnauthorized)
 			return
 		}
-		scope["session"] = session
+		scope[keys.Session] = session
 		allow()
 	},
 }
