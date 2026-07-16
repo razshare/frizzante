@@ -1,6 +1,7 @@
 package negotiate
 
 import (
+	"errors"
 	"net/http"
 
 	uuid "github.com/nu7hatch/gouuid"
@@ -12,10 +13,14 @@ import (
 func SessionId(writer http.ResponseWriter, request *http.Request) (value string, err error) {
 	var cookie *http.Cookie
 	if cookie, err = request.Cookie("session-id"); err != nil {
-		return
-	}
-	if value = cookie.Value; value != "" {
-		return
+		if !errors.Is(err, http.ErrNoCookie) {
+			return
+		}
+		err = nil
+	} else {
+		if value = cookie.Value; value != "" {
+			return
+		}
 	}
 	var ido *uuid.UUID
 	if ido, err = uuid.NewV4(); err != nil {
