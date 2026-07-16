@@ -3,7 +3,6 @@ package main
 import (
 	"embed"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -42,12 +41,12 @@ var session = guards.Guard{
 		sessionId, _ := negotiate.SessionId(writer, request)
 		session, _ := queries.FindSessionById(request.Context(), sessionId)
 		if session.ID == "" {
-			err := queries.AddSessionWithIdAndRoles(request.Context(), schema.AddSessionWithIdAndRolesParams{
+			if err := queries.AddSessionWithIdAndRoles(request.Context(), schema.AddSessionWithIdAndRolesParams{
 				ID:    sessionId,
 				Roles: "user",
-			})
-			if err != nil {
-				fmt.Printf("error:%v", err)
+			}); err != nil {
+				errorLog.Printf("error:%v", err)
+				return
 			}
 			session, _ = queries.FindSessionById(request.Context(), sessionId)
 		}
