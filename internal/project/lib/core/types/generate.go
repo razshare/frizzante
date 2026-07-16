@@ -47,14 +47,22 @@ func Generate[T any]() (err error) {
 	package_ := parts[count-1]
 	var globalBuilder strings.Builder
 	var namespaceBuilder strings.Builder
-	globalBuilder.WriteString(fmt.Sprintf("export type %s = %s.%s\n\n", type_.Name(), package_, type_.Name()))
+	if _, err = fmt.Fprintf(&globalBuilder, "export type %s = %s.%s\n\n", type_.Name(), package_, type_.Name()); err != nil {
+		return
+	}
 	for namespace, definition := range definitions {
 		namespaceBuilder.Reset()
-		namespaceBuilder.WriteString(fmt.Sprintf("export declare namespace %s {\n", namespace))
+		if _, err = fmt.Fprintf(&namespaceBuilder, "export declare namespace %s {\n", namespace); err != nil {
+			return
+		}
 		for name, lines := range definition {
-			namespaceBuilder.WriteString(fmt.Sprintf("    export type %s = {\n", name))
+			if _, err = fmt.Fprintf(&namespaceBuilder, "    export type %s = {\n", name); err != nil {
+				return
+			}
 			for _, line := range lines {
-				namespaceBuilder.WriteString(fmt.Sprintf("        %s\n", line))
+				if _, err = fmt.Fprintf(&namespaceBuilder, "        %s\n", line); err != nil {
+					return
+				}
 			}
 			namespaceBuilder.WriteString("    }\n")
 		}
@@ -62,18 +70,18 @@ func Generate[T any]() (err error) {
 		globalBuilder.WriteString(strings.TrimSpace(namespaceBuilder.String()))
 		globalBuilder.WriteString("\n\n")
 	}
-	var name string
+	var name strings.Builder
 	for index, char := range type_.Name() {
 		if !unicode.IsUpper(char) {
-			name += string(char)
+			name.WriteString(string(char))
 			continue
 		}
 		if index != 0 {
-			name += "_"
+			name.WriteString("_")
 		}
-		name += strings.ToLower(string(char))
+		name.WriteString(strings.ToLower(string(char)))
 	}
-	fileName := filepath.Join(packageDirectoryName, name+".d.ts")
+	fileName := filepath.Join(packageDirectoryName, name.String()+".d.ts")
 	if err = os.WriteFile(fileName, []byte(strings.TrimSpace(globalBuilder.String())), os.ModePerm); err != nil {
 		return
 	}
