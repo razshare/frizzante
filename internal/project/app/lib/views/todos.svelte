@@ -23,8 +23,8 @@
     import type { Props, schema } from "$lib/types/server/main/lib/routes/todos/props"
     import Icon from "$lib/components/icons/icon.svelte"
     import Layout from "$lib/components/layout.svelte"
-    import { action } from "$lib/scripts/core/action.ts"
-    import { href } from "$lib/scripts/core/href.ts"
+    import { action } from "$lib/scripts/core/action.svelte.ts"
+    import { href } from "$lib/scripts/core/href.svelte.ts"
     import { mdiArrowLeft, mdiCheckCircleOutline, mdiCircleOutline, mdiClose, mdiPlus } from "@mdi/js"
     import { slide } from "svelte/transition"
     let { items, error }: Props = $props()

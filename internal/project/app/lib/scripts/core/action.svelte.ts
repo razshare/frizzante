@@ -1,9 +1,6 @@
 import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
-import { navigate } from "$lib/scripts/core/navigate.ts"
-import { swap } from "$lib/scripts/core/swap"
-import { swapping } from "$lib/scripts/core/swapping.ts"
-import type { View } from "$lib/scripts/core/view"
-import { getContext } from "svelte"
+import { root } from "$lib/scripts/core/root.svelte"
+import { swap } from "$lib/scripts/core/swap.svelte"
 import type { ActionOptions } from "$lib/types/core/action_options"
 export function action(
     path = "",
@@ -15,12 +12,10 @@ export function action(
     if (!IS_BROWSER) {
         return { action: path, async onsubmit() {} }
     }
-    const view: View = getContext("view")
-    navigate(view)
     return {
         action: path,
         async onsubmit(event: Event) {
-            swapping.active = true
+            root.swapping = true
             const pending = setTimeout(function start() {
                 if (options.onpending) {
                     options.onpending()
@@ -30,7 +25,7 @@ export function action(
             event.preventDefault()
             try {
                 const form = event.target as HTMLFormElement
-                await swap(form, view).then(function done(record) {
+                await swap(form).then(function done(record) {
                     record()
                 })
             } catch (errorLocal) {
@@ -48,7 +43,7 @@ export function action(
                     options.ondone()
                 }
             }
-            swapping.active = false
+            root.swapping = false
         },
     }
 }

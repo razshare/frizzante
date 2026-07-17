@@ -1,7 +1,9 @@
+import type { views as clientViews } from "$exports.client"
+import type { views as serverViews } from "$exports.server"
+import { root } from "$lib/scripts/core/root.svelte"
 import type { HistoryEntry } from "$lib/types/core/history_entry"
-import type { View } from "$lib/scripts/core/view"
 let lastUrl: false | string = false
-export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: View): Promise<() => void> {
+export async function swap(target: HTMLAnchorElement | HTMLFormElement): Promise<() => void> {
     if (lastUrl === false) {
         lastUrl = location.toString()
     }
@@ -14,7 +16,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         const anchor = target as HTMLAnchorElement
         const parts = anchor.href.split("#", 2)
         requestUrl = parts[0]
-        if (view.type === "snapshot") {
+        if (root.type === "snapshot") {
             requestUrl = requestUrl.replace(/\/+$/, "") + "/data.json"
         }
         if (parts.length >= 2) {
@@ -30,7 +32,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
         const data = new FormData(form)
         const params = new URLSearchParams()
         requestUrl = form.action.split("?")[0] ?? ""
-        if (view.type === "snapshot") {
+        if (root.type === "snapshot") {
             requestUrl = requestUrl.replace(/\/+$/, "") + "/data.json"
         }
         form.reset()
@@ -53,7 +55,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
             })
         } else {
             requestUrl = form.action
-            if (view.type === "snapshot") {
+            if (root.type === "snapshot") {
                 requestUrl += "/data.json"
             }
             response = await fetch(requestUrl, {
@@ -71,28 +73,19 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement, view: Vi
     if (text === "") {
         return function push(): void {}
     }
-    const remote = JSON.parse(text) as View
-    view.name = remote.name
-    view.align = remote.align
-    view.render = remote.render
-    if (view.align === 1) {
-        if (typeof view.props !== "object") {
-            console.warn("view alignment intends to merge props, but local view props is not an object")
-            // Noop.
-        } else if (typeof remote.props !== "object") {
-            console.warn("view alignment intends to merge props, but remote props is not an object")
-            // Noop.
-        } else {
-            view.props = {
-                ...view.props,
-                ...remote.props,
-            }
-        }
-    } else {
-        view.props = remote.props
+    const remote = JSON.parse(text) as {
+        name: keyof typeof clientViews | keyof typeof serverViews
+        render: number
+        props: any
+    }
+    root.view = {
+        name: remote.name,
+        ondone() {
+            return remote.props
+        },
     }
     let fixedResponseUrl = response.url
-    if (view.type === "snapshot") {
+    if (root.type === "snapshot") {
         fixedResponseUrl = fixedResponseUrl.replace(/\/data\.json$/, "")
     }
     lastUrl = fixedResponseUrl

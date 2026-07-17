@@ -2,7 +2,7 @@
     import Icon from "$lib/components/icons/icon.svelte"
     import Layout from "$lib/components/layout.svelte"
     import Logo from "$lib/components/logo.svelte"
-    import { href } from "$lib/scripts/core/href.ts"
+    import { href } from "$lib/scripts/core/href.svelte.ts"
     import { mdiArrowRight } from "@mdi/js"
 </script>
 

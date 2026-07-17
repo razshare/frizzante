@@ -1,35 +1,35 @@
 <script lang="ts">
     import { views } from "$exports.client"
-    import type { View } from "$lib/scripts/core/view.d.ts"
-    import { setContext, type SvelteComponent } from "svelte"
-    let { name, props, render, align, type }: View = $props()
-    let ClientComponent = $state(false) as false | SvelteComponent
-    // svelte-ignore state_referenced_locally
-    let view = $state({ name, props, render, align, type })
-    let counter = 0
-    setContext("view", view)
-    $effect(route)
-    function route() {
-        const id = ++counter
-        const promise = views[view.name]()
-        promise
-            .then(function resolved(component) {
-                // there's a chance the user has clicked a new link
-                // and swapped views again while the component was loading [...]
-                if (counter != id) {
-                    // [...] when that happens we need to bail out,
-                    // because most likely the new request asks for a different component,
-                    // and we don't want to present the old component view
-                    return
-                }
-                ClientComponent = component as unknown as SvelteComponent
-            })
-            .catch(function failed(error) {
-                console.error(error)
-            })
+    import { navigate } from "$lib/scripts/core/navigate"
+    import { root } from "$lib/scripts/core/root.svelte"
+    import type { SvelteComponent } from "svelte"
+    type Props = {
+        name: keyof typeof views
+        props: Record<string, unknown>
+        type: "" | "default" | "snapshot"
     }
+    let { name = $bindable(), props = $bindable(), type = $bindable() }: Props = $props()
+    navigate()
+    root.type = type
+    root.view = {
+        name,
+        ondone() {
+            return props
+        },
+    }
+    let View: false | SvelteComponent = $state(false)
+    $effect(function start() {
+        if (root.view.name !== "") {
+            views[root.view.name]().then(function run(viewLocal) {
+                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                //@ts-expect-error
+                View = viewLocal
+                props = root.view.ondone()
+            })
+        }
+    })
 </script>
 
-{#if ClientComponent}
-    <ClientComponent.default {...view.props} />
+{#if View}
+    <View.default {...props} />
 {/if}

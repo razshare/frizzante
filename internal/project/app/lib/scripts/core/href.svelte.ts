@@ -1,10 +1,7 @@
-import type { HrefOptions } from "$lib/types/core/href_options"
 import { IS_BROWSER } from "$lib/scripts/core/is_browser.ts"
-import { navigate } from "$lib/scripts/core/navigate.ts"
-import { swap } from "$lib/scripts/core/swap"
-import { swapping } from "$lib/scripts/core/swapping.ts"
-import type { View } from "$lib/scripts/core/view"
-import { getContext } from "svelte"
+import { root } from "$lib/scripts/core/root.svelte"
+import { swap } from "$lib/scripts/core/swap.svelte"
+import type { HrefOptions } from "$lib/types/core/href_options"
 export function href(
     path = "",
     options: HrefOptions = {},
@@ -22,12 +19,10 @@ export function href(
     }
     const anchor = document.createElement("a")
     anchor.href = path
-    const view: View = getContext("view")
-    navigate(view)
     return {
         href: path,
         async onclick(event: MouseEvent) {
-            swapping.active = true
+            root.swapping = true
             let error: Error | undefined
             const pending = setTimeout(function start() {
                 if (options.onpending) {
@@ -36,7 +31,7 @@ export function href(
             }, options.pendingDelay ?? 100)
             event.preventDefault()
             try {
-                const record = await swap(anchor, view)
+                const record = await swap(anchor)
                 record()
             } catch (errorLocal) {
                 error = errorLocal as Error
@@ -51,7 +46,7 @@ export function href(
                     options.ondone()
                 }
             }
-            swapping.active = false
+            root.swapping = false
             return false
         },
     }
