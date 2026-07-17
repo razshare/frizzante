@@ -42,7 +42,7 @@ func Migration(options MigrationOptions) (err error) {
 			Schema string `yaml:"schema"`
 		} `yaml:"sql"`
 	}
-	baseDirectory := filepath.Dir(sqlcYaml)
+	baseDirectory := filepath.Join("migrate")
 	spin := spinners.New("creating migration file")
 	go spinners.Start(spin)
 	if !files.IsDirectory(filepath.Join(baseDirectory, "migrations")) {
