@@ -98,6 +98,19 @@ var Generate = Menu{
 			},
 		},
 		{
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "makefile" },
+			Choice: search.Choice{Id: "makefile", Description: "makefile"},
+			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
+				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+				fmt.Println(configs.Styles.Menu.Render("generate ▷ makefile"))
+				err = generations.Makefile(generations.MakefileOptions{
+					Efs:    app.Efs,
+					Strict: *app.Strict,
+				})
+				return
+			},
+		},
+		{
 			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "snapshot" },
 			Choice: search.Choice{Id: "snapshot", Description: "generates static pages, data and assets"},
 			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
