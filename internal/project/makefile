@@ -27,3 +27,14 @@ update:
 
 migrate:
 	frizzante migrate
+
+.PHONY: migrate
+.PHONY: configure
+.PHONY: test
+.PHONY: build
+.PHONY: dev
+.PHONY: check
+.PHONY: clean
+.PHONY: format
+.PHONY: install
+.PHONY: update
