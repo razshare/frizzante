@@ -48,14 +48,14 @@ func Schema(options SchemaOptions) (err error) {
 			return
 		}
 		if !yesInstall {
-			err = errors.New("cannot continue generating queries because sqlc is missing")
+			err = errors.New("cannot continue generating schema because sqlc is missing")
 		}
 		if err = Sqlc(SqlcOptions{Sqlc: options.Sqlc}); err != nil {
 			return
 		}
 	}
 	baseDirectory := filepath.Dir(sqlcYaml)
-	spin := spinners.New("generating queries")
+	spin := spinners.New("generating schema")
 	go spinners.Start(spin)
 	if !messages.Command(messages.CommandOptions{
 		DirectoryName: baseDirectory,
@@ -64,14 +64,14 @@ func Schema(options SchemaOptions) (err error) {
 		Args:          []string{"generate"},
 	}) {
 		spinners.Stop(spin)
-		err = errors.New("could not generate queries")
+		err = errors.New("could not generate schema")
 		return
 	}
 	spinners.Stop(spin)
 	if err = FixImports(FixImportsOptions{Directory: baseDirectory}); err != nil {
 		return
 	}
-	messages.Success("queries generated")
+	messages.Success("schema generated")
 	messages.Tip(
 		"## usage example\n",
 		"databases.Queries.FindTodosBySessionId(http.Request.Context(), \"some-session-id-123-...\")",

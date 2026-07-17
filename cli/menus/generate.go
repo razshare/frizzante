@@ -124,6 +124,19 @@ var Generate = Menu{
 			},
 		},
 		{
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "databases" },
+			Choice: search.Choice{Id: "databases", Description: "databases package"},
+			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
+				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+				fmt.Println(configs.Styles.Menu.Render("generate ▷ databases"))
+				err = generations.Databases(generations.DatabasesOptions{
+					Efs:    app.Efs,
+					Strict: *app.Strict,
+				})
+				return
+			},
+		},
+		{
 			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "icons" },
 			Choice: search.Choice{Id: "icons", Description: "icons components"},
 			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
