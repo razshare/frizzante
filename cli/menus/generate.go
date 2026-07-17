@@ -84,12 +84,12 @@ var Generate = Menu{
 			},
 		},
 		{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "queries" },
-			Choice: search.Choice{Id: "queries", Description: "go functions from your query file using sqlc"},
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return value == "schema" },
+			Choice: search.Choice{Id: "schema", Description: "go schema"},
 			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ queries"))
-				err = generations.Queries(generations.QueriesOptions{
+				fmt.Println(configs.Styles.Menu.Render("generate ▷ schema"))
+				err = generations.Schema(generations.SchemaOptions{
 					Strict:   *app.Strict,
 					Sqlc:     *app.Sqlc,
 					SqlcYaml: *app.SqlcYaml,

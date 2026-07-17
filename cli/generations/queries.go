@@ -15,7 +15,7 @@ import (
 	"github.com/razshare/frizzante/tui/spinners"
 )
 
-func Queries(options QueriesOptions) (err error) {
+func Schema(options SchemaOptions) (err error) {
 	sqlcYaml := options.SqlcYaml
 	if sqlcYaml == "" {
 		if options.Strict {
