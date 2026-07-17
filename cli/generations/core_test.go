@@ -31,6 +31,9 @@ func TestCore(t *testing.T) {
 		t.Fatal("app/lib/scripts/core/example.txt should exist")
 	}
 	if !files.IsFile(filepath.Join("app", "lib", "components", "core", "example.txt")) {
-		t.Fatal("app/lib/scripts/components/example.txt should exist")
+		t.Fatal("app/lib/scripts/components/core/example.txt should exist")
+	}
+	if !files.IsFile(filepath.Join("app", "lib", "types", "core", "example.txt")) {
+		t.Fatal("app/lib/scripts/types/core/example.txt should exist")
 	}
 }
