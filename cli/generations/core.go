@@ -61,6 +61,22 @@ func Core(options CoreOptions) (err error) {
 			}
 		}
 	}
+	directoryName = filepath.Join("app", "lib", "types", "core")
+	if files.IsDirectory(directoryName) {
+		if options.Strict {
+			err = fmt.Errorf("%s already exists", directoryName)
+			return
+		}
+		var yesRemove bool
+		if yesRemove, err = confirm.Sendf(true, "%s already exists. Remove?", directoryName); err != nil {
+			return err
+		}
+		if yesRemove {
+			if err = os.RemoveAll(directoryName); err != nil {
+				return
+			}
+		}
+	}
 	if err = Copy(CopyOptions{
 		From: "internal/project/lib/core",
 		To:   filepath.Join("lib", "core"),
@@ -78,6 +94,13 @@ func Core(options CoreOptions) (err error) {
 	if err = Copy(CopyOptions{
 		From: "internal/project/app/lib/components/core",
 		To:   filepath.Join("app", "lib", "components", "core"),
+		Efs:  options.Efs,
+	}); err != nil {
+		return
+	}
+	if err = Copy(CopyOptions{
+		From: "internal/project/app/lib/types/core",
+		To:   filepath.Join("app", "lib", "types", "core"),
 		Efs:  options.Efs,
 	}); err != nil {
 		return

@@ -31,12 +31,21 @@ func Start(options StartOptions) (err error) {
 	if options.Address == "" {
 		options.Address = "0.0.0.0:8080"
 	}
+	if options.ReadTimeout <= 0 {
+		options.ReadTimeout = 30 * time.Second
+	}
+	if options.WriteTimeout <= 0 {
+		options.WriteTimeout = 30 * time.Second
+	}
+	if options.MaxHeaderBytes <= 0 {
+		options.MaxHeaderBytes = 1024 * 1024 * 2 //2MB
+	}
 	server := &http.Server{
 		Addr:           options.Address,
 		Handler:        http.NewServeMux(),
-		ReadTimeout:    10 * time.Second,
-		WriteTimeout:   10 * time.Second,
-		MaxHeaderBytes: 2097152, // 2MB,
+		ReadTimeout:    options.ReadTimeout,
+		WriteTimeout:   options.WriteTimeout,
+		MaxHeaderBytes: options.MaxHeaderBytes,
 		ErrorLog:       errorLog,
 	}
 	background := context.Background()
