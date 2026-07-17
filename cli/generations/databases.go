@@ -36,5 +36,8 @@ func Databases(options DatabasesOptions) (err error) {
 	}); err != nil {
 		return
 	}
+	if err = FixImports(FixImportsOptions{Directory: filepath.Join("lib", "databases")}); err != nil {
+		return
+	}
 	return
 }
