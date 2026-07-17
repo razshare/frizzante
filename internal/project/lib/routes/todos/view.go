@@ -8,19 +8,19 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
-	"github.com/razshare/frizzante/internal/project/lib/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/keys"
+	schema2 "github.com/razshare/frizzante/internal/project/lib/schema"
 )
 
 func View(
-	queries *schema.Queries,
+	queries *schema2.Queries,
 	render renders.Render,
 ) routes.Handler {
 	return func(scope scopes.Scope, request *http.Request, writer http.ResponseWriter) {
 		context := request.Context()
-		session := scope[keys.Session].(schema.Session)
+		session := scope[keys.Session].(schema2.Session)
 		todos, _ := queries.FindTodosBySessionId(context, session.ID)
-		_ = queries.ModifySessionById(context, schema.ModifySessionByIdParams{
+		_ = queries.ModifySessionById(context, schema2.ModifySessionByIdParams{
 			ID: session.ID,
 		})
 		_ = send.View(writer, request, render, views.View{

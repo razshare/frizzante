@@ -6,6 +6,6 @@ sql:
     gen:
       go:
         package: "schema"
-        out: "schema"
+        out: "lib/schema"
         emit_json_tags: true
         json_tags_case_style: camel

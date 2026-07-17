@@ -15,11 +15,11 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/servers"
 	"github.com/razshare/frizzante/internal/project/lib/core/ssr"
 	"github.com/razshare/frizzante/internal/project/lib/databases"
-	"github.com/razshare/frizzante/internal/project/lib/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/keys"
 	"github.com/razshare/frizzante/internal/project/lib/routes/fallback"
 	"github.com/razshare/frizzante/internal/project/lib/routes/todos"
 	"github.com/razshare/frizzante/internal/project/lib/routes/welcome"
+	"github.com/razshare/frizzante/internal/project/lib/schema"
 )
 
 //go:generate frizzante clean
