@@ -5,7 +5,7 @@ import (
 	"embed"
 	"log"
 
-	databases2 "github.com/razshare/frizzante/internal/project/lib/databases"
+	"github.com/razshare/frizzante/internal/project/lib/databases"
 )
 
 //go:embed migrations
@@ -16,10 +16,10 @@ func main() {
 	// this program runs once and dies immediately
 	var err error
 	var database *sql.DB
-	if database, _, err = databases2.Connect(); err != nil {
+	if database, _, err = databases.Connect(); err != nil {
 		log.Fatal(err)
 	}
-	if err = databases2.Migrate(databases2.MigrateOptions{
+	if err = databases.Migrate(databases.MigrateOptions{
 		Efs:      efs,
 		Database: database,
 		Offset:   "first",
