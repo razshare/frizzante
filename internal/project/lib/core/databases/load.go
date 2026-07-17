@@ -6,8 +6,8 @@ import (
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/internal/project/lib/schema"
 )
 
 func Connect() (database *sql.DB, queries *schema.Queries, err error) {

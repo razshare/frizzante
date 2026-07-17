@@ -4,11 +4,11 @@ import (
 	"net/http"
 
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/receive"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/keys"
+	"github.com/razshare/frizzante/internal/project/lib/schema"
 )
 
 func Add(queries *schema.Queries) routes.Handler {

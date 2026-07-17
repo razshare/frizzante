@@ -16,18 +16,14 @@
 </style>
 
 <script lang="ts">
-    import { getContext, type Snippet } from "svelte"
-    import type { View } from "$lib/scripts/core/view.d.ts"
+    import { root } from "$lib/scripts/core/root.svelte"
+    import { type Snippet } from "svelte"
     import { scale } from "svelte/transition"
-
     type Props = {
         title?: string
         children: Snippet
     }
-
-    const view = getContext("view") as View
-
-    let { title = view.name, children }: Props = $props()
+    let { title = root.view.name, children }: Props = $props()
 </script>
 
 <svelte:head>

@@ -9,7 +9,6 @@ export function navigate(): void {
     const form = document.createElement("form")
     const anchor = document.createElement("a")
     const listener = async function pop(event: PopStateEvent) {
-        debugger
         const serialized: string = event.state ?? ""
         if (serialized !== "") {
             event.preventDefault()

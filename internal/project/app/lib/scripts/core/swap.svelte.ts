@@ -2,6 +2,7 @@ import type { views as clientViews } from "$exports.client"
 import type { views as serverViews } from "$exports.server"
 import { root } from "$lib/scripts/core/root.svelte"
 import type { HistoryEntry } from "$lib/types/core/history_entry"
+import { SvelteURLSearchParams } from "svelte/reactivity"
 let lastUrl: false | string = false
 export async function swap(target: HTMLAnchorElement | HTMLFormElement): Promise<() => void> {
     if (lastUrl === false) {
@@ -30,7 +31,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement): Promise
     } else if (target.nodeName === "FORM") {
         const form = target as HTMLFormElement
         const data = new FormData(form)
-        const params = new URLSearchParams()
+        const params = new SvelteURLSearchParams()
         requestUrl = form.action.split("?")[0] ?? ""
         if (root.type === "snapshot") {
             requestUrl = requestUrl.replace(/\/+$/, "") + "/data.json"
@@ -76,7 +77,7 @@ export async function swap(target: HTMLAnchorElement | HTMLFormElement): Promise
     const remote = JSON.parse(text) as {
         name: keyof typeof clientViews | keyof typeof serverViews
         render: number
-        props: any
+        props: Record<string, unknown>
     }
     root.view = {
         name: remote.name,

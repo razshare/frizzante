@@ -26,7 +26,7 @@ func Generate[T any]() (err error) {
 		}
 	}
 	befores := []string{
-		"github.com/razshare/frizzante/internal/project",
+		"main",
 	}
 	after := "main"
 	packagePath := type_.PkgPath()

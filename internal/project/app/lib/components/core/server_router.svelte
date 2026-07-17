@@ -2,12 +2,9 @@
     import { views } from "$exports.server"
     import { navigate } from "$lib/scripts/core/navigate"
     import { root } from "$lib/scripts/core/root.svelte"
-    type Props = {
-        name: keyof typeof views
-        props: Record<string, unknown>
-        type: "" | "default" | "snapshot"
-    }
-    let { name = $bindable(), props = $bindable(), type = $bindable() }: Props = $props()
+    import type { ServerRouterProps } from "$lib/types/core/server_router_props"
+    import { type Component } from "svelte"
+    let { name = $bindable(), props = $bindable(), type = $bindable() }: ServerRouterProps = $props()
     navigate()
     root.type = type
     root.view = {
@@ -19,7 +16,7 @@
 </script>
 
 {#if root.view.name !== ""}
-    {const View = views[root.view.name]}
+    {const View = views[root.view.name] as Component<Record<string, unknown>>}
     {#if View}
         <View {...root.view.ondone()} />
     {/if}

@@ -3,7 +3,7 @@ import type { views as serverViews } from "$exports.server"
 
 export type Root = {
     view: {
-        ondone: () => any
+        ondone: () => Record<string, unknown>
         name: keyof typeof clientViews | keyof typeof serverViews | ""
     }
     type: "" | "default" | "snapshot"

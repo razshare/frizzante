@@ -3,13 +3,13 @@ package todos
 import (
 	"net/http"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/internal/project/lib/core/send"
 	"github.com/razshare/frizzante/internal/project/lib/core/views"
 	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
 	"github.com/razshare/frizzante/internal/project/lib/keys"
+	"github.com/razshare/frizzante/internal/project/lib/schema"
 )
 
 func View(

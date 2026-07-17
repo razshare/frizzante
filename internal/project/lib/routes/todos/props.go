@@ -1,8 +1,6 @@
 package todos
 
-import (
-	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
-)
+import "github.com/razshare/frizzante/internal/project/lib/schema"
 
 type Props struct {
 	Items []schema.Todo `json:"items"`

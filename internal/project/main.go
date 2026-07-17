@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/razshare/frizzante/internal/project/lib/core/databases"
-	"github.com/razshare/frizzante/internal/project/lib/core/databases/schema"
 	"github.com/razshare/frizzante/internal/project/lib/core/guards"
 	"github.com/razshare/frizzante/internal/project/lib/core/negotiate"
 	"github.com/razshare/frizzante/internal/project/lib/core/routes"
@@ -20,6 +19,7 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/routes/fallback"
 	"github.com/razshare/frizzante/internal/project/lib/routes/todos"
 	"github.com/razshare/frizzante/internal/project/lib/routes/welcome"
+	"github.com/razshare/frizzante/internal/project/lib/schema"
 )
 
 //go:generate frizzante clean

@@ -2,13 +2,9 @@
     import { views } from "$exports.client"
     import { navigate } from "$lib/scripts/core/navigate"
     import { root } from "$lib/scripts/core/root.svelte"
+    import type { ClientRouterProps } from "$lib/types/core/client_router_props"
     import type { SvelteComponent } from "svelte"
-    type Props = {
-        name: keyof typeof views
-        props: Record<string, unknown>
-        type: "" | "default" | "snapshot"
-    }
-    let { name = $bindable(), props = $bindable(), type = $bindable() }: Props = $props()
+    let { name = $bindable(), props = $bindable(), type = $bindable() }: ClientRouterProps = $props()
     navigate()
     root.type = type
     root.view = {

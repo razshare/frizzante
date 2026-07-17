@@ -12,7 +12,11 @@ import (
 	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
 )
 
-func Migrate(database *sql.DB, offset string, target string) (err error) {
+func Migrate(options MigrateOptions) (err error) {
+	offset := options.Offset
+	target := options.Target
+	efs := options.Efs
+	database := options.Database
 	if offset == "" {
 		err = errors.New("offset migration cannot be empty")
 		return
@@ -21,8 +25,12 @@ func Migrate(database *sql.DB, offset string, target string) (err error) {
 		err = errors.New("target migration cannot be empty")
 		return
 	}
+	if !embeds.IsDirectory(efs, "migrations") {
+		err = errors.New("directory migrations not found")
+		return
+	}
 	var fileNames []string
-	if fileNames, err = embeds.ReadDirectory(Efs, "migrations"); err != nil {
+	if fileNames, err = embeds.ReadDirectory(efs, "migrations"); err != nil {
 		return
 	}
 	var numberOfMigrationFiles int
@@ -98,7 +106,7 @@ func Migrate(database *sql.DB, offset string, target string) (err error) {
 	for _, migration := range migrations {
 		fmt.Printf("executing migration file %s... ", migration)
 		var data []byte
-		if data, err = Efs.ReadFile(migration); err != nil {
+		if data, err = efs.ReadFile(migration); err != nil {
 			return
 		}
 		if forward {
