@@ -24,3 +24,6 @@ install:
 
 update:
 	frizzante update
+
+migrate:
+	frizzante migrate
