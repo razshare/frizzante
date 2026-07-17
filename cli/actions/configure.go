@@ -37,8 +37,7 @@ func Configure(options ConfigureOptions) (err error) {
 	if err = BuildMigrate(BuildMigrateOptions{Go: options.Go, Tags: options.Tags, Output: options.Output}); err != nil {
 		return
 	}
-	if !files.IsFile("source.sqlite") {
-		messages.Info("database ./source.sqlite not found")
+	if !files.IsDirectory("migrate") {
 		spinner := spinners.New("migrating database")
 		go spinners.Start(spinner)
 		if !messages.Command(messages.CommandOptions{

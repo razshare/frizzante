@@ -23,7 +23,7 @@ func Schema(options SchemaOptions) (err error) {
 			return
 		}
 		var names []string
-		if names, err = files.FindWithSuffix("lib", "sqlc.yaml"); err != nil {
+		if names, err = files.FindWithSuffix(".", "sqlc.yaml"); err != nil {
 			return
 		}
 		choices := make([]search.Choice, len(names))

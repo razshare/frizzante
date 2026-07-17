@@ -59,11 +59,6 @@ func Copy(options CopyOptions) (err error) {
 					string(filepath.Separator),
 				),
 			)
-			if strings.HasSuffix(name, "go.mod.txt") {
-				name = strings.TrimSuffix(name, ".txt")
-			} else if strings.HasSuffix(name, "go.sum.txt") {
-				name = strings.TrimSuffix(name, ".txt")
-			}
 			if err = embeds.CopyFile(options.Efs, entry, name); err != nil {
 				return
 			}

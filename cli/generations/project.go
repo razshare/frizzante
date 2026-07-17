@@ -9,10 +9,12 @@ import (
 
 func Project(options ProjectOptions) (err error) {
 	if err = Copy(CopyOptions{
-		From:   "internal/project",
-		To:     options.Name,
-		Efs:    options.Efs,
-		Ignore: []string{},
+		From: "internal/project",
+		To:   options.Name,
+		Efs:  options.Efs,
+		Ignore: []string{
+			"internal/project/LICENSE",
+		},
 	}); err != nil {
 		return
 	}
