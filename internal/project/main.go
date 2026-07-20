@@ -28,7 +28,8 @@ import (
 var efs embed.FS
 var errorLog = log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
 var infoLog = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
-var _, queries, databaseError = databases.Connect()
+var database, databaseError = databases.Connect()
+var queries = schema.New(database)
 var render = ssr.New(ssr.Options{
 	Efs:      efs,
 	ErrorLog: errorLog,
