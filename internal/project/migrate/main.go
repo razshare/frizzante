@@ -16,7 +16,7 @@ func main() {
 	// this program runs once and dies immediately
 	var err error
 	var database *sql.DB
-	if database, _, err = databases.Connect(); err != nil {
+	if database, err = databases.Connect(); err != nil {
 		log.Fatal(err)
 	}
 	if err = databases.Migrate(databases.MigrateOptions{
