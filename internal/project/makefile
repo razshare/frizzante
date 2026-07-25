@@ -28,6 +28,9 @@ update:
 migrate:
 	frizzante migrate
 
+migration:
+	frizzante generate migration
+
 types:
 	frizzante generate types
 
@@ -35,6 +38,7 @@ schema:
 	frizzante generate schema
 
 .PHONY: migrate
+.PHONY: migration
 .PHONY: configure
 .PHONY: test
 .PHONY: build
@@ -45,3 +49,4 @@ schema:
 .PHONY: install
 .PHONY: update
 .PHONY: types
+.PHONY: schema
