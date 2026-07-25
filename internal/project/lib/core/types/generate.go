@@ -34,13 +34,10 @@ func Generate[T any]() (err error) {
 		packagePath = strings.ReplaceAll(packagePath, before, after)
 	}
 	packageDirectoryName := filepath.Join(typesDirectoryName, strings.ReplaceAll(packagePath, "/", string(filepath.Separator)))
-	if files.IsDirectory(packageDirectoryName) {
-		if err = os.RemoveAll(packageDirectoryName); err != nil {
+	if !files.IsDirectory(packageDirectoryName) {
+		if err = os.MkdirAll(packageDirectoryName, os.ModePerm); err != nil {
 			return
 		}
-	}
-	if err = os.MkdirAll(packageDirectoryName, os.ModePerm); err != nil {
-		return
 	}
 	parts := strings.Split(type_.PkgPath(), "/")
 	count := len(parts)
