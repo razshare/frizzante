@@ -6,5 +6,6 @@ import (
 )
 
 func main() {
+	_ = types.Clear()
 	_ = types.Generate[todos.Props]()
 }

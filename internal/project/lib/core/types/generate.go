@@ -20,11 +20,10 @@ func Generate[T any]() (err error) {
 	if _, err = Define(type_, packages, definitions); err != nil {
 		return
 	}
-	if err = os.RemoveAll(typesDirectoryName); err != nil {
-		return
-	}
-	if err = os.MkdirAll(filepath.Join(typesDirectoryName), os.ModePerm); err != nil {
-		return
+	if !files.IsDirectory(filepath.Join(typesDirectoryName)) {
+		if err = os.MkdirAll(filepath.Join(typesDirectoryName), os.ModePerm); err != nil {
+			return
+		}
 	}
 	befores := []string{
 		"main",
