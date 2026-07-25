@@ -26,9 +26,6 @@ func Configure(options ConfigureOptions) (err error) {
 	if err = PreBuild(PreBuildOptions{Go: options.Go, Tags: options.Tags}); err != nil {
 		return
 	}
-	if err = BuildMigrate(BuildMigrateOptions{Go: options.Go, Tags: options.Tags, Output: options.Output}); err != nil {
-		return
-	}
 	messages.Success("project configured")
 	return
 }

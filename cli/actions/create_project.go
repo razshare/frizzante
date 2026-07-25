@@ -30,10 +30,12 @@ func CreateProject(options CreateProjectOptions) (err error) {
 	messages.Successf("project %s created with success!", projectName)
 	step1 := fmt.Sprintf("1. cd %s", projectName)
 	step2 := fmt.Sprintf("2. frizzante configure")
-	step3 := fmt.Sprintf("3. frizzante dev")
+	step3 := fmt.Sprintf("3. frizzante migrate")
+	step4 := fmt.Sprintf("4. frizzante dev")
 	length1 := len(step1)
 	length2 := len(step2)
 	length3 := len(step3)
+	length4 := len(step4)
 	width := length2
 	if length1 > length2 {
 		width = length1
@@ -41,14 +43,17 @@ func CreateProject(options CreateProjectOptions) (err error) {
 	padding1 := strings.Repeat(" ", width-length1)
 	padding2 := strings.Repeat(" ", width-length2)
 	padding3 := strings.Repeat(" ", width-length3)
+	padding4 := strings.Repeat(" ", width-length4)
 	comment1 := fmt.Sprintf("%s#changes directory to %s", padding1, projectName)
 	comment2 := fmt.Sprintf("%s#configures the project", padding2)
-	comment3 := fmt.Sprintf("%s#starts development mode", padding3)
+	comment3 := fmt.Sprintf("%s#migrates local database", padding3)
+	comment4 := fmt.Sprintf("%s#starts development mode", padding4)
 	messages.Tip(strings.Join([]string{
 		"## next steps",
 		fmt.Sprintf("%s %s", step1, comment1),
 		fmt.Sprintf("%s %s", step2, comment2),
 		fmt.Sprintf("%s %s", step3, comment3),
+		fmt.Sprintf("%s %s", step4, comment4),
 	}, "\n"))
 	return
 }
