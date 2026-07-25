@@ -28,8 +28,13 @@ func Snapshot(options SnapshotOptions) (err error) {
 	}
 	directoryName := filepath.Join(".gen", "snapshot")
 	client := http.Client{}
+	var staticsRequest *http.Request
+	if staticsRequest, err = http.NewRequest("GET", staticsUrl, nil); err != nil {
+		return
+	}
+	staticsRequest.Header.Add("Accept", "application/json")
 	var staticsResponse *http.Response
-	if staticsResponse, err = client.Get(staticsUrl); err != nil {
+	if staticsResponse, err = client.Do(staticsRequest); err != nil {
 		return
 	}
 	if staticsResponse.Body != nil {
@@ -61,14 +66,14 @@ func Snapshot(options SnapshotOptions) (err error) {
 		if err = os.MkdirAll(filepath.Join(directoryName, path), os.ModePerm); err != nil {
 			return
 		}
-		var request *http.Request
-		if request, err = http.NewRequest("GET", url, nil); err != nil {
+		var endpointRequest *http.Request
+		if endpointRequest, err = http.NewRequest("GET", url, nil); err != nil {
 			return
 		}
-		request.Header.Add("Accept", "text/html")
-		request.Header.Add("X-FrizzanteViewType", "snapshot")
+		endpointRequest.Header.Add("Accept", "text/html")
+		endpointRequest.Header.Add("X-FrizzanteViewType", "snapshot")
 		var staticResponseHtml *http.Response
-		if staticResponseHtml, err = client.Do(request); err != nil {
+		if staticResponseHtml, err = client.Do(endpointRequest); err != nil {
 			return
 		}
 		if staticResponseHtml.Body != nil {
@@ -89,13 +94,13 @@ func Snapshot(options SnapshotOptions) (err error) {
 			return
 		}
 		messages.Successf("%s generated from %s", fileNameHtml, url)
-		if request, err = http.NewRequest("GET", url, nil); err != nil {
+		if endpointRequest, err = http.NewRequest("GET", url, nil); err != nil {
 			return
 		}
-		request.Header.Add("Accept", "application/json")
-		request.Header.Add("X-FrizzanteViewType", "snapshot")
+		endpointRequest.Header.Add("Accept", "application/json")
+		endpointRequest.Header.Add("X-FrizzanteViewType", "snapshot")
 		var staticResponseJson *http.Response
-		if staticResponseJson, err = client.Do(request); err != nil {
+		if staticResponseJson, err = client.Do(endpointRequest); err != nil {
 			return
 		}
 		if staticResponseJson.Body != nil {
