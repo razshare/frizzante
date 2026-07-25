@@ -6,6 +6,7 @@
     "request": "launch",
     "mode": "debug",
     "buildFlags": [],
-    "args": ["generate"]
+    "args": ["generate"],
+    "env": {"DEV": "1"}
   }
 ]
