@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
 )
 
 func Generate[T any]() (err error) {

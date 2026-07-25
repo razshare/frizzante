@@ -8,8 +8,8 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/internal/project/lib/core/values"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/values"
 )
 
 func Command(options CommandOptions) (ok bool) {

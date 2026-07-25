@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	uuid "github.com/nu7hatch/gouuid"
-	"github.com/razshare/frizzante/internal/project/lib/core/send"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/send"
 )
 
 // SessionId tries to find a session id among the user's cookies.

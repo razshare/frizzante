@@ -1,7 +1,7 @@
 package search
 
 import (
-	"github.com/razshare/frizzante/tui/viewport"
+	"github.com/razshare/frizzante/v2/tui/viewport"
 )
 
 func Reset(search *Search, viewport *viewport.Viewport) {

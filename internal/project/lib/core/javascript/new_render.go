@@ -6,9 +6,9 @@ import (
 	"strings"
 
 	"github.com/dop251/goja"
-	"github.com/razshare/frizzante/internal/project/lib/core/security"
-	"github.com/razshare/frizzante/internal/project/lib/core/types"
-	"github.com/razshare/frizzante/internal/project/lib/core/views"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/security"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/types"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/views"
 )
 
 func NewRender(options NewRenderOptions) (render Render, err error) {

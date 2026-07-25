@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/tui/messages"
-	"github.com/razshare/frizzante/tui/spinners"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/tui/messages"
+	"github.com/razshare/frizzante/v2/tui/spinners"
 )
 
 func Install(options InstallOptions) (err error) {

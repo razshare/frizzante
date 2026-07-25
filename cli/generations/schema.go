@@ -6,13 +6,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/tui/confirm"
-	"github.com/razshare/frizzante/tui/inputs"
-	"github.com/razshare/frizzante/tui/messages"
-	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/select_one"
-	"github.com/razshare/frizzante/tui/spinners"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/tui/confirm"
+	"github.com/razshare/frizzante/v2/tui/inputs"
+	"github.com/razshare/frizzante/v2/tui/messages"
+	"github.com/razshare/frizzante/v2/tui/search"
+	"github.com/razshare/frizzante/v2/tui/select_one"
+	"github.com/razshare/frizzante/v2/tui/spinners"
 )
 
 func Schema(options SchemaOptions) (err error) {

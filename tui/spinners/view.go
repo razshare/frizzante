@@ -3,7 +3,7 @@ package spinners
 import (
 	"strings"
 
-	"github.com/razshare/frizzante/tui/configs"
+	"github.com/razshare/frizzante/v2/tui/configs"
 )
 
 func (model *Model) View() string {

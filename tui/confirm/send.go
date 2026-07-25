@@ -1,7 +1,7 @@
 package confirm
 
 import (
-	"github.com/razshare/frizzante/tui/program"
+	"github.com/razshare/frizzante/v2/tui/program"
 )
 
 func Send(defaultValue bool, message string) (yes bool, err error) {

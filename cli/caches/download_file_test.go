@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/razshare/frizzante/cli/paths"
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/internal/project/lib/core/security"
+	"github.com/razshare/frizzante/v2/cli/paths"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/security"
 )
 
 //go:embed test.zip

@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
 )
 
 //go:embed zip_file_test.go

@@ -5,7 +5,7 @@ This document describes the full process of setting up a fully working local dev
 Clone the `frizzante` repository from GitHub.
 
 ```go
-git clone https://github.com/razshare/frizzante
+git clone https://github.com/razshare/frizzante/v2
 ```
 
 > [!TIP]

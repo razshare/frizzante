@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/cli/tags"
-	"github.com/razshare/frizzante/tui/messages"
-	"github.com/razshare/frizzante/tui/spinners"
+	"github.com/razshare/frizzante/v2/cli/tags"
+	"github.com/razshare/frizzante/v2/tui/messages"
+	"github.com/razshare/frizzante/v2/tui/spinners"
 )
 
 func BuildServe(options BuildServeOptions) (err error) {

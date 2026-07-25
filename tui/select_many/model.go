@@ -1,8 +1,8 @@
 package select_many
 
 import (
-	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/viewport"
+	"github.com/razshare/frizzante/v2/tui/search"
+	"github.com/razshare/frizzante/v2/tui/viewport"
 )
 
 type Model struct {

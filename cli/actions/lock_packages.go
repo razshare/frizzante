@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/tui/messages"
 )
 
 func LockPackages(_ LockPackagesOptions) (err error) {

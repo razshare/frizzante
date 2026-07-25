@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/routes"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/routes"
 )
 
 type StartOptions struct {

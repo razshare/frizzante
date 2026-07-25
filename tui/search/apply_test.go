@@ -3,7 +3,7 @@ package search
 import (
 	"testing"
 
-	viewport_ "github.com/razshare/frizzante/tui/viewport"
+	viewport_ "github.com/razshare/frizzante/v2/tui/viewport"
 )
 
 func TestApply(t *testing.T) {

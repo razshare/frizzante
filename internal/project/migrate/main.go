@@ -5,7 +5,7 @@ import (
 	"embed"
 	"log"
 
-	"github.com/razshare/frizzante/internal/project/lib/databases"
+	"github.com/razshare/frizzante/v2/internal/project/lib/databases"
 )
 
 //go:embed migrations

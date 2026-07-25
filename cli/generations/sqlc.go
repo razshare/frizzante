@@ -3,8 +3,8 @@ package generations
 import (
 	"path/filepath"
 
-	"github.com/razshare/frizzante/cli/caches"
-	"github.com/razshare/frizzante/platforms"
+	"github.com/razshare/frizzante/v2/cli/caches"
+	"github.com/razshare/frizzante/v2/platforms"
 )
 
 func Sqlc(options SqlcOptions) (err error) {

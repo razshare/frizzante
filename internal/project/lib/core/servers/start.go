@@ -11,7 +11,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/scopes"
 )
 
 // Start starts a server.

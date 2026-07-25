@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/routes"
-	"github.com/razshare/frizzante/internal/project/lib/core/scopes"
-	"github.com/razshare/frizzante/internal/project/lib/core/send"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/routes"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/scopes"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/send"
 )
 
 // NewRouteHandler creates a route handler that lists all static routes of a given server.

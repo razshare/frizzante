@@ -1,9 +1,9 @@
 package menus
 
 import (
-	"github.com/razshare/frizzante/cli/apps"
-	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/select_one"
+	"github.com/razshare/frizzante/v2/cli/apps"
+	"github.com/razshare/frizzante/v2/tui/search"
+	"github.com/razshare/frizzante/v2/tui/select_one"
 )
 
 func Render(menu *Menu, app apps.App, value string, query []string, depth int) (id string, err error) {

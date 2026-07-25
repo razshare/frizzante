@@ -7,7 +7,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
 )
 
 func CopyFile(efs embed.FS, from string, to string) (err error) {

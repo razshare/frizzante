@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/dop251/goja"
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/stack"
 )
 
 func CreateLogger(options CreateLoggerOptions) func(call goja.FunctionCall) goja.Value {

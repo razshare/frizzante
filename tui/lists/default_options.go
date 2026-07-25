@@ -2,7 +2,7 @@ package lists
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/razshare/frizzante/tui/configs"
+	"github.com/razshare/frizzante/v2/tui/configs"
 )
 
 func DefaultOptions() Options {

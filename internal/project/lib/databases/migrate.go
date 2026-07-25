@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/embeds"
 )
 
 func Migrate(options MigrateOptions) (err error) {

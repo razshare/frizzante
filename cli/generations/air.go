@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/razshare/frizzante/cli/caches"
-	"github.com/razshare/frizzante/platforms"
+	"github.com/razshare/frizzante/v2/cli/caches"
+	"github.com/razshare/frizzante/v2/platforms"
 )
 
 func Air(options AirOptions) (err error) {

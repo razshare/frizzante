@@ -9,8 +9,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/views"
-	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/views"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/views/renders"
 )
 
 func New(options Options) renders.Render {

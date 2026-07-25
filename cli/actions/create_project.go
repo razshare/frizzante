@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/razshare/frizzante/cli/generations"
-	"github.com/razshare/frizzante/tui/inputs"
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/v2/cli/generations"
+	"github.com/razshare/frizzante/v2/tui/inputs"
+	"github.com/razshare/frizzante/v2/tui/messages"
 )
 
 func CreateProject(options CreateProjectOptions) (err error) {

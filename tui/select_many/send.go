@@ -1,9 +1,9 @@
 package select_many
 
 import (
-	"github.com/razshare/frizzante/tui/program"
-	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/viewport"
+	"github.com/razshare/frizzante/v2/tui/program"
+	"github.com/razshare/frizzante/v2/tui/search"
+	"github.com/razshare/frizzante/v2/tui/viewport"
 )
 
 func Send(choices []search.Choice, message string) (selected []string, err error) {

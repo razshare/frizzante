@@ -3,7 +3,7 @@ package negotiate
 import (
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/mocks"
 )
 
 func TestSessionId(t *testing.T) {

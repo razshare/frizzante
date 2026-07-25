@@ -1,7 +1,7 @@
 package renders
 
 import (
-	"github.com/razshare/frizzante/internal/project/lib/core/views"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/views"
 )
 
 type Options struct {

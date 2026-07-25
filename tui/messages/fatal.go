@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/razshare/frizzante/tui/configs"
+	"github.com/razshare/frizzante/v2/tui/configs"
 )
 
 func Fatal(args ...any) {

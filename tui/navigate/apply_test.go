@@ -3,8 +3,8 @@ package navigate
 import (
 	"testing"
 
-	search3 "github.com/razshare/frizzante/tui/search"
-	_viewport "github.com/razshare/frizzante/tui/viewport"
+	search3 "github.com/razshare/frizzante/v2/tui/search"
+	_viewport "github.com/razshare/frizzante/v2/tui/viewport"
 )
 
 func TestApply(t *testing.T) {

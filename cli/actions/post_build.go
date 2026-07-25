@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/razshare/frizzante/cli/tags"
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/v2/cli/tags"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/tui/messages"
 )
 
 func PostBuild(options PostBuildOptions) (err error) {

@@ -6,10 +6,10 @@ import (
 	"slices"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/razshare/frizzante/cli/actions"
-	"github.com/razshare/frizzante/cli/apps"
-	"github.com/razshare/frizzante/tui/configs"
-	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/v2/cli/actions"
+	"github.com/razshare/frizzante/v2/cli/apps"
+	"github.com/razshare/frizzante/v2/tui/configs"
+	"github.com/razshare/frizzante/v2/tui/search"
 )
 
 var Main = Menu{

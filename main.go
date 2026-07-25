@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/razshare/frizzante/cli/apps"
-	"github.com/razshare/frizzante/cli/extensions"
-	"github.com/razshare/frizzante/cli/menus"
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/v2/cli/apps"
+	"github.com/razshare/frizzante/v2/cli/extensions"
+	"github.com/razshare/frizzante/v2/cli/menus"
+	"github.com/razshare/frizzante/v2/tui/messages"
 	flag "github.com/spf13/pflag"
 )
 

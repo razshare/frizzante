@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/mocks"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/mocks"
 )
 
 func TestSseUpgrade(t *testing.T) {

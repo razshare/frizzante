@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/razshare/frizzante/internal/project/lib/core/types"
-	"github.com/razshare/frizzante/internal/project/lib/routes/todos"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/types"
+	"github.com/razshare/frizzante/v2/internal/project/lib/routes/todos"
 )
 
 func main() {

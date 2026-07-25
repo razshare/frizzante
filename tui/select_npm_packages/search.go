@@ -9,7 +9,7 @@ import (
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/razshare/frizzante/cli/npm"
+	"github.com/razshare/frizzante/v2/cli/npm"
 )
 
 func Search(query string) tea.Cmd {

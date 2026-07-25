@@ -1,8 +1,8 @@
 package actions
 
 import (
-	"github.com/razshare/frizzante/cli/npm"
-	"github.com/razshare/frizzante/tui/select_npm_packages"
+	"github.com/razshare/frizzante/v2/cli/npm"
+	"github.com/razshare/frizzante/v2/tui/select_npm_packages"
 )
 
 func Npm(options NpmOptions) (err error) {

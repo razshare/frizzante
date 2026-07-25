@@ -5,8 +5,8 @@ import (
 	"slices"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/razshare/frizzante/tui/navigate"
-	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/v2/tui/navigate"
+	"github.com/razshare/frizzante/v2/tui/search"
 )
 
 func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {

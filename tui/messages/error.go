@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/stack"
-	"github.com/razshare/frizzante/tui/configs"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/stack"
+	"github.com/razshare/frizzante/v2/tui/configs"
 )
 
 func Error(args ...any) {

@@ -1,6 +1,6 @@
 package menus
 
-import "github.com/razshare/frizzante/cli/apps"
+import "github.com/razshare/frizzante/v2/cli/apps"
 
 func Activate(menu *Menu, app apps.App, args []string, depth int) (id string, err error) {
 	argsLength := len(args)

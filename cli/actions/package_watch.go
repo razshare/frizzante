@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/v2/tui/messages"
 )
 
 func PackageWatch(options PackageWatchOptions) (err error) {

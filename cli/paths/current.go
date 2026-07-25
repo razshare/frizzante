@@ -3,7 +3,7 @@ package paths
 import (
 	"os"
 
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/v2/tui/messages"
 )
 
 // Current gets the current working directory.

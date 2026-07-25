@@ -13,11 +13,11 @@ import (
 	"strings"
 
 	"github.com/evanw/esbuild/pkg/api"
-	"github.com/razshare/frizzante/internal/project/lib/core/esbuild"
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/internal/project/lib/core/javascript"
-	"github.com/razshare/frizzante/internal/project/lib/core/views"
-	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/esbuild"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/javascript"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/views"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/views/renders"
 )
 
 func New(options Options) renders.Render {

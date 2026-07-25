@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/viewport"
+	"github.com/razshare/frizzante/v2/tui/search"
+	"github.com/razshare/frizzante/v2/tui/viewport"
 )
 
 func TestUpdate(t *testing.T) {

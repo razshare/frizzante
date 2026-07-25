@@ -13,10 +13,10 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/embeds"
-	"github.com/razshare/frizzante/internal/project/lib/core/javascript"
-	"github.com/razshare/frizzante/internal/project/lib/core/views"
-	"github.com/razshare/frizzante/internal/project/lib/core/views/renders"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/embeds"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/javascript"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/views"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/views/renders"
 )
 
 func New(options Options) renders.Render {

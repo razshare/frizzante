@@ -3,9 +3,9 @@ package hexviewer
 import (
 	"strings"
 
-	"github.com/razshare/frizzante/tui/program"
-	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/viewport"
+	"github.com/razshare/frizzante/v2/tui/program"
+	"github.com/razshare/frizzante/v2/tui/search"
+	"github.com/razshare/frizzante/v2/tui/viewport"
 )
 
 func Send(title string, text string) (err error) {

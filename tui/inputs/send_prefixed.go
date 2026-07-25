@@ -2,7 +2,7 @@ package inputs
 
 import (
 	"github.com/charmbracelet/bubbles/textinput"
-	"github.com/razshare/frizzante/tui/program"
+	"github.com/razshare/frizzante/v2/tui/program"
 )
 
 func SendPrefixed(message string, prefix string) (value string, err error) {

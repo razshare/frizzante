@@ -5,7 +5,7 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/charmbracelet/lipgloss/table"
-	"github.com/razshare/frizzante/tui/wrap"
+	"github.com/razshare/frizzante/v2/tui/wrap"
 )
 
 func Send(headers []string, rows [][]string, options ...Options) {

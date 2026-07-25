@@ -3,8 +3,8 @@ package caches
 import (
 	"path/filepath"
 
-	"github.com/razshare/frizzante/cli/paths"
-	"github.com/razshare/frizzante/internal/project/lib/core/security"
+	"github.com/razshare/frizzante/v2/cli/paths"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/security"
 )
 
 func CreateFileName(options CreateFileNameOptions) (fileName string, err error) {

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"os"
 
-	"github.com/razshare/frizzante/tui/messages"
-	"github.com/razshare/frizzante/tui/spinners"
+	"github.com/razshare/frizzante/v2/tui/messages"
+	"github.com/razshare/frizzante/v2/tui/spinners"
 )
 
 func Update(options UpdateOptions) (err error) {

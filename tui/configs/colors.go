@@ -1,7 +1,7 @@
 package configs
 
 import (
-	"github.com/razshare/frizzante/tui/themes"
+	"github.com/razshare/frizzante/v2/tui/themes"
 )
 
 var Colors = themes.Colors{

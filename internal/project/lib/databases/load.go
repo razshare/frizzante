@@ -5,7 +5,7 @@ import (
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
 )
 
 func Connect() (database *sql.DB, err error) {

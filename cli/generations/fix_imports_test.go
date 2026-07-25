@@ -13,7 +13,7 @@ func TestFixImports(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer func() { _ = os.RemoveAll(".gen") }()
-	data := []byte("package main\n\nimport \"github.com/razshare/frizzante/internal/project/lib/core/server\"")
+	data := []byte("package main\n\nimport \"github.com/razshare/frizzante/v2/internal/project/lib/core/server\"")
 	if err = os.MkdirAll(".gen", os.ModePerm); err != nil {
 		t.Fatal(err)
 	}
@@ -26,7 +26,7 @@ func TestFixImports(t *testing.T) {
 	if data, err = os.ReadFile(filepath.Join(".gen", "main.go")); err != nil {
 		t.Fatal(err)
 	}
-	if bytes.Contains(data, []byte("github.com/razshare/frizzante/internal/project/lib/core/server")) {
+	if bytes.Contains(data, []byte("github.com/razshare/frizzante/v2/internal/project/lib/core/server")) {
 		t.Fatal(".gen/main.go should not reference a global import")
 	}
 	if !bytes.Contains(data, []byte("main/lib/core/server")) {

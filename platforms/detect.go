@@ -4,7 +4,7 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/v2/tui/messages"
 )
 
 // Detect automatically detects the current platform.

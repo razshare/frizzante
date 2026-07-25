@@ -1,8 +1,8 @@
 package menus
 
 import (
-	"github.com/razshare/frizzante/cli/apps"
-	"github.com/razshare/frizzante/tui/search"
+	"github.com/razshare/frizzante/v2/cli/apps"
+	"github.com/razshare/frizzante/v2/tui/search"
 )
 
 type Item struct {

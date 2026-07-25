@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/razshare/frizzante/tui/viewport"
+	"github.com/razshare/frizzante/v2/tui/viewport"
 )
 
 func Apply(search *Search, viewport *viewport.Viewport, message tea.KeyMsg) tea.Cmd {

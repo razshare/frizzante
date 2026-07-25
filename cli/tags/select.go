@@ -3,10 +3,10 @@ package tags
 import (
 	"slices"
 
-	"github.com/razshare/frizzante/tui/confirm"
-	"github.com/razshare/frizzante/tui/inputs"
-	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/select_many"
+	"github.com/razshare/frizzante/v2/tui/confirm"
+	"github.com/razshare/frizzante/v2/tui/inputs"
+	"github.com/razshare/frizzante/v2/tui/search"
+	"github.com/razshare/frizzante/v2/tui/select_many"
 )
 
 func Select(choices []search.Choice) (tags []string, err error) {

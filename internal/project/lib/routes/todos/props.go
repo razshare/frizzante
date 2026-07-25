@@ -1,7 +1,7 @@
 package todos
 
 import (
-	"github.com/razshare/frizzante/internal/project/lib/schema"
+	"github.com/razshare/frizzante/v2/internal/project/lib/schema"
 )
 
 type Props struct {

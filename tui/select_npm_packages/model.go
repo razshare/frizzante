@@ -3,9 +3,9 @@ package select_npm_packages
 import (
 	"time"
 
-	"github.com/razshare/frizzante/cli/npm"
-	"github.com/razshare/frizzante/tui/search"
-	"github.com/razshare/frizzante/tui/viewport"
+	"github.com/razshare/frizzante/v2/cli/npm"
+	"github.com/razshare/frizzante/v2/tui/search"
+	"github.com/razshare/frizzante/v2/tui/viewport"
 )
 
 type Model struct {

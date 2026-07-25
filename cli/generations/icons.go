@@ -5,10 +5,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/cli/npm"
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/tui/confirm"
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/v2/cli/npm"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/tui/confirm"
+	"github.com/razshare/frizzante/v2/tui/messages"
 )
 
 func Icons(options IconsOptions) (err error) {

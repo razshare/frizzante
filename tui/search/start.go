@@ -3,7 +3,7 @@ package search
 import (
 	"strings"
 
-	"github.com/razshare/frizzante/tui/viewport"
+	"github.com/razshare/frizzante/v2/tui/viewport"
 )
 
 func Filter(search *Search, viewport *viewport.Viewport) {

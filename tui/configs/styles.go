@@ -2,7 +2,7 @@ package configs
 
 import (
 	"github.com/charmbracelet/lipgloss"
-	"github.com/razshare/frizzante/tui/themes"
+	"github.com/razshare/frizzante/v2/tui/themes"
 )
 
 var Styles = themes.Styles{

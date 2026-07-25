@@ -1,9 +1,9 @@
 package actions
 
 import (
-	"github.com/razshare/frizzante/cli/generations"
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/v2/cli/generations"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/tui/messages"
 )
 
 func Configure(options ConfigureOptions) (err error) {

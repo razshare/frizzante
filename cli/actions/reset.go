@@ -3,9 +3,9 @@ package actions
 import (
 	"os"
 
-	"github.com/razshare/frizzante/cli/paths"
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/v2/cli/paths"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/tui/messages"
 )
 
 func Reset(_ ResetOptions) (err error) {

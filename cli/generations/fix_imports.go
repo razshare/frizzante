@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
 )
 
 func FixImports(options FixImportsOptions) (err error) {
@@ -15,7 +15,7 @@ func FixImports(options FixImportsOptions) (err error) {
 		return
 	}
 	befores := [][]byte{
-		[]byte("github.com/razshare/frizzante/internal/project"),
+		[]byte("github.com/razshare/frizzante/v2/internal/project"),
 	}
 	after := []byte("main")
 	var entries []string

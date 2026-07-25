@@ -4,7 +4,7 @@ import (
 	"errors"
 	"os"
 
-	"github.com/razshare/frizzante/tui/messages"
+	"github.com/razshare/frizzante/v2/tui/messages"
 )
 
 func Test(options TestOptions) (err error) {

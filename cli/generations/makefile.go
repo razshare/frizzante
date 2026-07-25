@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/razshare/frizzante/internal/project/lib/core/files"
-	"github.com/razshare/frizzante/tui/confirm"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
+	"github.com/razshare/frizzante/v2/tui/confirm"
 )
 
 func Makefile(options MakefileOptions) (err error) {

@@ -3,7 +3,7 @@ package spinners
 import (
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/razshare/frizzante/tui/configs"
+	"github.com/razshare/frizzante/v2/tui/configs"
 )
 
 func New(message string) *Spinner {

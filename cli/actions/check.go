@@ -6,8 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/razshare/frizzante/tui/messages"
-	"github.com/razshare/frizzante/tui/spinners"
+	"github.com/razshare/frizzante/v2/tui/messages"
+	"github.com/razshare/frizzante/v2/tui/spinners"
 )
 
 func Check(options CheckOptions) (err error) {
