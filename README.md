@@ -67,3 +67,5 @@ go install github.com/razshare/frizzante@latest
     ```sh
     .gen/bin/serve
     ```
+> [!NOTE]
+> `.gen/bin/serve` is a standalone binary, it contains all html, css and javascript bundles.
