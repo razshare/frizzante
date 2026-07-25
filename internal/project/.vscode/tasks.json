@@ -5,7 +5,10 @@
       "label": "package",
       "type": "shell",
       "command": "frizzante",
-      "args": ["package"]
+      "args": ["package"],
+      "options": {
+        "env": { "DEV": "1" }
+      }
     }
   ]
 }
