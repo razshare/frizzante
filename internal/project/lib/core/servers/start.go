@@ -52,7 +52,7 @@ func Start(options StartOptions) (err error) {
 	defer stop()
 	go func() {
 		<-sigctx.Done()
-		infoLog.Println("shutting server down gracefully...")
+		infoLog.Println("attempting to down server gracefully...")
 		if cerr := server.Close(); cerr != nil {
 			if err == nil {
 				err = cerr
