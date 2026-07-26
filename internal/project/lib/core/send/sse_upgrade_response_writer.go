@@ -20,7 +20,7 @@ func (writer *SseUpgradeResponseWriter) Write(data []byte) (written int, err err
 		return
 	}
 	written += count
-	for _, line := range bytes.Split(data, []byte("\r\n")) {
+	for line := range bytes.SplitSeq(data, []byte("\r\n")) {
 		if count, err = writer.ResponseWriter.Write([]byte("data: ")); err != nil {
 			return
 		}
