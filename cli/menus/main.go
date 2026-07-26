@@ -136,6 +136,7 @@ var Main = Menu{
 					Bun:    *app.Bun,
 					Tags:   *app.Tags,
 					Output: *app.Output,
+					Value:  value,
 				})
 				return
 			},

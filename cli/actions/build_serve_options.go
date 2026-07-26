@@ -5,4 +5,5 @@ type BuildServeOptions struct {
 	Bun    string
 	Tags   string
 	Output string
+	Value  string
 }

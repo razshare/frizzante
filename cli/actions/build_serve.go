@@ -19,11 +19,13 @@ func BuildServe(options BuildServeOptions) (err error) {
 	}); err != nil {
 		return
 	}
-	if err = Package(PackageOptions{
-		Go:  options.Go,
-		Bun: options.Bun,
-	}); err != nil {
-		return
+	if options.Value != "no-package" {
+		if err = Package(PackageOptions{
+			Go:  options.Go,
+			Bun: options.Bun,
+		}); err != nil {
+			return
+		}
 	}
 	output := filepath.Join(strings.ReplaceAll(options.Output, "/", string(filepath.Separator)), "serve")
 	buildTags := make([]string, 0)
