@@ -6,20 +6,40 @@ This is a todo list application
 
 Configure project.
 
-```sh
-frizzante --configure
-```
+    ```sh
+    frizzante configure
+    ```
 
-Start development mode.
+Migrate development.
 
-```sh
-frizzante --dev
-```
+    ```sh
+    frizzante migrate
+    ```
 
-Build.
+Start development.
 
-```sh
-frizzante --build
-```
+    ```sh
+    frizzante dev
+    ```
 
-This will create a `.gen/bin/app` standalone executable.
+Build production.
+
+    ```sh
+    frizzante build
+    ```
+    
+    This will create two executables, `.gen/bin/migrate` and `.gen/bin/serve`.
+
+Migrate production.
+
+    ```sh
+    .gen/bin/migrate
+    ```
+
+Serve production.
+
+    ```sh
+    .gen/bin/serve
+    ```
+> [!NOTE]
+> `.gen/bin/serve` is a standalone binary, it contains all html, css and javascript bundles.
