@@ -24,6 +24,7 @@ func NewRouteHandler(appRoutes []routes.Route) routes.Handler {
 				statics = append(statics, parts[1])
 			}
 		}
+		statics = append(statics, "/favicon.ico")
 		_ = send.Json(writer, statics)
 	}
 }
