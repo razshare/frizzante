@@ -24,31 +24,31 @@ go install github.com/razshare/frizzante/v2@latest
 
 # Get Started
 
-Create project.
+1. Create project.
     
 ```sh
 frizzante create my_project
 ```
 
-Configure project.
+2. Configure project.
     
 ```sh
 frizzante configure
 ```
 
-Migrate development.
+3. Migrate development.
     
 ```sh
 frizzante migrate
 ```
 
-Start development.
+4. Start development.
     
 ```sh
 frizzante dev
 ```
 
-Build production.
+5. Build production.
     
 ```sh
 frizzante build
@@ -56,13 +56,13 @@ frizzante build
 
 This will create two executables, `.gen/bin/migrate` and `.gen/bin/serve`.
 
-Migrate production.
+6. Migrate production.
     
 ```sh
 .gen/bin/migrate
 ```
 
-Serve production.
+7. Serve production.
     
 ```sh
 .gen/bin/serve
