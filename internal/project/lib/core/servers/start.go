@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -29,7 +28,7 @@ func Start(options StartOptions) (err error) {
 		infoLog = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
 	}
 	if options.Address == "" {
-		options.Address = "0.0.0.0:8080"
+		options.Address = "127.0.0.1:8080"
 	}
 	if options.ReadTimeout <= 0 {
 		options.ReadTimeout = 30 * time.Second
@@ -87,8 +86,7 @@ func Start(options StartOptions) (err error) {
 		})
 	}
 	if certificate != "" && key != "" {
-		address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-		infoLog.Printf("server bound to address %s; visit your application at https://%s", server.Addr, address)
+		infoLog.Printf("server bound to address https://%s", server.Addr)
 		if err = server.ListenAndServeTLS(certificate, key); err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
 				err = nil
@@ -98,8 +96,7 @@ func Start(options StartOptions) (err error) {
 			return
 		}
 	} else {
-		address := strings.Replace(server.Addr, "0.0.0.0:", "127.0.0.1:", 1)
-		infoLog.Printf("server bound to address %s; visit your application at http://%s", server.Addr, address)
+		infoLog.Printf("server bound to address http://%s", server.Addr)
 		if err = server.ListenAndServe(); err != nil {
 			if errors.Is(err, http.ErrServerClosed) {
 				err = nil
