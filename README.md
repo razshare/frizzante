@@ -26,46 +26,47 @@ go install github.com/razshare/frizzante/v2@latest
 
 Create project.
     
-    ```sh
-    frizzante create my_project
-    ```
+```sh
+frizzante create my_project
+```
 
 Configure project.
     
-    ```sh
-    frizzante configure
-    ```
+```sh
+frizzante configure
+```
 
 Migrate development.
     
-    ```sh
-    frizzante migrate
-    ```
+```sh
+frizzante migrate
+```
 
 Start development.
     
-    ```sh
-    frizzante dev
-    ```
+```sh
+frizzante dev
+```
 
 Build production.
     
-    ```sh
-    frizzante build
-    ```
-    
-    This will create two executables, `.gen/bin/migrate` and `.gen/bin/serve`.
+```sh
+frizzante build
+```
+
+This will create two executables, `.gen/bin/migrate` and `.gen/bin/serve`.
 
 Migrate production.
     
-    ```sh
-    .gen/bin/migrate
-    ```
+```sh
+.gen/bin/migrate
+```
 
 Serve production.
     
-    ```sh
-    .gen/bin/serve
-    ```
+```sh
+.gen/bin/serve
+```
+
 > [!NOTE]
 > `.gen/bin/serve` is a standalone binary, it contains all html, css and javascript bundles.
