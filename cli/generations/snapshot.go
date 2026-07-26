@@ -135,6 +135,7 @@ func Snapshot(options SnapshotOptions) (err error) {
 		if err = generate(staticPath); err != nil {
 			if staticsPath == "/favicon.ico" {
 				messages.Warning("could not snapshot /favicon.ico")
+				continue
 			}
 			return
 		}
