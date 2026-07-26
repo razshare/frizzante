@@ -252,7 +252,7 @@ var Main = Menu{
 			Choice: search.Choice{Id: "clean", Description: "deletes .gen, .vite, app/{dist,node_modules}"},
 			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("running ▷ clean project"))
+				fmt.Println(configs.Styles.Menu.Render("running ▷ clean"))
 				err = actions.CleanProject(actions.CleanProjectOptions{Go: *app.Go})
 				return
 			},
