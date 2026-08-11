@@ -12,7 +12,7 @@ func (model *Model) Update(message tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch assert := message.(type) {
 	case tea.KeyMsg:
-		if assert.Type == tea.KeyRunes {
+		if assert.Type == tea.KeyRunes || assert.Type == tea.KeySpace {
 			value := assert.String()
 			if strings.HasPrefix(value, "[") && strings.HasSuffix(value, "]") {
 				value = value[1 : len(value)-1]
