@@ -1,6 +1,6 @@
 package actions
 
-type BuildServeOptions struct {
+type BuildOptions struct {
 	Go     string
 	Bun    string
 	Tags   string

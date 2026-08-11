@@ -3,14 +3,66 @@ package menus
 import (
 	"errors"
 	"fmt"
+	"os"
 	"slices"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/razshare/frizzante/v2/cli/actions"
 	"github.com/razshare/frizzante/v2/cli/apps"
+	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/v2/tui/configs"
 	"github.com/razshare/frizzante/v2/tui/search"
 )
+
+func init() {
+	if files.IsFile("ask.md") {
+		if data, err := os.ReadFile("ask.md"); err == nil {
+			Main.Items = append(Main.Items, Item{
+				Active: func(menu *Menu, app apps.App, value string, query []string) bool {
+					return slices.Contains([]string{"ask"}, value)
+				},
+				Choice: search.Choice{Id: "ask", Description: "ask your local ollama (optional and experimental)"},
+				Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
+					fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
+					fmt.Println(configs.Styles.Menu.Render("running ▷ ask (optional and experimental)"))
+					err = actions.Ask(actions.AskOptions{
+						Host:         "http://localhost:11434",
+						Go:           *app.Go,
+						Bun:          *app.Bun,
+						Tags:         *app.Tags,
+						Output:       *app.Output,
+						SystemPrompt: string(data),
+					})
+					return
+				},
+			})
+		}
+	}
+	Main.Items = append(Main.Items, Item{
+		Hidden: true,
+		Choice: search.Choice{Id: "render main menu"},
+		Active: func(menu *Menu, app apps.App, value string, query []string) bool { return true },
+		Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
+			if *app.Strict {
+				err = actions.Help(actions.HelpOptions{})
+				return
+			}
+			var data []byte
+			if data, err = app.Efs.ReadFile("logo.txt"); err != nil {
+				return
+			}
+			fmt.Println(configs.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data)))
+			for {
+				if _, err = Render(menu, app, value, query, depth+1); err != nil {
+					return
+				}
+				if depth > 1 {
+					return
+				}
+			}
+		},
+	})
+}
 
 var Main = Menu{
 	Title: "main",
@@ -131,7 +183,7 @@ var Main = Menu{
 			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ build"))
-				err = actions.BuildServe(actions.BuildServeOptions{
+				err = actions.Build(actions.BuildOptions{
 					Go:     *app.Go,
 					Bun:    *app.Bun,
 					Tags:   *app.Tags,
@@ -310,30 +362,6 @@ var Main = Menu{
 				fmt.Println(configs.Styles.Menu.Render("running ▷ version"))
 				err = actions.Version(actions.VersionOptions{Efs: app.Efs})
 				return
-			},
-		},
-		{
-			Hidden: true,
-			Choice: search.Choice{Id: "render main menu"},
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return true },
-			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
-				if *app.Strict {
-					err = actions.Help(actions.HelpOptions{})
-					return
-				}
-				var data []byte
-				if data, err = app.Efs.ReadFile("logo.txt"); err != nil {
-					return
-				}
-				fmt.Println(configs.Styles.BigText.PaddingLeft(1).PaddingRight(1).Render(string(data)))
-				for {
-					if _, err = Render(menu, app, value, query, depth+1); err != nil {
-						return
-					}
-					if depth > 1 {
-						return
-					}
-				}
 			},
 		},
 	},

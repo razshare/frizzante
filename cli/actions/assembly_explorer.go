@@ -36,7 +36,7 @@ func AssemblyExplorer(options AssemblyExplorerOptions) (err error) {
 		build = true
 	}
 	if build {
-		if err = BuildServe(BuildServeOptions{
+		if err = Build(BuildOptions{
 			Go:     options.Go,
 			Bun:    options.Bun,
 			Tags:   options.Tags,

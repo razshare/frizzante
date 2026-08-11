@@ -12,7 +12,7 @@ import (
 	"github.com/razshare/frizzante/v2/tui/spinners"
 )
 
-func BuildServe(options BuildServeOptions) (err error) {
+func Build(options BuildOptions) (err error) {
 	if err = PreBuild(PreBuildOptions{
 		Go:   options.Go,
 		Tags: options.Tags,
@@ -27,7 +27,7 @@ func BuildServe(options BuildServeOptions) (err error) {
 			return
 		}
 	}
-	output := filepath.Join(strings.ReplaceAll(options.Output, "/", string(filepath.Separator)), "serve")
+	output := filepath.Join(strings.ReplaceAll(options.Output, "/", string(filepath.Separator)), "start")
 	buildTags := make([]string, 0)
 	if len(options.Tags) > 0 {
 		var parsedTags []string
