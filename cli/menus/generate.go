@@ -2,51 +2,13 @@ package menus
 
 import (
 	"fmt"
-	"slices"
 
 	"github.com/razshare/frizzante/v2/cli/actions"
 	"github.com/razshare/frizzante/v2/cli/apps"
 	"github.com/razshare/frizzante/v2/cli/generations"
-	"github.com/razshare/frizzante/v2/internal/project/lib/core/files"
 	"github.com/razshare/frizzante/v2/tui/configs"
 	"github.com/razshare/frizzante/v2/tui/search"
 )
-
-func init() {
-	if files.IsFile("ask.md") {
-		Generate.Items = append(Generate.Items, Item{
-			Active: func(menu *Menu, app apps.App, value string, query []string) bool {
-				return slices.Contains([]string{"ask-docs"}, value)
-			},
-			Choice: search.Choice{Id: "ask docs", Description: "ask documentation"},
-			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
-				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
-				fmt.Println(configs.Styles.Menu.Render("generate ▷ ask docs"))
-				err = generations.AskDocs(generations.AskDocsOptions{})
-				return
-			},
-		})
-	}
-	Generate.Items = append(Generate.Items, Item{
-		Hidden: true,
-		Choice: search.Choice{Id: "render generate menu"},
-		Active: func(menu *Menu, app apps.App, value string, query []string) bool { return true },
-		Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
-			if *app.Strict {
-				err = actions.Help(actions.HelpOptions{})
-				return
-			}
-			for {
-				if _, err = Render(menu, app, value, query, depth+1); err != nil {
-					return
-				}
-				if depth > 1 {
-					return
-				}
-			}
-		},
-	})
-}
 
 var Generate = Menu{
 	Title: "generate",
@@ -199,6 +161,25 @@ var Generate = Menu{
 					Efs:    app.Efs,
 				})
 				return
+			},
+		},
+		{
+			Hidden: true,
+			Choice: search.Choice{Id: "render generate menu"},
+			Active: func(menu *Menu, app apps.App, value string, query []string) bool { return true },
+			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
+				if *app.Strict {
+					err = actions.Help(actions.HelpOptions{})
+					return
+				}
+				for {
+					if _, err = Render(menu, app, value, query, depth+1); err != nil {
+						return
+					}
+					if depth > 1 {
+						return
+					}
+				}
 			},
 		},
 	},
