@@ -33,23 +33,33 @@ func Command(options CommandOptions) (ok bool) {
 	if !options.DisabledStdin {
 		cmd.Stdin = os.Stdin
 	}
-	if !options.DisableStdout {
+	if !options.DisableStdout || options.StdoutBuilder != nil {
 		var stdout *os.File
 		stdout, cmd.Stdout, _ = os.Pipe()
 		go func() {
 			scanner := bufio.NewScanner(stdout)
 			for !done && scanner.Scan() {
-				_, _ = fmt.Fprintf(os.Stdout, "\r%s%s\n\r", Prefix, scanner.Text())
+				if options.StdoutBuilder != nil {
+					options.StdoutBuilder.WriteString(fmt.Sprintf("%s\n", scanner.Text()))
+				}
+				if !options.DisableStdout {
+					_, _ = fmt.Fprintf(os.Stdout, "\r%s%s\n\r", Prefix, scanner.Text())
+				}
 			}
 		}()
 	}
-	if !options.DisableStderr {
+	if !options.DisableStderr || options.StderrBuilder != nil {
 		var stderr *os.File
 		stderr, cmd.Stderr, _ = os.Pipe()
 		go func() {
 			scanner := bufio.NewScanner(stderr)
 			for !done && scanner.Scan() {
-				_, _ = fmt.Fprintf(os.Stderr, "\r%s%s\n\r", Prefix, scanner.Text())
+				if options.StderrBuilder != nil {
+					options.StderrBuilder.WriteString(fmt.Sprintf("%s\n", scanner.Text()))
+				}
+				if !options.DisableStderr {
+					_, _ = fmt.Fprintf(os.Stderr, "\r%s%s\n\r", Prefix, scanner.Text())
+				}
 			}
 		}()
 	}

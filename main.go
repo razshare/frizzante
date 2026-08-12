@@ -42,6 +42,9 @@ func main() {
 		DatabaseType: flag.StringP("database-type", "", "", "sets the type of database to use; currently only sqlite is supported"),
 		Context:      flag.StringP("context", "", "js", "sets the context; used with <frizzante add>; currently only \"js\" context is supported"),
 		Output:       flag.StringP("output", "o", filepath.Join(".gen", "bin"), "sets the output directory of the build process"),
+		AskModel:     flag.StringP("ask-model", "", "qwen3", "sets the ask model"),
+		AskHost:      flag.StringP("ask-host", "", "localhost:11434", "sets the ask host"),
+		AskProtocol:  flag.StringP("ask-protocol", "", "http", "sets the ask protocol"),
 		Strict:       flag.BoolP("strict", "s", false, "enables strict mode; program will stop if any required arguments or flags are missing; useful in ci/cd pipelines"),
 		Incremental:  flag.BoolP("incremental", "", false, "enables incremental mode for svelte-check"),
 	}

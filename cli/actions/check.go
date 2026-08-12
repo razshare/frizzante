@@ -2,9 +2,10 @@ package actions
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/razshare/frizzante/v2/tui/messages"
 	"github.com/razshare/frizzante/v2/tui/spinners"
@@ -14,13 +15,26 @@ func Check(options CheckOptions) (err error) {
 	spin := spinners.New("checking code")
 	go spinners.Start(spin)
 	defer spinners.Stop(spin)
+	var stdErrBuilder strings.Builder
+	if !messages.Command(messages.CommandOptions{
+		Environment:   os.Environ(),
+		Program:       options.Go,
+		StderrBuilder: &stdErrBuilder,
+		DisableStderr: true,
+		Args:          []string{"vet"},
+	}) {
+		err = fmt.Errorf("go vet failed:%s", stdErrBuilder.String())
+		return
+	}
 	if !messages.Command(messages.CommandOptions{
 		DirectoryName: "app",
 		Environment:   os.Environ(),
 		Program:       options.Bun,
+		StderrBuilder: &stdErrBuilder,
+		DisableStderr: true,
 		Args:          []string{"x", "eslint"},
 	}) {
-		err = errors.New("could not run eslint")
+		err = fmt.Errorf("eslint failed:%s", stdErrBuilder.String())
 		return
 	}
 	var data []byte
@@ -46,9 +60,11 @@ func Check(options CheckOptions) (err error) {
 			DirectoryName: "app",
 			Environment:   os.Environ(),
 			Program:       options.Bun,
+			StderrBuilder: &stdErrBuilder,
+			DisableStderr: true,
 			Args:          args,
 		}) {
-			err = errors.New("could not run svelte-check")
+			err = fmt.Errorf("svelte-check failed:%s", stdErrBuilder.String())
 			return
 		}
 	}

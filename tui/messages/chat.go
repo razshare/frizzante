@@ -13,5 +13,5 @@ func Chat(user string, args ...any) {
 	for i := 0; i < length; i++ {
 		entries[i] = fmt.Sprintf("%s", args[i])
 	}
-	Status(user, strings.Join(entries, ""), configs.Colors.Input, "17", configs.Colors.Input)
+	Status(user, strings.Join(entries, ""), configs.Colors.Tip, "17", configs.Colors.Tip)
 }
