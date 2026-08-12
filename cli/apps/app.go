@@ -14,6 +14,9 @@ type App struct {
 	DatabaseType *string
 	Context      *string
 	Output       *string
+	AskModel     *string
+	AskHost      *string
+	AskProtocol  *string
 	Strict       *bool
 	Incremental  *bool
 }
