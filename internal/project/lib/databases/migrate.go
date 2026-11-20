@@ -70,10 +70,8 @@ func Migrate(options MigrateOptions) (err error) {
 		isFirstVersion := strings.HasSuffix(version, options.FirstVersion)
 		var exists bool
 		var transaction *sql.Tx
-		if !isFirstVersion {
-			if exists, err = options.Exists(version); err != nil {
-				return
-			}
+		if exists, err = options.Exists(version); err != nil && !isFirstVersion {
+			return
 		}
 		var data []byte
 		if data, err = efs.ReadFile(version); err != nil {
