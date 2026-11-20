@@ -35,12 +35,13 @@ func Migrate(options MigrateOptions) (err error) {
 				args = append(args, fmt.Sprintf("-tags=%s", strings.Join(tagsLocal, ",")))
 			}
 			args = append(args, fmt.Sprintf(".%smigrate", string(filepath.Separator)))
+			args = append(args, options.Args...)
 			if !messages.Command(messages.CommandOptions{
 				Environment: os.Environ(),
 				Program:     options.Go,
 				Args:        args,
 			}) {
-				err = errors.New("something went wrong while running types")
+				err = errors.New("something went wrong while running migrations")
 				return
 			}
 			messages.Success("project database migrated")

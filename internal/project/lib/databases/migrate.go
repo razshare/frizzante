@@ -13,20 +13,10 @@ import (
 )
 
 func Migrate(options MigrateOptions) (err error) {
-	offset := options.Offset
-	target := options.Target
 	efs := options.Efs
 	database := options.Database
-	if offset == "" {
-		err = errors.New("offset migration cannot be empty")
-		return
-	}
-	if target == "" {
-		err = errors.New("target migration cannot be empty")
-		return
-	}
 	if !embeds.IsDirectory(efs, "migrations") {
-		err = errors.New("directory migrations not found")
+		err = errors.New("migrations directory not found")
 		return
 	}
 	var fileNames []string
@@ -53,24 +43,7 @@ func Migrate(options MigrateOptions) (err error) {
 	slices.SortFunc(migrationsTimes, func(a, b time.Time) int {
 		return b.Compare(a)
 	})
-	var offsetTime time.Time
-	if offset == "first" {
-		offsetTime = migrationsTimes[numberOfMigrationFiles-1]
-	} else if offset == "last" {
-		offsetTime = migrationsTimes[0]
-	} else if offsetTime, err = time.Parse("2006_01_02T15_04_05Z07_00", offset); err != nil {
-		return
-	}
-	var targetTime time.Time
-	if target == "first" {
-		targetTime = migrationsTimes[numberOfMigrationFiles-1]
-	} else if target == "last" {
-		targetTime = migrationsTimes[0]
-	} else if targetTime, err = time.Parse("2006_01_02T15_04_05Z07_00", target); err != nil {
-		return
-	}
-
-	forward := !offsetTime.After(targetTime)
+	forward := options.Direction == MigrationDirectionUp
 	migrations := make([]string, 0)
 	// at this moment the times slices is inverted,
 	// but when the user is trying to migrate
@@ -84,32 +57,39 @@ func Migrate(options MigrateOptions) (err error) {
 	}
 	for _, value := range migrationsTimes {
 		if forward {
-			if value.Before(offsetTime) || value.After(targetTime) {
-				continue
-			}
 			migrations = append(migrations, fmt.Sprintf("migrations/%s.sql", value.Format("2006_01_02T15_04_05Z07_00")))
 		} else {
-			if value.Before(targetTime) || value.After(offsetTime) {
-				continue
-			}
 			migrations = append(migrations, fmt.Sprintf("migrations/%s.sql", value.Format("2006_01_02T15_04_05Z07_00")))
 		}
 	}
 	if len(migrations) == 0 {
 		return
 	}
-	var transaction *sql.Tx
-	if transaction, err = database.Begin(); err != nil {
-		return
-	}
-
-	for _, migration := range migrations {
-		fmt.Printf("executing migration file %s... ", migration)
+	for _, version := range migrations {
+		fmt.Printf("executing migration file %s...", version)
+		isFirstVersion := strings.HasSuffix(version, options.FirstVersion)
+		var exists bool
+		var transaction *sql.Tx
+		if !isFirstVersion {
+			if exists, err = options.Exists(version); err != nil {
+				return
+			}
+		}
 		var data []byte
-		if data, err = efs.ReadFile(migration); err != nil {
+		if data, err = efs.ReadFile(version); err != nil {
 			return
 		}
 		if forward {
+			if exists {
+				fmt.Printf(" skipped.\n")
+				continue
+			}
+			if options.Stop != nil {
+				if options.Stop(version) {
+					fmt.Println(" skipped.")
+					break
+				}
+			}
 			var valid bool
 			var builder strings.Builder
 			for line := range strings.SplitSeq(string(data), "\n") {
@@ -127,17 +107,39 @@ func Migrate(options MigrateOptions) (err error) {
 				builder.WriteString("\n")
 			}
 			if forwardQuery := builder.String(); forwardQuery != "" {
+				if transaction, err = database.Begin(); err != nil {
+					return
+				}
 				if _, err = transaction.Exec(forwardQuery); err != nil {
 					if err = transaction.Rollback(); err != nil {
 						return
 					}
 					return
 				}
+				if err = transaction.Commit(); err != nil {
+					if terr := transaction.Rollback(); terr != nil {
+						err = errors.Join(err, terr)
+						return
+					}
+				}
+				if err = options.Add(version); err != nil {
+					return
+				}
 			}
 		} else {
+			if !exists && !isFirstVersion {
+				fmt.Printf(" skipped.\n")
+				continue
+			}
+			if options.Stop != nil {
+				if options.Stop(version) {
+					fmt.Println(" skipped.")
+					break
+				}
+			}
 			var valid bool
 			var builder strings.Builder
-			for _, line := range strings.Split(string(data), "\n") {
+			for line := range strings.SplitSeq(string(data), "\n") {
 				if line == "-- migration: down" {
 					valid = true
 					continue
@@ -152,21 +154,29 @@ func Migrate(options MigrateOptions) (err error) {
 				builder.WriteString("\n")
 			}
 			if backwardQuery := builder.String(); backwardQuery != "" {
+				if transaction, err = database.Begin(); err != nil {
+					return
+				}
 				if _, err = transaction.Exec(backwardQuery); err != nil {
 					if err = transaction.Rollback(); err != nil {
 						return
 					}
 					return
 				}
+				if err = transaction.Commit(); err != nil {
+					if terr := transaction.Rollback(); terr != nil {
+						err = errors.Join(err, terr)
+						return
+					}
+				}
+				if !isFirstVersion {
+					if err = options.Remove(version); err != nil {
+						return
+					}
+				}
 			}
 		}
 		fmt.Printf("done!\n")
-	}
-	if err = transaction.Commit(); err != nil {
-		if terr := transaction.Rollback(); terr != nil {
-			err = errors.Join(err, terr)
-			return
-		}
 	}
 	return
 }

@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+type Migration struct {
+	Version   string    `json:"version"`
+	CreatedAt time.Time `json:"createdAt"`
+}
+
 type Session struct {
 	ID        string    `json:"id"`
 	CreatedAt time.Time `json:"createdAt"`

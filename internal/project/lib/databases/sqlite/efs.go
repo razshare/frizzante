@@ -1,4 +1,4 @@
-package databases
+package sqlite
 
 import "embed"
 

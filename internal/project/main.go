@@ -14,7 +14,7 @@ import (
 	"github.com/razshare/frizzante/v2/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/v2/internal/project/lib/core/servers"
 	"github.com/razshare/frizzante/v2/internal/project/lib/core/ssr"
-	"github.com/razshare/frizzante/v2/internal/project/lib/databases"
+	"github.com/razshare/frizzante/v2/internal/project/lib/databases/sqlite"
 	"github.com/razshare/frizzante/v2/internal/project/lib/keys"
 	"github.com/razshare/frizzante/v2/internal/project/lib/routes/fallback"
 	"github.com/razshare/frizzante/v2/internal/project/lib/routes/todos"
@@ -28,7 +28,7 @@ import (
 var efs embed.FS
 var errorLog = log.New(os.Stderr, "[error]: ", log.Ldate|log.Ltime)
 var infoLog = log.New(os.Stdout, "[info]: ", log.Ldate|log.Ltime)
-var database, databaseError = databases.Connect()
+var database, databaseError = sqlite.Connect()
 var queries = schema.New(database)
 var render = ssr.New(ssr.Options{
 	Efs:      efs,

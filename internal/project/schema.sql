@@ -1,3 +1,7 @@
+create table if not exists migrations(
+    version varchar(36) primary key,
+    created_at datetime not null
+);
 create table if not exists sessions(
     id varchar(36) primary key,
     created_at datetime not null,

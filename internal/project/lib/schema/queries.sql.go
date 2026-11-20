@@ -9,6 +9,15 @@ import (
 	"context"
 )
 
+const addMigration = `-- name: AddMigration :exec
+insert into migrations(version, created_at) values (?1, datetime())
+`
+
+func (q *Queries) AddMigration(ctx context.Context, version string) error {
+	_, err := q.db.ExecContext(ctx, addMigration, version)
+	return err
+}
+
 const addSessionWithIdAndRoles = `-- name: AddSessionWithIdAndRoles :exec
 insert into sessions(id, created_at, updated_at, roles) values (?1, datetime(), datetime(), ?2)
 `
@@ -42,6 +51,33 @@ func (q *Queries) AddTodoWithIdAndSessionId(ctx context.Context, arg AddTodoWith
 		arg.Checked,
 	)
 	return err
+}
+
+const findMigration = `-- name: FindMigration :many
+select version, created_at from migrations where version = ?1
+`
+
+func (q *Queries) FindMigration(ctx context.Context, version string) ([]Migration, error) {
+	rows, err := q.db.QueryContext(ctx, findMigration, version)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Migration
+	for rows.Next() {
+		var i Migration
+		if err := rows.Scan(&i.Version, &i.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const findSessionById = `-- name: FindSessionById :one
@@ -105,6 +141,15 @@ type ModifySessionByIdParams struct {
 
 func (q *Queries) ModifySessionById(ctx context.Context, arg ModifySessionByIdParams) error {
 	_, err := q.db.ExecContext(ctx, modifySessionById, arg.Error, arg.ID)
+	return err
+}
+
+const removeMigration = `-- name: RemoveMigration :exec
+delete from migrations where version = ?1
+`
+
+func (q *Queries) RemoveMigration(ctx context.Context, version string) error {
+	_, err := q.db.ExecContext(ctx, removeMigration, version)
 	return err
 }
 

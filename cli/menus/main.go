@@ -116,9 +116,13 @@ var Main = Menu{
 			Handle: func(menu *Menu, app apps.App, value string, query []string, depth int) (err error) {
 				fmt.Print(configs.Styles.Menu.PaddingRight(1).Render("⎚"))
 				fmt.Println(configs.Styles.Menu.Render("running ▷ migrate"))
+				var args []string
+				args = append(args, value)
+				args = append(args, query...)
 				err = actions.Migrate(actions.MigrateOptions{
 					Go:   *app.Go,
 					Tags: *app.Tags,
+					Args: args,
 				})
 				return
 			},

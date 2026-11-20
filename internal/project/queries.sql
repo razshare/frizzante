@@ -1,3 +1,12 @@
+-- name: FindMigration :many
+select * from migrations where version = :version;
+
+-- name: AddMigration :exec
+insert into migrations(version, created_at) values (:version, datetime());
+
+-- name: RemoveMigration :exec
+delete from migrations where version = :version;
+
 -- name: FindSessionById :one
 select * from sessions where id = :id;
 
