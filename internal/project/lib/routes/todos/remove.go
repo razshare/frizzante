@@ -7,22 +7,22 @@ import (
 	"github.com/razshare/frizzante/v2/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/v2/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/v2/internal/project/lib/keys"
-	schema2 "github.com/razshare/frizzante/v2/internal/project/lib/schema"
+	"github.com/razshare/frizzante/v2/internal/project/lib/schema"
 )
 
-func Remove(queries *schema2.Queries) routes.Handler {
+func Remove(queries *schema.Queries) routes.Handler {
 	return func(scope scopes.Scope, request *http.Request, writer http.ResponseWriter) {
 		var form struct {
 			Id string `form:"id"`
 		}
 		context := request.Context()
-		session := scope[keys.Session].(schema2.Session)
+		session := scope[keys.Session].(schema.Session)
 		_ = receive.Form(request, &form)
-		_ = queries.RemoveTodosByIdAndSessionId(context, schema2.RemoveTodosByIdAndSessionIdParams{
+		_ = queries.RemoveTodosByIdAndSessionId(context, schema.RemoveTodosByIdAndSessionIdParams{
 			ID:        form.Id,
 			SessionID: session.ID,
 		})
-		_ = queries.ModifySessionById(request.Context(), schema2.ModifySessionByIdParams{
+		_ = queries.ModifySessionById(request.Context(), schema.ModifySessionByIdParams{
 			ID:    session.ID,
 			Error: session.Error,
 		})

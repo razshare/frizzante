@@ -8,28 +8,28 @@ import (
 	"github.com/razshare/frizzante/v2/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/v2/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/v2/internal/project/lib/keys"
-	schema2 "github.com/razshare/frizzante/v2/internal/project/lib/schema"
+	"github.com/razshare/frizzante/v2/internal/project/lib/schema"
 )
 
-func Add(queries *schema2.Queries) routes.Handler {
+func Add(queries *schema.Queries) routes.Handler {
 	return func(scope scopes.Scope, request *http.Request, writer http.ResponseWriter) {
 		var form struct {
 			Description string `form:"description"`
 		}
 		context := request.Context()
-		session := scope[keys.Session].(schema2.Session)
+		session := scope[keys.Session].(schema.Session)
 		_ = receive.Form(request, &form)
 		if form.Description == "" {
 			session.Error = "description cannot be empty"
 			return
 		}
 		todoId, _ := uuid.NewV4()
-		_ = queries.AddTodoWithIdAndSessionId(context, schema2.AddTodoWithIdAndSessionIdParams{
+		_ = queries.AddTodoWithIdAndSessionId(context, schema.AddTodoWithIdAndSessionIdParams{
 			ID:          todoId.String(),
 			SessionID:   session.ID,
 			Description: form.Description,
 		})
-		_ = queries.ModifySessionById(request.Context(), schema2.ModifySessionByIdParams{
+		_ = queries.ModifySessionById(request.Context(), schema.ModifySessionByIdParams{
 			ID:    session.ID,
 			Error: session.Error,
 		})

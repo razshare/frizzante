@@ -7,24 +7,24 @@ import (
 	"github.com/razshare/frizzante/v2/internal/project/lib/core/routes"
 	"github.com/razshare/frizzante/v2/internal/project/lib/core/scopes"
 	"github.com/razshare/frizzante/v2/internal/project/lib/keys"
-	schema2 "github.com/razshare/frizzante/v2/internal/project/lib/schema"
+	"github.com/razshare/frizzante/v2/internal/project/lib/schema"
 )
 
-func Toggle(queries *schema2.Queries) routes.Handler {
+func Toggle(queries *schema.Queries) routes.Handler {
 	return func(scope scopes.Scope, request *http.Request, writer http.ResponseWriter) {
 		var form struct {
 			Id    string `form:"id"`
 			Value int64  `form:"value"`
 		}
 		context := request.Context()
-		session := scope[keys.Session].(schema2.Session)
+		session := scope[keys.Session].(schema.Session)
 		_ = receive.Form(request, &form)
-		_ = queries.ToggleTodosByIdAndSessionId(context, schema2.ToggleTodosByIdAndSessionIdParams{
+		_ = queries.ToggleTodosByIdAndSessionId(context, schema.ToggleTodosByIdAndSessionIdParams{
 			ID:        form.Id,
 			SessionID: session.ID,
 			Checked:   form.Value,
 		})
-		_ = queries.ModifySessionById(context, schema2.ModifySessionByIdParams{
+		_ = queries.ModifySessionById(context, schema.ModifySessionByIdParams{
 			ID:    session.ID,
 			Error: session.Error,
 		})
